@@ -120,6 +120,8 @@ public final class CoreNLPProtos {
     }
 
     /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
@@ -127,6 +129,10 @@ public final class CoreNLPProtos {
       return forNumber(value);
     }
 
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
     public static Language forNumber(int value) {
       switch (value) {
         case 0: return Unknown;
@@ -247,6 +253,8 @@ public final class CoreNLPProtos {
     }
 
     /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
@@ -254,6 +262,10 @@ public final class CoreNLPProtos {
       return forNumber(value);
     }
 
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
     public static Sentiment forNumber(int value) {
       switch (value) {
         case 0: return STRONG_NEGATIVE;
@@ -384,6 +396,8 @@ public final class CoreNLPProtos {
     }
 
     /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
@@ -391,6 +405,10 @@ public final class CoreNLPProtos {
       return forNumber(value);
     }
 
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
     public static NaturalLogicRelation forNumber(int value) {
       switch (value) {
         case 0: return EQUIVALENCE;
@@ -456,14 +474,17 @@ public final class CoreNLPProtos {
 
     /**
      * <code>required string text = 1;</code>
+     * @return Whether the text field is set.
      */
     boolean hasText();
     /**
      * <code>required string text = 1;</code>
+     * @return The text.
      */
     java.lang.String getText();
     /**
      * <code>required string text = 1;</code>
+     * @return The bytes for text.
      */
     com.google.protobuf.ByteString
         getTextBytes();
@@ -518,38 +539,46 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional string docID = 4;</code>
+     * @return Whether the docID field is set.
      */
     boolean hasDocID();
     /**
      * <code>optional string docID = 4;</code>
+     * @return The docID.
      */
     java.lang.String getDocID();
     /**
      * <code>optional string docID = 4;</code>
+     * @return The bytes for docID.
      */
     com.google.protobuf.ByteString
         getDocIDBytes();
 
     /**
      * <code>optional string docDate = 7;</code>
+     * @return Whether the docDate field is set.
      */
     boolean hasDocDate();
     /**
      * <code>optional string docDate = 7;</code>
+     * @return The docDate.
      */
     java.lang.String getDocDate();
     /**
      * <code>optional string docDate = 7;</code>
+     * @return The bytes for docDate.
      */
     com.google.protobuf.ByteString
         getDocDateBytes();
 
     /**
      * <code>optional uint64 calendar = 8;</code>
+     * @return Whether the calendar field is set.
      */
     boolean hasCalendar();
     /**
      * <code>optional uint64 calendar = 8;</code>
+     * @return The calendar.
      */
     long getCalendar();
 
@@ -710,6 +739,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
+     * @return Whether the hasEntityMentionsAnnotation field is set.
      */
     boolean hasHasEntityMentionsAnnotation();
     /**
@@ -718,6 +748,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
+     * @return The hasEntityMentionsAnnotation.
      */
     boolean getHasEntityMentionsAnnotation();
 
@@ -728,6 +759,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool xmlDoc = 11;</code>
+     * @return Whether the xmlDoc field is set.
      */
     boolean hasXmlDoc();
     /**
@@ -737,6 +769,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool xmlDoc = 11;</code>
+     * @return The xmlDoc.
      */
     boolean getXmlDoc();
 
@@ -810,45 +843,57 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional bool hasCorefMentionAnnotation = 15;</code>
+     * @return Whether the hasCorefMentionAnnotation field is set.
      */
     boolean hasHasCorefMentionAnnotation();
     /**
      * <code>optional bool hasCorefMentionAnnotation = 15;</code>
+     * @return The hasCorefMentionAnnotation.
      */
     boolean getHasCorefMentionAnnotation();
 
     /**
      * <code>optional bool hasCorefAnnotation = 16;</code>
+     * @return Whether the hasCorefAnnotation field is set.
      */
     boolean hasHasCorefAnnotation();
     /**
      * <code>optional bool hasCorefAnnotation = 16;</code>
+     * @return The hasCorefAnnotation.
      */
     boolean getHasCorefAnnotation();
 
     /**
      * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * @return A list containing the corefMentionToEntityMentionMappings.
      */
     java.util.List<java.lang.Integer> getCorefMentionToEntityMentionMappingsList();
     /**
      * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * @return The count of corefMentionToEntityMentionMappings.
      */
     int getCorefMentionToEntityMentionMappingsCount();
     /**
      * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * @param index The index of the element to return.
+     * @return The corefMentionToEntityMentionMappings at the given index.
      */
     int getCorefMentionToEntityMentionMappings(int index);
 
     /**
      * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * @return A list containing the entityMentionToCorefMentionMappings.
      */
     java.util.List<java.lang.Integer> getEntityMentionToCorefMentionMappingsList();
     /**
      * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * @return The count of entityMentionToCorefMentionMappings.
      */
     int getEntityMentionToCorefMentionMappingsCount();
     /**
      * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * @param index The index of the element to return.
+     * @return The entityMentionToCorefMentionMappings at the given index.
      */
     int getEntityMentionToCorefMentionMappings(int index);
   }
@@ -1140,12 +1185,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object text_;
     /**
      * <code>required string text = 1;</code>
+     * @return Whether the text field is set.
      */
     public boolean hasText() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>required string text = 1;</code>
+     * @return The text.
      */
     public java.lang.String getText() {
       java.lang.Object ref = text_;
@@ -1163,6 +1210,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>required string text = 1;</code>
+     * @return The bytes for text.
      */
     public com.google.protobuf.ByteString
         getTextBytes() {
@@ -1252,12 +1300,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object docID_;
     /**
      * <code>optional string docID = 4;</code>
+     * @return Whether the docID field is set.
      */
     public boolean hasDocID() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional string docID = 4;</code>
+     * @return The docID.
      */
     public java.lang.String getDocID() {
       java.lang.Object ref = docID_;
@@ -1275,6 +1325,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string docID = 4;</code>
+     * @return The bytes for docID.
      */
     public com.google.protobuf.ByteString
         getDocIDBytes() {
@@ -1294,12 +1345,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object docDate_;
     /**
      * <code>optional string docDate = 7;</code>
+     * @return Whether the docDate field is set.
      */
     public boolean hasDocDate() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional string docDate = 7;</code>
+     * @return The docDate.
      */
     public java.lang.String getDocDate() {
       java.lang.Object ref = docDate_;
@@ -1317,6 +1370,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string docDate = 7;</code>
+     * @return The bytes for docDate.
      */
     public com.google.protobuf.ByteString
         getDocDateBytes() {
@@ -1336,12 +1390,14 @@ public final class CoreNLPProtos {
     private long calendar_;
     /**
      * <code>optional uint64 calendar = 8;</code>
+     * @return Whether the calendar field is set.
      */
     public boolean hasCalendar() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional uint64 calendar = 8;</code>
+     * @return The calendar.
      */
     public long getCalendar() {
       return calendar_;
@@ -1550,6 +1606,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
+     * @return Whether the hasEntityMentionsAnnotation field is set.
      */
     public boolean hasHasEntityMentionsAnnotation() {
       return ((bitField0_ & 0x00000010) != 0);
@@ -1560,6 +1617,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
+     * @return The hasEntityMentionsAnnotation.
      */
     public boolean getHasEntityMentionsAnnotation() {
       return hasEntityMentionsAnnotation_;
@@ -1574,6 +1632,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool xmlDoc = 11;</code>
+     * @return Whether the xmlDoc field is set.
      */
     public boolean hasXmlDoc() {
       return ((bitField0_ & 0x00000020) != 0);
@@ -1585,6 +1644,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool xmlDoc = 11;</code>
+     * @return The xmlDoc.
      */
     public boolean getXmlDoc() {
       return xmlDoc_;
@@ -1684,12 +1744,14 @@ public final class CoreNLPProtos {
     private boolean hasCorefMentionAnnotation_;
     /**
      * <code>optional bool hasCorefMentionAnnotation = 15;</code>
+     * @return Whether the hasCorefMentionAnnotation field is set.
      */
     public boolean hasHasCorefMentionAnnotation() {
       return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <code>optional bool hasCorefMentionAnnotation = 15;</code>
+     * @return The hasCorefMentionAnnotation.
      */
     public boolean getHasCorefMentionAnnotation() {
       return hasCorefMentionAnnotation_;
@@ -1699,12 +1761,14 @@ public final class CoreNLPProtos {
     private boolean hasCorefAnnotation_;
     /**
      * <code>optional bool hasCorefAnnotation = 16;</code>
+     * @return Whether the hasCorefAnnotation field is set.
      */
     public boolean hasHasCorefAnnotation() {
       return ((bitField0_ & 0x00000080) != 0);
     }
     /**
      * <code>optional bool hasCorefAnnotation = 16;</code>
+     * @return The hasCorefAnnotation.
      */
     public boolean getHasCorefAnnotation() {
       return hasCorefAnnotation_;
@@ -1714,6 +1778,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList corefMentionToEntityMentionMappings_;
     /**
      * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * @return A list containing the corefMentionToEntityMentionMappings.
      */
     public java.util.List<java.lang.Integer>
         getCorefMentionToEntityMentionMappingsList() {
@@ -1721,12 +1786,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * @return The count of corefMentionToEntityMentionMappings.
      */
     public int getCorefMentionToEntityMentionMappingsCount() {
       return corefMentionToEntityMentionMappings_.size();
     }
     /**
      * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * @param index The index of the element to return.
+     * @return The corefMentionToEntityMentionMappings at the given index.
      */
     public int getCorefMentionToEntityMentionMappings(int index) {
       return corefMentionToEntityMentionMappings_.getInt(index);
@@ -1736,6 +1804,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList entityMentionToCorefMentionMappings_;
     /**
      * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * @return A list containing the entityMentionToCorefMentionMappings.
      */
     public java.util.List<java.lang.Integer>
         getEntityMentionToCorefMentionMappingsList() {
@@ -1743,12 +1812,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * @return The count of entityMentionToCorefMentionMappings.
      */
     public int getEntityMentionToCorefMentionMappingsCount() {
       return entityMentionToCorefMentionMappings_.size();
     }
     /**
      * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * @param index The index of the element to return.
+     * @return The entityMentionToCorefMentionMappings at the given index.
      */
     public int getEntityMentionToCorefMentionMappings(int index) {
       return entityMentionToCorefMentionMappings_.getInt(index);
@@ -2896,12 +2968,14 @@ public final class CoreNLPProtos {
       private java.lang.Object text_ = "";
       /**
        * <code>required string text = 1;</code>
+       * @return Whether the text field is set.
        */
       public boolean hasText() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required string text = 1;</code>
+       * @return The text.
        */
       public java.lang.String getText() {
         java.lang.Object ref = text_;
@@ -2919,6 +2993,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string text = 1;</code>
+       * @return The bytes for text.
        */
       public com.google.protobuf.ByteString
           getTextBytes() {
@@ -2935,6 +3010,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string text = 1;</code>
+       * @param value The text to set.
+       * @return This builder for chaining.
        */
       public Builder setText(
           java.lang.String value) {
@@ -2948,6 +3025,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string text = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearText() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -2957,6 +3035,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string text = 1;</code>
+       * @param value The bytes for text to set.
+       * @return This builder for chaining.
        */
       public Builder setTextBytes(
           com.google.protobuf.ByteString value) {
@@ -3452,12 +3532,14 @@ public final class CoreNLPProtos {
       private java.lang.Object docID_ = "";
       /**
        * <code>optional string docID = 4;</code>
+       * @return Whether the docID field is set.
        */
       public boolean hasDocID() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional string docID = 4;</code>
+       * @return The docID.
        */
       public java.lang.String getDocID() {
         java.lang.Object ref = docID_;
@@ -3475,6 +3557,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docID = 4;</code>
+       * @return The bytes for docID.
        */
       public com.google.protobuf.ByteString
           getDocIDBytes() {
@@ -3491,6 +3574,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docID = 4;</code>
+       * @param value The docID to set.
+       * @return This builder for chaining.
        */
       public Builder setDocID(
           java.lang.String value) {
@@ -3504,6 +3589,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docID = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDocID() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -3513,6 +3599,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docID = 4;</code>
+       * @param value The bytes for docID to set.
+       * @return This builder for chaining.
        */
       public Builder setDocIDBytes(
           com.google.protobuf.ByteString value) {
@@ -3528,12 +3616,14 @@ public final class CoreNLPProtos {
       private java.lang.Object docDate_ = "";
       /**
        * <code>optional string docDate = 7;</code>
+       * @return Whether the docDate field is set.
        */
       public boolean hasDocDate() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional string docDate = 7;</code>
+       * @return The docDate.
        */
       public java.lang.String getDocDate() {
         java.lang.Object ref = docDate_;
@@ -3551,6 +3641,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docDate = 7;</code>
+       * @return The bytes for docDate.
        */
       public com.google.protobuf.ByteString
           getDocDateBytes() {
@@ -3567,6 +3658,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docDate = 7;</code>
+       * @param value The docDate to set.
+       * @return This builder for chaining.
        */
       public Builder setDocDate(
           java.lang.String value) {
@@ -3580,6 +3673,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docDate = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDocDate() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -3589,6 +3683,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docDate = 7;</code>
+       * @param value The bytes for docDate to set.
+       * @return This builder for chaining.
        */
       public Builder setDocDateBytes(
           com.google.protobuf.ByteString value) {
@@ -3604,18 +3700,22 @@ public final class CoreNLPProtos {
       private long calendar_ ;
       /**
        * <code>optional uint64 calendar = 8;</code>
+       * @return Whether the calendar field is set.
        */
       public boolean hasCalendar() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional uint64 calendar = 8;</code>
+       * @return The calendar.
        */
       public long getCalendar() {
         return calendar_;
       }
       /**
        * <code>optional uint64 calendar = 8;</code>
+       * @param value The calendar to set.
+       * @return This builder for chaining.
        */
       public Builder setCalendar(long value) {
         bitField0_ |= 0x00000020;
@@ -3625,6 +3725,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint64 calendar = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCalendar() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -4798,6 +4899,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
+       * @return Whether the hasEntityMentionsAnnotation field is set.
        */
       public boolean hasHasEntityMentionsAnnotation() {
         return ((bitField0_ & 0x00000400) != 0);
@@ -4808,6 +4910,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
+       * @return The hasEntityMentionsAnnotation.
        */
       public boolean getHasEntityMentionsAnnotation() {
         return hasEntityMentionsAnnotation_;
@@ -4818,6 +4921,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
+       * @param value The hasEntityMentionsAnnotation to set.
+       * @return This builder for chaining.
        */
       public Builder setHasEntityMentionsAnnotation(boolean value) {
         bitField0_ |= 0x00000400;
@@ -4831,6 +4936,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasEntityMentionsAnnotation() {
         bitField0_ = (bitField0_ & ~0x00000400);
@@ -4847,6 +4953,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool xmlDoc = 11;</code>
+       * @return Whether the xmlDoc field is set.
        */
       public boolean hasXmlDoc() {
         return ((bitField0_ & 0x00000800) != 0);
@@ -4858,6 +4965,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool xmlDoc = 11;</code>
+       * @return The xmlDoc.
        */
       public boolean getXmlDoc() {
         return xmlDoc_;
@@ -4869,6 +4977,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool xmlDoc = 11;</code>
+       * @param value The xmlDoc to set.
+       * @return This builder for chaining.
        */
       public Builder setXmlDoc(boolean value) {
         bitField0_ |= 0x00000800;
@@ -4883,6 +4993,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool xmlDoc = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearXmlDoc() {
         bitField0_ = (bitField0_ & ~0x00000800);
@@ -5446,18 +5557,22 @@ public final class CoreNLPProtos {
       private boolean hasCorefMentionAnnotation_ ;
       /**
        * <code>optional bool hasCorefMentionAnnotation = 15;</code>
+       * @return Whether the hasCorefMentionAnnotation field is set.
        */
       public boolean hasHasCorefMentionAnnotation() {
         return ((bitField0_ & 0x00004000) != 0);
       }
       /**
        * <code>optional bool hasCorefMentionAnnotation = 15;</code>
+       * @return The hasCorefMentionAnnotation.
        */
       public boolean getHasCorefMentionAnnotation() {
         return hasCorefMentionAnnotation_;
       }
       /**
        * <code>optional bool hasCorefMentionAnnotation = 15;</code>
+       * @param value The hasCorefMentionAnnotation to set.
+       * @return This builder for chaining.
        */
       public Builder setHasCorefMentionAnnotation(boolean value) {
         bitField0_ |= 0x00004000;
@@ -5467,6 +5582,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool hasCorefMentionAnnotation = 15;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasCorefMentionAnnotation() {
         bitField0_ = (bitField0_ & ~0x00004000);
@@ -5478,18 +5594,22 @@ public final class CoreNLPProtos {
       private boolean hasCorefAnnotation_ ;
       /**
        * <code>optional bool hasCorefAnnotation = 16;</code>
+       * @return Whether the hasCorefAnnotation field is set.
        */
       public boolean hasHasCorefAnnotation() {
         return ((bitField0_ & 0x00008000) != 0);
       }
       /**
        * <code>optional bool hasCorefAnnotation = 16;</code>
+       * @return The hasCorefAnnotation.
        */
       public boolean getHasCorefAnnotation() {
         return hasCorefAnnotation_;
       }
       /**
        * <code>optional bool hasCorefAnnotation = 16;</code>
+       * @param value The hasCorefAnnotation to set.
+       * @return This builder for chaining.
        */
       public Builder setHasCorefAnnotation(boolean value) {
         bitField0_ |= 0x00008000;
@@ -5499,6 +5619,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool hasCorefAnnotation = 16;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasCorefAnnotation() {
         bitField0_ = (bitField0_ & ~0x00008000);
@@ -5516,6 +5637,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * @return A list containing the corefMentionToEntityMentionMappings.
        */
       public java.util.List<java.lang.Integer>
           getCorefMentionToEntityMentionMappingsList() {
@@ -5524,18 +5646,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * @return The count of corefMentionToEntityMentionMappings.
        */
       public int getCorefMentionToEntityMentionMappingsCount() {
         return corefMentionToEntityMentionMappings_.size();
       }
       /**
        * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * @param index The index of the element to return.
+       * @return The corefMentionToEntityMentionMappings at the given index.
        */
       public int getCorefMentionToEntityMentionMappings(int index) {
         return corefMentionToEntityMentionMappings_.getInt(index);
       }
       /**
        * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * @param index The index to set the value at.
+       * @param value The corefMentionToEntityMentionMappings to set.
+       * @return This builder for chaining.
        */
       public Builder setCorefMentionToEntityMentionMappings(
           int index, int value) {
@@ -5546,6 +5674,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * @param value The corefMentionToEntityMentionMappings to add.
+       * @return This builder for chaining.
        */
       public Builder addCorefMentionToEntityMentionMappings(int value) {
         ensureCorefMentionToEntityMentionMappingsIsMutable();
@@ -5555,6 +5685,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * @param values The corefMentionToEntityMentionMappings to add.
+       * @return This builder for chaining.
        */
       public Builder addAllCorefMentionToEntityMentionMappings(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -5566,6 +5698,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCorefMentionToEntityMentionMappings() {
         corefMentionToEntityMentionMappings_ = emptyIntList();
@@ -5583,6 +5716,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * @return A list containing the entityMentionToCorefMentionMappings.
        */
       public java.util.List<java.lang.Integer>
           getEntityMentionToCorefMentionMappingsList() {
@@ -5591,18 +5725,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * @return The count of entityMentionToCorefMentionMappings.
        */
       public int getEntityMentionToCorefMentionMappingsCount() {
         return entityMentionToCorefMentionMappings_.size();
       }
       /**
        * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * @param index The index of the element to return.
+       * @return The entityMentionToCorefMentionMappings at the given index.
        */
       public int getEntityMentionToCorefMentionMappings(int index) {
         return entityMentionToCorefMentionMappings_.getInt(index);
       }
       /**
        * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * @param index The index to set the value at.
+       * @param value The entityMentionToCorefMentionMappings to set.
+       * @return This builder for chaining.
        */
       public Builder setEntityMentionToCorefMentionMappings(
           int index, int value) {
@@ -5613,6 +5753,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * @param value The entityMentionToCorefMentionMappings to add.
+       * @return This builder for chaining.
        */
       public Builder addEntityMentionToCorefMentionMappings(int value) {
         ensureEntityMentionToCorefMentionMappingsIsMutable();
@@ -5622,6 +5764,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * @param values The entityMentionToCorefMentionMappings to add.
+       * @return This builder for chaining.
        */
       public Builder addAllEntityMentionToCorefMentionMappings(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -5633,6 +5777,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEntityMentionToCorefMentionMappings() {
         entityMentionToCorefMentionMappings_ = emptyIntList();
@@ -5724,55 +5869,67 @@ public final class CoreNLPProtos {
 
     /**
      * <code>required uint32 tokenOffsetBegin = 2;</code>
+     * @return Whether the tokenOffsetBegin field is set.
      */
     boolean hasTokenOffsetBegin();
     /**
      * <code>required uint32 tokenOffsetBegin = 2;</code>
+     * @return The tokenOffsetBegin.
      */
     int getTokenOffsetBegin();
 
     /**
      * <code>required uint32 tokenOffsetEnd = 3;</code>
+     * @return Whether the tokenOffsetEnd field is set.
      */
     boolean hasTokenOffsetEnd();
     /**
      * <code>required uint32 tokenOffsetEnd = 3;</code>
+     * @return The tokenOffsetEnd.
      */
     int getTokenOffsetEnd();
 
     /**
      * <code>optional uint32 sentenceIndex = 4;</code>
+     * @return Whether the sentenceIndex field is set.
      */
     boolean hasSentenceIndex();
     /**
      * <code>optional uint32 sentenceIndex = 4;</code>
+     * @return The sentenceIndex.
      */
     int getSentenceIndex();
 
     /**
      * <code>optional uint32 characterOffsetBegin = 5;</code>
+     * @return Whether the characterOffsetBegin field is set.
      */
     boolean hasCharacterOffsetBegin();
     /**
      * <code>optional uint32 characterOffsetBegin = 5;</code>
+     * @return The characterOffsetBegin.
      */
     int getCharacterOffsetBegin();
 
     /**
      * <code>optional uint32 characterOffsetEnd = 6;</code>
+     * @return Whether the characterOffsetEnd field is set.
      */
     boolean hasCharacterOffsetEnd();
     /**
      * <code>optional uint32 characterOffsetEnd = 6;</code>
+     * @return The characterOffsetEnd.
      */
     int getCharacterOffsetEnd();
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree parseTree = 7;</code>
+     * @return Whether the parseTree field is set.
      */
     boolean hasParseTree();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree parseTree = 7;</code>
+     * @return The parseTree.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getParseTree();
     /**
@@ -5782,10 +5939,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree binarizedParseTree = 31;</code>
+     * @return Whether the binarizedParseTree field is set.
      */
     boolean hasBinarizedParseTree();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree binarizedParseTree = 31;</code>
+     * @return The binarizedParseTree.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getBinarizedParseTree();
     /**
@@ -5795,10 +5954,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree annotatedParseTree = 32;</code>
+     * @return Whether the annotatedParseTree field is set.
      */
     boolean hasAnnotatedParseTree();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree annotatedParseTree = 32;</code>
+     * @return The annotatedParseTree.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getAnnotatedParseTree();
     /**
@@ -5808,14 +5969,17 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional string sentiment = 33;</code>
+     * @return Whether the sentiment field is set.
      */
     boolean hasSentiment();
     /**
      * <code>optional string sentiment = 33;</code>
+     * @return The sentiment.
      */
     java.lang.String getSentiment();
     /**
      * <code>optional string sentiment = 33;</code>
+     * @return The bytes for sentiment.
      */
     com.google.protobuf.ByteString
         getSentimentBytes();
@@ -5846,10 +6010,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph basicDependencies = 8;</code>
+     * @return Whether the basicDependencies field is set.
      */
     boolean hasBasicDependencies();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph basicDependencies = 8;</code>
+     * @return The basicDependencies.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getBasicDependencies();
     /**
@@ -5859,10 +6025,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedDependencies = 9;</code>
+     * @return Whether the collapsedDependencies field is set.
      */
     boolean hasCollapsedDependencies();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedDependencies = 9;</code>
+     * @return The collapsedDependencies.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getCollapsedDependencies();
     /**
@@ -5872,10 +6040,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedCCProcessedDependencies = 10;</code>
+     * @return Whether the collapsedCCProcessedDependencies field is set.
      */
     boolean hasCollapsedCCProcessedDependencies();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedCCProcessedDependencies = 10;</code>
+     * @return The collapsedCCProcessedDependencies.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getCollapsedCCProcessedDependencies();
     /**
@@ -5885,10 +6055,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph alternativeDependencies = 13;</code>
+     * @return Whether the alternativeDependencies field is set.
      */
     boolean hasAlternativeDependencies();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph alternativeDependencies = 13;</code>
+     * @return The alternativeDependencies.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getAlternativeDependencies();
     /**
@@ -6074,10 +6246,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedDependencies = 17;</code>
+     * @return Whether the enhancedDependencies field is set.
      */
     boolean hasEnhancedDependencies();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedDependencies = 17;</code>
+     * @return The enhancedDependencies.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedDependencies();
     /**
@@ -6087,10 +6261,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedPlusPlusDependencies = 18;</code>
+     * @return Whether the enhancedPlusPlusDependencies field is set.
      */
     boolean hasEnhancedPlusPlusDependencies();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedPlusPlusDependencies = 18;</code>
+     * @return The enhancedPlusPlusDependencies.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedPlusPlusDependencies();
     /**
@@ -6124,10 +6300,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional uint32 paragraph = 11;</code>
+     * @return Whether the paragraph field is set.
      */
     boolean hasParagraph();
     /**
      * <code>optional uint32 paragraph = 11;</code>
+     * @return The paragraph.
      */
     int getParagraph();
 
@@ -6137,6 +6315,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string text = 12;</code>
+     * @return Whether the text field is set.
      */
     boolean hasText();
     /**
@@ -6145,6 +6324,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string text = 12;</code>
+     * @return The text.
      */
     java.lang.String getText();
     /**
@@ -6153,16 +6333,19 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string text = 12;</code>
+     * @return The bytes for text.
      */
     com.google.protobuf.ByteString
         getTextBytes();
 
     /**
      * <code>optional uint32 lineNumber = 20;</code>
+     * @return Whether the lineNumber field is set.
      */
     boolean hasLineNumber();
     /**
      * <code>optional uint32 lineNumber = 20;</code>
+     * @return The lineNumber.
      */
     int getLineNumber();
 
@@ -6172,6 +6355,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasRelationAnnotations = 51;</code>
+     * @return Whether the hasRelationAnnotations field is set.
      */
     boolean hasHasRelationAnnotations();
     /**
@@ -6180,6 +6364,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasRelationAnnotations = 51;</code>
+     * @return The hasRelationAnnotations.
      */
     boolean getHasRelationAnnotations();
 
@@ -6233,10 +6418,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
+     * @return Whether the hasNumerizedTokensAnnotation field is set.
      */
     boolean hasHasNumerizedTokensAnnotation();
     /**
      * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
+     * @return The hasNumerizedTokensAnnotation.
      */
     boolean getHasNumerizedTokensAnnotation();
 
@@ -6290,10 +6477,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
+     * @return Whether the hasCorefMentionsAnnotation field is set.
      */
     boolean hasHasCorefMentionsAnnotation();
     /**
      * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
+     * @return The hasCorefMentionsAnnotation.
      */
     boolean getHasCorefMentionsAnnotation();
 
@@ -6303,6 +6492,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentenceID = 58;</code>
+     * @return Whether the sentenceID field is set.
      */
     boolean hasSentenceID();
     /**
@@ -6311,6 +6501,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentenceID = 58;</code>
+     * @return The sentenceID.
      */
     java.lang.String getSentenceID();
     /**
@@ -6319,6 +6510,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentenceID = 58;</code>
+     * @return The bytes for sentenceID.
      */
     com.google.protobuf.ByteString
         getSentenceIDBytes();
@@ -6329,6 +6521,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionDate = 59;</code>
+     * @return Whether the sectionDate field is set.
      */
     boolean hasSectionDate();
     /**
@@ -6337,6 +6530,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionDate = 59;</code>
+     * @return The sectionDate.
      */
     java.lang.String getSectionDate();
     /**
@@ -6345,6 +6539,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionDate = 59;</code>
+     * @return The bytes for sectionDate.
      */
     com.google.protobuf.ByteString
         getSectionDateBytes();
@@ -6355,6 +6550,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 sectionIndex = 60;</code>
+     * @return Whether the sectionIndex field is set.
      */
     boolean hasSectionIndex();
     /**
@@ -6363,6 +6559,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 sectionIndex = 60;</code>
+     * @return The sectionIndex.
      */
     int getSectionIndex();
 
@@ -6372,6 +6569,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 61;</code>
+     * @return Whether the sectionName field is set.
      */
     boolean hasSectionName();
     /**
@@ -6380,6 +6578,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 61;</code>
+     * @return The sectionName.
      */
     java.lang.String getSectionName();
     /**
@@ -6388,6 +6587,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 61;</code>
+     * @return The bytes for sectionName.
      */
     com.google.protobuf.ByteString
         getSectionNameBytes();
@@ -6398,6 +6598,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionAuthor = 62;</code>
+     * @return Whether the sectionAuthor field is set.
      */
     boolean hasSectionAuthor();
     /**
@@ -6406,6 +6607,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionAuthor = 62;</code>
+     * @return The sectionAuthor.
      */
     java.lang.String getSectionAuthor();
     /**
@@ -6414,6 +6616,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionAuthor = 62;</code>
+     * @return The bytes for sectionAuthor.
      */
     com.google.protobuf.ByteString
         getSectionAuthorBytes();
@@ -6424,6 +6627,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string docID = 63;</code>
+     * @return Whether the docID field is set.
      */
     boolean hasDocID();
     /**
@@ -6432,6 +6636,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string docID = 63;</code>
+     * @return The docID.
      */
     java.lang.String getDocID();
     /**
@@ -6440,6 +6645,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string docID = 63;</code>
+     * @return The bytes for docID.
      */
     com.google.protobuf.ByteString
         getDocIDBytes();
@@ -6450,6 +6656,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool sectionQuoted = 64;</code>
+     * @return Whether the sectionQuoted field is set.
      */
     boolean hasSectionQuoted();
     /**
@@ -6458,6 +6665,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool sectionQuoted = 64;</code>
+     * @return The sectionQuoted.
      */
     boolean getSectionQuoted();
 
@@ -6467,6 +6675,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
+     * @return Whether the hasEntityMentionsAnnotation field is set.
      */
     boolean hasHasEntityMentionsAnnotation();
     /**
@@ -6475,6 +6684,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
+     * @return The hasEntityMentionsAnnotation.
      */
     boolean getHasEntityMentionsAnnotation();
 
@@ -6484,6 +6694,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
+     * @return Whether the hasKBPTriplesAnnotation field is set.
      */
     boolean hasHasKBPTriplesAnnotation();
     /**
@@ -6492,6 +6703,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
+     * @return The hasKBPTriplesAnnotation.
      */
     boolean getHasKBPTriplesAnnotation();
 
@@ -6501,6 +6713,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
+     * @return Whether the hasOpenieTriplesAnnotation field is set.
      */
     boolean hasHasOpenieTriplesAnnotation();
     /**
@@ -6509,6 +6722,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
+     * @return The hasOpenieTriplesAnnotation.
      */
     boolean getHasOpenieTriplesAnnotation();
 
@@ -6518,6 +6732,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 chapterIndex = 66;</code>
+     * @return Whether the chapterIndex field is set.
      */
     boolean hasChapterIndex();
     /**
@@ -6526,15 +6741,18 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 chapterIndex = 66;</code>
+     * @return The chapterIndex.
      */
     int getChapterIndex();
 
     /**
      * <code>optional uint32 paragraphIndex = 67;</code>
+     * @return Whether the paragraphIndex field is set.
      */
     boolean hasParagraphIndex();
     /**
      * <code>optional uint32 paragraphIndex = 67;</code>
+     * @return The paragraphIndex.
      */
     int getParagraphIndex();
   }
@@ -7057,12 +7275,14 @@ public final class CoreNLPProtos {
     private int tokenOffsetBegin_;
     /**
      * <code>required uint32 tokenOffsetBegin = 2;</code>
+     * @return Whether the tokenOffsetBegin field is set.
      */
     public boolean hasTokenOffsetBegin() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>required uint32 tokenOffsetBegin = 2;</code>
+     * @return The tokenOffsetBegin.
      */
     public int getTokenOffsetBegin() {
       return tokenOffsetBegin_;
@@ -7072,12 +7292,14 @@ public final class CoreNLPProtos {
     private int tokenOffsetEnd_;
     /**
      * <code>required uint32 tokenOffsetEnd = 3;</code>
+     * @return Whether the tokenOffsetEnd field is set.
      */
     public boolean hasTokenOffsetEnd() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>required uint32 tokenOffsetEnd = 3;</code>
+     * @return The tokenOffsetEnd.
      */
     public int getTokenOffsetEnd() {
       return tokenOffsetEnd_;
@@ -7087,12 +7309,14 @@ public final class CoreNLPProtos {
     private int sentenceIndex_;
     /**
      * <code>optional uint32 sentenceIndex = 4;</code>
+     * @return Whether the sentenceIndex field is set.
      */
     public boolean hasSentenceIndex() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional uint32 sentenceIndex = 4;</code>
+     * @return The sentenceIndex.
      */
     public int getSentenceIndex() {
       return sentenceIndex_;
@@ -7102,12 +7326,14 @@ public final class CoreNLPProtos {
     private int characterOffsetBegin_;
     /**
      * <code>optional uint32 characterOffsetBegin = 5;</code>
+     * @return Whether the characterOffsetBegin field is set.
      */
     public boolean hasCharacterOffsetBegin() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional uint32 characterOffsetBegin = 5;</code>
+     * @return The characterOffsetBegin.
      */
     public int getCharacterOffsetBegin() {
       return characterOffsetBegin_;
@@ -7117,12 +7343,14 @@ public final class CoreNLPProtos {
     private int characterOffsetEnd_;
     /**
      * <code>optional uint32 characterOffsetEnd = 6;</code>
+     * @return Whether the characterOffsetEnd field is set.
      */
     public boolean hasCharacterOffsetEnd() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional uint32 characterOffsetEnd = 6;</code>
+     * @return The characterOffsetEnd.
      */
     public int getCharacterOffsetEnd() {
       return characterOffsetEnd_;
@@ -7132,12 +7360,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree parseTree_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree parseTree = 7;</code>
+     * @return Whether the parseTree field is set.
      */
     public boolean hasParseTree() {
       return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree parseTree = 7;</code>
+     * @return The parseTree.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getParseTree() {
       return parseTree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.getDefaultInstance() : parseTree_;
@@ -7153,12 +7383,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree binarizedParseTree_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree binarizedParseTree = 31;</code>
+     * @return Whether the binarizedParseTree field is set.
      */
     public boolean hasBinarizedParseTree() {
       return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree binarizedParseTree = 31;</code>
+     * @return The binarizedParseTree.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getBinarizedParseTree() {
       return binarizedParseTree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.getDefaultInstance() : binarizedParseTree_;
@@ -7174,12 +7406,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree annotatedParseTree_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree annotatedParseTree = 32;</code>
+     * @return Whether the annotatedParseTree field is set.
      */
     public boolean hasAnnotatedParseTree() {
       return ((bitField0_ & 0x00000080) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree annotatedParseTree = 32;</code>
+     * @return The annotatedParseTree.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getAnnotatedParseTree() {
       return annotatedParseTree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.getDefaultInstance() : annotatedParseTree_;
@@ -7195,12 +7429,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object sentiment_;
     /**
      * <code>optional string sentiment = 33;</code>
+     * @return Whether the sentiment field is set.
      */
     public boolean hasSentiment() {
       return ((bitField0_ & 0x00000100) != 0);
     }
     /**
      * <code>optional string sentiment = 33;</code>
+     * @return The sentiment.
      */
     public java.lang.String getSentiment() {
       java.lang.Object ref = sentiment_;
@@ -7218,6 +7454,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string sentiment = 33;</code>
+     * @return The bytes for sentiment.
      */
     public com.google.protobuf.ByteString
         getSentimentBytes() {
@@ -7272,12 +7509,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph basicDependencies_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph basicDependencies = 8;</code>
+     * @return Whether the basicDependencies field is set.
      */
     public boolean hasBasicDependencies() {
       return ((bitField0_ & 0x00000200) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph basicDependencies = 8;</code>
+     * @return The basicDependencies.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getBasicDependencies() {
       return basicDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : basicDependencies_;
@@ -7293,12 +7532,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph collapsedDependencies_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedDependencies = 9;</code>
+     * @return Whether the collapsedDependencies field is set.
      */
     public boolean hasCollapsedDependencies() {
       return ((bitField0_ & 0x00000400) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedDependencies = 9;</code>
+     * @return The collapsedDependencies.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getCollapsedDependencies() {
       return collapsedDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : collapsedDependencies_;
@@ -7314,12 +7555,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph collapsedCCProcessedDependencies_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedCCProcessedDependencies = 10;</code>
+     * @return Whether the collapsedCCProcessedDependencies field is set.
      */
     public boolean hasCollapsedCCProcessedDependencies() {
       return ((bitField0_ & 0x00000800) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedCCProcessedDependencies = 10;</code>
+     * @return The collapsedCCProcessedDependencies.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getCollapsedCCProcessedDependencies() {
       return collapsedCCProcessedDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : collapsedCCProcessedDependencies_;
@@ -7335,12 +7578,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph alternativeDependencies_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph alternativeDependencies = 13;</code>
+     * @return Whether the alternativeDependencies field is set.
      */
     public boolean hasAlternativeDependencies() {
       return ((bitField0_ & 0x00001000) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph alternativeDependencies = 13;</code>
+     * @return The alternativeDependencies.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getAlternativeDependencies() {
       return alternativeDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : alternativeDependencies_;
@@ -7576,12 +7821,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph enhancedDependencies_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedDependencies = 17;</code>
+     * @return Whether the enhancedDependencies field is set.
      */
     public boolean hasEnhancedDependencies() {
       return ((bitField0_ & 0x00002000) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedDependencies = 17;</code>
+     * @return The enhancedDependencies.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedDependencies() {
       return enhancedDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : enhancedDependencies_;
@@ -7597,12 +7844,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph enhancedPlusPlusDependencies_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedPlusPlusDependencies = 18;</code>
+     * @return Whether the enhancedPlusPlusDependencies field is set.
      */
     public boolean hasEnhancedPlusPlusDependencies() {
       return ((bitField0_ & 0x00004000) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedPlusPlusDependencies = 18;</code>
+     * @return The enhancedPlusPlusDependencies.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedPlusPlusDependencies() {
       return enhancedPlusPlusDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : enhancedPlusPlusDependencies_;
@@ -7653,12 +7902,14 @@ public final class CoreNLPProtos {
     private int paragraph_;
     /**
      * <code>optional uint32 paragraph = 11;</code>
+     * @return Whether the paragraph field is set.
      */
     public boolean hasParagraph() {
       return ((bitField0_ & 0x00008000) != 0);
     }
     /**
      * <code>optional uint32 paragraph = 11;</code>
+     * @return The paragraph.
      */
     public int getParagraph() {
       return paragraph_;
@@ -7672,6 +7923,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string text = 12;</code>
+     * @return Whether the text field is set.
      */
     public boolean hasText() {
       return ((bitField0_ & 0x00010000) != 0);
@@ -7682,6 +7934,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string text = 12;</code>
+     * @return The text.
      */
     public java.lang.String getText() {
       java.lang.Object ref = text_;
@@ -7703,6 +7956,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string text = 12;</code>
+     * @return The bytes for text.
      */
     public com.google.protobuf.ByteString
         getTextBytes() {
@@ -7722,12 +7976,14 @@ public final class CoreNLPProtos {
     private int lineNumber_;
     /**
      * <code>optional uint32 lineNumber = 20;</code>
+     * @return Whether the lineNumber field is set.
      */
     public boolean hasLineNumber() {
       return ((bitField0_ & 0x00020000) != 0);
     }
     /**
      * <code>optional uint32 lineNumber = 20;</code>
+     * @return The lineNumber.
      */
     public int getLineNumber() {
       return lineNumber_;
@@ -7741,6 +7997,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasRelationAnnotations = 51;</code>
+     * @return Whether the hasRelationAnnotations field is set.
      */
     public boolean hasHasRelationAnnotations() {
       return ((bitField0_ & 0x00040000) != 0);
@@ -7751,6 +8008,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasRelationAnnotations = 51;</code>
+     * @return The hasRelationAnnotations.
      */
     public boolean getHasRelationAnnotations() {
       return hasRelationAnnotations_;
@@ -7830,12 +8088,14 @@ public final class CoreNLPProtos {
     private boolean hasNumerizedTokensAnnotation_;
     /**
      * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
+     * @return Whether the hasNumerizedTokensAnnotation field is set.
      */
     public boolean hasHasNumerizedTokensAnnotation() {
       return ((bitField0_ & 0x00080000) != 0);
     }
     /**
      * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
+     * @return The hasNumerizedTokensAnnotation.
      */
     public boolean getHasNumerizedTokensAnnotation() {
       return hasNumerizedTokensAnnotation_;
@@ -7915,12 +8175,14 @@ public final class CoreNLPProtos {
     private boolean hasCorefMentionsAnnotation_;
     /**
      * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
+     * @return Whether the hasCorefMentionsAnnotation field is set.
      */
     public boolean hasHasCorefMentionsAnnotation() {
       return ((bitField0_ & 0x00100000) != 0);
     }
     /**
      * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
+     * @return The hasCorefMentionsAnnotation.
      */
     public boolean getHasCorefMentionsAnnotation() {
       return hasCorefMentionsAnnotation_;
@@ -7934,6 +8196,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentenceID = 58;</code>
+     * @return Whether the sentenceID field is set.
      */
     public boolean hasSentenceID() {
       return ((bitField0_ & 0x00200000) != 0);
@@ -7944,6 +8207,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentenceID = 58;</code>
+     * @return The sentenceID.
      */
     public java.lang.String getSentenceID() {
       java.lang.Object ref = sentenceID_;
@@ -7965,6 +8229,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentenceID = 58;</code>
+     * @return The bytes for sentenceID.
      */
     public com.google.protobuf.ByteString
         getSentenceIDBytes() {
@@ -7988,6 +8253,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionDate = 59;</code>
+     * @return Whether the sectionDate field is set.
      */
     public boolean hasSectionDate() {
       return ((bitField0_ & 0x00400000) != 0);
@@ -7998,6 +8264,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionDate = 59;</code>
+     * @return The sectionDate.
      */
     public java.lang.String getSectionDate() {
       java.lang.Object ref = sectionDate_;
@@ -8019,6 +8286,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionDate = 59;</code>
+     * @return The bytes for sectionDate.
      */
     public com.google.protobuf.ByteString
         getSectionDateBytes() {
@@ -8042,6 +8310,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 sectionIndex = 60;</code>
+     * @return Whether the sectionIndex field is set.
      */
     public boolean hasSectionIndex() {
       return ((bitField0_ & 0x00800000) != 0);
@@ -8052,6 +8321,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 sectionIndex = 60;</code>
+     * @return The sectionIndex.
      */
     public int getSectionIndex() {
       return sectionIndex_;
@@ -8065,6 +8335,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 61;</code>
+     * @return Whether the sectionName field is set.
      */
     public boolean hasSectionName() {
       return ((bitField0_ & 0x01000000) != 0);
@@ -8075,6 +8346,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 61;</code>
+     * @return The sectionName.
      */
     public java.lang.String getSectionName() {
       java.lang.Object ref = sectionName_;
@@ -8096,6 +8368,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 61;</code>
+     * @return The bytes for sectionName.
      */
     public com.google.protobuf.ByteString
         getSectionNameBytes() {
@@ -8119,6 +8392,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionAuthor = 62;</code>
+     * @return Whether the sectionAuthor field is set.
      */
     public boolean hasSectionAuthor() {
       return ((bitField0_ & 0x02000000) != 0);
@@ -8129,6 +8403,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionAuthor = 62;</code>
+     * @return The sectionAuthor.
      */
     public java.lang.String getSectionAuthor() {
       java.lang.Object ref = sectionAuthor_;
@@ -8150,6 +8425,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionAuthor = 62;</code>
+     * @return The bytes for sectionAuthor.
      */
     public com.google.protobuf.ByteString
         getSectionAuthorBytes() {
@@ -8173,6 +8449,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string docID = 63;</code>
+     * @return Whether the docID field is set.
      */
     public boolean hasDocID() {
       return ((bitField0_ & 0x04000000) != 0);
@@ -8183,6 +8460,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string docID = 63;</code>
+     * @return The docID.
      */
     public java.lang.String getDocID() {
       java.lang.Object ref = docID_;
@@ -8204,6 +8482,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string docID = 63;</code>
+     * @return The bytes for docID.
      */
     public com.google.protobuf.ByteString
         getDocIDBytes() {
@@ -8227,6 +8506,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool sectionQuoted = 64;</code>
+     * @return Whether the sectionQuoted field is set.
      */
     public boolean hasSectionQuoted() {
       return ((bitField0_ & 0x08000000) != 0);
@@ -8237,6 +8517,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool sectionQuoted = 64;</code>
+     * @return The sectionQuoted.
      */
     public boolean getSectionQuoted() {
       return sectionQuoted_;
@@ -8250,6 +8531,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
+     * @return Whether the hasEntityMentionsAnnotation field is set.
      */
     public boolean hasHasEntityMentionsAnnotation() {
       return ((bitField0_ & 0x10000000) != 0);
@@ -8260,6 +8542,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
+     * @return The hasEntityMentionsAnnotation.
      */
     public boolean getHasEntityMentionsAnnotation() {
       return hasEntityMentionsAnnotation_;
@@ -8273,6 +8556,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
+     * @return Whether the hasKBPTriplesAnnotation field is set.
      */
     public boolean hasHasKBPTriplesAnnotation() {
       return ((bitField0_ & 0x20000000) != 0);
@@ -8283,6 +8567,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
+     * @return The hasKBPTriplesAnnotation.
      */
     public boolean getHasKBPTriplesAnnotation() {
       return hasKBPTriplesAnnotation_;
@@ -8296,6 +8581,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
+     * @return Whether the hasOpenieTriplesAnnotation field is set.
      */
     public boolean hasHasOpenieTriplesAnnotation() {
       return ((bitField0_ & 0x40000000) != 0);
@@ -8306,6 +8592,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
+     * @return The hasOpenieTriplesAnnotation.
      */
     public boolean getHasOpenieTriplesAnnotation() {
       return hasOpenieTriplesAnnotation_;
@@ -8319,6 +8606,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 chapterIndex = 66;</code>
+     * @return Whether the chapterIndex field is set.
      */
     public boolean hasChapterIndex() {
       return ((bitField0_ & 0x80000000) != 0);
@@ -8329,6 +8617,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 chapterIndex = 66;</code>
+     * @return The chapterIndex.
      */
     public int getChapterIndex() {
       return chapterIndex_;
@@ -8338,12 +8627,14 @@ public final class CoreNLPProtos {
     private int paragraphIndex_;
     /**
      * <code>optional uint32 paragraphIndex = 67;</code>
+     * @return Whether the paragraphIndex field is set.
      */
     public boolean hasParagraphIndex() {
       return ((bitField1_ & 0x00000001) != 0);
     }
     /**
      * <code>optional uint32 paragraphIndex = 67;</code>
+     * @return The paragraphIndex.
      */
     public int getParagraphIndex() {
       return paragraphIndex_;
@@ -10593,18 +10884,22 @@ public final class CoreNLPProtos {
       private int tokenOffsetBegin_ ;
       /**
        * <code>required uint32 tokenOffsetBegin = 2;</code>
+       * @return Whether the tokenOffsetBegin field is set.
        */
       public boolean hasTokenOffsetBegin() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>required uint32 tokenOffsetBegin = 2;</code>
+       * @return The tokenOffsetBegin.
        */
       public int getTokenOffsetBegin() {
         return tokenOffsetBegin_;
       }
       /**
        * <code>required uint32 tokenOffsetBegin = 2;</code>
+       * @param value The tokenOffsetBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenOffsetBegin(int value) {
         bitField0_ |= 0x00000002;
@@ -10614,6 +10909,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required uint32 tokenOffsetBegin = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenOffsetBegin() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -10625,18 +10921,22 @@ public final class CoreNLPProtos {
       private int tokenOffsetEnd_ ;
       /**
        * <code>required uint32 tokenOffsetEnd = 3;</code>
+       * @return Whether the tokenOffsetEnd field is set.
        */
       public boolean hasTokenOffsetEnd() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>required uint32 tokenOffsetEnd = 3;</code>
+       * @return The tokenOffsetEnd.
        */
       public int getTokenOffsetEnd() {
         return tokenOffsetEnd_;
       }
       /**
        * <code>required uint32 tokenOffsetEnd = 3;</code>
+       * @param value The tokenOffsetEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenOffsetEnd(int value) {
         bitField0_ |= 0x00000004;
@@ -10646,6 +10946,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required uint32 tokenOffsetEnd = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenOffsetEnd() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -10657,18 +10958,22 @@ public final class CoreNLPProtos {
       private int sentenceIndex_ ;
       /**
        * <code>optional uint32 sentenceIndex = 4;</code>
+       * @return Whether the sentenceIndex field is set.
        */
       public boolean hasSentenceIndex() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional uint32 sentenceIndex = 4;</code>
+       * @return The sentenceIndex.
        */
       public int getSentenceIndex() {
         return sentenceIndex_;
       }
       /**
        * <code>optional uint32 sentenceIndex = 4;</code>
+       * @param value The sentenceIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setSentenceIndex(int value) {
         bitField0_ |= 0x00000008;
@@ -10678,6 +10983,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 sentenceIndex = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentenceIndex() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -10689,18 +10995,22 @@ public final class CoreNLPProtos {
       private int characterOffsetBegin_ ;
       /**
        * <code>optional uint32 characterOffsetBegin = 5;</code>
+       * @return Whether the characterOffsetBegin field is set.
        */
       public boolean hasCharacterOffsetBegin() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional uint32 characterOffsetBegin = 5;</code>
+       * @return The characterOffsetBegin.
        */
       public int getCharacterOffsetBegin() {
         return characterOffsetBegin_;
       }
       /**
        * <code>optional uint32 characterOffsetBegin = 5;</code>
+       * @param value The characterOffsetBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setCharacterOffsetBegin(int value) {
         bitField0_ |= 0x00000010;
@@ -10710,6 +11020,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 characterOffsetBegin = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCharacterOffsetBegin() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -10721,18 +11032,22 @@ public final class CoreNLPProtos {
       private int characterOffsetEnd_ ;
       /**
        * <code>optional uint32 characterOffsetEnd = 6;</code>
+       * @return Whether the characterOffsetEnd field is set.
        */
       public boolean hasCharacterOffsetEnd() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional uint32 characterOffsetEnd = 6;</code>
+       * @return The characterOffsetEnd.
        */
       public int getCharacterOffsetEnd() {
         return characterOffsetEnd_;
       }
       /**
        * <code>optional uint32 characterOffsetEnd = 6;</code>
+       * @param value The characterOffsetEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setCharacterOffsetEnd(int value) {
         bitField0_ |= 0x00000020;
@@ -10742,6 +11057,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 characterOffsetEnd = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCharacterOffsetEnd() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -10755,12 +11071,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder> parseTreeBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.ParseTree parseTree = 7;</code>
+       * @return Whether the parseTree field is set.
        */
       public boolean hasParseTree() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.ParseTree parseTree = 7;</code>
+       * @return The parseTree.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getParseTree() {
         if (parseTreeBuilder_ == null) {
@@ -10873,12 +11191,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder> binarizedParseTreeBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.ParseTree binarizedParseTree = 31;</code>
+       * @return Whether the binarizedParseTree field is set.
        */
       public boolean hasBinarizedParseTree() {
         return ((bitField0_ & 0x00000080) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.ParseTree binarizedParseTree = 31;</code>
+       * @return The binarizedParseTree.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getBinarizedParseTree() {
         if (binarizedParseTreeBuilder_ == null) {
@@ -10991,12 +11311,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder> annotatedParseTreeBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.ParseTree annotatedParseTree = 32;</code>
+       * @return Whether the annotatedParseTree field is set.
        */
       public boolean hasAnnotatedParseTree() {
         return ((bitField0_ & 0x00000100) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.ParseTree annotatedParseTree = 32;</code>
+       * @return The annotatedParseTree.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getAnnotatedParseTree() {
         if (annotatedParseTreeBuilder_ == null) {
@@ -11107,12 +11429,14 @@ public final class CoreNLPProtos {
       private java.lang.Object sentiment_ = "";
       /**
        * <code>optional string sentiment = 33;</code>
+       * @return Whether the sentiment field is set.
        */
       public boolean hasSentiment() {
         return ((bitField0_ & 0x00000200) != 0);
       }
       /**
        * <code>optional string sentiment = 33;</code>
+       * @return The sentiment.
        */
       public java.lang.String getSentiment() {
         java.lang.Object ref = sentiment_;
@@ -11130,6 +11454,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sentiment = 33;</code>
+       * @return The bytes for sentiment.
        */
       public com.google.protobuf.ByteString
           getSentimentBytes() {
@@ -11146,6 +11471,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sentiment = 33;</code>
+       * @param value The sentiment to set.
+       * @return This builder for chaining.
        */
       public Builder setSentiment(
           java.lang.String value) {
@@ -11159,6 +11486,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sentiment = 33;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentiment() {
         bitField0_ = (bitField0_ & ~0x00000200);
@@ -11168,6 +11496,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sentiment = 33;</code>
+       * @param value The bytes for sentiment to set.
+       * @return This builder for chaining.
        */
       public Builder setSentimentBytes(
           com.google.protobuf.ByteString value) {
@@ -11425,12 +11755,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> basicDependenciesBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph basicDependencies = 8;</code>
+       * @return Whether the basicDependencies field is set.
        */
       public boolean hasBasicDependencies() {
         return ((bitField0_ & 0x00000800) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph basicDependencies = 8;</code>
+       * @return The basicDependencies.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getBasicDependencies() {
         if (basicDependenciesBuilder_ == null) {
@@ -11543,12 +11875,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> collapsedDependenciesBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedDependencies = 9;</code>
+       * @return Whether the collapsedDependencies field is set.
        */
       public boolean hasCollapsedDependencies() {
         return ((bitField0_ & 0x00001000) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedDependencies = 9;</code>
+       * @return The collapsedDependencies.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getCollapsedDependencies() {
         if (collapsedDependenciesBuilder_ == null) {
@@ -11661,12 +11995,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> collapsedCCProcessedDependenciesBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedCCProcessedDependencies = 10;</code>
+       * @return Whether the collapsedCCProcessedDependencies field is set.
        */
       public boolean hasCollapsedCCProcessedDependencies() {
         return ((bitField0_ & 0x00002000) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedCCProcessedDependencies = 10;</code>
+       * @return The collapsedCCProcessedDependencies.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getCollapsedCCProcessedDependencies() {
         if (collapsedCCProcessedDependenciesBuilder_ == null) {
@@ -11779,12 +12115,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> alternativeDependenciesBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph alternativeDependencies = 13;</code>
+       * @return Whether the alternativeDependencies field is set.
        */
       public boolean hasAlternativeDependencies() {
         return ((bitField0_ & 0x00004000) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph alternativeDependencies = 13;</code>
+       * @return The alternativeDependencies.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getAlternativeDependencies() {
         if (alternativeDependenciesBuilder_ == null) {
@@ -13145,12 +13483,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> enhancedDependenciesBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedDependencies = 17;</code>
+       * @return Whether the enhancedDependencies field is set.
        */
       public boolean hasEnhancedDependencies() {
         return ((bitField0_ & 0x00080000) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedDependencies = 17;</code>
+       * @return The enhancedDependencies.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedDependencies() {
         if (enhancedDependenciesBuilder_ == null) {
@@ -13263,12 +13603,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> enhancedPlusPlusDependenciesBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedPlusPlusDependencies = 18;</code>
+       * @return Whether the enhancedPlusPlusDependencies field is set.
        */
       public boolean hasEnhancedPlusPlusDependencies() {
         return ((bitField0_ & 0x00100000) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedPlusPlusDependencies = 18;</code>
+       * @return The enhancedPlusPlusDependencies.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedPlusPlusDependencies() {
         if (enhancedPlusPlusDependenciesBuilder_ == null) {
@@ -13619,18 +13961,22 @@ public final class CoreNLPProtos {
       private int paragraph_ ;
       /**
        * <code>optional uint32 paragraph = 11;</code>
+       * @return Whether the paragraph field is set.
        */
       public boolean hasParagraph() {
         return ((bitField0_ & 0x00400000) != 0);
       }
       /**
        * <code>optional uint32 paragraph = 11;</code>
+       * @return The paragraph.
        */
       public int getParagraph() {
         return paragraph_;
       }
       /**
        * <code>optional uint32 paragraph = 11;</code>
+       * @param value The paragraph to set.
+       * @return This builder for chaining.
        */
       public Builder setParagraph(int value) {
         bitField0_ |= 0x00400000;
@@ -13640,6 +13986,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 paragraph = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearParagraph() {
         bitField0_ = (bitField0_ & ~0x00400000);
@@ -13655,6 +14002,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string text = 12;</code>
+       * @return Whether the text field is set.
        */
       public boolean hasText() {
         return ((bitField0_ & 0x00800000) != 0);
@@ -13665,6 +14013,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string text = 12;</code>
+       * @return The text.
        */
       public java.lang.String getText() {
         java.lang.Object ref = text_;
@@ -13686,6 +14035,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string text = 12;</code>
+       * @return The bytes for text.
        */
       public com.google.protobuf.ByteString
           getTextBytes() {
@@ -13706,6 +14056,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string text = 12;</code>
+       * @param value The text to set.
+       * @return This builder for chaining.
        */
       public Builder setText(
           java.lang.String value) {
@@ -13723,6 +14075,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string text = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearText() {
         bitField0_ = (bitField0_ & ~0x00800000);
@@ -13736,6 +14089,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string text = 12;</code>
+       * @param value The bytes for text to set.
+       * @return This builder for chaining.
        */
       public Builder setTextBytes(
           com.google.protobuf.ByteString value) {
@@ -13751,18 +14106,22 @@ public final class CoreNLPProtos {
       private int lineNumber_ ;
       /**
        * <code>optional uint32 lineNumber = 20;</code>
+       * @return Whether the lineNumber field is set.
        */
       public boolean hasLineNumber() {
         return ((bitField0_ & 0x01000000) != 0);
       }
       /**
        * <code>optional uint32 lineNumber = 20;</code>
+       * @return The lineNumber.
        */
       public int getLineNumber() {
         return lineNumber_;
       }
       /**
        * <code>optional uint32 lineNumber = 20;</code>
+       * @param value The lineNumber to set.
+       * @return This builder for chaining.
        */
       public Builder setLineNumber(int value) {
         bitField0_ |= 0x01000000;
@@ -13772,6 +14131,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 lineNumber = 20;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLineNumber() {
         bitField0_ = (bitField0_ & ~0x01000000);
@@ -13787,6 +14147,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasRelationAnnotations = 51;</code>
+       * @return Whether the hasRelationAnnotations field is set.
        */
       public boolean hasHasRelationAnnotations() {
         return ((bitField0_ & 0x02000000) != 0);
@@ -13797,6 +14158,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasRelationAnnotations = 51;</code>
+       * @return The hasRelationAnnotations.
        */
       public boolean getHasRelationAnnotations() {
         return hasRelationAnnotations_;
@@ -13807,6 +14169,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasRelationAnnotations = 51;</code>
+       * @param value The hasRelationAnnotations to set.
+       * @return This builder for chaining.
        */
       public Builder setHasRelationAnnotations(boolean value) {
         bitField0_ |= 0x02000000;
@@ -13820,6 +14184,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasRelationAnnotations = 51;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasRelationAnnotations() {
         bitField0_ = (bitField0_ & ~0x02000000);
@@ -14311,18 +14676,22 @@ public final class CoreNLPProtos {
       private boolean hasNumerizedTokensAnnotation_ ;
       /**
        * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
+       * @return Whether the hasNumerizedTokensAnnotation field is set.
        */
       public boolean hasHasNumerizedTokensAnnotation() {
         return ((bitField0_ & 0x10000000) != 0);
       }
       /**
        * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
+       * @return The hasNumerizedTokensAnnotation.
        */
       public boolean getHasNumerizedTokensAnnotation() {
         return hasNumerizedTokensAnnotation_;
       }
       /**
        * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
+       * @param value The hasNumerizedTokensAnnotation to set.
+       * @return This builder for chaining.
        */
       public Builder setHasNumerizedTokensAnnotation(boolean value) {
         bitField0_ |= 0x10000000;
@@ -14332,6 +14701,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasNumerizedTokensAnnotation() {
         bitField0_ = (bitField0_ & ~0x10000000);
@@ -14823,18 +15193,22 @@ public final class CoreNLPProtos {
       private boolean hasCorefMentionsAnnotation_ ;
       /**
        * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
+       * @return Whether the hasCorefMentionsAnnotation field is set.
        */
       public boolean hasHasCorefMentionsAnnotation() {
         return ((bitField0_ & 0x80000000) != 0);
       }
       /**
        * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
+       * @return The hasCorefMentionsAnnotation.
        */
       public boolean getHasCorefMentionsAnnotation() {
         return hasCorefMentionsAnnotation_;
       }
       /**
        * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
+       * @param value The hasCorefMentionsAnnotation to set.
+       * @return This builder for chaining.
        */
       public Builder setHasCorefMentionsAnnotation(boolean value) {
         bitField0_ |= 0x80000000;
@@ -14844,6 +15218,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasCorefMentionsAnnotation() {
         bitField0_ = (bitField0_ & ~0x80000000);
@@ -14859,6 +15234,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentenceID = 58;</code>
+       * @return Whether the sentenceID field is set.
        */
       public boolean hasSentenceID() {
         return ((bitField1_ & 0x00000001) != 0);
@@ -14869,6 +15245,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentenceID = 58;</code>
+       * @return The sentenceID.
        */
       public java.lang.String getSentenceID() {
         java.lang.Object ref = sentenceID_;
@@ -14890,6 +15267,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentenceID = 58;</code>
+       * @return The bytes for sentenceID.
        */
       public com.google.protobuf.ByteString
           getSentenceIDBytes() {
@@ -14910,6 +15288,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentenceID = 58;</code>
+       * @param value The sentenceID to set.
+       * @return This builder for chaining.
        */
       public Builder setSentenceID(
           java.lang.String value) {
@@ -14927,6 +15307,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentenceID = 58;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentenceID() {
         bitField1_ = (bitField1_ & ~0x00000001);
@@ -14940,6 +15321,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentenceID = 58;</code>
+       * @param value The bytes for sentenceID to set.
+       * @return This builder for chaining.
        */
       public Builder setSentenceIDBytes(
           com.google.protobuf.ByteString value) {
@@ -14959,6 +15342,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionDate = 59;</code>
+       * @return Whether the sectionDate field is set.
        */
       public boolean hasSectionDate() {
         return ((bitField1_ & 0x00000002) != 0);
@@ -14969,6 +15353,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionDate = 59;</code>
+       * @return The sectionDate.
        */
       public java.lang.String getSectionDate() {
         java.lang.Object ref = sectionDate_;
@@ -14990,6 +15375,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionDate = 59;</code>
+       * @return The bytes for sectionDate.
        */
       public com.google.protobuf.ByteString
           getSectionDateBytes() {
@@ -15010,6 +15396,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionDate = 59;</code>
+       * @param value The sectionDate to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionDate(
           java.lang.String value) {
@@ -15027,6 +15415,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionDate = 59;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSectionDate() {
         bitField1_ = (bitField1_ & ~0x00000002);
@@ -15040,6 +15429,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionDate = 59;</code>
+       * @param value The bytes for sectionDate to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionDateBytes(
           com.google.protobuf.ByteString value) {
@@ -15059,6 +15450,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 sectionIndex = 60;</code>
+       * @return Whether the sectionIndex field is set.
        */
       public boolean hasSectionIndex() {
         return ((bitField1_ & 0x00000004) != 0);
@@ -15069,6 +15461,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 sectionIndex = 60;</code>
+       * @return The sectionIndex.
        */
       public int getSectionIndex() {
         return sectionIndex_;
@@ -15079,6 +15472,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 sectionIndex = 60;</code>
+       * @param value The sectionIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionIndex(int value) {
         bitField1_ |= 0x00000004;
@@ -15092,6 +15487,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 sectionIndex = 60;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSectionIndex() {
         bitField1_ = (bitField1_ & ~0x00000004);
@@ -15107,6 +15503,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 61;</code>
+       * @return Whether the sectionName field is set.
        */
       public boolean hasSectionName() {
         return ((bitField1_ & 0x00000008) != 0);
@@ -15117,6 +15514,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 61;</code>
+       * @return The sectionName.
        */
       public java.lang.String getSectionName() {
         java.lang.Object ref = sectionName_;
@@ -15138,6 +15536,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 61;</code>
+       * @return The bytes for sectionName.
        */
       public com.google.protobuf.ByteString
           getSectionNameBytes() {
@@ -15158,6 +15557,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 61;</code>
+       * @param value The sectionName to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionName(
           java.lang.String value) {
@@ -15175,6 +15576,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 61;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSectionName() {
         bitField1_ = (bitField1_ & ~0x00000008);
@@ -15188,6 +15590,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 61;</code>
+       * @param value The bytes for sectionName to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionNameBytes(
           com.google.protobuf.ByteString value) {
@@ -15207,6 +15611,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionAuthor = 62;</code>
+       * @return Whether the sectionAuthor field is set.
        */
       public boolean hasSectionAuthor() {
         return ((bitField1_ & 0x00000010) != 0);
@@ -15217,6 +15622,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionAuthor = 62;</code>
+       * @return The sectionAuthor.
        */
       public java.lang.String getSectionAuthor() {
         java.lang.Object ref = sectionAuthor_;
@@ -15238,6 +15644,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionAuthor = 62;</code>
+       * @return The bytes for sectionAuthor.
        */
       public com.google.protobuf.ByteString
           getSectionAuthorBytes() {
@@ -15258,6 +15665,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionAuthor = 62;</code>
+       * @param value The sectionAuthor to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionAuthor(
           java.lang.String value) {
@@ -15275,6 +15684,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionAuthor = 62;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSectionAuthor() {
         bitField1_ = (bitField1_ & ~0x00000010);
@@ -15288,6 +15698,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionAuthor = 62;</code>
+       * @param value The bytes for sectionAuthor to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionAuthorBytes(
           com.google.protobuf.ByteString value) {
@@ -15307,6 +15719,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string docID = 63;</code>
+       * @return Whether the docID field is set.
        */
       public boolean hasDocID() {
         return ((bitField1_ & 0x00000020) != 0);
@@ -15317,6 +15730,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string docID = 63;</code>
+       * @return The docID.
        */
       public java.lang.String getDocID() {
         java.lang.Object ref = docID_;
@@ -15338,6 +15752,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string docID = 63;</code>
+       * @return The bytes for docID.
        */
       public com.google.protobuf.ByteString
           getDocIDBytes() {
@@ -15358,6 +15773,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string docID = 63;</code>
+       * @param value The docID to set.
+       * @return This builder for chaining.
        */
       public Builder setDocID(
           java.lang.String value) {
@@ -15375,6 +15792,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string docID = 63;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDocID() {
         bitField1_ = (bitField1_ & ~0x00000020);
@@ -15388,6 +15806,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string docID = 63;</code>
+       * @param value The bytes for docID to set.
+       * @return This builder for chaining.
        */
       public Builder setDocIDBytes(
           com.google.protobuf.ByteString value) {
@@ -15407,6 +15827,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool sectionQuoted = 64;</code>
+       * @return Whether the sectionQuoted field is set.
        */
       public boolean hasSectionQuoted() {
         return ((bitField1_ & 0x00000040) != 0);
@@ -15417,6 +15838,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool sectionQuoted = 64;</code>
+       * @return The sectionQuoted.
        */
       public boolean getSectionQuoted() {
         return sectionQuoted_;
@@ -15427,6 +15849,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool sectionQuoted = 64;</code>
+       * @param value The sectionQuoted to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionQuoted(boolean value) {
         bitField1_ |= 0x00000040;
@@ -15440,6 +15864,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool sectionQuoted = 64;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSectionQuoted() {
         bitField1_ = (bitField1_ & ~0x00000040);
@@ -15455,6 +15880,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
+       * @return Whether the hasEntityMentionsAnnotation field is set.
        */
       public boolean hasHasEntityMentionsAnnotation() {
         return ((bitField1_ & 0x00000080) != 0);
@@ -15465,6 +15891,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
+       * @return The hasEntityMentionsAnnotation.
        */
       public boolean getHasEntityMentionsAnnotation() {
         return hasEntityMentionsAnnotation_;
@@ -15475,6 +15902,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
+       * @param value The hasEntityMentionsAnnotation to set.
+       * @return This builder for chaining.
        */
       public Builder setHasEntityMentionsAnnotation(boolean value) {
         bitField1_ |= 0x00000080;
@@ -15488,6 +15917,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasEntityMentionsAnnotation() {
         bitField1_ = (bitField1_ & ~0x00000080);
@@ -15503,6 +15933,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
+       * @return Whether the hasKBPTriplesAnnotation field is set.
        */
       public boolean hasHasKBPTriplesAnnotation() {
         return ((bitField1_ & 0x00000100) != 0);
@@ -15513,6 +15944,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
+       * @return The hasKBPTriplesAnnotation.
        */
       public boolean getHasKBPTriplesAnnotation() {
         return hasKBPTriplesAnnotation_;
@@ -15523,6 +15955,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
+       * @param value The hasKBPTriplesAnnotation to set.
+       * @return This builder for chaining.
        */
       public Builder setHasKBPTriplesAnnotation(boolean value) {
         bitField1_ |= 0x00000100;
@@ -15536,6 +15970,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasKBPTriplesAnnotation() {
         bitField1_ = (bitField1_ & ~0x00000100);
@@ -15551,6 +15986,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
+       * @return Whether the hasOpenieTriplesAnnotation field is set.
        */
       public boolean hasHasOpenieTriplesAnnotation() {
         return ((bitField1_ & 0x00000200) != 0);
@@ -15561,6 +15997,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
+       * @return The hasOpenieTriplesAnnotation.
        */
       public boolean getHasOpenieTriplesAnnotation() {
         return hasOpenieTriplesAnnotation_;
@@ -15571,6 +16008,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
+       * @param value The hasOpenieTriplesAnnotation to set.
+       * @return This builder for chaining.
        */
       public Builder setHasOpenieTriplesAnnotation(boolean value) {
         bitField1_ |= 0x00000200;
@@ -15584,6 +16023,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasOpenieTriplesAnnotation() {
         bitField1_ = (bitField1_ & ~0x00000200);
@@ -15599,6 +16039,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 chapterIndex = 66;</code>
+       * @return Whether the chapterIndex field is set.
        */
       public boolean hasChapterIndex() {
         return ((bitField1_ & 0x00000400) != 0);
@@ -15609,6 +16050,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 chapterIndex = 66;</code>
+       * @return The chapterIndex.
        */
       public int getChapterIndex() {
         return chapterIndex_;
@@ -15619,6 +16061,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 chapterIndex = 66;</code>
+       * @param value The chapterIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setChapterIndex(int value) {
         bitField1_ |= 0x00000400;
@@ -15632,6 +16076,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 chapterIndex = 66;</code>
+       * @return This builder for chaining.
        */
       public Builder clearChapterIndex() {
         bitField1_ = (bitField1_ & ~0x00000400);
@@ -15643,18 +16088,22 @@ public final class CoreNLPProtos {
       private int paragraphIndex_ ;
       /**
        * <code>optional uint32 paragraphIndex = 67;</code>
+       * @return Whether the paragraphIndex field is set.
        */
       public boolean hasParagraphIndex() {
         return ((bitField1_ & 0x00000800) != 0);
       }
       /**
        * <code>optional uint32 paragraphIndex = 67;</code>
+       * @return The paragraphIndex.
        */
       public int getParagraphIndex() {
         return paragraphIndex_;
       }
       /**
        * <code>optional uint32 paragraphIndex = 67;</code>
+       * @param value The paragraphIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setParagraphIndex(int value) {
         bitField1_ |= 0x00000800;
@@ -15664,6 +16113,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 paragraphIndex = 67;</code>
+       * @return This builder for chaining.
        */
       public Builder clearParagraphIndex() {
         bitField1_ = (bitField1_ & ~0x00000800);
@@ -15735,6 +16185,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string word = 1;</code>
+     * @return Whether the word field is set.
      */
     boolean hasWord();
     /**
@@ -15743,6 +16194,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string word = 1;</code>
+     * @return The word.
      */
     java.lang.String getWord();
     /**
@@ -15751,6 +16203,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string word = 1;</code>
+     * @return The bytes for word.
      */
     com.google.protobuf.ByteString
         getWordBytes();
@@ -15761,6 +16214,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string pos = 2;</code>
+     * @return Whether the pos field is set.
      */
     boolean hasPos();
     /**
@@ -15769,6 +16223,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string pos = 2;</code>
+     * @return The pos.
      */
     java.lang.String getPos();
     /**
@@ -15777,6 +16232,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string pos = 2;</code>
+     * @return The bytes for pos.
      */
     com.google.protobuf.ByteString
         getPosBytes();
@@ -15787,6 +16243,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string value = 3;</code>
+     * @return Whether the value field is set.
      */
     boolean hasValue();
     /**
@@ -15795,6 +16252,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string value = 3;</code>
+     * @return The value.
      */
     java.lang.String getValue();
     /**
@@ -15803,6 +16261,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string value = 3;</code>
+     * @return The bytes for value.
      */
     com.google.protobuf.ByteString
         getValueBytes();
@@ -15813,6 +16272,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string category = 4;</code>
+     * @return Whether the category field is set.
      */
     boolean hasCategory();
     /**
@@ -15821,6 +16281,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string category = 4;</code>
+     * @return The category.
      */
     java.lang.String getCategory();
     /**
@@ -15829,6 +16290,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string category = 4;</code>
+     * @return The bytes for category.
      */
     com.google.protobuf.ByteString
         getCategoryBytes();
@@ -15839,6 +16301,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string before = 5;</code>
+     * @return Whether the before field is set.
      */
     boolean hasBefore();
     /**
@@ -15847,6 +16310,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string before = 5;</code>
+     * @return The before.
      */
     java.lang.String getBefore();
     /**
@@ -15855,6 +16319,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string before = 5;</code>
+     * @return The bytes for before.
      */
     com.google.protobuf.ByteString
         getBeforeBytes();
@@ -15865,6 +16330,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string after = 6;</code>
+     * @return Whether the after field is set.
      */
     boolean hasAfter();
     /**
@@ -15873,6 +16339,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string after = 6;</code>
+     * @return The after.
      */
     java.lang.String getAfter();
     /**
@@ -15881,6 +16348,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string after = 6;</code>
+     * @return The bytes for after.
      */
     com.google.protobuf.ByteString
         getAfterBytes();
@@ -15891,6 +16359,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string originalText = 7;</code>
+     * @return Whether the originalText field is set.
      */
     boolean hasOriginalText();
     /**
@@ -15899,6 +16368,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string originalText = 7;</code>
+     * @return The originalText.
      */
     java.lang.String getOriginalText();
     /**
@@ -15907,6 +16377,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string originalText = 7;</code>
+     * @return The bytes for originalText.
      */
     com.google.protobuf.ByteString
         getOriginalTextBytes();
@@ -15917,6 +16388,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string ner = 8;</code>
+     * @return Whether the ner field is set.
      */
     boolean hasNer();
     /**
@@ -15925,6 +16397,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string ner = 8;</code>
+     * @return The ner.
      */
     java.lang.String getNer();
     /**
@@ -15933,6 +16406,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string ner = 8;</code>
+     * @return The bytes for ner.
      */
     com.google.protobuf.ByteString
         getNerBytes();
@@ -15943,6 +16417,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseNER = 62;</code>
+     * @return Whether the coarseNER field is set.
      */
     boolean hasCoarseNER();
     /**
@@ -15951,6 +16426,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseNER = 62;</code>
+     * @return The coarseNER.
      */
     java.lang.String getCoarseNER();
     /**
@@ -15959,6 +16435,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseNER = 62;</code>
+     * @return The bytes for coarseNER.
      */
     com.google.protobuf.ByteString
         getCoarseNERBytes();
@@ -15969,6 +16446,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string fineGrainedNER = 63;</code>
+     * @return Whether the fineGrainedNER field is set.
      */
     boolean hasFineGrainedNER();
     /**
@@ -15977,6 +16455,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string fineGrainedNER = 63;</code>
+     * @return The fineGrainedNER.
      */
     java.lang.String getFineGrainedNER();
     /**
@@ -15985,6 +16464,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string fineGrainedNER = 63;</code>
+     * @return The bytes for fineGrainedNER.
      */
     com.google.protobuf.ByteString
         getFineGrainedNERBytes();
@@ -15995,6 +16475,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string nerLabelProbs = 66;</code>
+     * @return A list containing the nerLabelProbs.
      */
     java.util.List<java.lang.String>
         getNerLabelProbsList();
@@ -16004,6 +16485,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string nerLabelProbs = 66;</code>
+     * @return The count of nerLabelProbs.
      */
     int getNerLabelProbsCount();
     /**
@@ -16012,6 +16494,8 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string nerLabelProbs = 66;</code>
+     * @param index The index of the element to return.
+     * @return The nerLabelProbs at the given index.
      */
     java.lang.String getNerLabelProbs(int index);
     /**
@@ -16020,6 +16504,8 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string nerLabelProbs = 66;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the nerLabelProbs at the given index.
      */
     com.google.protobuf.ByteString
         getNerLabelProbsBytes(int index);
@@ -16030,6 +16516,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string normalizedNER = 9;</code>
+     * @return Whether the normalizedNER field is set.
      */
     boolean hasNormalizedNER();
     /**
@@ -16038,6 +16525,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string normalizedNER = 9;</code>
+     * @return The normalizedNER.
      */
     java.lang.String getNormalizedNER();
     /**
@@ -16046,6 +16534,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string normalizedNER = 9;</code>
+     * @return The bytes for normalizedNER.
      */
     com.google.protobuf.ByteString
         getNormalizedNERBytes();
@@ -16056,6 +16545,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string lemma = 10;</code>
+     * @return Whether the lemma field is set.
      */
     boolean hasLemma();
     /**
@@ -16064,6 +16554,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string lemma = 10;</code>
+     * @return The lemma.
      */
     java.lang.String getLemma();
     /**
@@ -16072,6 +16563,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string lemma = 10;</code>
+     * @return The bytes for lemma.
      */
     com.google.protobuf.ByteString
         getLemmaBytes();
@@ -16082,6 +16574,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 beginChar = 11;</code>
+     * @return Whether the beginChar field is set.
      */
     boolean hasBeginChar();
     /**
@@ -16090,6 +16583,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 beginChar = 11;</code>
+     * @return The beginChar.
      */
     int getBeginChar();
 
@@ -16099,6 +16593,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 endChar = 12;</code>
+     * @return Whether the endChar field is set.
      */
     boolean hasEndChar();
     /**
@@ -16107,6 +16602,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 endChar = 12;</code>
+     * @return The endChar.
      */
     int getEndChar();
 
@@ -16116,6 +16612,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 utterance = 13;</code>
+     * @return Whether the utterance field is set.
      */
     boolean hasUtterance();
     /**
@@ -16124,6 +16621,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 utterance = 13;</code>
+     * @return The utterance.
      */
     int getUtterance();
 
@@ -16133,6 +16631,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string speaker = 14;</code>
+     * @return Whether the speaker field is set.
      */
     boolean hasSpeaker();
     /**
@@ -16141,6 +16640,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string speaker = 14;</code>
+     * @return The speaker.
      */
     java.lang.String getSpeaker();
     /**
@@ -16149,6 +16649,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string speaker = 14;</code>
+     * @return The bytes for speaker.
      */
     com.google.protobuf.ByteString
         getSpeakerBytes();
@@ -16159,6 +16660,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 beginIndex = 15;</code>
+     * @return Whether the beginIndex field is set.
      */
     boolean hasBeginIndex();
     /**
@@ -16167,6 +16669,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 beginIndex = 15;</code>
+     * @return The beginIndex.
      */
     int getBeginIndex();
 
@@ -16176,6 +16679,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 endIndex = 16;</code>
+     * @return Whether the endIndex field is set.
      */
     boolean hasEndIndex();
     /**
@@ -16184,6 +16688,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 endIndex = 16;</code>
+     * @return The endIndex.
      */
     int getEndIndex();
 
@@ -16193,6 +16698,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 tokenBeginIndex = 17;</code>
+     * @return Whether the tokenBeginIndex field is set.
      */
     boolean hasTokenBeginIndex();
     /**
@@ -16201,6 +16707,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 tokenBeginIndex = 17;</code>
+     * @return The tokenBeginIndex.
      */
     int getTokenBeginIndex();
 
@@ -16210,6 +16717,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 tokenEndIndex = 18;</code>
+     * @return Whether the tokenEndIndex field is set.
      */
     boolean hasTokenEndIndex();
     /**
@@ -16218,6 +16726,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 tokenEndIndex = 18;</code>
+     * @return The tokenEndIndex.
      */
     int getTokenEndIndex();
 
@@ -16227,6 +16736,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Timex timexValue = 19;</code>
+     * @return Whether the timexValue field is set.
      */
     boolean hasTimexValue();
     /**
@@ -16235,6 +16745,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Timex timexValue = 19;</code>
+     * @return The timexValue.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.Timex getTimexValue();
     /**
@@ -16252,6 +16763,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasXmlContext = 21;</code>
+     * @return Whether the hasXmlContext field is set.
      */
     boolean hasHasXmlContext();
     /**
@@ -16260,6 +16772,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasXmlContext = 21;</code>
+     * @return The hasXmlContext.
      */
     boolean getHasXmlContext();
 
@@ -16269,6 +16782,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string xmlContext = 22;</code>
+     * @return A list containing the xmlContext.
      */
     java.util.List<java.lang.String>
         getXmlContextList();
@@ -16278,6 +16792,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string xmlContext = 22;</code>
+     * @return The count of xmlContext.
      */
     int getXmlContextCount();
     /**
@@ -16286,6 +16801,8 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string xmlContext = 22;</code>
+     * @param index The index of the element to return.
+     * @return The xmlContext at the given index.
      */
     java.lang.String getXmlContext(int index);
     /**
@@ -16294,6 +16811,8 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string xmlContext = 22;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the xmlContext at the given index.
      */
     com.google.protobuf.ByteString
         getXmlContextBytes(int index);
@@ -16304,6 +16823,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 corefClusterID = 23;</code>
+     * @return Whether the corefClusterID field is set.
      */
     boolean hasCorefClusterID();
     /**
@@ -16312,6 +16832,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 corefClusterID = 23;</code>
+     * @return The corefClusterID.
      */
     int getCorefClusterID();
 
@@ -16321,6 +16842,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string answer = 24;</code>
+     * @return Whether the answer field is set.
      */
     boolean hasAnswer();
     /**
@@ -16329,6 +16851,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string answer = 24;</code>
+     * @return The answer.
      */
     java.lang.String getAnswer();
     /**
@@ -16337,6 +16860,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string answer = 24;</code>
+     * @return The bytes for answer.
      */
     com.google.protobuf.ByteString
         getAnswerBytes();
@@ -16347,6 +16871,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 headWordIndex = 26;</code>
+     * @return Whether the headWordIndex field is set.
      */
     boolean hasHeadWordIndex();
     /**
@@ -16355,6 +16880,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 headWordIndex = 26;</code>
+     * @return The headWordIndex.
      */
     int getHeadWordIndex();
 
@@ -16364,6 +16890,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Operator operator = 27;</code>
+     * @return Whether the operator field is set.
      */
     boolean hasOperator();
     /**
@@ -16372,6 +16899,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Operator operator = 27;</code>
+     * @return The operator.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.Operator getOperator();
     /**
@@ -16389,6 +16917,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Polarity polarity = 28;</code>
+     * @return Whether the polarity field is set.
      */
     boolean hasPolarity();
     /**
@@ -16397,6 +16926,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Polarity polarity = 28;</code>
+     * @return The polarity.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity getPolarity();
     /**
@@ -16414,6 +16944,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string polarity_dir = 39;</code>
+     * @return Whether the polarityDir field is set.
      */
     boolean hasPolarityDir();
     /**
@@ -16422,6 +16953,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string polarity_dir = 39;</code>
+     * @return The polarityDir.
      */
     java.lang.String getPolarityDir();
     /**
@@ -16430,6 +16962,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string polarity_dir = 39;</code>
+     * @return The bytes for polarityDir.
      */
     com.google.protobuf.ByteString
         getPolarityDirBytes();
@@ -16440,6 +16973,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Span span = 29;</code>
+     * @return Whether the span field is set.
      */
     boolean hasSpan();
     /**
@@ -16448,6 +16982,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Span span = 29;</code>
+     * @return The span.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.Span getSpan();
     /**
@@ -16465,6 +17000,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentiment = 30;</code>
+     * @return Whether the sentiment field is set.
      */
     boolean hasSentiment();
     /**
@@ -16473,6 +17009,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentiment = 30;</code>
+     * @return The sentiment.
      */
     java.lang.String getSentiment();
     /**
@@ -16481,6 +17018,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentiment = 30;</code>
+     * @return The bytes for sentiment.
      */
     com.google.protobuf.ByteString
         getSentimentBytes();
@@ -16491,6 +17029,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional int32 quotationIndex = 31;</code>
+     * @return Whether the quotationIndex field is set.
      */
     boolean hasQuotationIndex();
     /**
@@ -16499,15 +17038,18 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional int32 quotationIndex = 31;</code>
+     * @return The quotationIndex.
      */
     int getQuotationIndex();
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUFeatures = 32;</code>
+     * @return Whether the conllUFeatures field is set.
      */
     boolean hasConllUFeatures();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUFeatures = 32;</code>
+     * @return The conllUFeatures.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUFeatures();
     /**
@@ -16521,6 +17063,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseTag = 33;</code>
+     * @return Whether the coarseTag field is set.
      */
     boolean hasCoarseTag();
     /**
@@ -16529,6 +17072,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseTag = 33;</code>
+     * @return The coarseTag.
      */
     java.lang.String getCoarseTag();
     /**
@@ -16537,16 +17081,19 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseTag = 33;</code>
+     * @return The bytes for coarseTag.
      */
     com.google.protobuf.ByteString
         getCoarseTagBytes();
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Span conllUTokenSpan = 34;</code>
+     * @return Whether the conllUTokenSpan field is set.
      */
     boolean hasConllUTokenSpan();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Span conllUTokenSpan = 34;</code>
+     * @return The conllUTokenSpan.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.Span getConllUTokenSpan();
     /**
@@ -16556,24 +17103,29 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional string conllUMisc = 35;</code>
+     * @return Whether the conllUMisc field is set.
      */
     boolean hasConllUMisc();
     /**
      * <code>optional string conllUMisc = 35;</code>
+     * @return The conllUMisc.
      */
     java.lang.String getConllUMisc();
     /**
      * <code>optional string conllUMisc = 35;</code>
+     * @return The bytes for conllUMisc.
      */
     com.google.protobuf.ByteString
         getConllUMiscBytes();
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
+     * @return Whether the conllUSecondaryDeps field is set.
      */
     boolean hasConllUSecondaryDeps();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
+     * @return The conllUSecondaryDeps.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUSecondaryDeps();
     /**
@@ -16583,24 +17135,29 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional string wikipediaEntity = 37;</code>
+     * @return Whether the wikipediaEntity field is set.
      */
     boolean hasWikipediaEntity();
     /**
      * <code>optional string wikipediaEntity = 37;</code>
+     * @return The wikipediaEntity.
      */
     java.lang.String getWikipediaEntity();
     /**
      * <code>optional string wikipediaEntity = 37;</code>
+     * @return The bytes for wikipediaEntity.
      */
     com.google.protobuf.ByteString
         getWikipediaEntityBytes();
 
     /**
      * <code>optional bool isNewline = 38;</code>
+     * @return Whether the isNewline field is set.
      */
     boolean hasIsNewline();
     /**
      * <code>optional bool isNewline = 38;</code>
+     * @return The isNewline.
      */
     boolean getIsNewline();
 
@@ -16610,6 +17167,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string gender = 51;</code>
+     * @return Whether the gender field is set.
      */
     boolean hasGender();
     /**
@@ -16618,6 +17176,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string gender = 51;</code>
+     * @return The gender.
      */
     java.lang.String getGender();
     /**
@@ -16626,6 +17185,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string gender = 51;</code>
+     * @return The bytes for gender.
      */
     com.google.protobuf.ByteString
         getGenderBytes();
@@ -16636,6 +17196,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCase = 52;</code>
+     * @return Whether the trueCase field is set.
      */
     boolean hasTrueCase();
     /**
@@ -16644,6 +17205,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCase = 52;</code>
+     * @return The trueCase.
      */
     java.lang.String getTrueCase();
     /**
@@ -16652,6 +17214,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCase = 52;</code>
+     * @return The bytes for trueCase.
      */
     com.google.protobuf.ByteString
         getTrueCaseBytes();
@@ -16662,6 +17225,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCaseText = 53;</code>
+     * @return Whether the trueCaseText field is set.
      */
     boolean hasTrueCaseText();
     /**
@@ -16670,6 +17234,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCaseText = 53;</code>
+     * @return The trueCaseText.
      */
     java.lang.String getTrueCaseText();
     /**
@@ -16678,6 +17243,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCaseText = 53;</code>
+     * @return The bytes for trueCaseText.
      */
     com.google.protobuf.ByteString
         getTrueCaseTextBytes();
@@ -16688,6 +17254,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string chineseChar = 54;</code>
+     * @return Whether the chineseChar field is set.
      */
     boolean hasChineseChar();
     /**
@@ -16696,6 +17263,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string chineseChar = 54;</code>
+     * @return The chineseChar.
      */
     java.lang.String getChineseChar();
     /**
@@ -16704,34 +17272,41 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string chineseChar = 54;</code>
+     * @return The bytes for chineseChar.
      */
     com.google.protobuf.ByteString
         getChineseCharBytes();
 
     /**
      * <code>optional string chineseSeg = 55;</code>
+     * @return Whether the chineseSeg field is set.
      */
     boolean hasChineseSeg();
     /**
      * <code>optional string chineseSeg = 55;</code>
+     * @return The chineseSeg.
      */
     java.lang.String getChineseSeg();
     /**
      * <code>optional string chineseSeg = 55;</code>
+     * @return The bytes for chineseSeg.
      */
     com.google.protobuf.ByteString
         getChineseSegBytes();
 
     /**
      * <code>optional string chineseXMLChar = 60;</code>
+     * @return Whether the chineseXMLChar field is set.
      */
     boolean hasChineseXMLChar();
     /**
      * <code>optional string chineseXMLChar = 60;</code>
+     * @return The chineseXMLChar.
      */
     java.lang.String getChineseXMLChar();
     /**
      * <code>optional string chineseXMLChar = 60;</code>
+     * @return The bytes for chineseXMLChar.
      */
     com.google.protobuf.ByteString
         getChineseXMLCharBytes();
@@ -16742,6 +17317,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 56;</code>
+     * @return Whether the sectionName field is set.
      */
     boolean hasSectionName();
     /**
@@ -16750,6 +17326,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 56;</code>
+     * @return The sectionName.
      */
     java.lang.String getSectionName();
     /**
@@ -16758,48 +17335,58 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 56;</code>
+     * @return The bytes for sectionName.
      */
     com.google.protobuf.ByteString
         getSectionNameBytes();
 
     /**
      * <code>optional string sectionAuthor = 57;</code>
+     * @return Whether the sectionAuthor field is set.
      */
     boolean hasSectionAuthor();
     /**
      * <code>optional string sectionAuthor = 57;</code>
+     * @return The sectionAuthor.
      */
     java.lang.String getSectionAuthor();
     /**
      * <code>optional string sectionAuthor = 57;</code>
+     * @return The bytes for sectionAuthor.
      */
     com.google.protobuf.ByteString
         getSectionAuthorBytes();
 
     /**
      * <code>optional string sectionDate = 58;</code>
+     * @return Whether the sectionDate field is set.
      */
     boolean hasSectionDate();
     /**
      * <code>optional string sectionDate = 58;</code>
+     * @return The sectionDate.
      */
     java.lang.String getSectionDate();
     /**
      * <code>optional string sectionDate = 58;</code>
+     * @return The bytes for sectionDate.
      */
     com.google.protobuf.ByteString
         getSectionDateBytes();
 
     /**
      * <code>optional string sectionEndLabel = 59;</code>
+     * @return Whether the sectionEndLabel field is set.
      */
     boolean hasSectionEndLabel();
     /**
      * <code>optional string sectionEndLabel = 59;</code>
+     * @return The sectionEndLabel.
      */
     java.lang.String getSectionEndLabel();
     /**
      * <code>optional string sectionEndLabel = 59;</code>
+     * @return The bytes for sectionEndLabel.
      */
     com.google.protobuf.ByteString
         getSectionEndLabelBytes();
@@ -16810,6 +17397,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string parent = 61;</code>
+     * @return Whether the parent field is set.
      */
     boolean hasParent();
     /**
@@ -16818,6 +17406,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string parent = 61;</code>
+     * @return The parent.
      */
     java.lang.String getParent();
     /**
@@ -16826,6 +17415,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string parent = 61;</code>
+     * @return The bytes for parent.
      */
     com.google.protobuf.ByteString
         getParentBytes();
@@ -16836,6 +17426,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated uint32 corefMentionIndex = 64;</code>
+     * @return A list containing the corefMentionIndex.
      */
     java.util.List<java.lang.Integer> getCorefMentionIndexList();
     /**
@@ -16844,6 +17435,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated uint32 corefMentionIndex = 64;</code>
+     * @return The count of corefMentionIndex.
      */
     int getCorefMentionIndexCount();
     /**
@@ -16852,15 +17444,19 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated uint32 corefMentionIndex = 64;</code>
+     * @param index The index of the element to return.
+     * @return The corefMentionIndex at the given index.
      */
     int getCorefMentionIndex(int index);
 
     /**
      * <code>optional uint32 entityMentionIndex = 65;</code>
+     * @return Whether the entityMentionIndex field is set.
      */
     boolean hasEntityMentionIndex();
     /**
      * <code>optional uint32 entityMentionIndex = 65;</code>
+     * @return The entityMentionIndex.
      */
     int getEntityMentionIndex();
 
@@ -16870,6 +17466,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool isMWT = 67;</code>
+     * @return Whether the isMWT field is set.
      */
     boolean hasIsMWT();
     /**
@@ -16878,28 +17475,34 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool isMWT = 67;</code>
+     * @return The isMWT.
      */
     boolean getIsMWT();
 
     /**
      * <code>optional bool isFirstMWT = 68;</code>
+     * @return Whether the isFirstMWT field is set.
      */
     boolean hasIsFirstMWT();
     /**
      * <code>optional bool isFirstMWT = 68;</code>
+     * @return The isFirstMWT.
      */
     boolean getIsFirstMWT();
 
     /**
      * <code>optional string mwtText = 69;</code>
+     * @return Whether the mwtText field is set.
      */
     boolean hasMwtText();
     /**
      * <code>optional string mwtText = 69;</code>
+     * @return The mwtText.
      */
     java.lang.String getMwtText();
     /**
      * <code>optional string mwtText = 69;</code>
+     * @return The bytes for mwtText.
      */
     com.google.protobuf.ByteString
         getMwtTextBytes();
@@ -16910,6 +17513,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint64 numericValue = 70;</code>
+     * @return Whether the numericValue field is set.
      */
     boolean hasNumericValue();
     /**
@@ -16918,61 +17522,74 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint64 numericValue = 70;</code>
+     * @return The numericValue.
      */
     long getNumericValue();
 
     /**
      * <code>optional string numericType = 71;</code>
+     * @return Whether the numericType field is set.
      */
     boolean hasNumericType();
     /**
      * <code>optional string numericType = 71;</code>
+     * @return The numericType.
      */
     java.lang.String getNumericType();
     /**
      * <code>optional string numericType = 71;</code>
+     * @return The bytes for numericType.
      */
     com.google.protobuf.ByteString
         getNumericTypeBytes();
 
     /**
      * <code>optional uint64 numericCompositeValue = 72;</code>
+     * @return Whether the numericCompositeValue field is set.
      */
     boolean hasNumericCompositeValue();
     /**
      * <code>optional uint64 numericCompositeValue = 72;</code>
+     * @return The numericCompositeValue.
      */
     long getNumericCompositeValue();
 
     /**
      * <code>optional string numericCompositeType = 73;</code>
+     * @return Whether the numericCompositeType field is set.
      */
     boolean hasNumericCompositeType();
     /**
      * <code>optional string numericCompositeType = 73;</code>
+     * @return The numericCompositeType.
      */
     java.lang.String getNumericCompositeType();
     /**
      * <code>optional string numericCompositeType = 73;</code>
+     * @return The bytes for numericCompositeType.
      */
     com.google.protobuf.ByteString
         getNumericCompositeTypeBytes();
 
     /**
      * <code>optional uint32 codepointOffsetBegin = 74;</code>
+     * @return Whether the codepointOffsetBegin field is set.
      */
     boolean hasCodepointOffsetBegin();
     /**
      * <code>optional uint32 codepointOffsetBegin = 74;</code>
+     * @return The codepointOffsetBegin.
      */
     int getCodepointOffsetBegin();
 
     /**
      * <code>optional uint32 codepointOffsetEnd = 75;</code>
+     * @return Whether the codepointOffsetEnd field is set.
      */
     boolean hasCodepointOffsetEnd();
     /**
      * <code>optional uint32 codepointOffsetEnd = 75;</code>
+     * @return The codepointOffsetEnd.
      */
     int getCodepointOffsetEnd();
   }
@@ -17538,6 +18155,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string word = 1;</code>
+     * @return Whether the word field is set.
      */
     public boolean hasWord() {
       return ((bitField0_ & 0x00000001) != 0);
@@ -17548,6 +18166,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string word = 1;</code>
+     * @return The word.
      */
     public java.lang.String getWord() {
       java.lang.Object ref = word_;
@@ -17569,6 +18188,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string word = 1;</code>
+     * @return The bytes for word.
      */
     public com.google.protobuf.ByteString
         getWordBytes() {
@@ -17592,6 +18212,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string pos = 2;</code>
+     * @return Whether the pos field is set.
      */
     public boolean hasPos() {
       return ((bitField0_ & 0x00000002) != 0);
@@ -17602,6 +18223,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string pos = 2;</code>
+     * @return The pos.
      */
     public java.lang.String getPos() {
       java.lang.Object ref = pos_;
@@ -17623,6 +18245,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string pos = 2;</code>
+     * @return The bytes for pos.
      */
     public com.google.protobuf.ByteString
         getPosBytes() {
@@ -17646,6 +18269,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string value = 3;</code>
+     * @return Whether the value field is set.
      */
     public boolean hasValue() {
       return ((bitField0_ & 0x00000004) != 0);
@@ -17656,6 +18280,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string value = 3;</code>
+     * @return The value.
      */
     public java.lang.String getValue() {
       java.lang.Object ref = value_;
@@ -17677,6 +18302,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string value = 3;</code>
+     * @return The bytes for value.
      */
     public com.google.protobuf.ByteString
         getValueBytes() {
@@ -17700,6 +18326,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string category = 4;</code>
+     * @return Whether the category field is set.
      */
     public boolean hasCategory() {
       return ((bitField0_ & 0x00000008) != 0);
@@ -17710,6 +18337,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string category = 4;</code>
+     * @return The category.
      */
     public java.lang.String getCategory() {
       java.lang.Object ref = category_;
@@ -17731,6 +18359,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string category = 4;</code>
+     * @return The bytes for category.
      */
     public com.google.protobuf.ByteString
         getCategoryBytes() {
@@ -17754,6 +18383,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string before = 5;</code>
+     * @return Whether the before field is set.
      */
     public boolean hasBefore() {
       return ((bitField0_ & 0x00000010) != 0);
@@ -17764,6 +18394,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string before = 5;</code>
+     * @return The before.
      */
     public java.lang.String getBefore() {
       java.lang.Object ref = before_;
@@ -17785,6 +18416,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string before = 5;</code>
+     * @return The bytes for before.
      */
     public com.google.protobuf.ByteString
         getBeforeBytes() {
@@ -17808,6 +18440,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string after = 6;</code>
+     * @return Whether the after field is set.
      */
     public boolean hasAfter() {
       return ((bitField0_ & 0x00000020) != 0);
@@ -17818,6 +18451,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string after = 6;</code>
+     * @return The after.
      */
     public java.lang.String getAfter() {
       java.lang.Object ref = after_;
@@ -17839,6 +18473,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string after = 6;</code>
+     * @return The bytes for after.
      */
     public com.google.protobuf.ByteString
         getAfterBytes() {
@@ -17862,6 +18497,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string originalText = 7;</code>
+     * @return Whether the originalText field is set.
      */
     public boolean hasOriginalText() {
       return ((bitField0_ & 0x00000040) != 0);
@@ -17872,6 +18508,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string originalText = 7;</code>
+     * @return The originalText.
      */
     public java.lang.String getOriginalText() {
       java.lang.Object ref = originalText_;
@@ -17893,6 +18530,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string originalText = 7;</code>
+     * @return The bytes for originalText.
      */
     public com.google.protobuf.ByteString
         getOriginalTextBytes() {
@@ -17916,6 +18554,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string ner = 8;</code>
+     * @return Whether the ner field is set.
      */
     public boolean hasNer() {
       return ((bitField0_ & 0x00000080) != 0);
@@ -17926,6 +18565,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string ner = 8;</code>
+     * @return The ner.
      */
     public java.lang.String getNer() {
       java.lang.Object ref = ner_;
@@ -17947,6 +18587,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string ner = 8;</code>
+     * @return The bytes for ner.
      */
     public com.google.protobuf.ByteString
         getNerBytes() {
@@ -17970,6 +18611,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseNER = 62;</code>
+     * @return Whether the coarseNER field is set.
      */
     public boolean hasCoarseNER() {
       return ((bitField0_ & 0x00000100) != 0);
@@ -17980,6 +18622,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseNER = 62;</code>
+     * @return The coarseNER.
      */
     public java.lang.String getCoarseNER() {
       java.lang.Object ref = coarseNER_;
@@ -18001,6 +18644,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseNER = 62;</code>
+     * @return The bytes for coarseNER.
      */
     public com.google.protobuf.ByteString
         getCoarseNERBytes() {
@@ -18024,6 +18668,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string fineGrainedNER = 63;</code>
+     * @return Whether the fineGrainedNER field is set.
      */
     public boolean hasFineGrainedNER() {
       return ((bitField0_ & 0x00000200) != 0);
@@ -18034,6 +18679,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string fineGrainedNER = 63;</code>
+     * @return The fineGrainedNER.
      */
     public java.lang.String getFineGrainedNER() {
       java.lang.Object ref = fineGrainedNER_;
@@ -18055,6 +18701,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string fineGrainedNER = 63;</code>
+     * @return The bytes for fineGrainedNER.
      */
     public com.google.protobuf.ByteString
         getFineGrainedNERBytes() {
@@ -18078,6 +18725,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string nerLabelProbs = 66;</code>
+     * @return A list containing the nerLabelProbs.
      */
     public com.google.protobuf.ProtocolStringList
         getNerLabelProbsList() {
@@ -18089,6 +18737,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string nerLabelProbs = 66;</code>
+     * @return The count of nerLabelProbs.
      */
     public int getNerLabelProbsCount() {
       return nerLabelProbs_.size();
@@ -18099,6 +18748,8 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string nerLabelProbs = 66;</code>
+     * @param index The index of the element to return.
+     * @return The nerLabelProbs at the given index.
      */
     public java.lang.String getNerLabelProbs(int index) {
       return nerLabelProbs_.get(index);
@@ -18109,6 +18760,8 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string nerLabelProbs = 66;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the nerLabelProbs at the given index.
      */
     public com.google.protobuf.ByteString
         getNerLabelProbsBytes(int index) {
@@ -18123,6 +18776,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string normalizedNER = 9;</code>
+     * @return Whether the normalizedNER field is set.
      */
     public boolean hasNormalizedNER() {
       return ((bitField0_ & 0x00000400) != 0);
@@ -18133,6 +18787,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string normalizedNER = 9;</code>
+     * @return The normalizedNER.
      */
     public java.lang.String getNormalizedNER() {
       java.lang.Object ref = normalizedNER_;
@@ -18154,6 +18809,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string normalizedNER = 9;</code>
+     * @return The bytes for normalizedNER.
      */
     public com.google.protobuf.ByteString
         getNormalizedNERBytes() {
@@ -18177,6 +18833,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string lemma = 10;</code>
+     * @return Whether the lemma field is set.
      */
     public boolean hasLemma() {
       return ((bitField0_ & 0x00000800) != 0);
@@ -18187,6 +18844,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string lemma = 10;</code>
+     * @return The lemma.
      */
     public java.lang.String getLemma() {
       java.lang.Object ref = lemma_;
@@ -18208,6 +18866,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string lemma = 10;</code>
+     * @return The bytes for lemma.
      */
     public com.google.protobuf.ByteString
         getLemmaBytes() {
@@ -18231,6 +18890,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 beginChar = 11;</code>
+     * @return Whether the beginChar field is set.
      */
     public boolean hasBeginChar() {
       return ((bitField0_ & 0x00001000) != 0);
@@ -18241,6 +18901,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 beginChar = 11;</code>
+     * @return The beginChar.
      */
     public int getBeginChar() {
       return beginChar_;
@@ -18254,6 +18915,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 endChar = 12;</code>
+     * @return Whether the endChar field is set.
      */
     public boolean hasEndChar() {
       return ((bitField0_ & 0x00002000) != 0);
@@ -18264,6 +18926,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 endChar = 12;</code>
+     * @return The endChar.
      */
     public int getEndChar() {
       return endChar_;
@@ -18277,6 +18940,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 utterance = 13;</code>
+     * @return Whether the utterance field is set.
      */
     public boolean hasUtterance() {
       return ((bitField0_ & 0x00004000) != 0);
@@ -18287,6 +18951,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 utterance = 13;</code>
+     * @return The utterance.
      */
     public int getUtterance() {
       return utterance_;
@@ -18300,6 +18965,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string speaker = 14;</code>
+     * @return Whether the speaker field is set.
      */
     public boolean hasSpeaker() {
       return ((bitField0_ & 0x00008000) != 0);
@@ -18310,6 +18976,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string speaker = 14;</code>
+     * @return The speaker.
      */
     public java.lang.String getSpeaker() {
       java.lang.Object ref = speaker_;
@@ -18331,6 +18998,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string speaker = 14;</code>
+     * @return The bytes for speaker.
      */
     public com.google.protobuf.ByteString
         getSpeakerBytes() {
@@ -18354,6 +19022,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 beginIndex = 15;</code>
+     * @return Whether the beginIndex field is set.
      */
     public boolean hasBeginIndex() {
       return ((bitField0_ & 0x00010000) != 0);
@@ -18364,6 +19033,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 beginIndex = 15;</code>
+     * @return The beginIndex.
      */
     public int getBeginIndex() {
       return beginIndex_;
@@ -18377,6 +19047,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 endIndex = 16;</code>
+     * @return Whether the endIndex field is set.
      */
     public boolean hasEndIndex() {
       return ((bitField0_ & 0x00020000) != 0);
@@ -18387,6 +19058,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 endIndex = 16;</code>
+     * @return The endIndex.
      */
     public int getEndIndex() {
       return endIndex_;
@@ -18400,6 +19072,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 tokenBeginIndex = 17;</code>
+     * @return Whether the tokenBeginIndex field is set.
      */
     public boolean hasTokenBeginIndex() {
       return ((bitField0_ & 0x00040000) != 0);
@@ -18410,6 +19083,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 tokenBeginIndex = 17;</code>
+     * @return The tokenBeginIndex.
      */
     public int getTokenBeginIndex() {
       return tokenBeginIndex_;
@@ -18423,6 +19097,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 tokenEndIndex = 18;</code>
+     * @return Whether the tokenEndIndex field is set.
      */
     public boolean hasTokenEndIndex() {
       return ((bitField0_ & 0x00080000) != 0);
@@ -18433,6 +19108,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 tokenEndIndex = 18;</code>
+     * @return The tokenEndIndex.
      */
     public int getTokenEndIndex() {
       return tokenEndIndex_;
@@ -18446,6 +19122,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Timex timexValue = 19;</code>
+     * @return Whether the timexValue field is set.
      */
     public boolean hasTimexValue() {
       return ((bitField0_ & 0x00100000) != 0);
@@ -18456,6 +19133,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Timex timexValue = 19;</code>
+     * @return The timexValue.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Timex getTimexValue() {
       return timexValue_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.getDefaultInstance() : timexValue_;
@@ -18479,6 +19157,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasXmlContext = 21;</code>
+     * @return Whether the hasXmlContext field is set.
      */
     public boolean hasHasXmlContext() {
       return ((bitField0_ & 0x00200000) != 0);
@@ -18489,6 +19168,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool hasXmlContext = 21;</code>
+     * @return The hasXmlContext.
      */
     public boolean getHasXmlContext() {
       return hasXmlContext_;
@@ -18502,6 +19182,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string xmlContext = 22;</code>
+     * @return A list containing the xmlContext.
      */
     public com.google.protobuf.ProtocolStringList
         getXmlContextList() {
@@ -18513,6 +19194,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string xmlContext = 22;</code>
+     * @return The count of xmlContext.
      */
     public int getXmlContextCount() {
       return xmlContext_.size();
@@ -18523,6 +19205,8 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string xmlContext = 22;</code>
+     * @param index The index of the element to return.
+     * @return The xmlContext at the given index.
      */
     public java.lang.String getXmlContext(int index) {
       return xmlContext_.get(index);
@@ -18533,6 +19217,8 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated string xmlContext = 22;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the xmlContext at the given index.
      */
     public com.google.protobuf.ByteString
         getXmlContextBytes(int index) {
@@ -18547,6 +19233,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 corefClusterID = 23;</code>
+     * @return Whether the corefClusterID field is set.
      */
     public boolean hasCorefClusterID() {
       return ((bitField0_ & 0x00400000) != 0);
@@ -18557,6 +19244,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 corefClusterID = 23;</code>
+     * @return The corefClusterID.
      */
     public int getCorefClusterID() {
       return corefClusterID_;
@@ -18570,6 +19258,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string answer = 24;</code>
+     * @return Whether the answer field is set.
      */
     public boolean hasAnswer() {
       return ((bitField0_ & 0x00800000) != 0);
@@ -18580,6 +19269,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string answer = 24;</code>
+     * @return The answer.
      */
     public java.lang.String getAnswer() {
       java.lang.Object ref = answer_;
@@ -18601,6 +19291,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string answer = 24;</code>
+     * @return The bytes for answer.
      */
     public com.google.protobuf.ByteString
         getAnswerBytes() {
@@ -18624,6 +19315,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 headWordIndex = 26;</code>
+     * @return Whether the headWordIndex field is set.
      */
     public boolean hasHeadWordIndex() {
       return ((bitField0_ & 0x01000000) != 0);
@@ -18634,6 +19326,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint32 headWordIndex = 26;</code>
+     * @return The headWordIndex.
      */
     public int getHeadWordIndex() {
       return headWordIndex_;
@@ -18647,6 +19340,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Operator operator = 27;</code>
+     * @return Whether the operator field is set.
      */
     public boolean hasOperator() {
       return ((bitField0_ & 0x02000000) != 0);
@@ -18657,6 +19351,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Operator operator = 27;</code>
+     * @return The operator.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Operator getOperator() {
       return operator_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Operator.getDefaultInstance() : operator_;
@@ -18680,6 +19375,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Polarity polarity = 28;</code>
+     * @return Whether the polarity field is set.
      */
     public boolean hasPolarity() {
       return ((bitField0_ & 0x04000000) != 0);
@@ -18690,6 +19386,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Polarity polarity = 28;</code>
+     * @return The polarity.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity getPolarity() {
       return polarity_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity.getDefaultInstance() : polarity_;
@@ -18713,6 +19410,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string polarity_dir = 39;</code>
+     * @return Whether the polarityDir field is set.
      */
     public boolean hasPolarityDir() {
       return ((bitField0_ & 0x08000000) != 0);
@@ -18723,6 +19421,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string polarity_dir = 39;</code>
+     * @return The polarityDir.
      */
     public java.lang.String getPolarityDir() {
       java.lang.Object ref = polarityDir_;
@@ -18744,6 +19443,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string polarity_dir = 39;</code>
+     * @return The bytes for polarityDir.
      */
     public com.google.protobuf.ByteString
         getPolarityDirBytes() {
@@ -18767,6 +19467,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Span span = 29;</code>
+     * @return Whether the span field is set.
      */
     public boolean hasSpan() {
       return ((bitField0_ & 0x10000000) != 0);
@@ -18777,6 +19478,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.Span span = 29;</code>
+     * @return The span.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Span getSpan() {
       return span_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Span.getDefaultInstance() : span_;
@@ -18800,6 +19502,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentiment = 30;</code>
+     * @return Whether the sentiment field is set.
      */
     public boolean hasSentiment() {
       return ((bitField0_ & 0x20000000) != 0);
@@ -18810,6 +19513,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentiment = 30;</code>
+     * @return The sentiment.
      */
     public java.lang.String getSentiment() {
       java.lang.Object ref = sentiment_;
@@ -18831,6 +19535,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sentiment = 30;</code>
+     * @return The bytes for sentiment.
      */
     public com.google.protobuf.ByteString
         getSentimentBytes() {
@@ -18854,6 +19559,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional int32 quotationIndex = 31;</code>
+     * @return Whether the quotationIndex field is set.
      */
     public boolean hasQuotationIndex() {
       return ((bitField0_ & 0x40000000) != 0);
@@ -18864,6 +19570,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional int32 quotationIndex = 31;</code>
+     * @return The quotationIndex.
      */
     public int getQuotationIndex() {
       return quotationIndex_;
@@ -18873,12 +19580,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString conllUFeatures_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUFeatures = 32;</code>
+     * @return Whether the conllUFeatures field is set.
      */
     public boolean hasConllUFeatures() {
       return ((bitField0_ & 0x80000000) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUFeatures = 32;</code>
+     * @return The conllUFeatures.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUFeatures() {
       return conllUFeatures_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance() : conllUFeatures_;
@@ -18898,6 +19607,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseTag = 33;</code>
+     * @return Whether the coarseTag field is set.
      */
     public boolean hasCoarseTag() {
       return ((bitField1_ & 0x00000001) != 0);
@@ -18908,6 +19618,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseTag = 33;</code>
+     * @return The coarseTag.
      */
     public java.lang.String getCoarseTag() {
       java.lang.Object ref = coarseTag_;
@@ -18929,6 +19640,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string coarseTag = 33;</code>
+     * @return The bytes for coarseTag.
      */
     public com.google.protobuf.ByteString
         getCoarseTagBytes() {
@@ -18948,12 +19660,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.Span conllUTokenSpan_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Span conllUTokenSpan = 34;</code>
+     * @return Whether the conllUTokenSpan field is set.
      */
     public boolean hasConllUTokenSpan() {
       return ((bitField1_ & 0x00000002) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Span conllUTokenSpan = 34;</code>
+     * @return The conllUTokenSpan.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Span getConllUTokenSpan() {
       return conllUTokenSpan_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Span.getDefaultInstance() : conllUTokenSpan_;
@@ -18969,12 +19683,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object conllUMisc_;
     /**
      * <code>optional string conllUMisc = 35;</code>
+     * @return Whether the conllUMisc field is set.
      */
     public boolean hasConllUMisc() {
       return ((bitField1_ & 0x00000004) != 0);
     }
     /**
      * <code>optional string conllUMisc = 35;</code>
+     * @return The conllUMisc.
      */
     public java.lang.String getConllUMisc() {
       java.lang.Object ref = conllUMisc_;
@@ -18992,6 +19708,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string conllUMisc = 35;</code>
+     * @return The bytes for conllUMisc.
      */
     public com.google.protobuf.ByteString
         getConllUMiscBytes() {
@@ -19011,12 +19728,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString conllUSecondaryDeps_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
+     * @return Whether the conllUSecondaryDeps field is set.
      */
     public boolean hasConllUSecondaryDeps() {
       return ((bitField1_ & 0x00000008) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
+     * @return The conllUSecondaryDeps.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUSecondaryDeps() {
       return conllUSecondaryDeps_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance() : conllUSecondaryDeps_;
@@ -19032,12 +19751,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object wikipediaEntity_;
     /**
      * <code>optional string wikipediaEntity = 37;</code>
+     * @return Whether the wikipediaEntity field is set.
      */
     public boolean hasWikipediaEntity() {
       return ((bitField1_ & 0x00000010) != 0);
     }
     /**
      * <code>optional string wikipediaEntity = 37;</code>
+     * @return The wikipediaEntity.
      */
     public java.lang.String getWikipediaEntity() {
       java.lang.Object ref = wikipediaEntity_;
@@ -19055,6 +19776,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string wikipediaEntity = 37;</code>
+     * @return The bytes for wikipediaEntity.
      */
     public com.google.protobuf.ByteString
         getWikipediaEntityBytes() {
@@ -19074,12 +19796,14 @@ public final class CoreNLPProtos {
     private boolean isNewline_;
     /**
      * <code>optional bool isNewline = 38;</code>
+     * @return Whether the isNewline field is set.
      */
     public boolean hasIsNewline() {
       return ((bitField1_ & 0x00000020) != 0);
     }
     /**
      * <code>optional bool isNewline = 38;</code>
+     * @return The isNewline.
      */
     public boolean getIsNewline() {
       return isNewline_;
@@ -19093,6 +19817,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string gender = 51;</code>
+     * @return Whether the gender field is set.
      */
     public boolean hasGender() {
       return ((bitField1_ & 0x00000040) != 0);
@@ -19103,6 +19828,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string gender = 51;</code>
+     * @return The gender.
      */
     public java.lang.String getGender() {
       java.lang.Object ref = gender_;
@@ -19124,6 +19850,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string gender = 51;</code>
+     * @return The bytes for gender.
      */
     public com.google.protobuf.ByteString
         getGenderBytes() {
@@ -19147,6 +19874,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCase = 52;</code>
+     * @return Whether the trueCase field is set.
      */
     public boolean hasTrueCase() {
       return ((bitField1_ & 0x00000080) != 0);
@@ -19157,6 +19885,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCase = 52;</code>
+     * @return The trueCase.
      */
     public java.lang.String getTrueCase() {
       java.lang.Object ref = trueCase_;
@@ -19178,6 +19907,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCase = 52;</code>
+     * @return The bytes for trueCase.
      */
     public com.google.protobuf.ByteString
         getTrueCaseBytes() {
@@ -19201,6 +19931,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCaseText = 53;</code>
+     * @return Whether the trueCaseText field is set.
      */
     public boolean hasTrueCaseText() {
       return ((bitField1_ & 0x00000100) != 0);
@@ -19211,6 +19942,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCaseText = 53;</code>
+     * @return The trueCaseText.
      */
     public java.lang.String getTrueCaseText() {
       java.lang.Object ref = trueCaseText_;
@@ -19232,6 +19964,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string trueCaseText = 53;</code>
+     * @return The bytes for trueCaseText.
      */
     public com.google.protobuf.ByteString
         getTrueCaseTextBytes() {
@@ -19255,6 +19988,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string chineseChar = 54;</code>
+     * @return Whether the chineseChar field is set.
      */
     public boolean hasChineseChar() {
       return ((bitField1_ & 0x00000200) != 0);
@@ -19265,6 +19999,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string chineseChar = 54;</code>
+     * @return The chineseChar.
      */
     public java.lang.String getChineseChar() {
       java.lang.Object ref = chineseChar_;
@@ -19286,6 +20021,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string chineseChar = 54;</code>
+     * @return The bytes for chineseChar.
      */
     public com.google.protobuf.ByteString
         getChineseCharBytes() {
@@ -19305,12 +20041,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object chineseSeg_;
     /**
      * <code>optional string chineseSeg = 55;</code>
+     * @return Whether the chineseSeg field is set.
      */
     public boolean hasChineseSeg() {
       return ((bitField1_ & 0x00000400) != 0);
     }
     /**
      * <code>optional string chineseSeg = 55;</code>
+     * @return The chineseSeg.
      */
     public java.lang.String getChineseSeg() {
       java.lang.Object ref = chineseSeg_;
@@ -19328,6 +20066,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string chineseSeg = 55;</code>
+     * @return The bytes for chineseSeg.
      */
     public com.google.protobuf.ByteString
         getChineseSegBytes() {
@@ -19347,12 +20086,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object chineseXMLChar_;
     /**
      * <code>optional string chineseXMLChar = 60;</code>
+     * @return Whether the chineseXMLChar field is set.
      */
     public boolean hasChineseXMLChar() {
       return ((bitField1_ & 0x00000800) != 0);
     }
     /**
      * <code>optional string chineseXMLChar = 60;</code>
+     * @return The chineseXMLChar.
      */
     public java.lang.String getChineseXMLChar() {
       java.lang.Object ref = chineseXMLChar_;
@@ -19370,6 +20111,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string chineseXMLChar = 60;</code>
+     * @return The bytes for chineseXMLChar.
      */
     public com.google.protobuf.ByteString
         getChineseXMLCharBytes() {
@@ -19393,6 +20135,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 56;</code>
+     * @return Whether the sectionName field is set.
      */
     public boolean hasSectionName() {
       return ((bitField1_ & 0x00001000) != 0);
@@ -19403,6 +20146,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 56;</code>
+     * @return The sectionName.
      */
     public java.lang.String getSectionName() {
       java.lang.Object ref = sectionName_;
@@ -19424,6 +20168,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string sectionName = 56;</code>
+     * @return The bytes for sectionName.
      */
     public com.google.protobuf.ByteString
         getSectionNameBytes() {
@@ -19443,12 +20188,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object sectionAuthor_;
     /**
      * <code>optional string sectionAuthor = 57;</code>
+     * @return Whether the sectionAuthor field is set.
      */
     public boolean hasSectionAuthor() {
       return ((bitField1_ & 0x00002000) != 0);
     }
     /**
      * <code>optional string sectionAuthor = 57;</code>
+     * @return The sectionAuthor.
      */
     public java.lang.String getSectionAuthor() {
       java.lang.Object ref = sectionAuthor_;
@@ -19466,6 +20213,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string sectionAuthor = 57;</code>
+     * @return The bytes for sectionAuthor.
      */
     public com.google.protobuf.ByteString
         getSectionAuthorBytes() {
@@ -19485,12 +20233,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object sectionDate_;
     /**
      * <code>optional string sectionDate = 58;</code>
+     * @return Whether the sectionDate field is set.
      */
     public boolean hasSectionDate() {
       return ((bitField1_ & 0x00004000) != 0);
     }
     /**
      * <code>optional string sectionDate = 58;</code>
+     * @return The sectionDate.
      */
     public java.lang.String getSectionDate() {
       java.lang.Object ref = sectionDate_;
@@ -19508,6 +20258,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string sectionDate = 58;</code>
+     * @return The bytes for sectionDate.
      */
     public com.google.protobuf.ByteString
         getSectionDateBytes() {
@@ -19527,12 +20278,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object sectionEndLabel_;
     /**
      * <code>optional string sectionEndLabel = 59;</code>
+     * @return Whether the sectionEndLabel field is set.
      */
     public boolean hasSectionEndLabel() {
       return ((bitField1_ & 0x00008000) != 0);
     }
     /**
      * <code>optional string sectionEndLabel = 59;</code>
+     * @return The sectionEndLabel.
      */
     public java.lang.String getSectionEndLabel() {
       java.lang.Object ref = sectionEndLabel_;
@@ -19550,6 +20303,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string sectionEndLabel = 59;</code>
+     * @return The bytes for sectionEndLabel.
      */
     public com.google.protobuf.ByteString
         getSectionEndLabelBytes() {
@@ -19573,6 +20327,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string parent = 61;</code>
+     * @return Whether the parent field is set.
      */
     public boolean hasParent() {
       return ((bitField1_ & 0x00010000) != 0);
@@ -19583,6 +20338,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string parent = 61;</code>
+     * @return The parent.
      */
     public java.lang.String getParent() {
       java.lang.Object ref = parent_;
@@ -19604,6 +20360,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string parent = 61;</code>
+     * @return The bytes for parent.
      */
     public com.google.protobuf.ByteString
         getParentBytes() {
@@ -19627,6 +20384,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated uint32 corefMentionIndex = 64;</code>
+     * @return A list containing the corefMentionIndex.
      */
     public java.util.List<java.lang.Integer>
         getCorefMentionIndexList() {
@@ -19638,6 +20396,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated uint32 corefMentionIndex = 64;</code>
+     * @return The count of corefMentionIndex.
      */
     public int getCorefMentionIndexCount() {
       return corefMentionIndex_.size();
@@ -19648,6 +20407,8 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>repeated uint32 corefMentionIndex = 64;</code>
+     * @param index The index of the element to return.
+     * @return The corefMentionIndex at the given index.
      */
     public int getCorefMentionIndex(int index) {
       return corefMentionIndex_.getInt(index);
@@ -19657,12 +20418,14 @@ public final class CoreNLPProtos {
     private int entityMentionIndex_;
     /**
      * <code>optional uint32 entityMentionIndex = 65;</code>
+     * @return Whether the entityMentionIndex field is set.
      */
     public boolean hasEntityMentionIndex() {
       return ((bitField1_ & 0x00020000) != 0);
     }
     /**
      * <code>optional uint32 entityMentionIndex = 65;</code>
+     * @return The entityMentionIndex.
      */
     public int getEntityMentionIndex() {
       return entityMentionIndex_;
@@ -19676,6 +20439,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool isMWT = 67;</code>
+     * @return Whether the isMWT field is set.
      */
     public boolean hasIsMWT() {
       return ((bitField1_ & 0x00040000) != 0);
@@ -19686,6 +20450,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool isMWT = 67;</code>
+     * @return The isMWT.
      */
     public boolean getIsMWT() {
       return isMWT_;
@@ -19695,12 +20460,14 @@ public final class CoreNLPProtos {
     private boolean isFirstMWT_;
     /**
      * <code>optional bool isFirstMWT = 68;</code>
+     * @return Whether the isFirstMWT field is set.
      */
     public boolean hasIsFirstMWT() {
       return ((bitField1_ & 0x00080000) != 0);
     }
     /**
      * <code>optional bool isFirstMWT = 68;</code>
+     * @return The isFirstMWT.
      */
     public boolean getIsFirstMWT() {
       return isFirstMWT_;
@@ -19710,12 +20477,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object mwtText_;
     /**
      * <code>optional string mwtText = 69;</code>
+     * @return Whether the mwtText field is set.
      */
     public boolean hasMwtText() {
       return ((bitField1_ & 0x00100000) != 0);
     }
     /**
      * <code>optional string mwtText = 69;</code>
+     * @return The mwtText.
      */
     public java.lang.String getMwtText() {
       java.lang.Object ref = mwtText_;
@@ -19733,6 +20502,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string mwtText = 69;</code>
+     * @return The bytes for mwtText.
      */
     public com.google.protobuf.ByteString
         getMwtTextBytes() {
@@ -19756,6 +20526,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint64 numericValue = 70;</code>
+     * @return Whether the numericValue field is set.
      */
     public boolean hasNumericValue() {
       return ((bitField1_ & 0x00200000) != 0);
@@ -19766,6 +20537,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional uint64 numericValue = 70;</code>
+     * @return The numericValue.
      */
     public long getNumericValue() {
       return numericValue_;
@@ -19775,12 +20547,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object numericType_;
     /**
      * <code>optional string numericType = 71;</code>
+     * @return Whether the numericType field is set.
      */
     public boolean hasNumericType() {
       return ((bitField1_ & 0x00400000) != 0);
     }
     /**
      * <code>optional string numericType = 71;</code>
+     * @return The numericType.
      */
     public java.lang.String getNumericType() {
       java.lang.Object ref = numericType_;
@@ -19798,6 +20572,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string numericType = 71;</code>
+     * @return The bytes for numericType.
      */
     public com.google.protobuf.ByteString
         getNumericTypeBytes() {
@@ -19817,12 +20592,14 @@ public final class CoreNLPProtos {
     private long numericCompositeValue_;
     /**
      * <code>optional uint64 numericCompositeValue = 72;</code>
+     * @return Whether the numericCompositeValue field is set.
      */
     public boolean hasNumericCompositeValue() {
       return ((bitField1_ & 0x00800000) != 0);
     }
     /**
      * <code>optional uint64 numericCompositeValue = 72;</code>
+     * @return The numericCompositeValue.
      */
     public long getNumericCompositeValue() {
       return numericCompositeValue_;
@@ -19832,12 +20609,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object numericCompositeType_;
     /**
      * <code>optional string numericCompositeType = 73;</code>
+     * @return Whether the numericCompositeType field is set.
      */
     public boolean hasNumericCompositeType() {
       return ((bitField1_ & 0x01000000) != 0);
     }
     /**
      * <code>optional string numericCompositeType = 73;</code>
+     * @return The numericCompositeType.
      */
     public java.lang.String getNumericCompositeType() {
       java.lang.Object ref = numericCompositeType_;
@@ -19855,6 +20634,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string numericCompositeType = 73;</code>
+     * @return The bytes for numericCompositeType.
      */
     public com.google.protobuf.ByteString
         getNumericCompositeTypeBytes() {
@@ -19874,12 +20654,14 @@ public final class CoreNLPProtos {
     private int codepointOffsetBegin_;
     /**
      * <code>optional uint32 codepointOffsetBegin = 74;</code>
+     * @return Whether the codepointOffsetBegin field is set.
      */
     public boolean hasCodepointOffsetBegin() {
       return ((bitField1_ & 0x02000000) != 0);
     }
     /**
      * <code>optional uint32 codepointOffsetBegin = 74;</code>
+     * @return The codepointOffsetBegin.
      */
     public int getCodepointOffsetBegin() {
       return codepointOffsetBegin_;
@@ -19889,12 +20671,14 @@ public final class CoreNLPProtos {
     private int codepointOffsetEnd_;
     /**
      * <code>optional uint32 codepointOffsetEnd = 75;</code>
+     * @return Whether the codepointOffsetEnd field is set.
      */
     public boolean hasCodepointOffsetEnd() {
       return ((bitField1_ & 0x04000000) != 0);
     }
     /**
      * <code>optional uint32 codepointOffsetEnd = 75;</code>
+     * @return The codepointOffsetEnd.
      */
     public int getCodepointOffsetEnd() {
       return codepointOffsetEnd_;
@@ -21972,6 +22756,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string word = 1;</code>
+       * @return Whether the word field is set.
        */
       public boolean hasWord() {
         return ((bitField0_ & 0x00000001) != 0);
@@ -21982,6 +22767,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string word = 1;</code>
+       * @return The word.
        */
       public java.lang.String getWord() {
         java.lang.Object ref = word_;
@@ -22003,6 +22789,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string word = 1;</code>
+       * @return The bytes for word.
        */
       public com.google.protobuf.ByteString
           getWordBytes() {
@@ -22023,6 +22810,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string word = 1;</code>
+       * @param value The word to set.
+       * @return This builder for chaining.
        */
       public Builder setWord(
           java.lang.String value) {
@@ -22040,6 +22829,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string word = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWord() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -22053,6 +22843,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string word = 1;</code>
+       * @param value The bytes for word to set.
+       * @return This builder for chaining.
        */
       public Builder setWordBytes(
           com.google.protobuf.ByteString value) {
@@ -22072,6 +22864,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string pos = 2;</code>
+       * @return Whether the pos field is set.
        */
       public boolean hasPos() {
         return ((bitField0_ & 0x00000002) != 0);
@@ -22082,6 +22875,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string pos = 2;</code>
+       * @return The pos.
        */
       public java.lang.String getPos() {
         java.lang.Object ref = pos_;
@@ -22103,6 +22897,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string pos = 2;</code>
+       * @return The bytes for pos.
        */
       public com.google.protobuf.ByteString
           getPosBytes() {
@@ -22123,6 +22918,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string pos = 2;</code>
+       * @param value The pos to set.
+       * @return This builder for chaining.
        */
       public Builder setPos(
           java.lang.String value) {
@@ -22140,6 +22937,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string pos = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPos() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -22153,6 +22951,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string pos = 2;</code>
+       * @param value The bytes for pos to set.
+       * @return This builder for chaining.
        */
       public Builder setPosBytes(
           com.google.protobuf.ByteString value) {
@@ -22172,6 +22972,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string value = 3;</code>
+       * @return Whether the value field is set.
        */
       public boolean hasValue() {
         return ((bitField0_ & 0x00000004) != 0);
@@ -22182,6 +22983,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string value = 3;</code>
+       * @return The value.
        */
       public java.lang.String getValue() {
         java.lang.Object ref = value_;
@@ -22203,6 +23005,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string value = 3;</code>
+       * @return The bytes for value.
        */
       public com.google.protobuf.ByteString
           getValueBytes() {
@@ -22223,6 +23026,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string value = 3;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(
           java.lang.String value) {
@@ -22240,6 +23045,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string value = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -22253,6 +23059,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string value = 3;</code>
+       * @param value The bytes for value to set.
+       * @return This builder for chaining.
        */
       public Builder setValueBytes(
           com.google.protobuf.ByteString value) {
@@ -22272,6 +23080,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string category = 4;</code>
+       * @return Whether the category field is set.
        */
       public boolean hasCategory() {
         return ((bitField0_ & 0x00000008) != 0);
@@ -22282,6 +23091,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string category = 4;</code>
+       * @return The category.
        */
       public java.lang.String getCategory() {
         java.lang.Object ref = category_;
@@ -22303,6 +23113,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string category = 4;</code>
+       * @return The bytes for category.
        */
       public com.google.protobuf.ByteString
           getCategoryBytes() {
@@ -22323,6 +23134,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string category = 4;</code>
+       * @param value The category to set.
+       * @return This builder for chaining.
        */
       public Builder setCategory(
           java.lang.String value) {
@@ -22340,6 +23153,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string category = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCategory() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -22353,6 +23167,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string category = 4;</code>
+       * @param value The bytes for category to set.
+       * @return This builder for chaining.
        */
       public Builder setCategoryBytes(
           com.google.protobuf.ByteString value) {
@@ -22372,6 +23188,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string before = 5;</code>
+       * @return Whether the before field is set.
        */
       public boolean hasBefore() {
         return ((bitField0_ & 0x00000010) != 0);
@@ -22382,6 +23199,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string before = 5;</code>
+       * @return The before.
        */
       public java.lang.String getBefore() {
         java.lang.Object ref = before_;
@@ -22403,6 +23221,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string before = 5;</code>
+       * @return The bytes for before.
        */
       public com.google.protobuf.ByteString
           getBeforeBytes() {
@@ -22423,6 +23242,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string before = 5;</code>
+       * @param value The before to set.
+       * @return This builder for chaining.
        */
       public Builder setBefore(
           java.lang.String value) {
@@ -22440,6 +23261,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string before = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBefore() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -22453,6 +23275,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string before = 5;</code>
+       * @param value The bytes for before to set.
+       * @return This builder for chaining.
        */
       public Builder setBeforeBytes(
           com.google.protobuf.ByteString value) {
@@ -22472,6 +23296,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string after = 6;</code>
+       * @return Whether the after field is set.
        */
       public boolean hasAfter() {
         return ((bitField0_ & 0x00000020) != 0);
@@ -22482,6 +23307,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string after = 6;</code>
+       * @return The after.
        */
       public java.lang.String getAfter() {
         java.lang.Object ref = after_;
@@ -22503,6 +23329,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string after = 6;</code>
+       * @return The bytes for after.
        */
       public com.google.protobuf.ByteString
           getAfterBytes() {
@@ -22523,6 +23350,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string after = 6;</code>
+       * @param value The after to set.
+       * @return This builder for chaining.
        */
       public Builder setAfter(
           java.lang.String value) {
@@ -22540,6 +23369,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string after = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAfter() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -22553,6 +23383,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string after = 6;</code>
+       * @param value The bytes for after to set.
+       * @return This builder for chaining.
        */
       public Builder setAfterBytes(
           com.google.protobuf.ByteString value) {
@@ -22572,6 +23404,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string originalText = 7;</code>
+       * @return Whether the originalText field is set.
        */
       public boolean hasOriginalText() {
         return ((bitField0_ & 0x00000040) != 0);
@@ -22582,6 +23415,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string originalText = 7;</code>
+       * @return The originalText.
        */
       public java.lang.String getOriginalText() {
         java.lang.Object ref = originalText_;
@@ -22603,6 +23437,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string originalText = 7;</code>
+       * @return The bytes for originalText.
        */
       public com.google.protobuf.ByteString
           getOriginalTextBytes() {
@@ -22623,6 +23458,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string originalText = 7;</code>
+       * @param value The originalText to set.
+       * @return This builder for chaining.
        */
       public Builder setOriginalText(
           java.lang.String value) {
@@ -22640,6 +23477,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string originalText = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOriginalText() {
         bitField0_ = (bitField0_ & ~0x00000040);
@@ -22653,6 +23491,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string originalText = 7;</code>
+       * @param value The bytes for originalText to set.
+       * @return This builder for chaining.
        */
       public Builder setOriginalTextBytes(
           com.google.protobuf.ByteString value) {
@@ -22672,6 +23512,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string ner = 8;</code>
+       * @return Whether the ner field is set.
        */
       public boolean hasNer() {
         return ((bitField0_ & 0x00000080) != 0);
@@ -22682,6 +23523,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string ner = 8;</code>
+       * @return The ner.
        */
       public java.lang.String getNer() {
         java.lang.Object ref = ner_;
@@ -22703,6 +23545,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string ner = 8;</code>
+       * @return The bytes for ner.
        */
       public com.google.protobuf.ByteString
           getNerBytes() {
@@ -22723,6 +23566,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string ner = 8;</code>
+       * @param value The ner to set.
+       * @return This builder for chaining.
        */
       public Builder setNer(
           java.lang.String value) {
@@ -22740,6 +23585,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string ner = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNer() {
         bitField0_ = (bitField0_ & ~0x00000080);
@@ -22753,6 +23599,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string ner = 8;</code>
+       * @param value The bytes for ner to set.
+       * @return This builder for chaining.
        */
       public Builder setNerBytes(
           com.google.protobuf.ByteString value) {
@@ -22772,6 +23620,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseNER = 62;</code>
+       * @return Whether the coarseNER field is set.
        */
       public boolean hasCoarseNER() {
         return ((bitField0_ & 0x00000100) != 0);
@@ -22782,6 +23631,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseNER = 62;</code>
+       * @return The coarseNER.
        */
       public java.lang.String getCoarseNER() {
         java.lang.Object ref = coarseNER_;
@@ -22803,6 +23653,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseNER = 62;</code>
+       * @return The bytes for coarseNER.
        */
       public com.google.protobuf.ByteString
           getCoarseNERBytes() {
@@ -22823,6 +23674,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseNER = 62;</code>
+       * @param value The coarseNER to set.
+       * @return This builder for chaining.
        */
       public Builder setCoarseNER(
           java.lang.String value) {
@@ -22840,6 +23693,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseNER = 62;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCoarseNER() {
         bitField0_ = (bitField0_ & ~0x00000100);
@@ -22853,6 +23707,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseNER = 62;</code>
+       * @param value The bytes for coarseNER to set.
+       * @return This builder for chaining.
        */
       public Builder setCoarseNERBytes(
           com.google.protobuf.ByteString value) {
@@ -22872,6 +23728,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string fineGrainedNER = 63;</code>
+       * @return Whether the fineGrainedNER field is set.
        */
       public boolean hasFineGrainedNER() {
         return ((bitField0_ & 0x00000200) != 0);
@@ -22882,6 +23739,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string fineGrainedNER = 63;</code>
+       * @return The fineGrainedNER.
        */
       public java.lang.String getFineGrainedNER() {
         java.lang.Object ref = fineGrainedNER_;
@@ -22903,6 +23761,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string fineGrainedNER = 63;</code>
+       * @return The bytes for fineGrainedNER.
        */
       public com.google.protobuf.ByteString
           getFineGrainedNERBytes() {
@@ -22923,6 +23782,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string fineGrainedNER = 63;</code>
+       * @param value The fineGrainedNER to set.
+       * @return This builder for chaining.
        */
       public Builder setFineGrainedNER(
           java.lang.String value) {
@@ -22940,6 +23801,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string fineGrainedNER = 63;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFineGrainedNER() {
         bitField0_ = (bitField0_ & ~0x00000200);
@@ -22953,6 +23815,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string fineGrainedNER = 63;</code>
+       * @param value The bytes for fineGrainedNER to set.
+       * @return This builder for chaining.
        */
       public Builder setFineGrainedNERBytes(
           com.google.protobuf.ByteString value) {
@@ -22978,6 +23842,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string nerLabelProbs = 66;</code>
+       * @return A list containing the nerLabelProbs.
        */
       public com.google.protobuf.ProtocolStringList
           getNerLabelProbsList() {
@@ -22989,6 +23854,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string nerLabelProbs = 66;</code>
+       * @return The count of nerLabelProbs.
        */
       public int getNerLabelProbsCount() {
         return nerLabelProbs_.size();
@@ -22999,6 +23865,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string nerLabelProbs = 66;</code>
+       * @param index The index of the element to return.
+       * @return The nerLabelProbs at the given index.
        */
       public java.lang.String getNerLabelProbs(int index) {
         return nerLabelProbs_.get(index);
@@ -23009,6 +23877,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string nerLabelProbs = 66;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the nerLabelProbs at the given index.
        */
       public com.google.protobuf.ByteString
           getNerLabelProbsBytes(int index) {
@@ -23020,6 +23890,9 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string nerLabelProbs = 66;</code>
+       * @param index The index to set the value at.
+       * @param value The nerLabelProbs to set.
+       * @return This builder for chaining.
        */
       public Builder setNerLabelProbs(
           int index, java.lang.String value) {
@@ -23037,6 +23910,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string nerLabelProbs = 66;</code>
+       * @param value The nerLabelProbs to add.
+       * @return This builder for chaining.
        */
       public Builder addNerLabelProbs(
           java.lang.String value) {
@@ -23054,6 +23929,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string nerLabelProbs = 66;</code>
+       * @param values The nerLabelProbs to add.
+       * @return This builder for chaining.
        */
       public Builder addAllNerLabelProbs(
           java.lang.Iterable<java.lang.String> values) {
@@ -23069,6 +23946,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string nerLabelProbs = 66;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNerLabelProbs() {
         nerLabelProbs_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -23082,6 +23960,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string nerLabelProbs = 66;</code>
+       * @param value The bytes of the nerLabelProbs to add.
+       * @return This builder for chaining.
        */
       public Builder addNerLabelProbsBytes(
           com.google.protobuf.ByteString value) {
@@ -23101,6 +23981,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string normalizedNER = 9;</code>
+       * @return Whether the normalizedNER field is set.
        */
       public boolean hasNormalizedNER() {
         return ((bitField0_ & 0x00000800) != 0);
@@ -23111,6 +23992,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string normalizedNER = 9;</code>
+       * @return The normalizedNER.
        */
       public java.lang.String getNormalizedNER() {
         java.lang.Object ref = normalizedNER_;
@@ -23132,6 +24014,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string normalizedNER = 9;</code>
+       * @return The bytes for normalizedNER.
        */
       public com.google.protobuf.ByteString
           getNormalizedNERBytes() {
@@ -23152,6 +24035,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string normalizedNER = 9;</code>
+       * @param value The normalizedNER to set.
+       * @return This builder for chaining.
        */
       public Builder setNormalizedNER(
           java.lang.String value) {
@@ -23169,6 +24054,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string normalizedNER = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNormalizedNER() {
         bitField0_ = (bitField0_ & ~0x00000800);
@@ -23182,6 +24068,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string normalizedNER = 9;</code>
+       * @param value The bytes for normalizedNER to set.
+       * @return This builder for chaining.
        */
       public Builder setNormalizedNERBytes(
           com.google.protobuf.ByteString value) {
@@ -23201,6 +24089,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string lemma = 10;</code>
+       * @return Whether the lemma field is set.
        */
       public boolean hasLemma() {
         return ((bitField0_ & 0x00001000) != 0);
@@ -23211,6 +24100,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string lemma = 10;</code>
+       * @return The lemma.
        */
       public java.lang.String getLemma() {
         java.lang.Object ref = lemma_;
@@ -23232,6 +24122,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string lemma = 10;</code>
+       * @return The bytes for lemma.
        */
       public com.google.protobuf.ByteString
           getLemmaBytes() {
@@ -23252,6 +24143,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string lemma = 10;</code>
+       * @param value The lemma to set.
+       * @return This builder for chaining.
        */
       public Builder setLemma(
           java.lang.String value) {
@@ -23269,6 +24162,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string lemma = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLemma() {
         bitField0_ = (bitField0_ & ~0x00001000);
@@ -23282,6 +24176,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string lemma = 10;</code>
+       * @param value The bytes for lemma to set.
+       * @return This builder for chaining.
        */
       public Builder setLemmaBytes(
           com.google.protobuf.ByteString value) {
@@ -23301,6 +24197,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 beginChar = 11;</code>
+       * @return Whether the beginChar field is set.
        */
       public boolean hasBeginChar() {
         return ((bitField0_ & 0x00002000) != 0);
@@ -23311,6 +24208,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 beginChar = 11;</code>
+       * @return The beginChar.
        */
       public int getBeginChar() {
         return beginChar_;
@@ -23321,6 +24219,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 beginChar = 11;</code>
+       * @param value The beginChar to set.
+       * @return This builder for chaining.
        */
       public Builder setBeginChar(int value) {
         bitField0_ |= 0x00002000;
@@ -23334,6 +24234,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 beginChar = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBeginChar() {
         bitField0_ = (bitField0_ & ~0x00002000);
@@ -23349,6 +24250,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 endChar = 12;</code>
+       * @return Whether the endChar field is set.
        */
       public boolean hasEndChar() {
         return ((bitField0_ & 0x00004000) != 0);
@@ -23359,6 +24261,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 endChar = 12;</code>
+       * @return The endChar.
        */
       public int getEndChar() {
         return endChar_;
@@ -23369,6 +24272,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 endChar = 12;</code>
+       * @param value The endChar to set.
+       * @return This builder for chaining.
        */
       public Builder setEndChar(int value) {
         bitField0_ |= 0x00004000;
@@ -23382,6 +24287,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 endChar = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndChar() {
         bitField0_ = (bitField0_ & ~0x00004000);
@@ -23397,6 +24303,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 utterance = 13;</code>
+       * @return Whether the utterance field is set.
        */
       public boolean hasUtterance() {
         return ((bitField0_ & 0x00008000) != 0);
@@ -23407,6 +24314,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 utterance = 13;</code>
+       * @return The utterance.
        */
       public int getUtterance() {
         return utterance_;
@@ -23417,6 +24325,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 utterance = 13;</code>
+       * @param value The utterance to set.
+       * @return This builder for chaining.
        */
       public Builder setUtterance(int value) {
         bitField0_ |= 0x00008000;
@@ -23430,6 +24340,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 utterance = 13;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUtterance() {
         bitField0_ = (bitField0_ & ~0x00008000);
@@ -23445,6 +24356,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string speaker = 14;</code>
+       * @return Whether the speaker field is set.
        */
       public boolean hasSpeaker() {
         return ((bitField0_ & 0x00010000) != 0);
@@ -23455,6 +24367,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string speaker = 14;</code>
+       * @return The speaker.
        */
       public java.lang.String getSpeaker() {
         java.lang.Object ref = speaker_;
@@ -23476,6 +24389,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string speaker = 14;</code>
+       * @return The bytes for speaker.
        */
       public com.google.protobuf.ByteString
           getSpeakerBytes() {
@@ -23496,6 +24410,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string speaker = 14;</code>
+       * @param value The speaker to set.
+       * @return This builder for chaining.
        */
       public Builder setSpeaker(
           java.lang.String value) {
@@ -23513,6 +24429,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string speaker = 14;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSpeaker() {
         bitField0_ = (bitField0_ & ~0x00010000);
@@ -23526,6 +24443,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string speaker = 14;</code>
+       * @param value The bytes for speaker to set.
+       * @return This builder for chaining.
        */
       public Builder setSpeakerBytes(
           com.google.protobuf.ByteString value) {
@@ -23545,6 +24464,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 beginIndex = 15;</code>
+       * @return Whether the beginIndex field is set.
        */
       public boolean hasBeginIndex() {
         return ((bitField0_ & 0x00020000) != 0);
@@ -23555,6 +24475,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 beginIndex = 15;</code>
+       * @return The beginIndex.
        */
       public int getBeginIndex() {
         return beginIndex_;
@@ -23565,6 +24486,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 beginIndex = 15;</code>
+       * @param value The beginIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setBeginIndex(int value) {
         bitField0_ |= 0x00020000;
@@ -23578,6 +24501,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 beginIndex = 15;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBeginIndex() {
         bitField0_ = (bitField0_ & ~0x00020000);
@@ -23593,6 +24517,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 endIndex = 16;</code>
+       * @return Whether the endIndex field is set.
        */
       public boolean hasEndIndex() {
         return ((bitField0_ & 0x00040000) != 0);
@@ -23603,6 +24528,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 endIndex = 16;</code>
+       * @return The endIndex.
        */
       public int getEndIndex() {
         return endIndex_;
@@ -23613,6 +24539,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 endIndex = 16;</code>
+       * @param value The endIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setEndIndex(int value) {
         bitField0_ |= 0x00040000;
@@ -23626,6 +24554,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 endIndex = 16;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndIndex() {
         bitField0_ = (bitField0_ & ~0x00040000);
@@ -23641,6 +24570,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 tokenBeginIndex = 17;</code>
+       * @return Whether the tokenBeginIndex field is set.
        */
       public boolean hasTokenBeginIndex() {
         return ((bitField0_ & 0x00080000) != 0);
@@ -23651,6 +24581,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 tokenBeginIndex = 17;</code>
+       * @return The tokenBeginIndex.
        */
       public int getTokenBeginIndex() {
         return tokenBeginIndex_;
@@ -23661,6 +24592,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 tokenBeginIndex = 17;</code>
+       * @param value The tokenBeginIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenBeginIndex(int value) {
         bitField0_ |= 0x00080000;
@@ -23674,6 +24607,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 tokenBeginIndex = 17;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenBeginIndex() {
         bitField0_ = (bitField0_ & ~0x00080000);
@@ -23689,6 +24623,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 tokenEndIndex = 18;</code>
+       * @return Whether the tokenEndIndex field is set.
        */
       public boolean hasTokenEndIndex() {
         return ((bitField0_ & 0x00100000) != 0);
@@ -23699,6 +24634,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 tokenEndIndex = 18;</code>
+       * @return The tokenEndIndex.
        */
       public int getTokenEndIndex() {
         return tokenEndIndex_;
@@ -23709,6 +24645,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 tokenEndIndex = 18;</code>
+       * @param value The tokenEndIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenEndIndex(int value) {
         bitField0_ |= 0x00100000;
@@ -23722,6 +24660,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 tokenEndIndex = 18;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenEndIndex() {
         bitField0_ = (bitField0_ & ~0x00100000);
@@ -23739,6 +24678,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional .edu.stanford.nlp.pipeline.Timex timexValue = 19;</code>
+       * @return Whether the timexValue field is set.
        */
       public boolean hasTimexValue() {
         return ((bitField0_ & 0x00200000) != 0);
@@ -23749,6 +24689,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional .edu.stanford.nlp.pipeline.Timex timexValue = 19;</code>
+       * @return The timexValue.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Timex getTimexValue() {
         if (timexValueBuilder_ == null) {
@@ -23891,6 +24832,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasXmlContext = 21;</code>
+       * @return Whether the hasXmlContext field is set.
        */
       public boolean hasHasXmlContext() {
         return ((bitField0_ & 0x00400000) != 0);
@@ -23901,6 +24843,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasXmlContext = 21;</code>
+       * @return The hasXmlContext.
        */
       public boolean getHasXmlContext() {
         return hasXmlContext_;
@@ -23911,6 +24854,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasXmlContext = 21;</code>
+       * @param value The hasXmlContext to set.
+       * @return This builder for chaining.
        */
       public Builder setHasXmlContext(boolean value) {
         bitField0_ |= 0x00400000;
@@ -23924,6 +24869,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool hasXmlContext = 21;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasXmlContext() {
         bitField0_ = (bitField0_ & ~0x00400000);
@@ -23945,6 +24891,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string xmlContext = 22;</code>
+       * @return A list containing the xmlContext.
        */
       public com.google.protobuf.ProtocolStringList
           getXmlContextList() {
@@ -23956,6 +24903,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string xmlContext = 22;</code>
+       * @return The count of xmlContext.
        */
       public int getXmlContextCount() {
         return xmlContext_.size();
@@ -23966,6 +24914,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string xmlContext = 22;</code>
+       * @param index The index of the element to return.
+       * @return The xmlContext at the given index.
        */
       public java.lang.String getXmlContext(int index) {
         return xmlContext_.get(index);
@@ -23976,6 +24926,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string xmlContext = 22;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the xmlContext at the given index.
        */
       public com.google.protobuf.ByteString
           getXmlContextBytes(int index) {
@@ -23987,6 +24939,9 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string xmlContext = 22;</code>
+       * @param index The index to set the value at.
+       * @param value The xmlContext to set.
+       * @return This builder for chaining.
        */
       public Builder setXmlContext(
           int index, java.lang.String value) {
@@ -24004,6 +24959,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string xmlContext = 22;</code>
+       * @param value The xmlContext to add.
+       * @return This builder for chaining.
        */
       public Builder addXmlContext(
           java.lang.String value) {
@@ -24021,6 +24978,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string xmlContext = 22;</code>
+       * @param values The xmlContext to add.
+       * @return This builder for chaining.
        */
       public Builder addAllXmlContext(
           java.lang.Iterable<java.lang.String> values) {
@@ -24036,6 +24995,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string xmlContext = 22;</code>
+       * @return This builder for chaining.
        */
       public Builder clearXmlContext() {
         xmlContext_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -24049,6 +25009,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated string xmlContext = 22;</code>
+       * @param value The bytes of the xmlContext to add.
+       * @return This builder for chaining.
        */
       public Builder addXmlContextBytes(
           com.google.protobuf.ByteString value) {
@@ -24068,6 +25030,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 corefClusterID = 23;</code>
+       * @return Whether the corefClusterID field is set.
        */
       public boolean hasCorefClusterID() {
         return ((bitField0_ & 0x01000000) != 0);
@@ -24078,6 +25041,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 corefClusterID = 23;</code>
+       * @return The corefClusterID.
        */
       public int getCorefClusterID() {
         return corefClusterID_;
@@ -24088,6 +25052,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 corefClusterID = 23;</code>
+       * @param value The corefClusterID to set.
+       * @return This builder for chaining.
        */
       public Builder setCorefClusterID(int value) {
         bitField0_ |= 0x01000000;
@@ -24101,6 +25067,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 corefClusterID = 23;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCorefClusterID() {
         bitField0_ = (bitField0_ & ~0x01000000);
@@ -24116,6 +25083,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string answer = 24;</code>
+       * @return Whether the answer field is set.
        */
       public boolean hasAnswer() {
         return ((bitField0_ & 0x02000000) != 0);
@@ -24126,6 +25094,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string answer = 24;</code>
+       * @return The answer.
        */
       public java.lang.String getAnswer() {
         java.lang.Object ref = answer_;
@@ -24147,6 +25116,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string answer = 24;</code>
+       * @return The bytes for answer.
        */
       public com.google.protobuf.ByteString
           getAnswerBytes() {
@@ -24167,6 +25137,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string answer = 24;</code>
+       * @param value The answer to set.
+       * @return This builder for chaining.
        */
       public Builder setAnswer(
           java.lang.String value) {
@@ -24184,6 +25156,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string answer = 24;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAnswer() {
         bitField0_ = (bitField0_ & ~0x02000000);
@@ -24197,6 +25170,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string answer = 24;</code>
+       * @param value The bytes for answer to set.
+       * @return This builder for chaining.
        */
       public Builder setAnswerBytes(
           com.google.protobuf.ByteString value) {
@@ -24216,6 +25191,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 headWordIndex = 26;</code>
+       * @return Whether the headWordIndex field is set.
        */
       public boolean hasHeadWordIndex() {
         return ((bitField0_ & 0x04000000) != 0);
@@ -24226,6 +25202,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 headWordIndex = 26;</code>
+       * @return The headWordIndex.
        */
       public int getHeadWordIndex() {
         return headWordIndex_;
@@ -24236,6 +25213,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 headWordIndex = 26;</code>
+       * @param value The headWordIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setHeadWordIndex(int value) {
         bitField0_ |= 0x04000000;
@@ -24249,6 +25228,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 headWordIndex = 26;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHeadWordIndex() {
         bitField0_ = (bitField0_ & ~0x04000000);
@@ -24266,6 +25246,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional .edu.stanford.nlp.pipeline.Operator operator = 27;</code>
+       * @return Whether the operator field is set.
        */
       public boolean hasOperator() {
         return ((bitField0_ & 0x08000000) != 0);
@@ -24276,6 +25257,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional .edu.stanford.nlp.pipeline.Operator operator = 27;</code>
+       * @return The operator.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Operator getOperator() {
         if (operatorBuilder_ == null) {
@@ -24420,6 +25402,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional .edu.stanford.nlp.pipeline.Polarity polarity = 28;</code>
+       * @return Whether the polarity field is set.
        */
       public boolean hasPolarity() {
         return ((bitField0_ & 0x10000000) != 0);
@@ -24430,6 +25413,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional .edu.stanford.nlp.pipeline.Polarity polarity = 28;</code>
+       * @return The polarity.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity getPolarity() {
         if (polarityBuilder_ == null) {
@@ -24572,6 +25556,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string polarity_dir = 39;</code>
+       * @return Whether the polarityDir field is set.
        */
       public boolean hasPolarityDir() {
         return ((bitField0_ & 0x20000000) != 0);
@@ -24582,6 +25567,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string polarity_dir = 39;</code>
+       * @return The polarityDir.
        */
       public java.lang.String getPolarityDir() {
         java.lang.Object ref = polarityDir_;
@@ -24603,6 +25589,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string polarity_dir = 39;</code>
+       * @return The bytes for polarityDir.
        */
       public com.google.protobuf.ByteString
           getPolarityDirBytes() {
@@ -24623,6 +25610,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string polarity_dir = 39;</code>
+       * @param value The polarityDir to set.
+       * @return This builder for chaining.
        */
       public Builder setPolarityDir(
           java.lang.String value) {
@@ -24640,6 +25629,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string polarity_dir = 39;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPolarityDir() {
         bitField0_ = (bitField0_ & ~0x20000000);
@@ -24653,6 +25643,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string polarity_dir = 39;</code>
+       * @param value The bytes for polarityDir to set.
+       * @return This builder for chaining.
        */
       public Builder setPolarityDirBytes(
           com.google.protobuf.ByteString value) {
@@ -24674,6 +25666,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional .edu.stanford.nlp.pipeline.Span span = 29;</code>
+       * @return Whether the span field is set.
        */
       public boolean hasSpan() {
         return ((bitField0_ & 0x40000000) != 0);
@@ -24684,6 +25677,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional .edu.stanford.nlp.pipeline.Span span = 29;</code>
+       * @return The span.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Span getSpan() {
         if (spanBuilder_ == null) {
@@ -24826,6 +25820,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentiment = 30;</code>
+       * @return Whether the sentiment field is set.
        */
       public boolean hasSentiment() {
         return ((bitField0_ & 0x80000000) != 0);
@@ -24836,6 +25831,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentiment = 30;</code>
+       * @return The sentiment.
        */
       public java.lang.String getSentiment() {
         java.lang.Object ref = sentiment_;
@@ -24857,6 +25853,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentiment = 30;</code>
+       * @return The bytes for sentiment.
        */
       public com.google.protobuf.ByteString
           getSentimentBytes() {
@@ -24877,6 +25874,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentiment = 30;</code>
+       * @param value The sentiment to set.
+       * @return This builder for chaining.
        */
       public Builder setSentiment(
           java.lang.String value) {
@@ -24894,6 +25893,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentiment = 30;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentiment() {
         bitField0_ = (bitField0_ & ~0x80000000);
@@ -24907,6 +25907,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sentiment = 30;</code>
+       * @param value The bytes for sentiment to set.
+       * @return This builder for chaining.
        */
       public Builder setSentimentBytes(
           com.google.protobuf.ByteString value) {
@@ -24926,6 +25928,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional int32 quotationIndex = 31;</code>
+       * @return Whether the quotationIndex field is set.
        */
       public boolean hasQuotationIndex() {
         return ((bitField1_ & 0x00000001) != 0);
@@ -24936,6 +25939,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional int32 quotationIndex = 31;</code>
+       * @return The quotationIndex.
        */
       public int getQuotationIndex() {
         return quotationIndex_;
@@ -24946,6 +25950,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional int32 quotationIndex = 31;</code>
+       * @param value The quotationIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setQuotationIndex(int value) {
         bitField1_ |= 0x00000001;
@@ -24959,6 +25965,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional int32 quotationIndex = 31;</code>
+       * @return This builder for chaining.
        */
       public Builder clearQuotationIndex() {
         bitField1_ = (bitField1_ & ~0x00000001);
@@ -24972,12 +25979,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder> conllUFeaturesBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUFeatures = 32;</code>
+       * @return Whether the conllUFeatures field is set.
        */
       public boolean hasConllUFeatures() {
         return ((bitField1_ & 0x00000002) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUFeatures = 32;</code>
+       * @return The conllUFeatures.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUFeatures() {
         if (conllUFeaturesBuilder_ == null) {
@@ -25092,6 +26101,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseTag = 33;</code>
+       * @return Whether the coarseTag field is set.
        */
       public boolean hasCoarseTag() {
         return ((bitField1_ & 0x00000004) != 0);
@@ -25102,6 +26112,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseTag = 33;</code>
+       * @return The coarseTag.
        */
       public java.lang.String getCoarseTag() {
         java.lang.Object ref = coarseTag_;
@@ -25123,6 +26134,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseTag = 33;</code>
+       * @return The bytes for coarseTag.
        */
       public com.google.protobuf.ByteString
           getCoarseTagBytes() {
@@ -25143,6 +26155,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseTag = 33;</code>
+       * @param value The coarseTag to set.
+       * @return This builder for chaining.
        */
       public Builder setCoarseTag(
           java.lang.String value) {
@@ -25160,6 +26174,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseTag = 33;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCoarseTag() {
         bitField1_ = (bitField1_ & ~0x00000004);
@@ -25173,6 +26188,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string coarseTag = 33;</code>
+       * @param value The bytes for coarseTag to set.
+       * @return This builder for chaining.
        */
       public Builder setCoarseTagBytes(
           com.google.protobuf.ByteString value) {
@@ -25190,12 +26207,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Span, edu.stanford.nlp.pipeline.CoreNLPProtos.Span.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SpanOrBuilder> conllUTokenSpanBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Span conllUTokenSpan = 34;</code>
+       * @return Whether the conllUTokenSpan field is set.
        */
       public boolean hasConllUTokenSpan() {
         return ((bitField1_ & 0x00000008) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Span conllUTokenSpan = 34;</code>
+       * @return The conllUTokenSpan.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Span getConllUTokenSpan() {
         if (conllUTokenSpanBuilder_ == null) {
@@ -25306,12 +26325,14 @@ public final class CoreNLPProtos {
       private java.lang.Object conllUMisc_ = "";
       /**
        * <code>optional string conllUMisc = 35;</code>
+       * @return Whether the conllUMisc field is set.
        */
       public boolean hasConllUMisc() {
         return ((bitField1_ & 0x00000010) != 0);
       }
       /**
        * <code>optional string conllUMisc = 35;</code>
+       * @return The conllUMisc.
        */
       public java.lang.String getConllUMisc() {
         java.lang.Object ref = conllUMisc_;
@@ -25329,6 +26350,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string conllUMisc = 35;</code>
+       * @return The bytes for conllUMisc.
        */
       public com.google.protobuf.ByteString
           getConllUMiscBytes() {
@@ -25345,6 +26367,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string conllUMisc = 35;</code>
+       * @param value The conllUMisc to set.
+       * @return This builder for chaining.
        */
       public Builder setConllUMisc(
           java.lang.String value) {
@@ -25358,6 +26382,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string conllUMisc = 35;</code>
+       * @return This builder for chaining.
        */
       public Builder clearConllUMisc() {
         bitField1_ = (bitField1_ & ~0x00000010);
@@ -25367,6 +26392,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string conllUMisc = 35;</code>
+       * @param value The bytes for conllUMisc to set.
+       * @return This builder for chaining.
        */
       public Builder setConllUMiscBytes(
           com.google.protobuf.ByteString value) {
@@ -25384,12 +26411,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder> conllUSecondaryDepsBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
+       * @return Whether the conllUSecondaryDeps field is set.
        */
       public boolean hasConllUSecondaryDeps() {
         return ((bitField1_ & 0x00000020) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
+       * @return The conllUSecondaryDeps.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUSecondaryDeps() {
         if (conllUSecondaryDepsBuilder_ == null) {
@@ -25500,12 +26529,14 @@ public final class CoreNLPProtos {
       private java.lang.Object wikipediaEntity_ = "";
       /**
        * <code>optional string wikipediaEntity = 37;</code>
+       * @return Whether the wikipediaEntity field is set.
        */
       public boolean hasWikipediaEntity() {
         return ((bitField1_ & 0x00000040) != 0);
       }
       /**
        * <code>optional string wikipediaEntity = 37;</code>
+       * @return The wikipediaEntity.
        */
       public java.lang.String getWikipediaEntity() {
         java.lang.Object ref = wikipediaEntity_;
@@ -25523,6 +26554,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string wikipediaEntity = 37;</code>
+       * @return The bytes for wikipediaEntity.
        */
       public com.google.protobuf.ByteString
           getWikipediaEntityBytes() {
@@ -25539,6 +26571,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string wikipediaEntity = 37;</code>
+       * @param value The wikipediaEntity to set.
+       * @return This builder for chaining.
        */
       public Builder setWikipediaEntity(
           java.lang.String value) {
@@ -25552,6 +26586,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string wikipediaEntity = 37;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWikipediaEntity() {
         bitField1_ = (bitField1_ & ~0x00000040);
@@ -25561,6 +26596,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string wikipediaEntity = 37;</code>
+       * @param value The bytes for wikipediaEntity to set.
+       * @return This builder for chaining.
        */
       public Builder setWikipediaEntityBytes(
           com.google.protobuf.ByteString value) {
@@ -25576,18 +26613,22 @@ public final class CoreNLPProtos {
       private boolean isNewline_ ;
       /**
        * <code>optional bool isNewline = 38;</code>
+       * @return Whether the isNewline field is set.
        */
       public boolean hasIsNewline() {
         return ((bitField1_ & 0x00000080) != 0);
       }
       /**
        * <code>optional bool isNewline = 38;</code>
+       * @return The isNewline.
        */
       public boolean getIsNewline() {
         return isNewline_;
       }
       /**
        * <code>optional bool isNewline = 38;</code>
+       * @param value The isNewline to set.
+       * @return This builder for chaining.
        */
       public Builder setIsNewline(boolean value) {
         bitField1_ |= 0x00000080;
@@ -25597,6 +26638,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool isNewline = 38;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIsNewline() {
         bitField1_ = (bitField1_ & ~0x00000080);
@@ -25612,6 +26654,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string gender = 51;</code>
+       * @return Whether the gender field is set.
        */
       public boolean hasGender() {
         return ((bitField1_ & 0x00000100) != 0);
@@ -25622,6 +26665,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string gender = 51;</code>
+       * @return The gender.
        */
       public java.lang.String getGender() {
         java.lang.Object ref = gender_;
@@ -25643,6 +26687,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string gender = 51;</code>
+       * @return The bytes for gender.
        */
       public com.google.protobuf.ByteString
           getGenderBytes() {
@@ -25663,6 +26708,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string gender = 51;</code>
+       * @param value The gender to set.
+       * @return This builder for chaining.
        */
       public Builder setGender(
           java.lang.String value) {
@@ -25680,6 +26727,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string gender = 51;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGender() {
         bitField1_ = (bitField1_ & ~0x00000100);
@@ -25693,6 +26741,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string gender = 51;</code>
+       * @param value The bytes for gender to set.
+       * @return This builder for chaining.
        */
       public Builder setGenderBytes(
           com.google.protobuf.ByteString value) {
@@ -25712,6 +26762,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCase = 52;</code>
+       * @return Whether the trueCase field is set.
        */
       public boolean hasTrueCase() {
         return ((bitField1_ & 0x00000200) != 0);
@@ -25722,6 +26773,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCase = 52;</code>
+       * @return The trueCase.
        */
       public java.lang.String getTrueCase() {
         java.lang.Object ref = trueCase_;
@@ -25743,6 +26795,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCase = 52;</code>
+       * @return The bytes for trueCase.
        */
       public com.google.protobuf.ByteString
           getTrueCaseBytes() {
@@ -25763,6 +26816,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCase = 52;</code>
+       * @param value The trueCase to set.
+       * @return This builder for chaining.
        */
       public Builder setTrueCase(
           java.lang.String value) {
@@ -25780,6 +26835,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCase = 52;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTrueCase() {
         bitField1_ = (bitField1_ & ~0x00000200);
@@ -25793,6 +26849,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCase = 52;</code>
+       * @param value The bytes for trueCase to set.
+       * @return This builder for chaining.
        */
       public Builder setTrueCaseBytes(
           com.google.protobuf.ByteString value) {
@@ -25812,6 +26870,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCaseText = 53;</code>
+       * @return Whether the trueCaseText field is set.
        */
       public boolean hasTrueCaseText() {
         return ((bitField1_ & 0x00000400) != 0);
@@ -25822,6 +26881,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCaseText = 53;</code>
+       * @return The trueCaseText.
        */
       public java.lang.String getTrueCaseText() {
         java.lang.Object ref = trueCaseText_;
@@ -25843,6 +26903,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCaseText = 53;</code>
+       * @return The bytes for trueCaseText.
        */
       public com.google.protobuf.ByteString
           getTrueCaseTextBytes() {
@@ -25863,6 +26924,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCaseText = 53;</code>
+       * @param value The trueCaseText to set.
+       * @return This builder for chaining.
        */
       public Builder setTrueCaseText(
           java.lang.String value) {
@@ -25880,6 +26943,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCaseText = 53;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTrueCaseText() {
         bitField1_ = (bitField1_ & ~0x00000400);
@@ -25893,6 +26957,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string trueCaseText = 53;</code>
+       * @param value The bytes for trueCaseText to set.
+       * @return This builder for chaining.
        */
       public Builder setTrueCaseTextBytes(
           com.google.protobuf.ByteString value) {
@@ -25912,6 +26978,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string chineseChar = 54;</code>
+       * @return Whether the chineseChar field is set.
        */
       public boolean hasChineseChar() {
         return ((bitField1_ & 0x00000800) != 0);
@@ -25922,6 +26989,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string chineseChar = 54;</code>
+       * @return The chineseChar.
        */
       public java.lang.String getChineseChar() {
         java.lang.Object ref = chineseChar_;
@@ -25943,6 +27011,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string chineseChar = 54;</code>
+       * @return The bytes for chineseChar.
        */
       public com.google.protobuf.ByteString
           getChineseCharBytes() {
@@ -25963,6 +27032,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string chineseChar = 54;</code>
+       * @param value The chineseChar to set.
+       * @return This builder for chaining.
        */
       public Builder setChineseChar(
           java.lang.String value) {
@@ -25980,6 +27051,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string chineseChar = 54;</code>
+       * @return This builder for chaining.
        */
       public Builder clearChineseChar() {
         bitField1_ = (bitField1_ & ~0x00000800);
@@ -25993,6 +27065,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string chineseChar = 54;</code>
+       * @param value The bytes for chineseChar to set.
+       * @return This builder for chaining.
        */
       public Builder setChineseCharBytes(
           com.google.protobuf.ByteString value) {
@@ -26008,12 +27082,14 @@ public final class CoreNLPProtos {
       private java.lang.Object chineseSeg_ = "";
       /**
        * <code>optional string chineseSeg = 55;</code>
+       * @return Whether the chineseSeg field is set.
        */
       public boolean hasChineseSeg() {
         return ((bitField1_ & 0x00001000) != 0);
       }
       /**
        * <code>optional string chineseSeg = 55;</code>
+       * @return The chineseSeg.
        */
       public java.lang.String getChineseSeg() {
         java.lang.Object ref = chineseSeg_;
@@ -26031,6 +27107,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string chineseSeg = 55;</code>
+       * @return The bytes for chineseSeg.
        */
       public com.google.protobuf.ByteString
           getChineseSegBytes() {
@@ -26047,6 +27124,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string chineseSeg = 55;</code>
+       * @param value The chineseSeg to set.
+       * @return This builder for chaining.
        */
       public Builder setChineseSeg(
           java.lang.String value) {
@@ -26060,6 +27139,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string chineseSeg = 55;</code>
+       * @return This builder for chaining.
        */
       public Builder clearChineseSeg() {
         bitField1_ = (bitField1_ & ~0x00001000);
@@ -26069,6 +27149,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string chineseSeg = 55;</code>
+       * @param value The bytes for chineseSeg to set.
+       * @return This builder for chaining.
        */
       public Builder setChineseSegBytes(
           com.google.protobuf.ByteString value) {
@@ -26084,12 +27166,14 @@ public final class CoreNLPProtos {
       private java.lang.Object chineseXMLChar_ = "";
       /**
        * <code>optional string chineseXMLChar = 60;</code>
+       * @return Whether the chineseXMLChar field is set.
        */
       public boolean hasChineseXMLChar() {
         return ((bitField1_ & 0x00002000) != 0);
       }
       /**
        * <code>optional string chineseXMLChar = 60;</code>
+       * @return The chineseXMLChar.
        */
       public java.lang.String getChineseXMLChar() {
         java.lang.Object ref = chineseXMLChar_;
@@ -26107,6 +27191,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string chineseXMLChar = 60;</code>
+       * @return The bytes for chineseXMLChar.
        */
       public com.google.protobuf.ByteString
           getChineseXMLCharBytes() {
@@ -26123,6 +27208,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string chineseXMLChar = 60;</code>
+       * @param value The chineseXMLChar to set.
+       * @return This builder for chaining.
        */
       public Builder setChineseXMLChar(
           java.lang.String value) {
@@ -26136,6 +27223,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string chineseXMLChar = 60;</code>
+       * @return This builder for chaining.
        */
       public Builder clearChineseXMLChar() {
         bitField1_ = (bitField1_ & ~0x00002000);
@@ -26145,6 +27233,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string chineseXMLChar = 60;</code>
+       * @param value The bytes for chineseXMLChar to set.
+       * @return This builder for chaining.
        */
       public Builder setChineseXMLCharBytes(
           com.google.protobuf.ByteString value) {
@@ -26164,6 +27254,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 56;</code>
+       * @return Whether the sectionName field is set.
        */
       public boolean hasSectionName() {
         return ((bitField1_ & 0x00004000) != 0);
@@ -26174,6 +27265,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 56;</code>
+       * @return The sectionName.
        */
       public java.lang.String getSectionName() {
         java.lang.Object ref = sectionName_;
@@ -26195,6 +27287,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 56;</code>
+       * @return The bytes for sectionName.
        */
       public com.google.protobuf.ByteString
           getSectionNameBytes() {
@@ -26215,6 +27308,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 56;</code>
+       * @param value The sectionName to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionName(
           java.lang.String value) {
@@ -26232,6 +27327,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 56;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSectionName() {
         bitField1_ = (bitField1_ & ~0x00004000);
@@ -26245,6 +27341,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string sectionName = 56;</code>
+       * @param value The bytes for sectionName to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionNameBytes(
           com.google.protobuf.ByteString value) {
@@ -26260,12 +27358,14 @@ public final class CoreNLPProtos {
       private java.lang.Object sectionAuthor_ = "";
       /**
        * <code>optional string sectionAuthor = 57;</code>
+       * @return Whether the sectionAuthor field is set.
        */
       public boolean hasSectionAuthor() {
         return ((bitField1_ & 0x00008000) != 0);
       }
       /**
        * <code>optional string sectionAuthor = 57;</code>
+       * @return The sectionAuthor.
        */
       public java.lang.String getSectionAuthor() {
         java.lang.Object ref = sectionAuthor_;
@@ -26283,6 +27383,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionAuthor = 57;</code>
+       * @return The bytes for sectionAuthor.
        */
       public com.google.protobuf.ByteString
           getSectionAuthorBytes() {
@@ -26299,6 +27400,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionAuthor = 57;</code>
+       * @param value The sectionAuthor to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionAuthor(
           java.lang.String value) {
@@ -26312,6 +27415,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionAuthor = 57;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSectionAuthor() {
         bitField1_ = (bitField1_ & ~0x00008000);
@@ -26321,6 +27425,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionAuthor = 57;</code>
+       * @param value The bytes for sectionAuthor to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionAuthorBytes(
           com.google.protobuf.ByteString value) {
@@ -26336,12 +27442,14 @@ public final class CoreNLPProtos {
       private java.lang.Object sectionDate_ = "";
       /**
        * <code>optional string sectionDate = 58;</code>
+       * @return Whether the sectionDate field is set.
        */
       public boolean hasSectionDate() {
         return ((bitField1_ & 0x00010000) != 0);
       }
       /**
        * <code>optional string sectionDate = 58;</code>
+       * @return The sectionDate.
        */
       public java.lang.String getSectionDate() {
         java.lang.Object ref = sectionDate_;
@@ -26359,6 +27467,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionDate = 58;</code>
+       * @return The bytes for sectionDate.
        */
       public com.google.protobuf.ByteString
           getSectionDateBytes() {
@@ -26375,6 +27484,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionDate = 58;</code>
+       * @param value The sectionDate to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionDate(
           java.lang.String value) {
@@ -26388,6 +27499,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionDate = 58;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSectionDate() {
         bitField1_ = (bitField1_ & ~0x00010000);
@@ -26397,6 +27509,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionDate = 58;</code>
+       * @param value The bytes for sectionDate to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionDateBytes(
           com.google.protobuf.ByteString value) {
@@ -26412,12 +27526,14 @@ public final class CoreNLPProtos {
       private java.lang.Object sectionEndLabel_ = "";
       /**
        * <code>optional string sectionEndLabel = 59;</code>
+       * @return Whether the sectionEndLabel field is set.
        */
       public boolean hasSectionEndLabel() {
         return ((bitField1_ & 0x00020000) != 0);
       }
       /**
        * <code>optional string sectionEndLabel = 59;</code>
+       * @return The sectionEndLabel.
        */
       public java.lang.String getSectionEndLabel() {
         java.lang.Object ref = sectionEndLabel_;
@@ -26435,6 +27551,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionEndLabel = 59;</code>
+       * @return The bytes for sectionEndLabel.
        */
       public com.google.protobuf.ByteString
           getSectionEndLabelBytes() {
@@ -26451,6 +27568,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionEndLabel = 59;</code>
+       * @param value The sectionEndLabel to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionEndLabel(
           java.lang.String value) {
@@ -26464,6 +27583,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionEndLabel = 59;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSectionEndLabel() {
         bitField1_ = (bitField1_ & ~0x00020000);
@@ -26473,6 +27593,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string sectionEndLabel = 59;</code>
+       * @param value The bytes for sectionEndLabel to set.
+       * @return This builder for chaining.
        */
       public Builder setSectionEndLabelBytes(
           com.google.protobuf.ByteString value) {
@@ -26492,6 +27614,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string parent = 61;</code>
+       * @return Whether the parent field is set.
        */
       public boolean hasParent() {
         return ((bitField1_ & 0x00040000) != 0);
@@ -26502,6 +27625,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string parent = 61;</code>
+       * @return The parent.
        */
       public java.lang.String getParent() {
         java.lang.Object ref = parent_;
@@ -26523,6 +27647,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string parent = 61;</code>
+       * @return The bytes for parent.
        */
       public com.google.protobuf.ByteString
           getParentBytes() {
@@ -26543,6 +27668,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string parent = 61;</code>
+       * @param value The parent to set.
+       * @return This builder for chaining.
        */
       public Builder setParent(
           java.lang.String value) {
@@ -26560,6 +27687,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string parent = 61;</code>
+       * @return This builder for chaining.
        */
       public Builder clearParent() {
         bitField1_ = (bitField1_ & ~0x00040000);
@@ -26573,6 +27701,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string parent = 61;</code>
+       * @param value The bytes for parent to set.
+       * @return This builder for chaining.
        */
       public Builder setParentBytes(
           com.google.protobuf.ByteString value) {
@@ -26598,6 +27728,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated uint32 corefMentionIndex = 64;</code>
+       * @return A list containing the corefMentionIndex.
        */
       public java.util.List<java.lang.Integer>
           getCorefMentionIndexList() {
@@ -26610,6 +27741,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated uint32 corefMentionIndex = 64;</code>
+       * @return The count of corefMentionIndex.
        */
       public int getCorefMentionIndexCount() {
         return corefMentionIndex_.size();
@@ -26620,6 +27752,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated uint32 corefMentionIndex = 64;</code>
+       * @param index The index of the element to return.
+       * @return The corefMentionIndex at the given index.
        */
       public int getCorefMentionIndex(int index) {
         return corefMentionIndex_.getInt(index);
@@ -26630,6 +27764,9 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated uint32 corefMentionIndex = 64;</code>
+       * @param index The index to set the value at.
+       * @param value The corefMentionIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setCorefMentionIndex(
           int index, int value) {
@@ -26644,6 +27781,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated uint32 corefMentionIndex = 64;</code>
+       * @param value The corefMentionIndex to add.
+       * @return This builder for chaining.
        */
       public Builder addCorefMentionIndex(int value) {
         ensureCorefMentionIndexIsMutable();
@@ -26657,6 +27796,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated uint32 corefMentionIndex = 64;</code>
+       * @param values The corefMentionIndex to add.
+       * @return This builder for chaining.
        */
       public Builder addAllCorefMentionIndex(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -26672,6 +27813,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>repeated uint32 corefMentionIndex = 64;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCorefMentionIndex() {
         corefMentionIndex_ = emptyIntList();
@@ -26683,18 +27825,22 @@ public final class CoreNLPProtos {
       private int entityMentionIndex_ ;
       /**
        * <code>optional uint32 entityMentionIndex = 65;</code>
+       * @return Whether the entityMentionIndex field is set.
        */
       public boolean hasEntityMentionIndex() {
         return ((bitField1_ & 0x00100000) != 0);
       }
       /**
        * <code>optional uint32 entityMentionIndex = 65;</code>
+       * @return The entityMentionIndex.
        */
       public int getEntityMentionIndex() {
         return entityMentionIndex_;
       }
       /**
        * <code>optional uint32 entityMentionIndex = 65;</code>
+       * @param value The entityMentionIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setEntityMentionIndex(int value) {
         bitField1_ |= 0x00100000;
@@ -26704,6 +27850,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 entityMentionIndex = 65;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEntityMentionIndex() {
         bitField1_ = (bitField1_ & ~0x00100000);
@@ -26719,6 +27866,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool isMWT = 67;</code>
+       * @return Whether the isMWT field is set.
        */
       public boolean hasIsMWT() {
         return ((bitField1_ & 0x00200000) != 0);
@@ -26729,6 +27877,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool isMWT = 67;</code>
+       * @return The isMWT.
        */
       public boolean getIsMWT() {
         return isMWT_;
@@ -26739,6 +27888,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool isMWT = 67;</code>
+       * @param value The isMWT to set.
+       * @return This builder for chaining.
        */
       public Builder setIsMWT(boolean value) {
         bitField1_ |= 0x00200000;
@@ -26752,6 +27903,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool isMWT = 67;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIsMWT() {
         bitField1_ = (bitField1_ & ~0x00200000);
@@ -26763,18 +27915,22 @@ public final class CoreNLPProtos {
       private boolean isFirstMWT_ ;
       /**
        * <code>optional bool isFirstMWT = 68;</code>
+       * @return Whether the isFirstMWT field is set.
        */
       public boolean hasIsFirstMWT() {
         return ((bitField1_ & 0x00400000) != 0);
       }
       /**
        * <code>optional bool isFirstMWT = 68;</code>
+       * @return The isFirstMWT.
        */
       public boolean getIsFirstMWT() {
         return isFirstMWT_;
       }
       /**
        * <code>optional bool isFirstMWT = 68;</code>
+       * @param value The isFirstMWT to set.
+       * @return This builder for chaining.
        */
       public Builder setIsFirstMWT(boolean value) {
         bitField1_ |= 0x00400000;
@@ -26784,6 +27940,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool isFirstMWT = 68;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIsFirstMWT() {
         bitField1_ = (bitField1_ & ~0x00400000);
@@ -26795,12 +27952,14 @@ public final class CoreNLPProtos {
       private java.lang.Object mwtText_ = "";
       /**
        * <code>optional string mwtText = 69;</code>
+       * @return Whether the mwtText field is set.
        */
       public boolean hasMwtText() {
         return ((bitField1_ & 0x00800000) != 0);
       }
       /**
        * <code>optional string mwtText = 69;</code>
+       * @return The mwtText.
        */
       public java.lang.String getMwtText() {
         java.lang.Object ref = mwtText_;
@@ -26818,6 +27977,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mwtText = 69;</code>
+       * @return The bytes for mwtText.
        */
       public com.google.protobuf.ByteString
           getMwtTextBytes() {
@@ -26834,6 +27994,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mwtText = 69;</code>
+       * @param value The mwtText to set.
+       * @return This builder for chaining.
        */
       public Builder setMwtText(
           java.lang.String value) {
@@ -26847,6 +28009,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mwtText = 69;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMwtText() {
         bitField1_ = (bitField1_ & ~0x00800000);
@@ -26856,6 +28019,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mwtText = 69;</code>
+       * @param value The bytes for mwtText to set.
+       * @return This builder for chaining.
        */
       public Builder setMwtTextBytes(
           com.google.protobuf.ByteString value) {
@@ -26875,6 +28040,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint64 numericValue = 70;</code>
+       * @return Whether the numericValue field is set.
        */
       public boolean hasNumericValue() {
         return ((bitField1_ & 0x01000000) != 0);
@@ -26885,6 +28051,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint64 numericValue = 70;</code>
+       * @return The numericValue.
        */
       public long getNumericValue() {
         return numericValue_;
@@ -26895,6 +28062,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint64 numericValue = 70;</code>
+       * @param value The numericValue to set.
+       * @return This builder for chaining.
        */
       public Builder setNumericValue(long value) {
         bitField1_ |= 0x01000000;
@@ -26908,6 +28077,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint64 numericValue = 70;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNumericValue() {
         bitField1_ = (bitField1_ & ~0x01000000);
@@ -26919,12 +28089,14 @@ public final class CoreNLPProtos {
       private java.lang.Object numericType_ = "";
       /**
        * <code>optional string numericType = 71;</code>
+       * @return Whether the numericType field is set.
        */
       public boolean hasNumericType() {
         return ((bitField1_ & 0x02000000) != 0);
       }
       /**
        * <code>optional string numericType = 71;</code>
+       * @return The numericType.
        */
       public java.lang.String getNumericType() {
         java.lang.Object ref = numericType_;
@@ -26942,6 +28114,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string numericType = 71;</code>
+       * @return The bytes for numericType.
        */
       public com.google.protobuf.ByteString
           getNumericTypeBytes() {
@@ -26958,6 +28131,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string numericType = 71;</code>
+       * @param value The numericType to set.
+       * @return This builder for chaining.
        */
       public Builder setNumericType(
           java.lang.String value) {
@@ -26971,6 +28146,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string numericType = 71;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNumericType() {
         bitField1_ = (bitField1_ & ~0x02000000);
@@ -26980,6 +28156,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string numericType = 71;</code>
+       * @param value The bytes for numericType to set.
+       * @return This builder for chaining.
        */
       public Builder setNumericTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -26995,18 +28173,22 @@ public final class CoreNLPProtos {
       private long numericCompositeValue_ ;
       /**
        * <code>optional uint64 numericCompositeValue = 72;</code>
+       * @return Whether the numericCompositeValue field is set.
        */
       public boolean hasNumericCompositeValue() {
         return ((bitField1_ & 0x04000000) != 0);
       }
       /**
        * <code>optional uint64 numericCompositeValue = 72;</code>
+       * @return The numericCompositeValue.
        */
       public long getNumericCompositeValue() {
         return numericCompositeValue_;
       }
       /**
        * <code>optional uint64 numericCompositeValue = 72;</code>
+       * @param value The numericCompositeValue to set.
+       * @return This builder for chaining.
        */
       public Builder setNumericCompositeValue(long value) {
         bitField1_ |= 0x04000000;
@@ -27016,6 +28198,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint64 numericCompositeValue = 72;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNumericCompositeValue() {
         bitField1_ = (bitField1_ & ~0x04000000);
@@ -27027,12 +28210,14 @@ public final class CoreNLPProtos {
       private java.lang.Object numericCompositeType_ = "";
       /**
        * <code>optional string numericCompositeType = 73;</code>
+       * @return Whether the numericCompositeType field is set.
        */
       public boolean hasNumericCompositeType() {
         return ((bitField1_ & 0x08000000) != 0);
       }
       /**
        * <code>optional string numericCompositeType = 73;</code>
+       * @return The numericCompositeType.
        */
       public java.lang.String getNumericCompositeType() {
         java.lang.Object ref = numericCompositeType_;
@@ -27050,6 +28235,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string numericCompositeType = 73;</code>
+       * @return The bytes for numericCompositeType.
        */
       public com.google.protobuf.ByteString
           getNumericCompositeTypeBytes() {
@@ -27066,6 +28252,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string numericCompositeType = 73;</code>
+       * @param value The numericCompositeType to set.
+       * @return This builder for chaining.
        */
       public Builder setNumericCompositeType(
           java.lang.String value) {
@@ -27079,6 +28267,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string numericCompositeType = 73;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNumericCompositeType() {
         bitField1_ = (bitField1_ & ~0x08000000);
@@ -27088,6 +28277,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string numericCompositeType = 73;</code>
+       * @param value The bytes for numericCompositeType to set.
+       * @return This builder for chaining.
        */
       public Builder setNumericCompositeTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -27103,18 +28294,22 @@ public final class CoreNLPProtos {
       private int codepointOffsetBegin_ ;
       /**
        * <code>optional uint32 codepointOffsetBegin = 74;</code>
+       * @return Whether the codepointOffsetBegin field is set.
        */
       public boolean hasCodepointOffsetBegin() {
         return ((bitField1_ & 0x10000000) != 0);
       }
       /**
        * <code>optional uint32 codepointOffsetBegin = 74;</code>
+       * @return The codepointOffsetBegin.
        */
       public int getCodepointOffsetBegin() {
         return codepointOffsetBegin_;
       }
       /**
        * <code>optional uint32 codepointOffsetBegin = 74;</code>
+       * @param value The codepointOffsetBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setCodepointOffsetBegin(int value) {
         bitField1_ |= 0x10000000;
@@ -27124,6 +28319,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 codepointOffsetBegin = 74;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCodepointOffsetBegin() {
         bitField1_ = (bitField1_ & ~0x10000000);
@@ -27135,18 +28331,22 @@ public final class CoreNLPProtos {
       private int codepointOffsetEnd_ ;
       /**
        * <code>optional uint32 codepointOffsetEnd = 75;</code>
+       * @return Whether the codepointOffsetEnd field is set.
        */
       public boolean hasCodepointOffsetEnd() {
         return ((bitField1_ & 0x20000000) != 0);
       }
       /**
        * <code>optional uint32 codepointOffsetEnd = 75;</code>
+       * @return The codepointOffsetEnd.
        */
       public int getCodepointOffsetEnd() {
         return codepointOffsetEnd_;
       }
       /**
        * <code>optional uint32 codepointOffsetEnd = 75;</code>
+       * @param value The codepointOffsetEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setCodepointOffsetEnd(int value) {
         bitField1_ |= 0x20000000;
@@ -27156,6 +28356,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 codepointOffsetEnd = 75;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCodepointOffsetEnd() {
         bitField1_ = (bitField1_ & ~0x20000000);
@@ -27222,235 +28423,286 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional string text = 1;</code>
+     * @return Whether the text field is set.
      */
     boolean hasText();
     /**
      * <code>optional string text = 1;</code>
+     * @return The text.
      */
     java.lang.String getText();
     /**
      * <code>optional string text = 1;</code>
+     * @return The bytes for text.
      */
     com.google.protobuf.ByteString
         getTextBytes();
 
     /**
      * <code>optional uint32 begin = 2;</code>
+     * @return Whether the begin field is set.
      */
     boolean hasBegin();
     /**
      * <code>optional uint32 begin = 2;</code>
+     * @return The begin.
      */
     int getBegin();
 
     /**
      * <code>optional uint32 end = 3;</code>
+     * @return Whether the end field is set.
      */
     boolean hasEnd();
     /**
      * <code>optional uint32 end = 3;</code>
+     * @return The end.
      */
     int getEnd();
 
     /**
      * <code>optional uint32 sentenceBegin = 5;</code>
+     * @return Whether the sentenceBegin field is set.
      */
     boolean hasSentenceBegin();
     /**
      * <code>optional uint32 sentenceBegin = 5;</code>
+     * @return The sentenceBegin.
      */
     int getSentenceBegin();
 
     /**
      * <code>optional uint32 sentenceEnd = 6;</code>
+     * @return Whether the sentenceEnd field is set.
      */
     boolean hasSentenceEnd();
     /**
      * <code>optional uint32 sentenceEnd = 6;</code>
+     * @return The sentenceEnd.
      */
     int getSentenceEnd();
 
     /**
      * <code>optional uint32 tokenBegin = 7;</code>
+     * @return Whether the tokenBegin field is set.
      */
     boolean hasTokenBegin();
     /**
      * <code>optional uint32 tokenBegin = 7;</code>
+     * @return The tokenBegin.
      */
     int getTokenBegin();
 
     /**
      * <code>optional uint32 tokenEnd = 8;</code>
+     * @return Whether the tokenEnd field is set.
      */
     boolean hasTokenEnd();
     /**
      * <code>optional uint32 tokenEnd = 8;</code>
+     * @return The tokenEnd.
      */
     int getTokenEnd();
 
     /**
      * <code>optional string docid = 9;</code>
+     * @return Whether the docid field is set.
      */
     boolean hasDocid();
     /**
      * <code>optional string docid = 9;</code>
+     * @return The docid.
      */
     java.lang.String getDocid();
     /**
      * <code>optional string docid = 9;</code>
+     * @return The bytes for docid.
      */
     com.google.protobuf.ByteString
         getDocidBytes();
 
     /**
      * <code>optional uint32 index = 10;</code>
+     * @return Whether the index field is set.
      */
     boolean hasIndex();
     /**
      * <code>optional uint32 index = 10;</code>
+     * @return The index.
      */
     int getIndex();
 
     /**
      * <code>optional string author = 11;</code>
+     * @return Whether the author field is set.
      */
     boolean hasAuthor();
     /**
      * <code>optional string author = 11;</code>
+     * @return The author.
      */
     java.lang.String getAuthor();
     /**
      * <code>optional string author = 11;</code>
+     * @return The bytes for author.
      */
     com.google.protobuf.ByteString
         getAuthorBytes();
 
     /**
      * <code>optional string mention = 12;</code>
+     * @return Whether the mention field is set.
      */
     boolean hasMention();
     /**
      * <code>optional string mention = 12;</code>
+     * @return The mention.
      */
     java.lang.String getMention();
     /**
      * <code>optional string mention = 12;</code>
+     * @return The bytes for mention.
      */
     com.google.protobuf.ByteString
         getMentionBytes();
 
     /**
      * <code>optional uint32 mentionBegin = 13;</code>
+     * @return Whether the mentionBegin field is set.
      */
     boolean hasMentionBegin();
     /**
      * <code>optional uint32 mentionBegin = 13;</code>
+     * @return The mentionBegin.
      */
     int getMentionBegin();
 
     /**
      * <code>optional uint32 mentionEnd = 14;</code>
+     * @return Whether the mentionEnd field is set.
      */
     boolean hasMentionEnd();
     /**
      * <code>optional uint32 mentionEnd = 14;</code>
+     * @return The mentionEnd.
      */
     int getMentionEnd();
 
     /**
      * <code>optional string mentionType = 15;</code>
+     * @return Whether the mentionType field is set.
      */
     boolean hasMentionType();
     /**
      * <code>optional string mentionType = 15;</code>
+     * @return The mentionType.
      */
     java.lang.String getMentionType();
     /**
      * <code>optional string mentionType = 15;</code>
+     * @return The bytes for mentionType.
      */
     com.google.protobuf.ByteString
         getMentionTypeBytes();
 
     /**
      * <code>optional string mentionSieve = 16;</code>
+     * @return Whether the mentionSieve field is set.
      */
     boolean hasMentionSieve();
     /**
      * <code>optional string mentionSieve = 16;</code>
+     * @return The mentionSieve.
      */
     java.lang.String getMentionSieve();
     /**
      * <code>optional string mentionSieve = 16;</code>
+     * @return The bytes for mentionSieve.
      */
     com.google.protobuf.ByteString
         getMentionSieveBytes();
 
     /**
      * <code>optional string speaker = 17;</code>
+     * @return Whether the speaker field is set.
      */
     boolean hasSpeaker();
     /**
      * <code>optional string speaker = 17;</code>
+     * @return The speaker.
      */
     java.lang.String getSpeaker();
     /**
      * <code>optional string speaker = 17;</code>
+     * @return The bytes for speaker.
      */
     com.google.protobuf.ByteString
         getSpeakerBytes();
 
     /**
      * <code>optional string speakerSieve = 18;</code>
+     * @return Whether the speakerSieve field is set.
      */
     boolean hasSpeakerSieve();
     /**
      * <code>optional string speakerSieve = 18;</code>
+     * @return The speakerSieve.
      */
     java.lang.String getSpeakerSieve();
     /**
      * <code>optional string speakerSieve = 18;</code>
+     * @return The bytes for speakerSieve.
      */
     com.google.protobuf.ByteString
         getSpeakerSieveBytes();
 
     /**
      * <code>optional string canonicalMention = 19;</code>
+     * @return Whether the canonicalMention field is set.
      */
     boolean hasCanonicalMention();
     /**
      * <code>optional string canonicalMention = 19;</code>
+     * @return The canonicalMention.
      */
     java.lang.String getCanonicalMention();
     /**
      * <code>optional string canonicalMention = 19;</code>
+     * @return The bytes for canonicalMention.
      */
     com.google.protobuf.ByteString
         getCanonicalMentionBytes();
 
     /**
      * <code>optional uint32 canonicalMentionBegin = 20;</code>
+     * @return Whether the canonicalMentionBegin field is set.
      */
     boolean hasCanonicalMentionBegin();
     /**
      * <code>optional uint32 canonicalMentionBegin = 20;</code>
+     * @return The canonicalMentionBegin.
      */
     int getCanonicalMentionBegin();
 
     /**
      * <code>optional uint32 canonicalMentionEnd = 21;</code>
+     * @return Whether the canonicalMentionEnd field is set.
      */
     boolean hasCanonicalMentionEnd();
     /**
      * <code>optional uint32 canonicalMentionEnd = 21;</code>
+     * @return The canonicalMentionEnd.
      */
     int getCanonicalMentionEnd();
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph attributionDependencyGraph = 22;</code>
+     * @return Whether the attributionDependencyGraph field is set.
      */
     boolean hasAttributionDependencyGraph();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph attributionDependencyGraph = 22;</code>
+     * @return The attributionDependencyGraph.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getAttributionDependencyGraph();
     /**
@@ -27676,12 +28928,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object text_;
     /**
      * <code>optional string text = 1;</code>
+     * @return Whether the text field is set.
      */
     public boolean hasText() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional string text = 1;</code>
+     * @return The text.
      */
     public java.lang.String getText() {
       java.lang.Object ref = text_;
@@ -27699,6 +28953,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string text = 1;</code>
+     * @return The bytes for text.
      */
     public com.google.protobuf.ByteString
         getTextBytes() {
@@ -27718,12 +28973,14 @@ public final class CoreNLPProtos {
     private int begin_;
     /**
      * <code>optional uint32 begin = 2;</code>
+     * @return Whether the begin field is set.
      */
     public boolean hasBegin() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional uint32 begin = 2;</code>
+     * @return The begin.
      */
     public int getBegin() {
       return begin_;
@@ -27733,12 +28990,14 @@ public final class CoreNLPProtos {
     private int end_;
     /**
      * <code>optional uint32 end = 3;</code>
+     * @return Whether the end field is set.
      */
     public boolean hasEnd() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional uint32 end = 3;</code>
+     * @return The end.
      */
     public int getEnd() {
       return end_;
@@ -27748,12 +29007,14 @@ public final class CoreNLPProtos {
     private int sentenceBegin_;
     /**
      * <code>optional uint32 sentenceBegin = 5;</code>
+     * @return Whether the sentenceBegin field is set.
      */
     public boolean hasSentenceBegin() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional uint32 sentenceBegin = 5;</code>
+     * @return The sentenceBegin.
      */
     public int getSentenceBegin() {
       return sentenceBegin_;
@@ -27763,12 +29024,14 @@ public final class CoreNLPProtos {
     private int sentenceEnd_;
     /**
      * <code>optional uint32 sentenceEnd = 6;</code>
+     * @return Whether the sentenceEnd field is set.
      */
     public boolean hasSentenceEnd() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional uint32 sentenceEnd = 6;</code>
+     * @return The sentenceEnd.
      */
     public int getSentenceEnd() {
       return sentenceEnd_;
@@ -27778,12 +29041,14 @@ public final class CoreNLPProtos {
     private int tokenBegin_;
     /**
      * <code>optional uint32 tokenBegin = 7;</code>
+     * @return Whether the tokenBegin field is set.
      */
     public boolean hasTokenBegin() {
       return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>optional uint32 tokenBegin = 7;</code>
+     * @return The tokenBegin.
      */
     public int getTokenBegin() {
       return tokenBegin_;
@@ -27793,12 +29058,14 @@ public final class CoreNLPProtos {
     private int tokenEnd_;
     /**
      * <code>optional uint32 tokenEnd = 8;</code>
+     * @return Whether the tokenEnd field is set.
      */
     public boolean hasTokenEnd() {
       return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <code>optional uint32 tokenEnd = 8;</code>
+     * @return The tokenEnd.
      */
     public int getTokenEnd() {
       return tokenEnd_;
@@ -27808,12 +29075,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object docid_;
     /**
      * <code>optional string docid = 9;</code>
+     * @return Whether the docid field is set.
      */
     public boolean hasDocid() {
       return ((bitField0_ & 0x00000080) != 0);
     }
     /**
      * <code>optional string docid = 9;</code>
+     * @return The docid.
      */
     public java.lang.String getDocid() {
       java.lang.Object ref = docid_;
@@ -27831,6 +29100,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string docid = 9;</code>
+     * @return The bytes for docid.
      */
     public com.google.protobuf.ByteString
         getDocidBytes() {
@@ -27850,12 +29120,14 @@ public final class CoreNLPProtos {
     private int index_;
     /**
      * <code>optional uint32 index = 10;</code>
+     * @return Whether the index field is set.
      */
     public boolean hasIndex() {
       return ((bitField0_ & 0x00000100) != 0);
     }
     /**
      * <code>optional uint32 index = 10;</code>
+     * @return The index.
      */
     public int getIndex() {
       return index_;
@@ -27865,12 +29137,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object author_;
     /**
      * <code>optional string author = 11;</code>
+     * @return Whether the author field is set.
      */
     public boolean hasAuthor() {
       return ((bitField0_ & 0x00000200) != 0);
     }
     /**
      * <code>optional string author = 11;</code>
+     * @return The author.
      */
     public java.lang.String getAuthor() {
       java.lang.Object ref = author_;
@@ -27888,6 +29162,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string author = 11;</code>
+     * @return The bytes for author.
      */
     public com.google.protobuf.ByteString
         getAuthorBytes() {
@@ -27907,12 +29182,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object mention_;
     /**
      * <code>optional string mention = 12;</code>
+     * @return Whether the mention field is set.
      */
     public boolean hasMention() {
       return ((bitField0_ & 0x00000400) != 0);
     }
     /**
      * <code>optional string mention = 12;</code>
+     * @return The mention.
      */
     public java.lang.String getMention() {
       java.lang.Object ref = mention_;
@@ -27930,6 +29207,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string mention = 12;</code>
+     * @return The bytes for mention.
      */
     public com.google.protobuf.ByteString
         getMentionBytes() {
@@ -27949,12 +29227,14 @@ public final class CoreNLPProtos {
     private int mentionBegin_;
     /**
      * <code>optional uint32 mentionBegin = 13;</code>
+     * @return Whether the mentionBegin field is set.
      */
     public boolean hasMentionBegin() {
       return ((bitField0_ & 0x00000800) != 0);
     }
     /**
      * <code>optional uint32 mentionBegin = 13;</code>
+     * @return The mentionBegin.
      */
     public int getMentionBegin() {
       return mentionBegin_;
@@ -27964,12 +29244,14 @@ public final class CoreNLPProtos {
     private int mentionEnd_;
     /**
      * <code>optional uint32 mentionEnd = 14;</code>
+     * @return Whether the mentionEnd field is set.
      */
     public boolean hasMentionEnd() {
       return ((bitField0_ & 0x00001000) != 0);
     }
     /**
      * <code>optional uint32 mentionEnd = 14;</code>
+     * @return The mentionEnd.
      */
     public int getMentionEnd() {
       return mentionEnd_;
@@ -27979,12 +29261,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object mentionType_;
     /**
      * <code>optional string mentionType = 15;</code>
+     * @return Whether the mentionType field is set.
      */
     public boolean hasMentionType() {
       return ((bitField0_ & 0x00002000) != 0);
     }
     /**
      * <code>optional string mentionType = 15;</code>
+     * @return The mentionType.
      */
     public java.lang.String getMentionType() {
       java.lang.Object ref = mentionType_;
@@ -28002,6 +29286,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string mentionType = 15;</code>
+     * @return The bytes for mentionType.
      */
     public com.google.protobuf.ByteString
         getMentionTypeBytes() {
@@ -28021,12 +29306,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object mentionSieve_;
     /**
      * <code>optional string mentionSieve = 16;</code>
+     * @return Whether the mentionSieve field is set.
      */
     public boolean hasMentionSieve() {
       return ((bitField0_ & 0x00004000) != 0);
     }
     /**
      * <code>optional string mentionSieve = 16;</code>
+     * @return The mentionSieve.
      */
     public java.lang.String getMentionSieve() {
       java.lang.Object ref = mentionSieve_;
@@ -28044,6 +29331,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string mentionSieve = 16;</code>
+     * @return The bytes for mentionSieve.
      */
     public com.google.protobuf.ByteString
         getMentionSieveBytes() {
@@ -28063,12 +29351,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object speaker_;
     /**
      * <code>optional string speaker = 17;</code>
+     * @return Whether the speaker field is set.
      */
     public boolean hasSpeaker() {
       return ((bitField0_ & 0x00008000) != 0);
     }
     /**
      * <code>optional string speaker = 17;</code>
+     * @return The speaker.
      */
     public java.lang.String getSpeaker() {
       java.lang.Object ref = speaker_;
@@ -28086,6 +29376,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string speaker = 17;</code>
+     * @return The bytes for speaker.
      */
     public com.google.protobuf.ByteString
         getSpeakerBytes() {
@@ -28105,12 +29396,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object speakerSieve_;
     /**
      * <code>optional string speakerSieve = 18;</code>
+     * @return Whether the speakerSieve field is set.
      */
     public boolean hasSpeakerSieve() {
       return ((bitField0_ & 0x00010000) != 0);
     }
     /**
      * <code>optional string speakerSieve = 18;</code>
+     * @return The speakerSieve.
      */
     public java.lang.String getSpeakerSieve() {
       java.lang.Object ref = speakerSieve_;
@@ -28128,6 +29421,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string speakerSieve = 18;</code>
+     * @return The bytes for speakerSieve.
      */
     public com.google.protobuf.ByteString
         getSpeakerSieveBytes() {
@@ -28147,12 +29441,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object canonicalMention_;
     /**
      * <code>optional string canonicalMention = 19;</code>
+     * @return Whether the canonicalMention field is set.
      */
     public boolean hasCanonicalMention() {
       return ((bitField0_ & 0x00020000) != 0);
     }
     /**
      * <code>optional string canonicalMention = 19;</code>
+     * @return The canonicalMention.
      */
     public java.lang.String getCanonicalMention() {
       java.lang.Object ref = canonicalMention_;
@@ -28170,6 +29466,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string canonicalMention = 19;</code>
+     * @return The bytes for canonicalMention.
      */
     public com.google.protobuf.ByteString
         getCanonicalMentionBytes() {
@@ -28189,12 +29486,14 @@ public final class CoreNLPProtos {
     private int canonicalMentionBegin_;
     /**
      * <code>optional uint32 canonicalMentionBegin = 20;</code>
+     * @return Whether the canonicalMentionBegin field is set.
      */
     public boolean hasCanonicalMentionBegin() {
       return ((bitField0_ & 0x00040000) != 0);
     }
     /**
      * <code>optional uint32 canonicalMentionBegin = 20;</code>
+     * @return The canonicalMentionBegin.
      */
     public int getCanonicalMentionBegin() {
       return canonicalMentionBegin_;
@@ -28204,12 +29503,14 @@ public final class CoreNLPProtos {
     private int canonicalMentionEnd_;
     /**
      * <code>optional uint32 canonicalMentionEnd = 21;</code>
+     * @return Whether the canonicalMentionEnd field is set.
      */
     public boolean hasCanonicalMentionEnd() {
       return ((bitField0_ & 0x00080000) != 0);
     }
     /**
      * <code>optional uint32 canonicalMentionEnd = 21;</code>
+     * @return The canonicalMentionEnd.
      */
     public int getCanonicalMentionEnd() {
       return canonicalMentionEnd_;
@@ -28219,12 +29520,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph attributionDependencyGraph_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph attributionDependencyGraph = 22;</code>
+     * @return Whether the attributionDependencyGraph field is set.
      */
     public boolean hasAttributionDependencyGraph() {
       return ((bitField0_ & 0x00100000) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph attributionDependencyGraph = 22;</code>
+     * @return The attributionDependencyGraph.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getAttributionDependencyGraph() {
       return attributionDependencyGraph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : attributionDependencyGraph_;
@@ -29086,12 +30389,14 @@ public final class CoreNLPProtos {
       private java.lang.Object text_ = "";
       /**
        * <code>optional string text = 1;</code>
+       * @return Whether the text field is set.
        */
       public boolean hasText() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional string text = 1;</code>
+       * @return The text.
        */
       public java.lang.String getText() {
         java.lang.Object ref = text_;
@@ -29109,6 +30414,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string text = 1;</code>
+       * @return The bytes for text.
        */
       public com.google.protobuf.ByteString
           getTextBytes() {
@@ -29125,6 +30431,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string text = 1;</code>
+       * @param value The text to set.
+       * @return This builder for chaining.
        */
       public Builder setText(
           java.lang.String value) {
@@ -29138,6 +30446,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string text = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearText() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -29147,6 +30456,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string text = 1;</code>
+       * @param value The bytes for text to set.
+       * @return This builder for chaining.
        */
       public Builder setTextBytes(
           com.google.protobuf.ByteString value) {
@@ -29162,18 +30473,22 @@ public final class CoreNLPProtos {
       private int begin_ ;
       /**
        * <code>optional uint32 begin = 2;</code>
+       * @return Whether the begin field is set.
        */
       public boolean hasBegin() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional uint32 begin = 2;</code>
+       * @return The begin.
        */
       public int getBegin() {
         return begin_;
       }
       /**
        * <code>optional uint32 begin = 2;</code>
+       * @param value The begin to set.
+       * @return This builder for chaining.
        */
       public Builder setBegin(int value) {
         bitField0_ |= 0x00000002;
@@ -29183,6 +30498,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 begin = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBegin() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -29194,18 +30510,22 @@ public final class CoreNLPProtos {
       private int end_ ;
       /**
        * <code>optional uint32 end = 3;</code>
+       * @return Whether the end field is set.
        */
       public boolean hasEnd() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional uint32 end = 3;</code>
+       * @return The end.
        */
       public int getEnd() {
         return end_;
       }
       /**
        * <code>optional uint32 end = 3;</code>
+       * @param value The end to set.
+       * @return This builder for chaining.
        */
       public Builder setEnd(int value) {
         bitField0_ |= 0x00000004;
@@ -29215,6 +30535,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 end = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnd() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -29226,18 +30547,22 @@ public final class CoreNLPProtos {
       private int sentenceBegin_ ;
       /**
        * <code>optional uint32 sentenceBegin = 5;</code>
+       * @return Whether the sentenceBegin field is set.
        */
       public boolean hasSentenceBegin() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional uint32 sentenceBegin = 5;</code>
+       * @return The sentenceBegin.
        */
       public int getSentenceBegin() {
         return sentenceBegin_;
       }
       /**
        * <code>optional uint32 sentenceBegin = 5;</code>
+       * @param value The sentenceBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setSentenceBegin(int value) {
         bitField0_ |= 0x00000008;
@@ -29247,6 +30572,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 sentenceBegin = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentenceBegin() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -29258,18 +30584,22 @@ public final class CoreNLPProtos {
       private int sentenceEnd_ ;
       /**
        * <code>optional uint32 sentenceEnd = 6;</code>
+       * @return Whether the sentenceEnd field is set.
        */
       public boolean hasSentenceEnd() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional uint32 sentenceEnd = 6;</code>
+       * @return The sentenceEnd.
        */
       public int getSentenceEnd() {
         return sentenceEnd_;
       }
       /**
        * <code>optional uint32 sentenceEnd = 6;</code>
+       * @param value The sentenceEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setSentenceEnd(int value) {
         bitField0_ |= 0x00000010;
@@ -29279,6 +30609,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 sentenceEnd = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentenceEnd() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -29290,18 +30621,22 @@ public final class CoreNLPProtos {
       private int tokenBegin_ ;
       /**
        * <code>optional uint32 tokenBegin = 7;</code>
+       * @return Whether the tokenBegin field is set.
        */
       public boolean hasTokenBegin() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional uint32 tokenBegin = 7;</code>
+       * @return The tokenBegin.
        */
       public int getTokenBegin() {
         return tokenBegin_;
       }
       /**
        * <code>optional uint32 tokenBegin = 7;</code>
+       * @param value The tokenBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenBegin(int value) {
         bitField0_ |= 0x00000020;
@@ -29311,6 +30646,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 tokenBegin = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenBegin() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -29322,18 +30658,22 @@ public final class CoreNLPProtos {
       private int tokenEnd_ ;
       /**
        * <code>optional uint32 tokenEnd = 8;</code>
+       * @return Whether the tokenEnd field is set.
        */
       public boolean hasTokenEnd() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>optional uint32 tokenEnd = 8;</code>
+       * @return The tokenEnd.
        */
       public int getTokenEnd() {
         return tokenEnd_;
       }
       /**
        * <code>optional uint32 tokenEnd = 8;</code>
+       * @param value The tokenEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenEnd(int value) {
         bitField0_ |= 0x00000040;
@@ -29343,6 +30683,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 tokenEnd = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenEnd() {
         bitField0_ = (bitField0_ & ~0x00000040);
@@ -29354,12 +30695,14 @@ public final class CoreNLPProtos {
       private java.lang.Object docid_ = "";
       /**
        * <code>optional string docid = 9;</code>
+       * @return Whether the docid field is set.
        */
       public boolean hasDocid() {
         return ((bitField0_ & 0x00000080) != 0);
       }
       /**
        * <code>optional string docid = 9;</code>
+       * @return The docid.
        */
       public java.lang.String getDocid() {
         java.lang.Object ref = docid_;
@@ -29377,6 +30720,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docid = 9;</code>
+       * @return The bytes for docid.
        */
       public com.google.protobuf.ByteString
           getDocidBytes() {
@@ -29393,6 +30737,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docid = 9;</code>
+       * @param value The docid to set.
+       * @return This builder for chaining.
        */
       public Builder setDocid(
           java.lang.String value) {
@@ -29406,6 +30752,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docid = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDocid() {
         bitField0_ = (bitField0_ & ~0x00000080);
@@ -29415,6 +30762,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string docid = 9;</code>
+       * @param value The bytes for docid to set.
+       * @return This builder for chaining.
        */
       public Builder setDocidBytes(
           com.google.protobuf.ByteString value) {
@@ -29430,18 +30779,22 @@ public final class CoreNLPProtos {
       private int index_ ;
       /**
        * <code>optional uint32 index = 10;</code>
+       * @return Whether the index field is set.
        */
       public boolean hasIndex() {
         return ((bitField0_ & 0x00000100) != 0);
       }
       /**
        * <code>optional uint32 index = 10;</code>
+       * @return The index.
        */
       public int getIndex() {
         return index_;
       }
       /**
        * <code>optional uint32 index = 10;</code>
+       * @param value The index to set.
+       * @return This builder for chaining.
        */
       public Builder setIndex(int value) {
         bitField0_ |= 0x00000100;
@@ -29451,6 +30804,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 index = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIndex() {
         bitField0_ = (bitField0_ & ~0x00000100);
@@ -29462,12 +30816,14 @@ public final class CoreNLPProtos {
       private java.lang.Object author_ = "";
       /**
        * <code>optional string author = 11;</code>
+       * @return Whether the author field is set.
        */
       public boolean hasAuthor() {
         return ((bitField0_ & 0x00000200) != 0);
       }
       /**
        * <code>optional string author = 11;</code>
+       * @return The author.
        */
       public java.lang.String getAuthor() {
         java.lang.Object ref = author_;
@@ -29485,6 +30841,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string author = 11;</code>
+       * @return The bytes for author.
        */
       public com.google.protobuf.ByteString
           getAuthorBytes() {
@@ -29501,6 +30858,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string author = 11;</code>
+       * @param value The author to set.
+       * @return This builder for chaining.
        */
       public Builder setAuthor(
           java.lang.String value) {
@@ -29514,6 +30873,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string author = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAuthor() {
         bitField0_ = (bitField0_ & ~0x00000200);
@@ -29523,6 +30883,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string author = 11;</code>
+       * @param value The bytes for author to set.
+       * @return This builder for chaining.
        */
       public Builder setAuthorBytes(
           com.google.protobuf.ByteString value) {
@@ -29538,12 +30900,14 @@ public final class CoreNLPProtos {
       private java.lang.Object mention_ = "";
       /**
        * <code>optional string mention = 12;</code>
+       * @return Whether the mention field is set.
        */
       public boolean hasMention() {
         return ((bitField0_ & 0x00000400) != 0);
       }
       /**
        * <code>optional string mention = 12;</code>
+       * @return The mention.
        */
       public java.lang.String getMention() {
         java.lang.Object ref = mention_;
@@ -29561,6 +30925,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mention = 12;</code>
+       * @return The bytes for mention.
        */
       public com.google.protobuf.ByteString
           getMentionBytes() {
@@ -29577,6 +30942,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mention = 12;</code>
+       * @param value The mention to set.
+       * @return This builder for chaining.
        */
       public Builder setMention(
           java.lang.String value) {
@@ -29590,6 +30957,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mention = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMention() {
         bitField0_ = (bitField0_ & ~0x00000400);
@@ -29599,6 +30967,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mention = 12;</code>
+       * @param value The bytes for mention to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionBytes(
           com.google.protobuf.ByteString value) {
@@ -29614,18 +30984,22 @@ public final class CoreNLPProtos {
       private int mentionBegin_ ;
       /**
        * <code>optional uint32 mentionBegin = 13;</code>
+       * @return Whether the mentionBegin field is set.
        */
       public boolean hasMentionBegin() {
         return ((bitField0_ & 0x00000800) != 0);
       }
       /**
        * <code>optional uint32 mentionBegin = 13;</code>
+       * @return The mentionBegin.
        */
       public int getMentionBegin() {
         return mentionBegin_;
       }
       /**
        * <code>optional uint32 mentionBegin = 13;</code>
+       * @param value The mentionBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionBegin(int value) {
         bitField0_ |= 0x00000800;
@@ -29635,6 +31009,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 mentionBegin = 13;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMentionBegin() {
         bitField0_ = (bitField0_ & ~0x00000800);
@@ -29646,18 +31021,22 @@ public final class CoreNLPProtos {
       private int mentionEnd_ ;
       /**
        * <code>optional uint32 mentionEnd = 14;</code>
+       * @return Whether the mentionEnd field is set.
        */
       public boolean hasMentionEnd() {
         return ((bitField0_ & 0x00001000) != 0);
       }
       /**
        * <code>optional uint32 mentionEnd = 14;</code>
+       * @return The mentionEnd.
        */
       public int getMentionEnd() {
         return mentionEnd_;
       }
       /**
        * <code>optional uint32 mentionEnd = 14;</code>
+       * @param value The mentionEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionEnd(int value) {
         bitField0_ |= 0x00001000;
@@ -29667,6 +31046,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 mentionEnd = 14;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMentionEnd() {
         bitField0_ = (bitField0_ & ~0x00001000);
@@ -29678,12 +31058,14 @@ public final class CoreNLPProtos {
       private java.lang.Object mentionType_ = "";
       /**
        * <code>optional string mentionType = 15;</code>
+       * @return Whether the mentionType field is set.
        */
       public boolean hasMentionType() {
         return ((bitField0_ & 0x00002000) != 0);
       }
       /**
        * <code>optional string mentionType = 15;</code>
+       * @return The mentionType.
        */
       public java.lang.String getMentionType() {
         java.lang.Object ref = mentionType_;
@@ -29701,6 +31083,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 15;</code>
+       * @return The bytes for mentionType.
        */
       public com.google.protobuf.ByteString
           getMentionTypeBytes() {
@@ -29717,6 +31100,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 15;</code>
+       * @param value The mentionType to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionType(
           java.lang.String value) {
@@ -29730,6 +31115,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 15;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMentionType() {
         bitField0_ = (bitField0_ & ~0x00002000);
@@ -29739,6 +31125,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 15;</code>
+       * @param value The bytes for mentionType to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -29754,12 +31142,14 @@ public final class CoreNLPProtos {
       private java.lang.Object mentionSieve_ = "";
       /**
        * <code>optional string mentionSieve = 16;</code>
+       * @return Whether the mentionSieve field is set.
        */
       public boolean hasMentionSieve() {
         return ((bitField0_ & 0x00004000) != 0);
       }
       /**
        * <code>optional string mentionSieve = 16;</code>
+       * @return The mentionSieve.
        */
       public java.lang.String getMentionSieve() {
         java.lang.Object ref = mentionSieve_;
@@ -29777,6 +31167,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionSieve = 16;</code>
+       * @return The bytes for mentionSieve.
        */
       public com.google.protobuf.ByteString
           getMentionSieveBytes() {
@@ -29793,6 +31184,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionSieve = 16;</code>
+       * @param value The mentionSieve to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionSieve(
           java.lang.String value) {
@@ -29806,6 +31199,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionSieve = 16;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMentionSieve() {
         bitField0_ = (bitField0_ & ~0x00004000);
@@ -29815,6 +31209,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionSieve = 16;</code>
+       * @param value The bytes for mentionSieve to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionSieveBytes(
           com.google.protobuf.ByteString value) {
@@ -29830,12 +31226,14 @@ public final class CoreNLPProtos {
       private java.lang.Object speaker_ = "";
       /**
        * <code>optional string speaker = 17;</code>
+       * @return Whether the speaker field is set.
        */
       public boolean hasSpeaker() {
         return ((bitField0_ & 0x00008000) != 0);
       }
       /**
        * <code>optional string speaker = 17;</code>
+       * @return The speaker.
        */
       public java.lang.String getSpeaker() {
         java.lang.Object ref = speaker_;
@@ -29853,6 +31251,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speaker = 17;</code>
+       * @return The bytes for speaker.
        */
       public com.google.protobuf.ByteString
           getSpeakerBytes() {
@@ -29869,6 +31268,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speaker = 17;</code>
+       * @param value The speaker to set.
+       * @return This builder for chaining.
        */
       public Builder setSpeaker(
           java.lang.String value) {
@@ -29882,6 +31283,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speaker = 17;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSpeaker() {
         bitField0_ = (bitField0_ & ~0x00008000);
@@ -29891,6 +31293,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speaker = 17;</code>
+       * @param value The bytes for speaker to set.
+       * @return This builder for chaining.
        */
       public Builder setSpeakerBytes(
           com.google.protobuf.ByteString value) {
@@ -29906,12 +31310,14 @@ public final class CoreNLPProtos {
       private java.lang.Object speakerSieve_ = "";
       /**
        * <code>optional string speakerSieve = 18;</code>
+       * @return Whether the speakerSieve field is set.
        */
       public boolean hasSpeakerSieve() {
         return ((bitField0_ & 0x00010000) != 0);
       }
       /**
        * <code>optional string speakerSieve = 18;</code>
+       * @return The speakerSieve.
        */
       public java.lang.String getSpeakerSieve() {
         java.lang.Object ref = speakerSieve_;
@@ -29929,6 +31335,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speakerSieve = 18;</code>
+       * @return The bytes for speakerSieve.
        */
       public com.google.protobuf.ByteString
           getSpeakerSieveBytes() {
@@ -29945,6 +31352,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speakerSieve = 18;</code>
+       * @param value The speakerSieve to set.
+       * @return This builder for chaining.
        */
       public Builder setSpeakerSieve(
           java.lang.String value) {
@@ -29958,6 +31367,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speakerSieve = 18;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSpeakerSieve() {
         bitField0_ = (bitField0_ & ~0x00010000);
@@ -29967,6 +31377,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speakerSieve = 18;</code>
+       * @param value The bytes for speakerSieve to set.
+       * @return This builder for chaining.
        */
       public Builder setSpeakerSieveBytes(
           com.google.protobuf.ByteString value) {
@@ -29982,12 +31394,14 @@ public final class CoreNLPProtos {
       private java.lang.Object canonicalMention_ = "";
       /**
        * <code>optional string canonicalMention = 19;</code>
+       * @return Whether the canonicalMention field is set.
        */
       public boolean hasCanonicalMention() {
         return ((bitField0_ & 0x00020000) != 0);
       }
       /**
        * <code>optional string canonicalMention = 19;</code>
+       * @return The canonicalMention.
        */
       public java.lang.String getCanonicalMention() {
         java.lang.Object ref = canonicalMention_;
@@ -30005,6 +31419,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string canonicalMention = 19;</code>
+       * @return The bytes for canonicalMention.
        */
       public com.google.protobuf.ByteString
           getCanonicalMentionBytes() {
@@ -30021,6 +31436,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string canonicalMention = 19;</code>
+       * @param value The canonicalMention to set.
+       * @return This builder for chaining.
        */
       public Builder setCanonicalMention(
           java.lang.String value) {
@@ -30034,6 +31451,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string canonicalMention = 19;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCanonicalMention() {
         bitField0_ = (bitField0_ & ~0x00020000);
@@ -30043,6 +31461,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string canonicalMention = 19;</code>
+       * @param value The bytes for canonicalMention to set.
+       * @return This builder for chaining.
        */
       public Builder setCanonicalMentionBytes(
           com.google.protobuf.ByteString value) {
@@ -30058,18 +31478,22 @@ public final class CoreNLPProtos {
       private int canonicalMentionBegin_ ;
       /**
        * <code>optional uint32 canonicalMentionBegin = 20;</code>
+       * @return Whether the canonicalMentionBegin field is set.
        */
       public boolean hasCanonicalMentionBegin() {
         return ((bitField0_ & 0x00040000) != 0);
       }
       /**
        * <code>optional uint32 canonicalMentionBegin = 20;</code>
+       * @return The canonicalMentionBegin.
        */
       public int getCanonicalMentionBegin() {
         return canonicalMentionBegin_;
       }
       /**
        * <code>optional uint32 canonicalMentionBegin = 20;</code>
+       * @param value The canonicalMentionBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setCanonicalMentionBegin(int value) {
         bitField0_ |= 0x00040000;
@@ -30079,6 +31503,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 canonicalMentionBegin = 20;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCanonicalMentionBegin() {
         bitField0_ = (bitField0_ & ~0x00040000);
@@ -30090,18 +31515,22 @@ public final class CoreNLPProtos {
       private int canonicalMentionEnd_ ;
       /**
        * <code>optional uint32 canonicalMentionEnd = 21;</code>
+       * @return Whether the canonicalMentionEnd field is set.
        */
       public boolean hasCanonicalMentionEnd() {
         return ((bitField0_ & 0x00080000) != 0);
       }
       /**
        * <code>optional uint32 canonicalMentionEnd = 21;</code>
+       * @return The canonicalMentionEnd.
        */
       public int getCanonicalMentionEnd() {
         return canonicalMentionEnd_;
       }
       /**
        * <code>optional uint32 canonicalMentionEnd = 21;</code>
+       * @param value The canonicalMentionEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setCanonicalMentionEnd(int value) {
         bitField0_ |= 0x00080000;
@@ -30111,6 +31540,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 canonicalMentionEnd = 21;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCanonicalMentionEnd() {
         bitField0_ = (bitField0_ & ~0x00080000);
@@ -30124,12 +31554,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> attributionDependencyGraphBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph attributionDependencyGraph = 22;</code>
+       * @return Whether the attributionDependencyGraph field is set.
        */
       public boolean hasAttributionDependencyGraph() {
         return ((bitField0_ & 0x00100000) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph attributionDependencyGraph = 22;</code>
+       * @return The attributionDependencyGraph.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getAttributionDependencyGraph() {
         if (attributionDependencyGraphBuilder_ == null) {
@@ -30319,51 +31751,62 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional string value = 2;</code>
+     * @return Whether the value field is set.
      */
     boolean hasValue();
     /**
      * <code>optional string value = 2;</code>
+     * @return The value.
      */
     java.lang.String getValue();
     /**
      * <code>optional string value = 2;</code>
+     * @return The bytes for value.
      */
     com.google.protobuf.ByteString
         getValueBytes();
 
     /**
      * <code>optional uint32 yieldBeginIndex = 3;</code>
+     * @return Whether the yieldBeginIndex field is set.
      */
     boolean hasYieldBeginIndex();
     /**
      * <code>optional uint32 yieldBeginIndex = 3;</code>
+     * @return The yieldBeginIndex.
      */
     int getYieldBeginIndex();
 
     /**
      * <code>optional uint32 yieldEndIndex = 4;</code>
+     * @return Whether the yieldEndIndex field is set.
      */
     boolean hasYieldEndIndex();
     /**
      * <code>optional uint32 yieldEndIndex = 4;</code>
+     * @return The yieldEndIndex.
      */
     int getYieldEndIndex();
 
     /**
      * <code>optional double score = 5;</code>
+     * @return Whether the score field is set.
      */
     boolean hasScore();
     /**
      * <code>optional double score = 5;</code>
+     * @return The score.
      */
     double getScore();
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
+     * @return Whether the sentiment field is set.
      */
     boolean hasSentiment();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
+     * @return The sentiment.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment getSentiment();
   }
@@ -30537,12 +31980,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object value_;
     /**
      * <code>optional string value = 2;</code>
+     * @return Whether the value field is set.
      */
     public boolean hasValue() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional string value = 2;</code>
+     * @return The value.
      */
     public java.lang.String getValue() {
       java.lang.Object ref = value_;
@@ -30560,6 +32005,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string value = 2;</code>
+     * @return The bytes for value.
      */
     public com.google.protobuf.ByteString
         getValueBytes() {
@@ -30579,12 +32025,14 @@ public final class CoreNLPProtos {
     private int yieldBeginIndex_;
     /**
      * <code>optional uint32 yieldBeginIndex = 3;</code>
+     * @return Whether the yieldBeginIndex field is set.
      */
     public boolean hasYieldBeginIndex() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional uint32 yieldBeginIndex = 3;</code>
+     * @return The yieldBeginIndex.
      */
     public int getYieldBeginIndex() {
       return yieldBeginIndex_;
@@ -30594,12 +32042,14 @@ public final class CoreNLPProtos {
     private int yieldEndIndex_;
     /**
      * <code>optional uint32 yieldEndIndex = 4;</code>
+     * @return Whether the yieldEndIndex field is set.
      */
     public boolean hasYieldEndIndex() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional uint32 yieldEndIndex = 4;</code>
+     * @return The yieldEndIndex.
      */
     public int getYieldEndIndex() {
       return yieldEndIndex_;
@@ -30609,12 +32059,14 @@ public final class CoreNLPProtos {
     private double score_;
     /**
      * <code>optional double score = 5;</code>
+     * @return Whether the score field is set.
      */
     public boolean hasScore() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional double score = 5;</code>
+     * @return The score.
      */
     public double getScore() {
       return score_;
@@ -30624,12 +32076,14 @@ public final class CoreNLPProtos {
     private int sentiment_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
+     * @return Whether the sentiment field is set.
      */
     public boolean hasSentiment() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
+     * @return The sentiment.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment getSentiment() {
       @SuppressWarnings("deprecation")
@@ -31355,12 +32809,14 @@ public final class CoreNLPProtos {
       private java.lang.Object value_ = "";
       /**
        * <code>optional string value = 2;</code>
+       * @return Whether the value field is set.
        */
       public boolean hasValue() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional string value = 2;</code>
+       * @return The value.
        */
       public java.lang.String getValue() {
         java.lang.Object ref = value_;
@@ -31378,6 +32834,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string value = 2;</code>
+       * @return The bytes for value.
        */
       public com.google.protobuf.ByteString
           getValueBytes() {
@@ -31394,6 +32851,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string value = 2;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(
           java.lang.String value) {
@@ -31407,6 +32866,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string value = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -31416,6 +32876,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string value = 2;</code>
+       * @param value The bytes for value to set.
+       * @return This builder for chaining.
        */
       public Builder setValueBytes(
           com.google.protobuf.ByteString value) {
@@ -31431,18 +32893,22 @@ public final class CoreNLPProtos {
       private int yieldBeginIndex_ ;
       /**
        * <code>optional uint32 yieldBeginIndex = 3;</code>
+       * @return Whether the yieldBeginIndex field is set.
        */
       public boolean hasYieldBeginIndex() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional uint32 yieldBeginIndex = 3;</code>
+       * @return The yieldBeginIndex.
        */
       public int getYieldBeginIndex() {
         return yieldBeginIndex_;
       }
       /**
        * <code>optional uint32 yieldBeginIndex = 3;</code>
+       * @param value The yieldBeginIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setYieldBeginIndex(int value) {
         bitField0_ |= 0x00000004;
@@ -31452,6 +32918,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 yieldBeginIndex = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearYieldBeginIndex() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -31463,18 +32930,22 @@ public final class CoreNLPProtos {
       private int yieldEndIndex_ ;
       /**
        * <code>optional uint32 yieldEndIndex = 4;</code>
+       * @return Whether the yieldEndIndex field is set.
        */
       public boolean hasYieldEndIndex() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional uint32 yieldEndIndex = 4;</code>
+       * @return The yieldEndIndex.
        */
       public int getYieldEndIndex() {
         return yieldEndIndex_;
       }
       /**
        * <code>optional uint32 yieldEndIndex = 4;</code>
+       * @param value The yieldEndIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setYieldEndIndex(int value) {
         bitField0_ |= 0x00000008;
@@ -31484,6 +32955,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 yieldEndIndex = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearYieldEndIndex() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -31495,18 +32967,22 @@ public final class CoreNLPProtos {
       private double score_ ;
       /**
        * <code>optional double score = 5;</code>
+       * @return Whether the score field is set.
        */
       public boolean hasScore() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional double score = 5;</code>
+       * @return The score.
        */
       public double getScore() {
         return score_;
       }
       /**
        * <code>optional double score = 5;</code>
+       * @param value The score to set.
+       * @return This builder for chaining.
        */
       public Builder setScore(double value) {
         bitField0_ |= 0x00000010;
@@ -31516,6 +32992,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional double score = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearScore() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -31527,12 +33004,14 @@ public final class CoreNLPProtos {
       private int sentiment_ = 0;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
+       * @return Whether the sentiment field is set.
        */
       public boolean hasSentiment() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
+       * @return The sentiment.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment getSentiment() {
         @SuppressWarnings("deprecation")
@@ -31541,6 +33020,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
+       * @param value The sentiment to set.
+       * @return This builder for chaining.
        */
       public Builder setSentiment(edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment value) {
         if (value == null) {
@@ -31553,6 +33034,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentiment() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -31667,14 +33149,18 @@ public final class CoreNLPProtos {
 
     /**
      * <code>repeated uint32 root = 3 [packed = true];</code>
+     * @return A list containing the root.
      */
     java.util.List<java.lang.Integer> getRootList();
     /**
      * <code>repeated uint32 root = 3 [packed = true];</code>
+     * @return The count of root.
      */
     int getRootCount();
     /**
      * <code>repeated uint32 root = 3 [packed = true];</code>
+     * @param index The index of the element to return.
+     * @return The root at the given index.
      */
     int getRoot(int index);
   }
@@ -31817,28 +33303,34 @@ public final class CoreNLPProtos {
 
       /**
        * <code>required uint32 sentenceIndex = 1;</code>
+       * @return Whether the sentenceIndex field is set.
        */
       boolean hasSentenceIndex();
       /**
        * <code>required uint32 sentenceIndex = 1;</code>
+       * @return The sentenceIndex.
        */
       int getSentenceIndex();
 
       /**
        * <code>required uint32 index = 2;</code>
+       * @return Whether the index field is set.
        */
       boolean hasIndex();
       /**
        * <code>required uint32 index = 2;</code>
+       * @return The index.
        */
       int getIndex();
 
       /**
        * <code>optional uint32 copyAnnotation = 3;</code>
+       * @return Whether the copyAnnotation field is set.
        */
       boolean hasCopyAnnotation();
       /**
        * <code>optional uint32 copyAnnotation = 3;</code>
+       * @return The copyAnnotation.
        */
       int getCopyAnnotation();
     }
@@ -31940,12 +33432,14 @@ public final class CoreNLPProtos {
       private int sentenceIndex_;
       /**
        * <code>required uint32 sentenceIndex = 1;</code>
+       * @return Whether the sentenceIndex field is set.
        */
       public boolean hasSentenceIndex() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required uint32 sentenceIndex = 1;</code>
+       * @return The sentenceIndex.
        */
       public int getSentenceIndex() {
         return sentenceIndex_;
@@ -31955,12 +33449,14 @@ public final class CoreNLPProtos {
       private int index_;
       /**
        * <code>required uint32 index = 2;</code>
+       * @return Whether the index field is set.
        */
       public boolean hasIndex() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>required uint32 index = 2;</code>
+       * @return The index.
        */
       public int getIndex() {
         return index_;
@@ -31970,12 +33466,14 @@ public final class CoreNLPProtos {
       private int copyAnnotation_;
       /**
        * <code>optional uint32 copyAnnotation = 3;</code>
+       * @return Whether the copyAnnotation field is set.
        */
       public boolean hasCopyAnnotation() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional uint32 copyAnnotation = 3;</code>
+       * @return The copyAnnotation.
        */
       public int getCopyAnnotation() {
         return copyAnnotation_;
@@ -32362,18 +33860,22 @@ public final class CoreNLPProtos {
         private int sentenceIndex_ ;
         /**
          * <code>required uint32 sentenceIndex = 1;</code>
+         * @return Whether the sentenceIndex field is set.
          */
         public boolean hasSentenceIndex() {
           return ((bitField0_ & 0x00000001) != 0);
         }
         /**
          * <code>required uint32 sentenceIndex = 1;</code>
+         * @return The sentenceIndex.
          */
         public int getSentenceIndex() {
           return sentenceIndex_;
         }
         /**
          * <code>required uint32 sentenceIndex = 1;</code>
+         * @param value The sentenceIndex to set.
+         * @return This builder for chaining.
          */
         public Builder setSentenceIndex(int value) {
           bitField0_ |= 0x00000001;
@@ -32383,6 +33885,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>required uint32 sentenceIndex = 1;</code>
+         * @return This builder for chaining.
          */
         public Builder clearSentenceIndex() {
           bitField0_ = (bitField0_ & ~0x00000001);
@@ -32394,18 +33897,22 @@ public final class CoreNLPProtos {
         private int index_ ;
         /**
          * <code>required uint32 index = 2;</code>
+         * @return Whether the index field is set.
          */
         public boolean hasIndex() {
           return ((bitField0_ & 0x00000002) != 0);
         }
         /**
          * <code>required uint32 index = 2;</code>
+         * @return The index.
          */
         public int getIndex() {
           return index_;
         }
         /**
          * <code>required uint32 index = 2;</code>
+         * @param value The index to set.
+         * @return This builder for chaining.
          */
         public Builder setIndex(int value) {
           bitField0_ |= 0x00000002;
@@ -32415,6 +33922,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>required uint32 index = 2;</code>
+         * @return This builder for chaining.
          */
         public Builder clearIndex() {
           bitField0_ = (bitField0_ & ~0x00000002);
@@ -32426,18 +33934,22 @@ public final class CoreNLPProtos {
         private int copyAnnotation_ ;
         /**
          * <code>optional uint32 copyAnnotation = 3;</code>
+         * @return Whether the copyAnnotation field is set.
          */
         public boolean hasCopyAnnotation() {
           return ((bitField0_ & 0x00000004) != 0);
         }
         /**
          * <code>optional uint32 copyAnnotation = 3;</code>
+         * @return The copyAnnotation.
          */
         public int getCopyAnnotation() {
           return copyAnnotation_;
         }
         /**
          * <code>optional uint32 copyAnnotation = 3;</code>
+         * @param value The copyAnnotation to set.
+         * @return This builder for chaining.
          */
         public Builder setCopyAnnotation(int value) {
           bitField0_ |= 0x00000004;
@@ -32447,6 +33959,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional uint32 copyAnnotation = 3;</code>
+         * @return This builder for chaining.
          */
         public Builder clearCopyAnnotation() {
           bitField0_ = (bitField0_ & ~0x00000004);
@@ -32513,69 +34026,84 @@ public final class CoreNLPProtos {
 
       /**
        * <code>required uint32 source = 1;</code>
+       * @return Whether the source field is set.
        */
       boolean hasSource();
       /**
        * <code>required uint32 source = 1;</code>
+       * @return The source.
        */
       int getSource();
 
       /**
        * <code>required uint32 target = 2;</code>
+       * @return Whether the target field is set.
        */
       boolean hasTarget();
       /**
        * <code>required uint32 target = 2;</code>
+       * @return The target.
        */
       int getTarget();
 
       /**
        * <code>optional string dep = 3;</code>
+       * @return Whether the dep field is set.
        */
       boolean hasDep();
       /**
        * <code>optional string dep = 3;</code>
+       * @return The dep.
        */
       java.lang.String getDep();
       /**
        * <code>optional string dep = 3;</code>
+       * @return The bytes for dep.
        */
       com.google.protobuf.ByteString
           getDepBytes();
 
       /**
        * <code>optional bool isExtra = 4;</code>
+       * @return Whether the isExtra field is set.
        */
       boolean hasIsExtra();
       /**
        * <code>optional bool isExtra = 4;</code>
+       * @return The isExtra.
        */
       boolean getIsExtra();
 
       /**
        * <code>optional uint32 sourceCopy = 5;</code>
+       * @return Whether the sourceCopy field is set.
        */
       boolean hasSourceCopy();
       /**
        * <code>optional uint32 sourceCopy = 5;</code>
+       * @return The sourceCopy.
        */
       int getSourceCopy();
 
       /**
        * <code>optional uint32 targetCopy = 6;</code>
+       * @return Whether the targetCopy field is set.
        */
       boolean hasTargetCopy();
       /**
        * <code>optional uint32 targetCopy = 6;</code>
+       * @return The targetCopy.
        */
       int getTargetCopy();
 
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
+       * @return Whether the language field is set.
        */
       boolean hasLanguage();
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
+       * @return The language.
        */
       edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage();
     }
@@ -32707,12 +34235,14 @@ public final class CoreNLPProtos {
       private int source_;
       /**
        * <code>required uint32 source = 1;</code>
+       * @return Whether the source field is set.
        */
       public boolean hasSource() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required uint32 source = 1;</code>
+       * @return The source.
        */
       public int getSource() {
         return source_;
@@ -32722,12 +34252,14 @@ public final class CoreNLPProtos {
       private int target_;
       /**
        * <code>required uint32 target = 2;</code>
+       * @return Whether the target field is set.
        */
       public boolean hasTarget() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>required uint32 target = 2;</code>
+       * @return The target.
        */
       public int getTarget() {
         return target_;
@@ -32737,12 +34269,14 @@ public final class CoreNLPProtos {
       private volatile java.lang.Object dep_;
       /**
        * <code>optional string dep = 3;</code>
+       * @return Whether the dep field is set.
        */
       public boolean hasDep() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional string dep = 3;</code>
+       * @return The dep.
        */
       public java.lang.String getDep() {
         java.lang.Object ref = dep_;
@@ -32760,6 +34294,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string dep = 3;</code>
+       * @return The bytes for dep.
        */
       public com.google.protobuf.ByteString
           getDepBytes() {
@@ -32779,12 +34314,14 @@ public final class CoreNLPProtos {
       private boolean isExtra_;
       /**
        * <code>optional bool isExtra = 4;</code>
+       * @return Whether the isExtra field is set.
        */
       public boolean hasIsExtra() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional bool isExtra = 4;</code>
+       * @return The isExtra.
        */
       public boolean getIsExtra() {
         return isExtra_;
@@ -32794,12 +34331,14 @@ public final class CoreNLPProtos {
       private int sourceCopy_;
       /**
        * <code>optional uint32 sourceCopy = 5;</code>
+       * @return Whether the sourceCopy field is set.
        */
       public boolean hasSourceCopy() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional uint32 sourceCopy = 5;</code>
+       * @return The sourceCopy.
        */
       public int getSourceCopy() {
         return sourceCopy_;
@@ -32809,12 +34348,14 @@ public final class CoreNLPProtos {
       private int targetCopy_;
       /**
        * <code>optional uint32 targetCopy = 6;</code>
+       * @return Whether the targetCopy field is set.
        */
       public boolean hasTargetCopy() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional uint32 targetCopy = 6;</code>
+       * @return The targetCopy.
        */
       public int getTargetCopy() {
         return targetCopy_;
@@ -32824,12 +34365,14 @@ public final class CoreNLPProtos {
       private int language_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
+       * @return Whether the language field is set.
        */
       public boolean hasLanguage() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
+       * @return The language.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
         @SuppressWarnings("deprecation")
@@ -33319,18 +34862,22 @@ public final class CoreNLPProtos {
         private int source_ ;
         /**
          * <code>required uint32 source = 1;</code>
+         * @return Whether the source field is set.
          */
         public boolean hasSource() {
           return ((bitField0_ & 0x00000001) != 0);
         }
         /**
          * <code>required uint32 source = 1;</code>
+         * @return The source.
          */
         public int getSource() {
           return source_;
         }
         /**
          * <code>required uint32 source = 1;</code>
+         * @param value The source to set.
+         * @return This builder for chaining.
          */
         public Builder setSource(int value) {
           bitField0_ |= 0x00000001;
@@ -33340,6 +34887,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>required uint32 source = 1;</code>
+         * @return This builder for chaining.
          */
         public Builder clearSource() {
           bitField0_ = (bitField0_ & ~0x00000001);
@@ -33351,18 +34899,22 @@ public final class CoreNLPProtos {
         private int target_ ;
         /**
          * <code>required uint32 target = 2;</code>
+         * @return Whether the target field is set.
          */
         public boolean hasTarget() {
           return ((bitField0_ & 0x00000002) != 0);
         }
         /**
          * <code>required uint32 target = 2;</code>
+         * @return The target.
          */
         public int getTarget() {
           return target_;
         }
         /**
          * <code>required uint32 target = 2;</code>
+         * @param value The target to set.
+         * @return This builder for chaining.
          */
         public Builder setTarget(int value) {
           bitField0_ |= 0x00000002;
@@ -33372,6 +34924,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>required uint32 target = 2;</code>
+         * @return This builder for chaining.
          */
         public Builder clearTarget() {
           bitField0_ = (bitField0_ & ~0x00000002);
@@ -33383,12 +34936,14 @@ public final class CoreNLPProtos {
         private java.lang.Object dep_ = "";
         /**
          * <code>optional string dep = 3;</code>
+         * @return Whether the dep field is set.
          */
         public boolean hasDep() {
           return ((bitField0_ & 0x00000004) != 0);
         }
         /**
          * <code>optional string dep = 3;</code>
+         * @return The dep.
          */
         public java.lang.String getDep() {
           java.lang.Object ref = dep_;
@@ -33406,6 +34961,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string dep = 3;</code>
+         * @return The bytes for dep.
          */
         public com.google.protobuf.ByteString
             getDepBytes() {
@@ -33422,6 +34978,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string dep = 3;</code>
+         * @param value The dep to set.
+         * @return This builder for chaining.
          */
         public Builder setDep(
             java.lang.String value) {
@@ -33435,6 +34993,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string dep = 3;</code>
+         * @return This builder for chaining.
          */
         public Builder clearDep() {
           bitField0_ = (bitField0_ & ~0x00000004);
@@ -33444,6 +35003,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string dep = 3;</code>
+         * @param value The bytes for dep to set.
+         * @return This builder for chaining.
          */
         public Builder setDepBytes(
             com.google.protobuf.ByteString value) {
@@ -33459,18 +35020,22 @@ public final class CoreNLPProtos {
         private boolean isExtra_ ;
         /**
          * <code>optional bool isExtra = 4;</code>
+         * @return Whether the isExtra field is set.
          */
         public boolean hasIsExtra() {
           return ((bitField0_ & 0x00000008) != 0);
         }
         /**
          * <code>optional bool isExtra = 4;</code>
+         * @return The isExtra.
          */
         public boolean getIsExtra() {
           return isExtra_;
         }
         /**
          * <code>optional bool isExtra = 4;</code>
+         * @param value The isExtra to set.
+         * @return This builder for chaining.
          */
         public Builder setIsExtra(boolean value) {
           bitField0_ |= 0x00000008;
@@ -33480,6 +35045,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional bool isExtra = 4;</code>
+         * @return This builder for chaining.
          */
         public Builder clearIsExtra() {
           bitField0_ = (bitField0_ & ~0x00000008);
@@ -33491,18 +35057,22 @@ public final class CoreNLPProtos {
         private int sourceCopy_ ;
         /**
          * <code>optional uint32 sourceCopy = 5;</code>
+         * @return Whether the sourceCopy field is set.
          */
         public boolean hasSourceCopy() {
           return ((bitField0_ & 0x00000010) != 0);
         }
         /**
          * <code>optional uint32 sourceCopy = 5;</code>
+         * @return The sourceCopy.
          */
         public int getSourceCopy() {
           return sourceCopy_;
         }
         /**
          * <code>optional uint32 sourceCopy = 5;</code>
+         * @param value The sourceCopy to set.
+         * @return This builder for chaining.
          */
         public Builder setSourceCopy(int value) {
           bitField0_ |= 0x00000010;
@@ -33512,6 +35082,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional uint32 sourceCopy = 5;</code>
+         * @return This builder for chaining.
          */
         public Builder clearSourceCopy() {
           bitField0_ = (bitField0_ & ~0x00000010);
@@ -33523,18 +35094,22 @@ public final class CoreNLPProtos {
         private int targetCopy_ ;
         /**
          * <code>optional uint32 targetCopy = 6;</code>
+         * @return Whether the targetCopy field is set.
          */
         public boolean hasTargetCopy() {
           return ((bitField0_ & 0x00000020) != 0);
         }
         /**
          * <code>optional uint32 targetCopy = 6;</code>
+         * @return The targetCopy.
          */
         public int getTargetCopy() {
           return targetCopy_;
         }
         /**
          * <code>optional uint32 targetCopy = 6;</code>
+         * @param value The targetCopy to set.
+         * @return This builder for chaining.
          */
         public Builder setTargetCopy(int value) {
           bitField0_ |= 0x00000020;
@@ -33544,6 +35119,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional uint32 targetCopy = 6;</code>
+         * @return This builder for chaining.
          */
         public Builder clearTargetCopy() {
           bitField0_ = (bitField0_ & ~0x00000020);
@@ -33555,12 +35131,14 @@ public final class CoreNLPProtos {
         private int language_ = 0;
         /**
          * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
+         * @return Whether the language field is set.
          */
         public boolean hasLanguage() {
           return ((bitField0_ & 0x00000040) != 0);
         }
         /**
          * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
+         * @return The language.
          */
         public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
           @SuppressWarnings("deprecation")
@@ -33569,6 +35147,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
+         * @param value The language to set.
+         * @return This builder for chaining.
          */
         public Builder setLanguage(edu.stanford.nlp.pipeline.CoreNLPProtos.Language value) {
           if (value == null) {
@@ -33581,6 +35161,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
+         * @return This builder for chaining.
          */
         public Builder clearLanguage() {
           bitField0_ = (bitField0_ & ~0x00000040);
@@ -33715,6 +35296,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList root_;
     /**
      * <code>repeated uint32 root = 3 [packed = true];</code>
+     * @return A list containing the root.
      */
     public java.util.List<java.lang.Integer>
         getRootList() {
@@ -33722,12 +35304,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated uint32 root = 3 [packed = true];</code>
+     * @return The count of root.
      */
     public int getRootCount() {
       return root_.size();
     }
     /**
      * <code>repeated uint32 root = 3 [packed = true];</code>
+     * @param index The index of the element to return.
+     * @return The root at the given index.
      */
     public int getRoot(int index) {
       return root_.getInt(index);
@@ -34691,6 +36276,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 root = 3 [packed = true];</code>
+       * @return A list containing the root.
        */
       public java.util.List<java.lang.Integer>
           getRootList() {
@@ -34699,18 +36285,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 root = 3 [packed = true];</code>
+       * @return The count of root.
        */
       public int getRootCount() {
         return root_.size();
       }
       /**
        * <code>repeated uint32 root = 3 [packed = true];</code>
+       * @param index The index of the element to return.
+       * @return The root at the given index.
        */
       public int getRoot(int index) {
         return root_.getInt(index);
       }
       /**
        * <code>repeated uint32 root = 3 [packed = true];</code>
+       * @param index The index to set the value at.
+       * @param value The root to set.
+       * @return This builder for chaining.
        */
       public Builder setRoot(
           int index, int value) {
@@ -34721,6 +36313,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 root = 3 [packed = true];</code>
+       * @param value The root to add.
+       * @return This builder for chaining.
        */
       public Builder addRoot(int value) {
         ensureRootIsMutable();
@@ -34730,6 +36324,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 root = 3 [packed = true];</code>
+       * @param values The root to add.
+       * @return This builder for chaining.
        */
       public Builder addAllRoot(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -34741,6 +36337,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 root = 3 [packed = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearRoot() {
         root_ = emptyIntList();
@@ -34807,10 +36404,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>required int32 chainID = 1;</code>
+     * @return Whether the chainID field is set.
      */
     boolean hasChainID();
     /**
      * <code>required int32 chainID = 1;</code>
+     * @return The chainID.
      */
     int getChainID();
 
@@ -34840,10 +36439,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>required uint32 representative = 3;</code>
+     * @return Whether the representative field is set.
      */
     boolean hasRepresentative();
     /**
      * <code>required uint32 representative = 3;</code>
+     * @return The representative.
      */
     int getRepresentative();
   }
@@ -34959,102 +36560,124 @@ public final class CoreNLPProtos {
 
       /**
        * <code>optional int32 mentionID = 1;</code>
+       * @return Whether the mentionID field is set.
        */
       boolean hasMentionID();
       /**
        * <code>optional int32 mentionID = 1;</code>
+       * @return The mentionID.
        */
       int getMentionID();
 
       /**
        * <code>optional string mentionType = 2;</code>
+       * @return Whether the mentionType field is set.
        */
       boolean hasMentionType();
       /**
        * <code>optional string mentionType = 2;</code>
+       * @return The mentionType.
        */
       java.lang.String getMentionType();
       /**
        * <code>optional string mentionType = 2;</code>
+       * @return The bytes for mentionType.
        */
       com.google.protobuf.ByteString
           getMentionTypeBytes();
 
       /**
        * <code>optional string number = 3;</code>
+       * @return Whether the number field is set.
        */
       boolean hasNumber();
       /**
        * <code>optional string number = 3;</code>
+       * @return The number.
        */
       java.lang.String getNumber();
       /**
        * <code>optional string number = 3;</code>
+       * @return The bytes for number.
        */
       com.google.protobuf.ByteString
           getNumberBytes();
 
       /**
        * <code>optional string gender = 4;</code>
+       * @return Whether the gender field is set.
        */
       boolean hasGender();
       /**
        * <code>optional string gender = 4;</code>
+       * @return The gender.
        */
       java.lang.String getGender();
       /**
        * <code>optional string gender = 4;</code>
+       * @return The bytes for gender.
        */
       com.google.protobuf.ByteString
           getGenderBytes();
 
       /**
        * <code>optional string animacy = 5;</code>
+       * @return Whether the animacy field is set.
        */
       boolean hasAnimacy();
       /**
        * <code>optional string animacy = 5;</code>
+       * @return The animacy.
        */
       java.lang.String getAnimacy();
       /**
        * <code>optional string animacy = 5;</code>
+       * @return The bytes for animacy.
        */
       com.google.protobuf.ByteString
           getAnimacyBytes();
 
       /**
        * <code>optional uint32 beginIndex = 6;</code>
+       * @return Whether the beginIndex field is set.
        */
       boolean hasBeginIndex();
       /**
        * <code>optional uint32 beginIndex = 6;</code>
+       * @return The beginIndex.
        */
       int getBeginIndex();
 
       /**
        * <code>optional uint32 endIndex = 7;</code>
+       * @return Whether the endIndex field is set.
        */
       boolean hasEndIndex();
       /**
        * <code>optional uint32 endIndex = 7;</code>
+       * @return The endIndex.
        */
       int getEndIndex();
 
       /**
        * <code>optional uint32 headIndex = 9;</code>
+       * @return Whether the headIndex field is set.
        */
       boolean hasHeadIndex();
       /**
        * <code>optional uint32 headIndex = 9;</code>
+       * @return The headIndex.
        */
       int getHeadIndex();
 
       /**
        * <code>optional uint32 sentenceIndex = 10;</code>
+       * @return Whether the sentenceIndex field is set.
        */
       boolean hasSentenceIndex();
       /**
        * <code>optional uint32 sentenceIndex = 10;</code>
+       * @return The sentenceIndex.
        */
       int getSentenceIndex();
 
@@ -35064,6 +36687,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 position = 11;</code>
+       * @return Whether the position field is set.
        */
       boolean hasPosition();
       /**
@@ -35072,6 +36696,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 position = 11;</code>
+       * @return The position.
        */
       int getPosition();
     }
@@ -35216,12 +36841,14 @@ public final class CoreNLPProtos {
       private int mentionID_;
       /**
        * <code>optional int32 mentionID = 1;</code>
+       * @return Whether the mentionID field is set.
        */
       public boolean hasMentionID() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional int32 mentionID = 1;</code>
+       * @return The mentionID.
        */
       public int getMentionID() {
         return mentionID_;
@@ -35231,12 +36858,14 @@ public final class CoreNLPProtos {
       private volatile java.lang.Object mentionType_;
       /**
        * <code>optional string mentionType = 2;</code>
+       * @return Whether the mentionType field is set.
        */
       public boolean hasMentionType() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional string mentionType = 2;</code>
+       * @return The mentionType.
        */
       public java.lang.String getMentionType() {
         java.lang.Object ref = mentionType_;
@@ -35254,6 +36883,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 2;</code>
+       * @return The bytes for mentionType.
        */
       public com.google.protobuf.ByteString
           getMentionTypeBytes() {
@@ -35273,12 +36903,14 @@ public final class CoreNLPProtos {
       private volatile java.lang.Object number_;
       /**
        * <code>optional string number = 3;</code>
+       * @return Whether the number field is set.
        */
       public boolean hasNumber() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional string number = 3;</code>
+       * @return The number.
        */
       public java.lang.String getNumber() {
         java.lang.Object ref = number_;
@@ -35296,6 +36928,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string number = 3;</code>
+       * @return The bytes for number.
        */
       public com.google.protobuf.ByteString
           getNumberBytes() {
@@ -35315,12 +36948,14 @@ public final class CoreNLPProtos {
       private volatile java.lang.Object gender_;
       /**
        * <code>optional string gender = 4;</code>
+       * @return Whether the gender field is set.
        */
       public boolean hasGender() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional string gender = 4;</code>
+       * @return The gender.
        */
       public java.lang.String getGender() {
         java.lang.Object ref = gender_;
@@ -35338,6 +36973,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string gender = 4;</code>
+       * @return The bytes for gender.
        */
       public com.google.protobuf.ByteString
           getGenderBytes() {
@@ -35357,12 +36993,14 @@ public final class CoreNLPProtos {
       private volatile java.lang.Object animacy_;
       /**
        * <code>optional string animacy = 5;</code>
+       * @return Whether the animacy field is set.
        */
       public boolean hasAnimacy() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional string animacy = 5;</code>
+       * @return The animacy.
        */
       public java.lang.String getAnimacy() {
         java.lang.Object ref = animacy_;
@@ -35380,6 +37018,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string animacy = 5;</code>
+       * @return The bytes for animacy.
        */
       public com.google.protobuf.ByteString
           getAnimacyBytes() {
@@ -35399,12 +37038,14 @@ public final class CoreNLPProtos {
       private int beginIndex_;
       /**
        * <code>optional uint32 beginIndex = 6;</code>
+       * @return Whether the beginIndex field is set.
        */
       public boolean hasBeginIndex() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional uint32 beginIndex = 6;</code>
+       * @return The beginIndex.
        */
       public int getBeginIndex() {
         return beginIndex_;
@@ -35414,12 +37055,14 @@ public final class CoreNLPProtos {
       private int endIndex_;
       /**
        * <code>optional uint32 endIndex = 7;</code>
+       * @return Whether the endIndex field is set.
        */
       public boolean hasEndIndex() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>optional uint32 endIndex = 7;</code>
+       * @return The endIndex.
        */
       public int getEndIndex() {
         return endIndex_;
@@ -35429,12 +37072,14 @@ public final class CoreNLPProtos {
       private int headIndex_;
       /**
        * <code>optional uint32 headIndex = 9;</code>
+       * @return Whether the headIndex field is set.
        */
       public boolean hasHeadIndex() {
         return ((bitField0_ & 0x00000080) != 0);
       }
       /**
        * <code>optional uint32 headIndex = 9;</code>
+       * @return The headIndex.
        */
       public int getHeadIndex() {
         return headIndex_;
@@ -35444,12 +37089,14 @@ public final class CoreNLPProtos {
       private int sentenceIndex_;
       /**
        * <code>optional uint32 sentenceIndex = 10;</code>
+       * @return Whether the sentenceIndex field is set.
        */
       public boolean hasSentenceIndex() {
         return ((bitField0_ & 0x00000100) != 0);
       }
       /**
        * <code>optional uint32 sentenceIndex = 10;</code>
+       * @return The sentenceIndex.
        */
       public int getSentenceIndex() {
         return sentenceIndex_;
@@ -35463,6 +37110,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 position = 11;</code>
+       * @return Whether the position field is set.
        */
       public boolean hasPosition() {
         return ((bitField0_ & 0x00000200) != 0);
@@ -35473,6 +37121,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional uint32 position = 11;</code>
+       * @return The position.
        */
       public int getPosition() {
         return position_;
@@ -36024,18 +37673,22 @@ public final class CoreNLPProtos {
         private int mentionID_ ;
         /**
          * <code>optional int32 mentionID = 1;</code>
+         * @return Whether the mentionID field is set.
          */
         public boolean hasMentionID() {
           return ((bitField0_ & 0x00000001) != 0);
         }
         /**
          * <code>optional int32 mentionID = 1;</code>
+         * @return The mentionID.
          */
         public int getMentionID() {
           return mentionID_;
         }
         /**
          * <code>optional int32 mentionID = 1;</code>
+         * @param value The mentionID to set.
+         * @return This builder for chaining.
          */
         public Builder setMentionID(int value) {
           bitField0_ |= 0x00000001;
@@ -36045,6 +37698,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional int32 mentionID = 1;</code>
+         * @return This builder for chaining.
          */
         public Builder clearMentionID() {
           bitField0_ = (bitField0_ & ~0x00000001);
@@ -36056,12 +37710,14 @@ public final class CoreNLPProtos {
         private java.lang.Object mentionType_ = "";
         /**
          * <code>optional string mentionType = 2;</code>
+         * @return Whether the mentionType field is set.
          */
         public boolean hasMentionType() {
           return ((bitField0_ & 0x00000002) != 0);
         }
         /**
          * <code>optional string mentionType = 2;</code>
+         * @return The mentionType.
          */
         public java.lang.String getMentionType() {
           java.lang.Object ref = mentionType_;
@@ -36079,6 +37735,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string mentionType = 2;</code>
+         * @return The bytes for mentionType.
          */
         public com.google.protobuf.ByteString
             getMentionTypeBytes() {
@@ -36095,6 +37752,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string mentionType = 2;</code>
+         * @param value The mentionType to set.
+         * @return This builder for chaining.
          */
         public Builder setMentionType(
             java.lang.String value) {
@@ -36108,6 +37767,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string mentionType = 2;</code>
+         * @return This builder for chaining.
          */
         public Builder clearMentionType() {
           bitField0_ = (bitField0_ & ~0x00000002);
@@ -36117,6 +37777,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string mentionType = 2;</code>
+         * @param value The bytes for mentionType to set.
+         * @return This builder for chaining.
          */
         public Builder setMentionTypeBytes(
             com.google.protobuf.ByteString value) {
@@ -36132,12 +37794,14 @@ public final class CoreNLPProtos {
         private java.lang.Object number_ = "";
         /**
          * <code>optional string number = 3;</code>
+         * @return Whether the number field is set.
          */
         public boolean hasNumber() {
           return ((bitField0_ & 0x00000004) != 0);
         }
         /**
          * <code>optional string number = 3;</code>
+         * @return The number.
          */
         public java.lang.String getNumber() {
           java.lang.Object ref = number_;
@@ -36155,6 +37819,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string number = 3;</code>
+         * @return The bytes for number.
          */
         public com.google.protobuf.ByteString
             getNumberBytes() {
@@ -36171,6 +37836,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string number = 3;</code>
+         * @param value The number to set.
+         * @return This builder for chaining.
          */
         public Builder setNumber(
             java.lang.String value) {
@@ -36184,6 +37851,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string number = 3;</code>
+         * @return This builder for chaining.
          */
         public Builder clearNumber() {
           bitField0_ = (bitField0_ & ~0x00000004);
@@ -36193,6 +37861,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string number = 3;</code>
+         * @param value The bytes for number to set.
+         * @return This builder for chaining.
          */
         public Builder setNumberBytes(
             com.google.protobuf.ByteString value) {
@@ -36208,12 +37878,14 @@ public final class CoreNLPProtos {
         private java.lang.Object gender_ = "";
         /**
          * <code>optional string gender = 4;</code>
+         * @return Whether the gender field is set.
          */
         public boolean hasGender() {
           return ((bitField0_ & 0x00000008) != 0);
         }
         /**
          * <code>optional string gender = 4;</code>
+         * @return The gender.
          */
         public java.lang.String getGender() {
           java.lang.Object ref = gender_;
@@ -36231,6 +37903,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string gender = 4;</code>
+         * @return The bytes for gender.
          */
         public com.google.protobuf.ByteString
             getGenderBytes() {
@@ -36247,6 +37920,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string gender = 4;</code>
+         * @param value The gender to set.
+         * @return This builder for chaining.
          */
         public Builder setGender(
             java.lang.String value) {
@@ -36260,6 +37935,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string gender = 4;</code>
+         * @return This builder for chaining.
          */
         public Builder clearGender() {
           bitField0_ = (bitField0_ & ~0x00000008);
@@ -36269,6 +37945,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string gender = 4;</code>
+         * @param value The bytes for gender to set.
+         * @return This builder for chaining.
          */
         public Builder setGenderBytes(
             com.google.protobuf.ByteString value) {
@@ -36284,12 +37962,14 @@ public final class CoreNLPProtos {
         private java.lang.Object animacy_ = "";
         /**
          * <code>optional string animacy = 5;</code>
+         * @return Whether the animacy field is set.
          */
         public boolean hasAnimacy() {
           return ((bitField0_ & 0x00000010) != 0);
         }
         /**
          * <code>optional string animacy = 5;</code>
+         * @return The animacy.
          */
         public java.lang.String getAnimacy() {
           java.lang.Object ref = animacy_;
@@ -36307,6 +37987,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string animacy = 5;</code>
+         * @return The bytes for animacy.
          */
         public com.google.protobuf.ByteString
             getAnimacyBytes() {
@@ -36323,6 +38004,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string animacy = 5;</code>
+         * @param value The animacy to set.
+         * @return This builder for chaining.
          */
         public Builder setAnimacy(
             java.lang.String value) {
@@ -36336,6 +38019,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string animacy = 5;</code>
+         * @return This builder for chaining.
          */
         public Builder clearAnimacy() {
           bitField0_ = (bitField0_ & ~0x00000010);
@@ -36345,6 +38029,8 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional string animacy = 5;</code>
+         * @param value The bytes for animacy to set.
+         * @return This builder for chaining.
          */
         public Builder setAnimacyBytes(
             com.google.protobuf.ByteString value) {
@@ -36360,18 +38046,22 @@ public final class CoreNLPProtos {
         private int beginIndex_ ;
         /**
          * <code>optional uint32 beginIndex = 6;</code>
+         * @return Whether the beginIndex field is set.
          */
         public boolean hasBeginIndex() {
           return ((bitField0_ & 0x00000020) != 0);
         }
         /**
          * <code>optional uint32 beginIndex = 6;</code>
+         * @return The beginIndex.
          */
         public int getBeginIndex() {
           return beginIndex_;
         }
         /**
          * <code>optional uint32 beginIndex = 6;</code>
+         * @param value The beginIndex to set.
+         * @return This builder for chaining.
          */
         public Builder setBeginIndex(int value) {
           bitField0_ |= 0x00000020;
@@ -36381,6 +38071,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional uint32 beginIndex = 6;</code>
+         * @return This builder for chaining.
          */
         public Builder clearBeginIndex() {
           bitField0_ = (bitField0_ & ~0x00000020);
@@ -36392,18 +38083,22 @@ public final class CoreNLPProtos {
         private int endIndex_ ;
         /**
          * <code>optional uint32 endIndex = 7;</code>
+         * @return Whether the endIndex field is set.
          */
         public boolean hasEndIndex() {
           return ((bitField0_ & 0x00000040) != 0);
         }
         /**
          * <code>optional uint32 endIndex = 7;</code>
+         * @return The endIndex.
          */
         public int getEndIndex() {
           return endIndex_;
         }
         /**
          * <code>optional uint32 endIndex = 7;</code>
+         * @param value The endIndex to set.
+         * @return This builder for chaining.
          */
         public Builder setEndIndex(int value) {
           bitField0_ |= 0x00000040;
@@ -36413,6 +38108,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional uint32 endIndex = 7;</code>
+         * @return This builder for chaining.
          */
         public Builder clearEndIndex() {
           bitField0_ = (bitField0_ & ~0x00000040);
@@ -36424,18 +38120,22 @@ public final class CoreNLPProtos {
         private int headIndex_ ;
         /**
          * <code>optional uint32 headIndex = 9;</code>
+         * @return Whether the headIndex field is set.
          */
         public boolean hasHeadIndex() {
           return ((bitField0_ & 0x00000080) != 0);
         }
         /**
          * <code>optional uint32 headIndex = 9;</code>
+         * @return The headIndex.
          */
         public int getHeadIndex() {
           return headIndex_;
         }
         /**
          * <code>optional uint32 headIndex = 9;</code>
+         * @param value The headIndex to set.
+         * @return This builder for chaining.
          */
         public Builder setHeadIndex(int value) {
           bitField0_ |= 0x00000080;
@@ -36445,6 +38145,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional uint32 headIndex = 9;</code>
+         * @return This builder for chaining.
          */
         public Builder clearHeadIndex() {
           bitField0_ = (bitField0_ & ~0x00000080);
@@ -36456,18 +38157,22 @@ public final class CoreNLPProtos {
         private int sentenceIndex_ ;
         /**
          * <code>optional uint32 sentenceIndex = 10;</code>
+         * @return Whether the sentenceIndex field is set.
          */
         public boolean hasSentenceIndex() {
           return ((bitField0_ & 0x00000100) != 0);
         }
         /**
          * <code>optional uint32 sentenceIndex = 10;</code>
+         * @return The sentenceIndex.
          */
         public int getSentenceIndex() {
           return sentenceIndex_;
         }
         /**
          * <code>optional uint32 sentenceIndex = 10;</code>
+         * @param value The sentenceIndex to set.
+         * @return This builder for chaining.
          */
         public Builder setSentenceIndex(int value) {
           bitField0_ |= 0x00000100;
@@ -36477,6 +38182,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <code>optional uint32 sentenceIndex = 10;</code>
+         * @return This builder for chaining.
          */
         public Builder clearSentenceIndex() {
           bitField0_ = (bitField0_ & ~0x00000100);
@@ -36492,6 +38198,7 @@ public final class CoreNLPProtos {
          * </pre>
          *
          * <code>optional uint32 position = 11;</code>
+         * @return Whether the position field is set.
          */
         public boolean hasPosition() {
           return ((bitField0_ & 0x00000200) != 0);
@@ -36502,6 +38209,7 @@ public final class CoreNLPProtos {
          * </pre>
          *
          * <code>optional uint32 position = 11;</code>
+         * @return The position.
          */
         public int getPosition() {
           return position_;
@@ -36512,6 +38220,8 @@ public final class CoreNLPProtos {
          * </pre>
          *
          * <code>optional uint32 position = 11;</code>
+         * @param value The position to set.
+         * @return This builder for chaining.
          */
         public Builder setPosition(int value) {
           bitField0_ |= 0x00000200;
@@ -36525,6 +38235,7 @@ public final class CoreNLPProtos {
          * </pre>
          *
          * <code>optional uint32 position = 11;</code>
+         * @return This builder for chaining.
          */
         public Builder clearPosition() {
           bitField0_ = (bitField0_ & ~0x00000200);
@@ -36590,12 +38301,14 @@ public final class CoreNLPProtos {
     private int chainID_;
     /**
      * <code>required int32 chainID = 1;</code>
+     * @return Whether the chainID field is set.
      */
     public boolean hasChainID() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>required int32 chainID = 1;</code>
+     * @return The chainID.
      */
     public int getChainID() {
       return chainID_;
@@ -36640,12 +38353,14 @@ public final class CoreNLPProtos {
     private int representative_;
     /**
      * <code>required uint32 representative = 3;</code>
+     * @return Whether the representative field is set.
      */
     public boolean hasRepresentative() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>required uint32 representative = 3;</code>
+     * @return The representative.
      */
     public int getRepresentative() {
       return representative_;
@@ -37067,18 +38782,22 @@ public final class CoreNLPProtos {
       private int chainID_ ;
       /**
        * <code>required int32 chainID = 1;</code>
+       * @return Whether the chainID field is set.
        */
       public boolean hasChainID() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required int32 chainID = 1;</code>
+       * @return The chainID.
        */
       public int getChainID() {
         return chainID_;
       }
       /**
        * <code>required int32 chainID = 1;</code>
+       * @param value The chainID to set.
+       * @return This builder for chaining.
        */
       public Builder setChainID(int value) {
         bitField0_ |= 0x00000001;
@@ -37088,6 +38807,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required int32 chainID = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearChainID() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -37339,18 +39059,22 @@ public final class CoreNLPProtos {
       private int representative_ ;
       /**
        * <code>required uint32 representative = 3;</code>
+       * @return Whether the representative field is set.
        */
       public boolean hasRepresentative() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>required uint32 representative = 3;</code>
+       * @return The representative.
        */
       public int getRepresentative() {
         return representative_;
       }
       /**
        * <code>required uint32 representative = 3;</code>
+       * @param value The representative to set.
+       * @return This builder for chaining.
        */
       public Builder setRepresentative(int value) {
         bitField0_ |= 0x00000004;
@@ -37360,6 +39084,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required uint32 representative = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRepresentative() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -37426,297 +39151,362 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional int32 mentionID = 1;</code>
+     * @return Whether the mentionID field is set.
      */
     boolean hasMentionID();
     /**
      * <code>optional int32 mentionID = 1;</code>
+     * @return The mentionID.
      */
     int getMentionID();
 
     /**
      * <code>optional string mentionType = 2;</code>
+     * @return Whether the mentionType field is set.
      */
     boolean hasMentionType();
     /**
      * <code>optional string mentionType = 2;</code>
+     * @return The mentionType.
      */
     java.lang.String getMentionType();
     /**
      * <code>optional string mentionType = 2;</code>
+     * @return The bytes for mentionType.
      */
     com.google.protobuf.ByteString
         getMentionTypeBytes();
 
     /**
      * <code>optional string number = 3;</code>
+     * @return Whether the number field is set.
      */
     boolean hasNumber();
     /**
      * <code>optional string number = 3;</code>
+     * @return The number.
      */
     java.lang.String getNumber();
     /**
      * <code>optional string number = 3;</code>
+     * @return The bytes for number.
      */
     com.google.protobuf.ByteString
         getNumberBytes();
 
     /**
      * <code>optional string gender = 4;</code>
+     * @return Whether the gender field is set.
      */
     boolean hasGender();
     /**
      * <code>optional string gender = 4;</code>
+     * @return The gender.
      */
     java.lang.String getGender();
     /**
      * <code>optional string gender = 4;</code>
+     * @return The bytes for gender.
      */
     com.google.protobuf.ByteString
         getGenderBytes();
 
     /**
      * <code>optional string animacy = 5;</code>
+     * @return Whether the animacy field is set.
      */
     boolean hasAnimacy();
     /**
      * <code>optional string animacy = 5;</code>
+     * @return The animacy.
      */
     java.lang.String getAnimacy();
     /**
      * <code>optional string animacy = 5;</code>
+     * @return The bytes for animacy.
      */
     com.google.protobuf.ByteString
         getAnimacyBytes();
 
     /**
      * <code>optional string person = 6;</code>
+     * @return Whether the person field is set.
      */
     boolean hasPerson();
     /**
      * <code>optional string person = 6;</code>
+     * @return The person.
      */
     java.lang.String getPerson();
     /**
      * <code>optional string person = 6;</code>
+     * @return The bytes for person.
      */
     com.google.protobuf.ByteString
         getPersonBytes();
 
     /**
      * <code>optional uint32 startIndex = 7;</code>
+     * @return Whether the startIndex field is set.
      */
     boolean hasStartIndex();
     /**
      * <code>optional uint32 startIndex = 7;</code>
+     * @return The startIndex.
      */
     int getStartIndex();
 
     /**
      * <code>optional uint32 endIndex = 9;</code>
+     * @return Whether the endIndex field is set.
      */
     boolean hasEndIndex();
     /**
      * <code>optional uint32 endIndex = 9;</code>
+     * @return The endIndex.
      */
     int getEndIndex();
 
     /**
      * <code>optional uint32 headIndex = 10;</code>
+     * @return Whether the headIndex field is set.
      */
     boolean hasHeadIndex();
     /**
      * <code>optional uint32 headIndex = 10;</code>
+     * @return The headIndex.
      */
     int getHeadIndex();
 
     /**
      * <code>optional string headString = 11;</code>
+     * @return Whether the headString field is set.
      */
     boolean hasHeadString();
     /**
      * <code>optional string headString = 11;</code>
+     * @return The headString.
      */
     java.lang.String getHeadString();
     /**
      * <code>optional string headString = 11;</code>
+     * @return The bytes for headString.
      */
     com.google.protobuf.ByteString
         getHeadStringBytes();
 
     /**
      * <code>optional string nerString = 12;</code>
+     * @return Whether the nerString field is set.
      */
     boolean hasNerString();
     /**
      * <code>optional string nerString = 12;</code>
+     * @return The nerString.
      */
     java.lang.String getNerString();
     /**
      * <code>optional string nerString = 12;</code>
+     * @return The bytes for nerString.
      */
     com.google.protobuf.ByteString
         getNerStringBytes();
 
     /**
      * <code>optional uint32 originalRef = 13;</code>
+     * @return Whether the originalRef field is set.
      */
     boolean hasOriginalRef();
     /**
      * <code>optional uint32 originalRef = 13;</code>
+     * @return The originalRef.
      */
     int getOriginalRef();
 
     /**
      * <code>optional int32 goldCorefClusterID = 14;</code>
+     * @return Whether the goldCorefClusterID field is set.
      */
     boolean hasGoldCorefClusterID();
     /**
      * <code>optional int32 goldCorefClusterID = 14;</code>
+     * @return The goldCorefClusterID.
      */
     int getGoldCorefClusterID();
 
     /**
      * <code>optional int32 corefClusterID = 15;</code>
+     * @return Whether the corefClusterID field is set.
      */
     boolean hasCorefClusterID();
     /**
      * <code>optional int32 corefClusterID = 15;</code>
+     * @return The corefClusterID.
      */
     int getCorefClusterID();
 
     /**
      * <code>optional uint32 mentionNum = 16;</code>
+     * @return Whether the mentionNum field is set.
      */
     boolean hasMentionNum();
     /**
      * <code>optional uint32 mentionNum = 16;</code>
+     * @return The mentionNum.
      */
     int getMentionNum();
 
     /**
      * <code>optional uint32 sentNum = 17;</code>
+     * @return Whether the sentNum field is set.
      */
     boolean hasSentNum();
     /**
      * <code>optional uint32 sentNum = 17;</code>
+     * @return The sentNum.
      */
     int getSentNum();
 
     /**
      * <code>optional uint32 utter = 18;</code>
+     * @return Whether the utter field is set.
      */
     boolean hasUtter();
     /**
      * <code>optional uint32 utter = 18;</code>
+     * @return The utter.
      */
     int getUtter();
 
     /**
      * <code>optional uint32 paragraph = 19;</code>
+     * @return Whether the paragraph field is set.
      */
     boolean hasParagraph();
     /**
      * <code>optional uint32 paragraph = 19;</code>
+     * @return The paragraph.
      */
     int getParagraph();
 
     /**
      * <code>optional bool isSubject = 20;</code>
+     * @return Whether the isSubject field is set.
      */
     boolean hasIsSubject();
     /**
      * <code>optional bool isSubject = 20;</code>
+     * @return The isSubject.
      */
     boolean getIsSubject();
 
     /**
      * <code>optional bool isDirectObject = 21;</code>
+     * @return Whether the isDirectObject field is set.
      */
     boolean hasIsDirectObject();
     /**
      * <code>optional bool isDirectObject = 21;</code>
+     * @return The isDirectObject.
      */
     boolean getIsDirectObject();
 
     /**
      * <code>optional bool isIndirectObject = 22;</code>
+     * @return Whether the isIndirectObject field is set.
      */
     boolean hasIsIndirectObject();
     /**
      * <code>optional bool isIndirectObject = 22;</code>
+     * @return The isIndirectObject.
      */
     boolean getIsIndirectObject();
 
     /**
      * <code>optional bool isPrepositionObject = 23;</code>
+     * @return Whether the isPrepositionObject field is set.
      */
     boolean hasIsPrepositionObject();
     /**
      * <code>optional bool isPrepositionObject = 23;</code>
+     * @return The isPrepositionObject.
      */
     boolean getIsPrepositionObject();
 
     /**
      * <code>optional bool hasTwin = 24;</code>
+     * @return Whether the hasTwin field is set.
      */
     boolean hasHasTwin();
     /**
      * <code>optional bool hasTwin = 24;</code>
+     * @return The hasTwin.
      */
     boolean getHasTwin();
 
     /**
      * <code>optional bool generic = 25;</code>
+     * @return Whether the generic field is set.
      */
     boolean hasGeneric();
     /**
      * <code>optional bool generic = 25;</code>
+     * @return The generic.
      */
     boolean getGeneric();
 
     /**
      * <code>optional bool isSingleton = 26;</code>
+     * @return Whether the isSingleton field is set.
      */
     boolean hasIsSingleton();
     /**
      * <code>optional bool isSingleton = 26;</code>
+     * @return The isSingleton.
      */
     boolean getIsSingleton();
 
     /**
      * <code>optional bool hasBasicDependency = 27;</code>
+     * @return Whether the hasBasicDependency field is set.
      */
     boolean hasHasBasicDependency();
     /**
      * <code>optional bool hasBasicDependency = 27;</code>
+     * @return The hasBasicDependency.
      */
     boolean getHasBasicDependency();
 
     /**
      * <code>optional bool hasEnhancedDepenedncy = 28;</code>
+     * @return Whether the hasEnhancedDepenedncy field is set.
      */
     boolean hasHasEnhancedDepenedncy();
     /**
      * <code>optional bool hasEnhancedDepenedncy = 28;</code>
+     * @return The hasEnhancedDepenedncy.
      */
     boolean getHasEnhancedDepenedncy();
 
     /**
      * <code>optional bool hasContextParseTree = 29;</code>
+     * @return Whether the hasContextParseTree field is set.
      */
     boolean hasHasContextParseTree();
     /**
      * <code>optional bool hasContextParseTree = 29;</code>
+     * @return The hasContextParseTree.
      */
     boolean getHasContextParseTree();
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headIndexedWord = 30;</code>
+     * @return Whether the headIndexedWord field is set.
      */
     boolean hasHeadIndexedWord();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headIndexedWord = 30;</code>
+     * @return The headIndexedWord.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getHeadIndexedWord();
     /**
@@ -37726,10 +39516,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord dependingVerb = 31;</code>
+     * @return Whether the dependingVerb field is set.
      */
     boolean hasDependingVerb();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord dependingVerb = 31;</code>
+     * @return The dependingVerb.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getDependingVerb();
     /**
@@ -37739,10 +39531,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headWord = 32;</code>
+     * @return Whether the headWord field is set.
      */
     boolean hasHeadWord();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headWord = 32;</code>
+     * @return The headWord.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getHeadWord();
     /**
@@ -37752,10 +39546,12 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+     * @return Whether the speakerInfo field is set.
      */
     boolean hasSpeakerInfo();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+     * @return The speakerInfo.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo getSpeakerInfo();
     /**
@@ -37813,104 +39609,136 @@ public final class CoreNLPProtos {
 
     /**
      * <code>repeated string dependents = 52;</code>
+     * @return A list containing the dependents.
      */
     java.util.List<java.lang.String>
         getDependentsList();
     /**
      * <code>repeated string dependents = 52;</code>
+     * @return The count of dependents.
      */
     int getDependentsCount();
     /**
      * <code>repeated string dependents = 52;</code>
+     * @param index The index of the element to return.
+     * @return The dependents at the given index.
      */
     java.lang.String getDependents(int index);
     /**
      * <code>repeated string dependents = 52;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the dependents at the given index.
      */
     com.google.protobuf.ByteString
         getDependentsBytes(int index);
 
     /**
      * <code>repeated string preprocessedTerms = 53;</code>
+     * @return A list containing the preprocessedTerms.
      */
     java.util.List<java.lang.String>
         getPreprocessedTermsList();
     /**
      * <code>repeated string preprocessedTerms = 53;</code>
+     * @return The count of preprocessedTerms.
      */
     int getPreprocessedTermsCount();
     /**
      * <code>repeated string preprocessedTerms = 53;</code>
+     * @param index The index of the element to return.
+     * @return The preprocessedTerms at the given index.
      */
     java.lang.String getPreprocessedTerms(int index);
     /**
      * <code>repeated string preprocessedTerms = 53;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the preprocessedTerms at the given index.
      */
     com.google.protobuf.ByteString
         getPreprocessedTermsBytes(int index);
 
     /**
      * <code>repeated int32 appositions = 54;</code>
+     * @return A list containing the appositions.
      */
     java.util.List<java.lang.Integer> getAppositionsList();
     /**
      * <code>repeated int32 appositions = 54;</code>
+     * @return The count of appositions.
      */
     int getAppositionsCount();
     /**
      * <code>repeated int32 appositions = 54;</code>
+     * @param index The index of the element to return.
+     * @return The appositions at the given index.
      */
     int getAppositions(int index);
 
     /**
      * <code>repeated int32 predicateNominatives = 55;</code>
+     * @return A list containing the predicateNominatives.
      */
     java.util.List<java.lang.Integer> getPredicateNominativesList();
     /**
      * <code>repeated int32 predicateNominatives = 55;</code>
+     * @return The count of predicateNominatives.
      */
     int getPredicateNominativesCount();
     /**
      * <code>repeated int32 predicateNominatives = 55;</code>
+     * @param index The index of the element to return.
+     * @return The predicateNominatives at the given index.
      */
     int getPredicateNominatives(int index);
 
     /**
      * <code>repeated int32 relativePronouns = 56;</code>
+     * @return A list containing the relativePronouns.
      */
     java.util.List<java.lang.Integer> getRelativePronounsList();
     /**
      * <code>repeated int32 relativePronouns = 56;</code>
+     * @return The count of relativePronouns.
      */
     int getRelativePronounsCount();
     /**
      * <code>repeated int32 relativePronouns = 56;</code>
+     * @param index The index of the element to return.
+     * @return The relativePronouns at the given index.
      */
     int getRelativePronouns(int index);
 
     /**
      * <code>repeated int32 listMembers = 57;</code>
+     * @return A list containing the listMembers.
      */
     java.util.List<java.lang.Integer> getListMembersList();
     /**
      * <code>repeated int32 listMembers = 57;</code>
+     * @return The count of listMembers.
      */
     int getListMembersCount();
     /**
      * <code>repeated int32 listMembers = 57;</code>
+     * @param index The index of the element to return.
+     * @return The listMembers at the given index.
      */
     int getListMembers(int index);
 
     /**
      * <code>repeated int32 belongToLists = 58;</code>
+     * @return A list containing the belongToLists.
      */
     java.util.List<java.lang.Integer> getBelongToListsList();
     /**
      * <code>repeated int32 belongToLists = 58;</code>
+     * @return The count of belongToLists.
      */
     int getBelongToListsCount();
     /**
      * <code>repeated int32 belongToLists = 58;</code>
+     * @param index The index of the element to return.
+     * @return The belongToLists at the given index.
      */
     int getBelongToLists(int index);
   }
@@ -38381,12 +40209,14 @@ public final class CoreNLPProtos {
     private int mentionID_;
     /**
      * <code>optional int32 mentionID = 1;</code>
+     * @return Whether the mentionID field is set.
      */
     public boolean hasMentionID() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional int32 mentionID = 1;</code>
+     * @return The mentionID.
      */
     public int getMentionID() {
       return mentionID_;
@@ -38396,12 +40226,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object mentionType_;
     /**
      * <code>optional string mentionType = 2;</code>
+     * @return Whether the mentionType field is set.
      */
     public boolean hasMentionType() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional string mentionType = 2;</code>
+     * @return The mentionType.
      */
     public java.lang.String getMentionType() {
       java.lang.Object ref = mentionType_;
@@ -38419,6 +40251,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string mentionType = 2;</code>
+     * @return The bytes for mentionType.
      */
     public com.google.protobuf.ByteString
         getMentionTypeBytes() {
@@ -38438,12 +40271,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object number_;
     /**
      * <code>optional string number = 3;</code>
+     * @return Whether the number field is set.
      */
     public boolean hasNumber() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional string number = 3;</code>
+     * @return The number.
      */
     public java.lang.String getNumber() {
       java.lang.Object ref = number_;
@@ -38461,6 +40296,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string number = 3;</code>
+     * @return The bytes for number.
      */
     public com.google.protobuf.ByteString
         getNumberBytes() {
@@ -38480,12 +40316,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object gender_;
     /**
      * <code>optional string gender = 4;</code>
+     * @return Whether the gender field is set.
      */
     public boolean hasGender() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional string gender = 4;</code>
+     * @return The gender.
      */
     public java.lang.String getGender() {
       java.lang.Object ref = gender_;
@@ -38503,6 +40341,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string gender = 4;</code>
+     * @return The bytes for gender.
      */
     public com.google.protobuf.ByteString
         getGenderBytes() {
@@ -38522,12 +40361,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object animacy_;
     /**
      * <code>optional string animacy = 5;</code>
+     * @return Whether the animacy field is set.
      */
     public boolean hasAnimacy() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional string animacy = 5;</code>
+     * @return The animacy.
      */
     public java.lang.String getAnimacy() {
       java.lang.Object ref = animacy_;
@@ -38545,6 +40386,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string animacy = 5;</code>
+     * @return The bytes for animacy.
      */
     public com.google.protobuf.ByteString
         getAnimacyBytes() {
@@ -38564,12 +40406,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object person_;
     /**
      * <code>optional string person = 6;</code>
+     * @return Whether the person field is set.
      */
     public boolean hasPerson() {
       return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>optional string person = 6;</code>
+     * @return The person.
      */
     public java.lang.String getPerson() {
       java.lang.Object ref = person_;
@@ -38587,6 +40431,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string person = 6;</code>
+     * @return The bytes for person.
      */
     public com.google.protobuf.ByteString
         getPersonBytes() {
@@ -38606,12 +40451,14 @@ public final class CoreNLPProtos {
     private int startIndex_;
     /**
      * <code>optional uint32 startIndex = 7;</code>
+     * @return Whether the startIndex field is set.
      */
     public boolean hasStartIndex() {
       return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <code>optional uint32 startIndex = 7;</code>
+     * @return The startIndex.
      */
     public int getStartIndex() {
       return startIndex_;
@@ -38621,12 +40468,14 @@ public final class CoreNLPProtos {
     private int endIndex_;
     /**
      * <code>optional uint32 endIndex = 9;</code>
+     * @return Whether the endIndex field is set.
      */
     public boolean hasEndIndex() {
       return ((bitField0_ & 0x00000080) != 0);
     }
     /**
      * <code>optional uint32 endIndex = 9;</code>
+     * @return The endIndex.
      */
     public int getEndIndex() {
       return endIndex_;
@@ -38636,12 +40485,14 @@ public final class CoreNLPProtos {
     private int headIndex_;
     /**
      * <code>optional uint32 headIndex = 10;</code>
+     * @return Whether the headIndex field is set.
      */
     public boolean hasHeadIndex() {
       return ((bitField0_ & 0x00000100) != 0);
     }
     /**
      * <code>optional uint32 headIndex = 10;</code>
+     * @return The headIndex.
      */
     public int getHeadIndex() {
       return headIndex_;
@@ -38651,12 +40502,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object headString_;
     /**
      * <code>optional string headString = 11;</code>
+     * @return Whether the headString field is set.
      */
     public boolean hasHeadString() {
       return ((bitField0_ & 0x00000200) != 0);
     }
     /**
      * <code>optional string headString = 11;</code>
+     * @return The headString.
      */
     public java.lang.String getHeadString() {
       java.lang.Object ref = headString_;
@@ -38674,6 +40527,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string headString = 11;</code>
+     * @return The bytes for headString.
      */
     public com.google.protobuf.ByteString
         getHeadStringBytes() {
@@ -38693,12 +40547,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object nerString_;
     /**
      * <code>optional string nerString = 12;</code>
+     * @return Whether the nerString field is set.
      */
     public boolean hasNerString() {
       return ((bitField0_ & 0x00000400) != 0);
     }
     /**
      * <code>optional string nerString = 12;</code>
+     * @return The nerString.
      */
     public java.lang.String getNerString() {
       java.lang.Object ref = nerString_;
@@ -38716,6 +40572,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string nerString = 12;</code>
+     * @return The bytes for nerString.
      */
     public com.google.protobuf.ByteString
         getNerStringBytes() {
@@ -38735,12 +40592,14 @@ public final class CoreNLPProtos {
     private int originalRef_;
     /**
      * <code>optional uint32 originalRef = 13;</code>
+     * @return Whether the originalRef field is set.
      */
     public boolean hasOriginalRef() {
       return ((bitField0_ & 0x00000800) != 0);
     }
     /**
      * <code>optional uint32 originalRef = 13;</code>
+     * @return The originalRef.
      */
     public int getOriginalRef() {
       return originalRef_;
@@ -38750,12 +40609,14 @@ public final class CoreNLPProtos {
     private int goldCorefClusterID_;
     /**
      * <code>optional int32 goldCorefClusterID = 14;</code>
+     * @return Whether the goldCorefClusterID field is set.
      */
     public boolean hasGoldCorefClusterID() {
       return ((bitField0_ & 0x00001000) != 0);
     }
     /**
      * <code>optional int32 goldCorefClusterID = 14;</code>
+     * @return The goldCorefClusterID.
      */
     public int getGoldCorefClusterID() {
       return goldCorefClusterID_;
@@ -38765,12 +40626,14 @@ public final class CoreNLPProtos {
     private int corefClusterID_;
     /**
      * <code>optional int32 corefClusterID = 15;</code>
+     * @return Whether the corefClusterID field is set.
      */
     public boolean hasCorefClusterID() {
       return ((bitField0_ & 0x00002000) != 0);
     }
     /**
      * <code>optional int32 corefClusterID = 15;</code>
+     * @return The corefClusterID.
      */
     public int getCorefClusterID() {
       return corefClusterID_;
@@ -38780,12 +40643,14 @@ public final class CoreNLPProtos {
     private int mentionNum_;
     /**
      * <code>optional uint32 mentionNum = 16;</code>
+     * @return Whether the mentionNum field is set.
      */
     public boolean hasMentionNum() {
       return ((bitField0_ & 0x00004000) != 0);
     }
     /**
      * <code>optional uint32 mentionNum = 16;</code>
+     * @return The mentionNum.
      */
     public int getMentionNum() {
       return mentionNum_;
@@ -38795,12 +40660,14 @@ public final class CoreNLPProtos {
     private int sentNum_;
     /**
      * <code>optional uint32 sentNum = 17;</code>
+     * @return Whether the sentNum field is set.
      */
     public boolean hasSentNum() {
       return ((bitField0_ & 0x00008000) != 0);
     }
     /**
      * <code>optional uint32 sentNum = 17;</code>
+     * @return The sentNum.
      */
     public int getSentNum() {
       return sentNum_;
@@ -38810,12 +40677,14 @@ public final class CoreNLPProtos {
     private int utter_;
     /**
      * <code>optional uint32 utter = 18;</code>
+     * @return Whether the utter field is set.
      */
     public boolean hasUtter() {
       return ((bitField0_ & 0x00010000) != 0);
     }
     /**
      * <code>optional uint32 utter = 18;</code>
+     * @return The utter.
      */
     public int getUtter() {
       return utter_;
@@ -38825,12 +40694,14 @@ public final class CoreNLPProtos {
     private int paragraph_;
     /**
      * <code>optional uint32 paragraph = 19;</code>
+     * @return Whether the paragraph field is set.
      */
     public boolean hasParagraph() {
       return ((bitField0_ & 0x00020000) != 0);
     }
     /**
      * <code>optional uint32 paragraph = 19;</code>
+     * @return The paragraph.
      */
     public int getParagraph() {
       return paragraph_;
@@ -38840,12 +40711,14 @@ public final class CoreNLPProtos {
     private boolean isSubject_;
     /**
      * <code>optional bool isSubject = 20;</code>
+     * @return Whether the isSubject field is set.
      */
     public boolean hasIsSubject() {
       return ((bitField0_ & 0x00040000) != 0);
     }
     /**
      * <code>optional bool isSubject = 20;</code>
+     * @return The isSubject.
      */
     public boolean getIsSubject() {
       return isSubject_;
@@ -38855,12 +40728,14 @@ public final class CoreNLPProtos {
     private boolean isDirectObject_;
     /**
      * <code>optional bool isDirectObject = 21;</code>
+     * @return Whether the isDirectObject field is set.
      */
     public boolean hasIsDirectObject() {
       return ((bitField0_ & 0x00080000) != 0);
     }
     /**
      * <code>optional bool isDirectObject = 21;</code>
+     * @return The isDirectObject.
      */
     public boolean getIsDirectObject() {
       return isDirectObject_;
@@ -38870,12 +40745,14 @@ public final class CoreNLPProtos {
     private boolean isIndirectObject_;
     /**
      * <code>optional bool isIndirectObject = 22;</code>
+     * @return Whether the isIndirectObject field is set.
      */
     public boolean hasIsIndirectObject() {
       return ((bitField0_ & 0x00100000) != 0);
     }
     /**
      * <code>optional bool isIndirectObject = 22;</code>
+     * @return The isIndirectObject.
      */
     public boolean getIsIndirectObject() {
       return isIndirectObject_;
@@ -38885,12 +40762,14 @@ public final class CoreNLPProtos {
     private boolean isPrepositionObject_;
     /**
      * <code>optional bool isPrepositionObject = 23;</code>
+     * @return Whether the isPrepositionObject field is set.
      */
     public boolean hasIsPrepositionObject() {
       return ((bitField0_ & 0x00200000) != 0);
     }
     /**
      * <code>optional bool isPrepositionObject = 23;</code>
+     * @return The isPrepositionObject.
      */
     public boolean getIsPrepositionObject() {
       return isPrepositionObject_;
@@ -38900,12 +40779,14 @@ public final class CoreNLPProtos {
     private boolean hasTwin_;
     /**
      * <code>optional bool hasTwin = 24;</code>
+     * @return Whether the hasTwin field is set.
      */
     public boolean hasHasTwin() {
       return ((bitField0_ & 0x00400000) != 0);
     }
     /**
      * <code>optional bool hasTwin = 24;</code>
+     * @return The hasTwin.
      */
     public boolean getHasTwin() {
       return hasTwin_;
@@ -38915,12 +40796,14 @@ public final class CoreNLPProtos {
     private boolean generic_;
     /**
      * <code>optional bool generic = 25;</code>
+     * @return Whether the generic field is set.
      */
     public boolean hasGeneric() {
       return ((bitField0_ & 0x00800000) != 0);
     }
     /**
      * <code>optional bool generic = 25;</code>
+     * @return The generic.
      */
     public boolean getGeneric() {
       return generic_;
@@ -38930,12 +40813,14 @@ public final class CoreNLPProtos {
     private boolean isSingleton_;
     /**
      * <code>optional bool isSingleton = 26;</code>
+     * @return Whether the isSingleton field is set.
      */
     public boolean hasIsSingleton() {
       return ((bitField0_ & 0x01000000) != 0);
     }
     /**
      * <code>optional bool isSingleton = 26;</code>
+     * @return The isSingleton.
      */
     public boolean getIsSingleton() {
       return isSingleton_;
@@ -38945,12 +40830,14 @@ public final class CoreNLPProtos {
     private boolean hasBasicDependency_;
     /**
      * <code>optional bool hasBasicDependency = 27;</code>
+     * @return Whether the hasBasicDependency field is set.
      */
     public boolean hasHasBasicDependency() {
       return ((bitField0_ & 0x02000000) != 0);
     }
     /**
      * <code>optional bool hasBasicDependency = 27;</code>
+     * @return The hasBasicDependency.
      */
     public boolean getHasBasicDependency() {
       return hasBasicDependency_;
@@ -38960,12 +40847,14 @@ public final class CoreNLPProtos {
     private boolean hasEnhancedDepenedncy_;
     /**
      * <code>optional bool hasEnhancedDepenedncy = 28;</code>
+     * @return Whether the hasEnhancedDepenedncy field is set.
      */
     public boolean hasHasEnhancedDepenedncy() {
       return ((bitField0_ & 0x04000000) != 0);
     }
     /**
      * <code>optional bool hasEnhancedDepenedncy = 28;</code>
+     * @return The hasEnhancedDepenedncy.
      */
     public boolean getHasEnhancedDepenedncy() {
       return hasEnhancedDepenedncy_;
@@ -38975,12 +40864,14 @@ public final class CoreNLPProtos {
     private boolean hasContextParseTree_;
     /**
      * <code>optional bool hasContextParseTree = 29;</code>
+     * @return Whether the hasContextParseTree field is set.
      */
     public boolean hasHasContextParseTree() {
       return ((bitField0_ & 0x08000000) != 0);
     }
     /**
      * <code>optional bool hasContextParseTree = 29;</code>
+     * @return The hasContextParseTree.
      */
     public boolean getHasContextParseTree() {
       return hasContextParseTree_;
@@ -38990,12 +40881,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord headIndexedWord_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headIndexedWord = 30;</code>
+     * @return Whether the headIndexedWord field is set.
      */
     public boolean hasHeadIndexedWord() {
       return ((bitField0_ & 0x10000000) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headIndexedWord = 30;</code>
+     * @return The headIndexedWord.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getHeadIndexedWord() {
       return headIndexedWord_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance() : headIndexedWord_;
@@ -39011,12 +40904,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord dependingVerb_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord dependingVerb = 31;</code>
+     * @return Whether the dependingVerb field is set.
      */
     public boolean hasDependingVerb() {
       return ((bitField0_ & 0x20000000) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord dependingVerb = 31;</code>
+     * @return The dependingVerb.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getDependingVerb() {
       return dependingVerb_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance() : dependingVerb_;
@@ -39032,12 +40927,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord headWord_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headWord = 32;</code>
+     * @return Whether the headWord field is set.
      */
     public boolean hasHeadWord() {
       return ((bitField0_ & 0x40000000) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headWord = 32;</code>
+     * @return The headWord.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getHeadWord() {
       return headWord_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance() : headWord_;
@@ -39053,12 +40950,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo speakerInfo_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+     * @return Whether the speakerInfo field is set.
      */
     public boolean hasSpeakerInfo() {
       return ((bitField0_ & 0x80000000) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+     * @return The speakerInfo.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo getSpeakerInfo() {
       return speakerInfo_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.getDefaultInstance() : speakerInfo_;
@@ -39144,6 +41043,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.LazyStringList dependents_;
     /**
      * <code>repeated string dependents = 52;</code>
+     * @return A list containing the dependents.
      */
     public com.google.protobuf.ProtocolStringList
         getDependentsList() {
@@ -39151,18 +41051,23 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated string dependents = 52;</code>
+     * @return The count of dependents.
      */
     public int getDependentsCount() {
       return dependents_.size();
     }
     /**
      * <code>repeated string dependents = 52;</code>
+     * @param index The index of the element to return.
+     * @return The dependents at the given index.
      */
     public java.lang.String getDependents(int index) {
       return dependents_.get(index);
     }
     /**
      * <code>repeated string dependents = 52;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the dependents at the given index.
      */
     public com.google.protobuf.ByteString
         getDependentsBytes(int index) {
@@ -39173,6 +41078,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.LazyStringList preprocessedTerms_;
     /**
      * <code>repeated string preprocessedTerms = 53;</code>
+     * @return A list containing the preprocessedTerms.
      */
     public com.google.protobuf.ProtocolStringList
         getPreprocessedTermsList() {
@@ -39180,18 +41086,23 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated string preprocessedTerms = 53;</code>
+     * @return The count of preprocessedTerms.
      */
     public int getPreprocessedTermsCount() {
       return preprocessedTerms_.size();
     }
     /**
      * <code>repeated string preprocessedTerms = 53;</code>
+     * @param index The index of the element to return.
+     * @return The preprocessedTerms at the given index.
      */
     public java.lang.String getPreprocessedTerms(int index) {
       return preprocessedTerms_.get(index);
     }
     /**
      * <code>repeated string preprocessedTerms = 53;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the preprocessedTerms at the given index.
      */
     public com.google.protobuf.ByteString
         getPreprocessedTermsBytes(int index) {
@@ -39202,6 +41113,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList appositions_;
     /**
      * <code>repeated int32 appositions = 54;</code>
+     * @return A list containing the appositions.
      */
     public java.util.List<java.lang.Integer>
         getAppositionsList() {
@@ -39209,12 +41121,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated int32 appositions = 54;</code>
+     * @return The count of appositions.
      */
     public int getAppositionsCount() {
       return appositions_.size();
     }
     /**
      * <code>repeated int32 appositions = 54;</code>
+     * @param index The index of the element to return.
+     * @return The appositions at the given index.
      */
     public int getAppositions(int index) {
       return appositions_.getInt(index);
@@ -39224,6 +41139,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList predicateNominatives_;
     /**
      * <code>repeated int32 predicateNominatives = 55;</code>
+     * @return A list containing the predicateNominatives.
      */
     public java.util.List<java.lang.Integer>
         getPredicateNominativesList() {
@@ -39231,12 +41147,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated int32 predicateNominatives = 55;</code>
+     * @return The count of predicateNominatives.
      */
     public int getPredicateNominativesCount() {
       return predicateNominatives_.size();
     }
     /**
      * <code>repeated int32 predicateNominatives = 55;</code>
+     * @param index The index of the element to return.
+     * @return The predicateNominatives at the given index.
      */
     public int getPredicateNominatives(int index) {
       return predicateNominatives_.getInt(index);
@@ -39246,6 +41165,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList relativePronouns_;
     /**
      * <code>repeated int32 relativePronouns = 56;</code>
+     * @return A list containing the relativePronouns.
      */
     public java.util.List<java.lang.Integer>
         getRelativePronounsList() {
@@ -39253,12 +41173,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated int32 relativePronouns = 56;</code>
+     * @return The count of relativePronouns.
      */
     public int getRelativePronounsCount() {
       return relativePronouns_.size();
     }
     /**
      * <code>repeated int32 relativePronouns = 56;</code>
+     * @param index The index of the element to return.
+     * @return The relativePronouns at the given index.
      */
     public int getRelativePronouns(int index) {
       return relativePronouns_.getInt(index);
@@ -39268,6 +41191,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList listMembers_;
     /**
      * <code>repeated int32 listMembers = 57;</code>
+     * @return A list containing the listMembers.
      */
     public java.util.List<java.lang.Integer>
         getListMembersList() {
@@ -39275,12 +41199,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated int32 listMembers = 57;</code>
+     * @return The count of listMembers.
      */
     public int getListMembersCount() {
       return listMembers_.size();
     }
     /**
      * <code>repeated int32 listMembers = 57;</code>
+     * @param index The index of the element to return.
+     * @return The listMembers at the given index.
      */
     public int getListMembers(int index) {
       return listMembers_.getInt(index);
@@ -39290,6 +41217,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList belongToLists_;
     /**
      * <code>repeated int32 belongToLists = 58;</code>
+     * @return A list containing the belongToLists.
      */
     public java.util.List<java.lang.Integer>
         getBelongToListsList() {
@@ -39297,12 +41225,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated int32 belongToLists = 58;</code>
+     * @return The count of belongToLists.
      */
     public int getBelongToListsCount() {
       return belongToLists_.size();
     }
     /**
      * <code>repeated int32 belongToLists = 58;</code>
+     * @param index The index of the element to return.
+     * @return The belongToLists at the given index.
      */
     public int getBelongToLists(int index) {
       return belongToLists_.getInt(index);
@@ -40808,18 +42739,22 @@ public final class CoreNLPProtos {
       private int mentionID_ ;
       /**
        * <code>optional int32 mentionID = 1;</code>
+       * @return Whether the mentionID field is set.
        */
       public boolean hasMentionID() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional int32 mentionID = 1;</code>
+       * @return The mentionID.
        */
       public int getMentionID() {
         return mentionID_;
       }
       /**
        * <code>optional int32 mentionID = 1;</code>
+       * @param value The mentionID to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionID(int value) {
         bitField0_ |= 0x00000001;
@@ -40829,6 +42764,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional int32 mentionID = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMentionID() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -40840,12 +42776,14 @@ public final class CoreNLPProtos {
       private java.lang.Object mentionType_ = "";
       /**
        * <code>optional string mentionType = 2;</code>
+       * @return Whether the mentionType field is set.
        */
       public boolean hasMentionType() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional string mentionType = 2;</code>
+       * @return The mentionType.
        */
       public java.lang.String getMentionType() {
         java.lang.Object ref = mentionType_;
@@ -40863,6 +42801,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 2;</code>
+       * @return The bytes for mentionType.
        */
       public com.google.protobuf.ByteString
           getMentionTypeBytes() {
@@ -40879,6 +42818,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 2;</code>
+       * @param value The mentionType to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionType(
           java.lang.String value) {
@@ -40892,6 +42833,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMentionType() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -40901,6 +42843,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 2;</code>
+       * @param value The bytes for mentionType to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -40916,12 +42860,14 @@ public final class CoreNLPProtos {
       private java.lang.Object number_ = "";
       /**
        * <code>optional string number = 3;</code>
+       * @return Whether the number field is set.
        */
       public boolean hasNumber() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional string number = 3;</code>
+       * @return The number.
        */
       public java.lang.String getNumber() {
         java.lang.Object ref = number_;
@@ -40939,6 +42885,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string number = 3;</code>
+       * @return The bytes for number.
        */
       public com.google.protobuf.ByteString
           getNumberBytes() {
@@ -40955,6 +42902,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string number = 3;</code>
+       * @param value The number to set.
+       * @return This builder for chaining.
        */
       public Builder setNumber(
           java.lang.String value) {
@@ -40968,6 +42917,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string number = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNumber() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -40977,6 +42927,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string number = 3;</code>
+       * @param value The bytes for number to set.
+       * @return This builder for chaining.
        */
       public Builder setNumberBytes(
           com.google.protobuf.ByteString value) {
@@ -40992,12 +42944,14 @@ public final class CoreNLPProtos {
       private java.lang.Object gender_ = "";
       /**
        * <code>optional string gender = 4;</code>
+       * @return Whether the gender field is set.
        */
       public boolean hasGender() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional string gender = 4;</code>
+       * @return The gender.
        */
       public java.lang.String getGender() {
         java.lang.Object ref = gender_;
@@ -41015,6 +42969,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string gender = 4;</code>
+       * @return The bytes for gender.
        */
       public com.google.protobuf.ByteString
           getGenderBytes() {
@@ -41031,6 +42986,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string gender = 4;</code>
+       * @param value The gender to set.
+       * @return This builder for chaining.
        */
       public Builder setGender(
           java.lang.String value) {
@@ -41044,6 +43001,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string gender = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGender() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -41053,6 +43011,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string gender = 4;</code>
+       * @param value The bytes for gender to set.
+       * @return This builder for chaining.
        */
       public Builder setGenderBytes(
           com.google.protobuf.ByteString value) {
@@ -41068,12 +43028,14 @@ public final class CoreNLPProtos {
       private java.lang.Object animacy_ = "";
       /**
        * <code>optional string animacy = 5;</code>
+       * @return Whether the animacy field is set.
        */
       public boolean hasAnimacy() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional string animacy = 5;</code>
+       * @return The animacy.
        */
       public java.lang.String getAnimacy() {
         java.lang.Object ref = animacy_;
@@ -41091,6 +43053,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string animacy = 5;</code>
+       * @return The bytes for animacy.
        */
       public com.google.protobuf.ByteString
           getAnimacyBytes() {
@@ -41107,6 +43070,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string animacy = 5;</code>
+       * @param value The animacy to set.
+       * @return This builder for chaining.
        */
       public Builder setAnimacy(
           java.lang.String value) {
@@ -41120,6 +43085,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string animacy = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAnimacy() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -41129,6 +43095,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string animacy = 5;</code>
+       * @param value The bytes for animacy to set.
+       * @return This builder for chaining.
        */
       public Builder setAnimacyBytes(
           com.google.protobuf.ByteString value) {
@@ -41144,12 +43112,14 @@ public final class CoreNLPProtos {
       private java.lang.Object person_ = "";
       /**
        * <code>optional string person = 6;</code>
+       * @return Whether the person field is set.
        */
       public boolean hasPerson() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional string person = 6;</code>
+       * @return The person.
        */
       public java.lang.String getPerson() {
         java.lang.Object ref = person_;
@@ -41167,6 +43137,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string person = 6;</code>
+       * @return The bytes for person.
        */
       public com.google.protobuf.ByteString
           getPersonBytes() {
@@ -41183,6 +43154,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string person = 6;</code>
+       * @param value The person to set.
+       * @return This builder for chaining.
        */
       public Builder setPerson(
           java.lang.String value) {
@@ -41196,6 +43169,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string person = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPerson() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -41205,6 +43179,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string person = 6;</code>
+       * @param value The bytes for person to set.
+       * @return This builder for chaining.
        */
       public Builder setPersonBytes(
           com.google.protobuf.ByteString value) {
@@ -41220,18 +43196,22 @@ public final class CoreNLPProtos {
       private int startIndex_ ;
       /**
        * <code>optional uint32 startIndex = 7;</code>
+       * @return Whether the startIndex field is set.
        */
       public boolean hasStartIndex() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>optional uint32 startIndex = 7;</code>
+       * @return The startIndex.
        */
       public int getStartIndex() {
         return startIndex_;
       }
       /**
        * <code>optional uint32 startIndex = 7;</code>
+       * @param value The startIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setStartIndex(int value) {
         bitField0_ |= 0x00000040;
@@ -41241,6 +43221,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 startIndex = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStartIndex() {
         bitField0_ = (bitField0_ & ~0x00000040);
@@ -41252,18 +43233,22 @@ public final class CoreNLPProtos {
       private int endIndex_ ;
       /**
        * <code>optional uint32 endIndex = 9;</code>
+       * @return Whether the endIndex field is set.
        */
       public boolean hasEndIndex() {
         return ((bitField0_ & 0x00000080) != 0);
       }
       /**
        * <code>optional uint32 endIndex = 9;</code>
+       * @return The endIndex.
        */
       public int getEndIndex() {
         return endIndex_;
       }
       /**
        * <code>optional uint32 endIndex = 9;</code>
+       * @param value The endIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setEndIndex(int value) {
         bitField0_ |= 0x00000080;
@@ -41273,6 +43258,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 endIndex = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndIndex() {
         bitField0_ = (bitField0_ & ~0x00000080);
@@ -41284,18 +43270,22 @@ public final class CoreNLPProtos {
       private int headIndex_ ;
       /**
        * <code>optional uint32 headIndex = 10;</code>
+       * @return Whether the headIndex field is set.
        */
       public boolean hasHeadIndex() {
         return ((bitField0_ & 0x00000100) != 0);
       }
       /**
        * <code>optional uint32 headIndex = 10;</code>
+       * @return The headIndex.
        */
       public int getHeadIndex() {
         return headIndex_;
       }
       /**
        * <code>optional uint32 headIndex = 10;</code>
+       * @param value The headIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setHeadIndex(int value) {
         bitField0_ |= 0x00000100;
@@ -41305,6 +43295,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 headIndex = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHeadIndex() {
         bitField0_ = (bitField0_ & ~0x00000100);
@@ -41316,12 +43307,14 @@ public final class CoreNLPProtos {
       private java.lang.Object headString_ = "";
       /**
        * <code>optional string headString = 11;</code>
+       * @return Whether the headString field is set.
        */
       public boolean hasHeadString() {
         return ((bitField0_ & 0x00000200) != 0);
       }
       /**
        * <code>optional string headString = 11;</code>
+       * @return The headString.
        */
       public java.lang.String getHeadString() {
         java.lang.Object ref = headString_;
@@ -41339,6 +43332,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string headString = 11;</code>
+       * @return The bytes for headString.
        */
       public com.google.protobuf.ByteString
           getHeadStringBytes() {
@@ -41355,6 +43349,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string headString = 11;</code>
+       * @param value The headString to set.
+       * @return This builder for chaining.
        */
       public Builder setHeadString(
           java.lang.String value) {
@@ -41368,6 +43364,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string headString = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHeadString() {
         bitField0_ = (bitField0_ & ~0x00000200);
@@ -41377,6 +43374,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string headString = 11;</code>
+       * @param value The bytes for headString to set.
+       * @return This builder for chaining.
        */
       public Builder setHeadStringBytes(
           com.google.protobuf.ByteString value) {
@@ -41392,12 +43391,14 @@ public final class CoreNLPProtos {
       private java.lang.Object nerString_ = "";
       /**
        * <code>optional string nerString = 12;</code>
+       * @return Whether the nerString field is set.
        */
       public boolean hasNerString() {
         return ((bitField0_ & 0x00000400) != 0);
       }
       /**
        * <code>optional string nerString = 12;</code>
+       * @return The nerString.
        */
       public java.lang.String getNerString() {
         java.lang.Object ref = nerString_;
@@ -41415,6 +43416,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string nerString = 12;</code>
+       * @return The bytes for nerString.
        */
       public com.google.protobuf.ByteString
           getNerStringBytes() {
@@ -41431,6 +43433,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string nerString = 12;</code>
+       * @param value The nerString to set.
+       * @return This builder for chaining.
        */
       public Builder setNerString(
           java.lang.String value) {
@@ -41444,6 +43448,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string nerString = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNerString() {
         bitField0_ = (bitField0_ & ~0x00000400);
@@ -41453,6 +43458,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string nerString = 12;</code>
+       * @param value The bytes for nerString to set.
+       * @return This builder for chaining.
        */
       public Builder setNerStringBytes(
           com.google.protobuf.ByteString value) {
@@ -41468,18 +43475,22 @@ public final class CoreNLPProtos {
       private int originalRef_ ;
       /**
        * <code>optional uint32 originalRef = 13;</code>
+       * @return Whether the originalRef field is set.
        */
       public boolean hasOriginalRef() {
         return ((bitField0_ & 0x00000800) != 0);
       }
       /**
        * <code>optional uint32 originalRef = 13;</code>
+       * @return The originalRef.
        */
       public int getOriginalRef() {
         return originalRef_;
       }
       /**
        * <code>optional uint32 originalRef = 13;</code>
+       * @param value The originalRef to set.
+       * @return This builder for chaining.
        */
       public Builder setOriginalRef(int value) {
         bitField0_ |= 0x00000800;
@@ -41489,6 +43500,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 originalRef = 13;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOriginalRef() {
         bitField0_ = (bitField0_ & ~0x00000800);
@@ -41500,18 +43512,22 @@ public final class CoreNLPProtos {
       private int goldCorefClusterID_ ;
       /**
        * <code>optional int32 goldCorefClusterID = 14;</code>
+       * @return Whether the goldCorefClusterID field is set.
        */
       public boolean hasGoldCorefClusterID() {
         return ((bitField0_ & 0x00001000) != 0);
       }
       /**
        * <code>optional int32 goldCorefClusterID = 14;</code>
+       * @return The goldCorefClusterID.
        */
       public int getGoldCorefClusterID() {
         return goldCorefClusterID_;
       }
       /**
        * <code>optional int32 goldCorefClusterID = 14;</code>
+       * @param value The goldCorefClusterID to set.
+       * @return This builder for chaining.
        */
       public Builder setGoldCorefClusterID(int value) {
         bitField0_ |= 0x00001000;
@@ -41521,6 +43537,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional int32 goldCorefClusterID = 14;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGoldCorefClusterID() {
         bitField0_ = (bitField0_ & ~0x00001000);
@@ -41532,18 +43549,22 @@ public final class CoreNLPProtos {
       private int corefClusterID_ ;
       /**
        * <code>optional int32 corefClusterID = 15;</code>
+       * @return Whether the corefClusterID field is set.
        */
       public boolean hasCorefClusterID() {
         return ((bitField0_ & 0x00002000) != 0);
       }
       /**
        * <code>optional int32 corefClusterID = 15;</code>
+       * @return The corefClusterID.
        */
       public int getCorefClusterID() {
         return corefClusterID_;
       }
       /**
        * <code>optional int32 corefClusterID = 15;</code>
+       * @param value The corefClusterID to set.
+       * @return This builder for chaining.
        */
       public Builder setCorefClusterID(int value) {
         bitField0_ |= 0x00002000;
@@ -41553,6 +43574,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional int32 corefClusterID = 15;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCorefClusterID() {
         bitField0_ = (bitField0_ & ~0x00002000);
@@ -41564,18 +43586,22 @@ public final class CoreNLPProtos {
       private int mentionNum_ ;
       /**
        * <code>optional uint32 mentionNum = 16;</code>
+       * @return Whether the mentionNum field is set.
        */
       public boolean hasMentionNum() {
         return ((bitField0_ & 0x00004000) != 0);
       }
       /**
        * <code>optional uint32 mentionNum = 16;</code>
+       * @return The mentionNum.
        */
       public int getMentionNum() {
         return mentionNum_;
       }
       /**
        * <code>optional uint32 mentionNum = 16;</code>
+       * @param value The mentionNum to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionNum(int value) {
         bitField0_ |= 0x00004000;
@@ -41585,6 +43611,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 mentionNum = 16;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMentionNum() {
         bitField0_ = (bitField0_ & ~0x00004000);
@@ -41596,18 +43623,22 @@ public final class CoreNLPProtos {
       private int sentNum_ ;
       /**
        * <code>optional uint32 sentNum = 17;</code>
+       * @return Whether the sentNum field is set.
        */
       public boolean hasSentNum() {
         return ((bitField0_ & 0x00008000) != 0);
       }
       /**
        * <code>optional uint32 sentNum = 17;</code>
+       * @return The sentNum.
        */
       public int getSentNum() {
         return sentNum_;
       }
       /**
        * <code>optional uint32 sentNum = 17;</code>
+       * @param value The sentNum to set.
+       * @return This builder for chaining.
        */
       public Builder setSentNum(int value) {
         bitField0_ |= 0x00008000;
@@ -41617,6 +43648,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 sentNum = 17;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentNum() {
         bitField0_ = (bitField0_ & ~0x00008000);
@@ -41628,18 +43660,22 @@ public final class CoreNLPProtos {
       private int utter_ ;
       /**
        * <code>optional uint32 utter = 18;</code>
+       * @return Whether the utter field is set.
        */
       public boolean hasUtter() {
         return ((bitField0_ & 0x00010000) != 0);
       }
       /**
        * <code>optional uint32 utter = 18;</code>
+       * @return The utter.
        */
       public int getUtter() {
         return utter_;
       }
       /**
        * <code>optional uint32 utter = 18;</code>
+       * @param value The utter to set.
+       * @return This builder for chaining.
        */
       public Builder setUtter(int value) {
         bitField0_ |= 0x00010000;
@@ -41649,6 +43685,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 utter = 18;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUtter() {
         bitField0_ = (bitField0_ & ~0x00010000);
@@ -41660,18 +43697,22 @@ public final class CoreNLPProtos {
       private int paragraph_ ;
       /**
        * <code>optional uint32 paragraph = 19;</code>
+       * @return Whether the paragraph field is set.
        */
       public boolean hasParagraph() {
         return ((bitField0_ & 0x00020000) != 0);
       }
       /**
        * <code>optional uint32 paragraph = 19;</code>
+       * @return The paragraph.
        */
       public int getParagraph() {
         return paragraph_;
       }
       /**
        * <code>optional uint32 paragraph = 19;</code>
+       * @param value The paragraph to set.
+       * @return This builder for chaining.
        */
       public Builder setParagraph(int value) {
         bitField0_ |= 0x00020000;
@@ -41681,6 +43722,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 paragraph = 19;</code>
+       * @return This builder for chaining.
        */
       public Builder clearParagraph() {
         bitField0_ = (bitField0_ & ~0x00020000);
@@ -41692,18 +43734,22 @@ public final class CoreNLPProtos {
       private boolean isSubject_ ;
       /**
        * <code>optional bool isSubject = 20;</code>
+       * @return Whether the isSubject field is set.
        */
       public boolean hasIsSubject() {
         return ((bitField0_ & 0x00040000) != 0);
       }
       /**
        * <code>optional bool isSubject = 20;</code>
+       * @return The isSubject.
        */
       public boolean getIsSubject() {
         return isSubject_;
       }
       /**
        * <code>optional bool isSubject = 20;</code>
+       * @param value The isSubject to set.
+       * @return This builder for chaining.
        */
       public Builder setIsSubject(boolean value) {
         bitField0_ |= 0x00040000;
@@ -41713,6 +43759,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool isSubject = 20;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIsSubject() {
         bitField0_ = (bitField0_ & ~0x00040000);
@@ -41724,18 +43771,22 @@ public final class CoreNLPProtos {
       private boolean isDirectObject_ ;
       /**
        * <code>optional bool isDirectObject = 21;</code>
+       * @return Whether the isDirectObject field is set.
        */
       public boolean hasIsDirectObject() {
         return ((bitField0_ & 0x00080000) != 0);
       }
       /**
        * <code>optional bool isDirectObject = 21;</code>
+       * @return The isDirectObject.
        */
       public boolean getIsDirectObject() {
         return isDirectObject_;
       }
       /**
        * <code>optional bool isDirectObject = 21;</code>
+       * @param value The isDirectObject to set.
+       * @return This builder for chaining.
        */
       public Builder setIsDirectObject(boolean value) {
         bitField0_ |= 0x00080000;
@@ -41745,6 +43796,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool isDirectObject = 21;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIsDirectObject() {
         bitField0_ = (bitField0_ & ~0x00080000);
@@ -41756,18 +43808,22 @@ public final class CoreNLPProtos {
       private boolean isIndirectObject_ ;
       /**
        * <code>optional bool isIndirectObject = 22;</code>
+       * @return Whether the isIndirectObject field is set.
        */
       public boolean hasIsIndirectObject() {
         return ((bitField0_ & 0x00100000) != 0);
       }
       /**
        * <code>optional bool isIndirectObject = 22;</code>
+       * @return The isIndirectObject.
        */
       public boolean getIsIndirectObject() {
         return isIndirectObject_;
       }
       /**
        * <code>optional bool isIndirectObject = 22;</code>
+       * @param value The isIndirectObject to set.
+       * @return This builder for chaining.
        */
       public Builder setIsIndirectObject(boolean value) {
         bitField0_ |= 0x00100000;
@@ -41777,6 +43833,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool isIndirectObject = 22;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIsIndirectObject() {
         bitField0_ = (bitField0_ & ~0x00100000);
@@ -41788,18 +43845,22 @@ public final class CoreNLPProtos {
       private boolean isPrepositionObject_ ;
       /**
        * <code>optional bool isPrepositionObject = 23;</code>
+       * @return Whether the isPrepositionObject field is set.
        */
       public boolean hasIsPrepositionObject() {
         return ((bitField0_ & 0x00200000) != 0);
       }
       /**
        * <code>optional bool isPrepositionObject = 23;</code>
+       * @return The isPrepositionObject.
        */
       public boolean getIsPrepositionObject() {
         return isPrepositionObject_;
       }
       /**
        * <code>optional bool isPrepositionObject = 23;</code>
+       * @param value The isPrepositionObject to set.
+       * @return This builder for chaining.
        */
       public Builder setIsPrepositionObject(boolean value) {
         bitField0_ |= 0x00200000;
@@ -41809,6 +43870,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool isPrepositionObject = 23;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIsPrepositionObject() {
         bitField0_ = (bitField0_ & ~0x00200000);
@@ -41820,18 +43882,22 @@ public final class CoreNLPProtos {
       private boolean hasTwin_ ;
       /**
        * <code>optional bool hasTwin = 24;</code>
+       * @return Whether the hasTwin field is set.
        */
       public boolean hasHasTwin() {
         return ((bitField0_ & 0x00400000) != 0);
       }
       /**
        * <code>optional bool hasTwin = 24;</code>
+       * @return The hasTwin.
        */
       public boolean getHasTwin() {
         return hasTwin_;
       }
       /**
        * <code>optional bool hasTwin = 24;</code>
+       * @param value The hasTwin to set.
+       * @return This builder for chaining.
        */
       public Builder setHasTwin(boolean value) {
         bitField0_ |= 0x00400000;
@@ -41841,6 +43907,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool hasTwin = 24;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasTwin() {
         bitField0_ = (bitField0_ & ~0x00400000);
@@ -41852,18 +43919,22 @@ public final class CoreNLPProtos {
       private boolean generic_ ;
       /**
        * <code>optional bool generic = 25;</code>
+       * @return Whether the generic field is set.
        */
       public boolean hasGeneric() {
         return ((bitField0_ & 0x00800000) != 0);
       }
       /**
        * <code>optional bool generic = 25;</code>
+       * @return The generic.
        */
       public boolean getGeneric() {
         return generic_;
       }
       /**
        * <code>optional bool generic = 25;</code>
+       * @param value The generic to set.
+       * @return This builder for chaining.
        */
       public Builder setGeneric(boolean value) {
         bitField0_ |= 0x00800000;
@@ -41873,6 +43944,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool generic = 25;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGeneric() {
         bitField0_ = (bitField0_ & ~0x00800000);
@@ -41884,18 +43956,22 @@ public final class CoreNLPProtos {
       private boolean isSingleton_ ;
       /**
        * <code>optional bool isSingleton = 26;</code>
+       * @return Whether the isSingleton field is set.
        */
       public boolean hasIsSingleton() {
         return ((bitField0_ & 0x01000000) != 0);
       }
       /**
        * <code>optional bool isSingleton = 26;</code>
+       * @return The isSingleton.
        */
       public boolean getIsSingleton() {
         return isSingleton_;
       }
       /**
        * <code>optional bool isSingleton = 26;</code>
+       * @param value The isSingleton to set.
+       * @return This builder for chaining.
        */
       public Builder setIsSingleton(boolean value) {
         bitField0_ |= 0x01000000;
@@ -41905,6 +43981,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool isSingleton = 26;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIsSingleton() {
         bitField0_ = (bitField0_ & ~0x01000000);
@@ -41916,18 +43993,22 @@ public final class CoreNLPProtos {
       private boolean hasBasicDependency_ ;
       /**
        * <code>optional bool hasBasicDependency = 27;</code>
+       * @return Whether the hasBasicDependency field is set.
        */
       public boolean hasHasBasicDependency() {
         return ((bitField0_ & 0x02000000) != 0);
       }
       /**
        * <code>optional bool hasBasicDependency = 27;</code>
+       * @return The hasBasicDependency.
        */
       public boolean getHasBasicDependency() {
         return hasBasicDependency_;
       }
       /**
        * <code>optional bool hasBasicDependency = 27;</code>
+       * @param value The hasBasicDependency to set.
+       * @return This builder for chaining.
        */
       public Builder setHasBasicDependency(boolean value) {
         bitField0_ |= 0x02000000;
@@ -41937,6 +44018,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool hasBasicDependency = 27;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasBasicDependency() {
         bitField0_ = (bitField0_ & ~0x02000000);
@@ -41948,18 +44030,22 @@ public final class CoreNLPProtos {
       private boolean hasEnhancedDepenedncy_ ;
       /**
        * <code>optional bool hasEnhancedDepenedncy = 28;</code>
+       * @return Whether the hasEnhancedDepenedncy field is set.
        */
       public boolean hasHasEnhancedDepenedncy() {
         return ((bitField0_ & 0x04000000) != 0);
       }
       /**
        * <code>optional bool hasEnhancedDepenedncy = 28;</code>
+       * @return The hasEnhancedDepenedncy.
        */
       public boolean getHasEnhancedDepenedncy() {
         return hasEnhancedDepenedncy_;
       }
       /**
        * <code>optional bool hasEnhancedDepenedncy = 28;</code>
+       * @param value The hasEnhancedDepenedncy to set.
+       * @return This builder for chaining.
        */
       public Builder setHasEnhancedDepenedncy(boolean value) {
         bitField0_ |= 0x04000000;
@@ -41969,6 +44055,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool hasEnhancedDepenedncy = 28;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasEnhancedDepenedncy() {
         bitField0_ = (bitField0_ & ~0x04000000);
@@ -41980,18 +44067,22 @@ public final class CoreNLPProtos {
       private boolean hasContextParseTree_ ;
       /**
        * <code>optional bool hasContextParseTree = 29;</code>
+       * @return Whether the hasContextParseTree field is set.
        */
       public boolean hasHasContextParseTree() {
         return ((bitField0_ & 0x08000000) != 0);
       }
       /**
        * <code>optional bool hasContextParseTree = 29;</code>
+       * @return The hasContextParseTree.
        */
       public boolean getHasContextParseTree() {
         return hasContextParseTree_;
       }
       /**
        * <code>optional bool hasContextParseTree = 29;</code>
+       * @param value The hasContextParseTree to set.
+       * @return This builder for chaining.
        */
       public Builder setHasContextParseTree(boolean value) {
         bitField0_ |= 0x08000000;
@@ -42001,6 +44092,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool hasContextParseTree = 29;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHasContextParseTree() {
         bitField0_ = (bitField0_ & ~0x08000000);
@@ -42014,12 +44106,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord, edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder> headIndexedWordBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headIndexedWord = 30;</code>
+       * @return Whether the headIndexedWord field is set.
        */
       public boolean hasHeadIndexedWord() {
         return ((bitField0_ & 0x10000000) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headIndexedWord = 30;</code>
+       * @return The headIndexedWord.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getHeadIndexedWord() {
         if (headIndexedWordBuilder_ == null) {
@@ -42132,12 +44226,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord, edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder> dependingVerbBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.IndexedWord dependingVerb = 31;</code>
+       * @return Whether the dependingVerb field is set.
        */
       public boolean hasDependingVerb() {
         return ((bitField0_ & 0x20000000) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.IndexedWord dependingVerb = 31;</code>
+       * @return The dependingVerb.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getDependingVerb() {
         if (dependingVerbBuilder_ == null) {
@@ -42250,12 +44346,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord, edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder> headWordBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headWord = 32;</code>
+       * @return Whether the headWord field is set.
        */
       public boolean hasHeadWord() {
         return ((bitField0_ & 0x40000000) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headWord = 32;</code>
+       * @return The headWord.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getHeadWord() {
         if (headWordBuilder_ == null) {
@@ -42368,12 +44466,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo, edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfoOrBuilder> speakerInfoBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       * @return Whether the speakerInfo field is set.
        */
       public boolean hasSpeakerInfo() {
         return ((bitField0_ & 0x80000000) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       * @return The speakerInfo.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo getSpeakerInfo() {
         if (speakerInfoBuilder_ == null) {
@@ -42970,6 +45070,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string dependents = 52;</code>
+       * @return A list containing the dependents.
        */
       public com.google.protobuf.ProtocolStringList
           getDependentsList() {
@@ -42977,18 +45078,23 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string dependents = 52;</code>
+       * @return The count of dependents.
        */
       public int getDependentsCount() {
         return dependents_.size();
       }
       /**
        * <code>repeated string dependents = 52;</code>
+       * @param index The index of the element to return.
+       * @return The dependents at the given index.
        */
       public java.lang.String getDependents(int index) {
         return dependents_.get(index);
       }
       /**
        * <code>repeated string dependents = 52;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the dependents at the given index.
        */
       public com.google.protobuf.ByteString
           getDependentsBytes(int index) {
@@ -42996,6 +45102,9 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string dependents = 52;</code>
+       * @param index The index to set the value at.
+       * @param value The dependents to set.
+       * @return This builder for chaining.
        */
       public Builder setDependents(
           int index, java.lang.String value) {
@@ -43009,6 +45118,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string dependents = 52;</code>
+       * @param value The dependents to add.
+       * @return This builder for chaining.
        */
       public Builder addDependents(
           java.lang.String value) {
@@ -43022,6 +45133,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string dependents = 52;</code>
+       * @param values The dependents to add.
+       * @return This builder for chaining.
        */
       public Builder addAllDependents(
           java.lang.Iterable<java.lang.String> values) {
@@ -43033,6 +45146,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string dependents = 52;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDependents() {
         dependents_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -43042,6 +45156,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string dependents = 52;</code>
+       * @param value The bytes of the dependents to add.
+       * @return This builder for chaining.
        */
       public Builder addDependentsBytes(
           com.google.protobuf.ByteString value) {
@@ -43063,6 +45179,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string preprocessedTerms = 53;</code>
+       * @return A list containing the preprocessedTerms.
        */
       public com.google.protobuf.ProtocolStringList
           getPreprocessedTermsList() {
@@ -43070,18 +45187,23 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string preprocessedTerms = 53;</code>
+       * @return The count of preprocessedTerms.
        */
       public int getPreprocessedTermsCount() {
         return preprocessedTerms_.size();
       }
       /**
        * <code>repeated string preprocessedTerms = 53;</code>
+       * @param index The index of the element to return.
+       * @return The preprocessedTerms at the given index.
        */
       public java.lang.String getPreprocessedTerms(int index) {
         return preprocessedTerms_.get(index);
       }
       /**
        * <code>repeated string preprocessedTerms = 53;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the preprocessedTerms at the given index.
        */
       public com.google.protobuf.ByteString
           getPreprocessedTermsBytes(int index) {
@@ -43089,6 +45211,9 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string preprocessedTerms = 53;</code>
+       * @param index The index to set the value at.
+       * @param value The preprocessedTerms to set.
+       * @return This builder for chaining.
        */
       public Builder setPreprocessedTerms(
           int index, java.lang.String value) {
@@ -43102,6 +45227,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string preprocessedTerms = 53;</code>
+       * @param value The preprocessedTerms to add.
+       * @return This builder for chaining.
        */
       public Builder addPreprocessedTerms(
           java.lang.String value) {
@@ -43115,6 +45242,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string preprocessedTerms = 53;</code>
+       * @param values The preprocessedTerms to add.
+       * @return This builder for chaining.
        */
       public Builder addAllPreprocessedTerms(
           java.lang.Iterable<java.lang.String> values) {
@@ -43126,6 +45255,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string preprocessedTerms = 53;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPreprocessedTerms() {
         preprocessedTerms_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -43135,6 +45265,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string preprocessedTerms = 53;</code>
+       * @param value The bytes of the preprocessedTerms to add.
+       * @return This builder for chaining.
        */
       public Builder addPreprocessedTermsBytes(
           com.google.protobuf.ByteString value) {
@@ -43156,6 +45288,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 appositions = 54;</code>
+       * @return A list containing the appositions.
        */
       public java.util.List<java.lang.Integer>
           getAppositionsList() {
@@ -43164,18 +45297,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 appositions = 54;</code>
+       * @return The count of appositions.
        */
       public int getAppositionsCount() {
         return appositions_.size();
       }
       /**
        * <code>repeated int32 appositions = 54;</code>
+       * @param index The index of the element to return.
+       * @return The appositions at the given index.
        */
       public int getAppositions(int index) {
         return appositions_.getInt(index);
       }
       /**
        * <code>repeated int32 appositions = 54;</code>
+       * @param index The index to set the value at.
+       * @param value The appositions to set.
+       * @return This builder for chaining.
        */
       public Builder setAppositions(
           int index, int value) {
@@ -43186,6 +45325,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 appositions = 54;</code>
+       * @param value The appositions to add.
+       * @return This builder for chaining.
        */
       public Builder addAppositions(int value) {
         ensureAppositionsIsMutable();
@@ -43195,6 +45336,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 appositions = 54;</code>
+       * @param values The appositions to add.
+       * @return This builder for chaining.
        */
       public Builder addAllAppositions(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -43206,6 +45349,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 appositions = 54;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAppositions() {
         appositions_ = emptyIntList();
@@ -43223,6 +45367,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 predicateNominatives = 55;</code>
+       * @return A list containing the predicateNominatives.
        */
       public java.util.List<java.lang.Integer>
           getPredicateNominativesList() {
@@ -43231,18 +45376,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 predicateNominatives = 55;</code>
+       * @return The count of predicateNominatives.
        */
       public int getPredicateNominativesCount() {
         return predicateNominatives_.size();
       }
       /**
        * <code>repeated int32 predicateNominatives = 55;</code>
+       * @param index The index of the element to return.
+       * @return The predicateNominatives at the given index.
        */
       public int getPredicateNominatives(int index) {
         return predicateNominatives_.getInt(index);
       }
       /**
        * <code>repeated int32 predicateNominatives = 55;</code>
+       * @param index The index to set the value at.
+       * @param value The predicateNominatives to set.
+       * @return This builder for chaining.
        */
       public Builder setPredicateNominatives(
           int index, int value) {
@@ -43253,6 +45404,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 predicateNominatives = 55;</code>
+       * @param value The predicateNominatives to add.
+       * @return This builder for chaining.
        */
       public Builder addPredicateNominatives(int value) {
         ensurePredicateNominativesIsMutable();
@@ -43262,6 +45415,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 predicateNominatives = 55;</code>
+       * @param values The predicateNominatives to add.
+       * @return This builder for chaining.
        */
       public Builder addAllPredicateNominatives(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -43273,6 +45428,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 predicateNominatives = 55;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPredicateNominatives() {
         predicateNominatives_ = emptyIntList();
@@ -43290,6 +45446,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 relativePronouns = 56;</code>
+       * @return A list containing the relativePronouns.
        */
       public java.util.List<java.lang.Integer>
           getRelativePronounsList() {
@@ -43298,18 +45455,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 relativePronouns = 56;</code>
+       * @return The count of relativePronouns.
        */
       public int getRelativePronounsCount() {
         return relativePronouns_.size();
       }
       /**
        * <code>repeated int32 relativePronouns = 56;</code>
+       * @param index The index of the element to return.
+       * @return The relativePronouns at the given index.
        */
       public int getRelativePronouns(int index) {
         return relativePronouns_.getInt(index);
       }
       /**
        * <code>repeated int32 relativePronouns = 56;</code>
+       * @param index The index to set the value at.
+       * @param value The relativePronouns to set.
+       * @return This builder for chaining.
        */
       public Builder setRelativePronouns(
           int index, int value) {
@@ -43320,6 +45483,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 relativePronouns = 56;</code>
+       * @param value The relativePronouns to add.
+       * @return This builder for chaining.
        */
       public Builder addRelativePronouns(int value) {
         ensureRelativePronounsIsMutable();
@@ -43329,6 +45494,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 relativePronouns = 56;</code>
+       * @param values The relativePronouns to add.
+       * @return This builder for chaining.
        */
       public Builder addAllRelativePronouns(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -43340,6 +45507,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 relativePronouns = 56;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRelativePronouns() {
         relativePronouns_ = emptyIntList();
@@ -43357,6 +45525,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 listMembers = 57;</code>
+       * @return A list containing the listMembers.
        */
       public java.util.List<java.lang.Integer>
           getListMembersList() {
@@ -43365,18 +45534,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 listMembers = 57;</code>
+       * @return The count of listMembers.
        */
       public int getListMembersCount() {
         return listMembers_.size();
       }
       /**
        * <code>repeated int32 listMembers = 57;</code>
+       * @param index The index of the element to return.
+       * @return The listMembers at the given index.
        */
       public int getListMembers(int index) {
         return listMembers_.getInt(index);
       }
       /**
        * <code>repeated int32 listMembers = 57;</code>
+       * @param index The index to set the value at.
+       * @param value The listMembers to set.
+       * @return This builder for chaining.
        */
       public Builder setListMembers(
           int index, int value) {
@@ -43387,6 +45562,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 listMembers = 57;</code>
+       * @param value The listMembers to add.
+       * @return This builder for chaining.
        */
       public Builder addListMembers(int value) {
         ensureListMembersIsMutable();
@@ -43396,6 +45573,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 listMembers = 57;</code>
+       * @param values The listMembers to add.
+       * @return This builder for chaining.
        */
       public Builder addAllListMembers(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -43407,6 +45586,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 listMembers = 57;</code>
+       * @return This builder for chaining.
        */
       public Builder clearListMembers() {
         listMembers_ = emptyIntList();
@@ -43424,6 +45604,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 belongToLists = 58;</code>
+       * @return A list containing the belongToLists.
        */
       public java.util.List<java.lang.Integer>
           getBelongToListsList() {
@@ -43432,18 +45613,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 belongToLists = 58;</code>
+       * @return The count of belongToLists.
        */
       public int getBelongToListsCount() {
         return belongToLists_.size();
       }
       /**
        * <code>repeated int32 belongToLists = 58;</code>
+       * @param index The index of the element to return.
+       * @return The belongToLists at the given index.
        */
       public int getBelongToLists(int index) {
         return belongToLists_.getInt(index);
       }
       /**
        * <code>repeated int32 belongToLists = 58;</code>
+       * @param index The index to set the value at.
+       * @param value The belongToLists to set.
+       * @return This builder for chaining.
        */
       public Builder setBelongToLists(
           int index, int value) {
@@ -43454,6 +45641,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 belongToLists = 58;</code>
+       * @param value The belongToLists to add.
+       * @return This builder for chaining.
        */
       public Builder addBelongToLists(int value) {
         ensureBelongToListsIsMutable();
@@ -43463,6 +45652,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 belongToLists = 58;</code>
+       * @param values The belongToLists to add.
+       * @return This builder for chaining.
        */
       public Builder addAllBelongToLists(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -43474,6 +45665,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 belongToLists = 58;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBelongToLists() {
         belongToLists_ = emptyIntList();
@@ -43540,37 +45732,45 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional uint32 sentenceNum = 1;</code>
+     * @return Whether the sentenceNum field is set.
      */
     boolean hasSentenceNum();
     /**
      * <code>optional uint32 sentenceNum = 1;</code>
+     * @return The sentenceNum.
      */
     int getSentenceNum();
 
     /**
      * <code>optional uint32 tokenIndex = 2;</code>
+     * @return Whether the tokenIndex field is set.
      */
     boolean hasTokenIndex();
     /**
      * <code>optional uint32 tokenIndex = 2;</code>
+     * @return The tokenIndex.
      */
     int getTokenIndex();
 
     /**
      * <code>optional uint32 docID = 3;</code>
+     * @return Whether the docID field is set.
      */
     boolean hasDocID();
     /**
      * <code>optional uint32 docID = 3;</code>
+     * @return The docID.
      */
     int getDocID();
 
     /**
      * <code>optional uint32 copyCount = 4;</code>
+     * @return Whether the copyCount field is set.
      */
     boolean hasCopyCount();
     /**
      * <code>optional uint32 copyCount = 4;</code>
+     * @return The copyCount.
      */
     int getCopyCount();
   }
@@ -43677,12 +45877,14 @@ public final class CoreNLPProtos {
     private int sentenceNum_;
     /**
      * <code>optional uint32 sentenceNum = 1;</code>
+     * @return Whether the sentenceNum field is set.
      */
     public boolean hasSentenceNum() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional uint32 sentenceNum = 1;</code>
+     * @return The sentenceNum.
      */
     public int getSentenceNum() {
       return sentenceNum_;
@@ -43692,12 +45894,14 @@ public final class CoreNLPProtos {
     private int tokenIndex_;
     /**
      * <code>optional uint32 tokenIndex = 2;</code>
+     * @return Whether the tokenIndex field is set.
      */
     public boolean hasTokenIndex() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional uint32 tokenIndex = 2;</code>
+     * @return The tokenIndex.
      */
     public int getTokenIndex() {
       return tokenIndex_;
@@ -43707,12 +45911,14 @@ public final class CoreNLPProtos {
     private int docID_;
     /**
      * <code>optional uint32 docID = 3;</code>
+     * @return Whether the docID field is set.
      */
     public boolean hasDocID() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional uint32 docID = 3;</code>
+     * @return The docID.
      */
     public int getDocID() {
       return docID_;
@@ -43722,12 +45928,14 @@ public final class CoreNLPProtos {
     private int copyCount_;
     /**
      * <code>optional uint32 copyCount = 4;</code>
+     * @return Whether the copyCount field is set.
      */
     public boolean hasCopyCount() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional uint32 copyCount = 4;</code>
+     * @return The copyCount.
      */
     public int getCopyCount() {
       return copyCount_;
@@ -44125,18 +46333,22 @@ public final class CoreNLPProtos {
       private int sentenceNum_ ;
       /**
        * <code>optional uint32 sentenceNum = 1;</code>
+       * @return Whether the sentenceNum field is set.
        */
       public boolean hasSentenceNum() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional uint32 sentenceNum = 1;</code>
+       * @return The sentenceNum.
        */
       public int getSentenceNum() {
         return sentenceNum_;
       }
       /**
        * <code>optional uint32 sentenceNum = 1;</code>
+       * @param value The sentenceNum to set.
+       * @return This builder for chaining.
        */
       public Builder setSentenceNum(int value) {
         bitField0_ |= 0x00000001;
@@ -44146,6 +46358,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 sentenceNum = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentenceNum() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -44157,18 +46370,22 @@ public final class CoreNLPProtos {
       private int tokenIndex_ ;
       /**
        * <code>optional uint32 tokenIndex = 2;</code>
+       * @return Whether the tokenIndex field is set.
        */
       public boolean hasTokenIndex() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional uint32 tokenIndex = 2;</code>
+       * @return The tokenIndex.
        */
       public int getTokenIndex() {
         return tokenIndex_;
       }
       /**
        * <code>optional uint32 tokenIndex = 2;</code>
+       * @param value The tokenIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenIndex(int value) {
         bitField0_ |= 0x00000002;
@@ -44178,6 +46395,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 tokenIndex = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenIndex() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -44189,18 +46407,22 @@ public final class CoreNLPProtos {
       private int docID_ ;
       /**
        * <code>optional uint32 docID = 3;</code>
+       * @return Whether the docID field is set.
        */
       public boolean hasDocID() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional uint32 docID = 3;</code>
+       * @return The docID.
        */
       public int getDocID() {
         return docID_;
       }
       /**
        * <code>optional uint32 docID = 3;</code>
+       * @param value The docID to set.
+       * @return This builder for chaining.
        */
       public Builder setDocID(int value) {
         bitField0_ |= 0x00000004;
@@ -44210,6 +46432,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 docID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDocID() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -44221,18 +46444,22 @@ public final class CoreNLPProtos {
       private int copyCount_ ;
       /**
        * <code>optional uint32 copyCount = 4;</code>
+       * @return Whether the copyCount field is set.
        */
       public boolean hasCopyCount() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional uint32 copyCount = 4;</code>
+       * @return The copyCount.
        */
       public int getCopyCount() {
         return copyCount_;
       }
       /**
        * <code>optional uint32 copyCount = 4;</code>
+       * @param value The copyCount to set.
+       * @return This builder for chaining.
        */
       public Builder setCopyCount(int value) {
         bitField0_ |= 0x00000008;
@@ -44242,6 +46469,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 copyCount = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCopyCount() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -44308,28 +46536,35 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional string speakerName = 1;</code>
+     * @return Whether the speakerName field is set.
      */
     boolean hasSpeakerName();
     /**
      * <code>optional string speakerName = 1;</code>
+     * @return The speakerName.
      */
     java.lang.String getSpeakerName();
     /**
      * <code>optional string speakerName = 1;</code>
+     * @return The bytes for speakerName.
      */
     com.google.protobuf.ByteString
         getSpeakerNameBytes();
 
     /**
      * <code>repeated int32 mentions = 2;</code>
+     * @return A list containing the mentions.
      */
     java.util.List<java.lang.Integer> getMentionsList();
     /**
      * <code>repeated int32 mentions = 2;</code>
+     * @return The count of mentions.
      */
     int getMentionsCount();
     /**
      * <code>repeated int32 mentions = 2;</code>
+     * @param index The index of the element to return.
+     * @return The mentions at the given index.
      */
     int getMentions(int index);
   }
@@ -44448,12 +46683,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object speakerName_;
     /**
      * <code>optional string speakerName = 1;</code>
+     * @return Whether the speakerName field is set.
      */
     public boolean hasSpeakerName() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional string speakerName = 1;</code>
+     * @return The speakerName.
      */
     public java.lang.String getSpeakerName() {
       java.lang.Object ref = speakerName_;
@@ -44471,6 +46708,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string speakerName = 1;</code>
+     * @return The bytes for speakerName.
      */
     public com.google.protobuf.ByteString
         getSpeakerNameBytes() {
@@ -44490,6 +46728,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList mentions_;
     /**
      * <code>repeated int32 mentions = 2;</code>
+     * @return A list containing the mentions.
      */
     public java.util.List<java.lang.Integer>
         getMentionsList() {
@@ -44497,12 +46736,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated int32 mentions = 2;</code>
+     * @return The count of mentions.
      */
     public int getMentionsCount() {
       return mentions_.size();
     }
     /**
      * <code>repeated int32 mentions = 2;</code>
+     * @param index The index of the element to return.
+     * @return The mentions at the given index.
      */
     public int getMentions(int index) {
       return mentions_.getInt(index);
@@ -44861,12 +47103,14 @@ public final class CoreNLPProtos {
       private java.lang.Object speakerName_ = "";
       /**
        * <code>optional string speakerName = 1;</code>
+       * @return Whether the speakerName field is set.
        */
       public boolean hasSpeakerName() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional string speakerName = 1;</code>
+       * @return The speakerName.
        */
       public java.lang.String getSpeakerName() {
         java.lang.Object ref = speakerName_;
@@ -44884,6 +47128,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speakerName = 1;</code>
+       * @return The bytes for speakerName.
        */
       public com.google.protobuf.ByteString
           getSpeakerNameBytes() {
@@ -44900,6 +47145,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speakerName = 1;</code>
+       * @param value The speakerName to set.
+       * @return This builder for chaining.
        */
       public Builder setSpeakerName(
           java.lang.String value) {
@@ -44913,6 +47160,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speakerName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSpeakerName() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -44922,6 +47170,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string speakerName = 1;</code>
+       * @param value The bytes for speakerName to set.
+       * @return This builder for chaining.
        */
       public Builder setSpeakerNameBytes(
           com.google.protobuf.ByteString value) {
@@ -44943,6 +47193,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 mentions = 2;</code>
+       * @return A list containing the mentions.
        */
       public java.util.List<java.lang.Integer>
           getMentionsList() {
@@ -44951,18 +47202,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 mentions = 2;</code>
+       * @return The count of mentions.
        */
       public int getMentionsCount() {
         return mentions_.size();
       }
       /**
        * <code>repeated int32 mentions = 2;</code>
+       * @param index The index of the element to return.
+       * @return The mentions at the given index.
        */
       public int getMentions(int index) {
         return mentions_.getInt(index);
       }
       /**
        * <code>repeated int32 mentions = 2;</code>
+       * @param index The index to set the value at.
+       * @param value The mentions to set.
+       * @return This builder for chaining.
        */
       public Builder setMentions(
           int index, int value) {
@@ -44973,6 +47230,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 mentions = 2;</code>
+       * @param value The mentions to add.
+       * @return This builder for chaining.
        */
       public Builder addMentions(int value) {
         ensureMentionsIsMutable();
@@ -44982,6 +47241,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 mentions = 2;</code>
+       * @param values The mentions to add.
+       * @return This builder for chaining.
        */
       public Builder addAllMentions(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -44993,6 +47254,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated int32 mentions = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMentions() {
         mentions_ = emptyIntList();
@@ -45059,19 +47321,23 @@ public final class CoreNLPProtos {
 
     /**
      * <code>required uint32 begin = 1;</code>
+     * @return Whether the begin field is set.
      */
     boolean hasBegin();
     /**
      * <code>required uint32 begin = 1;</code>
+     * @return The begin.
      */
     int getBegin();
 
     /**
      * <code>required uint32 end = 2;</code>
+     * @return Whether the end field is set.
      */
     boolean hasEnd();
     /**
      * <code>required uint32 end = 2;</code>
+     * @return The end.
      */
     int getEnd();
   }
@@ -45172,12 +47438,14 @@ public final class CoreNLPProtos {
     private int begin_;
     /**
      * <code>required uint32 begin = 1;</code>
+     * @return Whether the begin field is set.
      */
     public boolean hasBegin() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>required uint32 begin = 1;</code>
+     * @return The begin.
      */
     public int getBegin() {
       return begin_;
@@ -45187,12 +47455,14 @@ public final class CoreNLPProtos {
     private int end_;
     /**
      * <code>required uint32 end = 2;</code>
+     * @return Whether the end field is set.
      */
     public boolean hasEnd() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>required uint32 end = 2;</code>
+     * @return The end.
      */
     public int getEnd() {
       return end_;
@@ -45558,18 +47828,22 @@ public final class CoreNLPProtos {
       private int begin_ ;
       /**
        * <code>required uint32 begin = 1;</code>
+       * @return Whether the begin field is set.
        */
       public boolean hasBegin() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required uint32 begin = 1;</code>
+       * @return The begin.
        */
       public int getBegin() {
         return begin_;
       }
       /**
        * <code>required uint32 begin = 1;</code>
+       * @param value The begin to set.
+       * @return This builder for chaining.
        */
       public Builder setBegin(int value) {
         bitField0_ |= 0x00000001;
@@ -45579,6 +47853,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required uint32 begin = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBegin() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -45590,18 +47865,22 @@ public final class CoreNLPProtos {
       private int end_ ;
       /**
        * <code>required uint32 end = 2;</code>
+       * @return Whether the end field is set.
        */
       public boolean hasEnd() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>required uint32 end = 2;</code>
+       * @return The end.
        */
       public int getEnd() {
         return end_;
       }
       /**
        * <code>required uint32 end = 2;</code>
+       * @param value The end to set.
+       * @return This builder for chaining.
        */
       public Builder setEnd(int value) {
         bitField0_ |= 0x00000002;
@@ -45611,6 +47890,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required uint32 end = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnd() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -45677,89 +47957,108 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional string value = 1;</code>
+     * @return Whether the value field is set.
      */
     boolean hasValue();
     /**
      * <code>optional string value = 1;</code>
+     * @return The value.
      */
     java.lang.String getValue();
     /**
      * <code>optional string value = 1;</code>
+     * @return The bytes for value.
      */
     com.google.protobuf.ByteString
         getValueBytes();
 
     /**
      * <code>optional string altValue = 2;</code>
+     * @return Whether the altValue field is set.
      */
     boolean hasAltValue();
     /**
      * <code>optional string altValue = 2;</code>
+     * @return The altValue.
      */
     java.lang.String getAltValue();
     /**
      * <code>optional string altValue = 2;</code>
+     * @return The bytes for altValue.
      */
     com.google.protobuf.ByteString
         getAltValueBytes();
 
     /**
      * <code>optional string text = 3;</code>
+     * @return Whether the text field is set.
      */
     boolean hasText();
     /**
      * <code>optional string text = 3;</code>
+     * @return The text.
      */
     java.lang.String getText();
     /**
      * <code>optional string text = 3;</code>
+     * @return The bytes for text.
      */
     com.google.protobuf.ByteString
         getTextBytes();
 
     /**
      * <code>optional string type = 4;</code>
+     * @return Whether the type field is set.
      */
     boolean hasType();
     /**
      * <code>optional string type = 4;</code>
+     * @return The type.
      */
     java.lang.String getType();
     /**
      * <code>optional string type = 4;</code>
+     * @return The bytes for type.
      */
     com.google.protobuf.ByteString
         getTypeBytes();
 
     /**
      * <code>optional string tid = 5;</code>
+     * @return Whether the tid field is set.
      */
     boolean hasTid();
     /**
      * <code>optional string tid = 5;</code>
+     * @return The tid.
      */
     java.lang.String getTid();
     /**
      * <code>optional string tid = 5;</code>
+     * @return The bytes for tid.
      */
     com.google.protobuf.ByteString
         getTidBytes();
 
     /**
      * <code>optional uint32 beginPoint = 6;</code>
+     * @return Whether the beginPoint field is set.
      */
     boolean hasBeginPoint();
     /**
      * <code>optional uint32 beginPoint = 6;</code>
+     * @return The beginPoint.
      */
     int getBeginPoint();
 
     /**
      * <code>optional uint32 endPoint = 7;</code>
+     * @return Whether the endPoint field is set.
      */
     boolean hasEndPoint();
     /**
      * <code>optional uint32 endPoint = 7;</code>
+     * @return The endPoint.
      */
     int getEndPoint();
   }
@@ -45896,12 +48195,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object value_;
     /**
      * <code>optional string value = 1;</code>
+     * @return Whether the value field is set.
      */
     public boolean hasValue() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional string value = 1;</code>
+     * @return The value.
      */
     public java.lang.String getValue() {
       java.lang.Object ref = value_;
@@ -45919,6 +48220,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string value = 1;</code>
+     * @return The bytes for value.
      */
     public com.google.protobuf.ByteString
         getValueBytes() {
@@ -45938,12 +48240,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object altValue_;
     /**
      * <code>optional string altValue = 2;</code>
+     * @return Whether the altValue field is set.
      */
     public boolean hasAltValue() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional string altValue = 2;</code>
+     * @return The altValue.
      */
     public java.lang.String getAltValue() {
       java.lang.Object ref = altValue_;
@@ -45961,6 +48265,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string altValue = 2;</code>
+     * @return The bytes for altValue.
      */
     public com.google.protobuf.ByteString
         getAltValueBytes() {
@@ -45980,12 +48285,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object text_;
     /**
      * <code>optional string text = 3;</code>
+     * @return Whether the text field is set.
      */
     public boolean hasText() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional string text = 3;</code>
+     * @return The text.
      */
     public java.lang.String getText() {
       java.lang.Object ref = text_;
@@ -46003,6 +48310,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string text = 3;</code>
+     * @return The bytes for text.
      */
     public com.google.protobuf.ByteString
         getTextBytes() {
@@ -46022,12 +48330,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object type_;
     /**
      * <code>optional string type = 4;</code>
+     * @return Whether the type field is set.
      */
     public boolean hasType() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional string type = 4;</code>
+     * @return The type.
      */
     public java.lang.String getType() {
       java.lang.Object ref = type_;
@@ -46045,6 +48355,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string type = 4;</code>
+     * @return The bytes for type.
      */
     public com.google.protobuf.ByteString
         getTypeBytes() {
@@ -46064,12 +48375,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object tid_;
     /**
      * <code>optional string tid = 5;</code>
+     * @return Whether the tid field is set.
      */
     public boolean hasTid() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional string tid = 5;</code>
+     * @return The tid.
      */
     public java.lang.String getTid() {
       java.lang.Object ref = tid_;
@@ -46087,6 +48400,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string tid = 5;</code>
+     * @return The bytes for tid.
      */
     public com.google.protobuf.ByteString
         getTidBytes() {
@@ -46106,12 +48420,14 @@ public final class CoreNLPProtos {
     private int beginPoint_;
     /**
      * <code>optional uint32 beginPoint = 6;</code>
+     * @return Whether the beginPoint field is set.
      */
     public boolean hasBeginPoint() {
       return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>optional uint32 beginPoint = 6;</code>
+     * @return The beginPoint.
      */
     public int getBeginPoint() {
       return beginPoint_;
@@ -46121,12 +48437,14 @@ public final class CoreNLPProtos {
     private int endPoint_;
     /**
      * <code>optional uint32 endPoint = 7;</code>
+     * @return Whether the endPoint field is set.
      */
     public boolean hasEndPoint() {
       return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <code>optional uint32 endPoint = 7;</code>
+     * @return The endPoint.
      */
     public int getEndPoint() {
       return endPoint_;
@@ -46609,12 +48927,14 @@ public final class CoreNLPProtos {
       private java.lang.Object value_ = "";
       /**
        * <code>optional string value = 1;</code>
+       * @return Whether the value field is set.
        */
       public boolean hasValue() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional string value = 1;</code>
+       * @return The value.
        */
       public java.lang.String getValue() {
         java.lang.Object ref = value_;
@@ -46632,6 +48952,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string value = 1;</code>
+       * @return The bytes for value.
        */
       public com.google.protobuf.ByteString
           getValueBytes() {
@@ -46648,6 +48969,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string value = 1;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(
           java.lang.String value) {
@@ -46661,6 +48984,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string value = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -46670,6 +48994,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string value = 1;</code>
+       * @param value The bytes for value to set.
+       * @return This builder for chaining.
        */
       public Builder setValueBytes(
           com.google.protobuf.ByteString value) {
@@ -46685,12 +49011,14 @@ public final class CoreNLPProtos {
       private java.lang.Object altValue_ = "";
       /**
        * <code>optional string altValue = 2;</code>
+       * @return Whether the altValue field is set.
        */
       public boolean hasAltValue() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional string altValue = 2;</code>
+       * @return The altValue.
        */
       public java.lang.String getAltValue() {
         java.lang.Object ref = altValue_;
@@ -46708,6 +49036,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string altValue = 2;</code>
+       * @return The bytes for altValue.
        */
       public com.google.protobuf.ByteString
           getAltValueBytes() {
@@ -46724,6 +49053,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string altValue = 2;</code>
+       * @param value The altValue to set.
+       * @return This builder for chaining.
        */
       public Builder setAltValue(
           java.lang.String value) {
@@ -46737,6 +49068,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string altValue = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAltValue() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -46746,6 +49078,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string altValue = 2;</code>
+       * @param value The bytes for altValue to set.
+       * @return This builder for chaining.
        */
       public Builder setAltValueBytes(
           com.google.protobuf.ByteString value) {
@@ -46761,12 +49095,14 @@ public final class CoreNLPProtos {
       private java.lang.Object text_ = "";
       /**
        * <code>optional string text = 3;</code>
+       * @return Whether the text field is set.
        */
       public boolean hasText() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional string text = 3;</code>
+       * @return The text.
        */
       public java.lang.String getText() {
         java.lang.Object ref = text_;
@@ -46784,6 +49120,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string text = 3;</code>
+       * @return The bytes for text.
        */
       public com.google.protobuf.ByteString
           getTextBytes() {
@@ -46800,6 +49137,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string text = 3;</code>
+       * @param value The text to set.
+       * @return This builder for chaining.
        */
       public Builder setText(
           java.lang.String value) {
@@ -46813,6 +49152,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string text = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearText() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -46822,6 +49162,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string text = 3;</code>
+       * @param value The bytes for text to set.
+       * @return This builder for chaining.
        */
       public Builder setTextBytes(
           com.google.protobuf.ByteString value) {
@@ -46837,12 +49179,14 @@ public final class CoreNLPProtos {
       private java.lang.Object type_ = "";
       /**
        * <code>optional string type = 4;</code>
+       * @return Whether the type field is set.
        */
       public boolean hasType() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional string type = 4;</code>
+       * @return The type.
        */
       public java.lang.String getType() {
         java.lang.Object ref = type_;
@@ -46860,6 +49204,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @return The bytes for type.
        */
       public com.google.protobuf.ByteString
           getTypeBytes() {
@@ -46876,6 +49221,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
        */
       public Builder setType(
           java.lang.String value) {
@@ -46889,6 +49236,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -46898,6 +49246,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @param value The bytes for type to set.
+       * @return This builder for chaining.
        */
       public Builder setTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -46913,12 +49263,14 @@ public final class CoreNLPProtos {
       private java.lang.Object tid_ = "";
       /**
        * <code>optional string tid = 5;</code>
+       * @return Whether the tid field is set.
        */
       public boolean hasTid() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional string tid = 5;</code>
+       * @return The tid.
        */
       public java.lang.String getTid() {
         java.lang.Object ref = tid_;
@@ -46936,6 +49288,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string tid = 5;</code>
+       * @return The bytes for tid.
        */
       public com.google.protobuf.ByteString
           getTidBytes() {
@@ -46952,6 +49305,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string tid = 5;</code>
+       * @param value The tid to set.
+       * @return This builder for chaining.
        */
       public Builder setTid(
           java.lang.String value) {
@@ -46965,6 +49320,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string tid = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTid() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -46974,6 +49330,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string tid = 5;</code>
+       * @param value The bytes for tid to set.
+       * @return This builder for chaining.
        */
       public Builder setTidBytes(
           com.google.protobuf.ByteString value) {
@@ -46989,18 +49347,22 @@ public final class CoreNLPProtos {
       private int beginPoint_ ;
       /**
        * <code>optional uint32 beginPoint = 6;</code>
+       * @return Whether the beginPoint field is set.
        */
       public boolean hasBeginPoint() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional uint32 beginPoint = 6;</code>
+       * @return The beginPoint.
        */
       public int getBeginPoint() {
         return beginPoint_;
       }
       /**
        * <code>optional uint32 beginPoint = 6;</code>
+       * @param value The beginPoint to set.
+       * @return This builder for chaining.
        */
       public Builder setBeginPoint(int value) {
         bitField0_ |= 0x00000020;
@@ -47010,6 +49372,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 beginPoint = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBeginPoint() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -47021,18 +49384,22 @@ public final class CoreNLPProtos {
       private int endPoint_ ;
       /**
        * <code>optional uint32 endPoint = 7;</code>
+       * @return Whether the endPoint field is set.
        */
       public boolean hasEndPoint() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>optional uint32 endPoint = 7;</code>
+       * @return The endPoint.
        */
       public int getEndPoint() {
         return endPoint_;
       }
       /**
        * <code>optional uint32 endPoint = 7;</code>
+       * @param value The endPoint to set.
+       * @return This builder for chaining.
        */
       public Builder setEndPoint(int value) {
         bitField0_ |= 0x00000040;
@@ -47042,6 +49409,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 endPoint = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndPoint() {
         bitField0_ = (bitField0_ & ~0x00000040);
@@ -47108,69 +49476,84 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional uint32 headStart = 6;</code>
+     * @return Whether the headStart field is set.
      */
     boolean hasHeadStart();
     /**
      * <code>optional uint32 headStart = 6;</code>
+     * @return The headStart.
      */
     int getHeadStart();
 
     /**
      * <code>optional uint32 headEnd = 7;</code>
+     * @return Whether the headEnd field is set.
      */
     boolean hasHeadEnd();
     /**
      * <code>optional uint32 headEnd = 7;</code>
+     * @return The headEnd.
      */
     int getHeadEnd();
 
     /**
      * <code>optional string mentionType = 8;</code>
+     * @return Whether the mentionType field is set.
      */
     boolean hasMentionType();
     /**
      * <code>optional string mentionType = 8;</code>
+     * @return The mentionType.
      */
     java.lang.String getMentionType();
     /**
      * <code>optional string mentionType = 8;</code>
+     * @return The bytes for mentionType.
      */
     com.google.protobuf.ByteString
         getMentionTypeBytes();
 
     /**
      * <code>optional string normalizedName = 9;</code>
+     * @return Whether the normalizedName field is set.
      */
     boolean hasNormalizedName();
     /**
      * <code>optional string normalizedName = 9;</code>
+     * @return The normalizedName.
      */
     java.lang.String getNormalizedName();
     /**
      * <code>optional string normalizedName = 9;</code>
+     * @return The bytes for normalizedName.
      */
     com.google.protobuf.ByteString
         getNormalizedNameBytes();
 
     /**
      * <code>optional uint32 headTokenIndex = 10;</code>
+     * @return Whether the headTokenIndex field is set.
      */
     boolean hasHeadTokenIndex();
     /**
      * <code>optional uint32 headTokenIndex = 10;</code>
+     * @return The headTokenIndex.
      */
     int getHeadTokenIndex();
 
     /**
      * <code>optional string corefID = 11;</code>
+     * @return Whether the corefID field is set.
      */
     boolean hasCorefID();
     /**
      * <code>optional string corefID = 11;</code>
+     * @return The corefID.
      */
     java.lang.String getCorefID();
     /**
      * <code>optional string corefID = 11;</code>
+     * @return The bytes for corefID.
      */
     com.google.protobuf.ByteString
         getCorefIDBytes();
@@ -47181,6 +49564,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return Whether the objectID field is set.
      */
     boolean hasObjectID();
     /**
@@ -47189,6 +49573,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return The objectID.
      */
     java.lang.String getObjectID();
     /**
@@ -47197,38 +49582,46 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return The bytes for objectID.
      */
     com.google.protobuf.ByteString
         getObjectIDBytes();
 
     /**
      * <code>optional uint32 extentStart = 2;</code>
+     * @return Whether the extentStart field is set.
      */
     boolean hasExtentStart();
     /**
      * <code>optional uint32 extentStart = 2;</code>
+     * @return The extentStart.
      */
     int getExtentStart();
 
     /**
      * <code>optional uint32 extentEnd = 3;</code>
+     * @return Whether the extentEnd field is set.
      */
     boolean hasExtentEnd();
     /**
      * <code>optional uint32 extentEnd = 3;</code>
+     * @return The extentEnd.
      */
     int getExtentEnd();
 
     /**
      * <code>optional string type = 4;</code>
+     * @return Whether the type field is set.
      */
     boolean hasType();
     /**
      * <code>optional string type = 4;</code>
+     * @return The type.
      */
     java.lang.String getType();
     /**
      * <code>optional string type = 4;</code>
+     * @return The bytes for type.
      */
     com.google.protobuf.ByteString
         getTypeBytes();
@@ -47240,6 +49633,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return Whether the subtype field is set.
      */
     boolean hasSubtype();
     /**
@@ -47249,6 +49643,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return The subtype.
      */
     java.lang.String getSubtype();
     /**
@@ -47258,6 +49653,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return The bytes for subtype.
      */
     com.google.protobuf.ByteString
         getSubtypeBytes();
@@ -47418,12 +49814,14 @@ public final class CoreNLPProtos {
     private int headStart_;
     /**
      * <code>optional uint32 headStart = 6;</code>
+     * @return Whether the headStart field is set.
      */
     public boolean hasHeadStart() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional uint32 headStart = 6;</code>
+     * @return The headStart.
      */
     public int getHeadStart() {
       return headStart_;
@@ -47433,12 +49831,14 @@ public final class CoreNLPProtos {
     private int headEnd_;
     /**
      * <code>optional uint32 headEnd = 7;</code>
+     * @return Whether the headEnd field is set.
      */
     public boolean hasHeadEnd() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional uint32 headEnd = 7;</code>
+     * @return The headEnd.
      */
     public int getHeadEnd() {
       return headEnd_;
@@ -47448,12 +49848,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object mentionType_;
     /**
      * <code>optional string mentionType = 8;</code>
+     * @return Whether the mentionType field is set.
      */
     public boolean hasMentionType() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional string mentionType = 8;</code>
+     * @return The mentionType.
      */
     public java.lang.String getMentionType() {
       java.lang.Object ref = mentionType_;
@@ -47471,6 +49873,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string mentionType = 8;</code>
+     * @return The bytes for mentionType.
      */
     public com.google.protobuf.ByteString
         getMentionTypeBytes() {
@@ -47490,12 +49893,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object normalizedName_;
     /**
      * <code>optional string normalizedName = 9;</code>
+     * @return Whether the normalizedName field is set.
      */
     public boolean hasNormalizedName() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional string normalizedName = 9;</code>
+     * @return The normalizedName.
      */
     public java.lang.String getNormalizedName() {
       java.lang.Object ref = normalizedName_;
@@ -47513,6 +49918,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string normalizedName = 9;</code>
+     * @return The bytes for normalizedName.
      */
     public com.google.protobuf.ByteString
         getNormalizedNameBytes() {
@@ -47532,12 +49938,14 @@ public final class CoreNLPProtos {
     private int headTokenIndex_;
     /**
      * <code>optional uint32 headTokenIndex = 10;</code>
+     * @return Whether the headTokenIndex field is set.
      */
     public boolean hasHeadTokenIndex() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional uint32 headTokenIndex = 10;</code>
+     * @return The headTokenIndex.
      */
     public int getHeadTokenIndex() {
       return headTokenIndex_;
@@ -47547,12 +49955,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object corefID_;
     /**
      * <code>optional string corefID = 11;</code>
+     * @return Whether the corefID field is set.
      */
     public boolean hasCorefID() {
       return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>optional string corefID = 11;</code>
+     * @return The corefID.
      */
     public java.lang.String getCorefID() {
       java.lang.Object ref = corefID_;
@@ -47570,6 +49980,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string corefID = 11;</code>
+     * @return The bytes for corefID.
      */
     public com.google.protobuf.ByteString
         getCorefIDBytes() {
@@ -47593,6 +50004,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return Whether the objectID field is set.
      */
     public boolean hasObjectID() {
       return ((bitField0_ & 0x00000040) != 0);
@@ -47603,6 +50015,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return The objectID.
      */
     public java.lang.String getObjectID() {
       java.lang.Object ref = objectID_;
@@ -47624,6 +50037,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return The bytes for objectID.
      */
     public com.google.protobuf.ByteString
         getObjectIDBytes() {
@@ -47643,12 +50057,14 @@ public final class CoreNLPProtos {
     private int extentStart_;
     /**
      * <code>optional uint32 extentStart = 2;</code>
+     * @return Whether the extentStart field is set.
      */
     public boolean hasExtentStart() {
       return ((bitField0_ & 0x00000080) != 0);
     }
     /**
      * <code>optional uint32 extentStart = 2;</code>
+     * @return The extentStart.
      */
     public int getExtentStart() {
       return extentStart_;
@@ -47658,12 +50074,14 @@ public final class CoreNLPProtos {
     private int extentEnd_;
     /**
      * <code>optional uint32 extentEnd = 3;</code>
+     * @return Whether the extentEnd field is set.
      */
     public boolean hasExtentEnd() {
       return ((bitField0_ & 0x00000100) != 0);
     }
     /**
      * <code>optional uint32 extentEnd = 3;</code>
+     * @return The extentEnd.
      */
     public int getExtentEnd() {
       return extentEnd_;
@@ -47673,12 +50091,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object type_;
     /**
      * <code>optional string type = 4;</code>
+     * @return Whether the type field is set.
      */
     public boolean hasType() {
       return ((bitField0_ & 0x00000200) != 0);
     }
     /**
      * <code>optional string type = 4;</code>
+     * @return The type.
      */
     public java.lang.String getType() {
       java.lang.Object ref = type_;
@@ -47696,6 +50116,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string type = 4;</code>
+     * @return The bytes for type.
      */
     public com.google.protobuf.ByteString
         getTypeBytes() {
@@ -47720,6 +50141,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return Whether the subtype field is set.
      */
     public boolean hasSubtype() {
       return ((bitField0_ & 0x00000400) != 0);
@@ -47731,6 +50153,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return The subtype.
      */
     public java.lang.String getSubtype() {
       java.lang.Object ref = subtype_;
@@ -47753,6 +50176,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return The bytes for subtype.
      */
     public com.google.protobuf.ByteString
         getSubtypeBytes() {
@@ -48347,18 +50771,22 @@ public final class CoreNLPProtos {
       private int headStart_ ;
       /**
        * <code>optional uint32 headStart = 6;</code>
+       * @return Whether the headStart field is set.
        */
       public boolean hasHeadStart() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional uint32 headStart = 6;</code>
+       * @return The headStart.
        */
       public int getHeadStart() {
         return headStart_;
       }
       /**
        * <code>optional uint32 headStart = 6;</code>
+       * @param value The headStart to set.
+       * @return This builder for chaining.
        */
       public Builder setHeadStart(int value) {
         bitField0_ |= 0x00000001;
@@ -48368,6 +50796,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 headStart = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHeadStart() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -48379,18 +50808,22 @@ public final class CoreNLPProtos {
       private int headEnd_ ;
       /**
        * <code>optional uint32 headEnd = 7;</code>
+       * @return Whether the headEnd field is set.
        */
       public boolean hasHeadEnd() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional uint32 headEnd = 7;</code>
+       * @return The headEnd.
        */
       public int getHeadEnd() {
         return headEnd_;
       }
       /**
        * <code>optional uint32 headEnd = 7;</code>
+       * @param value The headEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setHeadEnd(int value) {
         bitField0_ |= 0x00000002;
@@ -48400,6 +50833,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 headEnd = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHeadEnd() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -48411,12 +50845,14 @@ public final class CoreNLPProtos {
       private java.lang.Object mentionType_ = "";
       /**
        * <code>optional string mentionType = 8;</code>
+       * @return Whether the mentionType field is set.
        */
       public boolean hasMentionType() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional string mentionType = 8;</code>
+       * @return The mentionType.
        */
       public java.lang.String getMentionType() {
         java.lang.Object ref = mentionType_;
@@ -48434,6 +50870,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 8;</code>
+       * @return The bytes for mentionType.
        */
       public com.google.protobuf.ByteString
           getMentionTypeBytes() {
@@ -48450,6 +50887,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 8;</code>
+       * @param value The mentionType to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionType(
           java.lang.String value) {
@@ -48463,6 +50902,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMentionType() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -48472,6 +50912,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string mentionType = 8;</code>
+       * @param value The bytes for mentionType to set.
+       * @return This builder for chaining.
        */
       public Builder setMentionTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -48487,12 +50929,14 @@ public final class CoreNLPProtos {
       private java.lang.Object normalizedName_ = "";
       /**
        * <code>optional string normalizedName = 9;</code>
+       * @return Whether the normalizedName field is set.
        */
       public boolean hasNormalizedName() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional string normalizedName = 9;</code>
+       * @return The normalizedName.
        */
       public java.lang.String getNormalizedName() {
         java.lang.Object ref = normalizedName_;
@@ -48510,6 +50954,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string normalizedName = 9;</code>
+       * @return The bytes for normalizedName.
        */
       public com.google.protobuf.ByteString
           getNormalizedNameBytes() {
@@ -48526,6 +50971,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string normalizedName = 9;</code>
+       * @param value The normalizedName to set.
+       * @return This builder for chaining.
        */
       public Builder setNormalizedName(
           java.lang.String value) {
@@ -48539,6 +50986,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string normalizedName = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNormalizedName() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -48548,6 +50996,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string normalizedName = 9;</code>
+       * @param value The bytes for normalizedName to set.
+       * @return This builder for chaining.
        */
       public Builder setNormalizedNameBytes(
           com.google.protobuf.ByteString value) {
@@ -48563,18 +51013,22 @@ public final class CoreNLPProtos {
       private int headTokenIndex_ ;
       /**
        * <code>optional uint32 headTokenIndex = 10;</code>
+       * @return Whether the headTokenIndex field is set.
        */
       public boolean hasHeadTokenIndex() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional uint32 headTokenIndex = 10;</code>
+       * @return The headTokenIndex.
        */
       public int getHeadTokenIndex() {
         return headTokenIndex_;
       }
       /**
        * <code>optional uint32 headTokenIndex = 10;</code>
+       * @param value The headTokenIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setHeadTokenIndex(int value) {
         bitField0_ |= 0x00000010;
@@ -48584,6 +51038,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 headTokenIndex = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHeadTokenIndex() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -48595,12 +51050,14 @@ public final class CoreNLPProtos {
       private java.lang.Object corefID_ = "";
       /**
        * <code>optional string corefID = 11;</code>
+       * @return Whether the corefID field is set.
        */
       public boolean hasCorefID() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional string corefID = 11;</code>
+       * @return The corefID.
        */
       public java.lang.String getCorefID() {
         java.lang.Object ref = corefID_;
@@ -48618,6 +51075,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string corefID = 11;</code>
+       * @return The bytes for corefID.
        */
       public com.google.protobuf.ByteString
           getCorefIDBytes() {
@@ -48634,6 +51092,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string corefID = 11;</code>
+       * @param value The corefID to set.
+       * @return This builder for chaining.
        */
       public Builder setCorefID(
           java.lang.String value) {
@@ -48647,6 +51107,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string corefID = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCorefID() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -48656,6 +51117,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string corefID = 11;</code>
+       * @param value The bytes for corefID to set.
+       * @return This builder for chaining.
        */
       public Builder setCorefIDBytes(
           com.google.protobuf.ByteString value) {
@@ -48675,6 +51138,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @return Whether the objectID field is set.
        */
       public boolean hasObjectID() {
         return ((bitField0_ & 0x00000040) != 0);
@@ -48685,6 +51149,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @return The objectID.
        */
       public java.lang.String getObjectID() {
         java.lang.Object ref = objectID_;
@@ -48706,6 +51171,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @return The bytes for objectID.
        */
       public com.google.protobuf.ByteString
           getObjectIDBytes() {
@@ -48726,6 +51192,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @param value The objectID to set.
+       * @return This builder for chaining.
        */
       public Builder setObjectID(
           java.lang.String value) {
@@ -48743,6 +51211,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearObjectID() {
         bitField0_ = (bitField0_ & ~0x00000040);
@@ -48756,6 +51225,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @param value The bytes for objectID to set.
+       * @return This builder for chaining.
        */
       public Builder setObjectIDBytes(
           com.google.protobuf.ByteString value) {
@@ -48771,18 +51242,22 @@ public final class CoreNLPProtos {
       private int extentStart_ ;
       /**
        * <code>optional uint32 extentStart = 2;</code>
+       * @return Whether the extentStart field is set.
        */
       public boolean hasExtentStart() {
         return ((bitField0_ & 0x00000080) != 0);
       }
       /**
        * <code>optional uint32 extentStart = 2;</code>
+       * @return The extentStart.
        */
       public int getExtentStart() {
         return extentStart_;
       }
       /**
        * <code>optional uint32 extentStart = 2;</code>
+       * @param value The extentStart to set.
+       * @return This builder for chaining.
        */
       public Builder setExtentStart(int value) {
         bitField0_ |= 0x00000080;
@@ -48792,6 +51267,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 extentStart = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearExtentStart() {
         bitField0_ = (bitField0_ & ~0x00000080);
@@ -48803,18 +51279,22 @@ public final class CoreNLPProtos {
       private int extentEnd_ ;
       /**
        * <code>optional uint32 extentEnd = 3;</code>
+       * @return Whether the extentEnd field is set.
        */
       public boolean hasExtentEnd() {
         return ((bitField0_ & 0x00000100) != 0);
       }
       /**
        * <code>optional uint32 extentEnd = 3;</code>
+       * @return The extentEnd.
        */
       public int getExtentEnd() {
         return extentEnd_;
       }
       /**
        * <code>optional uint32 extentEnd = 3;</code>
+       * @param value The extentEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setExtentEnd(int value) {
         bitField0_ |= 0x00000100;
@@ -48824,6 +51304,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 extentEnd = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearExtentEnd() {
         bitField0_ = (bitField0_ & ~0x00000100);
@@ -48835,12 +51316,14 @@ public final class CoreNLPProtos {
       private java.lang.Object type_ = "";
       /**
        * <code>optional string type = 4;</code>
+       * @return Whether the type field is set.
        */
       public boolean hasType() {
         return ((bitField0_ & 0x00000200) != 0);
       }
       /**
        * <code>optional string type = 4;</code>
+       * @return The type.
        */
       public java.lang.String getType() {
         java.lang.Object ref = type_;
@@ -48858,6 +51341,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @return The bytes for type.
        */
       public com.google.protobuf.ByteString
           getTypeBytes() {
@@ -48874,6 +51358,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
        */
       public Builder setType(
           java.lang.String value) {
@@ -48887,6 +51373,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000200);
@@ -48896,6 +51383,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @param value The bytes for type to set.
+       * @return This builder for chaining.
        */
       public Builder setTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -48916,6 +51405,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @return Whether the subtype field is set.
        */
       public boolean hasSubtype() {
         return ((bitField0_ & 0x00000400) != 0);
@@ -48927,6 +51417,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @return The subtype.
        */
       public java.lang.String getSubtype() {
         java.lang.Object ref = subtype_;
@@ -48949,6 +51440,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @return The bytes for subtype.
        */
       public com.google.protobuf.ByteString
           getSubtypeBytes() {
@@ -48970,6 +51462,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @param value The subtype to set.
+       * @return This builder for chaining.
        */
       public Builder setSubtype(
           java.lang.String value) {
@@ -48988,6 +51482,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSubtype() {
         bitField0_ = (bitField0_ & ~0x00000400);
@@ -49002,6 +51497,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @param value The bytes for subtype to set.
+       * @return This builder for chaining.
        */
       public Builder setSubtypeBytes(
           com.google.protobuf.ByteString value) {
@@ -49072,19 +51569,25 @@ public final class CoreNLPProtos {
 
     /**
      * <code>repeated string argName = 6;</code>
+     * @return A list containing the argName.
      */
     java.util.List<java.lang.String>
         getArgNameList();
     /**
      * <code>repeated string argName = 6;</code>
+     * @return The count of argName.
      */
     int getArgNameCount();
     /**
      * <code>repeated string argName = 6;</code>
+     * @param index The index of the element to return.
+     * @return The argName at the given index.
      */
     java.lang.String getArgName(int index);
     /**
      * <code>repeated string argName = 6;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the argName at the given index.
      */
     com.google.protobuf.ByteString
         getArgNameBytes(int index);
@@ -49115,14 +51618,17 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional string signature = 8;</code>
+     * @return Whether the signature field is set.
      */
     boolean hasSignature();
     /**
      * <code>optional string signature = 8;</code>
+     * @return The signature.
      */
     java.lang.String getSignature();
     /**
      * <code>optional string signature = 8;</code>
+     * @return The bytes for signature.
      */
     com.google.protobuf.ByteString
         getSignatureBytes();
@@ -49133,6 +51639,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return Whether the objectID field is set.
      */
     boolean hasObjectID();
     /**
@@ -49141,6 +51648,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return The objectID.
      */
     java.lang.String getObjectID();
     /**
@@ -49149,38 +51657,46 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return The bytes for objectID.
      */
     com.google.protobuf.ByteString
         getObjectIDBytes();
 
     /**
      * <code>optional uint32 extentStart = 2;</code>
+     * @return Whether the extentStart field is set.
      */
     boolean hasExtentStart();
     /**
      * <code>optional uint32 extentStart = 2;</code>
+     * @return The extentStart.
      */
     int getExtentStart();
 
     /**
      * <code>optional uint32 extentEnd = 3;</code>
+     * @return Whether the extentEnd field is set.
      */
     boolean hasExtentEnd();
     /**
      * <code>optional uint32 extentEnd = 3;</code>
+     * @return The extentEnd.
      */
     int getExtentEnd();
 
     /**
      * <code>optional string type = 4;</code>
+     * @return Whether the type field is set.
      */
     boolean hasType();
     /**
      * <code>optional string type = 4;</code>
+     * @return The type.
      */
     java.lang.String getType();
     /**
      * <code>optional string type = 4;</code>
+     * @return The bytes for type.
      */
     com.google.protobuf.ByteString
         getTypeBytes();
@@ -49192,6 +51708,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return Whether the subtype field is set.
      */
     boolean hasSubtype();
     /**
@@ -49201,6 +51718,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return The subtype.
      */
     java.lang.String getSubtype();
     /**
@@ -49210,6 +51728,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return The bytes for subtype.
      */
     com.google.protobuf.ByteString
         getSubtypeBytes();
@@ -49365,6 +51884,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.LazyStringList argName_;
     /**
      * <code>repeated string argName = 6;</code>
+     * @return A list containing the argName.
      */
     public com.google.protobuf.ProtocolStringList
         getArgNameList() {
@@ -49372,18 +51892,23 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated string argName = 6;</code>
+     * @return The count of argName.
      */
     public int getArgNameCount() {
       return argName_.size();
     }
     /**
      * <code>repeated string argName = 6;</code>
+     * @param index The index of the element to return.
+     * @return The argName at the given index.
      */
     public java.lang.String getArgName(int index) {
       return argName_.get(index);
     }
     /**
      * <code>repeated string argName = 6;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the argName at the given index.
      */
     public com.google.protobuf.ByteString
         getArgNameBytes(int index) {
@@ -49429,12 +51954,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object signature_;
     /**
      * <code>optional string signature = 8;</code>
+     * @return Whether the signature field is set.
      */
     public boolean hasSignature() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional string signature = 8;</code>
+     * @return The signature.
      */
     public java.lang.String getSignature() {
       java.lang.Object ref = signature_;
@@ -49452,6 +51979,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string signature = 8;</code>
+     * @return The bytes for signature.
      */
     public com.google.protobuf.ByteString
         getSignatureBytes() {
@@ -49475,6 +52003,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return Whether the objectID field is set.
      */
     public boolean hasObjectID() {
       return ((bitField0_ & 0x00000002) != 0);
@@ -49485,6 +52014,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return The objectID.
      */
     public java.lang.String getObjectID() {
       java.lang.Object ref = objectID_;
@@ -49506,6 +52036,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string objectID = 1;</code>
+     * @return The bytes for objectID.
      */
     public com.google.protobuf.ByteString
         getObjectIDBytes() {
@@ -49525,12 +52056,14 @@ public final class CoreNLPProtos {
     private int extentStart_;
     /**
      * <code>optional uint32 extentStart = 2;</code>
+     * @return Whether the extentStart field is set.
      */
     public boolean hasExtentStart() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional uint32 extentStart = 2;</code>
+     * @return The extentStart.
      */
     public int getExtentStart() {
       return extentStart_;
@@ -49540,12 +52073,14 @@ public final class CoreNLPProtos {
     private int extentEnd_;
     /**
      * <code>optional uint32 extentEnd = 3;</code>
+     * @return Whether the extentEnd field is set.
      */
     public boolean hasExtentEnd() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional uint32 extentEnd = 3;</code>
+     * @return The extentEnd.
      */
     public int getExtentEnd() {
       return extentEnd_;
@@ -49555,12 +52090,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object type_;
     /**
      * <code>optional string type = 4;</code>
+     * @return Whether the type field is set.
      */
     public boolean hasType() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional string type = 4;</code>
+     * @return The type.
      */
     public java.lang.String getType() {
       java.lang.Object ref = type_;
@@ -49578,6 +52115,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string type = 4;</code>
+     * @return The bytes for type.
      */
     public com.google.protobuf.ByteString
         getTypeBytes() {
@@ -49602,6 +52140,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return Whether the subtype field is set.
      */
     public boolean hasSubtype() {
       return ((bitField0_ & 0x00000020) != 0);
@@ -49613,6 +52152,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return The subtype.
      */
     public java.lang.String getSubtype() {
       java.lang.Object ref = subtype_;
@@ -49635,6 +52175,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subtype = 5;</code>
+     * @return The bytes for subtype.
      */
     public com.google.protobuf.ByteString
         getSubtypeBytes() {
@@ -50195,6 +52736,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string argName = 6;</code>
+       * @return A list containing the argName.
        */
       public com.google.protobuf.ProtocolStringList
           getArgNameList() {
@@ -50202,18 +52744,23 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string argName = 6;</code>
+       * @return The count of argName.
        */
       public int getArgNameCount() {
         return argName_.size();
       }
       /**
        * <code>repeated string argName = 6;</code>
+       * @param index The index of the element to return.
+       * @return The argName at the given index.
        */
       public java.lang.String getArgName(int index) {
         return argName_.get(index);
       }
       /**
        * <code>repeated string argName = 6;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the argName at the given index.
        */
       public com.google.protobuf.ByteString
           getArgNameBytes(int index) {
@@ -50221,6 +52768,9 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string argName = 6;</code>
+       * @param index The index to set the value at.
+       * @param value The argName to set.
+       * @return This builder for chaining.
        */
       public Builder setArgName(
           int index, java.lang.String value) {
@@ -50234,6 +52784,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string argName = 6;</code>
+       * @param value The argName to add.
+       * @return This builder for chaining.
        */
       public Builder addArgName(
           java.lang.String value) {
@@ -50247,6 +52799,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string argName = 6;</code>
+       * @param values The argName to add.
+       * @return This builder for chaining.
        */
       public Builder addAllArgName(
           java.lang.Iterable<java.lang.String> values) {
@@ -50258,6 +52812,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string argName = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearArgName() {
         argName_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -50267,6 +52822,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string argName = 6;</code>
+       * @param value The bytes of the argName to add.
+       * @return This builder for chaining.
        */
       public Builder addArgNameBytes(
           com.google.protobuf.ByteString value) {
@@ -50522,12 +53079,14 @@ public final class CoreNLPProtos {
       private java.lang.Object signature_ = "";
       /**
        * <code>optional string signature = 8;</code>
+       * @return Whether the signature field is set.
        */
       public boolean hasSignature() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional string signature = 8;</code>
+       * @return The signature.
        */
       public java.lang.String getSignature() {
         java.lang.Object ref = signature_;
@@ -50545,6 +53104,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string signature = 8;</code>
+       * @return The bytes for signature.
        */
       public com.google.protobuf.ByteString
           getSignatureBytes() {
@@ -50561,6 +53121,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string signature = 8;</code>
+       * @param value The signature to set.
+       * @return This builder for chaining.
        */
       public Builder setSignature(
           java.lang.String value) {
@@ -50574,6 +53136,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string signature = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSignature() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -50583,6 +53146,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string signature = 8;</code>
+       * @param value The bytes for signature to set.
+       * @return This builder for chaining.
        */
       public Builder setSignatureBytes(
           com.google.protobuf.ByteString value) {
@@ -50602,6 +53167,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @return Whether the objectID field is set.
        */
       public boolean hasObjectID() {
         return ((bitField0_ & 0x00000008) != 0);
@@ -50612,6 +53178,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @return The objectID.
        */
       public java.lang.String getObjectID() {
         java.lang.Object ref = objectID_;
@@ -50633,6 +53200,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @return The bytes for objectID.
        */
       public com.google.protobuf.ByteString
           getObjectIDBytes() {
@@ -50653,6 +53221,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @param value The objectID to set.
+       * @return This builder for chaining.
        */
       public Builder setObjectID(
           java.lang.String value) {
@@ -50670,6 +53240,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearObjectID() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -50683,6 +53254,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string objectID = 1;</code>
+       * @param value The bytes for objectID to set.
+       * @return This builder for chaining.
        */
       public Builder setObjectIDBytes(
           com.google.protobuf.ByteString value) {
@@ -50698,18 +53271,22 @@ public final class CoreNLPProtos {
       private int extentStart_ ;
       /**
        * <code>optional uint32 extentStart = 2;</code>
+       * @return Whether the extentStart field is set.
        */
       public boolean hasExtentStart() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional uint32 extentStart = 2;</code>
+       * @return The extentStart.
        */
       public int getExtentStart() {
         return extentStart_;
       }
       /**
        * <code>optional uint32 extentStart = 2;</code>
+       * @param value The extentStart to set.
+       * @return This builder for chaining.
        */
       public Builder setExtentStart(int value) {
         bitField0_ |= 0x00000010;
@@ -50719,6 +53296,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 extentStart = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearExtentStart() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -50730,18 +53308,22 @@ public final class CoreNLPProtos {
       private int extentEnd_ ;
       /**
        * <code>optional uint32 extentEnd = 3;</code>
+       * @return Whether the extentEnd field is set.
        */
       public boolean hasExtentEnd() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional uint32 extentEnd = 3;</code>
+       * @return The extentEnd.
        */
       public int getExtentEnd() {
         return extentEnd_;
       }
       /**
        * <code>optional uint32 extentEnd = 3;</code>
+       * @param value The extentEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setExtentEnd(int value) {
         bitField0_ |= 0x00000020;
@@ -50751,6 +53333,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 extentEnd = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearExtentEnd() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -50762,12 +53345,14 @@ public final class CoreNLPProtos {
       private java.lang.Object type_ = "";
       /**
        * <code>optional string type = 4;</code>
+       * @return Whether the type field is set.
        */
       public boolean hasType() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>optional string type = 4;</code>
+       * @return The type.
        */
       public java.lang.String getType() {
         java.lang.Object ref = type_;
@@ -50785,6 +53370,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @return The bytes for type.
        */
       public com.google.protobuf.ByteString
           getTypeBytes() {
@@ -50801,6 +53387,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
        */
       public Builder setType(
           java.lang.String value) {
@@ -50814,6 +53402,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000040);
@@ -50823,6 +53412,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string type = 4;</code>
+       * @param value The bytes for type to set.
+       * @return This builder for chaining.
        */
       public Builder setTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -50843,6 +53434,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @return Whether the subtype field is set.
        */
       public boolean hasSubtype() {
         return ((bitField0_ & 0x00000080) != 0);
@@ -50854,6 +53446,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @return The subtype.
        */
       public java.lang.String getSubtype() {
         java.lang.Object ref = subtype_;
@@ -50876,6 +53469,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @return The bytes for subtype.
        */
       public com.google.protobuf.ByteString
           getSubtypeBytes() {
@@ -50897,6 +53491,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @param value The subtype to set.
+       * @return This builder for chaining.
        */
       public Builder setSubtype(
           java.lang.String value) {
@@ -50915,6 +53511,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSubtype() {
         bitField0_ = (bitField0_ & ~0x00000080);
@@ -50929,6 +53526,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subtype = 5;</code>
+       * @param value The bytes for subtype to set.
+       * @return This builder for chaining.
        */
       public Builder setSubtypeBytes(
           com.google.protobuf.ByteString value) {
@@ -50999,69 +53598,84 @@ public final class CoreNLPProtos {
 
     /**
      * <code>required string name = 1;</code>
+     * @return Whether the name field is set.
      */
     boolean hasName();
     /**
      * <code>required string name = 1;</code>
+     * @return The name.
      */
     java.lang.String getName();
     /**
      * <code>required string name = 1;</code>
+     * @return The bytes for name.
      */
     com.google.protobuf.ByteString
         getNameBytes();
 
     /**
      * <code>required int32 quantifierSpanBegin = 2;</code>
+     * @return Whether the quantifierSpanBegin field is set.
      */
     boolean hasQuantifierSpanBegin();
     /**
      * <code>required int32 quantifierSpanBegin = 2;</code>
+     * @return The quantifierSpanBegin.
      */
     int getQuantifierSpanBegin();
 
     /**
      * <code>required int32 quantifierSpanEnd = 3;</code>
+     * @return Whether the quantifierSpanEnd field is set.
      */
     boolean hasQuantifierSpanEnd();
     /**
      * <code>required int32 quantifierSpanEnd = 3;</code>
+     * @return The quantifierSpanEnd.
      */
     int getQuantifierSpanEnd();
 
     /**
      * <code>required int32 subjectSpanBegin = 4;</code>
+     * @return Whether the subjectSpanBegin field is set.
      */
     boolean hasSubjectSpanBegin();
     /**
      * <code>required int32 subjectSpanBegin = 4;</code>
+     * @return The subjectSpanBegin.
      */
     int getSubjectSpanBegin();
 
     /**
      * <code>required int32 subjectSpanEnd = 5;</code>
+     * @return Whether the subjectSpanEnd field is set.
      */
     boolean hasSubjectSpanEnd();
     /**
      * <code>required int32 subjectSpanEnd = 5;</code>
+     * @return The subjectSpanEnd.
      */
     int getSubjectSpanEnd();
 
     /**
      * <code>required int32 objectSpanBegin = 6;</code>
+     * @return Whether the objectSpanBegin field is set.
      */
     boolean hasObjectSpanBegin();
     /**
      * <code>required int32 objectSpanBegin = 6;</code>
+     * @return The objectSpanBegin.
      */
     int getObjectSpanBegin();
 
     /**
      * <code>required int32 objectSpanEnd = 7;</code>
+     * @return Whether the objectSpanEnd field is set.
      */
     boolean hasObjectSpanEnd();
     /**
      * <code>required int32 objectSpanEnd = 7;</code>
+     * @return The objectSpanEnd.
      */
     int getObjectSpanEnd();
   }
@@ -51189,12 +53803,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object name_;
     /**
      * <code>required string name = 1;</code>
+     * @return Whether the name field is set.
      */
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>required string name = 1;</code>
+     * @return The name.
      */
     public java.lang.String getName() {
       java.lang.Object ref = name_;
@@ -51212,6 +53828,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>required string name = 1;</code>
+     * @return The bytes for name.
      */
     public com.google.protobuf.ByteString
         getNameBytes() {
@@ -51231,12 +53848,14 @@ public final class CoreNLPProtos {
     private int quantifierSpanBegin_;
     /**
      * <code>required int32 quantifierSpanBegin = 2;</code>
+     * @return Whether the quantifierSpanBegin field is set.
      */
     public boolean hasQuantifierSpanBegin() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>required int32 quantifierSpanBegin = 2;</code>
+     * @return The quantifierSpanBegin.
      */
     public int getQuantifierSpanBegin() {
       return quantifierSpanBegin_;
@@ -51246,12 +53865,14 @@ public final class CoreNLPProtos {
     private int quantifierSpanEnd_;
     /**
      * <code>required int32 quantifierSpanEnd = 3;</code>
+     * @return Whether the quantifierSpanEnd field is set.
      */
     public boolean hasQuantifierSpanEnd() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>required int32 quantifierSpanEnd = 3;</code>
+     * @return The quantifierSpanEnd.
      */
     public int getQuantifierSpanEnd() {
       return quantifierSpanEnd_;
@@ -51261,12 +53882,14 @@ public final class CoreNLPProtos {
     private int subjectSpanBegin_;
     /**
      * <code>required int32 subjectSpanBegin = 4;</code>
+     * @return Whether the subjectSpanBegin field is set.
      */
     public boolean hasSubjectSpanBegin() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>required int32 subjectSpanBegin = 4;</code>
+     * @return The subjectSpanBegin.
      */
     public int getSubjectSpanBegin() {
       return subjectSpanBegin_;
@@ -51276,12 +53899,14 @@ public final class CoreNLPProtos {
     private int subjectSpanEnd_;
     /**
      * <code>required int32 subjectSpanEnd = 5;</code>
+     * @return Whether the subjectSpanEnd field is set.
      */
     public boolean hasSubjectSpanEnd() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>required int32 subjectSpanEnd = 5;</code>
+     * @return The subjectSpanEnd.
      */
     public int getSubjectSpanEnd() {
       return subjectSpanEnd_;
@@ -51291,12 +53916,14 @@ public final class CoreNLPProtos {
     private int objectSpanBegin_;
     /**
      * <code>required int32 objectSpanBegin = 6;</code>
+     * @return Whether the objectSpanBegin field is set.
      */
     public boolean hasObjectSpanBegin() {
       return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>required int32 objectSpanBegin = 6;</code>
+     * @return The objectSpanBegin.
      */
     public int getObjectSpanBegin() {
       return objectSpanBegin_;
@@ -51306,12 +53933,14 @@ public final class CoreNLPProtos {
     private int objectSpanEnd_;
     /**
      * <code>required int32 objectSpanEnd = 7;</code>
+     * @return Whether the objectSpanEnd field is set.
      */
     public boolean hasObjectSpanEnd() {
       return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <code>required int32 objectSpanEnd = 7;</code>
+     * @return The objectSpanEnd.
      */
     public int getObjectSpanEnd() {
       return objectSpanEnd_;
@@ -51838,12 +54467,14 @@ public final class CoreNLPProtos {
       private java.lang.Object name_ = "";
       /**
        * <code>required string name = 1;</code>
+       * @return Whether the name field is set.
        */
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required string name = 1;</code>
+       * @return The name.
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
@@ -51861,6 +54492,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string name = 1;</code>
+       * @return The bytes for name.
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -51877,6 +54509,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
        */
       public Builder setName(
           java.lang.String value) {
@@ -51890,6 +54524,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string name = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearName() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -51899,6 +54534,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
@@ -51914,18 +54551,22 @@ public final class CoreNLPProtos {
       private int quantifierSpanBegin_ ;
       /**
        * <code>required int32 quantifierSpanBegin = 2;</code>
+       * @return Whether the quantifierSpanBegin field is set.
        */
       public boolean hasQuantifierSpanBegin() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>required int32 quantifierSpanBegin = 2;</code>
+       * @return The quantifierSpanBegin.
        */
       public int getQuantifierSpanBegin() {
         return quantifierSpanBegin_;
       }
       /**
        * <code>required int32 quantifierSpanBegin = 2;</code>
+       * @param value The quantifierSpanBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setQuantifierSpanBegin(int value) {
         bitField0_ |= 0x00000002;
@@ -51935,6 +54576,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required int32 quantifierSpanBegin = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearQuantifierSpanBegin() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -51946,18 +54588,22 @@ public final class CoreNLPProtos {
       private int quantifierSpanEnd_ ;
       /**
        * <code>required int32 quantifierSpanEnd = 3;</code>
+       * @return Whether the quantifierSpanEnd field is set.
        */
       public boolean hasQuantifierSpanEnd() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>required int32 quantifierSpanEnd = 3;</code>
+       * @return The quantifierSpanEnd.
        */
       public int getQuantifierSpanEnd() {
         return quantifierSpanEnd_;
       }
       /**
        * <code>required int32 quantifierSpanEnd = 3;</code>
+       * @param value The quantifierSpanEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setQuantifierSpanEnd(int value) {
         bitField0_ |= 0x00000004;
@@ -51967,6 +54613,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required int32 quantifierSpanEnd = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearQuantifierSpanEnd() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -51978,18 +54625,22 @@ public final class CoreNLPProtos {
       private int subjectSpanBegin_ ;
       /**
        * <code>required int32 subjectSpanBegin = 4;</code>
+       * @return Whether the subjectSpanBegin field is set.
        */
       public boolean hasSubjectSpanBegin() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>required int32 subjectSpanBegin = 4;</code>
+       * @return The subjectSpanBegin.
        */
       public int getSubjectSpanBegin() {
         return subjectSpanBegin_;
       }
       /**
        * <code>required int32 subjectSpanBegin = 4;</code>
+       * @param value The subjectSpanBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setSubjectSpanBegin(int value) {
         bitField0_ |= 0x00000008;
@@ -51999,6 +54650,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required int32 subjectSpanBegin = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSubjectSpanBegin() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -52010,18 +54662,22 @@ public final class CoreNLPProtos {
       private int subjectSpanEnd_ ;
       /**
        * <code>required int32 subjectSpanEnd = 5;</code>
+       * @return Whether the subjectSpanEnd field is set.
        */
       public boolean hasSubjectSpanEnd() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>required int32 subjectSpanEnd = 5;</code>
+       * @return The subjectSpanEnd.
        */
       public int getSubjectSpanEnd() {
         return subjectSpanEnd_;
       }
       /**
        * <code>required int32 subjectSpanEnd = 5;</code>
+       * @param value The subjectSpanEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setSubjectSpanEnd(int value) {
         bitField0_ |= 0x00000010;
@@ -52031,6 +54687,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required int32 subjectSpanEnd = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSubjectSpanEnd() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -52042,18 +54699,22 @@ public final class CoreNLPProtos {
       private int objectSpanBegin_ ;
       /**
        * <code>required int32 objectSpanBegin = 6;</code>
+       * @return Whether the objectSpanBegin field is set.
        */
       public boolean hasObjectSpanBegin() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>required int32 objectSpanBegin = 6;</code>
+       * @return The objectSpanBegin.
        */
       public int getObjectSpanBegin() {
         return objectSpanBegin_;
       }
       /**
        * <code>required int32 objectSpanBegin = 6;</code>
+       * @param value The objectSpanBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setObjectSpanBegin(int value) {
         bitField0_ |= 0x00000020;
@@ -52063,6 +54724,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required int32 objectSpanBegin = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearObjectSpanBegin() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -52074,18 +54736,22 @@ public final class CoreNLPProtos {
       private int objectSpanEnd_ ;
       /**
        * <code>required int32 objectSpanEnd = 7;</code>
+       * @return Whether the objectSpanEnd field is set.
        */
       public boolean hasObjectSpanEnd() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>required int32 objectSpanEnd = 7;</code>
+       * @return The objectSpanEnd.
        */
       public int getObjectSpanEnd() {
         return objectSpanEnd_;
       }
       /**
        * <code>required int32 objectSpanEnd = 7;</code>
+       * @param value The objectSpanEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setObjectSpanEnd(int value) {
         bitField0_ |= 0x00000040;
@@ -52095,6 +54761,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required int32 objectSpanEnd = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearObjectSpanEnd() {
         bitField0_ = (bitField0_ & ~0x00000040);
@@ -52161,64 +54828,78 @@ public final class CoreNLPProtos {
 
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
+     * @return Whether the projectEquivalence field is set.
      */
     boolean hasProjectEquivalence();
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
+     * @return The projectEquivalence.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectEquivalence();
 
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
+     * @return Whether the projectForwardEntailment field is set.
      */
     boolean hasProjectForwardEntailment();
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
+     * @return The projectForwardEntailment.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectForwardEntailment();
 
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
+     * @return Whether the projectReverseEntailment field is set.
      */
     boolean hasProjectReverseEntailment();
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
+     * @return The projectReverseEntailment.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectReverseEntailment();
 
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
+     * @return Whether the projectNegation field is set.
      */
     boolean hasProjectNegation();
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
+     * @return The projectNegation.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectNegation();
 
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
+     * @return Whether the projectAlternation field is set.
      */
     boolean hasProjectAlternation();
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
+     * @return The projectAlternation.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectAlternation();
 
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
+     * @return Whether the projectCover field is set.
      */
     boolean hasProjectCover();
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
+     * @return The projectCover.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectCover();
 
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
+     * @return Whether the projectIndependence field is set.
      */
     boolean hasProjectIndependence();
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
+     * @return The projectIndependence.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectIndependence();
   }
@@ -52400,12 +55081,14 @@ public final class CoreNLPProtos {
     private int projectEquivalence_;
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
+     * @return Whether the projectEquivalence field is set.
      */
     public boolean hasProjectEquivalence() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
+     * @return The projectEquivalence.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectEquivalence() {
       @SuppressWarnings("deprecation")
@@ -52417,12 +55100,14 @@ public final class CoreNLPProtos {
     private int projectForwardEntailment_;
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
+     * @return Whether the projectForwardEntailment field is set.
      */
     public boolean hasProjectForwardEntailment() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
+     * @return The projectForwardEntailment.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectForwardEntailment() {
       @SuppressWarnings("deprecation")
@@ -52434,12 +55119,14 @@ public final class CoreNLPProtos {
     private int projectReverseEntailment_;
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
+     * @return Whether the projectReverseEntailment field is set.
      */
     public boolean hasProjectReverseEntailment() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
+     * @return The projectReverseEntailment.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectReverseEntailment() {
       @SuppressWarnings("deprecation")
@@ -52451,12 +55138,14 @@ public final class CoreNLPProtos {
     private int projectNegation_;
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
+     * @return Whether the projectNegation field is set.
      */
     public boolean hasProjectNegation() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
+     * @return The projectNegation.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectNegation() {
       @SuppressWarnings("deprecation")
@@ -52468,12 +55157,14 @@ public final class CoreNLPProtos {
     private int projectAlternation_;
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
+     * @return Whether the projectAlternation field is set.
      */
     public boolean hasProjectAlternation() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
+     * @return The projectAlternation.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectAlternation() {
       @SuppressWarnings("deprecation")
@@ -52485,12 +55176,14 @@ public final class CoreNLPProtos {
     private int projectCover_;
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
+     * @return Whether the projectCover field is set.
      */
     public boolean hasProjectCover() {
       return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
+     * @return The projectCover.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectCover() {
       @SuppressWarnings("deprecation")
@@ -52502,12 +55195,14 @@ public final class CoreNLPProtos {
     private int projectIndependence_;
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
+     * @return Whether the projectIndependence field is set.
      */
     public boolean hasProjectIndependence() {
       return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
+     * @return The projectIndependence.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectIndependence() {
       @SuppressWarnings("deprecation")
@@ -53028,12 +55723,14 @@ public final class CoreNLPProtos {
       private int projectEquivalence_ = 0;
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
+       * @return Whether the projectEquivalence field is set.
        */
       public boolean hasProjectEquivalence() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
+       * @return The projectEquivalence.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectEquivalence() {
         @SuppressWarnings("deprecation")
@@ -53042,6 +55739,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
+       * @param value The projectEquivalence to set.
+       * @return This builder for chaining.
        */
       public Builder setProjectEquivalence(edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value) {
         if (value == null) {
@@ -53054,6 +55753,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearProjectEquivalence() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -53065,12 +55765,14 @@ public final class CoreNLPProtos {
       private int projectForwardEntailment_ = 0;
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
+       * @return Whether the projectForwardEntailment field is set.
        */
       public boolean hasProjectForwardEntailment() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
+       * @return The projectForwardEntailment.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectForwardEntailment() {
         @SuppressWarnings("deprecation")
@@ -53079,6 +55781,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
+       * @param value The projectForwardEntailment to set.
+       * @return This builder for chaining.
        */
       public Builder setProjectForwardEntailment(edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value) {
         if (value == null) {
@@ -53091,6 +55795,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearProjectForwardEntailment() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -53102,12 +55807,14 @@ public final class CoreNLPProtos {
       private int projectReverseEntailment_ = 0;
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
+       * @return Whether the projectReverseEntailment field is set.
        */
       public boolean hasProjectReverseEntailment() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
+       * @return The projectReverseEntailment.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectReverseEntailment() {
         @SuppressWarnings("deprecation")
@@ -53116,6 +55823,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
+       * @param value The projectReverseEntailment to set.
+       * @return This builder for chaining.
        */
       public Builder setProjectReverseEntailment(edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value) {
         if (value == null) {
@@ -53128,6 +55837,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearProjectReverseEntailment() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -53139,12 +55849,14 @@ public final class CoreNLPProtos {
       private int projectNegation_ = 0;
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
+       * @return Whether the projectNegation field is set.
        */
       public boolean hasProjectNegation() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
+       * @return The projectNegation.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectNegation() {
         @SuppressWarnings("deprecation")
@@ -53153,6 +55865,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
+       * @param value The projectNegation to set.
+       * @return This builder for chaining.
        */
       public Builder setProjectNegation(edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value) {
         if (value == null) {
@@ -53165,6 +55879,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearProjectNegation() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -53176,12 +55891,14 @@ public final class CoreNLPProtos {
       private int projectAlternation_ = 0;
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
+       * @return Whether the projectAlternation field is set.
        */
       public boolean hasProjectAlternation() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
+       * @return The projectAlternation.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectAlternation() {
         @SuppressWarnings("deprecation")
@@ -53190,6 +55907,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
+       * @param value The projectAlternation to set.
+       * @return This builder for chaining.
        */
       public Builder setProjectAlternation(edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value) {
         if (value == null) {
@@ -53202,6 +55921,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearProjectAlternation() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -53213,12 +55933,14 @@ public final class CoreNLPProtos {
       private int projectCover_ = 0;
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
+       * @return Whether the projectCover field is set.
        */
       public boolean hasProjectCover() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
+       * @return The projectCover.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectCover() {
         @SuppressWarnings("deprecation")
@@ -53227,6 +55949,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
+       * @param value The projectCover to set.
+       * @return This builder for chaining.
        */
       public Builder setProjectCover(edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value) {
         if (value == null) {
@@ -53239,6 +55963,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearProjectCover() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -53250,12 +55975,14 @@ public final class CoreNLPProtos {
       private int projectIndependence_ = 0;
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
+       * @return Whether the projectIndependence field is set.
        */
       public boolean hasProjectIndependence() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
+       * @return The projectIndependence.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectIndependence() {
         @SuppressWarnings("deprecation")
@@ -53264,6 +55991,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
+       * @param value The projectIndependence to set.
+       * @return This builder for chaining.
        */
       public Builder setProjectIndependence(edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value) {
         if (value == null) {
@@ -53276,6 +56005,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearProjectIndependence() {
         bitField0_ = (bitField0_ & ~0x00000040);
@@ -53342,79 +56072,96 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional uint32 sentenceIndex = 1;</code>
+     * @return Whether the sentenceIndex field is set.
      */
     boolean hasSentenceIndex();
     /**
      * <code>optional uint32 sentenceIndex = 1;</code>
+     * @return The sentenceIndex.
      */
     int getSentenceIndex();
 
     /**
      * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
+     * @return Whether the tokenStartInSentenceInclusive field is set.
      */
     boolean hasTokenStartInSentenceInclusive();
     /**
      * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
+     * @return The tokenStartInSentenceInclusive.
      */
     int getTokenStartInSentenceInclusive();
 
     /**
      * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
+     * @return Whether the tokenEndInSentenceExclusive field is set.
      */
     boolean hasTokenEndInSentenceExclusive();
     /**
      * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
+     * @return The tokenEndInSentenceExclusive.
      */
     int getTokenEndInSentenceExclusive();
 
     /**
      * <code>required string ner = 4;</code>
+     * @return Whether the ner field is set.
      */
     boolean hasNer();
     /**
      * <code>required string ner = 4;</code>
+     * @return The ner.
      */
     java.lang.String getNer();
     /**
      * <code>required string ner = 4;</code>
+     * @return The bytes for ner.
      */
     com.google.protobuf.ByteString
         getNerBytes();
 
     /**
      * <code>optional string normalizedNER = 5;</code>
+     * @return Whether the normalizedNER field is set.
      */
     boolean hasNormalizedNER();
     /**
      * <code>optional string normalizedNER = 5;</code>
+     * @return The normalizedNER.
      */
     java.lang.String getNormalizedNER();
     /**
      * <code>optional string normalizedNER = 5;</code>
+     * @return The bytes for normalizedNER.
      */
     com.google.protobuf.ByteString
         getNormalizedNERBytes();
 
     /**
      * <code>optional string entityType = 6;</code>
+     * @return Whether the entityType field is set.
      */
     boolean hasEntityType();
     /**
      * <code>optional string entityType = 6;</code>
+     * @return The entityType.
      */
     java.lang.String getEntityType();
     /**
      * <code>optional string entityType = 6;</code>
+     * @return The bytes for entityType.
      */
     com.google.protobuf.ByteString
         getEntityTypeBytes();
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Timex timex = 7;</code>
+     * @return Whether the timex field is set.
      */
     boolean hasTimex();
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Timex timex = 7;</code>
+     * @return The timex.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.Timex getTimex();
     /**
@@ -53424,60 +56171,73 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional string wikipediaEntity = 8;</code>
+     * @return Whether the wikipediaEntity field is set.
      */
     boolean hasWikipediaEntity();
     /**
      * <code>optional string wikipediaEntity = 8;</code>
+     * @return The wikipediaEntity.
      */
     java.lang.String getWikipediaEntity();
     /**
      * <code>optional string wikipediaEntity = 8;</code>
+     * @return The bytes for wikipediaEntity.
      */
     com.google.protobuf.ByteString
         getWikipediaEntityBytes();
 
     /**
      * <code>optional string gender = 9;</code>
+     * @return Whether the gender field is set.
      */
     boolean hasGender();
     /**
      * <code>optional string gender = 9;</code>
+     * @return The gender.
      */
     java.lang.String getGender();
     /**
      * <code>optional string gender = 9;</code>
+     * @return The bytes for gender.
      */
     com.google.protobuf.ByteString
         getGenderBytes();
 
     /**
      * <code>optional uint32 entityMentionIndex = 10;</code>
+     * @return Whether the entityMentionIndex field is set.
      */
     boolean hasEntityMentionIndex();
     /**
      * <code>optional uint32 entityMentionIndex = 10;</code>
+     * @return The entityMentionIndex.
      */
     int getEntityMentionIndex();
 
     /**
      * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
+     * @return Whether the canonicalEntityMentionIndex field is set.
      */
     boolean hasCanonicalEntityMentionIndex();
     /**
      * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
+     * @return The canonicalEntityMentionIndex.
      */
     int getCanonicalEntityMentionIndex();
 
     /**
      * <code>optional string entityMentionText = 12;</code>
+     * @return Whether the entityMentionText field is set.
      */
     boolean hasEntityMentionText();
     /**
      * <code>optional string entityMentionText = 12;</code>
+     * @return The entityMentionText.
      */
     java.lang.String getEntityMentionText();
     /**
      * <code>optional string entityMentionText = 12;</code>
+     * @return The bytes for entityMentionText.
      */
     com.google.protobuf.ByteString
         getEntityMentionTextBytes();
@@ -53649,12 +56409,14 @@ public final class CoreNLPProtos {
     private int sentenceIndex_;
     /**
      * <code>optional uint32 sentenceIndex = 1;</code>
+     * @return Whether the sentenceIndex field is set.
      */
     public boolean hasSentenceIndex() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional uint32 sentenceIndex = 1;</code>
+     * @return The sentenceIndex.
      */
     public int getSentenceIndex() {
       return sentenceIndex_;
@@ -53664,12 +56426,14 @@ public final class CoreNLPProtos {
     private int tokenStartInSentenceInclusive_;
     /**
      * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
+     * @return Whether the tokenStartInSentenceInclusive field is set.
      */
     public boolean hasTokenStartInSentenceInclusive() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
+     * @return The tokenStartInSentenceInclusive.
      */
     public int getTokenStartInSentenceInclusive() {
       return tokenStartInSentenceInclusive_;
@@ -53679,12 +56443,14 @@ public final class CoreNLPProtos {
     private int tokenEndInSentenceExclusive_;
     /**
      * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
+     * @return Whether the tokenEndInSentenceExclusive field is set.
      */
     public boolean hasTokenEndInSentenceExclusive() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
+     * @return The tokenEndInSentenceExclusive.
      */
     public int getTokenEndInSentenceExclusive() {
       return tokenEndInSentenceExclusive_;
@@ -53694,12 +56460,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object ner_;
     /**
      * <code>required string ner = 4;</code>
+     * @return Whether the ner field is set.
      */
     public boolean hasNer() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>required string ner = 4;</code>
+     * @return The ner.
      */
     public java.lang.String getNer() {
       java.lang.Object ref = ner_;
@@ -53717,6 +56485,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>required string ner = 4;</code>
+     * @return The bytes for ner.
      */
     public com.google.protobuf.ByteString
         getNerBytes() {
@@ -53736,12 +56505,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object normalizedNER_;
     /**
      * <code>optional string normalizedNER = 5;</code>
+     * @return Whether the normalizedNER field is set.
      */
     public boolean hasNormalizedNER() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional string normalizedNER = 5;</code>
+     * @return The normalizedNER.
      */
     public java.lang.String getNormalizedNER() {
       java.lang.Object ref = normalizedNER_;
@@ -53759,6 +56530,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string normalizedNER = 5;</code>
+     * @return The bytes for normalizedNER.
      */
     public com.google.protobuf.ByteString
         getNormalizedNERBytes() {
@@ -53778,12 +56550,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object entityType_;
     /**
      * <code>optional string entityType = 6;</code>
+     * @return Whether the entityType field is set.
      */
     public boolean hasEntityType() {
       return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>optional string entityType = 6;</code>
+     * @return The entityType.
      */
     public java.lang.String getEntityType() {
       java.lang.Object ref = entityType_;
@@ -53801,6 +56575,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string entityType = 6;</code>
+     * @return The bytes for entityType.
      */
     public com.google.protobuf.ByteString
         getEntityTypeBytes() {
@@ -53820,12 +56595,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.Timex timex_;
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Timex timex = 7;</code>
+     * @return Whether the timex field is set.
      */
     public boolean hasTimex() {
       return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Timex timex = 7;</code>
+     * @return The timex.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Timex getTimex() {
       return timex_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.getDefaultInstance() : timex_;
@@ -53841,12 +56618,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object wikipediaEntity_;
     /**
      * <code>optional string wikipediaEntity = 8;</code>
+     * @return Whether the wikipediaEntity field is set.
      */
     public boolean hasWikipediaEntity() {
       return ((bitField0_ & 0x00000080) != 0);
     }
     /**
      * <code>optional string wikipediaEntity = 8;</code>
+     * @return The wikipediaEntity.
      */
     public java.lang.String getWikipediaEntity() {
       java.lang.Object ref = wikipediaEntity_;
@@ -53864,6 +56643,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string wikipediaEntity = 8;</code>
+     * @return The bytes for wikipediaEntity.
      */
     public com.google.protobuf.ByteString
         getWikipediaEntityBytes() {
@@ -53883,12 +56663,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object gender_;
     /**
      * <code>optional string gender = 9;</code>
+     * @return Whether the gender field is set.
      */
     public boolean hasGender() {
       return ((bitField0_ & 0x00000100) != 0);
     }
     /**
      * <code>optional string gender = 9;</code>
+     * @return The gender.
      */
     public java.lang.String getGender() {
       java.lang.Object ref = gender_;
@@ -53906,6 +56688,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string gender = 9;</code>
+     * @return The bytes for gender.
      */
     public com.google.protobuf.ByteString
         getGenderBytes() {
@@ -53925,12 +56708,14 @@ public final class CoreNLPProtos {
     private int entityMentionIndex_;
     /**
      * <code>optional uint32 entityMentionIndex = 10;</code>
+     * @return Whether the entityMentionIndex field is set.
      */
     public boolean hasEntityMentionIndex() {
       return ((bitField0_ & 0x00000200) != 0);
     }
     /**
      * <code>optional uint32 entityMentionIndex = 10;</code>
+     * @return The entityMentionIndex.
      */
     public int getEntityMentionIndex() {
       return entityMentionIndex_;
@@ -53940,12 +56725,14 @@ public final class CoreNLPProtos {
     private int canonicalEntityMentionIndex_;
     /**
      * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
+     * @return Whether the canonicalEntityMentionIndex field is set.
      */
     public boolean hasCanonicalEntityMentionIndex() {
       return ((bitField0_ & 0x00000400) != 0);
     }
     /**
      * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
+     * @return The canonicalEntityMentionIndex.
      */
     public int getCanonicalEntityMentionIndex() {
       return canonicalEntityMentionIndex_;
@@ -53955,12 +56742,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object entityMentionText_;
     /**
      * <code>optional string entityMentionText = 12;</code>
+     * @return Whether the entityMentionText field is set.
      */
     public boolean hasEntityMentionText() {
       return ((bitField0_ & 0x00000800) != 0);
     }
     /**
      * <code>optional string entityMentionText = 12;</code>
+     * @return The entityMentionText.
      */
     public java.lang.String getEntityMentionText() {
       java.lang.Object ref = entityMentionText_;
@@ -53978,6 +56767,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string entityMentionText = 12;</code>
+     * @return The bytes for entityMentionText.
      */
     public com.google.protobuf.ByteString
         getEntityMentionTextBytes() {
@@ -54625,18 +57415,22 @@ public final class CoreNLPProtos {
       private int sentenceIndex_ ;
       /**
        * <code>optional uint32 sentenceIndex = 1;</code>
+       * @return Whether the sentenceIndex field is set.
        */
       public boolean hasSentenceIndex() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional uint32 sentenceIndex = 1;</code>
+       * @return The sentenceIndex.
        */
       public int getSentenceIndex() {
         return sentenceIndex_;
       }
       /**
        * <code>optional uint32 sentenceIndex = 1;</code>
+       * @param value The sentenceIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setSentenceIndex(int value) {
         bitField0_ |= 0x00000001;
@@ -54646,6 +57440,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 sentenceIndex = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentenceIndex() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -54657,18 +57452,22 @@ public final class CoreNLPProtos {
       private int tokenStartInSentenceInclusive_ ;
       /**
        * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
+       * @return Whether the tokenStartInSentenceInclusive field is set.
        */
       public boolean hasTokenStartInSentenceInclusive() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
+       * @return The tokenStartInSentenceInclusive.
        */
       public int getTokenStartInSentenceInclusive() {
         return tokenStartInSentenceInclusive_;
       }
       /**
        * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
+       * @param value The tokenStartInSentenceInclusive to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenStartInSentenceInclusive(int value) {
         bitField0_ |= 0x00000002;
@@ -54678,6 +57477,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenStartInSentenceInclusive() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -54689,18 +57489,22 @@ public final class CoreNLPProtos {
       private int tokenEndInSentenceExclusive_ ;
       /**
        * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
+       * @return Whether the tokenEndInSentenceExclusive field is set.
        */
       public boolean hasTokenEndInSentenceExclusive() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
+       * @return The tokenEndInSentenceExclusive.
        */
       public int getTokenEndInSentenceExclusive() {
         return tokenEndInSentenceExclusive_;
       }
       /**
        * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
+       * @param value The tokenEndInSentenceExclusive to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenEndInSentenceExclusive(int value) {
         bitField0_ |= 0x00000004;
@@ -54710,6 +57514,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenEndInSentenceExclusive() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -54721,12 +57526,14 @@ public final class CoreNLPProtos {
       private java.lang.Object ner_ = "";
       /**
        * <code>required string ner = 4;</code>
+       * @return Whether the ner field is set.
        */
       public boolean hasNer() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>required string ner = 4;</code>
+       * @return The ner.
        */
       public java.lang.String getNer() {
         java.lang.Object ref = ner_;
@@ -54744,6 +57551,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string ner = 4;</code>
+       * @return The bytes for ner.
        */
       public com.google.protobuf.ByteString
           getNerBytes() {
@@ -54760,6 +57568,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string ner = 4;</code>
+       * @param value The ner to set.
+       * @return This builder for chaining.
        */
       public Builder setNer(
           java.lang.String value) {
@@ -54773,6 +57583,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string ner = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNer() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -54782,6 +57593,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required string ner = 4;</code>
+       * @param value The bytes for ner to set.
+       * @return This builder for chaining.
        */
       public Builder setNerBytes(
           com.google.protobuf.ByteString value) {
@@ -54797,12 +57610,14 @@ public final class CoreNLPProtos {
       private java.lang.Object normalizedNER_ = "";
       /**
        * <code>optional string normalizedNER = 5;</code>
+       * @return Whether the normalizedNER field is set.
        */
       public boolean hasNormalizedNER() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional string normalizedNER = 5;</code>
+       * @return The normalizedNER.
        */
       public java.lang.String getNormalizedNER() {
         java.lang.Object ref = normalizedNER_;
@@ -54820,6 +57635,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string normalizedNER = 5;</code>
+       * @return The bytes for normalizedNER.
        */
       public com.google.protobuf.ByteString
           getNormalizedNERBytes() {
@@ -54836,6 +57652,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string normalizedNER = 5;</code>
+       * @param value The normalizedNER to set.
+       * @return This builder for chaining.
        */
       public Builder setNormalizedNER(
           java.lang.String value) {
@@ -54849,6 +57667,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string normalizedNER = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNormalizedNER() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -54858,6 +57677,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string normalizedNER = 5;</code>
+       * @param value The bytes for normalizedNER to set.
+       * @return This builder for chaining.
        */
       public Builder setNormalizedNERBytes(
           com.google.protobuf.ByteString value) {
@@ -54873,12 +57694,14 @@ public final class CoreNLPProtos {
       private java.lang.Object entityType_ = "";
       /**
        * <code>optional string entityType = 6;</code>
+       * @return Whether the entityType field is set.
        */
       public boolean hasEntityType() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional string entityType = 6;</code>
+       * @return The entityType.
        */
       public java.lang.String getEntityType() {
         java.lang.Object ref = entityType_;
@@ -54896,6 +57719,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string entityType = 6;</code>
+       * @return The bytes for entityType.
        */
       public com.google.protobuf.ByteString
           getEntityTypeBytes() {
@@ -54912,6 +57736,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string entityType = 6;</code>
+       * @param value The entityType to set.
+       * @return This builder for chaining.
        */
       public Builder setEntityType(
           java.lang.String value) {
@@ -54925,6 +57751,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string entityType = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEntityType() {
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -54934,6 +57761,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string entityType = 6;</code>
+       * @param value The bytes for entityType to set.
+       * @return This builder for chaining.
        */
       public Builder setEntityTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -54951,12 +57780,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Timex, edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TimexOrBuilder> timexBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Timex timex = 7;</code>
+       * @return Whether the timex field is set.
        */
       public boolean hasTimex() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Timex timex = 7;</code>
+       * @return The timex.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Timex getTimex() {
         if (timexBuilder_ == null) {
@@ -55067,12 +57898,14 @@ public final class CoreNLPProtos {
       private java.lang.Object wikipediaEntity_ = "";
       /**
        * <code>optional string wikipediaEntity = 8;</code>
+       * @return Whether the wikipediaEntity field is set.
        */
       public boolean hasWikipediaEntity() {
         return ((bitField0_ & 0x00000080) != 0);
       }
       /**
        * <code>optional string wikipediaEntity = 8;</code>
+       * @return The wikipediaEntity.
        */
       public java.lang.String getWikipediaEntity() {
         java.lang.Object ref = wikipediaEntity_;
@@ -55090,6 +57923,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string wikipediaEntity = 8;</code>
+       * @return The bytes for wikipediaEntity.
        */
       public com.google.protobuf.ByteString
           getWikipediaEntityBytes() {
@@ -55106,6 +57940,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string wikipediaEntity = 8;</code>
+       * @param value The wikipediaEntity to set.
+       * @return This builder for chaining.
        */
       public Builder setWikipediaEntity(
           java.lang.String value) {
@@ -55119,6 +57955,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string wikipediaEntity = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWikipediaEntity() {
         bitField0_ = (bitField0_ & ~0x00000080);
@@ -55128,6 +57965,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string wikipediaEntity = 8;</code>
+       * @param value The bytes for wikipediaEntity to set.
+       * @return This builder for chaining.
        */
       public Builder setWikipediaEntityBytes(
           com.google.protobuf.ByteString value) {
@@ -55143,12 +57982,14 @@ public final class CoreNLPProtos {
       private java.lang.Object gender_ = "";
       /**
        * <code>optional string gender = 9;</code>
+       * @return Whether the gender field is set.
        */
       public boolean hasGender() {
         return ((bitField0_ & 0x00000100) != 0);
       }
       /**
        * <code>optional string gender = 9;</code>
+       * @return The gender.
        */
       public java.lang.String getGender() {
         java.lang.Object ref = gender_;
@@ -55166,6 +58007,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string gender = 9;</code>
+       * @return The bytes for gender.
        */
       public com.google.protobuf.ByteString
           getGenderBytes() {
@@ -55182,6 +58024,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string gender = 9;</code>
+       * @param value The gender to set.
+       * @return This builder for chaining.
        */
       public Builder setGender(
           java.lang.String value) {
@@ -55195,6 +58039,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string gender = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGender() {
         bitField0_ = (bitField0_ & ~0x00000100);
@@ -55204,6 +58049,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string gender = 9;</code>
+       * @param value The bytes for gender to set.
+       * @return This builder for chaining.
        */
       public Builder setGenderBytes(
           com.google.protobuf.ByteString value) {
@@ -55219,18 +58066,22 @@ public final class CoreNLPProtos {
       private int entityMentionIndex_ ;
       /**
        * <code>optional uint32 entityMentionIndex = 10;</code>
+       * @return Whether the entityMentionIndex field is set.
        */
       public boolean hasEntityMentionIndex() {
         return ((bitField0_ & 0x00000200) != 0);
       }
       /**
        * <code>optional uint32 entityMentionIndex = 10;</code>
+       * @return The entityMentionIndex.
        */
       public int getEntityMentionIndex() {
         return entityMentionIndex_;
       }
       /**
        * <code>optional uint32 entityMentionIndex = 10;</code>
+       * @param value The entityMentionIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setEntityMentionIndex(int value) {
         bitField0_ |= 0x00000200;
@@ -55240,6 +58091,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 entityMentionIndex = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEntityMentionIndex() {
         bitField0_ = (bitField0_ & ~0x00000200);
@@ -55251,18 +58103,22 @@ public final class CoreNLPProtos {
       private int canonicalEntityMentionIndex_ ;
       /**
        * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
+       * @return Whether the canonicalEntityMentionIndex field is set.
        */
       public boolean hasCanonicalEntityMentionIndex() {
         return ((bitField0_ & 0x00000400) != 0);
       }
       /**
        * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
+       * @return The canonicalEntityMentionIndex.
        */
       public int getCanonicalEntityMentionIndex() {
         return canonicalEntityMentionIndex_;
       }
       /**
        * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
+       * @param value The canonicalEntityMentionIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setCanonicalEntityMentionIndex(int value) {
         bitField0_ |= 0x00000400;
@@ -55272,6 +58128,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCanonicalEntityMentionIndex() {
         bitField0_ = (bitField0_ & ~0x00000400);
@@ -55283,12 +58140,14 @@ public final class CoreNLPProtos {
       private java.lang.Object entityMentionText_ = "";
       /**
        * <code>optional string entityMentionText = 12;</code>
+       * @return Whether the entityMentionText field is set.
        */
       public boolean hasEntityMentionText() {
         return ((bitField0_ & 0x00000800) != 0);
       }
       /**
        * <code>optional string entityMentionText = 12;</code>
+       * @return The entityMentionText.
        */
       public java.lang.String getEntityMentionText() {
         java.lang.Object ref = entityMentionText_;
@@ -55306,6 +58165,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string entityMentionText = 12;</code>
+       * @return The bytes for entityMentionText.
        */
       public com.google.protobuf.ByteString
           getEntityMentionTextBytes() {
@@ -55322,6 +58182,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string entityMentionText = 12;</code>
+       * @param value The entityMentionText to set.
+       * @return This builder for chaining.
        */
       public Builder setEntityMentionText(
           java.lang.String value) {
@@ -55335,6 +58197,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string entityMentionText = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEntityMentionText() {
         bitField0_ = (bitField0_ & ~0x00000800);
@@ -55344,6 +58207,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string entityMentionText = 12;</code>
+       * @param value The bytes for entityMentionText to set.
+       * @return This builder for chaining.
        */
       public Builder setEntityMentionTextBytes(
           com.google.protobuf.ByteString value) {
@@ -55414,41 +58279,51 @@ public final class CoreNLPProtos {
 
     /**
      * <code>repeated uint32 tokenIndex = 1;</code>
+     * @return A list containing the tokenIndex.
      */
     java.util.List<java.lang.Integer> getTokenIndexList();
     /**
      * <code>repeated uint32 tokenIndex = 1;</code>
+     * @return The count of tokenIndex.
      */
     int getTokenIndexCount();
     /**
      * <code>repeated uint32 tokenIndex = 1;</code>
+     * @param index The index of the element to return.
+     * @return The tokenIndex at the given index.
      */
     int getTokenIndex(int index);
 
     /**
      * <code>optional uint32 root = 2;</code>
+     * @return Whether the root field is set.
      */
     boolean hasRoot();
     /**
      * <code>optional uint32 root = 2;</code>
+     * @return The root.
      */
     int getRoot();
 
     /**
      * <code>optional bool assumedTruth = 3;</code>
+     * @return Whether the assumedTruth field is set.
      */
     boolean hasAssumedTruth();
     /**
      * <code>optional bool assumedTruth = 3;</code>
+     * @return The assumedTruth.
      */
     boolean getAssumedTruth();
 
     /**
      * <code>optional double score = 4;</code>
+     * @return Whether the score field is set.
      */
     boolean hasScore();
     /**
      * <code>optional double score = 4;</code>
+     * @return The score.
      */
     double getScore();
   }
@@ -55580,6 +58455,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList tokenIndex_;
     /**
      * <code>repeated uint32 tokenIndex = 1;</code>
+     * @return A list containing the tokenIndex.
      */
     public java.util.List<java.lang.Integer>
         getTokenIndexList() {
@@ -55587,12 +58463,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated uint32 tokenIndex = 1;</code>
+     * @return The count of tokenIndex.
      */
     public int getTokenIndexCount() {
       return tokenIndex_.size();
     }
     /**
      * <code>repeated uint32 tokenIndex = 1;</code>
+     * @param index The index of the element to return.
+     * @return The tokenIndex at the given index.
      */
     public int getTokenIndex(int index) {
       return tokenIndex_.getInt(index);
@@ -55602,12 +58481,14 @@ public final class CoreNLPProtos {
     private int root_;
     /**
      * <code>optional uint32 root = 2;</code>
+     * @return Whether the root field is set.
      */
     public boolean hasRoot() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional uint32 root = 2;</code>
+     * @return The root.
      */
     public int getRoot() {
       return root_;
@@ -55617,12 +58498,14 @@ public final class CoreNLPProtos {
     private boolean assumedTruth_;
     /**
      * <code>optional bool assumedTruth = 3;</code>
+     * @return Whether the assumedTruth field is set.
      */
     public boolean hasAssumedTruth() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional bool assumedTruth = 3;</code>
+     * @return The assumedTruth.
      */
     public boolean getAssumedTruth() {
       return assumedTruth_;
@@ -55632,12 +58515,14 @@ public final class CoreNLPProtos {
     private double score_;
     /**
      * <code>optional double score = 4;</code>
+     * @return Whether the score field is set.
      */
     public boolean hasScore() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional double score = 4;</code>
+     * @return The score.
      */
     public double getScore() {
       return score_;
@@ -56059,6 +58944,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 tokenIndex = 1;</code>
+       * @return A list containing the tokenIndex.
        */
       public java.util.List<java.lang.Integer>
           getTokenIndexList() {
@@ -56067,18 +58953,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 tokenIndex = 1;</code>
+       * @return The count of tokenIndex.
        */
       public int getTokenIndexCount() {
         return tokenIndex_.size();
       }
       /**
        * <code>repeated uint32 tokenIndex = 1;</code>
+       * @param index The index of the element to return.
+       * @return The tokenIndex at the given index.
        */
       public int getTokenIndex(int index) {
         return tokenIndex_.getInt(index);
       }
       /**
        * <code>repeated uint32 tokenIndex = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The tokenIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenIndex(
           int index, int value) {
@@ -56089,6 +58981,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 tokenIndex = 1;</code>
+       * @param value The tokenIndex to add.
+       * @return This builder for chaining.
        */
       public Builder addTokenIndex(int value) {
         ensureTokenIndexIsMutable();
@@ -56098,6 +58992,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 tokenIndex = 1;</code>
+       * @param values The tokenIndex to add.
+       * @return This builder for chaining.
        */
       public Builder addAllTokenIndex(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -56109,6 +59005,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 tokenIndex = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenIndex() {
         tokenIndex_ = emptyIntList();
@@ -56120,18 +59017,22 @@ public final class CoreNLPProtos {
       private int root_ ;
       /**
        * <code>optional uint32 root = 2;</code>
+       * @return Whether the root field is set.
        */
       public boolean hasRoot() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional uint32 root = 2;</code>
+       * @return The root.
        */
       public int getRoot() {
         return root_;
       }
       /**
        * <code>optional uint32 root = 2;</code>
+       * @param value The root to set.
+       * @return This builder for chaining.
        */
       public Builder setRoot(int value) {
         bitField0_ |= 0x00000002;
@@ -56141,6 +59042,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 root = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRoot() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -56152,18 +59054,22 @@ public final class CoreNLPProtos {
       private boolean assumedTruth_ ;
       /**
        * <code>optional bool assumedTruth = 3;</code>
+       * @return Whether the assumedTruth field is set.
        */
       public boolean hasAssumedTruth() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional bool assumedTruth = 3;</code>
+       * @return The assumedTruth.
        */
       public boolean getAssumedTruth() {
         return assumedTruth_;
       }
       /**
        * <code>optional bool assumedTruth = 3;</code>
+       * @param value The assumedTruth to set.
+       * @return This builder for chaining.
        */
       public Builder setAssumedTruth(boolean value) {
         bitField0_ |= 0x00000004;
@@ -56173,6 +59079,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional bool assumedTruth = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAssumedTruth() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -56184,18 +59091,22 @@ public final class CoreNLPProtos {
       private double score_ ;
       /**
        * <code>optional double score = 4;</code>
+       * @return Whether the score field is set.
        */
       public boolean hasScore() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>optional double score = 4;</code>
+       * @return The score.
        */
       public double getScore() {
         return score_;
       }
       /**
        * <code>optional double score = 4;</code>
+       * @param value The score to set.
+       * @return This builder for chaining.
        */
       public Builder setScore(double value) {
         bitField0_ |= 0x00000008;
@@ -56205,6 +59116,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional double score = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearScore() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -56271,19 +59183,23 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional uint32 sentenceIndex = 1;</code>
+     * @return Whether the sentenceIndex field is set.
      */
     boolean hasSentenceIndex();
     /**
      * <code>optional uint32 sentenceIndex = 1;</code>
+     * @return The sentenceIndex.
      */
     int getSentenceIndex();
 
     /**
      * <code>optional uint32 tokenIndex = 2;</code>
+     * @return Whether the tokenIndex field is set.
      */
     boolean hasTokenIndex();
     /**
      * <code>optional uint32 tokenIndex = 2;</code>
+     * @return The tokenIndex.
      */
     int getTokenIndex();
   }
@@ -56385,12 +59301,14 @@ public final class CoreNLPProtos {
     private int sentenceIndex_;
     /**
      * <code>optional uint32 sentenceIndex = 1;</code>
+     * @return Whether the sentenceIndex field is set.
      */
     public boolean hasSentenceIndex() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional uint32 sentenceIndex = 1;</code>
+     * @return The sentenceIndex.
      */
     public int getSentenceIndex() {
       return sentenceIndex_;
@@ -56400,12 +59318,14 @@ public final class CoreNLPProtos {
     private int tokenIndex_;
     /**
      * <code>optional uint32 tokenIndex = 2;</code>
+     * @return Whether the tokenIndex field is set.
      */
     public boolean hasTokenIndex() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional uint32 tokenIndex = 2;</code>
+     * @return The tokenIndex.
      */
     public int getTokenIndex() {
       return tokenIndex_;
@@ -56758,18 +59678,22 @@ public final class CoreNLPProtos {
       private int sentenceIndex_ ;
       /**
        * <code>optional uint32 sentenceIndex = 1;</code>
+       * @return Whether the sentenceIndex field is set.
        */
       public boolean hasSentenceIndex() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>optional uint32 sentenceIndex = 1;</code>
+       * @return The sentenceIndex.
        */
       public int getSentenceIndex() {
         return sentenceIndex_;
       }
       /**
        * <code>optional uint32 sentenceIndex = 1;</code>
+       * @param value The sentenceIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setSentenceIndex(int value) {
         bitField0_ |= 0x00000001;
@@ -56779,6 +59703,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 sentenceIndex = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentenceIndex() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -56790,18 +59715,22 @@ public final class CoreNLPProtos {
       private int tokenIndex_ ;
       /**
        * <code>optional uint32 tokenIndex = 2;</code>
+       * @return Whether the tokenIndex field is set.
        */
       public boolean hasTokenIndex() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>optional uint32 tokenIndex = 2;</code>
+       * @return The tokenIndex.
        */
       public int getTokenIndex() {
         return tokenIndex_;
       }
       /**
        * <code>optional uint32 tokenIndex = 2;</code>
+       * @param value The tokenIndex to set.
+       * @return This builder for chaining.
        */
       public Builder setTokenIndex(int value) {
         bitField0_ |= 0x00000002;
@@ -56811,6 +59740,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 tokenIndex = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTokenIndex() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -56881,6 +59811,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subject = 1;</code>
+     * @return Whether the subject field is set.
      */
     boolean hasSubject();
     /**
@@ -56889,6 +59820,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subject = 1;</code>
+     * @return The subject.
      */
     java.lang.String getSubject();
     /**
@@ -56897,6 +59829,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subject = 1;</code>
+     * @return The bytes for subject.
      */
     com.google.protobuf.ByteString
         getSubjectBytes();
@@ -56907,6 +59840,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string relation = 2;</code>
+     * @return Whether the relation field is set.
      */
     boolean hasRelation();
     /**
@@ -56915,6 +59849,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string relation = 2;</code>
+     * @return The relation.
      */
     java.lang.String getRelation();
     /**
@@ -56923,6 +59858,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string relation = 2;</code>
+     * @return The bytes for relation.
      */
     com.google.protobuf.ByteString
         getRelationBytes();
@@ -56933,6 +59869,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string object = 3;</code>
+     * @return Whether the object field is set.
      */
     boolean hasObject();
     /**
@@ -56941,6 +59878,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string object = 3;</code>
+     * @return The object.
      */
     java.lang.String getObject();
     /**
@@ -56949,6 +59887,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string object = 3;</code>
+     * @return The bytes for object.
      */
     com.google.protobuf.ByteString
         getObjectBytes();
@@ -56959,6 +59898,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional double confidence = 4;</code>
+     * @return Whether the confidence field is set.
      */
     boolean hasConfidence();
     /**
@@ -56967,6 +59907,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional double confidence = 4;</code>
+     * @return The confidence.
      */
     double getConfidence();
 
@@ -57108,6 +60049,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph tree = 8;</code>
+     * @return Whether the tree field is set.
      */
     boolean hasTree();
     /**
@@ -57116,6 +60058,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph tree = 8;</code>
+     * @return The tree.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getTree();
     /**
@@ -57133,6 +60076,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool istmod = 9;</code>
+     * @return Whether the istmod field is set.
      */
     boolean hasIstmod();
     /**
@@ -57141,6 +60085,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool istmod = 9;</code>
+     * @return The istmod.
      */
     boolean getIstmod();
 
@@ -57150,6 +60095,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool prefixBe = 10;</code>
+     * @return Whether the prefixBe field is set.
      */
     boolean hasPrefixBe();
     /**
@@ -57158,6 +60104,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool prefixBe = 10;</code>
+     * @return The prefixBe.
      */
     boolean getPrefixBe();
 
@@ -57167,6 +60114,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool suffixBe = 11;</code>
+     * @return Whether the suffixBe field is set.
      */
     boolean hasSuffixBe();
     /**
@@ -57175,6 +60123,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool suffixBe = 11;</code>
+     * @return The suffixBe.
      */
     boolean getSuffixBe();
 
@@ -57184,6 +60133,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool suffixOf = 12;</code>
+     * @return Whether the suffixOf field is set.
      */
     boolean hasSuffixOf();
     /**
@@ -57192,6 +60142,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool suffixOf = 12;</code>
+     * @return The suffixOf.
      */
     boolean getSuffixOf();
   }
@@ -57385,6 +60336,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subject = 1;</code>
+     * @return Whether the subject field is set.
      */
     public boolean hasSubject() {
       return ((bitField0_ & 0x00000001) != 0);
@@ -57395,6 +60347,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subject = 1;</code>
+     * @return The subject.
      */
     public java.lang.String getSubject() {
       java.lang.Object ref = subject_;
@@ -57416,6 +60369,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string subject = 1;</code>
+     * @return The bytes for subject.
      */
     public com.google.protobuf.ByteString
         getSubjectBytes() {
@@ -57439,6 +60393,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string relation = 2;</code>
+     * @return Whether the relation field is set.
      */
     public boolean hasRelation() {
       return ((bitField0_ & 0x00000002) != 0);
@@ -57449,6 +60404,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string relation = 2;</code>
+     * @return The relation.
      */
     public java.lang.String getRelation() {
       java.lang.Object ref = relation_;
@@ -57470,6 +60426,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string relation = 2;</code>
+     * @return The bytes for relation.
      */
     public com.google.protobuf.ByteString
         getRelationBytes() {
@@ -57493,6 +60450,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string object = 3;</code>
+     * @return Whether the object field is set.
      */
     public boolean hasObject() {
       return ((bitField0_ & 0x00000004) != 0);
@@ -57503,6 +60461,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string object = 3;</code>
+     * @return The object.
      */
     public java.lang.String getObject() {
       java.lang.Object ref = object_;
@@ -57524,6 +60483,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional string object = 3;</code>
+     * @return The bytes for object.
      */
     public com.google.protobuf.ByteString
         getObjectBytes() {
@@ -57547,6 +60507,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional double confidence = 4;</code>
+     * @return Whether the confidence field is set.
      */
     public boolean hasConfidence() {
       return ((bitField0_ & 0x00000008) != 0);
@@ -57557,6 +60518,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional double confidence = 4;</code>
+     * @return The confidence.
      */
     public double getConfidence() {
       return confidence_;
@@ -57735,6 +60697,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph tree = 8;</code>
+     * @return Whether the tree field is set.
      */
     public boolean hasTree() {
       return ((bitField0_ & 0x00000010) != 0);
@@ -57745,6 +60708,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph tree = 8;</code>
+     * @return The tree.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getTree() {
       return tree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : tree_;
@@ -57768,6 +60732,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool istmod = 9;</code>
+     * @return Whether the istmod field is set.
      */
     public boolean hasIstmod() {
       return ((bitField0_ & 0x00000020) != 0);
@@ -57778,6 +60743,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool istmod = 9;</code>
+     * @return The istmod.
      */
     public boolean getIstmod() {
       return istmod_;
@@ -57791,6 +60757,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool prefixBe = 10;</code>
+     * @return Whether the prefixBe field is set.
      */
     public boolean hasPrefixBe() {
       return ((bitField0_ & 0x00000040) != 0);
@@ -57801,6 +60768,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool prefixBe = 10;</code>
+     * @return The prefixBe.
      */
     public boolean getPrefixBe() {
       return prefixBe_;
@@ -57814,6 +60782,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool suffixBe = 11;</code>
+     * @return Whether the suffixBe field is set.
      */
     public boolean hasSuffixBe() {
       return ((bitField0_ & 0x00000080) != 0);
@@ -57824,6 +60793,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool suffixBe = 11;</code>
+     * @return The suffixBe.
      */
     public boolean getSuffixBe() {
       return suffixBe_;
@@ -57837,6 +60807,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool suffixOf = 12;</code>
+     * @return Whether the suffixOf field is set.
      */
     public boolean hasSuffixOf() {
       return ((bitField0_ & 0x00000100) != 0);
@@ -57847,6 +60818,7 @@ public final class CoreNLPProtos {
      * </pre>
      *
      * <code>optional bool suffixOf = 12;</code>
+     * @return The suffixOf.
      */
     public boolean getSuffixOf() {
       return suffixOf_;
@@ -58572,6 +61544,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subject = 1;</code>
+       * @return Whether the subject field is set.
        */
       public boolean hasSubject() {
         return ((bitField0_ & 0x00000001) != 0);
@@ -58582,6 +61555,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subject = 1;</code>
+       * @return The subject.
        */
       public java.lang.String getSubject() {
         java.lang.Object ref = subject_;
@@ -58603,6 +61577,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subject = 1;</code>
+       * @return The bytes for subject.
        */
       public com.google.protobuf.ByteString
           getSubjectBytes() {
@@ -58623,6 +61598,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subject = 1;</code>
+       * @param value The subject to set.
+       * @return This builder for chaining.
        */
       public Builder setSubject(
           java.lang.String value) {
@@ -58640,6 +61617,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subject = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSubject() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -58653,6 +61631,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string subject = 1;</code>
+       * @param value The bytes for subject to set.
+       * @return This builder for chaining.
        */
       public Builder setSubjectBytes(
           com.google.protobuf.ByteString value) {
@@ -58672,6 +61652,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string relation = 2;</code>
+       * @return Whether the relation field is set.
        */
       public boolean hasRelation() {
         return ((bitField0_ & 0x00000002) != 0);
@@ -58682,6 +61663,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string relation = 2;</code>
+       * @return The relation.
        */
       public java.lang.String getRelation() {
         java.lang.Object ref = relation_;
@@ -58703,6 +61685,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string relation = 2;</code>
+       * @return The bytes for relation.
        */
       public com.google.protobuf.ByteString
           getRelationBytes() {
@@ -58723,6 +61706,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string relation = 2;</code>
+       * @param value The relation to set.
+       * @return This builder for chaining.
        */
       public Builder setRelation(
           java.lang.String value) {
@@ -58740,6 +61725,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string relation = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRelation() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -58753,6 +61739,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string relation = 2;</code>
+       * @param value The bytes for relation to set.
+       * @return This builder for chaining.
        */
       public Builder setRelationBytes(
           com.google.protobuf.ByteString value) {
@@ -58772,6 +61760,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string object = 3;</code>
+       * @return Whether the object field is set.
        */
       public boolean hasObject() {
         return ((bitField0_ & 0x00000004) != 0);
@@ -58782,6 +61771,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string object = 3;</code>
+       * @return The object.
        */
       public java.lang.String getObject() {
         java.lang.Object ref = object_;
@@ -58803,6 +61793,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string object = 3;</code>
+       * @return The bytes for object.
        */
       public com.google.protobuf.ByteString
           getObjectBytes() {
@@ -58823,6 +61814,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string object = 3;</code>
+       * @param value The object to set.
+       * @return This builder for chaining.
        */
       public Builder setObject(
           java.lang.String value) {
@@ -58840,6 +61833,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string object = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearObject() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -58853,6 +61847,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional string object = 3;</code>
+       * @param value The bytes for object to set.
+       * @return This builder for chaining.
        */
       public Builder setObjectBytes(
           com.google.protobuf.ByteString value) {
@@ -58872,6 +61868,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional double confidence = 4;</code>
+       * @return Whether the confidence field is set.
        */
       public boolean hasConfidence() {
         return ((bitField0_ & 0x00000008) != 0);
@@ -58882,6 +61879,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional double confidence = 4;</code>
+       * @return The confidence.
        */
       public double getConfidence() {
         return confidence_;
@@ -58892,6 +61890,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional double confidence = 4;</code>
+       * @param value The confidence to set.
+       * @return This builder for chaining.
        */
       public Builder setConfidence(double value) {
         bitField0_ |= 0x00000008;
@@ -58905,6 +61905,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional double confidence = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearConfidence() {
         bitField0_ = (bitField0_ & ~0x00000008);
@@ -59858,6 +62859,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph tree = 8;</code>
+       * @return Whether the tree field is set.
        */
       public boolean hasTree() {
         return ((bitField0_ & 0x00000080) != 0);
@@ -59868,6 +62870,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph tree = 8;</code>
+       * @return The tree.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getTree() {
         if (treeBuilder_ == null) {
@@ -60010,6 +63013,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool istmod = 9;</code>
+       * @return Whether the istmod field is set.
        */
       public boolean hasIstmod() {
         return ((bitField0_ & 0x00000100) != 0);
@@ -60020,6 +63024,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool istmod = 9;</code>
+       * @return The istmod.
        */
       public boolean getIstmod() {
         return istmod_;
@@ -60030,6 +63035,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool istmod = 9;</code>
+       * @param value The istmod to set.
+       * @return This builder for chaining.
        */
       public Builder setIstmod(boolean value) {
         bitField0_ |= 0x00000100;
@@ -60043,6 +63050,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool istmod = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIstmod() {
         bitField0_ = (bitField0_ & ~0x00000100);
@@ -60058,6 +63066,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool prefixBe = 10;</code>
+       * @return Whether the prefixBe field is set.
        */
       public boolean hasPrefixBe() {
         return ((bitField0_ & 0x00000200) != 0);
@@ -60068,6 +63077,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool prefixBe = 10;</code>
+       * @return The prefixBe.
        */
       public boolean getPrefixBe() {
         return prefixBe_;
@@ -60078,6 +63088,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool prefixBe = 10;</code>
+       * @param value The prefixBe to set.
+       * @return This builder for chaining.
        */
       public Builder setPrefixBe(boolean value) {
         bitField0_ |= 0x00000200;
@@ -60091,6 +63103,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool prefixBe = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPrefixBe() {
         bitField0_ = (bitField0_ & ~0x00000200);
@@ -60106,6 +63119,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool suffixBe = 11;</code>
+       * @return Whether the suffixBe field is set.
        */
       public boolean hasSuffixBe() {
         return ((bitField0_ & 0x00000400) != 0);
@@ -60116,6 +63130,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool suffixBe = 11;</code>
+       * @return The suffixBe.
        */
       public boolean getSuffixBe() {
         return suffixBe_;
@@ -60126,6 +63141,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool suffixBe = 11;</code>
+       * @param value The suffixBe to set.
+       * @return This builder for chaining.
        */
       public Builder setSuffixBe(boolean value) {
         bitField0_ |= 0x00000400;
@@ -60139,6 +63156,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool suffixBe = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSuffixBe() {
         bitField0_ = (bitField0_ & ~0x00000400);
@@ -60154,6 +63172,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool suffixOf = 12;</code>
+       * @return Whether the suffixOf field is set.
        */
       public boolean hasSuffixOf() {
         return ((bitField0_ & 0x00000800) != 0);
@@ -60164,6 +63183,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool suffixOf = 12;</code>
+       * @return The suffixOf.
        */
       public boolean getSuffixOf() {
         return suffixOf_;
@@ -60174,6 +63194,8 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool suffixOf = 12;</code>
+       * @param value The suffixOf to set.
+       * @return This builder for chaining.
        */
       public Builder setSuffixOf(boolean value) {
         bitField0_ |= 0x00000800;
@@ -60187,6 +63209,7 @@ public final class CoreNLPProtos {
        * </pre>
        *
        * <code>optional bool suffixOf = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSuffixOf() {
         bitField0_ = (bitField0_ & ~0x00000800);
@@ -60253,38 +63276,50 @@ public final class CoreNLPProtos {
 
     /**
      * <code>repeated string key = 1;</code>
+     * @return A list containing the key.
      */
     java.util.List<java.lang.String>
         getKeyList();
     /**
      * <code>repeated string key = 1;</code>
+     * @return The count of key.
      */
     int getKeyCount();
     /**
      * <code>repeated string key = 1;</code>
+     * @param index The index of the element to return.
+     * @return The key at the given index.
      */
     java.lang.String getKey(int index);
     /**
      * <code>repeated string key = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the key at the given index.
      */
     com.google.protobuf.ByteString
         getKeyBytes(int index);
 
     /**
      * <code>repeated string value = 2;</code>
+     * @return A list containing the value.
      */
     java.util.List<java.lang.String>
         getValueList();
     /**
      * <code>repeated string value = 2;</code>
+     * @return The count of value.
      */
     int getValueCount();
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the element to return.
+     * @return The value at the given index.
      */
     java.lang.String getValue(int index);
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the value at the given index.
      */
     com.google.protobuf.ByteString
         getValueBytes(int index);
@@ -60402,6 +63437,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.LazyStringList key_;
     /**
      * <code>repeated string key = 1;</code>
+     * @return A list containing the key.
      */
     public com.google.protobuf.ProtocolStringList
         getKeyList() {
@@ -60409,18 +63445,23 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated string key = 1;</code>
+     * @return The count of key.
      */
     public int getKeyCount() {
       return key_.size();
     }
     /**
      * <code>repeated string key = 1;</code>
+     * @param index The index of the element to return.
+     * @return The key at the given index.
      */
     public java.lang.String getKey(int index) {
       return key_.get(index);
     }
     /**
      * <code>repeated string key = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the key at the given index.
      */
     public com.google.protobuf.ByteString
         getKeyBytes(int index) {
@@ -60431,6 +63472,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.LazyStringList value_;
     /**
      * <code>repeated string value = 2;</code>
+     * @return A list containing the value.
      */
     public com.google.protobuf.ProtocolStringList
         getValueList() {
@@ -60438,18 +63480,23 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated string value = 2;</code>
+     * @return The count of value.
      */
     public int getValueCount() {
       return value_.size();
     }
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the element to return.
+     * @return The value at the given index.
      */
     public java.lang.String getValue(int index) {
       return value_.get(index);
     }
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the value at the given index.
      */
     public com.google.protobuf.ByteString
         getValueBytes(int index) {
@@ -60825,6 +63872,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @return A list containing the key.
        */
       public com.google.protobuf.ProtocolStringList
           getKeyList() {
@@ -60832,18 +63880,23 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @return The count of key.
        */
       public int getKeyCount() {
         return key_.size();
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param index The index of the element to return.
+       * @return The key at the given index.
        */
       public java.lang.String getKey(int index) {
         return key_.get(index);
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the key at the given index.
        */
       public com.google.protobuf.ByteString
           getKeyBytes(int index) {
@@ -60851,6 +63904,9 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The key to set.
+       * @return This builder for chaining.
        */
       public Builder setKey(
           int index, java.lang.String value) {
@@ -60864,6 +63920,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param value The key to add.
+       * @return This builder for chaining.
        */
       public Builder addKey(
           java.lang.String value) {
@@ -60877,6 +63935,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param values The key to add.
+       * @return This builder for chaining.
        */
       public Builder addAllKey(
           java.lang.Iterable<java.lang.String> values) {
@@ -60888,6 +63948,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearKey() {
         key_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -60897,6 +63958,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param value The bytes of the key to add.
+       * @return This builder for chaining.
        */
       public Builder addKeyBytes(
           com.google.protobuf.ByteString value) {
@@ -60918,6 +63981,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @return A list containing the value.
        */
       public com.google.protobuf.ProtocolStringList
           getValueList() {
@@ -60925,18 +63989,23 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @return The count of value.
        */
       public int getValueCount() {
         return value_.size();
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param index The index of the element to return.
+       * @return The value at the given index.
        */
       public java.lang.String getValue(int index) {
         return value_.get(index);
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the value at the given index.
        */
       public com.google.protobuf.ByteString
           getValueBytes(int index) {
@@ -60944,6 +64013,9 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param index The index to set the value at.
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(
           int index, java.lang.String value) {
@@ -60957,6 +64029,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param value The value to add.
+       * @return This builder for chaining.
        */
       public Builder addValue(
           java.lang.String value) {
@@ -60970,6 +64044,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param values The value to add.
+       * @return This builder for chaining.
        */
       public Builder addAllValue(
           java.lang.Iterable<java.lang.String> values) {
@@ -60981,6 +64057,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         value_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -60990,6 +64067,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param value The bytes of the value to add.
+       * @return This builder for chaining.
        */
       public Builder addValueBytes(
           com.google.protobuf.ByteString value) {
@@ -61060,32 +64139,42 @@ public final class CoreNLPProtos {
 
     /**
      * <code>repeated uint32 key = 1;</code>
+     * @return A list containing the key.
      */
     java.util.List<java.lang.Integer> getKeyList();
     /**
      * <code>repeated uint32 key = 1;</code>
+     * @return The count of key.
      */
     int getKeyCount();
     /**
      * <code>repeated uint32 key = 1;</code>
+     * @param index The index of the element to return.
+     * @return The key at the given index.
      */
     int getKey(int index);
 
     /**
      * <code>repeated string value = 2;</code>
+     * @return A list containing the value.
      */
     java.util.List<java.lang.String>
         getValueList();
     /**
      * <code>repeated string value = 2;</code>
+     * @return The count of value.
      */
     int getValueCount();
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the element to return.
+     * @return The value at the given index.
      */
     java.lang.String getValue(int index);
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the value at the given index.
      */
     com.google.protobuf.ByteString
         getValueBytes(int index);
@@ -61215,6 +64304,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList key_;
     /**
      * <code>repeated uint32 key = 1;</code>
+     * @return A list containing the key.
      */
     public java.util.List<java.lang.Integer>
         getKeyList() {
@@ -61222,12 +64312,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated uint32 key = 1;</code>
+     * @return The count of key.
      */
     public int getKeyCount() {
       return key_.size();
     }
     /**
      * <code>repeated uint32 key = 1;</code>
+     * @param index The index of the element to return.
+     * @return The key at the given index.
      */
     public int getKey(int index) {
       return key_.getInt(index);
@@ -61237,6 +64330,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.LazyStringList value_;
     /**
      * <code>repeated string value = 2;</code>
+     * @return A list containing the value.
      */
     public com.google.protobuf.ProtocolStringList
         getValueList() {
@@ -61244,18 +64338,23 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated string value = 2;</code>
+     * @return The count of value.
      */
     public int getValueCount() {
       return value_.size();
     }
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the element to return.
+     * @return The value at the given index.
      */
     public java.lang.String getValue(int index) {
       return value_.get(index);
     }
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the value at the given index.
      */
     public com.google.protobuf.ByteString
         getValueBytes(int index) {
@@ -61632,6 +64731,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 key = 1;</code>
+       * @return A list containing the key.
        */
       public java.util.List<java.lang.Integer>
           getKeyList() {
@@ -61640,18 +64740,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 key = 1;</code>
+       * @return The count of key.
        */
       public int getKeyCount() {
         return key_.size();
       }
       /**
        * <code>repeated uint32 key = 1;</code>
+       * @param index The index of the element to return.
+       * @return The key at the given index.
        */
       public int getKey(int index) {
         return key_.getInt(index);
       }
       /**
        * <code>repeated uint32 key = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The key to set.
+       * @return This builder for chaining.
        */
       public Builder setKey(
           int index, int value) {
@@ -61662,6 +64768,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 key = 1;</code>
+       * @param value The key to add.
+       * @return This builder for chaining.
        */
       public Builder addKey(int value) {
         ensureKeyIsMutable();
@@ -61671,6 +64779,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 key = 1;</code>
+       * @param values The key to add.
+       * @return This builder for chaining.
        */
       public Builder addAllKey(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -61682,6 +64792,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 key = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearKey() {
         key_ = emptyIntList();
@@ -61699,6 +64810,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @return A list containing the value.
        */
       public com.google.protobuf.ProtocolStringList
           getValueList() {
@@ -61706,18 +64818,23 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @return The count of value.
        */
       public int getValueCount() {
         return value_.size();
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param index The index of the element to return.
+       * @return The value at the given index.
        */
       public java.lang.String getValue(int index) {
         return value_.get(index);
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the value at the given index.
        */
       public com.google.protobuf.ByteString
           getValueBytes(int index) {
@@ -61725,6 +64842,9 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param index The index to set the value at.
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(
           int index, java.lang.String value) {
@@ -61738,6 +64858,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param value The value to add.
+       * @return This builder for chaining.
        */
       public Builder addValue(
           java.lang.String value) {
@@ -61751,6 +64873,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param values The value to add.
+       * @return This builder for chaining.
        */
       public Builder addAllValue(
           java.lang.Iterable<java.lang.String> values) {
@@ -61762,6 +64886,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         value_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -61771,6 +64896,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param value The bytes of the value to add.
+       * @return This builder for chaining.
        */
       public Builder addValueBytes(
           com.google.protobuf.ByteString value) {
@@ -61841,59 +64968,73 @@ public final class CoreNLPProtos {
 
     /**
      * <code>required uint32 charBegin = 1;</code>
+     * @return Whether the charBegin field is set.
      */
     boolean hasCharBegin();
     /**
      * <code>required uint32 charBegin = 1;</code>
+     * @return The charBegin.
      */
     int getCharBegin();
 
     /**
      * <code>required uint32 charEnd = 2;</code>
+     * @return Whether the charEnd field is set.
      */
     boolean hasCharEnd();
     /**
      * <code>required uint32 charEnd = 2;</code>
+     * @return The charEnd.
      */
     int getCharEnd();
 
     /**
      * <code>optional string author = 3;</code>
+     * @return Whether the author field is set.
      */
     boolean hasAuthor();
     /**
      * <code>optional string author = 3;</code>
+     * @return The author.
      */
     java.lang.String getAuthor();
     /**
      * <code>optional string author = 3;</code>
+     * @return The bytes for author.
      */
     com.google.protobuf.ByteString
         getAuthorBytes();
 
     /**
      * <code>repeated uint32 sentenceIndexes = 4;</code>
+     * @return A list containing the sentenceIndexes.
      */
     java.util.List<java.lang.Integer> getSentenceIndexesList();
     /**
      * <code>repeated uint32 sentenceIndexes = 4;</code>
+     * @return The count of sentenceIndexes.
      */
     int getSentenceIndexesCount();
     /**
      * <code>repeated uint32 sentenceIndexes = 4;</code>
+     * @param index The index of the element to return.
+     * @return The sentenceIndexes at the given index.
      */
     int getSentenceIndexes(int index);
 
     /**
      * <code>optional string datetime = 5;</code>
+     * @return Whether the datetime field is set.
      */
     boolean hasDatetime();
     /**
      * <code>optional string datetime = 5;</code>
+     * @return The datetime.
      */
     java.lang.String getDatetime();
     /**
      * <code>optional string datetime = 5;</code>
+     * @return The bytes for datetime.
      */
     com.google.protobuf.ByteString
         getDatetimeBytes();
@@ -61924,28 +65065,34 @@ public final class CoreNLPProtos {
 
     /**
      * <code>optional uint32 authorCharBegin = 7;</code>
+     * @return Whether the authorCharBegin field is set.
      */
     boolean hasAuthorCharBegin();
     /**
      * <code>optional uint32 authorCharBegin = 7;</code>
+     * @return The authorCharBegin.
      */
     int getAuthorCharBegin();
 
     /**
      * <code>optional uint32 authorCharEnd = 8;</code>
+     * @return Whether the authorCharEnd field is set.
      */
     boolean hasAuthorCharEnd();
     /**
      * <code>optional uint32 authorCharEnd = 8;</code>
+     * @return The authorCharEnd.
      */
     int getAuthorCharEnd();
 
     /**
      * <code>required .edu.stanford.nlp.pipeline.Token xmlTag = 9;</code>
+     * @return Whether the xmlTag field is set.
      */
     boolean hasXmlTag();
     /**
      * <code>required .edu.stanford.nlp.pipeline.Token xmlTag = 9;</code>
+     * @return The xmlTag.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.Token getXmlTag();
     /**
@@ -62121,12 +65268,14 @@ public final class CoreNLPProtos {
     private int charBegin_;
     /**
      * <code>required uint32 charBegin = 1;</code>
+     * @return Whether the charBegin field is set.
      */
     public boolean hasCharBegin() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>required uint32 charBegin = 1;</code>
+     * @return The charBegin.
      */
     public int getCharBegin() {
       return charBegin_;
@@ -62136,12 +65285,14 @@ public final class CoreNLPProtos {
     private int charEnd_;
     /**
      * <code>required uint32 charEnd = 2;</code>
+     * @return Whether the charEnd field is set.
      */
     public boolean hasCharEnd() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>required uint32 charEnd = 2;</code>
+     * @return The charEnd.
      */
     public int getCharEnd() {
       return charEnd_;
@@ -62151,12 +65302,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object author_;
     /**
      * <code>optional string author = 3;</code>
+     * @return Whether the author field is set.
      */
     public boolean hasAuthor() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional string author = 3;</code>
+     * @return The author.
      */
     public java.lang.String getAuthor() {
       java.lang.Object ref = author_;
@@ -62174,6 +65327,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string author = 3;</code>
+     * @return The bytes for author.
      */
     public com.google.protobuf.ByteString
         getAuthorBytes() {
@@ -62193,6 +65347,7 @@ public final class CoreNLPProtos {
     private com.google.protobuf.Internal.IntList sentenceIndexes_;
     /**
      * <code>repeated uint32 sentenceIndexes = 4;</code>
+     * @return A list containing the sentenceIndexes.
      */
     public java.util.List<java.lang.Integer>
         getSentenceIndexesList() {
@@ -62200,12 +65355,15 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>repeated uint32 sentenceIndexes = 4;</code>
+     * @return The count of sentenceIndexes.
      */
     public int getSentenceIndexesCount() {
       return sentenceIndexes_.size();
     }
     /**
      * <code>repeated uint32 sentenceIndexes = 4;</code>
+     * @param index The index of the element to return.
+     * @return The sentenceIndexes at the given index.
      */
     public int getSentenceIndexes(int index) {
       return sentenceIndexes_.getInt(index);
@@ -62215,12 +65373,14 @@ public final class CoreNLPProtos {
     private volatile java.lang.Object datetime_;
     /**
      * <code>optional string datetime = 5;</code>
+     * @return Whether the datetime field is set.
      */
     public boolean hasDatetime() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>optional string datetime = 5;</code>
+     * @return The datetime.
      */
     public java.lang.String getDatetime() {
       java.lang.Object ref = datetime_;
@@ -62238,6 +65398,7 @@ public final class CoreNLPProtos {
     }
     /**
      * <code>optional string datetime = 5;</code>
+     * @return The bytes for datetime.
      */
     public com.google.protobuf.ByteString
         getDatetimeBytes() {
@@ -62292,12 +65453,14 @@ public final class CoreNLPProtos {
     private int authorCharBegin_;
     /**
      * <code>optional uint32 authorCharBegin = 7;</code>
+     * @return Whether the authorCharBegin field is set.
      */
     public boolean hasAuthorCharBegin() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional uint32 authorCharBegin = 7;</code>
+     * @return The authorCharBegin.
      */
     public int getAuthorCharBegin() {
       return authorCharBegin_;
@@ -62307,12 +65470,14 @@ public final class CoreNLPProtos {
     private int authorCharEnd_;
     /**
      * <code>optional uint32 authorCharEnd = 8;</code>
+     * @return Whether the authorCharEnd field is set.
      */
     public boolean hasAuthorCharEnd() {
       return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>optional uint32 authorCharEnd = 8;</code>
+     * @return The authorCharEnd.
      */
     public int getAuthorCharEnd() {
       return authorCharEnd_;
@@ -62322,12 +65487,14 @@ public final class CoreNLPProtos {
     private edu.stanford.nlp.pipeline.CoreNLPProtos.Token xmlTag_;
     /**
      * <code>required .edu.stanford.nlp.pipeline.Token xmlTag = 9;</code>
+     * @return Whether the xmlTag field is set.
      */
     public boolean hasXmlTag() {
       return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.Token xmlTag = 9;</code>
+     * @return The xmlTag.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Token getXmlTag() {
       return xmlTag_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Token.getDefaultInstance() : xmlTag_;
@@ -62946,18 +66113,22 @@ public final class CoreNLPProtos {
       private int charBegin_ ;
       /**
        * <code>required uint32 charBegin = 1;</code>
+       * @return Whether the charBegin field is set.
        */
       public boolean hasCharBegin() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required uint32 charBegin = 1;</code>
+       * @return The charBegin.
        */
       public int getCharBegin() {
         return charBegin_;
       }
       /**
        * <code>required uint32 charBegin = 1;</code>
+       * @param value The charBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setCharBegin(int value) {
         bitField0_ |= 0x00000001;
@@ -62967,6 +66138,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required uint32 charBegin = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCharBegin() {
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -62978,18 +66150,22 @@ public final class CoreNLPProtos {
       private int charEnd_ ;
       /**
        * <code>required uint32 charEnd = 2;</code>
+       * @return Whether the charEnd field is set.
        */
       public boolean hasCharEnd() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>required uint32 charEnd = 2;</code>
+       * @return The charEnd.
        */
       public int getCharEnd() {
         return charEnd_;
       }
       /**
        * <code>required uint32 charEnd = 2;</code>
+       * @param value The charEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setCharEnd(int value) {
         bitField0_ |= 0x00000002;
@@ -62999,6 +66175,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>required uint32 charEnd = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCharEnd() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -63010,12 +66187,14 @@ public final class CoreNLPProtos {
       private java.lang.Object author_ = "";
       /**
        * <code>optional string author = 3;</code>
+       * @return Whether the author field is set.
        */
       public boolean hasAuthor() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional string author = 3;</code>
+       * @return The author.
        */
       public java.lang.String getAuthor() {
         java.lang.Object ref = author_;
@@ -63033,6 +66212,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string author = 3;</code>
+       * @return The bytes for author.
        */
       public com.google.protobuf.ByteString
           getAuthorBytes() {
@@ -63049,6 +66229,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string author = 3;</code>
+       * @param value The author to set.
+       * @return This builder for chaining.
        */
       public Builder setAuthor(
           java.lang.String value) {
@@ -63062,6 +66244,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string author = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAuthor() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -63071,6 +66254,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string author = 3;</code>
+       * @param value The bytes for author to set.
+       * @return This builder for chaining.
        */
       public Builder setAuthorBytes(
           com.google.protobuf.ByteString value) {
@@ -63092,6 +66277,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 sentenceIndexes = 4;</code>
+       * @return A list containing the sentenceIndexes.
        */
       public java.util.List<java.lang.Integer>
           getSentenceIndexesList() {
@@ -63100,18 +66286,24 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 sentenceIndexes = 4;</code>
+       * @return The count of sentenceIndexes.
        */
       public int getSentenceIndexesCount() {
         return sentenceIndexes_.size();
       }
       /**
        * <code>repeated uint32 sentenceIndexes = 4;</code>
+       * @param index The index of the element to return.
+       * @return The sentenceIndexes at the given index.
        */
       public int getSentenceIndexes(int index) {
         return sentenceIndexes_.getInt(index);
       }
       /**
        * <code>repeated uint32 sentenceIndexes = 4;</code>
+       * @param index The index to set the value at.
+       * @param value The sentenceIndexes to set.
+       * @return This builder for chaining.
        */
       public Builder setSentenceIndexes(
           int index, int value) {
@@ -63122,6 +66314,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 sentenceIndexes = 4;</code>
+       * @param value The sentenceIndexes to add.
+       * @return This builder for chaining.
        */
       public Builder addSentenceIndexes(int value) {
         ensureSentenceIndexesIsMutable();
@@ -63131,6 +66325,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 sentenceIndexes = 4;</code>
+       * @param values The sentenceIndexes to add.
+       * @return This builder for chaining.
        */
       public Builder addAllSentenceIndexes(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -63142,6 +66338,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>repeated uint32 sentenceIndexes = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSentenceIndexes() {
         sentenceIndexes_ = emptyIntList();
@@ -63153,12 +66350,14 @@ public final class CoreNLPProtos {
       private java.lang.Object datetime_ = "";
       /**
        * <code>optional string datetime = 5;</code>
+       * @return Whether the datetime field is set.
        */
       public boolean hasDatetime() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>optional string datetime = 5;</code>
+       * @return The datetime.
        */
       public java.lang.String getDatetime() {
         java.lang.Object ref = datetime_;
@@ -63176,6 +66375,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string datetime = 5;</code>
+       * @return The bytes for datetime.
        */
       public com.google.protobuf.ByteString
           getDatetimeBytes() {
@@ -63192,6 +66392,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string datetime = 5;</code>
+       * @param value The datetime to set.
+       * @return This builder for chaining.
        */
       public Builder setDatetime(
           java.lang.String value) {
@@ -63205,6 +66407,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string datetime = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDatetime() {
         bitField0_ = (bitField0_ & ~0x00000010);
@@ -63214,6 +66417,8 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional string datetime = 5;</code>
+       * @param value The bytes for datetime to set.
+       * @return This builder for chaining.
        */
       public Builder setDatetimeBytes(
           com.google.protobuf.ByteString value) {
@@ -63469,18 +66674,22 @@ public final class CoreNLPProtos {
       private int authorCharBegin_ ;
       /**
        * <code>optional uint32 authorCharBegin = 7;</code>
+       * @return Whether the authorCharBegin field is set.
        */
       public boolean hasAuthorCharBegin() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>optional uint32 authorCharBegin = 7;</code>
+       * @return The authorCharBegin.
        */
       public int getAuthorCharBegin() {
         return authorCharBegin_;
       }
       /**
        * <code>optional uint32 authorCharBegin = 7;</code>
+       * @param value The authorCharBegin to set.
+       * @return This builder for chaining.
        */
       public Builder setAuthorCharBegin(int value) {
         bitField0_ |= 0x00000040;
@@ -63490,6 +66699,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 authorCharBegin = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAuthorCharBegin() {
         bitField0_ = (bitField0_ & ~0x00000040);
@@ -63501,18 +66711,22 @@ public final class CoreNLPProtos {
       private int authorCharEnd_ ;
       /**
        * <code>optional uint32 authorCharEnd = 8;</code>
+       * @return Whether the authorCharEnd field is set.
        */
       public boolean hasAuthorCharEnd() {
         return ((bitField0_ & 0x00000080) != 0);
       }
       /**
        * <code>optional uint32 authorCharEnd = 8;</code>
+       * @return The authorCharEnd.
        */
       public int getAuthorCharEnd() {
         return authorCharEnd_;
       }
       /**
        * <code>optional uint32 authorCharEnd = 8;</code>
+       * @param value The authorCharEnd to set.
+       * @return This builder for chaining.
        */
       public Builder setAuthorCharEnd(int value) {
         bitField0_ |= 0x00000080;
@@ -63522,6 +66736,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <code>optional uint32 authorCharEnd = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAuthorCharEnd() {
         bitField0_ = (bitField0_ & ~0x00000080);
@@ -63535,12 +66750,14 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Token, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> xmlTagBuilder_;
       /**
        * <code>required .edu.stanford.nlp.pipeline.Token xmlTag = 9;</code>
+       * @return Whether the xmlTag field is set.
        */
       public boolean hasXmlTag() {
         return ((bitField0_ & 0x00000100) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.Token xmlTag = 9;</code>
+       * @return The xmlTag.
        */
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Token getXmlTag() {
         if (xmlTagBuilder_ == null) {
