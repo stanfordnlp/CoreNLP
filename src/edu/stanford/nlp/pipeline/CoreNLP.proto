@@ -10,6 +10,12 @@ option java_outer_classname = "CoreNLPProtos";
 //
 
 //
+// To do the python version:
+//
+//  protoc -I=./doc --python_out=./stanza/protobuf ./doc/CoreNLP.proto
+//
+
+//
 // An enumeration for the valid languages allowed in CoreNLP
 //
 enum Language {
