@@ -423,7 +423,7 @@ public class OperatorScopeITest {
     checkScope("{ The } [ ITEL - XZ ] [ is fast ]");
     checkScope("{ The } [ ITEL - ZX ] [ is an ITEL computer ]");
     checkScope("{ The } [ ITEL - ZX ] [ is slower than 500 MIPS ]");
-    checkScope("{ The } [ PC - 6082 ] [ is as fast as the ITEL-XZ ]");
+    checkScope("{ The } [ PC - 6082 ] [ is as fast as the ITEL - XZ ]");
     checkScope("{ The } [ PC - 6082 ] [ is fast ]");
     checkScope("{ The } [ PC - 6082 ] [ is faster than 500 MIPS ]");
     checkScope("{ The } [ PC - 6082 ] [ is faster than any ITEL computer ]");
