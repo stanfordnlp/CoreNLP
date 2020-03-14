@@ -9,6 +9,7 @@ import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Interner;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.SystemUtils;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -45,8 +46,11 @@ public class WikidictAnnotator extends SentenceAnnotator {
 
   /**
    * The actual Wikidict dictionary.
+   * <br>
+   * Initialized with a huge size to limit the resizing needed when loading.
+   * Load factor of 0.75 and 21M entries
    */
-  private final Map<String, String> dictionary = new HashMap<>(21000000);  // it's gonna be large no matter what
+  private final Map<String, String> dictionary = new HashMap<>(30000000);
 
   /**
    * Create a new WikiDict annotator, with the given name and properties.
@@ -58,14 +62,19 @@ public class WikidictAnnotator extends SentenceAnnotator {
     try {
       int i = 0;
       String[] fields = new String[3];
+      // Note that using our own Interner means that there will be no
+      // overlap with other models which store large amounts of words.
+      // However, this is much faster at loading
+      Interner<String> interner = new Interner<>();
       for (String line : IOUtils.readLines(wikidictPath, "UTF-8")) {
         if (line.charAt(0) == '\t') {
           continue;
         }
-        StringUtils.splitOnChar(fields, line, '\t');
         if (i % 1000000 == 0) {
           log.info("Loaded " + i + " entries from Wikidict [" + SystemUtils.getMemoryInUse() + "MB memory used; " + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + " elapsed]");
         }
+        i += 1;
+        StringUtils.splitOnChar(fields, line, '\t');
         // Check that the read entry is above the score threshold
         if (threshold > 0.0) {
           double score = Double.parseDouble(fields[2]);
@@ -76,12 +85,11 @@ public class WikidictAnnotator extends SentenceAnnotator {
         String surfaceForm = fields[0];
         if (wikidictCaseless)
           surfaceForm = surfaceForm.toLowerCase();
-        String link = fields[1].intern();  // intern, as most entities have multiple surface forms
+        String link = interner.intern(fields[1]);  // intern, as most entities have multiple surface forms
         // Add the entry
         dictionary.put(surfaceForm, link);
-        i += 1;
       }
-      log.info("Done reading Wikidict (" + dictionary.size() + " links read; " + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + " elapsed)");
+      log.info("Done reading Wikidict (" + dictionary.size() + " links read; " + interner.size() + " unique entities; " + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + " elapsed)");
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
