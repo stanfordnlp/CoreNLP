@@ -235,6 +235,10 @@ public class Generics  {
     return new WeakHashMap<>();
   }
 
+  public static <K,V> WeakHashMap<K,V> newWeakHashMap(int initialCapacity) {
+    return new WeakHashMap<>(initialCapacity);
+  }
+
   public static <K,V> ConcurrentHashMap<K,V> newConcurrentHashMap() {
     return new ConcurrentHashMap<>();
   }
