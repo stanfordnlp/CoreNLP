@@ -20,6 +20,10 @@ import java.util.regex.Pattern;
 
 /**
  * An annotator for entity linking to Wikipedia pages via the Wikidict.
+ * <br>
+ * The wikidict dictionary in particular is based on this paper: <br>
+ * "A Cross-Lingual Dictionary for English Wikipedia Concepts" <br>
+ * https://nlp.stanford.edu/pubs/crosswikis.pdf
  *
  * @author Gabor Angeli
  */
