@@ -28,6 +28,27 @@ public class StemmerTest {
 		String actualResult = sut.stem(happyTestCase);
 		assertEquals(expectedResult, actualResult);
 	}
+	
+	@Test
+	public void testValidWord() {
+		String invalidWord = "";
+		String stemmedWord = sut.stem(invalidWord);
+		assertEquals(invalidWord, stemmedWord);
+	}
+	@Test
+	public void testShortWord() {
+		String shortWord = "going";
+		String stemmedWord = sut.stem(shortWord);
+		String expectedStem = "go";
+		assertEquals(expectedStem, stemmedWord);
+	}
+	@Test
+	public void testLongWord() {
+		String longWord = "Pneumonoultramicroscopicsilicovolcanoconiosis";
+		String stemmedWord = sut.stem(longWord);
+		String expectedStem = "Pneumonoultramicroscopicsilicovolcanoconiosi";
+		assertEquals(expectedStem, stemmedWord);
+	}
 
 	@Test
 	public void testStemmingWithEmptyWord() {
