@@ -3,6 +3,8 @@ package edu.stanford.nlp.simple;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.util.Optional;
+
 public class TokenTest {
 
   private String string = "the quick brown fox jumped over the lazy dog";
