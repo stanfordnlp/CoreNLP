@@ -6,6 +6,8 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -145,7 +147,7 @@ public class SentenceTest {
 
   @Test
   public void testFromCoreMapCorrectnessCheck() {
-	Annotation ann = new Annotation("This is a sentence.");
+    Annotation ann = new Annotation("This is a sentence.");
     Sentence s = tokenizeAndSplitAnnotation(ann);
     assertEquals(ann.get(CoreAnnotations.TextAnnotation.class), s.text());
     assertEquals("This", s.word(0));
@@ -229,5 +231,38 @@ public class SentenceTest {
 
     assertTrue(wasWrittenTo);
     assertTrue(wasNotClosed);
+  }
+
+  @Test
+  public void testDeserializeFromInputStream () throws IOException {
+    final class MockedInputStream extends InputStream {
+      int counter = 0;
+      /* Array of bytes representing deserialized
+       * Sentence "This is a test"
+       */
+      public ArrayList<Integer> serializedSentence = new ArrayList<Integer>();
+      public MockedInputStream(ArrayList<Integer> bytes) {
+        this.serializedSentence = bytes;
+      }
+      public int getReadCount() {
+        return counter;
+      }
+      boolean allBytesRead() {
+        return counter == this.serializedSentence.size();
+      }
+      @Override
+      public int read() throws IOException {
+        return serializedSentence.get(counter++);
+      }
+    }
+    Sentence sent = new Sentence("This was previously serialized");
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    sent.serialize(out);
+    byte[] previouslySerialized = out.toByteArray();
+
+    ByteArrayInputStream in = new ByteArrayInputStream(previouslySerialized);
+    Sentence deserialized = Sentence.deserialize(in);
+
+    assertEquals("This was previously serialized", deserialized.toString());
   }
 }

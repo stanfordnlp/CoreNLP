@@ -18,6 +18,7 @@ import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -1738,13 +1739,16 @@ public class StringUtils  {
    *         false otherwise
    */
   public static boolean isTitleCase(String s) {
-    String[] words = s.split("\\s+");
-    for (String w : words) {
-      if (!(Character.isUpperCase(w.charAt(0)) && (w.substring(1).toLowerCase().equals(w.substring(1))))) {
-        return false;
-      }
+    Predicate<String> capitalized = word -> Character.isUpperCase(word.charAt(0));
+    Predicate<String> remainderIsLowerCase = w -> w.substring(1).toLowerCase().equals(w.substring(1));
+
+    Predicate<String> titleCased = capitalized.and(remainderIsLowerCase);
+
+    if(s.isEmpty()){
+      return false;
     }
-    return true;
+    String[] words = s.split("\\s+");
+    return Arrays.stream(words).allMatch(titleCased);
   }
 
   /**
