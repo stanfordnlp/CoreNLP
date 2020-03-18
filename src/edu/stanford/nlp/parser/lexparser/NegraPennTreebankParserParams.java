@@ -72,6 +72,7 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
     headFinder = new NegraHeadFinder();
 
  // override output encoding: make it UTF-8
+    setInputEncoding("UTF-8");
     setOutputEncoding("UTF-8");
   }
 
