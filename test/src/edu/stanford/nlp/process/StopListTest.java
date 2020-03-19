@@ -1,6 +1,6 @@
 package edu.stanford.nlp.process;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
