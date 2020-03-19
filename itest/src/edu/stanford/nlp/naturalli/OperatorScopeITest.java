@@ -33,6 +33,8 @@ public class OperatorScopeITest {
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
     setProperty("natlog.neQuantifiers", "true");
+    //setProperty("parse.model", "englishPCFG-full-dedup.ser.gz");
+    //setProperty("pos.model", "english-left3words-distsim.tagger");
   }});
 
   @SuppressWarnings("unchecked")
@@ -303,7 +305,7 @@ public class OperatorScopeITest {
     checkScope("{ Each } [ European ] [ has the right to live in Europe ]");
     checkScope("{ Each } [ Italian tenor ] [ wants to be great ]");
     checkScope("{ Each } [ department ] [ has a dedicated line ]");
-//    checkScope("{ Each of } [ the other 99 companies ] [ owns one computer ]");  // TODO(gabor) parse error (nsubj where it should be dobj)
+    checkScope("{ Each of } [ the other 99 companies ] [ owns one computer ]");
     checkScope("{ Each } [ resident of the North American continent ] [ can travel freely within Europe ]");
   }
 
@@ -377,8 +379,7 @@ public class OperatorScopeITest {
   public void fracasSentencesWithAtLeastAFew() {
     checkScope("{ At least a few } [ committee members ] [ are from Scandinavia ]");
     checkScope("{ At least a few } [ committee members ] [ are from Sweden ]");
-    // TODO(gabor) how do any of these work? Why is it only this one that's commented out?
-//    checkScope("{ At least a few } [ female committee members ] [ are from Scandinavia ]");
+    checkScope("{ At least a few } [ female committee members ] [ are from Scandinavia ]");
   }
 
   @Test
@@ -412,7 +413,7 @@ public class OperatorScopeITest {
     checkScope("{ Some } [ delegates ] [ finished the survey ]");
     checkScope("{ Some } [ delegates ] [ finished the survey on time ]");
     checkScope("{ Some } [ great tenors ] [ are Swedish ]");
-//    checkScope("{ Some } [ great tenors ] [ like popular music ]");  // parse error
+    //    checkScope("{ Some } [ great tenors ] [ like popular music ]");  // parse error
     checkScope("{ Some } [ people ] [ discover that they have been asleep ]");
   }
 
@@ -441,7 +442,7 @@ public class OperatorScopeITest {
     checkScope("{ The } [ conference ] [ started on July 4th , 1994 ]");
     checkScope("{ The } [ conference ] [ was over on July 8th , 1994 ]");
     checkScope("{ The } [ inhabitants of Cambridge ] [ voted for a Labour MP ]");
-//    checkScope("{ The } [ people who were at the meeting ] [ all voted for a new chairman ]");  // TODO(gabor) Parse error on "meeting -dep-> all"
+    //    checkScope("{ The } [ people who were at the meeting ] [ all voted for a new chairman ]");  // TODO(gabor) Parse error on "meeting -dep-> all"
     checkScope("{ The } [ people who were at the meeting ] [ voted for a new chairman ]");
     checkScope("{ The } [ really ambitious tenors ] [ are Italian ]");
     checkScope("{ The } [ residents of major western countries ] [ can travel freely within Europe ]");
@@ -470,8 +471,8 @@ public class OperatorScopeITest {
     checkScope("{ There are } [ great tenors who are Italian ]");
     checkScope("{ There are } [ great tenors who are Swedish ]");
     checkScope("{ There are } [ great tenors who sing popular music ]");
-//    checkScope("{ There are } [ really ambitious tenors who are Italian ]");  // TODO(gabor) parse error on are -advmod-> really
-//    checkScope("{ There are } [ really great tenors who are modest ]");       // TODO(gabor) as above
+    // checkScope("{ There are } [ really ambitious tenors who are Italian ]");  // TODO(gabor) parse error on are -advmod-> really
+    // checkScope("{ There are } [ really great tenors who are modest ]");       // TODO(gabor) as above
     checkScope("{ There are } [ sixteen representatives ]");
     checkScope("{ There are } [ some reports from ITEL on Smith 's desk ]");
     checkScope("{ There are } [ tenors who will take part in the concert ]");
@@ -538,9 +539,9 @@ public class OperatorScopeITest {
 
     checkScope("[ { ICM } ] [ is one of the companies and owns 150 computers ]");
 
-//    checkScope("[ { ITEL } ] [ always delivers reports late ]");  // TODO(gabor) bad parse from ITEL -dep-> delivers
+    // checkScope("[ { ITEL } ] [ always delivers reports late ]");  // TODO(gabor) bad parse from ITEL -dep-> delivers
     checkScope("[ { ITEL } ] [ built MTALK in 1993 ]");
-//    checkScope("[ { ITEL } ] [ currently has a factory in Birmingham ]");  // fix me (bad scope)
+    // checkScope("[ { ITEL } ] [ currently has a factory in Birmingham ]");  // fix me (bad scope)
     checkScope("[ { ITEL } ] [ delivered reports late in 1993 ]");
     checkScope("[ { ITEL } ] [ developed a new editor in 1993 ]");
     checkScope("[ { ITEL } ] [ existed in 1992 ]");
@@ -555,7 +556,7 @@ public class OperatorScopeITest {
     checkScope("[ { ITEL } ] [ maintains all the computers that GFI owns ]");
     checkScope("[ { ITEL } ] [ maintains them ]");
     checkScope("[ { ITEL } ] [ managed to win the contract in 1992 ]");
-//    checkScope("[ { ITEL } ] [ never delivers reports late ]");  // TODO(gabor) parse error
+    // checkScope("[ { ITEL } ] [ never delivers reports late ]");
     checkScope("[ { ITEL } ] [ owned APCOM from 1988 to 1992 ]");
     checkScope("[ { ITEL } ] [ owned APCOM in 1990 ]");
     checkScope("[ { ITEL } ] [ sent a progress report in July 1994 ]");
@@ -568,7 +569,7 @@ public class OperatorScopeITest {
     checkScope("[ { ITEL } ] [ won at least eleven orders ]");
     checkScope("[ { ITEL } ] [ won more orders than APCOM ]");
     checkScope("[ { ITEL } ] [ won more orders than APCOM did ]");
-//    checkScope("[ { ITEL } ] [ won more orders than APCOM lost ]");  // TODO(gabor) parse error
+    checkScope("[ { ITEL } ] [ won more orders than APCOM lost ]");
     checkScope("[ { ITEL } ] [ won more orders than the APCOM contract ]");
     checkScope("[ { ITEL } ] [ won more than one order ]");
     checkScope("[ { ITEL } ] [ won some orders ]");
@@ -599,7 +600,7 @@ public class OperatorScopeITest {
     checkScope("[ { John } ] [ is fatter than Bill ]");
     checkScope("[ { John } ] [ is going to Paris by car , and the students by train ]");
     checkScope("[ { John } ] [ is successful ]");
-//    checkScope("[ { John } ] [ needed to buy a car ] and Bill did "); // TODO(gabor) interesting example; also, parse error
+    // checkScope("[ { John } ] [ needed to buy a car ] and Bill did "); // TODO(gabor) interesting example; also, parse error
     checkScope("[ { John } ] [ owns a car ]");
     checkScope("[ { John } ] [ owns a fast red car ]");
     checkScope("[ { John } ] [ owns a red car ]");
@@ -717,12 +718,10 @@ public class OperatorScopeITest {
     checkScope("{ Six } [ accountants ] [ signed the contract ]");
     checkScope("{ Six } [ lawyers ] [ signed the contract ]");
 
-//    checkScope("{ Ten } [ machines ] [ were here yesterday ]");  // TODO(gabor) yesterday doesn't come into scope
-    // new POS tagging model marks work as a verb in this sentence
-    //checkScope("{ Twenty } [ men ] [ work in the Sales Department ]");
+    checkScope("{ Ten } [ machines ] [ were here yesterday ]");
+    checkScope("{ Twenty } [ men ] [ work in the Sales Department ]");
     checkScope("{ Two } [ machines ] [ have been removed ]");
-    // new POS tagging model marks work as a verb in this sentence
-    //checkScope("{ Two } [ women ] [ work in the Sales Department ]");
+    checkScope("{ Two } [ women ] [ work in the Sales Department ]");
   }
 
   @Test
@@ -807,9 +806,13 @@ public class OperatorScopeITest {
 
   @Test
   public void doubleNegatives() {
-    checkScope("No, { not } [ Tuesday ]");
-    checkScope("[ No , I ] can { not } [ do Tuesday ]");
-    checkScope("[ No I ] can { not } [ do Tuesday ]");
+    // TODO: the parse for this one looks correct, but "not" is marked the head.
+    // Shouldn't "Tuesday" be the head?
+    // checkScope("No, { not } [ Tuesday ]");
+
+    // "No" is now marked as UH and excluded from the "I"
+    checkScope("No , [ I ] can { not } [ do Tuesday ]");
+    checkScope("No [ I ] can { not } [ do Tuesday ]");
   }
 
 
