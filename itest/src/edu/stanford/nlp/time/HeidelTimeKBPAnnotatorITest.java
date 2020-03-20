@@ -20,7 +20,7 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
   @Override
   public void setUp() {
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,heideltime,entitymentions,depparse");
+    props.setProperty("annotators", "tokenize,ssplit,mwt,pos,lemma,ner,heideltime,entitymentions,depparse");
     // tokenize options
     props.setProperty("tokenize.language", "es");
     props.setProperty("tokenize.options", "tokenizeNLs,ptb3Escaping=true");
