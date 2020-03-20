@@ -39,7 +39,7 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
     // regexner
     props.setProperty("ner.fine.regexner.mapping",
         "edu/stanford/nlp/models/kbp/spanish/gazetteers/kbp_regexner_mapping_sp.tag");
-    props.setProperty("ner.fine.regexner.validpospattern", " ^(NOUN|ADJ|PROPN).*");
+    props.setProperty("ner.fine.regexner.validpospattern", "^(NOUN|ADJ|PROPN).*");
     props.setProperty("ner.fine.regexner.ignorecase", "true");
     props.setProperty("ner.fine.regexner.noDefaultOverwriteLabels", "CITY,COUNTRY,STATE_OR_PROVINCE");
     // add heideltime
