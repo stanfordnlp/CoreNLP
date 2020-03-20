@@ -363,7 +363,11 @@ public class Document implements Serializable {
         if(goldMentionPositions.containsKey(pos)) {
           Collection<Mention> cm = goldMentionPositions.get(pos);
           Mention g = cm.iterator().next();
-          cm.remove(g);
+          if (cm.size() > 1) {
+            cm.remove(g);
+          } else {
+            goldMentionPositions.remove(pos);
+          }
           p.mentionID = g.mentionID;
           p.twinless = false;
           g.twinless = false;
