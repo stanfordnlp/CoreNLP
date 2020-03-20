@@ -26,6 +26,8 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
     props.setProperty("tokenize.options", "tokenizeNLs,ptb3Escaping=true");
     // ssplit options
     props.setProperty("ssplit.eolonly", "true");
+    // pos options
+    props.setProperty("pos.model", "edu/stanford/nlp/models/pos-tagger/spanish-ud.tagger");
     // ner options
     props.setProperty("ner.model", "edu/stanford/nlp/models/ner/spanish.kbp.ancora.distsim.s512.crf.ser.gz");
     props.setProperty("ner.applyNumericClassifiers", "true");
