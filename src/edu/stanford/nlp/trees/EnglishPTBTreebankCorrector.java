@@ -867,6 +867,12 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
      "relabel bad CC\n" +
      '\n') +
 
+    // this is also wrong: all of the either X or Y constructions should be
+    // either_CC X or_CC Y
+    ("/Neither|neither|either/ > (DT=bad $++ CC)\n" +
+     "relabel bad CC\n" +
+     '\n') +
+
     /* ----------------------------
        tregex3 -f -w '@VP < NN' | & less
 
