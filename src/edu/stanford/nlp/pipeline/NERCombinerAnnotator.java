@@ -413,27 +413,30 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   public static void transferNERAnnotationsToAnnotation(Annotation nerTokenizedAnnotation, Annotation originalAnnotation) {
     int nerTokenizedIdx = 0;
     int originalIdx = 0;
-    CoreLabel nerTokenizedToken = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(nerTokenizedIdx);
-    while (originalIdx < originalAnnotation.get(CoreAnnotations.TokensAnnotation.class).size()) {
-      CoreLabel origToken = originalAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(originalIdx);
-      if (origToken.endPosition() > nerTokenizedToken.endPosition()) {
-        nerTokenizedIdx++;
-        nerTokenizedToken = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(nerTokenizedIdx);
+    // nerTokenizedAnnotation might have no tokens if empty strings are annotated
+    if (!nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).isEmpty()) {
+      CoreLabel nerTokenizedToken = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(nerTokenizedIdx);
+      while (originalIdx < originalAnnotation.get(CoreAnnotations.TokensAnnotation.class).size()) {
+        CoreLabel origToken = originalAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(originalIdx);
+        if (origToken.endPosition() > nerTokenizedToken.endPosition()) {
+          nerTokenizedIdx++;
+          nerTokenizedToken = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(nerTokenizedIdx);
+        }
+        // list of all NER related keys
+        List<Class> nerKeys = Arrays.asList(CoreAnnotations.NamedEntityTagAnnotation.class,
+            CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
+            CoreAnnotations.NamedEntityTagProbsAnnotation.class,
+            CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class,
+            CoreAnnotations.CoarseNamedEntityTagAnnotation.class, TimeAnnotations.TimexAnnotation.class,
+            CoreAnnotations.NumericValueAnnotation.class, CoreAnnotations.NumericTypeAnnotation.class,
+            CoreAnnotations.NumericCompositeValueAnnotation.class, CoreAnnotations.NumericCompositeTypeAnnotation.class);
+        for (Class c : nerKeys) {
+          if (nerTokenizedToken.get(c) != null)
+            origToken.set(c, nerTokenizedToken.get(c));
+        }
+        // move on to next original token
+        originalIdx++;
       }
-      // list of all NER related keys
-      List<Class> nerKeys = Arrays.asList(CoreAnnotations.NamedEntityTagAnnotation.class,
-          CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
-          CoreAnnotations.NamedEntityTagProbsAnnotation.class,
-          CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class,
-          CoreAnnotations.CoarseNamedEntityTagAnnotation.class, TimeAnnotations.TimexAnnotation.class,
-          CoreAnnotations.NumericValueAnnotation.class, CoreAnnotations.NumericTypeAnnotation.class,
-          CoreAnnotations.NumericCompositeValueAnnotation.class, CoreAnnotations.NumericCompositeTypeAnnotation.class);
-      for (Class c : nerKeys) {
-        if (nerTokenizedToken.get(c) != null)
-          origToken.set(c, nerTokenizedToken.get(c));
-      }
-      // move on to next original token
-      originalIdx++;
     }
   }
 
