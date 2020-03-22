@@ -5,6 +5,9 @@ import edu.stanford.nlp.stats.Counter;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class CandidatePhraseTest {
 
     @Test
@@ -61,5 +64,16 @@ public class CandidatePhraseTest {
         Assert.assertEquals(candidatePhrase.getFeatureValue("q"), 2.0, 0d);
         Assert.assertEquals(candidatePhrase.getFeatureValue("r"), 3.0, 0d);
         Assert.assertEquals(candidatePhrase.getFeatureValue("s"), 4.0, 0d);
+    }
+
+    @Test
+    public void testConvertStringPhrases() {
+        List<String> list = new LinkedList();
+        list.add("sleep");
+        list.add("eat");
+
+        List<CandidatePhrase> candidateList = CandidatePhrase.convertStringPhrases(list);
+        Assert.assertEquals(candidateList.get(0).getPhrase(), "sleep");
+        Assert.assertEquals(candidateList.get(1).getPhrase(), "eat");
     }
 }
