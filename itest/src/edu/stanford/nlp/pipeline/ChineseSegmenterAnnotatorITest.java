@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.StringUtils;
 
 
 public class ChineseSegmenterAnnotatorITest {
@@ -64,10 +65,10 @@ public class ChineseSegmenterAnnotatorITest {
         new int[]{2, 3, 4, 5, 7, 8, 84, 88, 90, 91, 92, 94, 95});
 
     // Check still works with non-BMP chars
-    testOne("买点咖啡提点精神\uD83D\uDE0A",
-            new String[] { "买", "点", "咖啡", "提", "点", "精神", "\uD83D\uDE0A" },
-            new int[] { 0, 1, 2, 4, 5, 6, 8 },
-            new int[] { 1, 2, 4, 5, 6, 8, 10});
+    testOne("买点咖啡\uD83D\uDE0A",
+            new String[] { "买", "点", "咖啡", "\uD83D\uDE0A" },
+            new int[] { 0, 1, 2, 4 },
+            new int[] { 1, 2, 4, 6});
   }
 
   private void testOne(String query, String[] expectedWords, int[] expectedBeginPositions, int[] expectedEndPositions) {
@@ -75,6 +76,10 @@ public class ChineseSegmenterAnnotatorITest {
     pipeline.annotate(annotation);
 
     List<CoreLabel> tokens = annotation.get(TokensAnnotation.class);
+    if (expectedWords.length != tokens.size()) {
+      System.err.println("Expected: " + StringUtils.join(expectedWords, "  "));
+      System.err.println("Got:      " + StringUtils.joinWords(tokens, "  "));
+    }
     Assert.assertEquals(expectedWords.length, tokens.size());
     for (int i = 0; i < expectedWords.length; ++i) {
       Assert.assertEquals(expectedWords[i], tokens.get(i).word());
