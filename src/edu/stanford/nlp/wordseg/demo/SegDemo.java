@@ -14,6 +14,12 @@ import edu.stanford.nlp.ling.CoreLabel;
  *  <code>
  *  Usage: java -mx1g -cp seg.jar SegDemo fileName
  *  </code>
+ *  <br>
+ *  To run with the segmenter models jar file in the classpath:
+ *  <br>
+ *  <code>
+ *  java -Dbasedir=edu/stanford/nlp/models/segmenter/chinese edu.stanford.nlp.wordseg.demo.SegDemo
+ *  </code>
  *  This will run correctly in the distribution home directory.  To
  *  run in general, the properties for where to find dictionaries or
  *  normalizations have to be set.
@@ -48,7 +54,7 @@ public class SegDemo {
     }
 
     if (args.length == 0) {
-      String sample = "我住在美国。";
+      String sample = "2008年我住在美国。";
       List<String> segmented = segmenter.segmentString(sample);
       System.out.println(segmented);
     }
