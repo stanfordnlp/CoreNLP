@@ -68,12 +68,28 @@ public class CandidatePhraseTest {
 
     @Test
     public void testConvertStringPhrases() {
-        List<String> list = new LinkedList();
-        list.add("sleep");
-        list.add("eat");
+        List<String> stringList = new LinkedList();
+        stringList.add("sleep");
+        stringList.add("eat");
 
-        List<CandidatePhrase> candidateList = CandidatePhrase.convertStringPhrases(list);
+        List<CandidatePhrase> candidateList = CandidatePhrase.convertStringPhrases(stringList);
         Assert.assertEquals(candidateList.get(0).getPhrase(), "sleep");
         Assert.assertEquals(candidateList.get(1).getPhrase(), "eat");
+
+        Assert.assertEquals(stringList.size(), candidateList.size());
+
+    }
+
+    @Test
+    public void testConvertToString() {
+        List<CandidatePhrase> candidateList = new LinkedList();
+        candidateList.add(CandidatePhrase.createOrGet("sleep"));
+        candidateList.add(CandidatePhrase.createOrGet("drink"));
+
+        List<String> stringCandidateList = CandidatePhrase.convertToString(candidateList);
+        Assert.assertEquals(stringCandidateList.get(0), "sleep");
+        Assert.assertEquals(stringCandidateList.get(1), "drink");
+
+        Assert.assertEquals(stringCandidateList.size(), candidateList.size());
     }
 }
