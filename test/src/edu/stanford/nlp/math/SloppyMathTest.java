@@ -19,6 +19,10 @@ public class SloppyMathTest extends TestCase {
   }
 
   public void testRound2() {
+      assertEquals(0.0, SloppyMath.round(49, -2));
+      assertEquals(100.0, SloppyMath.round(50, -2));
+      assertEquals(100.0, SloppyMath.round(51, -2));
+//  assertEquals(-100.0, SloppyMath.round(-50, -2));
     assertEquals(3.14, SloppyMath.round(Math.PI, 2));
     assertEquals(400.0, SloppyMath.round(431.5, -2));
     assertEquals(432.0, SloppyMath.round(431.5, 0));
