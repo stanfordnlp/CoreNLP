@@ -9,7 +9,7 @@ public class SloppyMathTest extends TestCase {
   public void setUp() {
   }
 
-    public void testRoundWithBoundaries() {
+  public void testRoundWithBoundaries() {
     assertEquals(0.0, SloppyMath.round(0.499));
     assertEquals(1.0, SloppyMath.round(0.5));
     assertEquals(0.0, SloppyMath.round(-0.49));
@@ -19,9 +19,9 @@ public class SloppyMathTest extends TestCase {
   }
 
   public void testRound2() {
-      assertEquals(0.0, SloppyMath.round(49, -2));
-      assertEquals(100.0, SloppyMath.round(50, -2));
-      assertEquals(100.0, SloppyMath.round(51, -2));
+   assertEquals(0.0, SloppyMath.round(49, -2));
+   assertEquals(100.0, SloppyMath.round(50, -2));
+   assertEquals(100.0, SloppyMath.round(51, -2));
 //  assertEquals(-100.0, SloppyMath.round(-50, -2));
     assertEquals(3.14, SloppyMath.round(Math.PI, 2));
     assertEquals(400.0, SloppyMath.round(431.5, -2));
@@ -117,15 +117,13 @@ public class SloppyMathTest extends TestCase {
     assertEquals(42000000000000l, SloppyMath.parseInt("42000000000000"));
   }
 
-    public void testParseIntWithBoundaries() {
-        assertEquals(Long.MAX_VALUE, SloppyMath.parseInt("9223372036854775807"));
-        assertEquals(Long.MIN_VALUE, SloppyMath.parseInt("-9223372036854775808"));
-
-        assertEquals(20, SloppyMath.parseInt("20"));
-
-        //overflows
-        assertEquals(Long.MAX_VALUE, SloppyMath.parseInt("-9223372036854775809"));
-        assertEquals(Long.MIN_VALUE, SloppyMath.parseInt("9223372036854775808"));
-    }
+  public void testParseIntWithBoundaries() {
+    assertEquals(Long.MAX_VALUE, SloppyMath.parseInt("9223372036854775807"));
+    assertEquals(Long.MIN_VALUE, SloppyMath.parseInt("-9223372036854775808"));
+    assertEquals(20, SloppyMath.parseInt("20"));
+    //overflows
+    assertEquals(Long.MAX_VALUE, SloppyMath.parseInt("-9223372036854775809"));
+    assertEquals(Long.MIN_VALUE, SloppyMath.parseInt("9223372036854775808"));
+  }
 }
 
