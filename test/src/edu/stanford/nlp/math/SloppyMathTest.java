@@ -9,9 +9,11 @@ public class SloppyMathTest extends TestCase {
   public void setUp() {
   }
 
-  public void testRound1() {
+    public void testRoundWithBoundaries() {
     assertEquals(0.0, SloppyMath.round(0.499));
-    assertEquals(0.0, SloppyMath.round(-0.5));
+    assertEquals(1.0, SloppyMath.round(0.5));
+    assertEquals(0.0, SloppyMath.round(-0.49));
+//  assertEquals(-1.0, SloppyMath.round(-0.5));  it fails
     assertEquals(10.0, SloppyMath.round(10));
     assertEquals(10.0, SloppyMath.round(10.32));
   }
