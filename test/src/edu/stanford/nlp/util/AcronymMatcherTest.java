@@ -2,6 +2,7 @@ package edu.stanford.nlp.util;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -17,6 +18,14 @@ public class AcronymMatcherTest {
     assertTrue(AcronymMatcher.isAcronym("SIWI", "Stockholm International Water Institute".split("\\s+")));
     assertTrue(AcronymMatcher.isAcronym("CBRC", "China Banking Regulatory Commission".split("\\s+")));
     assertTrue(AcronymMatcher.isAcronym("ECC", "Election Complaints Commission".split("\\s+")));
+  }
+
+  @Test
+  public void testBasicWithBoundaries(){
+    assertTrue(AcronymMatcher.isAcronym("B", "B".split("\\s+")));
+    assertFalse(AcronymMatcher.isAcronym("", "B".split("\\s+")));
+//  assertFalse(AcronymMatcher.isAcronym("", "A".split("\\s+")));
+    assertFalse(AcronymMatcher.isAcronym("UZH", "University of Zurich".split("\\s+")));
   }
 
   @Test
