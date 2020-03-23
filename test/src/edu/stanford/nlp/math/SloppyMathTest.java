@@ -110,5 +110,16 @@ public class SloppyMathTest extends TestCase {
     assertEquals(-42, SloppyMath.parseInt("-42"));
     assertEquals(42000000000000l, SloppyMath.parseInt("42000000000000"));
   }
+
+    public void testParseIntWithBoundaries() {
+        assertEquals(Long.MAX_VALUE, SloppyMath.parseInt("9223372036854775807"));
+        assertEquals(Long.MIN_VALUE, SloppyMath.parseInt("-9223372036854775808"));
+
+        assertEquals(20, SloppyMath.parseInt("20"));
+
+        //overflows
+        assertEquals(Long.MAX_VALUE, SloppyMath.parseInt("-9223372036854775809"));
+        assertEquals(Long.MIN_VALUE, SloppyMath.parseInt("9223372036854775808"));
+    }
 }
 
