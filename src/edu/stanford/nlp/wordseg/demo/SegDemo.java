@@ -31,6 +31,7 @@ public class SegDemo {
 
   private static final String basedir = System.getProperty("basedir", "data");
   private static final String MODEL = System.getProperty("model", basedir + "/ctb.gz");
+  private static final String DICT = System.getProperty("dict", basedir + "/dict-chris6.ser.gz");
 
   public static void main(String[] args) throws Exception {
     System.setOut(new PrintStream(System.out, true, "utf-8"));
@@ -40,7 +41,7 @@ public class SegDemo {
     // props.setProperty("NormalizationTable", "data/norm.simp.utf8");
     // props.setProperty("normTableEncoding", "UTF-8");
     // below is needed because CTBSegDocumentIteratorFactory accesses it
-    props.setProperty("serDictionary", basedir + "/dict-chris6.ser.gz");
+    props.setProperty("serDictionary", DICT);
     if (args.length > 0) {
       props.setProperty("testFile", args[0]);
     }
