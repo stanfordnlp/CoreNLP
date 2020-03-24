@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 //import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,31 +15,29 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import edu.stanford.nlp.coref.CorefDocumentProcessor;
-import edu.stanford.nlp.coref.CorefProperties;
-import edu.stanford.nlp.coref.CorefProperties.Dataset;
-import edu.stanford.nlp.coref.CorefUtils;
 import edu.stanford.nlp.coref.data.CorefCluster;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Document;
-import edu.stanford.nlp.coref.data.Mention;
+import edu.stanford.nlp.coref.CorefDocumentProcessor;
+import edu.stanford.nlp.coref.CorefProperties;
+import edu.stanford.nlp.coref.CorefUtils;
+import edu.stanford.nlp.coref.CorefProperties.Dataset;
+import edu.stanford.nlp.coref.statistical.DocumentExamples;
 import edu.stanford.nlp.coref.statistical.CompressedFeatureVector;
 import edu.stanford.nlp.coref.statistical.Compressor;
-import edu.stanford.nlp.coref.statistical.DocumentExamples;
 import edu.stanford.nlp.coref.statistical.Example;
 import edu.stanford.nlp.coref.statistical.FeatureExtractor;
 import edu.stanford.nlp.coref.statistical.StatisticalCorefProperties;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 //import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.coref.data.Mention;
 
-/** Writes CoNLL data to JSON for fastneural model training (using python/tensorflow). */
 public class FastNeuralCorefDataExporter implements CorefDocumentProcessor {
   private final FeatureExtractor extractor;
   private final Compressor<String> compressor;
@@ -96,11 +93,11 @@ public class FastNeuralCorefDataExporter implements CorefDocumentProcessor {
 
     JsonObjectBuilder mentions = Json.createObjectBuilder();
     for (Mention m : document.predictedMentionsByID.values()) {
-      Iterator<SemanticGraphEdge> iterator =
-          m.enhancedDependency.incomingEdgeIterator(m.headIndexedWord);
-      SemanticGraphEdge relation = iterator.hasNext() ? iterator.next() : null;
-      String depRelation = relation == null ? "no-parent" : relation.getRelation().toString();
-      String depParent = relation == null ? "<missing>" : relation.getSource().word();
+      //Iterator<SemanticGraphEdge> iterator =
+      //    m.enhancedDependency.incomingEdgeIterator(m.headIndexedWord);
+      //SemanticGraphEdge relation = iterator.hasNext() ? iterator.next() : null;
+      //String depRelation = relation == null ? "no-parent" : relation.getRelation().toString();
+      //String depParent = relation == null ? "<missing>" : relation.getSource().word();
 
       mentions.add(String.valueOf(m.mentionNum), Json.createObjectBuilder()
           .add("doc_id", id)
@@ -111,8 +108,8 @@ public class FastNeuralCorefDataExporter implements CorefDocumentProcessor {
           .add("end_index", m.endIndex)
           .add("head_index", m.headIndex)
           .add("mention_type", m.mentionType.toString())
-          .add("dep_relation", depRelation)
-          .add("dep_parent", depParent)
+          //.add("dep_relation", depRelation)
+          //.add("dep_parent", depParent)
           .add("sentence", getSentenceArray(m.sentenceWords))
           //.add("contained-in-other-mention", mentionsByHeadIndex.get(m.headIndex).stream()
           //    .anyMatch(m2 -> m != m2 && m.insideIn(m2)) ? 1 : 0)

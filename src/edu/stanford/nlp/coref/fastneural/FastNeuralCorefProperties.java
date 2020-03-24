@@ -15,6 +15,6 @@ public class FastNeuralCorefProperties {
 
   public static String modelPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.fastneural.modelPath",
-        "edu/stanford/nlp/models/coref/fastneural/fast-english-model.ser.gz");
+        "edu/stanford/nlp/models/coref/fastneural/model.ser.gz");
   }
 }

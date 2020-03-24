@@ -10,6 +10,7 @@ import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.coref.CorefUtils;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Document;
+import edu.stanford.nlp.coref.neural.NeuralCorefAlgorithm;
 import edu.stanford.nlp.coref.statistical.Compressor;
 import edu.stanford.nlp.coref.statistical.DocumentExamples;
 import edu.stanford.nlp.coref.statistical.Example;
@@ -21,7 +22,6 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.logging.Redwood;
-import org.ejml.simple.SimpleMatrix;
 
 /**
  * Neural mention-ranking coreference model. Similar to the one in
@@ -37,7 +37,7 @@ import org.ejml.simple.SimpleMatrix;
  * @author Kevin Clark
  */
 public class FastNeuralCorefAlgorithm implements CorefAlgorithm {
-  private static Redwood.RedwoodChannels log = Redwood.channels(FastNeuralCorefAlgorithm.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(NeuralCorefAlgorithm.class);
   private final double greedyness;
   private final int maxMentionDistance;
   private final int maxMentionDistanceWithStringMatch;
@@ -50,31 +50,30 @@ public class FastNeuralCorefAlgorithm implements CorefAlgorithm {
     maxMentionDistanceWithStringMatch = CorefProperties.maxMentionDistanceWithStringMatch(props);
     featureExtractor = new FeatureExtractor(props, dictionaries, null,
         StatisticalCorefProperties.wordCountsPath(props));
-    FastNeuralCorefModel loadedModel = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
-        log, "Loading coref model...", FastNeuralCorefProperties.modelPath(props));
-    model = loadedModel.getCopyWithNewWeights();  // TODO: remove when ejml upgraded
+    model = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
+        log, "Loading coref model", FastNeuralCorefProperties.modelPath(props));
   }
 
   @Override
   public void runCoref(Document document) {
+    if (Thread.interrupted()) {  // Allow interrupting
+      throw new RuntimeInterruptedException();
+    }
+
     Map<Integer, List<Integer>> mentionToCandidateAntecedents = CorefUtils.heuristicFilter(
         CorefUtils.getSortedMentions(document),
         maxMentionDistance, maxMentionDistanceWithStringMatch);
-    Map<Pair<Integer, Integer>, Boolean> mentionPairs = new HashMap<>();
+    Map<Pair<Integer, Integer>, Boolean> pairs = new HashMap<>();
     for (Map.Entry<Integer, List<Integer>> e: mentionToCandidateAntecedents.entrySet()) {
       for (int m1 : e.getValue()) {
-        mentionPairs.put(new Pair<>(m1, e.getKey()), true);
+        pairs.put(new Pair<>(m1, e.getKey()), true);
       }
     }
 
     Compressor<String> compressor = new Compressor<>();
-    DocumentExamples examples = featureExtractor.extract(0, document, mentionPairs, compressor);
-    Counter<Pair<Integer, Integer>> pairwiseScores = new ClassicCounter<>();
-    // We cache representations for mentions so we compute them O(n) rather than O(n^2) times
-    Map<Integer, SimpleMatrix> antecedentCache = new HashMap<>();
-    Map<Integer, SimpleMatrix> anaphorCache = new HashMap<>();
+    DocumentExamples examples = featureExtractor.extract(0, document, pairs, compressor);
 
-    // Score all mention pairs on how likely they are to be coreferent
+    Counter<Pair<Integer, Integer>> pairwiseScores = new ClassicCounter<>();
     for (Example mentionPair : examples.examples) {
       if (Thread.interrupted()) {  // Allow interrupting
         throw new RuntimeInterruptedException();
@@ -85,28 +84,18 @@ public class FastNeuralCorefAlgorithm implements CorefAlgorithm {
               document.predictedMentionsByID.get(mentionPair.mentionId2),
               compressor.uncompress(examples.mentionFeatures.get(mentionPair.mentionId1)),
               compressor.uncompress(examples.mentionFeatures.get(mentionPair.mentionId2)),
-              compressor.uncompress(mentionPair.pairwiseFeatures),
-              antecedentCache,
-              anaphorCache
-          ));
+              compressor.uncompress(mentionPair.pairwiseFeatures)));
     }
-    // Score each mention for anaphoricity
     for (int anaphorId : mentionToCandidateAntecedents.keySet()) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       pairwiseScores.incrementCount(new Pair<>(-1, anaphorId),
           model.score(
               null,
               document.predictedMentionsByID.get(anaphorId),
               null,
               compressor.uncompress(examples.mentionFeatures.get(anaphorId)),
-              null,
-              antecedentCache,
-              anaphorCache));
+              null));
     }
 
-    // Link each mention to the highest-scoring candidate antecedent
     for (Map.Entry<Integer, List<Integer>> e : mentionToCandidateAntecedents.entrySet()) {
       int antecedent = -1;
       int anaphor = e.getKey();
