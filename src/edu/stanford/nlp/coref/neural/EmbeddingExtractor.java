@@ -25,12 +25,14 @@ public class EmbeddingExtractor implements Serializable {
   private final boolean conll;
   private final Embedding staticWordEmbeddings;
   private final Embedding tunedWordEmbeddings;
+  private final String naEmbedding;
 
   public EmbeddingExtractor(boolean conll, Embedding staticWordEmbeddings,
-      Embedding tunedWordEmbeddings) {
+      Embedding tunedWordEmbeddings, String naEmbedding) {
     this.conll = conll;
     this.staticWordEmbeddings = staticWordEmbeddings;
     this.tunedWordEmbeddings = tunedWordEmbeddings;
+    this.naEmbedding = naEmbedding;
   }
 
   public SimpleMatrix getDocumentEmbedding(Document document) {
@@ -49,14 +51,22 @@ public class EmbeddingExtractor implements Serializable {
   }
 
   public SimpleMatrix getMentionEmbeddingsForFast(Mention m) {
+    Iterator<SemanticGraphEdge> iterator =
+        m.enhancedDependency.incomingEdgeIterator(m.headIndexedWord);
+    SemanticGraphEdge relation = iterator.hasNext() ? iterator.next() : null;
+    String depParent = relation == null ? "<missing>" : relation.getSource().word();
+
     return NeuralUtils.concatenate(
-        getWordEmbedding(m.sentenceWords, m.headIndex),
-        getWordEmbedding(m.sentenceWords, m.startIndex),
-        getWordEmbedding(m.sentenceWords, m.endIndex - 1),
-        getWordEmbedding(m.sentenceWords, m.startIndex - 1),
-        getWordEmbedding(m.sentenceWords, m.endIndex),
         getWordEmbedding(m.sentenceWords, m.startIndex - 2),
-        getWordEmbedding(m.sentenceWords, m.endIndex + 1)
+        getWordEmbedding(m.sentenceWords, m.startIndex - 1),
+        getWordEmbedding(m.sentenceWords, m.startIndex),
+        getWordEmbedding(m.sentenceWords, m.headIndex),
+        getWordEmbedding(m.sentenceWords, m.endIndex - 1),
+        getWordEmbedding(m.sentenceWords, m.endIndex),
+        getWordEmbedding(m.sentenceWords, m.endIndex + 1),
+        getWordEmbedding(depParent) ,
+        getAverageEmbedding(m.sentenceWords.subList(
+            m.startIndex, Math.min(m.endIndex, m.startIndex + 10)))
     );
   }
 
@@ -83,9 +93,11 @@ public class EmbeddingExtractor implements Serializable {
   }
 
   private SimpleMatrix getAverageEmbedding(List<CoreLabel> words) {
-    SimpleMatrix emb = new SimpleMatrix(staticWordEmbeddings.getEmbeddingSize(), 1);
+    Embedding embeddings = staticWordEmbeddings == null ? tunedWordEmbeddings : staticWordEmbeddings;
+    SimpleMatrix emb = new SimpleMatrix(embeddings.getEmbeddingSize(), 1);
     for (CoreLabel word : words) {
-      emb = emb.plus(getStaticWordEmbedding(word.word()));
+      String w = normalizeWord(word.word());
+      emb = emb.plus(embeddings.get(w));
     }
     return emb.divide(Math.max(1, words.size()));
   }
@@ -96,7 +108,7 @@ public class EmbeddingExtractor implements Serializable {
   }
 
   private SimpleMatrix getWordEmbedding(List<CoreLabel> sentence, int i) {
-    return getWordEmbedding(i < 0 || i >= sentence.size() ? null : sentence.get(i).word());
+    return getWordEmbedding(i < 0 || i >= sentence.size() ? naEmbedding : sentence.get(i).word());
   }
 
   public SimpleMatrix getWordEmbedding(String word) {
@@ -106,10 +118,6 @@ public class EmbeddingExtractor implements Serializable {
     }
     return tunedWordEmbeddings.containsWord(word) ? tunedWordEmbeddings.get(word) :
       staticWordEmbeddings.get(word);
-  }
-
-  public SimpleMatrix getStaticWordEmbedding(String word) {
-    return staticWordEmbeddings.get(normalizeWord(word));
   }
 
   private static String normalizeWord(String w) {
@@ -131,6 +139,10 @@ public class EmbeddingExtractor implements Serializable {
       return "[";
     } else if (w.equals("-RSB-")) {
       return "]";
+    } else if (w.equals("''")) {
+      w = "\"";
+    } else if (w.startsWith("%") && w.length() > 1) {
+      w = w.substring(1);
     }
     return w.replaceAll("\\d", "0").toLowerCase();
   }
