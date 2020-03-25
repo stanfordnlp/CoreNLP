@@ -44,7 +44,7 @@ public class OntoNotesUDUpdater {
         while (replacementTreesMatcher.find()) {
           Tree replacementTree = replacementTreesMatcher.getMatch();
           String newLabel = labelSubstitutions.get(replacementTree);
-          replacementTree.label().setFromString(newLabel);
+          replacementTree.label().setValue(newLabel);
         }
         System.out.println(t);
       }
