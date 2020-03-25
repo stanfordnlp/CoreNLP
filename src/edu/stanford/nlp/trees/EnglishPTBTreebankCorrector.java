@@ -1196,6 +1196,10 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     "relabel bad RB\n" +
             '\n') +
 
+    ("before|after > (RB=bad > @SBAR $+ @S)\n" +
+     "relabel bad IN\n" +
+     '\n') +
+
     ("@ADVP=bad <1 PRT !<2 __\n" +
     "excise bad bad\n" +
             '\n') +
