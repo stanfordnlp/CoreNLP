@@ -20,7 +20,7 @@ public class OntoNotesUDUpdater {
       TregexPattern.compile("/-LCB-|-RCB-|-LSB-|-RSB-|TOP|XX/ < /.*/");
 
   /** Label substitutions to make **/
-  public static HashMap<String,String> labelSubstitutions;
+  public static HashMap<String,String> labelSubstitutions = new HashMap<>();
   static {
     labelSubstitutions.put("-LCB-", "{");
     labelSubstitutions.put("-RCB-", "}");
