@@ -12,8 +12,8 @@ public class SloppyMathTest extends TestCase {
   public void testRoundWithBoundaries() {
     assertEquals(0.0, SloppyMath.round(0.499));
     assertEquals(1.0, SloppyMath.round(0.5));
-    assertEquals(0.0, SloppyMath.round(-0.49));
-//  assertEquals(-1.0, SloppyMath.round(-0.5));  it fails
+    assertEquals(0.0, SloppyMath.round(-0.5));
+    assertEquals(-1.0, SloppyMath.round(-0.51));
     assertEquals(10.0, SloppyMath.round(10));
     assertEquals(10.0, SloppyMath.round(10.32));
   }
@@ -22,7 +22,8 @@ public class SloppyMathTest extends TestCase {
     assertEquals(0.0, SloppyMath.round(49, -2));
     assertEquals(100.0, SloppyMath.round(50, -2));
     assertEquals(100.0, SloppyMath.round(51, -2));
-//  assertEquals(-100.0, SloppyMath.round(-50, -2));
+    assertEquals(0.0, SloppyMath.round(-50, -2));
+    assertEquals(-100.0, SloppyMath.round(-51, -2));
     assertEquals(3.14, SloppyMath.round(Math.PI, 2));
     assertEquals(400.0, SloppyMath.round(431.5, -2));
     assertEquals(432.0, SloppyMath.round(431.5, 0));
