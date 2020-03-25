@@ -930,17 +930,21 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
   };
 
   public static<E> List<List<E>> getThreadBatches(List<E> keyset, int numThreads){
-    int num;
-    if (numThreads == 1)
-      num = keyset.size();
-    else
-      num = keyset.size() / (numThreads - 1);
+    int num = (numThreads == 1) ? keyset.size() : Math.max(keyset.size() / (numThreads - 1), 1);
     Redwood.log(ConstantsAndVariables.extremedebug, "keyset size is " + keyset.size());
     List<List<E>> threadedSentIds = new ArrayList<>();
     for (int i = 0; i < numThreads; i++) {
-      List<E> keys = keyset.subList(i * num, Math.min(keyset.size(), (i + 1) * num));
-      threadedSentIds.add(keys);
-      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num + " till " + Math.min(keyset.size(), (i + 1) * num));
+      int from = i * num;
+      int to = Math.min(keyset.size(), (i + 1) * num);
+      if (from >= to) {
+        // this can happen if numThreads > keyset.size()
+        threadedSentIds.add(Collections.emptyList());
+        Redwood.log(ConstantsAndVariables.extremedebug, "thread " + i + " not assigned any items");
+      } else {
+        List<E> keys = keyset.subList(from, to);
+        threadedSentIds.add(keys);
+        Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num + " till " + Math.min(keyset.size(), (i + 1) * num));
+      }
     }
     return threadedSentIds;
   }
@@ -1581,14 +1585,9 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     if (n > c.size())
       throw new IllegalArgumentException("n > size of collection: " + n + ", " + c.size());
     List<List<E>> resultAll = new ArrayList<>(numThreads);
-    int num;
+    int num = (numThreads == 1) ? n : Math.max(1, n / (numThreads - 1));
 
-    if (numThreads == 1)
-      num = n;
-    else
-      num = n / (numThreads - 1);
-
-    System.out.println("shuffled " + c.size() + " sentences and selecting " + num  + " sentences per thread");
+    log.info("shuffled " + c.size() + " sentences and selecting " + num  + " sentences per thread");
     List<E> result = new ArrayList<>(num);
     int totalitems = 0;
     int nitem = 0;
