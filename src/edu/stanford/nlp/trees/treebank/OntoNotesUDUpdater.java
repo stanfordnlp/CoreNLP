@@ -39,9 +39,7 @@ public class OntoNotesUDUpdater {
     // iterate through trees, replace labels that need updating for UD
     Tree t = tr.readTree();
     while(t != null) {
-      if (badLabelsPattern.matcher(t).find())
-        continue;
-      else {
+      if (!badLabelsPattern.matcher(t).find()) {
         TregexMatcher replacementTreesMatcher = substitutionLabelsPattern.matcher(t);
         while (replacementTreesMatcher.find()) {
           Tree replacementTree = replacementTreesMatcher.getMatch();
@@ -50,6 +48,7 @@ public class OntoNotesUDUpdater {
         }
         System.out.println(t);
       }
+      t = tr.readTree();
     }
   }
 
