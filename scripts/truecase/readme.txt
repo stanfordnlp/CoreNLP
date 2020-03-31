@@ -59,19 +59,3 @@ use a machine with huge RAM
 run make
 
 
-
-
-Rough description of the models:
-
-truecasing.fast.caseless.qn.ser.gz:
-  has been reduced in size from the full version using the feature dropping mechanism.
-  operates on text without considering the original case
-
-truecasing.fast.qn.ser.gz
-  also reduced in size
-  but uses the original case to determine the replacement case
-  actually, this is not particularly useful considering the way the wikipedia data is built
-  would need to be rebuilt using data with the casing intentionally fudged into common errors
-
-truecasing.full.qn.ser.gz
-  same, but just as useless and significantly larger since it didn't use feature pruning

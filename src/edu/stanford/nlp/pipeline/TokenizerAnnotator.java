@@ -135,7 +135,8 @@ public class TokenizerAnnotator implements Annotator  {
   private final Annotator segmenterAnnotator;
 
   /** run a custom post processor after the lexer **/
-  private final List<CoreLabelProcessor> postProcessors;
+  private final boolean usePostProcessor;
+  private final CoreLabelProcessor postProcessor;
 
   // CONSTRUCTORS
 
@@ -226,18 +227,17 @@ public class TokenizerAnnotator implements Annotator  {
 
     // load any custom token post processing
     String postProcessorClass = props.getProperty("tokenize.postProcessor", "");
-    List<CoreLabelProcessor> processors = new ArrayList<>();
     try {
       if (!postProcessorClass.equals("")) {
-        processors.add(ReflectionLoading.loadByReflection(postProcessorClass));
+        postProcessor = ReflectionLoading.loadByReflection(postProcessorClass);
+        usePostProcessor = true;
+      } else {
+        postProcessor = null;
+        usePostProcessor = false;
       }
-    } catch (RuntimeException e) {
+    } catch (Exception e) {
       throw new RuntimeException("Loading: "+postProcessorClass+" failed with: "+e.getMessage());
     }
-    if (PropertiesUtils.getBool(props, "tokenize.codepoint")) {
-      processors.add(new CodepointCoreLabelProcessor());
-    }
-    postProcessors = Collections.unmodifiableList(processors);
 
     VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
     TokenizerType type = TokenizerType.getTokenizerType(props);
@@ -385,9 +385,8 @@ public class TokenizerAnnotator implements Annotator  {
       setTokenBeginTokenEnd(tokens);
 
       // run post processing
-      for (CoreLabelProcessor postProcessor : postProcessors) {
+      if (usePostProcessor)
         tokens = postProcessor.process(tokens);
-      }
 
       // add tokens list to annotation
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
