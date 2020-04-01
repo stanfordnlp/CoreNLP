@@ -24,7 +24,7 @@ public class CorefProperties {
 
   public static CorefAlgorithmType algorithm(Properties props) {
     String type = PropertiesUtils.getString(props, "coref.algorithm",
-        getLanguage(props) == Locale.ENGLISH ? "fastneural" : "neural");
+        getLanguage(props) == Locale.ENGLISH ? "statistical" : "neural");
     return CorefAlgorithmType.valueOf(type.toUpperCase());
   }
 
