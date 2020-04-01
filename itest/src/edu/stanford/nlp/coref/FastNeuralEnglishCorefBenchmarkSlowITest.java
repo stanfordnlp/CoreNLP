@@ -4,7 +4,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 
-public class FastNeuralEnglishCorefCoNLLBenchmarkSlowITest extends CorefBenchmark {
+public class FastNeuralEnglishCorefBenchmarkSlowITest extends CorefBenchmark {
 
   @Override
   public void setUp() throws Exception, IOException {
