@@ -17,7 +17,7 @@ import edu.stanford.nlp.util.Sets;
  */
 public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
-  public static Set<String> tagsToIgnore = new HashSet<String>(Arrays.asList("X", "_"));
+  public static Set<String> tagsToIgnore = new HashSet<String>(Arrays.asList());
 
   private static void testTagSet4(String[] lexParsers,
                                   String[] maxentTaggers,
@@ -56,7 +56,7 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
       assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
                    "left - right: " + Sets.diff(tagSet, srParserTagSet) +
                    "; right - left: " + Sets.diff(srParserTagSet, tagSet) + "\n",
-                   tagSet, srParserTagSet);
+                   tagSet, srp.tagSet());
     }
 
     for (String name : nnDepParsers) {
@@ -66,7 +66,7 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
       assertEquals(refTaggerName + " vs. " + name + " tag set mismatch:\n" +
                    "left - right: " + Sets.diff(tagSet, nnDepParserTagSet) +
                    "; right - left: " + Sets.diff(nnDepParserTagSet, tagSet) + "\n",
-                   tagSet, nnDepParserTagSet);
+                   tagSet, dp.getPosSet());
     }
 
   }

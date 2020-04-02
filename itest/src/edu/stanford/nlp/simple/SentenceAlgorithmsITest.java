@@ -196,21 +196,13 @@ public class SentenceAlgorithmsITest {
     s.dependencyGraph();
     assertEquals(new ArrayList<String>(){{
       add("forced");
-      add("<-amod-");
-      add("governors");
-      add("<-dep-");
-      add("dominance");
-      add("<-appos-");
+      add("<-acl:relcl-");
       add("Geledi");
       add("<-nmod:of-");
       add("Sultanate");
-      add("<-conj:and-");
-      add("commander");
       add("<-dep-");
-      add("Sultanate");
-      add("<-nmod:including-");
-      add("trade");
-      add("<-obj-");
+      add("and");
+      add("<-dep-");
       add("dominated");
       add("-obl:in->");
       add("Ages");
