@@ -12,37 +12,37 @@ public class POSTaggerBenchmarkITest extends TestCase {
   public void testEnglishWSJDevPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger",
             "tagSeparator=_,/u/nlp/data/pos-tagger/models-4.0.0/data/wsj/dev/wsj-dev.txt",
-            96.90);
+            96.78);
   }
 
   public void testEnglishWSJTestPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger",
             "tagSeparator=_,/u/nlp/data/pos-tagger/models-4.0.0/data/wsj/test/wsj-test.txt",
-            97.40);
+            97.22);
   }
 
   public void testEnglishBiDirectionalWSJDevPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger",
             "tagSeparator=_,/u/nlp/data/pos-tagger/models-4.0.0/data/wsj/dev/wsj-dev.txt",
-            97.34);
+            97.24);
   }
 
   public void testEnglishBiDirectionalWSJTestPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger",
             "tagSeparator=_,/u/nlp/data/pos-tagger/models-4.0.0/data/wsj/test/wsj-test.txt",
-            97.68);
+            97.57);
   }
 
   public void testEnglishCaselessWSJDevPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger",
             "tagSeparator=_,/u/nlp/data/pos-tagger/models-4.0.0/data/wsj-caseless/dev/wsj-caseless-dev.txt",
-            95.80);
+            95.81);
   }
 
   public void testEnglishCaselessWSJTestPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger",
             "tagSeparator=_,/u/nlp/data/pos-tagger/models-4.0.0/data/wsj-caseless/test/wsj-caseless-test.txt",
-            95.92);
+            96.29);
   }
 
   public void testChineseTestPOS() throws IOException {
