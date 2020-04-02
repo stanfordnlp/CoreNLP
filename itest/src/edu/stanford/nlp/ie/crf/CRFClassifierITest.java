@@ -336,7 +336,7 @@ public class CRFClassifierITest {
       Counter<String> lowResults = new ClassicCounter<>();
       lowResults.setCount("NER F1", 53.0);
       Counter<String> highResults = new ClassicCounter<>();
-      highResults.setCount("NER F1", 54.35);
+      highResults.setCount("NER F1", 54.36);
       BenchmarkingHelper.benchmarkResults(results, lowResults, highResults, null);
     } catch (IOException ioe) {
       Assert.fail("IOError on CRF test file");
