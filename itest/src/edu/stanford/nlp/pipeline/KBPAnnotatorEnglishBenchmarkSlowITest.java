@@ -12,7 +12,7 @@ public class KBPAnnotatorEnglishBenchmarkSlowITest extends KBPAnnotatorBenchmark
     // set the English specific settings
     KBP_DOCS_DIR = "/u/nlp/data/kbp-resources/benchmark/kbp-docs";
     GOLD_RELATIONS_PATH = "/u/nlp/data/kbp-resources/benchmark/kbp-gold-relations.txt";
-    KBP_MINIMUM_SCORE = .460;
+    KBP_MINIMUM_SCORE = .453;
     docIDToText = new HashMap<String,String>();
     docIDToRelations = new HashMap<String,Set<String>>();
     // load the gold relations from gold relations file

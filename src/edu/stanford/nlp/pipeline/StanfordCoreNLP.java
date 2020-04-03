@@ -520,7 +520,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     Map<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> pool = new HashMap<>();
     pool.put(STANFORD_TOKENIZE, (props, impl) -> impl.tokenizer(props));
     pool.put(STANFORD_CLEAN_XML, (props, impl) -> impl.cleanXML(props));
-    pool.put(STANFORD_CODEPOINT, (props, impl) -> impl.codepoint(props));
     pool.put(STANFORD_SSPLIT, (props, impl) -> impl.wordToSentences(props));
     pool.put(STANFORD_MWT, (props, impl) -> impl.multiWordToken(props));
     pool.put(STANFORD_DOCDATE, (props, impl) -> impl.docDate(props));
@@ -833,12 +832,13 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     os.println("(if -props or -annotators is not passed in, default properties will be loaded via the classpath)");
     os.println("\t\"props\" - path to file with configuration properties");
     os.println("\t\"annotators\" - comma separated list of annotators");
-    os.println("\tThe following annotators are supported: cleanxml, tokenize, codepoint, quote, ssplit, pos, lemma, ner, truecase, parse, hcoref, relation");
+    os.println("\tThe following annotators are supported: cleanxml, tokenize, quote, ssplit, pos, lemma, ner, truecase, parse, hcoref, relation");
 
     os.println();
     os.println("\tIf annotator \"tokenize\" is defined:");
     os.println("\t\"tokenize.options\" - PTBTokenizer options (see edu.stanford.nlp.process.PTBTokenizer for details)");
     os.println("\t\"tokenize.whitespace\" - If true, just use whitespace tokenization");
+    os.println("\t\"tokenize.codepoint\" - If true, add codepoint offsets for counting non-BMP characters");
 
     os.println();
     os.println("\tIf annotator \"cleanxml\" is defined:");
