@@ -1,19 +1,17 @@
-package edu.stanford.nlp.process;
+package edu.stanford.nlp.pipeline;
 
 import java.util.List;
-import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import edu.stanford.nlp.util.PropertiesUtils;
+
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.pipeline.TokenizerAnnotator;
 
 
 
-public class CodepointCoreLabelProcessorTest extends TestCase {
+public class CodepointAnnotatorTest extends TestCase {
 
   private static final String basicText = "She'll prove it ain't so.\n\nMaybe it is\n";
 
@@ -22,13 +20,10 @@ public class CodepointCoreLabelProcessorTest extends TestCase {
 
   private Annotation annotate(String text) {
     Annotation ann = new Annotation(text);
-
-    Properties props = new Properties();
-    props.setProperty("tokenize.language", "en");
-    props.setProperty("tokenize.codepoint", "true");
-    Annotator tokenizer = new TokenizerAnnotator(false, props, "");
-
+    Annotator tokenizer = new TokenizerAnnotator("en");
     tokenizer.annotate(ann);
+    Annotator codepoint = new CodepointAnnotator();
+    codepoint.annotate(ann);
     return ann;
   }
 

@@ -225,12 +225,9 @@ public class OpenIEITest {
   public void testExtractionsObamaWikiSix() {
     assertExtracted(new HashSet<String>() {{
       add("He\tdefeated\tRepublican nominee John McCain");
-      // The exact mention sometimes changes as the model changes...
-      //add("He\tdefeated\tnominee John McCain");
-      //add("He\tdefeated nominee John McCain in\telection");
-      //add("He\tdefeated nominee John McCain in\tgeneral election");
-      add("He\tdefeated Republican nominee John McCain in\telection");
-      add("He\tdefeated Republican nominee John McCain in\tgeneral election");
+      add("He\tdefeated\tnominee John McCain");
+      add("He\tdefeated nominee John McCain in\telection");
+      add("He\tdefeated nominee John McCain in\tgeneral election");
       add("He\twas\tinaugurated as president on January 20 2009");
       add("He\twas inaugurated as\tpresident");
       add("He\twas\tinaugurated");

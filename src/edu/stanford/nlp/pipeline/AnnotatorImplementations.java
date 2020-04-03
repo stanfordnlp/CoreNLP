@@ -39,6 +39,13 @@ public class AnnotatorImplementations  {
   }
 
   /**
+   * Adds codepoint labels to go along with begin/end labels
+   */
+  public Annotator codepoint(Properties properties) {
+    return new CodepointAnnotator(properties);
+  }
+
+  /**
    * Sentence split, in addition to a bunch of other things in this annotator (be careful to check the implementation!)
    */
   public Annotator wordToSentences(Properties properties) {
