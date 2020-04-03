@@ -476,7 +476,7 @@ public class ProtobufAnnotationSerializerSlowITest {
 
   @Test
   public void testCodePoint() {
-    testAnnotators("tokenize,codepoint");
+    testAnnotators("tokenize", Pair.makePair("tokenize.codepoint", "true"));
   }
 
   @Test
