@@ -44,6 +44,11 @@ public class CreatePatterns<E> {
     Date startDate = new Date();
     List<String> keyset = new ArrayList<>(sents.keySet());
 
+    if (keyset.size() == 0) {
+      Redwood.log(Redwood.DBG, "No sentences to process when adding patterns!");
+      return;
+    }
+
     int numThreads = Math.min(constVars.numThreads, keyset.size());
     int numItemsPerThread = (numThreads == 1) ? keyset.size() : keyset.size() / numThreads;
     ExecutorService executor = Executors.newFixedThreadPool(numThreads);
@@ -61,8 +66,7 @@ public class CreatePatterns<E> {
       List<String> ids = keyset.subList(from ,to);
       Callable<Boolean> task = new CreatePatternsThread(sents, ids, props, storePatsForEachTokenWay);
 
-      Future<Boolean> submit = executor
-          .submit(task);
+      Future<Boolean> submit = executor.submit(task);
       list.add(submit);
     }
 
