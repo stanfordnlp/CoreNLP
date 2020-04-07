@@ -2,17 +2,25 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.util.*;
+
+import static org.junit.Assert.assertEquals;
+
 import java.util.*;
-import junit.framework.TestCase;
 
-public class CoreQuoteSanityITest extends TestCase {
+import org.junit.Before;
+import org.junit.Test;
 
+/** Test generation of core quotes and coref+quotes **/
+
+public class CoreQuoteSanityITest {
+
+  // example with a quote and coreference
   public String testDocText = "In the summer Joe Smith decided to go on vacation.  " +
       "He said \"I'm going to go to Hawaii.\"  That July, vacationer Joe went to Hawaii. ";
 
   public StanfordCoreNLP pipeline;
 
-  @Override
+  @Before
   public void setUp() {
     // set up pipeline and serializer
     Properties props = new Properties();
@@ -20,6 +28,7 @@ public class CoreQuoteSanityITest extends TestCase {
     pipeline = new StanfordCoreNLP(props);
   }
 
+  @Test
   public void testCoreQuote() {
     // make the core document
     CoreDocument testDoc = new CoreDocument(testDocText);

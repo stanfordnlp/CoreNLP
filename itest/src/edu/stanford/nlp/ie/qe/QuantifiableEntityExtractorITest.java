@@ -1,28 +1,38 @@
 package edu.stanford.nlp.ie.qe;
 
-import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
-import edu.stanford.nlp.pipeline.*;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.AnnotationPipeline;
+import edu.stanford.nlp.pipeline.DefaultPaths;
+import edu.stanford.nlp.pipeline.POSTaggerAnnotator;
+import edu.stanford.nlp.pipeline.TokenizerAnnotator;
+import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
 
 /**
  * Test for quantifiable entity extractor.
  *
  * @author Angel Chang
  */
-public class QuantifiableEntityExtractorITest extends TestCase {
+public class QuantifiableEntityExtractorITest {
 
   private static AnnotationPipeline pipeline; // = null;
   private static QuantifiableEntityExtractor extractor; // = null;
 
+  @Test
   public void test() throws Exception {
     // TODO: Enable tests after rules files are added to models
   }
 
-  @Override
+  @Before
   public void setUp() throws Exception {
-    super.setUp();
     synchronized(QuantifiableEntityExtractorITest.class) {
       if (pipeline == null) {
         pipeline = new AnnotationPipeline();

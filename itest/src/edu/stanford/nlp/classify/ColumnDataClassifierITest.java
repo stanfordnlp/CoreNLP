@@ -1,5 +1,7 @@
 package edu.stanford.nlp.classify;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,8 +9,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Test;
+
 import edu.stanford.nlp.io.IOUtils;
-import junit.framework.TestCase;
 
 /**
  * This is a really rough ColumnDataClassifierITest.
@@ -32,7 +35,7 @@ import junit.framework.TestCase;
  *
  * @author John Bauer
  */
-public class ColumnDataClassifierITest extends TestCase {
+public class ColumnDataClassifierITest {
   public static void runAndTestCDC(String goldFileName,
                                    String ... args)
     throws IOException
@@ -68,6 +71,7 @@ public class ColumnDataClassifierITest extends TestCase {
     }
   }
 
+  @Test
   public void testNoArgClassify()
     throws IOException {
     runAndTestCDC("projects/core/data/edu/stanford/nlp/classify/iris.gold",
