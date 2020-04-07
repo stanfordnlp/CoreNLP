@@ -1,6 +1,6 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory;
 import edu.stanford.nlp.trees.Tree;
@@ -19,7 +23,7 @@ import edu.stanford.nlp.trees.TreeReaderFactory;
  * Tests that the parser doesn't crash and comes up with the same
  * result when run in a variety of multithreaded situations
  */
-public class ThreadedParserSlowITest extends TestCase {
+public class ThreadedParserSlowITest {
   public static List<Tree> readTrees(String filename, String encoding) {
     ArrayList<Tree> trees = new ArrayList<>();
     try {
@@ -162,7 +166,7 @@ public class ThreadedParserSlowITest extends TestCase {
     // expectedResults.put(chineseFactored, results);
   }
 
-  @Override
+  @Before
   public void setUp() {
     synchronized(ThreadedParserSlowITest.class) {
       if (expectedResults == null) {
@@ -215,18 +219,21 @@ public class ThreadedParserSlowITest extends TestCase {
             new ParserThread(parserPath, input, results));
   }
 
+  @Test
   public void testEnglish()
     throws Exception
   {
     runFourTests(englishPCFG, englishFactored);
   }
 
+  @Test
   public void testGerman()
     throws Exception
   {
     runFourTests(germanPCFG, germanFactored);
   }
 
+  @Test
   public void testChinese()
     throws Exception
   {
@@ -234,6 +241,7 @@ public class ThreadedParserSlowITest extends TestCase {
   }
 
   // TODO: problem: very slow
+  // @Test
   // public void testFrench()
   //   throws Exception
   // {
@@ -241,6 +249,7 @@ public class ThreadedParserSlowITest extends TestCase {
   // }
 
   // TODO: problem: very slow
+  //   @Test
   // public void testArabic()
   //   throws Exception
   // {
@@ -256,7 +265,4 @@ public class ThreadedParserSlowITest extends TestCase {
       thread.compareResults();
     }
   }
-
-
-
 }
