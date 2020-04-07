@@ -1,5 +1,7 @@
 package edu.stanford.nlp.dcoref;
 
+import static edu.stanford.nlp.util.BenchmarkingHelper.setLowHighExpected;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -8,16 +10,14 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.util.BenchmarkingHelper;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.util.BenchmarkingHelper;
 import edu.stanford.nlp.util.StringUtils;
-
-import static edu.stanford.nlp.util.BenchmarkingHelper.setLowHighExpected;
 
 
 /**
@@ -29,7 +29,7 @@ import static edu.stanford.nlp.util.BenchmarkingHelper.setLowHighExpected;
  * @author John Bauer
  * @author Christopher Manning
  */
-public class DcorefBenchmarkSlowITest extends TestCase {
+public class DcorefBenchmarkSlowITest {
 
   private static String runCorefTest(boolean deleteOnExit) throws Exception {
     final File WORK_DIR_FILE = File.createTempFile("DcorefBenchmarkTest", "");
@@ -135,7 +135,7 @@ public class DcorefBenchmarkSlowITest extends TestCase {
   }
 
 
-
+  @Test
   public void testDcoref() throws Exception {
     Counter<String> results = getCorefResults(runCorefTest(true));
 
