@@ -1,5 +1,15 @@
 package edu.stanford.nlp.parser.nndep;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -8,16 +18,11 @@ import edu.stanford.nlp.pipeline.AnnotationComparator;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.util.CoreMap;
 
-import java.util.*;
-import java.io.*;
-
-import junit.framework.TestCase;
-
 /**
  * Test that dependency parsing code reads in CoNLL lines correctly.
  */
 
-public class CoNLLReadingITest extends TestCase {
+public class CoNLLReadingITest {
 
     String exampleCoNLLXPath = "/u/nlp/data/stanford-corenlp-testing/data/conllu/fr_gsd-ud-train.conllu.clean";
     String exampleCoNLLUPath = "";
@@ -83,6 +88,7 @@ public class CoNLLReadingITest extends TestCase {
         return originalLines;
     }
 
+    @Test
     public void testReadingCoNLLXFile() {
         // load CoNLL-X file with original loading
         List<CoreMap> originalSentences = new ArrayList<CoreMap>();

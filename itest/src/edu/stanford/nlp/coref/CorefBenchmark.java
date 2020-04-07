@@ -1,17 +1,20 @@
 package edu.stanford.nlp.coref;
 
-import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.util.StringUtils;
-
-import edu.stanford.nlp.util.logging.Redwood;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.Properties;
 
-public class CorefBenchmark extends TestCase {
+import org.junit.Before;
+import org.junit.Test;
+
+import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
+
+public class CorefBenchmark {
 
   // coref system
   public static CorefSystem corefSystem;
@@ -27,6 +30,7 @@ public class CorefBenchmark extends TestCase {
   public String WORK_DIR_NAME;
   public String testName;
 
+  @Before
   public void setUp() throws Exception, IOException {
 
     // set up working dir
@@ -49,6 +53,7 @@ public class CorefBenchmark extends TestCase {
     corefSystem = new CorefSystem(props);
   }
 
+  @Test
   public void testCoref() throws Exception {
     // run CorefSystem
     corefSystem.runOnConll(props);

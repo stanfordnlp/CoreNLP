@@ -1,13 +1,21 @@
 package edu.stanford.nlp.ie;
 
 
-import edu.stanford.nlp.io.IOUtils;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Properties;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import edu.stanford.nlp.ie.crf.CRFClassifier;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.net.Ports;
 
 /**
@@ -28,7 +36,7 @@ import edu.stanford.nlp.net.Ports;
  * <br>
  * @author John Bauer
  */
-public class NERServerITest extends TestCase {
+public class NERServerITest {
   private static CRFClassifier crf = null;
 
   private static final String englishCRFPath =
@@ -59,6 +67,7 @@ public class NERServerITest extends TestCase {
     return thread;
   }
 
+  @Before
   public void setUp()
     throws IOException
   {
@@ -103,6 +112,7 @@ public class NERServerITest extends TestCase {
 
   }
 
+  @Test
   public void testStartServer()
     throws IOException
   {
@@ -111,6 +121,7 @@ public class NERServerITest extends TestCase {
     startNERServer(port, crf, CHARSET, true);
   }
 
+  @Test
   public void testQueryServer()
     throws IOException
   {
@@ -131,6 +142,7 @@ public class NERServerITest extends TestCase {
    * This test would hang forever for some various kinds of bugs in
    * the server/client read/write code
    */
+  @Test
   public void testServerDoesntHang()
     throws IOException
   {
@@ -148,6 +160,7 @@ public class NERServerITest extends TestCase {
     assertEquals("", sout.toString().trim());
   }
 
+  @Test
   public void testThreadedServer()
     throws IOException, InterruptedException
   {
