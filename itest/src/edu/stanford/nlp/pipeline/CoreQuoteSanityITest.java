@@ -10,8 +10,11 @@ import java.util.*;
 import org.junit.Before;
 import org.junit.Test;
 
+/** Test generation of core quotes and coref+quotes **/
+
 public class CoreQuoteSanityITest {
 
+  // example with a quote and coreference
   public String testDocText = "In the summer Joe Smith decided to go on vacation.  " +
       "He said \"I'm going to go to Hawaii.\"  That July, vacationer Joe went to Hawaii. ";
 
