@@ -1,8 +1,9 @@
 package edu.stanford.nlp.ie.crf;
 
-import junit.framework.TestCase;
-
 import java.util.Properties;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test that the CRFClassifier works when multiple classifiers are run
@@ -10,7 +11,7 @@ import java.util.Properties;
  *
  *  @author John Bauer
  */
-public class ThreadedCRFClassifierITest extends TestCase {
+public class ThreadedCRFClassifierITest {
 
   Properties props;
 
@@ -31,11 +32,12 @@ public class ThreadedCRFClassifierITest extends TestCase {
   private static final String germanEncoding = "utf-8";
   private static final String englishEncoding = "utf-8";
 
-  @Override
+  @Before
   public void setUp() {
     props = new Properties();
   }
 
+  @Test
   public void testOneEnglishCRF() {
     props.setProperty("crf1", english1);
     props.setProperty("testFile", englishTestFile);
@@ -43,6 +45,7 @@ public class ThreadedCRFClassifierITest extends TestCase {
     TestThreadedCRFClassifier.runTest(props);
   }
 
+  @Test
   public void testOneGermanCRF() {
     props.setProperty("crf1", german1);
     props.setProperty("testFile", germanTestFile);
@@ -50,6 +53,7 @@ public class ThreadedCRFClassifierITest extends TestCase {
     TestThreadedCRFClassifier.runTest(props);
   }
 
+  @Test
   public void testTwoEnglishCRFs() {
     props.setProperty("crf1", english1);
     props.setProperty("crf2", english2);

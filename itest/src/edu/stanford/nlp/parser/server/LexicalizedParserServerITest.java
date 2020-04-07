@@ -1,6 +1,11 @@
 package edu.stanford.nlp.parser.server;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import edu.stanford.nlp.util.Lazy;
 import junit.framework.TestCase;
@@ -14,7 +19,7 @@ import edu.stanford.nlp.trees.Tree;
 
 // TODO: tests should fail if a query causes the server to crash.  Right now it just hangs.
 // Alternatively, the server should catch exceptions and do something productive with them
-public class LexicalizedParserServerITest extends TestCase {
+public class LexicalizedParserServerITest {
   private static LexicalizedParser lexparser = null;
   private static Lazy<ShiftReduceParser> srparser = null;
 
@@ -42,6 +47,7 @@ public class LexicalizedParserServerITest extends TestCase {
   static final String lemmaTestString = "A man was walking in the rain.";
   static final String lemmaExpectedString = "a man be walk in the rain .";
 
+  @Before
   public void setUp() 
     throws IOException
   {
@@ -89,8 +95,7 @@ public class LexicalizedParserServerITest extends TestCase {
     return thread;
   }
 
-
-
+  @Test
   public void testStartServer() 
     throws IOException
   {
@@ -100,6 +105,7 @@ public class LexicalizedParserServerITest extends TestCase {
   }
 
 
+  @Test
   public void testGetTree()
     throws IOException
   {
@@ -113,6 +119,7 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(resultString, tree.toString().trim());
   }
 
+  @Test
   public void testGetTokenizedTest()
     throws IOException
   {
@@ -126,6 +133,7 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(tokenizedString, tokenized);
   }
 
+  @Test
   public void testGetLemmas()
     throws IOException
   {
@@ -139,6 +147,7 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(lemmaExpectedString, tokenized);
   }    
 
+  @Test
   public void testGetTextTree()
     throws IOException
   {
@@ -152,6 +161,7 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(resultString, tree.trim());
   }
 
+  @Test
   public void testGetBinarizedTextTree()
     throws IOException
   {
@@ -165,6 +175,7 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(binarizedResultString, tree.trim());
   }
 
+  @Test
   public void testGetCollapsedTreeStanfordDependencies()
     throws IOException
   {
@@ -178,6 +189,7 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(collapsedTreeStanfordDependenciesString, result.trim());
   }
 
+  @Test
   public void testGetCollapsedTreeUniversalDependencies()
     throws IOException
   {
@@ -191,6 +203,7 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(collapsedTreeUniversalDependenciesString, result.trim());
   }
 
+  @Test
   public void testQuit()
     throws IOException
   {
@@ -209,6 +222,7 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(Thread.State.TERMINATED, serverThread.getState());
   }
 
+  @Test
   public void testGetShiftReduceText()
     throws IOException
   {
@@ -222,5 +236,4 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(resultString, tree.trim());
   }
 
-  
 }

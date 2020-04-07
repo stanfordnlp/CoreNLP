@@ -1,14 +1,22 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.io.*;
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.util.*;
+import static org.junit.Assert.assertEquals;
 
-import junit.framework.TestCase;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
-import java.util.*;
+import org.junit.Test;
 
-public class ChineseTokenizationITest extends TestCase {
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
+
+public class ChineseTokenizationITest {
 
 
   public static List<List<String>> xmlDocSentenceTokens = new ArrayList<>();
@@ -35,6 +43,7 @@ public class ChineseTokenizationITest extends TestCase {
     xmlDocCharOffsets.get(1).add(new Pair<>(88,89));
   }
 
+  @Test
   public void testXMLDocWithNewlines() throws Exception {
     // set up properties
     String RESOURCE_DIR = "/u/scr/nlp/data/stanford-corenlp-testing/";

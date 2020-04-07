@@ -1,11 +1,16 @@
 package edu.stanford.nlp.parser.nndep;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+
+import org.junit.Test;
 
 import junit.framework.TestCase;
 
@@ -23,19 +28,18 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
-
-
 /**
  *  @author Christopher Manning
  *  @author Jon Gauthier
  */
-public class DependencyParserITest extends TestCase {
+public class DependencyParserITest {
 
   private static final double EnglishSdLas = 89.55236534222574; // was until Sept 2016: 89.46997859637266;
 
   /**
    * Test that the NN dependency parser performance doesn't change.
    */
+  @Test
   public void testDependencyParserEnglishSD() {
     DependencyParser parser = new DependencyParser();
     parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2014-10-26/PTB_Stanford_params.txt.gz");
@@ -50,6 +54,7 @@ public class DependencyParserITest extends TestCase {
   /**
    * Test that the NN dependency parser performance doesn't change.
    */
+  @Test
   public void testDependencyParserEnglishUD() {
     DependencyParser parser = new DependencyParser();
     parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2015-04-16/english_UD.gz");
@@ -63,6 +68,7 @@ public class DependencyParserITest extends TestCase {
   /**
    * Test that the NN dependency parser performance doesn't change.
    */
+  @Test
   public void testDependencyParserEnglishCoNLL2008() {
     DependencyParser parser = new DependencyParser();
     parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2014-10-26/PTB_CoNLL_params.txt.gz");
@@ -76,6 +82,7 @@ public class DependencyParserITest extends TestCase {
   /**
    * Test that the NN dependency parser performance doesn't change.
    */
+  @Test
   public void testDependencyParserChineseCoNLLX() {
     Properties props = StringUtils.stringToProperties("language=Chinese");
     DependencyParser parser = new DependencyParser(props);
@@ -90,6 +97,7 @@ public class DependencyParserITest extends TestCase {
    * Test that postprocessing like CC-processing can handle the parser
    * output properly
    */
+  @Test
   public void testCCProcess() {
     Properties props = PropertiesUtils.fromString("annotators=tokenize,ssplit,pos,depparse");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
@@ -110,6 +118,7 @@ public class DependencyParserITest extends TestCase {
   /**
    * Test that Java serialization works properly.
    */
+  @Test
   public void testSerializationAnnotation() throws IOException, ClassNotFoundException {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse");
