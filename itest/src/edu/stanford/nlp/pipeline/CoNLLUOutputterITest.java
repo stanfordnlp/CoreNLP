@@ -1,11 +1,9 @@
 package edu.stanford.nlp.pipeline;
 
-import static org.junit.Assert.assertEquals;
+import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.util.Properties;
-
-import org.junit.Test;
 
 /**
  * A very basic test for {@link edu.stanford.nlp.pipeline.CoNLLUOutputter}.
@@ -13,7 +11,7 @@ import org.junit.Test;
  * @author Sebastian Schuster
  * @author Gabor Angeli
  */
-public class CoNLLUOutputterITest {
+public class CoNLLUOutputterITest extends TestCase {
 
     static StanfordCoreNLP pipeline =
             new StanfordCoreNLP(new Properties() {{
@@ -22,7 +20,6 @@ public class CoNLLUOutputterITest {
             }});
 
     /** Make sure that an invalid dependency type barfs. */
-    @Test
     public void testInvalidOutputter() throws IOException {
         try {
             Annotation ann = new Annotation("CoNLL-U is neat. Better than XML.");
@@ -34,7 +31,6 @@ public class CoNLLUOutputterITest {
         }
     }
 
-    @Test
     public void testSimpleSentence() throws IOException {
         Annotation ann = new Annotation("CoNLL-U is neat. Better than XML.");
         pipeline.annotate(ann);

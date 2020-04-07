@@ -1,20 +1,13 @@
 package edu.stanford.nlp.international.german.process;
 
-import static org.junit.Assert.assertEquals;
+import junit.framework.TestCase;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
+import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.util.*;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.CoreDocument;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.util.StringUtils;
+import java.util.*;
+import java.util.stream.*;
 
 /**
  * Testing for the module that alters tokenization during German NER.
@@ -25,12 +18,12 @@ import edu.stanford.nlp.util.StringUtils;
  * creates a final tokens list with the correct NER-related annotations.
  */
 
-public class GermanNERCoreLabelProcessorITest {
+public class GermanNERCoreLabelProcessorITest extends TestCase {
 
   public StanfordCoreNLP pipeline;
   public GermanNERCoreLabelProcessor germanNERCoreLabelProcessor;
 
-  @Before
+  @Override
   public void setUp() {
     Properties props = StringUtils.argsToProperties("-props", "german");
     props.setProperty("annotators", "tokenize,ssplit");
@@ -73,7 +66,6 @@ public class GermanNERCoreLabelProcessorITest {
     assertEquals(document.tokens(), restoredTokens);
   }
 
-  @Test
   public void testProcessor() {
     // basic example
     // should split "Microsoft-Aktie" into "Microsoft", "-", and "Aktie", merge during NER, then restore to split

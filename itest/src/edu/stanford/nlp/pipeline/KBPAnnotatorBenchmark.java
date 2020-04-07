@@ -1,5 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import junit.framework.TestCase;
+
 import edu.stanford.nlp.ie.util.*;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -7,14 +9,10 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.*;
 import java.util.*;
 
-import org.junit.Test;
-
-public class KBPAnnotatorBenchmark {
+public class KBPAnnotatorBenchmark extends TestCase {
 
   public HashMap<String,String> docIDToText;
   public HashMap<String,Set<String>> docIDToRelations;
@@ -86,7 +84,6 @@ public class KBPAnnotatorBenchmark {
     return foundRelationStrings;
   }
 
-  @Test
   public void testKBPAnnotatorResults() {
     int totalGoldRelations = 0;
     int totalCorrectFoundRelations = 0;

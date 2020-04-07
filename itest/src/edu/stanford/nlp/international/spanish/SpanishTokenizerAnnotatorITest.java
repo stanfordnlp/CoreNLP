@@ -1,19 +1,15 @@
 package edu.stanford.nlp.international.spanish;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-
-import org.junit.Test;
-
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 /**
  * @see edu.stanford.nlp.pipeline.TokenizerAnnotatorTest
@@ -22,12 +18,11 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
  *
  * @author Gabor Angeli
  */
-public class SpanishTokenizerAnnotatorITest {
+public class SpanishTokenizerAnnotatorITest extends TestCase {
 
   private static List<String> spanishTokens = Arrays.asList(
       "Damelo");
 
-  @Test
   public void testSpanish() {
     Annotation ann = new Annotation("Damelo");
     Properties props = new Properties();

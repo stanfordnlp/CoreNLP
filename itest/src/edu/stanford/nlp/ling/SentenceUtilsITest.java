@@ -1,24 +1,19 @@
 package edu.stanford.nlp.ling;
 
-import static org.junit.Assert.assertTrue;
+import edu.stanford.nlp.pipeline.*;
 
-import java.io.IOException;
-import java.util.Properties;
+import junit.framework.TestCase;
 
-import org.junit.Test;
-
-import edu.stanford.nlp.pipeline.CoreDocument;
-import edu.stanford.nlp.pipeline.LanguageInfo;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import java.io.*;
+import java.util.*;
 
 /**
  * Basic testing of rebuilding text from CoreLabel(s).
  */
 
 
-public class SentenceUtilsITest {
+public class SentenceUtilsITest extends TestCase {
 
-  @Test
   public void testRebuildingMWTText() throws IOException {
     // set up French properties
     Properties frenchProperties = LanguageInfo.getLanguageProperties("french");
@@ -30,7 +25,6 @@ public class SentenceUtilsITest {
     assertTrue(frenchText.equals(rebuiltFrenchText));
   }
 
-  @Test
   public void testRebuildingText() {
     // set up basic English pipeline
     Properties basicProperties = new Properties();

@@ -5,17 +5,15 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.Test;
+import junit.framework.TestCase;
 
-public abstract class NERBenchmarkTestCase {
+public abstract class NERBenchmarkTestCase  extends TestCase {
 
   /** official CoNLL NER evaluation script **/
   public static final String NER_EVAL_SCRIPT = "/u/nlp/data/ner/benchmark/eval_conll.sh";
@@ -180,15 +178,13 @@ public abstract class NERBenchmarkTestCase {
       System.err.println(String.format("Predicted file: %s not present, clean up unnecessary.", predictedFilePath));
     }
     IOUtils.writeStringToFile(annotatedCoNLL, predictedFilePath, "UTF-8");
-    assertEquals(expectedScore, getF1Score(predictedFilePath), 0);
+    assertEquals(expectedScore, getF1Score(predictedFilePath));
   }
 
-  @Test
   public void testDev() throws IOException {
     runTest(devGoldFile, devPredictedFile, expectedDevScore);
   }
 
-  @Test
   public void testTest() throws IOException {
     runTest(testGoldFile, testPredictedFile, expectedTestScore);
   }

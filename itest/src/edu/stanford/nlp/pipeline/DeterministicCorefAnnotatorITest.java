@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+
+import junit.framework.TestCase;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.data.CorefChain;
@@ -16,11 +16,11 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 
-public class DeterministicCorefAnnotatorITest {
+public class DeterministicCorefAnnotatorITest extends TestCase {
 
   private static AnnotationPipeline pipeline;
 
-  @Before
+  @Override
   public void setUp() throws Exception {
     synchronized(DeterministicCorefAnnotatorITest.class) {
       pipeline = new AnnotationPipeline();
@@ -39,7 +39,7 @@ public class DeterministicCorefAnnotatorITest {
     }
   }
 
-  @Test
+
   public void testDeterministicCorefAnnotator() throws Exception {
     // create annotation with text
     String text = "Dan Ramage is working for\nMicrosoft. He's in Seattle!\nAt least, he used to be.  Ed is not in Seattle.";
@@ -73,7 +73,6 @@ public class DeterministicCorefAnnotatorITest {
    * Tests named entities with exact string matches (also tests some more pronouns).
    * @throws Exception
    */
-  @Test
   public void testSameString() throws Exception {
     // create annotation with text
     String text = "Your mom thinks she lives in Denver, but it's a big city.  She actually lives outside of Denver.";

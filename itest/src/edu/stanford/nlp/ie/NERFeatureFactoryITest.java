@@ -1,19 +1,18 @@
 package edu.stanford.nlp.ie;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import edu.stanford.nlp.ling.SentenceUtils;
+import junit.framework.TestCase;
+
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.sequences.SeqClassifierFlags;
+import edu.stanford.nlp.util.PaddedList;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import org.junit.Test;
-
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SentenceUtils;
-import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.util.PaddedList;
 
 /**
  * Tests that various features options produce the expected sets of strings.
@@ -21,7 +20,7 @@ import edu.stanford.nlp.util.PaddedList;
  *
  * @author John Bauer
  */
-public class NERFeatureFactoryITest {
+public class NERFeatureFactoryITest extends TestCase {
 
   private static void checkFeatures(Set<String> features, String ... expected) {
     assertEquals(expected.length, features.size());
@@ -30,7 +29,6 @@ public class NERFeatureFactoryITest {
     }
   }
 
-  @Test
   public void testSloppyGazette() {
     List<CoreLabel> sentence = SentenceUtils.toCoreLabelList("For three years , John Bauer has worked at Stanford .".split(" +"));
     PaddedList<CoreLabel> paddedSentence = new PaddedList<>(sentence, new CoreLabel());
