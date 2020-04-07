@@ -1,20 +1,15 @@
 package edu.stanford.nlp.parser.lexparser.demo;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import org.junit.Before;
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import java.io.*;
 
-public class ParserDemoITest {
+public class ParserDemoITest extends TestCase {
 
   private static LexicalizedParser parser; // = null;
 
-  @Before
+  @Override
   public void setUp() throws Exception {
     synchronized(ParserDemoITest.class) {
       if (parser == null) {
@@ -23,12 +18,10 @@ public class ParserDemoITest {
     }
   }
 
-  @Test
   public void testAPI() {
     ParserDemo.demoAPI(parser);
   }
 
-  @Test
   public void testDP() throws IOException {
     File temp = File.createTempFile("ParserDemoITest", "txt");
     BufferedWriter out = new BufferedWriter(new FileWriter(temp));

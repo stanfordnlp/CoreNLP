@@ -1,21 +1,17 @@
 package edu.stanford.nlp.international.french;
 
-import static org.junit.Assert.assertEquals;
+import edu.stanford.nlp.pipeline.*;
+import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.Test;
-
-import edu.stanford.nlp.pipeline.CoreDocument;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-
 /**
  * French tokenizer test
  */
 
-public class FrenchTokenizerAnnotatorITest {
+public class FrenchTokenizerAnnotatorITest extends TestCase {
 
 
   private static List<String> frenchSentences = Arrays.asList(
@@ -47,7 +43,6 @@ public class FrenchTokenizerAnnotatorITest {
           "renforcement", "et", "à", "leur", "diversification", ".")
   );
 
-  @Test
   public void testFrench() {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize, ssplit, mwt");

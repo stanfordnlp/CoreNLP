@@ -2,18 +2,16 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.util.PropertiesUtils;
 
-import static org.junit.Assert.assertEquals;
+import junit.framework.TestCase;
 
 import java.io.IOException;
-
-import org.junit.Test;
 
 /**
  * Tests for the various annotation outputters which require the models to be loaded.
  *
  * @author Gabor Angeli
  */
-public class AnnotationOutputterITest {
+public class AnnotationOutputterITest extends TestCase {
 
   private static final StanfordCoreNLP pipeline =
       new StanfordCoreNLP(PropertiesUtils.asProperties(
@@ -22,7 +20,6 @@ public class AnnotationOutputterITest {
               "ner.buildEntityMentions", "false"
       ));
 
-  @Test
   public void testSimpleSentenceCoNLL() throws IOException {
     Annotation ann = new Annotation("The cat is fat. The dog is lazy.");
     pipeline.annotate(ann);
@@ -43,7 +40,6 @@ public class AnnotationOutputterITest {
     assertEquals(expected, actual);
   }
 
-  @Test
   public void testSimpleSentenceJSON() throws IOException {
     Annotation ann = new Annotation("Bad wolf");
     pipeline.annotate(ann);

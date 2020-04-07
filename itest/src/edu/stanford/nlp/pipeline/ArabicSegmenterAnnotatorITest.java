@@ -1,20 +1,17 @@
 package edu.stanford.nlp.pipeline;
 
-import static org.junit.Assert.assertEquals;
+import junit.framework.TestCase;
 
 import java.util.List;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 
-public class ArabicSegmenterAnnotatorITest {
+public class ArabicSegmenterAnnotatorITest extends TestCase {
   StanfordCoreNLP pipeline = null;
 
-  @Before
+  @Override
   public void setUp()
     throws Exception
   {
@@ -42,7 +39,6 @@ public class ArabicSegmenterAnnotatorITest {
     }
   }
 
-  @Test
   public void testPipeline() {
     String query = "وما هي كلمتُك المفضلة للدراسة؟";
     String[] expectedWords = {"و", "ما", "هي", "كلمة", "ك", "المفضلة", "ل", "الدراسة", "?"};
@@ -51,7 +47,6 @@ public class ArabicSegmenterAnnotatorITest {
     runTest(query, expectedWords, expectedStartPositions, expectedEndPositions);
   }
 
-  @Test
   public void testParens() {
     // the Arabic segmenter shouldn't convert parents to -LRB- -RRB-
     String query = "( )";

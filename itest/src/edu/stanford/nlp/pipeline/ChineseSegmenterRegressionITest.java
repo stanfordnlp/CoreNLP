@@ -4,14 +4,11 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.util.*;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.*;
+import junit.framework.TestCase;
 
-import org.junit.Before;
-import org.junit.Test;
 
-public class ChineseSegmenterRegressionITest {
+public class ChineseSegmenterRegressionITest  extends TestCase {
 
   public StanfordCoreNLP pipeline;
 
@@ -21,7 +18,6 @@ public class ChineseSegmenterRegressionITest {
   // expected token lists
   List<List<String>> expectedTokenLists = new ArrayList<>();
 
-  @Before
   public void setUp() {
 
     // first set up Chinese pipeline
@@ -65,7 +61,6 @@ public class ChineseSegmenterRegressionITest {
     expectedTokenLists.add(exampleThreeTokenList);
   }
 
-  @Test
   public void testChineseSegmentation() {
     int exampleCount = 0;
     for (String inputString : inputStrings) {

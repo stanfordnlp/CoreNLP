@@ -1,15 +1,10 @@
 package edu.stanford.nlp.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import org.junit.Test;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -30,9 +25,8 @@ import junit.framework.TestCase;
 /**
  * Makes sure that the dependencies generated from the parser output are indexed starting at 1.
  */
-public class DependencyIndexITest {
+public class DependencyIndexITest extends TestCase {
 
-  @Test
   public void testPositions() {
     try {
       // System.err.println();
