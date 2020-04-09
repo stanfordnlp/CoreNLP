@@ -561,6 +561,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
           FileTreeNode treebank = treebanks.get(i);
           String filename = treebank.getFilename();
           for (Tree curTree : treebank.getTreebank()) {
+            if (curTree == null) {
+              // some of the treebanks have empty trees,
+              // such as some versions of ontonotes
+              continue;
+            }
             trees.add(new TreeFromFile(curTree, filename));
           }
           updateProgressBar(multiplier*(i+1));
