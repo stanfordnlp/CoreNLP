@@ -419,6 +419,19 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     });
   }
 
+  /**
+   * Updates the number of total trees found in the selected tree files.
+   *
+   * @param treeMatches count of trees in the selected files
+   */
+  public void updateBrowseStats(final int treeMatches) {
+    final String txt = "<html>Browse stats: " + treeMatches + " trees found in the selected files</html>";
+    SwingUtilities.invokeLater(() -> {
+      foundStats.setPreferredSize(foundStats.getSize());
+      foundStats.setText(txt);
+      });
+  }
+
   public void useProgressBar(boolean useProgressBar) {
     if (useProgressBar) {//make sure we're in progress bar mode
       if (progressBar == null) {
@@ -571,6 +584,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
             }
             updateProgressBar(multiplier*(i+1));
           }
+          updateBrowseStats(trees.size());
           SwingUtilities.invokeLater(() -> {
               MatchesPanel.getInstance().setMatches(trees, null);
               MatchesPanel.getInstance().focusOnList();
