@@ -547,35 +547,38 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       public void run() {
         useProgressBar(true);
 
-        final List<TreeFromFile> trees = new ArrayList<>();
+        try {
+          final List<TreeFromFile> trees = new ArrayList<>();
 
-        //Go through the treebanks and get all the trees
-        List<FileTreeNode> treebanks = FilePanel.getInstance().getActiveTreebanks();
+          //Go through the treebanks and get all the trees
+          List<FileTreeNode> treebanks = FilePanel.getInstance().getActiveTreebanks();
 
-        //Tdiff
-        if(TregexGUI.getInstance().isTdiffEnabled())
-          treebanks.remove(0); //Remove the reference
+          //Tdiff
+          if(TregexGUI.getInstance().isTdiffEnabled())
+            treebanks.remove(0); //Remove the reference
 
-        double multiplier = 100.0/treebanks.size();
-        for (int i = 0; i < treebanks.size(); i++) {
-          FileTreeNode treebank = treebanks.get(i);
-          String filename = treebank.getFilename();
-          for (Tree curTree : treebank.getTreebank()) {
-            if (curTree == null) {
-              // some of the treebanks have empty trees,
-              // such as some versions of ontonotes
-              continue;
+          double multiplier = 100.0/treebanks.size();
+          for (int i = 0; i < treebanks.size(); i++) {
+            FileTreeNode treebank = treebanks.get(i);
+            String filename = treebank.getFilename();
+            for (Tree curTree : treebank.getTreebank()) {
+              if (curTree == null) {
+                // some of the treebanks have empty trees,
+                // such as some versions of ontonotes
+                continue;
+              }
+              trees.add(new TreeFromFile(curTree, filename));
             }
-            trees.add(new TreeFromFile(curTree, filename));
+            updateProgressBar(multiplier*(i+1));
           }
-          updateProgressBar(multiplier*(i+1));
+          SwingUtilities.invokeLater(() -> {
+              MatchesPanel.getInstance().setMatches(trees, null);
+              MatchesPanel.getInstance().focusOnList();
+              useProgressBar(false);
+            });//end SwingUtilities.invokeLater
+        } catch (Exception e) {
+          doError("Sorry, but something went wrong.  Please post on https://github.com/stanfordnlp/CoreNLP if you think you have found a bug.", e);
         }
-        SwingUtilities.invokeLater(() -> {
-          MatchesPanel.getInstance().setMatches(trees, null);
-          MatchesPanel.getInstance().focusOnList();
-          useProgressBar(false);
-        });//end SwingUtilities.invokeLater
-
       } //end run
     };//end Thread
 
