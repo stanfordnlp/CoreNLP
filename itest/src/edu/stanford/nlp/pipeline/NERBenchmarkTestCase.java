@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public abstract class NERBenchmarkTestCase {
@@ -36,6 +37,7 @@ public abstract class NERBenchmarkTestCase {
   public Double expectedDevScore;
   public Double expectedTestScore;
 
+  @Before
   public void setUp() {
     languageSpecificSetUp();
     setUpPaths();

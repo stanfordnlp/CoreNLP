@@ -58,11 +58,12 @@ public class NERBenchmarkSlowITest {
     private static final String ONTO_DEV = ONTO_BASE_DIR + "onto-3class-dev.tsv";
     private static final String ONTO_TEST = ONTO_BASE_DIR + "onto-3class-test.tsv";
 
-    // CoNLL eval shell script
     // TODO: use the model directly to run the test
-    private static final String CONLL_EVAL = (new File("projects/core/scripts/ner/eval_conll_cmd.sh").exists() ?
-                                              "projects/core/scripts/ner/eval_conll_cmd.sh" :
-                                              "../../scripts/ner/eval_conll_cmd.sh");
+    /** official CoNLL NER evaluation script **/
+    private static final String CONLL_EVAL = "/u/nlp/data/ner/benchmark/eval_conll.sh";
+    // private static final String CONLL_EVAL = (new File("projects/core/scripts/ner/eval_conll_cmd.sh").exists() ?
+    //                                           "projects/core/scripts/ner/eval_conll_cmd.sh" :
+    //                                           "../../scripts/ner/eval_conll_cmd.sh");
     private static final Pattern FB1_Pattern = Pattern.compile("FB1:  (\\d+\\.\\d+)");
 
     // Note we need two annotator pipelines because the datasets use different NER models
