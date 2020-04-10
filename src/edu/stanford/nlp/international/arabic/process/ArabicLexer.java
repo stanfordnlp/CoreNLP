@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.LexedTokenFactory;
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -772,6 +773,8 @@ class ArabicLexer {
   /* user code: */
  private LexedTokenFactory<?> tokenFactory;
  private boolean invertible;
+ private CoreLabel prevWord;
+ private StringBuilder prevWordAfter;
  
  // Convert Arabic digits to ASCII digits
  private boolean normArDigits;
@@ -830,6 +833,14 @@ class ArabicLexer {
    atbEscaping = PropertiesUtils.getBool(props, "atbEscaping", false);
 
    setupNormalizationMap();
+
+   if (invertible) {
+     if (!(tf instanceof CoreLabelTokenFactory)) {
+       throw new IllegalArgumentException("ArabicLexer: the invertible option requires a CoreLabelTokenFactory");
+     }
+     prevWord = (CoreLabel) tf.makeToken("", 0, 0);
+     prevWordAfter = new StringBuilder();
+   }
  }
 
  private void setupNormalizationMap() {
@@ -1018,13 +1029,13 @@ class ArabicLexer {
       throw new RuntimeException(this.getClass().getName() + ": Token factory is null.");
     }
     if (invertible) {
-      //String str = prevWordAfter.toString();
-      //prevWordAfter.setLength(0);
+      String str = prevWordAfter.toString();
+      prevWordAfter.setLength(0);
       CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, yychar, yylength());
       word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
-      //word.set(CoreAnnotations.BeforeAnnotation.class, str);
-      //prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
-      //prevWord = word;
+      word.set(CoreAnnotations.BeforeAnnotation.class, str);
+      prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
+      prevWord = word;
       return word;
     } else {
       return tokenFactory.makeToken(txt, yychar, yylength());
@@ -1357,7 +1368,12 @@ class ArabicLexer {
       if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
         zzAtEOF = true;
               {
-                return null;
+                if (invertible) {
+                String str = prevWordAfter.toString();
+                prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
+                prevWordAfter.setLength(0);
+              }
+              return null;
               }
       }
       else {
@@ -1370,11 +1386,15 @@ class ArabicLexer {
           case 2: 
             { if (tokenizeNLs) {
                 return getNext(NEWLINE_TOKEN, yytext());
+              } else if (invertible) {
+                prevWordAfter.append(yytext());
               }
             }
           case 10: break;
           case 3: 
-            { 
+            { if (invertible) {
+                prevWordAfter.append(yytext());
+              }
             }
           case 11: break;
           case 4: 
@@ -1390,13 +1410,19 @@ class ArabicLexer {
             }
           case 14: break;
           case 7: 
-            { if (! removeProMarker) return getNext(false);
+            { if (! removeProMarker) {
+               return getNext(false);
+             } else if (invertible) {
+               prevWordAfter.append(yytext());
+             }
             }
           case 15: break;
           case 8: 
             { if (removeProMarker) {
                 if ( ! removeSegMarker) {
                   return getNext("-", yytext());
+                } else if (invertible) {
+                  prevWordAfter.append(yytext());
                 }
               } else {
                 return getNext(false);

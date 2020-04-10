@@ -8,7 +8,7 @@ public class FastNeuralEnglishCorefBenchmarkSlowITest extends CorefBenchmark {
 
   @Override
   public void setUp() throws Exception, IOException {
-    logger = Redwood.channels(FastNeuralEnglishCorefBenchmarkSlowITest.class);
+    logger = Redwood.channels(StatisticalCorefCoNLLBenchmarkSlowITest.class);
     EXPECTED_F1_SCORE = 59.22;
     PROPERTIES_PATH =  "edu/stanford/nlp/coref/properties/fastneural-english.properties";
     WORK_DIR_NAME = "FastNeuralCorefBenchmarkTest";
