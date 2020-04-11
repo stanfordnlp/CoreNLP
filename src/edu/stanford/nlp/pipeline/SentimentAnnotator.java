@@ -17,6 +17,7 @@ import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * This annotator attaches a binarized tree with sentiment annotations
@@ -36,7 +37,7 @@ import edu.stanford.nlp.util.IntPair;
  *
  * @author John Bauer
  */
-public class SentimentAnnotator implements Annotator {
+public class SentimentAnnotator extends SentenceAnnotator {
 
   private static final String DEFAULT_MODEL = "edu/stanford/nlp/models/sentiment/sentiment.ser.gz";
 
@@ -44,12 +45,22 @@ public class SentimentAnnotator implements Annotator {
   private final SentimentModel model;
   private final CollapseUnaryTransformer transformer = new CollapseUnaryTransformer();
 
-  public SentimentAnnotator(String name, Properties props) {
-    this.modelPath = props.getProperty(name + ".model", DEFAULT_MODEL);
+  private final int nThreads;
+
+  /**
+   * Stop processing if we exceed this time limit, in milliseconds.
+   * Use 0 for no limit.
+   */
+  private final long maxTime;
+
+  public SentimentAnnotator(String annotatorName, Properties props) {
+    this.modelPath = props.getProperty(annotatorName + ".model", DEFAULT_MODEL);
     if (modelPath == null) {
       throw new IllegalArgumentException("No model specified for Sentiment annotator");
     }
     this.model = SentimentModel.loadSerialized(modelPath);
+    this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
+    this.maxTime = PropertiesUtils.getLong(props, annotatorName + ".maxtime", -1);
   }
 
   @Override
@@ -67,53 +78,71 @@ public class SentimentAnnotator implements Annotator {
     )));
   }
 
+  public static String signature(String annotatorName, Properties props) {
+    StringBuilder os = new StringBuilder();
+    os.append(annotatorName + ".model:" +
+              props.getProperty(annotatorName + ".model", DEFAULT_MODEL));
+    os.append(annotatorName + ".nthreads:" +
+              props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
+    os.append(annotatorName + ".maxtime:" +
+              props.getProperty(annotatorName + ".maxtime", "-1"));
+    return os.toString();
+  }
+
   @Override
-  public void annotate(Annotation annotation) {
-    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-      // TODO: parallelize
-      List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
-      for (CoreMap sentence : sentences) {
-        Tree binarized = sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
-        if (binarized == null) {
-          throw new AssertionError("Binarized sentences not built by parser");
-        }
-        Tree collapsedUnary = transformer.transformTree(binarized);
-        SentimentCostAndGradient scorer = new SentimentCostAndGradient(model, null);
-        scorer.forwardPropagateTree(collapsedUnary);
-        sentence.set(SentimentCoreAnnotations.SentimentAnnotatedTree.class, collapsedUnary);
-        int sentiment = RNNCoreAnnotations.getPredictedClass(collapsedUnary);
-        sentence.set(SentimentCoreAnnotations.SentimentClass.class, SentimentUtils.sentimentString(model, sentiment));
-        Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-        if (tree != null) {
-          collapsedUnary.setSpans();
-          // map the sentiment annotations onto the tree
-          Map<IntPair,String> spanSentiment = Generics.newHashMap();
-          for (Tree bt : collapsedUnary) {
-            IntPair p = bt.getSpan();
-            int sen = RNNCoreAnnotations.getPredictedClass(bt);
-            String sentStr = SentimentUtils.sentimentString(model, sen);
-            if ( ! spanSentiment.containsKey(p)) {
-              // we'll take the first = highest one discovered
-              spanSentiment.put(p, sentStr);
-            }
-          }
-          if (((CoreLabel) tree.label()).containsKey(CoreAnnotations.SpanAnnotation.class)) {
-            throw new IllegalStateException("This code assumes you don't have SpanAnnotation");
-          }
-          tree.setSpans();
-          for (Tree t : tree) {
-            IntPair p = t.getSpan();
-            String str = spanSentiment.get(p);
-            if (str != null) {
-              CoreLabel cl = (CoreLabel) t.label();
-              cl.set(SentimentCoreAnnotations.SentimentClass.class, str);
-              cl.remove(CoreAnnotations.SpanAnnotation.class);
-            }
-          }
+  protected int nThreads() {
+    return nThreads;
+  }
+
+  @Override
+  protected long maxTime() {
+    return maxTime;
+  }
+
+  @Override
+  public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
+    // not sure what to do here, so just bail
+  }
+
+  @Override
+  protected void doOneSentence(Annotation annotation, CoreMap sentence) {
+    Tree binarized = sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
+    if (binarized == null) {
+      throw new AssertionError("Binarized sentences not built by parser");
+    }
+    Tree collapsedUnary = transformer.transformTree(binarized);
+    SentimentCostAndGradient scorer = new SentimentCostAndGradient(model, null);
+    scorer.forwardPropagateTree(collapsedUnary);
+    sentence.set(SentimentCoreAnnotations.SentimentAnnotatedTree.class, collapsedUnary);
+    int sentiment = RNNCoreAnnotations.getPredictedClass(collapsedUnary);
+    sentence.set(SentimentCoreAnnotations.SentimentClass.class, SentimentUtils.sentimentString(model, sentiment));
+    Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+    if (tree != null) {
+      collapsedUnary.setSpans();
+      // map the sentiment annotations onto the tree
+      Map<IntPair,String> spanSentiment = Generics.newHashMap();
+      for (Tree bt : collapsedUnary) {
+        IntPair p = bt.getSpan();
+        int sen = RNNCoreAnnotations.getPredictedClass(bt);
+        String sentStr = SentimentUtils.sentimentString(model, sen);
+        if ( ! spanSentiment.containsKey(p)) {
+          // we'll take the first = highest one discovered
+          spanSentiment.put(p, sentStr);
         }
       }
-    } else {
-      throw new RuntimeException("unable to find sentences in: " + annotation);
+      if (((CoreLabel) tree.label()).containsKey(CoreAnnotations.SpanAnnotation.class)) {
+        throw new IllegalStateException("This code assumes you don't have SpanAnnotation");
+      }
+      tree.setSpans();
+      for (Tree t : tree) {
+        IntPair p = t.getSpan();
+        String str = spanSentiment.get(p);
+        if (str != null) {
+          CoreLabel cl = (CoreLabel) t.label();
+          cl.set(SentimentCoreAnnotations.SentimentClass.class, str);
+          cl.remove(CoreAnnotations.SpanAnnotation.class);
+        }
+      }
     }
   }
 
