@@ -121,7 +121,7 @@ The pattern for other languages is much the same, except that you substitute the
 java -mx3g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-spanish.properties -file spanish.txt -outputFormat json
 ```
 
-### [Models for other languages created by other people](#models-for-other-languages)
+### Models for other languages
 
 Other people have developed models using or compatible with CoreNLP for several further languages. They may or may not be compatible with the most recent release of CoreNLP that we provide.
 
