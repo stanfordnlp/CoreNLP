@@ -20,8 +20,7 @@ public class LexicalizedParserCharacterEncodingITest extends TestCase {
   private static final String input = "café";
 
   private static final String expectedText = ("(ROOT" + System.lineSeparator() +
-                                              "  (FRAG" + System.lineSeparator() +
-                                              "    (NP (NNP café))))" + System.lineSeparator());
+                                              "  (NP (NNP café)))" + System.lineSeparator());
 
   private static final byte[] utf8Bytes = expectedText.getBytes(Charset.forName("UTF-8"));
   private static final byte[] iso8859Bytes = expectedText.getBytes(Charset.forName("iso-8859-1"));
