@@ -201,25 +201,25 @@ public class OpenIEITest {
   }
 
   //@Test
-  //public void testExtractionsObamaWikiFive() {
-    //assertExtracted(new HashSet<String>() {{
-      //add("He\tserved\tthree terms");
+  public void testExtractionsObamaWikiFive() {
+    assertExtracted(new HashSet<String>() {{
+      add("He\tserved\tthree terms");
       // note[gabor] Should get these
-//      add("He\trepresenting\t13th District in Illinois Senate");
-//      add("He\trepresenting\t13th District");
-//      add("He\trepresenting\tDistrict in Illinois Senate");
-//      add("He\trepresenting\tDistrict");
-//      add("He\trunning unsuccessfully for\tUnited States House of Representatives in 2000");
-      //add("13th district\tis in\tIllinois Senate");
-      //add("He\trunning unsuccessfully for\tUnited States House of Representatives");
-      //add("He\trunning unsuccessfully for\tUnited States House");
-//      add("He\trunning for\tUnited States House of Representatives in 2000");
-      //add("He\trunning for\tUnited States House of Representatives");
-      //add("He\trunning for\tUnited States House");
-      //add("He\trunning in\t2000");
-      //add("He\trunning unsuccessfully in\t2000");
-    //}}, "He served three terms representing the 13th District in the Illinois Senate from 1997 to 2004, running unsuccessfully for the United States House of Representatives in 2000.");
-  //}
+      //      add("He\trepresenting\t13th District in Illinois Senate");
+      //      add("He\trepresenting\t13th District");
+      //      add("He\trepresenting\tDistrict in Illinois Senate");
+      //      add("He\trepresenting\tDistrict");
+      //      add("He\trunning unsuccessfully for\tUnited States House of Representatives in 2000");
+      add("13th district\tis in\tIllinois Senate");
+      add("He\trunning unsuccessfully for\tUnited States House of Representatives");
+      add("He\trunning unsuccessfully for\tUnited States House");
+      //      add("He\trunning for\tUnited States House of Representatives in 2000");
+      add("He\trunning for\tUnited States House of Representatives");
+      add("He\trunning for\tUnited States House");
+      add("He\trunning in\t2000");
+      add("He\trunning unsuccessfully in\t2000");
+    }}, "He served three terms representing the 13th District in the Illinois Senate from 1997 to 2004, running unsuccessfully for the United States House of Representatives in 2000.");
+  }
 
   @Test
   public void testExtractionsObamaWikiSix() {
