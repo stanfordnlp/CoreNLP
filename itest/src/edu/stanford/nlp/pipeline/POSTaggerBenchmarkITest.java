@@ -24,13 +24,13 @@ public class POSTaggerBenchmarkITest extends TestCase {
   public void testEnglishBiDirectionalWSJDevPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger",
             "tagSeparator=_,/u/nlp/data/pos-tagger/models-4.0.0/data/wsj/dev/wsj-dev.txt",
-            97.24);
+            97.21);
   }
 
   public void testEnglishBiDirectionalWSJTestPOS() throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger",
             "tagSeparator=_,/u/nlp/data/pos-tagger/models-4.0.0/data/wsj/test/wsj-test.txt",
-            97.57);
+            97.56);
   }
 
   public void testEnglishCaselessWSJDevPOS() throws IOException {
