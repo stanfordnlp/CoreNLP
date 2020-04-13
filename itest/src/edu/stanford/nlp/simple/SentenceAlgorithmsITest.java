@@ -198,15 +198,13 @@ public class SentenceAlgorithmsITest {
       add("forced");
       add("<-amod-");
       add("governors");
-      add("<-dep-");
-      add("dominance");
-      add("<-appos-");
+      add("<-nsubj-");
+      add("pay");
+      add("<-acl:relcl-");
       add("Geledi");
       add("<-nmod:of-");
       add("Sultanate");
       add("<-conj:and-");
-      add("commander");
-      add("<-dep-");
       add("Sultanate");
       add("<-nmod:including-");
       add("trade");
