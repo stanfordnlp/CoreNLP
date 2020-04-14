@@ -34,17 +34,26 @@ public class SentenceTest {
   }
 
   @Test
-  public void testLength() {
+  public void testLengthOfMultiWordSentence() {
     Sentence sent = new Sentence("the quick brown fox jumped over the lazy dog");
     assertEquals(9, sent.length());
+  }
 
-    sent = new Sentence(".");
+  @Test
+  public void testLengthOfSpecialCharacterOnlySentence() {
+    Sentence sent = new Sentence(".");
     assertEquals(1, sent.length());
+  }
 
-    sent = new Sentence("Aloha");
+  @Test
+  public void testLengthOfOneWordSentence() {
+    Sentence sent = new Sentence("Aloha");
     assertEquals(1, sent.length());
+  }
 
-    sent = new Sentence("Aloha.");
+  @Test
+  public void testLengthOfOneWordSentenceWithDot() {
+    Sentence sent = new Sentence("Aloha.");
     assertEquals(2, sent.length());
   }
 
