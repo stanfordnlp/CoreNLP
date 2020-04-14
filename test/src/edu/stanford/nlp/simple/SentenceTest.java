@@ -118,28 +118,26 @@ public class SentenceTest {
     assertEquals(17, sentences.get(1).sentenceTokenOffsetEnd());
   }
 
-  @Test
-  public void testFromCoreMapCrashCheck() {
+  public Sentence tokenizeAndSplitAnnotation(Annotation ann) {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
       setProperty("annotators", "tokenize,ssplit");
     }});
-    Annotation ann = new Annotation("This is a sentence.");
+
     pipeline.annotate(ann);
     CoreMap map = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+    return new Sentence(map);
+  }
 
-    new Sentence(map);
+  @Test
+  public void testFromCoreMapCrashCheck() {
+    Annotation ann = new Annotation("This is a sentence.");
+    tokenizeAndSplitAnnotation(ann);
   }
 
   @Test
   public void testFromCoreMapCorrectnessCheck() {
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
-      setProperty("annotators", "tokenize,ssplit");
-    }});
-    Annotation ann = new Annotation("This is a sentence.");
-    pipeline.annotate(ann);
-    CoreMap map = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-
-    Sentence s = new Sentence(map);
+	Annotation ann = new Annotation("This is a sentence.");
+    Sentence s = tokenizeAndSplitAnnotation(ann);
     assertEquals(ann.get(CoreAnnotations.TextAnnotation.class), s.text());
     assertEquals("This", s.word(0));
     assertEquals(5, s.length());
