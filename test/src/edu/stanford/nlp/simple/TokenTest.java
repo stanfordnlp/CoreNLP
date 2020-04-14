@@ -61,7 +61,6 @@ public class TokenTest {
         assertEquals(4, token.next().characterOffsetBegin());
         assertEquals(10, token.next().next().characterOffsetBegin());
         assertEquals(16, token.next().next().next().characterOffsetBegin());
-
     }
 
     @Test
@@ -79,13 +78,19 @@ public class TokenTest {
     }
 
     @Test
-    public void testWhiteSpace() {
+    public void testWhiteSpaceBefore() {
         Sentence sentence = new Sentence(string);
         Token token = new Token(sentence, 0);
 
         assertEquals("", token.before());
-        assertEquals(" ", token.after());
+    }
 
+    @Test
+    public void testWhiteSpaceAfter() {
+        Sentence sentence = new Sentence(string);
+        Token token = new Token(sentence, 0);
+
+        assertEquals(" ", token.after());
     }
 
     @Test
