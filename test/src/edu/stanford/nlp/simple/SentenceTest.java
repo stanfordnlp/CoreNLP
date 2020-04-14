@@ -6,6 +6,9 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -183,5 +186,94 @@ public class SentenceTest {
     Sentence sut = new Sentence(d, sentenceIndex);
     String sentence = sut.toString();
     assertEquals("Together, they form a document!", sentence);
+  }
+
+  @Test
+  public void testSerializeToStream() throws IOException {
+    final class MockOutputStream extends OutputStream {
+      int writeCount = 0;
+        boolean closed = false;
+		
+        protected int getWriteCount () {
+          return writeCount;
+        }
+		
+        protected boolean gotClosed() {
+          return closed;
+        }
+        @Override
+        public void write(int arg0) throws IOException {
+          writeCount++;
+        }
+        @Override
+        public void close () throws IOException {
+          this.closed = true;	
+          super.close();
+        }
+    }
+    Sentence sut = new Sentence("This is a sentence.");
+    MockOutputStream mockedOutStream = new MockOutputStream();
+    sut.serialize(mockedOutStream);
+
+    /* The serialize method should write but should not close the
+     * provided OutputStream as specified in Sentence.java. */
+    boolean wasWrittenTo = mockedOutStream.getWriteCount() > 0;
+    boolean wasNotClosed = !mockedOutStream.gotClosed();
+
+    assertTrue(wasWrittenTo);
+    assertTrue(wasNotClosed);
+  }
+
+  @Test
+  public void testDeserializeFromInputStream () throws IOException {
+    final class MockedInputStream extends InputStream {
+      int counter = 0;
+      /* Array of bytes representing deserialized
+       * Sentence "This is a test"
+       */
+      int[] serializedSentence = {
+        -70, 1, 10, 39, 10, 4, 84, 104,
+        105, 115, 26, 4, 84, 104, 105, 115,
+        42, 0, 50, 1, 32, 58, 4, 84,
+        104, 105, 115, 88, 0, 96, 4, -120,
+        1, 0, -112, 1, 1, -88, 1, 0,
+        -80, 2, 0, 10, 34, 10, 2, 105,
+        115, 26, 2, 105, 115, 42, 1, 32,
+        50, 1, 32, 58, 2, 105, 115, 88,
+        5, 96, 7, -120, 1, 1, -112, 1,
+        2, -88, 1, 0, -80, 2, 0, 10,
+        31, 10, 1, 97, 26, 1, 97, 42,
+        1, 32, 50, 1, 32, 58, 1, 97,
+        88, 8, 96, 9, -120, 1, 2, -112,
+        1, 3, -88, 1, 0, -80, 2, 0,
+        10, 39, 10, 4, 116, 101, 115, 116,
+        26, 4, 116, 101, 115, 116, 42, 1,
+        32, 50, 0, 58, 4, 116, 101, 115,
+        116, 88, 10, 96, 14, -120, 1, 3,
+        -112, 1, 4, -88, 1, 0, -80, 2,
+        0, 16, 0, 24, 4, 32, 0, 40,
+        0, 48, 14, 98, 14, 84, 104, 105,
+        115, 32, 105, 115, 32, 97, 32, 116,
+        101, 115, 116, -104, 3, 0, -80, 3,
+        0, -120, 4, 0
+      };
+
+      public int getReadCount() {
+        return counter;
+      }
+      boolean allBytesRead() {
+        return counter == serializedSentence.length;
+      }
+      @Override
+      public int read() throws IOException {
+        return serializedSentence[counter++];
+      }
+    }
+    MockedInputStream mockedInput = new MockedInputStream();
+    Sentence deserialized = Sentence.deserialize(mockedInput);
+    boolean inputWasConsumedCompletely = mockedInput.allBytesRead();
+
+    assertEquals("This is a test", deserialized.toString());
+    assertTrue(inputWasConsumedCompletely);
   }
 }

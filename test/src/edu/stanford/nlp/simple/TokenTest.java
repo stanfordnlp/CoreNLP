@@ -3,6 +3,8 @@ package edu.stanford.nlp.simple;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.util.Optional;
+
 public class TokenTest {
 
     private String string = "the quick brown fox jumped over the lazy dog";
@@ -109,5 +111,24 @@ public class TokenTest {
         Token token = new Token(sentence, 6);
 
         assertEquals(35, token.endPosition());
+    }
+
+    @Test
+    public void testAfterLastTokenOfSentence() {
+        final class MockedSentence extends Sentence {
+            int length;
+            public MockedSentence(String text, int length) {
+                super(text);
+                this.length = length;
+			}
+            public int length (){
+                return this.length;
+            }
+        }
+        int sentenceLength = 2;
+        MockedSentence mockedSentence = new MockedSentence("Test sentence", sentenceLength);
+        Token t = new Token(mockedSentence, sentenceLength);
+        String nextToken = t.after();
+        assertEquals("", nextToken);
     }
 }
