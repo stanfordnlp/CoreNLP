@@ -6,7 +6,8 @@ import org.junit.Before;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 /**
  * A test for aspects of {@link edu.stanford.nlp.simple.Document} which do not require loading the NLP models.
