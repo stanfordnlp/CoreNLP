@@ -51,7 +51,7 @@ import edu.stanford.nlp.util.Pair;
 @SuppressWarnings("serial")
 public class MatchesPanel extends JPanel implements ListSelectionListener {
   private static MatchesPanel instance = null;
-  private JList list;
+  private JList<TreeFromFile> list;
   // todo: Change the below to just be a List<List<Tree>> paralleling list above
   private Map<TreeFromFile,List<Tree>> matchedParts;
   private List<MatchesPanelListener> listeners;
@@ -75,7 +75,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
 
   private MatchesPanel() {
     //data
-    DefaultListModel model = new DefaultListModel();
+    DefaultListModel<TreeFromFile> model = new DefaultListModel<>();
     list = new TooltipJList(model);
     list.setCellRenderer(new MatchCellRenderer());
     list.setTransferHandler(new TreeTransferHandler());
@@ -90,7 +90,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
           firstMouseEvent = e;
         }
         e.consume();
-        TreeFromFile selectedValue = (TreeFromFile) list.getSelectedValue();
+        TreeFromFile selectedValue = list.getSelectedValue();
         if(selectedValue == null) return;
         JTextField label = selectedValue.getLabel();
         if(((e.getModifiersEx()) & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK) {
@@ -140,7 +140,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
 
         if (firstMouseEvent != null) {
           e.consume();
-          JTextField label = ((TreeFromFile) list.getSelectedValue()).getLabel();
+          JTextField label = list.getSelectedValue().getLabel();
           if(dragNDrop) {
             if(label == null)
               return;
@@ -177,7 +177,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   }
 
   public void removeAllMatches() {
-    setMatchedParts(Generics.<TreeFromFile, List<Tree>>newHashMap());
+    setMatchedParts(Generics.newHashMap());
     ((DefaultListModel) list.getModel()).removeAllElements();
     list.setSelectedIndex(-1);
     this.sendToListeners();
@@ -201,10 +201,9 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   public void setMatches(List<TreeFromFile> matches, Map<TreeFromFile, List<Tree>> matchedParts) {
     // cdm Nov 2010: I rewrote this so the performance wasn't dreadful.
     // In the old days, one by one updates to active Swing components gave dreadful performance, so
-    // I changed that, but that wasn't really the problem, it was that the if part didn't honor
-    // maxMatches!
+    // I changed that, but that wasn't really the problem, it was that the if part didn't honor maxMatches!
     removeAllMatches();
-    final DefaultListModel newModel = new DefaultListModel();
+    final DefaultListModel<TreeFromFile> newModel = new DefaultListModel<>();
     newModel.ensureCapacity(matches.size());
 
     //Two cases:
@@ -283,7 +282,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
    */
   public Pair<TreeFromFile, List<Tree>> getSelectedMatch() {
     if(!isEmpty()) {
-      TreeFromFile selectedTree = (TreeFromFile) list.getSelectedValue();
+      TreeFromFile selectedTree = list.getSelectedValue();
       return new Pair<>(selectedTree, matchedParts.get(selectedTree));
     }
     else
@@ -299,7 +298,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   public String getMatches() {
     StringBuilder sb = new StringBuilder();
     for(int i = 0, sz = list.getModel().getSize(); i < sz; i++) {
-      Tree t = ((TreeFromFile) list.getModel().getElementAt(i)).getTree();
+      Tree t = list.getModel().getElementAt(i).getTree();
       sb.append(t.pennString());
       sb.append("\n\n");
     }
@@ -314,7 +313,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   public String getMatchedSentences() {
     StringBuilder sb = new StringBuilder();
     for (int i = 0, sz = list.getModel().getSize(); i < sz; i++) {
-      String t = ((TreeFromFile) list.getModel().getElementAt(i)).getLabel().getText();
+      String t = list.getModel().getElementAt(i).getLabel().getText();
       sb.append(t);
       sb.append("\n");
     }
@@ -347,7 +346,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
    *
    */
   public interface MatchesPanelListener {
-    public void matchesChanged();
+    void matchesChanged();
 
   }
 
@@ -393,24 +392,26 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
 
   }
 
+
   private static class TreeTransferHandler extends TransferHandler {
+
     public TreeTransferHandler() {
       super();
     }
+
     private static String exportString(JComponent c) {
-      JList list = (JList)c;
-      Object[] values = list.getSelectedValues();
+      JList<TreeFromFile>  list = (JList<TreeFromFile> ) c;
+      List<TreeFromFile> values = list.getSelectedValuesList();
       StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < values.length; i++) {
-        TreeFromFile val = (TreeFromFile) values[i];
+      for (TreeFromFile val : values) {
         Highlighter h = val.getLabel().getHighlighter();
         Highlight[] highlights = h.getHighlights();
-        if(highlights == null || highlights.length == 0) {
+        if (highlights == null || highlights.length == 0) {
           sb.append(val.getLabel().getText());
         } else {
-          //we have a highlight
-          for(int j = 0; i < highlights.length; i++) {
-            sb.append(val.getLabel().getText().substring(highlights[j].getStartOffset(), highlights[j].getEndOffset()));
+          // we have a highlight
+          for (Highlight highlight : highlights) {
+            sb.append(val.getLabel().getText(), highlight.getStartOffset(), highlight.getEndOffset());
           }
         }
       }
@@ -426,7 +427,9 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
     public int getSourceActions(JComponent c) {
       return COPY_OR_MOVE;
     }
-  }
+
+  } // end static class TreeTransferHandler
+
 
   public Map<TreeFromFile, List<Tree>> getMatchedParts() {
     return matchedParts;
@@ -463,8 +466,8 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
 
   @Override
   public void valueChanged(ListSelectionEvent arg0) {
-    TreeFromFile t = (TreeFromFile) list.getSelectedValue();
-    if(t == null) {
+    TreeFromFile t = list.getSelectedValue();
+    if (t == null) {
       lastSelected = null;
       return;
     }

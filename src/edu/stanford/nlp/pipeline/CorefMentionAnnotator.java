@@ -104,7 +104,9 @@ public class CorefMentionAnnotator extends TextAnnotationCreator implements Anno
         cmTokens = cmSentence.get(CoreAnnotations.TokensAnnotation.class).subList(cm.startIndex, cm.endIndex);
     // if trying to synch with a PERSON entity mention, ignore leading TITLE tokens
     if (em.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PERSON")) {
-      while (currCMTokenIndex < cmTokens.size() && cmTokens.get(currCMTokenIndex).ner().equals("TITLE")) {
+      while (currCMTokenIndex < cmTokens.size() &&
+          cmTokens.get(currCMTokenIndex).get(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class) != null &&
+          cmTokens.get(currCMTokenIndex).get(CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class).equals("TITLE")) {
         currCMTokenIndex++;
       }
     }

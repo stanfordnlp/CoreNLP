@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.LexedTokenFactory;
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -30,6 +31,8 @@ import edu.stanford.nlp.util.PropertiesUtils;
 %{
  private LexedTokenFactory<?> tokenFactory;
  private boolean invertible;
+ private CoreLabel prevWord;
+ private StringBuilder prevWordAfter;
  
  // Convert Arabic digits to ASCII digits
  private boolean normArDigits;
@@ -88,6 +91,14 @@ import edu.stanford.nlp.util.PropertiesUtils;
    atbEscaping = PropertiesUtils.getBool(props, "atbEscaping", false);
 
    setupNormalizationMap();
+
+   if (invertible) {
+     if (!(tf instanceof CoreLabelTokenFactory)) {
+       throw new IllegalArgumentException("ArabicLexer: the invertible option requires a CoreLabelTokenFactory");
+     }
+     prevWord = (CoreLabel) tf.makeToken("", 0, 0);
+     prevWordAfter = new StringBuilder();
+   }
  }
 
  private void setupNormalizationMap() {
@@ -276,13 +287,13 @@ import edu.stanford.nlp.util.PropertiesUtils;
       throw new RuntimeException(this.getClass().getName() + ": Token factory is null.");
     }
     if (invertible) {
-      //String str = prevWordAfter.toString();
-      //prevWordAfter.setLength(0);
+      String str = prevWordAfter.toString();
+      prevWordAfter.setLength(0);
       CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, yychar, yylength());
       word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
-      //word.set(CoreAnnotations.BeforeAnnotation.class, str);
-      //prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
-      //prevWord = word;
+      word.set(CoreAnnotations.BeforeAnnotation.class, str);
+      prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
+      prevWord = word;
       return word;
     } else {
       return tokenFactory.makeToken(txt, yychar, yylength());
@@ -363,23 +374,41 @@ PAREN = -LRB-|-RRB-
 {NULLPRONSEG}  { if (removeProMarker) {
                 if ( ! removeSegMarker) {
                   return getNext("-", yytext());
+                } else if (invertible) {
+                  prevWordAfter.append(yytext());
                 }
               } else {
                 return getNext(false);
               }
             }
 
-{NULLPRON} { if (! removeProMarker) return getNext(false); } 
+{NULLPRON} { if (! removeProMarker) {
+               return getNext(false);
+             } else if (invertible) {
+               prevWordAfter.append(yytext());
+             }
+           }
 
 {ARWORD}    |
 {FORNWORD}  { return getNext(true); }
 
 {CR}        { if (tokenizeNLs) {
                 return getNext(NEWLINE_TOKEN, yytext());
+              } else if (invertible) {
+                prevWordAfter.append(yytext());
               }
             } 
-{SPACES}    { }
+{SPACES}    { if (invertible) {
+                prevWordAfter.append(yytext());
+              }
+            }
 .           { System.err.printf("Untokenizable: %s%n", yytext());
 	      return getNext(true);
 	    }
-<<EOF>>     { return null; }
+<<EOF>>     { if (invertible) {
+                String str = prevWordAfter.toString();
+                prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
+                prevWordAfter.setLength(0);
+              }
+              return null; 
+            }

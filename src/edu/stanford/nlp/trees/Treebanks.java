@@ -49,7 +49,7 @@ public class Treebanks  {
    * number range if any are loaded.<p>
    * By default, this class works over raw trees.
    * You can normalize the trees as we usually do in an English-specific way by using either of the flags:
-   * {@code -normalize} or {@code -trf edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory}.
+   * {@code -normalized} or {@code -trf edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory}.
    * You can normalize for different treebanks by loading an appropriate TreeReaderFactory.
    * You can print trees one per line up to a certain length (for EVALB) and many other things.
    * <p>

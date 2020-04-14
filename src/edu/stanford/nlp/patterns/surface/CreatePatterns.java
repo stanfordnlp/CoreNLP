@@ -44,33 +44,29 @@ public class CreatePatterns<E> {
     Date startDate = new Date();
     List<String> keyset = new ArrayList<>(sents.keySet());
 
-    int num;
-    if (constVars.numThreads == 1)
-      num = keyset.size();
-    else
-      num = keyset.size() / (constVars.numThreads);
-    ExecutorService executor = Executors
-        .newFixedThreadPool(constVars.numThreads);
+    if (keyset.size() == 0) {
+      Redwood.log(Redwood.DBG, "No sentences to process when adding patterns!");
+      return;
+    }
 
-    Redwood.log(ConstantsAndVariables.extremedebug, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
+    int numThreads = Math.min(constVars.numThreads, keyset.size());
+    int numItemsPerThread = (numThreads == 1) ? keyset.size() : keyset.size() / numThreads;
+    ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+
+    Redwood.log(ConstantsAndVariables.extremedebug, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + numItemsPerThread + " values to each of " + numThreads + " thread(s)");
     List<Future<Boolean>> list = new ArrayList<>();
-    for (int i = 0; i < constVars.numThreads; i++) {
+    for (int i = 0; i < numThreads; i++) {
 
-      int from = i * num;
-      int to = -1;
-      if(i == constVars.numThreads -1)
-        to = keyset.size();
-      else
-       to =Math.min(keyset.size(), (i + 1) * num);
-//
-//      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num
-//          + " till " + Math.min(keyset.size(), (i + 1) * num));
+      int from = i * numItemsPerThread;
+      int to = (i == numThreads - 1) ? keyset.size() : Math.min(keyset.size(), (i + 1) * numItemsPerThread);
+      //
+      //      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num
+      //          + " till " + Math.min(keyset.size(), (i + 1) * num));
 
       List<String> ids = keyset.subList(from ,to);
       Callable<Boolean> task = new CreatePatternsThread(sents, ids, props, storePatsForEachTokenWay);
 
-      Future<Boolean> submit = executor
-          .submit(task);
+      Future<Boolean> submit = executor.submit(task);
       list.add(submit);
     }
 

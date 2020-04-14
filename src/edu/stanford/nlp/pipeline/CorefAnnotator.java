@@ -143,10 +143,10 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   @Override
   public void annotate(Annotation annotation){
     // check if mention detection should be performed by this annotator
+    // temporarily change granularity
+    setNamedEntityTagGranularity(annotation, "coarse");
     if (performMentionDetection)
       mentionAnnotator.annotate(annotation);
-    // temporarily set the primary named entity tag to the coarse tag
-    setNamedEntityTagGranularity(annotation, "coarse");
     try {
       if (!annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
         log.error("this coreference resolution system requires SentencesAnnotation!");

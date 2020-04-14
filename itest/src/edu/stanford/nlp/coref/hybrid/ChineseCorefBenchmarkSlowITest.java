@@ -9,15 +9,15 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.util.BenchmarkingHelper;
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.util.BenchmarkingHelper;
 import edu.stanford.nlp.util.StringUtils;
-
-import edu.stanford.nlp.coref.*;
 
 /**
  * Run the dcoref system using the exact properties we distribute as
@@ -28,7 +28,7 @@ import edu.stanford.nlp.coref.*;
  * @author John Bauer
  * @author Christopher Manning
  */
-public class ChineseCorefBenchmarkSlowITest extends TestCase {
+public class ChineseCorefBenchmarkSlowITest {
 
   private static String runCorefTest(boolean deleteOnExit) throws Exception {
     final File WORK_DIR_FILE = File.createTempFile("DcorefChineseBenchmarkTest", "");
@@ -97,6 +97,7 @@ public class ChineseCorefBenchmarkSlowITest extends TestCase {
     expRes.setCount(key, expVal);
   }
 
+  @Test
   public void testChineseDcoref() throws Exception {
     Counter<String> results = getCorefResults(runCorefTest(true));
 

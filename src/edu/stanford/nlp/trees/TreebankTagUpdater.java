@@ -2,7 +2,9 @@ package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.tagger.maxent.*;
+import edu.stanford.nlp.util.StringUtils;
 
+import java.io.*;
 import java.util.*;
 import java.util.stream.*;
 
@@ -39,6 +41,30 @@ public class TreebankTagUpdater {
         returnList.addAll(getTaggedLeaves(c));
       }
       return returnList;
+    }
+  }
+
+  /** Read in a tree file, print out trees with updated tags **/
+  public static void main(String[] args) throws IOException {
+    // load properties
+    Properties props = StringUtils.argsToProperties(args);
+    String taggerPath = props.getProperty("tagger");
+    String treeFilePath = props.getProperty("treeFile");
+    // build tag updater
+    TreebankTagUpdater updater = new TreebankTagUpdater(taggerPath);
+    // read in trees, update, and print out updated tree
+    // set up tree reader
+    TreeFactory tf = new LabeledScoredTreeFactory();
+    Reader r = new BufferedReader(new InputStreamReader(new FileInputStream(treeFilePath), "UTF-8"));
+    TreeReader tr = new PennTreeReader(r, tf);
+    Tree t = tr.readTree();
+    while (t != null) {
+      // update tree
+      updater.tagTree(t);
+      // print new updated tree
+      System.out.println(t);
+      // move on to next tree
+      t = tr.readTree();
     }
   }
 

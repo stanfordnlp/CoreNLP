@@ -22,7 +22,7 @@ public class FrenchTreebankLanguagePack extends AbstractTreebankLanguagePack {
   //the current FrenchTreebankParserParams is currently configured to
   //read UTF-8, PTB style trees that have been extracted from the XML
   //files.
-  public static final String FTB_ENCODING = "ISO8859_1";
+  public static final String FTB_ENCODING = "UTF-8";
 
   //The raw treebank uses "PONCT". Change to LDC convention.
   private static final String[] frenchPunctTags = {"PUNC"};

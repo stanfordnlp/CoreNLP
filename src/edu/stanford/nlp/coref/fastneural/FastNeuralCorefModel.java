@@ -1,51 +1,97 @@
 package edu.stanford.nlp.coref.fastneural;
 
-import java.util.Arrays;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.stream.Collectors;
 
-import org.ejml.simple.SimpleMatrix;
-import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.coref.neural.CategoricalFeatureExtractor;
 import edu.stanford.nlp.coref.neural.EmbeddingExtractor;
-import edu.stanford.nlp.coref.neural.NeuralCorefProperties;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.logging.Redwood;
+import org.ejml.simple.SimpleMatrix;
 
 /**
- * Featurizes and scores mention pairs using {@link FastNeuralCorefNetwork}.
+ * Featurizes and scores mention pairs using a neural network.
  * @author kevinclark
  */
-public class FastNeuralCorefModel {
+public class FastNeuralCorefModel implements Serializable {
+  private static final long serialVersionUID = 8663264823377059140L;
+
   private final EmbeddingExtractor embeddingExtractor;
-  private final FastNeuralCorefNetwork network;
   private final Map<String, Integer> pairFeatureIds;
   private final Map<String, Integer> mentionFeatureIds;
 
-  public FastNeuralCorefModel(EmbeddingExtractor embeddingExtractor, FastNeuralCorefNetwork network,
-      Map<String, Integer> pairFeatureIds, Map<String, Integer> mentionFeatureIds) {
+  private SimpleMatrix anaphorKernel;
+  private SimpleMatrix anaphorBias;
+  private SimpleMatrix antecedentKernel;
+  private SimpleMatrix antecedentBias;
+  private SimpleMatrix pairFeaturesKernel;
+  private SimpleMatrix pairFeaturesBias;
+  private SimpleMatrix NARepresentation;
+  private List<SimpleMatrix> networkLayers;
+
+  public FastNeuralCorefModel(EmbeddingExtractor embeddingExtractor,
+      Map<String, Integer> pairFeatureIds, Map<String, Integer> mentionFeatureIds,
+      List<SimpleMatrix> weights) {
     this.embeddingExtractor = embeddingExtractor;
-    this.network = network;
     this.pairFeatureIds = pairFeatureIds;
     this.mentionFeatureIds = mentionFeatureIds;
+
+    anaphorKernel = weights.get(0);
+    anaphorBias = weights.get(1);
+    antecedentKernel = weights.get(2);
+    antecedentBias = weights.get(3);
+    pairFeaturesKernel = weights.get(4);
+    pairFeaturesBias = weights.get(5);
+    NARepresentation = weights.get(6);
+    networkLayers = new ArrayList<>(weights.subList(7, weights.size()));
   }
 
   public double score(Mention antecedent, Mention anaphor, Counter<String> antecedentFeatures,
-      Counter<String> anaphorFeatures, Counter<String> pairFeatures) {
-    MentionPairVectors mentionPair = new MentionPairVectors(
-        antecedent == null ? null : embeddingExtractor.getMentionEmbeddingsForFast(antecedent),
-        embeddingExtractor.getMentionEmbeddingsForFast(anaphor),
-        antecedent == null ? null : makeFeatureVector(antecedentFeatures, mentionFeatureIds),
-        makeFeatureVector(anaphorFeatures, mentionFeatureIds),
-        pairFeatures == null ? new SimpleMatrix(pairFeatureIds.size() + 23, 1) :
-          addDistanceFeatures(makeFeatureVector(pairFeatures, pairFeatureIds),
-          antecedent, anaphor));
-    return network.score(mentionPair);
+      Counter<String> anaphorFeatures, Counter<String> pairFeatures,
+      Map<Integer, SimpleMatrix> antecedentCache, Map<Integer, SimpleMatrix> anaphorCache) {
+    SimpleMatrix antecedentVector = NARepresentation;
+    if (antecedent != null) {
+      antecedentVector = antecedentCache.get(antecedent.mentionID);
+      if (antecedentVector == null) {
+        antecedentVector = antecedentKernel
+            .mult(NeuralUtils.concatenate(
+                embeddingExtractor.getMentionEmbeddingsForFast(antecedent),
+                makeFeatureVector(antecedentFeatures, mentionFeatureIds)))
+            .plus(antecedentBias);
+        antecedentCache.put(antecedent.mentionID, antecedentVector);
+      }
+    }
+    SimpleMatrix anaphorVector = anaphorCache.get(anaphor.mentionID);
+    if (anaphorVector == null) {
+      anaphorVector = anaphorKernel
+          .mult(NeuralUtils.concatenate(
+              embeddingExtractor.getMentionEmbeddingsForFast(anaphor),
+              makeFeatureVector(anaphorFeatures, mentionFeatureIds)))
+          .plus(anaphorBias);
+      anaphorCache.put(anaphor.mentionID, anaphorVector);
+    }
+    SimpleMatrix pairFeaturesVector = pairFeaturesKernel
+        .mult(pairFeatures == null ? new SimpleMatrix(pairFeatureIds.size() + 23, 1) :
+          addDistanceFeatures(
+              makeFeatureVector(pairFeatures, pairFeatureIds), antecedent, anaphor))
+        .plus(pairFeaturesBias);
+    SimpleMatrix pairVector = antecedentVector.concatRows(anaphorVector).concatRows(
+        pairFeaturesVector);
+    pairVector = NeuralUtils.elementwiseApplyReLU(pairVector);
+    for (int i = 0; i < networkLayers.size(); i += 2) {
+      pairVector = networkLayers.get(i).mult(pairVector).plus(networkLayers.get(i + 1));
+      if (networkLayers.get(i).numRows() > 1) {
+        pairVector = NeuralUtils.elementwiseApplyReLU(pairVector);
+      }
+    }
+    return pairVector.elementSum();
   }
 
   private SimpleMatrix makeFeatureVector(Counter<String> features, Map<String, Integer> featureIds) {
@@ -72,35 +118,43 @@ public class FastNeuralCorefModel {
     );
   }
 
-  public static FastNeuralCorefModel getDummyNeuralCorefModel(Properties props, Redwood.RedwoodChannels log) {
-    Map<String, Integer> mentionFeatureIds = new HashMap<>();
-    Map<String, Integer> pairFeatureIds = new HashMap<>();
-    for (int i = 0; i < 100; i++) {
-      mentionFeatureIds.put(String.valueOf(i), i);
-    }
-    for (int i = 0; i < 211; i++) {
-      pairFeatureIds.put(String.valueOf(i), i);
-    }
-    List<SimpleMatrix> weights = Arrays.asList(new SimpleMatrix[] {
-        new SimpleMatrix(128, 450),  //Ana
-        new SimpleMatrix(128, 1),
-        new SimpleMatrix(128, 450),  //Ant
-        new SimpleMatrix(128, 1),
-        new SimpleMatrix(128, 234),  //Pair
-        new SimpleMatrix(128, 1),
-        new SimpleMatrix(128, 1),  //NA
-        new SimpleMatrix(128, 128),   // hidden
-        new SimpleMatrix(128, 1),
-        new SimpleMatrix(128, 128),
-        new SimpleMatrix(128, 1),
-        new SimpleMatrix(1, 128),  // logits
-        new SimpleMatrix(1, 1),
-    });
+  // TODO: remove when ejml is upgraded
+  public FastNeuralCorefModel getCopyWithNewWeights() {
+    List<SimpleMatrix> weights = new ArrayList<>();
+    weights.add(new SimpleMatrix(anaphorKernel));
+    weights.add(new SimpleMatrix(anaphorBias));
+    weights.add(new SimpleMatrix(antecedentKernel));
+    weights.add(new SimpleMatrix(anaphorBias));
+    weights.add(new SimpleMatrix(pairFeaturesKernel));
+    weights.add(new SimpleMatrix(pairFeaturesBias));
+    weights.add(new SimpleMatrix(NARepresentation));
+    weights.addAll(networkLayers.stream()
+        .map(x->new SimpleMatrix(x))
+        .collect(Collectors.toList()));
+    return new FastNeuralCorefModel(
+        embeddingExtractor,
+        pairFeatureIds,
+        mentionFeatureIds,
+        weights);
+  }
 
-    EmbeddingExtractor embeddingExtractor = new EmbeddingExtractor(CorefProperties.conll(props), null,
-        IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
-            log, "Loading coref embeddings", NeuralCorefProperties.pretrainedEmbeddingsPath(props)));
-    FastNeuralCorefNetwork network = new FastNeuralCorefNetwork(weights);
-    return new FastNeuralCorefModel(embeddingExtractor, network, pairFeatureIds, mentionFeatureIds);
+  public static FastNeuralCorefModel loadFromTextFiles(String path) {
+    List<SimpleMatrix> weights = NeuralUtils.loadTextMatrices(path + "weights.txt");
+    weights.set(weights.size() - 2, weights.get(weights.size() - 2).transpose());
+    Embedding embeddings = new Embedding(path + "embeddings.txt");
+    EmbeddingExtractor extractor = new EmbeddingExtractor(false, null, embeddings, "<missing>");
+    Map<String, Integer> pairFeatureIds = loadMapFromTextFile(path + "pair_features.txt");
+    Map<String, Integer> mentionFeatureIds = loadMapFromTextFile(path + "mention_features.txt");
+    return new FastNeuralCorefModel(extractor, pairFeatureIds, mentionFeatureIds, weights);
+  }
+
+  public static Map<String, Integer> loadMapFromTextFile(String filename) {
+    Map<String, Integer> dict = new HashMap<>();
+    for (String line : IOUtils.readLines(filename, "utf-8")) {
+      String[] lineSplit = line.split("\\s+");
+      assert lineSplit.length == 2;
+      dict.put(lineSplit[0], Integer.parseInt(lineSplit[1]));
+    }
+    return dict;
   }
 }

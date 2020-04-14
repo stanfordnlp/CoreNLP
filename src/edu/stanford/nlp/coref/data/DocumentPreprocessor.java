@@ -231,7 +231,11 @@ public class DocumentPreprocessor  {
               minId = m.mentionID;
             }
           }
-          cm.remove(g);
+          if (cm.size() == 1) {
+            goldMentionPositions.remove(pos);
+          } else {
+            cm.remove(g);
+          }
           p.mentionID = g.mentionID;
           p.hasTwin = true;
           g.hasTwin = true;

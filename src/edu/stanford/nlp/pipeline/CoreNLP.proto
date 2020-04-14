@@ -1,3 +1,5 @@
+syntax = "proto2";
+
 package edu.stanford.nlp.pipeline;
 
 option java_package = "edu.stanford.nlp.pipeline";
@@ -340,16 +342,16 @@ message Mention {
   optional string person               = 6;
   optional uint32 startIndex           = 7;
   optional uint32 endIndex             = 9;
-  optional uint32 headIndex            = 10;
+  optional int32 headIndex             = 10;
   optional string headString           = 11;
   optional string nerString            = 12;
-  optional uint32 originalRef          = 13;
+  optional int32 originalRef           = 13;
   optional int32 goldCorefClusterID    = 14;
   optional int32 corefClusterID        = 15;
-  optional uint32 mentionNum           = 16;
-  optional uint32 sentNum              = 17;
-  optional uint32 utter                = 18;
-  optional uint32 paragraph            = 19;
+  optional int32 mentionNum            = 16;
+  optional int32 sentNum               = 17;
+  optional int32 utter                 = 18;
+  optional int32 paragraph             = 19;
   optional bool isSubject              = 20;
   optional bool isDirectObject         = 21;
   optional bool isIndirectObject       = 22;
@@ -382,9 +384,9 @@ message Mention {
 //
 
 message IndexedWord {
-  optional uint32 sentenceNum          = 1;
-  optional uint32 tokenIndex           = 2;
-  optional uint32 docID                = 3;
+  optional  int32 sentenceNum          = 1;
+  optional  int32 tokenIndex           = 2;
+  optional  int32 docID                = 3;
   optional uint32 copyCount            = 4;
 }
 

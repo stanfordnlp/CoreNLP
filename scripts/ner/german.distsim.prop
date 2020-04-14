@@ -1,5 +1,5 @@
-trainFileList = /u/nlp/data/ner/german/german-ner.train.conll,/u/nlp/data/ner/german/german-ner-extra-eval.train.conll
-testFile = /u/nlp/data/ner/german/german-ner.dev.conll
+trainFileList = /u/nlp/data/ner/german/german-ner-w-hyphens.train.conll,/u/nlp/data/ner/german/german-ner-extra-eval-w-hyphens.train.conll
+testFile = /u/nlp/data/ner/german/german-ner-w-hyphens.dev.conll
 serializeTo = /u/nlp/data/ner/german/models/german.distsim.crf.ser.gz
 
 type=crf

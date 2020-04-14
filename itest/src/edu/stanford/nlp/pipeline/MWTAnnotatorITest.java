@@ -2,16 +2,19 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.util.*;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 import java.util.*;
+
+import org.junit.Test;
 
 /**
  * Basic testing of MWT splitting
  */
 
-public class MWTAnnotatorITest extends TestCase {
+public class MWTAnnotatorITest {
 
+    @Test
     public void testFrenchMWTTokenizationBasic() {
         String frenchTextBasic = "Le but des bandes de roulement est d'augmenter la traction. " +
                 "Elle est présidente du conseil d'administration.";

@@ -852,7 +852,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
 
     // a few trees start with "Either way", etc but get labeled as if they
     // were Either X or Y, or in one case, labeled completely randomly
-    ("/CC|NNP/=bad < Either !$++ CC\n" +
+    ("/CC|NNP/=bad < /Either|Neither/ !$++ CC\n" +
      "relabel bad DT\n" +
      '\n') +
 
@@ -863,7 +863,13 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     // "either structured in ways that create unnecessary burdens..."
     // "either receive a percentage of cash flow, a percentage of ..."
     // "either look for greater equity participation..."
-    ("either > (RB=bad $++ CC)\n" +
+    ("/neither|either/ > (RB=bad $++ CC)\n" +
+     "relabel bad CC\n" +
+     '\n') +
+
+    // this is also wrong: all of the either X or Y constructions should be
+    // either_CC X or_CC Y
+    ("/Neither|neither|either/ > (DT=bad $++ CC)\n" +
      "relabel bad CC\n" +
      '\n') +
 
@@ -1189,6 +1195,10 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     ("@ADVP < (RP=bad < around|before)\n" +
     "relabel bad RB\n" +
             '\n') +
+
+    ("before|after > (RB=bad > @SBAR $+ @S)\n" +
+     "relabel bad IN\n" +
+     '\n') +
 
     ("@ADVP=bad <1 PRT !<2 __\n" +
     "excise bad bad\n" +

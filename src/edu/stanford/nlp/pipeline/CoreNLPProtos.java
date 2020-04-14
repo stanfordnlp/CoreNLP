@@ -39268,12 +39268,12 @@ public final class CoreNLPProtos {
     int getEndIndex();
 
     /**
-     * <code>optional uint32 headIndex = 10;</code>
+     * <code>optional int32 headIndex = 10;</code>
      * @return Whether the headIndex field is set.
      */
     boolean hasHeadIndex();
     /**
-     * <code>optional uint32 headIndex = 10;</code>
+     * <code>optional int32 headIndex = 10;</code>
      * @return The headIndex.
      */
     int getHeadIndex();
@@ -39313,12 +39313,12 @@ public final class CoreNLPProtos {
         getNerStringBytes();
 
     /**
-     * <code>optional uint32 originalRef = 13;</code>
+     * <code>optional int32 originalRef = 13;</code>
      * @return Whether the originalRef field is set.
      */
     boolean hasOriginalRef();
     /**
-     * <code>optional uint32 originalRef = 13;</code>
+     * <code>optional int32 originalRef = 13;</code>
      * @return The originalRef.
      */
     int getOriginalRef();
@@ -39346,45 +39346,45 @@ public final class CoreNLPProtos {
     int getCorefClusterID();
 
     /**
-     * <code>optional uint32 mentionNum = 16;</code>
+     * <code>optional int32 mentionNum = 16;</code>
      * @return Whether the mentionNum field is set.
      */
     boolean hasMentionNum();
     /**
-     * <code>optional uint32 mentionNum = 16;</code>
+     * <code>optional int32 mentionNum = 16;</code>
      * @return The mentionNum.
      */
     int getMentionNum();
 
     /**
-     * <code>optional uint32 sentNum = 17;</code>
+     * <code>optional int32 sentNum = 17;</code>
      * @return Whether the sentNum field is set.
      */
     boolean hasSentNum();
     /**
-     * <code>optional uint32 sentNum = 17;</code>
+     * <code>optional int32 sentNum = 17;</code>
      * @return The sentNum.
      */
     int getSentNum();
 
     /**
-     * <code>optional uint32 utter = 18;</code>
+     * <code>optional int32 utter = 18;</code>
      * @return Whether the utter field is set.
      */
     boolean hasUtter();
     /**
-     * <code>optional uint32 utter = 18;</code>
+     * <code>optional int32 utter = 18;</code>
      * @return The utter.
      */
     int getUtter();
 
     /**
-     * <code>optional uint32 paragraph = 19;</code>
+     * <code>optional int32 paragraph = 19;</code>
      * @return Whether the paragraph field is set.
      */
     boolean hasParagraph();
     /**
-     * <code>optional uint32 paragraph = 19;</code>
+     * <code>optional int32 paragraph = 19;</code>
      * @return The paragraph.
      */
     int getParagraph();
@@ -39852,7 +39852,7 @@ public final class CoreNLPProtos {
             }
             case 80: {
               bitField0_ |= 0x00000100;
-              headIndex_ = input.readUInt32();
+              headIndex_ = input.readInt32();
               break;
             }
             case 90: {
@@ -39869,7 +39869,7 @@ public final class CoreNLPProtos {
             }
             case 104: {
               bitField0_ |= 0x00000800;
-              originalRef_ = input.readUInt32();
+              originalRef_ = input.readInt32();
               break;
             }
             case 112: {
@@ -39884,22 +39884,22 @@ public final class CoreNLPProtos {
             }
             case 128: {
               bitField0_ |= 0x00004000;
-              mentionNum_ = input.readUInt32();
+              mentionNum_ = input.readInt32();
               break;
             }
             case 136: {
               bitField0_ |= 0x00008000;
-              sentNum_ = input.readUInt32();
+              sentNum_ = input.readInt32();
               break;
             }
             case 144: {
               bitField0_ |= 0x00010000;
-              utter_ = input.readUInt32();
+              utter_ = input.readInt32();
               break;
             }
             case 152: {
               bitField0_ |= 0x00020000;
-              paragraph_ = input.readUInt32();
+              paragraph_ = input.readInt32();
               break;
             }
             case 160: {
@@ -40484,14 +40484,14 @@ public final class CoreNLPProtos {
     public static final int HEADINDEX_FIELD_NUMBER = 10;
     private int headIndex_;
     /**
-     * <code>optional uint32 headIndex = 10;</code>
+     * <code>optional int32 headIndex = 10;</code>
      * @return Whether the headIndex field is set.
      */
     public boolean hasHeadIndex() {
       return ((bitField0_ & 0x00000100) != 0);
     }
     /**
-     * <code>optional uint32 headIndex = 10;</code>
+     * <code>optional int32 headIndex = 10;</code>
      * @return The headIndex.
      */
     public int getHeadIndex() {
@@ -40591,14 +40591,14 @@ public final class CoreNLPProtos {
     public static final int ORIGINALREF_FIELD_NUMBER = 13;
     private int originalRef_;
     /**
-     * <code>optional uint32 originalRef = 13;</code>
+     * <code>optional int32 originalRef = 13;</code>
      * @return Whether the originalRef field is set.
      */
     public boolean hasOriginalRef() {
       return ((bitField0_ & 0x00000800) != 0);
     }
     /**
-     * <code>optional uint32 originalRef = 13;</code>
+     * <code>optional int32 originalRef = 13;</code>
      * @return The originalRef.
      */
     public int getOriginalRef() {
@@ -40642,14 +40642,14 @@ public final class CoreNLPProtos {
     public static final int MENTIONNUM_FIELD_NUMBER = 16;
     private int mentionNum_;
     /**
-     * <code>optional uint32 mentionNum = 16;</code>
+     * <code>optional int32 mentionNum = 16;</code>
      * @return Whether the mentionNum field is set.
      */
     public boolean hasMentionNum() {
       return ((bitField0_ & 0x00004000) != 0);
     }
     /**
-     * <code>optional uint32 mentionNum = 16;</code>
+     * <code>optional int32 mentionNum = 16;</code>
      * @return The mentionNum.
      */
     public int getMentionNum() {
@@ -40659,14 +40659,14 @@ public final class CoreNLPProtos {
     public static final int SENTNUM_FIELD_NUMBER = 17;
     private int sentNum_;
     /**
-     * <code>optional uint32 sentNum = 17;</code>
+     * <code>optional int32 sentNum = 17;</code>
      * @return Whether the sentNum field is set.
      */
     public boolean hasSentNum() {
       return ((bitField0_ & 0x00008000) != 0);
     }
     /**
-     * <code>optional uint32 sentNum = 17;</code>
+     * <code>optional int32 sentNum = 17;</code>
      * @return The sentNum.
      */
     public int getSentNum() {
@@ -40676,14 +40676,14 @@ public final class CoreNLPProtos {
     public static final int UTTER_FIELD_NUMBER = 18;
     private int utter_;
     /**
-     * <code>optional uint32 utter = 18;</code>
+     * <code>optional int32 utter = 18;</code>
      * @return Whether the utter field is set.
      */
     public boolean hasUtter() {
       return ((bitField0_ & 0x00010000) != 0);
     }
     /**
-     * <code>optional uint32 utter = 18;</code>
+     * <code>optional int32 utter = 18;</code>
      * @return The utter.
      */
     public int getUtter() {
@@ -40693,14 +40693,14 @@ public final class CoreNLPProtos {
     public static final int PARAGRAPH_FIELD_NUMBER = 19;
     private int paragraph_;
     /**
-     * <code>optional uint32 paragraph = 19;</code>
+     * <code>optional int32 paragraph = 19;</code>
      * @return Whether the paragraph field is set.
      */
     public boolean hasParagraph() {
       return ((bitField0_ & 0x00020000) != 0);
     }
     /**
-     * <code>optional uint32 paragraph = 19;</code>
+     * <code>optional int32 paragraph = 19;</code>
      * @return The paragraph.
      */
     public int getParagraph() {
@@ -41278,7 +41278,7 @@ public final class CoreNLPProtos {
         output.writeUInt32(9, endIndex_);
       }
       if (((bitField0_ & 0x00000100) != 0)) {
-        output.writeUInt32(10, headIndex_);
+        output.writeInt32(10, headIndex_);
       }
       if (((bitField0_ & 0x00000200) != 0)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 11, headString_);
@@ -41287,7 +41287,7 @@ public final class CoreNLPProtos {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 12, nerString_);
       }
       if (((bitField0_ & 0x00000800) != 0)) {
-        output.writeUInt32(13, originalRef_);
+        output.writeInt32(13, originalRef_);
       }
       if (((bitField0_ & 0x00001000) != 0)) {
         output.writeInt32(14, goldCorefClusterID_);
@@ -41296,16 +41296,16 @@ public final class CoreNLPProtos {
         output.writeInt32(15, corefClusterID_);
       }
       if (((bitField0_ & 0x00004000) != 0)) {
-        output.writeUInt32(16, mentionNum_);
+        output.writeInt32(16, mentionNum_);
       }
       if (((bitField0_ & 0x00008000) != 0)) {
-        output.writeUInt32(17, sentNum_);
+        output.writeInt32(17, sentNum_);
       }
       if (((bitField0_ & 0x00010000) != 0)) {
-        output.writeUInt32(18, utter_);
+        output.writeInt32(18, utter_);
       }
       if (((bitField0_ & 0x00020000) != 0)) {
-        output.writeUInt32(19, paragraph_);
+        output.writeInt32(19, paragraph_);
       }
       if (((bitField0_ & 0x00040000) != 0)) {
         output.writeBool(20, isSubject_);
@@ -41414,7 +41414,7 @@ public final class CoreNLPProtos {
       }
       if (((bitField0_ & 0x00000100) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(10, headIndex_);
+          .computeInt32Size(10, headIndex_);
       }
       if (((bitField0_ & 0x00000200) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, headString_);
@@ -41424,7 +41424,7 @@ public final class CoreNLPProtos {
       }
       if (((bitField0_ & 0x00000800) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(13, originalRef_);
+          .computeInt32Size(13, originalRef_);
       }
       if (((bitField0_ & 0x00001000) != 0)) {
         size += com.google.protobuf.CodedOutputStream
@@ -41436,19 +41436,19 @@ public final class CoreNLPProtos {
       }
       if (((bitField0_ & 0x00004000) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(16, mentionNum_);
+          .computeInt32Size(16, mentionNum_);
       }
       if (((bitField0_ & 0x00008000) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(17, sentNum_);
+          .computeInt32Size(17, sentNum_);
       }
       if (((bitField0_ & 0x00010000) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(18, utter_);
+          .computeInt32Size(18, utter_);
       }
       if (((bitField0_ & 0x00020000) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(19, paragraph_);
+          .computeInt32Size(19, paragraph_);
       }
       if (((bitField0_ & 0x00040000) != 0)) {
         size += com.google.protobuf.CodedOutputStream
@@ -43269,21 +43269,21 @@ public final class CoreNLPProtos {
 
       private int headIndex_ ;
       /**
-       * <code>optional uint32 headIndex = 10;</code>
+       * <code>optional int32 headIndex = 10;</code>
        * @return Whether the headIndex field is set.
        */
       public boolean hasHeadIndex() {
         return ((bitField0_ & 0x00000100) != 0);
       }
       /**
-       * <code>optional uint32 headIndex = 10;</code>
+       * <code>optional int32 headIndex = 10;</code>
        * @return The headIndex.
        */
       public int getHeadIndex() {
         return headIndex_;
       }
       /**
-       * <code>optional uint32 headIndex = 10;</code>
+       * <code>optional int32 headIndex = 10;</code>
        * @param value The headIndex to set.
        * @return This builder for chaining.
        */
@@ -43294,7 +43294,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional uint32 headIndex = 10;</code>
+       * <code>optional int32 headIndex = 10;</code>
        * @return This builder for chaining.
        */
       public Builder clearHeadIndex() {
@@ -43474,21 +43474,21 @@ public final class CoreNLPProtos {
 
       private int originalRef_ ;
       /**
-       * <code>optional uint32 originalRef = 13;</code>
+       * <code>optional int32 originalRef = 13;</code>
        * @return Whether the originalRef field is set.
        */
       public boolean hasOriginalRef() {
         return ((bitField0_ & 0x00000800) != 0);
       }
       /**
-       * <code>optional uint32 originalRef = 13;</code>
+       * <code>optional int32 originalRef = 13;</code>
        * @return The originalRef.
        */
       public int getOriginalRef() {
         return originalRef_;
       }
       /**
-       * <code>optional uint32 originalRef = 13;</code>
+       * <code>optional int32 originalRef = 13;</code>
        * @param value The originalRef to set.
        * @return This builder for chaining.
        */
@@ -43499,7 +43499,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional uint32 originalRef = 13;</code>
+       * <code>optional int32 originalRef = 13;</code>
        * @return This builder for chaining.
        */
       public Builder clearOriginalRef() {
@@ -43585,21 +43585,21 @@ public final class CoreNLPProtos {
 
       private int mentionNum_ ;
       /**
-       * <code>optional uint32 mentionNum = 16;</code>
+       * <code>optional int32 mentionNum = 16;</code>
        * @return Whether the mentionNum field is set.
        */
       public boolean hasMentionNum() {
         return ((bitField0_ & 0x00004000) != 0);
       }
       /**
-       * <code>optional uint32 mentionNum = 16;</code>
+       * <code>optional int32 mentionNum = 16;</code>
        * @return The mentionNum.
        */
       public int getMentionNum() {
         return mentionNum_;
       }
       /**
-       * <code>optional uint32 mentionNum = 16;</code>
+       * <code>optional int32 mentionNum = 16;</code>
        * @param value The mentionNum to set.
        * @return This builder for chaining.
        */
@@ -43610,7 +43610,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional uint32 mentionNum = 16;</code>
+       * <code>optional int32 mentionNum = 16;</code>
        * @return This builder for chaining.
        */
       public Builder clearMentionNum() {
@@ -43622,21 +43622,21 @@ public final class CoreNLPProtos {
 
       private int sentNum_ ;
       /**
-       * <code>optional uint32 sentNum = 17;</code>
+       * <code>optional int32 sentNum = 17;</code>
        * @return Whether the sentNum field is set.
        */
       public boolean hasSentNum() {
         return ((bitField0_ & 0x00008000) != 0);
       }
       /**
-       * <code>optional uint32 sentNum = 17;</code>
+       * <code>optional int32 sentNum = 17;</code>
        * @return The sentNum.
        */
       public int getSentNum() {
         return sentNum_;
       }
       /**
-       * <code>optional uint32 sentNum = 17;</code>
+       * <code>optional int32 sentNum = 17;</code>
        * @param value The sentNum to set.
        * @return This builder for chaining.
        */
@@ -43647,7 +43647,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional uint32 sentNum = 17;</code>
+       * <code>optional int32 sentNum = 17;</code>
        * @return This builder for chaining.
        */
       public Builder clearSentNum() {
@@ -43659,21 +43659,21 @@ public final class CoreNLPProtos {
 
       private int utter_ ;
       /**
-       * <code>optional uint32 utter = 18;</code>
+       * <code>optional int32 utter = 18;</code>
        * @return Whether the utter field is set.
        */
       public boolean hasUtter() {
         return ((bitField0_ & 0x00010000) != 0);
       }
       /**
-       * <code>optional uint32 utter = 18;</code>
+       * <code>optional int32 utter = 18;</code>
        * @return The utter.
        */
       public int getUtter() {
         return utter_;
       }
       /**
-       * <code>optional uint32 utter = 18;</code>
+       * <code>optional int32 utter = 18;</code>
        * @param value The utter to set.
        * @return This builder for chaining.
        */
@@ -43684,7 +43684,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional uint32 utter = 18;</code>
+       * <code>optional int32 utter = 18;</code>
        * @return This builder for chaining.
        */
       public Builder clearUtter() {
@@ -43696,21 +43696,21 @@ public final class CoreNLPProtos {
 
       private int paragraph_ ;
       /**
-       * <code>optional uint32 paragraph = 19;</code>
+       * <code>optional int32 paragraph = 19;</code>
        * @return Whether the paragraph field is set.
        */
       public boolean hasParagraph() {
         return ((bitField0_ & 0x00020000) != 0);
       }
       /**
-       * <code>optional uint32 paragraph = 19;</code>
+       * <code>optional int32 paragraph = 19;</code>
        * @return The paragraph.
        */
       public int getParagraph() {
         return paragraph_;
       }
       /**
-       * <code>optional uint32 paragraph = 19;</code>
+       * <code>optional int32 paragraph = 19;</code>
        * @param value The paragraph to set.
        * @return This builder for chaining.
        */
@@ -43721,7 +43721,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional uint32 paragraph = 19;</code>
+       * <code>optional int32 paragraph = 19;</code>
        * @return This builder for chaining.
        */
       public Builder clearParagraph() {
@@ -45731,34 +45731,34 @@ public final class CoreNLPProtos {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional uint32 sentenceNum = 1;</code>
+     * <code>optional int32 sentenceNum = 1;</code>
      * @return Whether the sentenceNum field is set.
      */
     boolean hasSentenceNum();
     /**
-     * <code>optional uint32 sentenceNum = 1;</code>
+     * <code>optional int32 sentenceNum = 1;</code>
      * @return The sentenceNum.
      */
     int getSentenceNum();
 
     /**
-     * <code>optional uint32 tokenIndex = 2;</code>
+     * <code>optional int32 tokenIndex = 2;</code>
      * @return Whether the tokenIndex field is set.
      */
     boolean hasTokenIndex();
     /**
-     * <code>optional uint32 tokenIndex = 2;</code>
+     * <code>optional int32 tokenIndex = 2;</code>
      * @return The tokenIndex.
      */
     int getTokenIndex();
 
     /**
-     * <code>optional uint32 docID = 3;</code>
+     * <code>optional int32 docID = 3;</code>
      * @return Whether the docID field is set.
      */
     boolean hasDocID();
     /**
-     * <code>optional uint32 docID = 3;</code>
+     * <code>optional int32 docID = 3;</code>
      * @return The docID.
      */
     int getDocID();
@@ -45822,17 +45822,17 @@ public final class CoreNLPProtos {
               break;
             case 8: {
               bitField0_ |= 0x00000001;
-              sentenceNum_ = input.readUInt32();
+              sentenceNum_ = input.readInt32();
               break;
             }
             case 16: {
               bitField0_ |= 0x00000002;
-              tokenIndex_ = input.readUInt32();
+              tokenIndex_ = input.readInt32();
               break;
             }
             case 24: {
               bitField0_ |= 0x00000004;
-              docID_ = input.readUInt32();
+              docID_ = input.readInt32();
               break;
             }
             case 32: {
@@ -45876,14 +45876,14 @@ public final class CoreNLPProtos {
     public static final int SENTENCENUM_FIELD_NUMBER = 1;
     private int sentenceNum_;
     /**
-     * <code>optional uint32 sentenceNum = 1;</code>
+     * <code>optional int32 sentenceNum = 1;</code>
      * @return Whether the sentenceNum field is set.
      */
     public boolean hasSentenceNum() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>optional uint32 sentenceNum = 1;</code>
+     * <code>optional int32 sentenceNum = 1;</code>
      * @return The sentenceNum.
      */
     public int getSentenceNum() {
@@ -45893,14 +45893,14 @@ public final class CoreNLPProtos {
     public static final int TOKENINDEX_FIELD_NUMBER = 2;
     private int tokenIndex_;
     /**
-     * <code>optional uint32 tokenIndex = 2;</code>
+     * <code>optional int32 tokenIndex = 2;</code>
      * @return Whether the tokenIndex field is set.
      */
     public boolean hasTokenIndex() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
-     * <code>optional uint32 tokenIndex = 2;</code>
+     * <code>optional int32 tokenIndex = 2;</code>
      * @return The tokenIndex.
      */
     public int getTokenIndex() {
@@ -45910,14 +45910,14 @@ public final class CoreNLPProtos {
     public static final int DOCID_FIELD_NUMBER = 3;
     private int docID_;
     /**
-     * <code>optional uint32 docID = 3;</code>
+     * <code>optional int32 docID = 3;</code>
      * @return Whether the docID field is set.
      */
     public boolean hasDocID() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
-     * <code>optional uint32 docID = 3;</code>
+     * <code>optional int32 docID = 3;</code>
      * @return The docID.
      */
     public int getDocID() {
@@ -45956,13 +45956,13 @@ public final class CoreNLPProtos {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        output.writeUInt32(1, sentenceNum_);
+        output.writeInt32(1, sentenceNum_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        output.writeUInt32(2, tokenIndex_);
+        output.writeInt32(2, tokenIndex_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        output.writeUInt32(3, docID_);
+        output.writeInt32(3, docID_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
         output.writeUInt32(4, copyCount_);
@@ -45978,15 +45978,15 @@ public final class CoreNLPProtos {
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(1, sentenceNum_);
+          .computeInt32Size(1, sentenceNum_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(2, tokenIndex_);
+          .computeInt32Size(2, tokenIndex_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(3, docID_);
+          .computeInt32Size(3, docID_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
         size += com.google.protobuf.CodedOutputStream
@@ -46332,21 +46332,21 @@ public final class CoreNLPProtos {
 
       private int sentenceNum_ ;
       /**
-       * <code>optional uint32 sentenceNum = 1;</code>
+       * <code>optional int32 sentenceNum = 1;</code>
        * @return Whether the sentenceNum field is set.
        */
       public boolean hasSentenceNum() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>optional uint32 sentenceNum = 1;</code>
+       * <code>optional int32 sentenceNum = 1;</code>
        * @return The sentenceNum.
        */
       public int getSentenceNum() {
         return sentenceNum_;
       }
       /**
-       * <code>optional uint32 sentenceNum = 1;</code>
+       * <code>optional int32 sentenceNum = 1;</code>
        * @param value The sentenceNum to set.
        * @return This builder for chaining.
        */
@@ -46357,7 +46357,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional uint32 sentenceNum = 1;</code>
+       * <code>optional int32 sentenceNum = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearSentenceNum() {
@@ -46369,21 +46369,21 @@ public final class CoreNLPProtos {
 
       private int tokenIndex_ ;
       /**
-       * <code>optional uint32 tokenIndex = 2;</code>
+       * <code>optional int32 tokenIndex = 2;</code>
        * @return Whether the tokenIndex field is set.
        */
       public boolean hasTokenIndex() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
-       * <code>optional uint32 tokenIndex = 2;</code>
+       * <code>optional int32 tokenIndex = 2;</code>
        * @return The tokenIndex.
        */
       public int getTokenIndex() {
         return tokenIndex_;
       }
       /**
-       * <code>optional uint32 tokenIndex = 2;</code>
+       * <code>optional int32 tokenIndex = 2;</code>
        * @param value The tokenIndex to set.
        * @return This builder for chaining.
        */
@@ -46394,7 +46394,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional uint32 tokenIndex = 2;</code>
+       * <code>optional int32 tokenIndex = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearTokenIndex() {
@@ -46406,21 +46406,21 @@ public final class CoreNLPProtos {
 
       private int docID_ ;
       /**
-       * <code>optional uint32 docID = 3;</code>
+       * <code>optional int32 docID = 3;</code>
        * @return Whether the docID field is set.
        */
       public boolean hasDocID() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
-       * <code>optional uint32 docID = 3;</code>
+       * <code>optional int32 docID = 3;</code>
        * @return The docID.
        */
       public int getDocID() {
         return docID_;
       }
       /**
-       * <code>optional uint32 docID = 3;</code>
+       * <code>optional int32 docID = 3;</code>
        * @param value The docID to set.
        * @return This builder for chaining.
        */
@@ -46431,7 +46431,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional uint32 docID = 3;</code>
+       * <code>optional int32 docID = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearDocID() {
@@ -67203,11 +67203,11 @@ public final class CoreNLPProtos {
       "\001(\t\022\016\n\006number\030\003 \001(\t\022\016\n\006gender\030\004 \001(\t\022\017\n\007a" +
       "nimacy\030\005 \001(\t\022\016\n\006person\030\006 \001(\t\022\022\n\nstartInd" +
       "ex\030\007 \001(\r\022\020\n\010endIndex\030\t \001(\r\022\021\n\theadIndex\030" +
-      "\n \001(\r\022\022\n\nheadString\030\013 \001(\t\022\021\n\tnerString\030\014" +
-      " \001(\t\022\023\n\013originalRef\030\r \001(\r\022\032\n\022goldCorefCl" +
+      "\n \001(\005\022\022\n\nheadString\030\013 \001(\t\022\021\n\tnerString\030\014" +
+      " \001(\t\022\023\n\013originalRef\030\r \001(\005\022\032\n\022goldCorefCl" +
       "usterID\030\016 \001(\005\022\026\n\016corefClusterID\030\017 \001(\005\022\022\n" +
-      "\nmentionNum\030\020 \001(\r\022\017\n\007sentNum\030\021 \001(\r\022\r\n\005ut" +
-      "ter\030\022 \001(\r\022\021\n\tparagraph\030\023 \001(\r\022\021\n\tisSubjec" +
+      "\nmentionNum\030\020 \001(\005\022\017\n\007sentNum\030\021 \001(\005\022\r\n\005ut" +
+      "ter\030\022 \001(\005\022\021\n\tparagraph\030\023 \001(\005\022\021\n\tisSubjec" +
       "t\030\024 \001(\010\022\026\n\016isDirectObject\030\025 \001(\010\022\030\n\020isInd" +
       "irectObject\030\026 \001(\010\022\033\n\023isPrepositionObject" +
       "\030\027 \001(\010\022\017\n\007hasTwin\030\030 \001(\010\022\017\n\007generic\030\031 \001(\010" +
@@ -67228,7 +67228,7 @@ public final class CoreNLPProtos {
       "teNominatives\0307 \003(\005\022\030\n\020relativePronouns\030" +
       "8 \003(\005\022\023\n\013listMembers\0309 \003(\005\022\025\n\rbelongToLi" +
       "sts\030: \003(\005\"X\n\013IndexedWord\022\023\n\013sentenceNum\030" +
-      "\001 \001(\r\022\022\n\ntokenIndex\030\002 \001(\r\022\r\n\005docID\030\003 \001(\r" +
+      "\001 \001(\005\022\022\n\ntokenIndex\030\002 \001(\005\022\r\n\005docID\030\003 \001(\005" +
       "\022\021\n\tcopyCount\030\004 \001(\r\"4\n\013SpeakerInfo\022\023\n\013sp" +
       "eakerName\030\001 \001(\t\022\020\n\010mentions\030\002 \003(\005\"\"\n\004Spa" +
       "n\022\r\n\005begin\030\001 \002(\r\022\013\n\003end\030\002 \002(\r\"w\n\005Timex\022\r" +

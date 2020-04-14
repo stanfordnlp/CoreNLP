@@ -1,9 +1,13 @@
 package edu.stanford.nlp.international.spanish;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
 import edu.stanford.nlp.international.spanish.process.AnCoraPronounDisambiguator;
 import junit.framework.TestCase;
 
-public class AnCoraPronounDisambiguatorITest extends TestCase {
+public class AnCoraPronounDisambiguatorITest {
 
   private final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
 
@@ -13,6 +17,7 @@ public class AnCoraPronounDisambiguatorITest extends TestCase {
                  AnCoraPronounDisambiguator.disambiguatePersonalPronoun(verbStripper.separatePronouns(verb), i, ""));
   }
 
+  @Test
   public void testDisambiguation() {
     runTest(AnCoraPronounDisambiguator.PersonalPronounType.REFLEXIVE, "enterarme", 0);
   }

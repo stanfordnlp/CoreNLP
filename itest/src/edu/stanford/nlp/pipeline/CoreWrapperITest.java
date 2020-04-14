@@ -4,15 +4,19 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.util.Pair;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.*;
-import junit.framework.TestCase;
 
+import org.junit.Test;
 
-public class CoreWrapperITest extends TestCase {
+public class CoreWrapperITest {
 
+  @Test
   public void testPipeline() throws Exception {
     // set up pipeline
     Properties props = new Properties();
@@ -92,7 +96,7 @@ public class CoreWrapperITest extends TestCase {
     assertEquals(expectedDependencyParse, firstSentence.dependencyParse().toString());
     // coref info
     String expectedCoref =
-            "{18=CHAIN18-[\"us\" in sentence 3, \"our\" in sentence 3], 20=CHAIN20-[\"Barack Obama\" in sentence 1, " +
+            "{17=CHAIN17-[\"us\" in sentence 3, \"our\" in sentence 3], 19=CHAIN19-[\"Barack Obama\" in sentence 1, " +
                     "\"He\" in sentence 2, \"Obama\" in sentence 3, \"My\" in sentence 3, \"I\" in sentence 3, \"his\" " +
                     "in sentence 3]}";
     assertEquals(expectedCoref, exampleDocument.corefChains().toString());

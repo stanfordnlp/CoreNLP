@@ -2,16 +2,18 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.util.PropertiesUtils;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+
+import org.junit.Test;
 
 /**
  * Tests for the various annotation outputters which require the models to be loaded.
  *
  * @author Gabor Angeli
  */
-public class AnnotationOutputterITest extends TestCase {
+public class AnnotationOutputterITest {
 
   private static final StanfordCoreNLP pipeline =
       new StanfordCoreNLP(PropertiesUtils.asProperties(
@@ -20,6 +22,7 @@ public class AnnotationOutputterITest extends TestCase {
               "ner.buildEntityMentions", "false"
       ));
 
+  @Test
   public void testSimpleSentenceCoNLL() throws IOException {
     Annotation ann = new Annotation("The cat is fat. The dog is lazy.");
     pipeline.annotate(ann);
@@ -28,7 +31,7 @@ public class AnnotationOutputterITest extends TestCase {
         "1\tThe\tthe\tDT\tO\t2\tdet\n" +
             "2\tcat\tcat\tNN\tO\t4\tnsubj\n" +
             "3\tis\tbe\tVBZ\tO\t4\tcop\n" +
-            "4\tfat\tfat\tNN\tO\t0\tROOT\n" +
+            "4\tfat\tfat\tJJ\tO\t0\tROOT\n" +
             "5\t.\t.\t.\tO\t4\tpunct\n" +
             '\n' +
             "1\tThe\tthe\tDT\tO\t2\tdet\n" +
@@ -40,6 +43,7 @@ public class AnnotationOutputterITest extends TestCase {
     assertEquals(expected, actual);
   }
 
+  @Test
   public void testSimpleSentenceJSON() throws IOException {
     Annotation ann = new Annotation("Bad wolf");
     pipeline.annotate(ann);

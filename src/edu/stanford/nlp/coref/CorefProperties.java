@@ -23,7 +23,6 @@ public class CorefProperties {
   public enum CorefAlgorithmType {CLUSTERING, STATISTICAL, NEURAL, FASTNEURAL, HYBRID}
 
   public static CorefAlgorithmType algorithm(Properties props) {
-    // TODO: change default to "fastneural"
     String type = PropertiesUtils.getString(props, "coref.algorithm",
         getLanguage(props) == Locale.ENGLISH ? "statistical" : "neural");
     return CorefAlgorithmType.valueOf(type.toUpperCase());
@@ -32,7 +31,7 @@ public class CorefProperties {
   //---------- General Coreference Options ----------
 
   /**
-   * When conll() is true, coref models:
+   * When conll() is true, the neural and statistical (but not fastneural) coref models:
    * <ul>
    *    <li>Use provided POS, NER, Parsing, etc. (instead of using CoreNLP annotators)</li>
    *    <li>Use provided speaker annotations</li>

@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 public class HeidelTimeKBPAnnotatorITest extends TestCase {
 
   public StanfordCoreNLP pipeline;
-  public String WORKING_DIR = "/u/scr/nlp/data/stanford-corenlp-testing/spanish-heideltime";
+  public String WORKING_DIR = "/u/nlp/data/stanford-corenlp-testing/working-dirs/spanish-heideltime";
   public Set<String> GOLD_RESULTS = new HashSet<>(
       Arrays.asList("Rusia\tCOUNTRY", "Japón\tCOUNTRY", "hoy\tDATE","rusa\tLOCATION", "Vicente Fox\tPERSON",
           "el 2 de julio de 1942\tDATE", "Esta semana\tDATE", "ING\tORGANIZATION",
@@ -19,9 +19,36 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
 
   @Override
   public void setUp() {
-    Properties props =
-        StringUtils.argsToProperties(
-            new String[]{"-props", WORKING_DIR+"/test.props"});
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,mwt,pos,lemma,ner,heideltime,entitymentions,depparse");
+    // tokenize options
+    props.setProperty("tokenize.language", "es");
+    props.setProperty("tokenize.options", "tokenizeNLs,ptb3Escaping=true");
+    // ssplit options
+    props.setProperty("ssplit.eolonly", "true");
+    // pos options
+    props.setProperty("pos.model", "edu/stanford/nlp/models/pos-tagger/spanish-ud.tagger");
+    // ner options
+    props.setProperty("ner.model", "edu/stanford/nlp/models/ner/spanish.kbp.ancora.distsim.s512.crf.ser.gz");
+    props.setProperty("ner.applyNumericClassifiers", "true");
+    props.setProperty("ner.useSUTime", "false");
+    props.setProperty("ner.language", "es");
+    props.setProperty("ner.buildEntityMentions", "false");
+    props.setProperty("ner.docdate.usePresent", "true");
+    props.setProperty("entitymentions.language", "es");
+    // regexner
+    props.setProperty("ner.fine.regexner.mapping",
+        "edu/stanford/nlp/models/kbp/spanish/gazetteers/kbp_regexner_mapping_sp.tag");
+    props.setProperty("ner.fine.regexner.validpospattern", "^(NOUN|ADJ|PROPN).*");
+    props.setProperty("ner.fine.regexner.ignorecase", "true");
+    props.setProperty("ner.fine.regexner.noDefaultOverwriteLabels", "CITY,COUNTRY,STATE_OR_PROVINCE");
+    // add heideltime
+    props.setProperty("customAnnotatorClass.heideltime", "edu.stanford.nlp.time.HeidelTimeKBPAnnotator");
+    props.setProperty("heideltime.path", "/u/scr/nlp/data/stanford-corenlp-testing/spanish-heideltime/heideltime");
+    props.setProperty("heideltime.language", "spanish");
+    // depparse
+    props.setProperty("depparse.model", "edu/stanford/nlp/models/parser/nndep/UD_Spanish.gz");
+    props.setProperty("depparse.language", "spanish");
     pipeline = new StanfordCoreNLP(props);
   }
 

@@ -411,6 +411,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    */
 
   public static void transferNERAnnotationsToAnnotation(Annotation nerTokenizedAnnotation, Annotation originalAnnotation) {
+    // annotations might have no tokens if empty strings are annotated
+    if (nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).isEmpty() ||
+        originalAnnotation.get(CoreAnnotations.TokensAnnotation.class).isEmpty())
+      return;
     int nerTokenizedIdx = 0;
     int originalIdx = 0;
     CoreLabel nerTokenizedToken = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(nerTokenizedIdx);

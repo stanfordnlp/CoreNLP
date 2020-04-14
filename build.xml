@@ -281,7 +281,7 @@
   </target>
   
   <target name="itest-misc" depends="classpath"
-          description="NER related slow itests">
+          description="Other assorted slow itests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
         haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">

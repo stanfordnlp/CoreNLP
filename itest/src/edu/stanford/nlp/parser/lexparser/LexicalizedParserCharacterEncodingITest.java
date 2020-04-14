@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 
 import edu.stanford.nlp.io.IOUtils;
 import junit.framework.TestCase;
@@ -18,18 +19,12 @@ public class LexicalizedParserCharacterEncodingITest extends TestCase {
 
   private static final String input = "café";
 
-  private static final byte[] utf8Bytes = { 0x28, 0x52, 0x4f, 0x4f, 0x54, 0x0a,
-          0x20, 0x20,  0x28, 0x4e, 0x50, 0x20, 0x28, 0x4e, 0x4e, 0x50, 0x20, 0x63, 0x61, 0x66, (byte) (0xc3 - 256), (byte) (0xa9 - 256), 0x29, 0x29, 0x29, 0x0a,
-  };
+  private static final String expectedText = ("(ROOT" + System.lineSeparator() +
+                                              "  (NP (NNP café)))" + System.lineSeparator());
 
-  private static final byte[] iso8859Bytes = { 0x28, 0x52, 0x4f, 0x4f, 0x54, 0x0a,
-          0x20, 0x20,  0x28, 0x4e, 0x50, 0x20, 0x28, 0x4e, 0x4e, 0x50, 0x20, 0x63, 0x61, 0x66, (byte) (0xe9 - 256), 0x29, 0x29, 0x29, 0x0a,
-  };
-
-  private static final byte[] gb18030Bytes = { 0x28, 0x52, 0x4f, 0x4f, 0x54, 0x0a,
-          0x20, 0x20,  0x28, 0x4e, 0x50, 0x20, 0x28, 0x4e, 0x4e, 0x50, 0x20, 0x63, 0x61, 0x66, (byte) (0xa8 - 256), (byte) (0xa6 - 256), 0x29, 0x29, 0x29, 0x0a,
-  };
-
+  private static final byte[] utf8Bytes = expectedText.getBytes(Charset.forName("UTF-8"));
+  private static final byte[] iso8859Bytes = expectedText.getBytes(Charset.forName("iso-8859-1"));
+  private static final byte[] gb18030Bytes = expectedText.getBytes(Charset.forName("gb18030"));
 
   public void testCharEncodingUtf8() throws IOException {
     tryCharEncoding("utf-8", utf8Bytes);
@@ -52,7 +47,7 @@ public class LexicalizedParserCharacterEncodingITest extends TestCase {
     pw.close();
 
     File tmpFile = File.createTempFile("parser", null);
-    System.err.println("Sending output to " + tmpFile.getCanonicalPath());
+    System.err.println("Sending output for encoding " + encoding + " to " + tmpFile.getCanonicalPath());
     // tmpFile.deleteOnExit();
 
     PrintStream ps = new PrintStream(tmpFile);

@@ -105,7 +105,6 @@ def parse_raw(filename, lines):
     return new_lines
 
 
-
 def read_file(filename):
     lines = open(filename).readlines()
     # /u/scr/corpora/ldc/2016/LDC2016T13/ctb9.0/data/segmented/chtb_0050.nw.seg
@@ -163,6 +162,20 @@ def output_file(lines, filename):
             fout.write('%s\n' % line)
             repeats.add(line)
 
+
+filters = [re.compile("p([.]?) [0-9]+"),
+           re.compile("[0-9]+ [/] [0-9.]+")]
+def filter_bad_lines(lines):
+    """
+    Filters some of the more common, essentially useless lines:
+
+    p. 55
+    2000 / 15
+    """
+    lines = [x for x in lines if min(f.match(x) is None for f in filters)]
+    return lines
+
+
 def main():
     train_data = []
     test_data = []
@@ -176,8 +189,8 @@ def main():
         else:
             train_data.extend(new_lines)
 
-    output_file(train_data, 'ctb9_train.txt')
-    output_file(test_data, 'ctb9_test.txt')
+    output_file(filter_bad_lines(train_data), 'ctb9_train.txt')
+    output_file(filter_bad_lines(test_data), 'ctb9_test.txt')
 
 
 

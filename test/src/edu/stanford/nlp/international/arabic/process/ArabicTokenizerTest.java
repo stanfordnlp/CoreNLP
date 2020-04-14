@@ -7,6 +7,7 @@ import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.TokenizerFactory;
 import junit.framework.TestCase;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.Tokenizer;
 
@@ -125,13 +126,17 @@ public class ArabicTokenizerTest extends TestCase {
       "اكد العاهل السعودي الملك فهد بن عبد العزيز في رسالة بعث ب ها الى الرئيس الاميركي جورج بوش في الذكرى الاولى ل هجمات 11 ايلول , التزام بلاد ه حملة مكافحة الارهاب , مشددا في الوقت ذات ه على \" رسوخ \" العلاقات الثنائية .",
   };
 
-  public void testArabicTokenizer() {
+  public void runArabicTokenizer(boolean invertible) {
     assert(untokInputs.length == tokReferences.length);
 
     TokenizerFactory<CoreLabel> tf = ArabicTokenizer.atbFactory();
     tf.setOptions("removeProMarker");
     tf.setOptions("removeSegMarker");
     tf.setOptions("removeMorphMarker");
+
+    if (invertible) {
+      tf.setOptions("invertible");
+    }
 
     for (int i = 0; i < untokInputs.length; ++i) {
       String line = untokInputs[i];
@@ -141,6 +146,14 @@ public class ArabicTokenizerTest extends TestCase {
       String reference = tokReferences[i];
       assertEquals("Tokenization deviates from reference", reference, tokenizedLine);
     }
+  }
+
+  public void testArabicTokenizerNoninvertible() {
+    runArabicTokenizer(false);
+  }
+
+  public void testArabicTokenizerInvertible() {
+    runArabicTokenizer(true);
   }
 
   public void testCharOffsets() {
@@ -159,6 +172,29 @@ public class ArabicTokenizerTest extends TestCase {
     for (int i = 0; i < beginOffsets.length; i++) {
       assertEquals("Char begin offset deviates from reference", beginOffsets[i], tokens.get(i).beginPosition());
       assertEquals("Char end offset deviates from reference", endOffsets[i], tokens.get(i).endPosition());
+    }
+  }
+
+  public void testBeforeAfter() {
+    // TODO: there are other texts which get eliminated by the
+    // tokenizer and added to BeforeAnnotation or AfterAnnotation.
+    // Testing that would require someone who knows Arabic
+    String untokInput = "إِنَّ- -نا هادِئ+ُونَ   .";
+    String[] beforeAnnotations = {"", " ", " ", "   "};
+    String[] afterAnnotations = {" ", " ", "   ", ""};
+
+    TokenizerFactory<CoreLabel> tf = ArabicTokenizer.atbFactory();
+    tf.setOptions("removeProMarker");
+    tf.setOptions("removeSegMarker");
+    tf.setOptions("removeMorphMarker");
+    tf.setOptions("invertible");
+
+    Tokenizer<CoreLabel> tokenizer = tf.getTokenizer(new StringReader(untokInput));
+    List<CoreLabel> tokens = tokenizer.tokenize();
+    assertEquals("Number of tokens doesn't match reference", tokens.size(), beforeAnnotations.length);
+    for (int i = 0; i < beforeAnnotations.length; i++) {
+      assertEquals("Before annotation deviates from reference", beforeAnnotations[i], tokens.get(i).get(CoreAnnotations.BeforeAnnotation.class));
+      assertEquals("After annotation deviates from reference", afterAnnotations[i], tokens.get(i).get(CoreAnnotations.AfterAnnotation.class));
     }
   }
 }

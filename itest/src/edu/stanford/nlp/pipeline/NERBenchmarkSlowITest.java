@@ -1,17 +1,27 @@
 package edu.stanford.nlp.pipeline;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertTrue;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.util.*;
+import org.junit.Test;
 
-public class NERBenchmarkSlowITest extends TestCase {
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
+
+public class NERBenchmarkSlowITest {
 
   String NER_BENCHMARK_WORKING_DIR = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir";
 
@@ -124,6 +134,7 @@ public class NERBenchmarkSlowITest extends TestCase {
     return foundF1Score;
   }
 
+  @Test
   public void testChineseNEROnOntoNotesDev() throws IOException {
     String conllTestPath =
         "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes5-chinese-ner-7class.dev";
@@ -138,6 +149,7 @@ public class NERBenchmarkSlowITest extends TestCase {
         78.98);
   }
 
+  @Test
   public void testChineseNEROnOntoNotesTest() throws IOException {
     String conllTestPath =
         "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes5-chinese-ner-7class.test";
@@ -152,6 +164,7 @@ public class NERBenchmarkSlowITest extends TestCase {
         80.00);
   }
 
+  @Test
   public void testEnglishNEROnCoNLLDev() throws IOException {
     String conllTestPath = "/u/nlp/data/ner/english/conll.4class.testa";
     Properties props = new Properties();
@@ -166,6 +179,7 @@ public class NERBenchmarkSlowITest extends TestCase {
         94.01);
   }
 
+  @Test
   public void testEnglishNEROnCoNLLTest() throws IOException {
     String conllTestPath = "/u/nlp/data/ner/english/conll.4class.testb";
     Properties props = new Properties();
@@ -180,6 +194,7 @@ public class NERBenchmarkSlowITest extends TestCase {
         90.19);
   }
 
+  @Test
   public void testEnglishNEROnOntoNotesDev() throws IOException {
     String conllTestPath = "/u/nlp/data/ner/english/ontonotes.3class.dev";
     Properties props = new Properties();
@@ -194,6 +209,7 @@ public class NERBenchmarkSlowITest extends TestCase {
         89.93);
   }
 
+  @Test
   public void testEnglishNEROnOntoNotesTest() throws IOException {
     String conllTestPath = "/u/nlp/data/ner/english/ontonotes.3class.test";
     Properties props = new Properties();

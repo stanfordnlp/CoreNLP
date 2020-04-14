@@ -109,6 +109,30 @@ public class CollectionValuedMapTest {
     Assert.assertEquals(cvm.values().size(), 0);
   }
 
+  @Test
+  public void testRemoveMapping() {
+    CollectionValuedMap<String, Integer> cvm = new CollectionValuedMap<>();
+    cvm.add("key1", 1);
+    cvm.add("key2", 1);
+    cvm.add("key2", 2);
+    cvm.add("key3", 3);
+    Assert.assertEquals(3, cvm.size());
+
+    Assert.assertEquals(1, cvm.get("key3").size());
+    cvm.removeMapping("key3", 3);
+    Assert.assertEquals(0, cvm.get("key3").size());
+    cvm.removeMapping("key3", 3);
+    Assert.assertEquals(0, cvm.get("key3").size());
+
+    Assert.assertEquals(2, cvm.get("key2").size());
+    cvm.removeMapping("key2", 2);
+    Assert.assertEquals(1, cvm.get("key2").size());
+    cvm.removeMapping("key2", 2);
+    Assert.assertEquals(1, cvm.get("key2").size());
+    cvm.removeMapping("key2", 1);
+    Assert.assertEquals(0, cvm.get("key2").size());
+  }
+
   /**
    * Tests various forms of addAll()/constructors, clone(), and equality.
    */
