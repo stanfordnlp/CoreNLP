@@ -15,7 +15,7 @@ public class StopListTest {
 	}
 	@Test
 	public void testGenericWordConstainsString() {
-		// Tests that no exception being thrown during instantiation
+		// Tests that a common stopword is contained in the list as string
 		StopList sut = new StopList();
 		boolean containsWord = sut.contains("and");
 		assertTrue(containsWord);
@@ -23,7 +23,7 @@ public class StopListTest {
 
 	@Test
 	public void testGenericWordConstainsWord() {
-		// Tests that no exception being thrown during instantiation
+		// Tests that a common stopword is contained in the list as Word object
 		StopList sut = new StopList();
 		Word testinput = new Word("or");
 		boolean containsWord = sut.contains(testinput);
