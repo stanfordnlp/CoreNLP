@@ -157,4 +157,31 @@ public class SentenceTest {
     assertEquals("baz", s.word(2));
   }
 
+  @Test
+  public void testStringRepresentation() {
+    String initialSentence = "This is a sentence.";
+    Sentence sut = new Sentence(initialSentence);
+    String converted = sut.toString();
+    assertEquals(initialSentence, converted);
+  }
+
+  @Test
+  public void testSubstring() {
+    String initialSentence = "This is a sentence.";
+    Sentence sut = new Sentence(initialSentence);
+    String substring = sut.substring(1, 4);
+    assertEquals("is a sentence", substring);
+  }
+
+  @Test
+  public void testSentenceFromDocument() {
+    String initialDocument = "This is a sentence. "
+                           + "This is another sentence. "
+                           + "Together, they form a document!";
+    Document d = new Document(initialDocument);
+    int sentenceIndex = 2;
+    Sentence sut = new Sentence(d, sentenceIndex);
+    String sentence = sut.toString();
+    assertEquals("Together, they form a document!", sentence);
+  }
 }
