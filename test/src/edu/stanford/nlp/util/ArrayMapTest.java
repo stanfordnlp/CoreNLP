@@ -31,10 +31,7 @@ public class ArrayMapTest extends TestCase {
   }
  
   public void testEquals() {
-    assertEquals(map, map);
     assertTrue(map.equals(map));
-    assertEquals(map, hmap);
-    assertEquals(hmap, map);
   }
 
   public void testClear() {
