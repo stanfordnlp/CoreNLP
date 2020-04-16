@@ -29,8 +29,6 @@ public class DelimitRegExIteratorTest {
 
   @Test
   public void testFunctionality() {
-    assertEquals(testCases.length, delimiterCases.length);
-    assertEquals(testCases.length, answerCases.length);
     for (int i = 0; i < testCases.length; i++) {
       String s = testCases[i];
       DelimitRegExIterator<String> di = DelimitRegExIterator.defaultDelimitRegExIterator(
@@ -43,4 +41,13 @@ public class DelimitRegExIteratorTest {
     }
   }
 
+  @Test
+  public void testDelimiterLength() {
+    assertEquals(testCases.length, delimiterCases.length);
+  }
+
+  @Test
+  public void testAnswerLength() {
+    assertEquals(testCases.length, answerCases.length);
+  }
 }
