@@ -28,6 +28,11 @@
       <name>Jason Bolton</name>
       <email>jebolton@stanford.edu</email>
     </developer>
+    <developer>
+      <id>john.bauer</id>
+      <name>John Bauer</name>
+      <email>horatio@gmail.com</email>
+    </developer>
   </developers>
   <properties>
     <encoding>UTF-8</encoding>
