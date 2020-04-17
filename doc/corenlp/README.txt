@@ -41,6 +41,12 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2020-04-16    4.0.0     Upgrade to UD tokenization standard; handling 
+                        of multi-word-tokens; improved taggers and 
+                        parsers for English, French, German, Spanish; 
+                        new French NER; new Chinese segmenter; library 
+                        updates, bug fixes 
+
 2018-10-05    3.9.2     improved NER pipeline and entity mention 
                         confidences; support for Java 11; new POS 
                         models for English; 4 methods for setting 
