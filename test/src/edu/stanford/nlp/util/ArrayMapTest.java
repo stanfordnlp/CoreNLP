@@ -30,8 +30,12 @@ public class ArrayMapTest extends TestCase {
     hmap.put("Baz", 500);
   }
  
-  public void testEquals() {
+  public void testArrayMapEqualsMethod() {
     assertTrue(map.equals(map));
+  }
+
+  public void testHashMapEqualsArrayMap() {
+    assertEquals(hmap, map);
   }
 
   public void testClear() {
@@ -46,7 +50,8 @@ public class ArrayMapTest extends TestCase {
     map.clear();
     assertTrue(map.isEmpty());
     map.putAll(hmap);
-    testEquals();
+    testArrayMapEqualsMethod();
+    testHashMapEqualsArrayMap();
     HashMap<String, Integer> newmap = new HashMap<>();
     newmap.putAll(map);
     assertEquals(newmap, map);
