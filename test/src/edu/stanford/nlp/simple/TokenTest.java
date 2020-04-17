@@ -3,6 +3,8 @@ package edu.stanford.nlp.simple;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.util.Optional;
+
 public class TokenTest {
 
     private String string = "the quick brown fox jumped over the lazy dog";
@@ -59,7 +61,6 @@ public class TokenTest {
         assertEquals(4, token.next().characterOffsetBegin());
         assertEquals(10, token.next().next().characterOffsetBegin());
         assertEquals(16, token.next().next().next().characterOffsetBegin());
-
     }
 
     @Test
@@ -77,13 +78,19 @@ public class TokenTest {
     }
 
     @Test
-    public void testWhiteSpace() {
+    public void testWhiteSpaceBefore() {
         Sentence sentence = new Sentence(string);
         Token token = new Token(sentence, 0);
 
         assertEquals("", token.before());
-        assertEquals(" ", token.after());
+    }
 
+    @Test
+    public void testWhiteSpaceAfter() {
+        Sentence sentence = new Sentence(string);
+        Token token = new Token(sentence, 0);
+
+        assertEquals(" ", token.after());
     }
 
     @Test
@@ -109,5 +116,24 @@ public class TokenTest {
         Token token = new Token(sentence, 6);
 
         assertEquals(35, token.endPosition());
+    }
+
+    @Test
+    public void testAfterLastTokenOfSentence() {
+        final class MockedSentence extends Sentence {
+            int length;
+            public MockedSentence(String text, int length) {
+                super(text);
+                this.length = length;
+			}
+            public int length (){
+                return this.length;
+            }
+        }
+        int sentenceLength = 2;
+        MockedSentence mockedSentence = new MockedSentence("Test sentence", sentenceLength);
+        Token t = new Token(mockedSentence, sentenceLength);
+        String nextToken = t.after();
+        assertEquals("", nextToken);
     }
 }
