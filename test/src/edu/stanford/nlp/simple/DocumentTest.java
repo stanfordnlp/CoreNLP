@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 public class DocumentTest {
   Document oneSentenceDocument;
   Document twoSentenceDocument;
-  
+
   @Before
   public void prepareDocuments() {
     oneSentenceDocument = new Document("the quick brown fox jumped over the lazy dog");

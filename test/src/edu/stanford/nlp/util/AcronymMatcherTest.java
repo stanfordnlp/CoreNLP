@@ -21,7 +21,7 @@ public class AcronymMatcherTest {
   }
 
   @Test
-  public void testBasicWithBoundaries(){
+  public void testBasicWithBoundaries() {
     assertTrue(AcronymMatcher.isAcronym("B", "B".split("\\s+")));
     assertFalse(AcronymMatcher.isAcronym("", "B".split("\\s+")));
 //  assertFalse(AcronymMatcher.isAcronym("", "A".split("\\s+")));
