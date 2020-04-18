@@ -32,7 +32,7 @@ public class CandidatePhraseTest {
     Assert.assertEquals(candidatePhrase.getPhraseLemma(), String.valueOf("runs"));
   }
 
-    @Test
+  @Test
   public void testStaticMethodCreateOrGetWithLemmaAndCounterBranchCoverage() {
     //get branch
     //emptyFeatures
