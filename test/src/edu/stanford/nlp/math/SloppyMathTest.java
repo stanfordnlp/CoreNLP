@@ -10,12 +10,12 @@ public class SloppyMathTest extends TestCase {
   }
 
   public void testRoundWithBoundaries() {
-    assertEquals(0.0, SloppyMath.round(0.499));
-    assertEquals(1.0, SloppyMath.round(0.5));
-    assertEquals(0.0, SloppyMath.round(-0.5));
-    assertEquals(-1.0, SloppyMath.round(-0.51));
-    assertEquals(10.0, SloppyMath.round(10));
-    assertEquals(10.0, SloppyMath.round(10.32));
+    assertEquals("Boundary off point positive",0.0, SloppyMath.round(0.499));
+    assertEquals("Boundary on point",1.0, SloppyMath.round(0.5));
+    assertEquals("Boundary on point negative",0.0, SloppyMath.round(-0.5));
+    assertEquals("Boundary off point negative",-1.0, SloppyMath.round(-0.51));
+    assertEquals("Round 10 to 10",10.0, SloppyMath.round(10));
+    assertEquals("Round 10.32 to 10",10.0, SloppyMath.round(10.32));
   }
 
   public void testRound2() {
