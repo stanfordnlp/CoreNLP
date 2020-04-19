@@ -60,6 +60,16 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
       new HashSet<>(Arrays.asList("based", "area", "registered", "headquartered", "native", "born", "raised", 
                                   "backed", "controlled", "owned", "resident", "trained", "educated"));
 
+  /**
+   * Helper class for aligning merged tokens and original tokens, stores number of merged tokens
+   * this merged token contains (e.g. All - Star --> All-Star, 2)
+   */
+  public static class TokenMergeCountAnnotation implements CoreAnnotation<Integer> {
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
   private static final String spanishNumberRegexRules =
       "edu/stanford/nlp/models/kbp/spanish/gazetteers/kbp_regexner_number_sp.tag";
 
@@ -336,8 +346,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     token.setAfter(nextToken.after());
     token.setEndPosition(nextToken.endPosition());
     token.setValue(token.word()+"-"+token.sentIndex());
+    // update number of merges that went into building this token
+    if (token.get(TokenMergeCountAnnotation.class) == null) {
+      token.set(TokenMergeCountAnnotation.class, 1);
+    } else {
+      token.set(TokenMergeCountAnnotation.class, token.get(TokenMergeCountAnnotation.class) + 1);
+    }
   }
-
 
   /**
    * Create a copy of an Annotation with NER specific tokenization (e.g. merge hyphen split tokens into one token).
@@ -415,29 +430,43 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).isEmpty() ||
         originalAnnotation.get(CoreAnnotations.TokensAnnotation.class).isEmpty())
       return;
+    // list of all NER related keys
+    List<Class> nerKeys = Arrays.asList(CoreAnnotations.NamedEntityTagAnnotation.class,
+        CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
+        CoreAnnotations.NamedEntityTagProbsAnnotation.class,
+        CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class,
+        CoreAnnotations.CoarseNamedEntityTagAnnotation.class, TimeAnnotations.TimexAnnotation.class,
+        CoreAnnotations.NumericValueAnnotation.class, CoreAnnotations.NumericTypeAnnotation.class,
+        CoreAnnotations.NumericCompositeValueAnnotation.class, CoreAnnotations.NumericCompositeTypeAnnotation.class);
+    List<CoreLabel> originalTokens = originalAnnotation.get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreLabel> nerTokenizedTokens = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class);
     int nerTokenizedIdx = 0;
+    int mergeCount = 0;
     int originalIdx = 0;
-    CoreLabel nerTokenizedToken = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(nerTokenizedIdx);
-    while (originalIdx < originalAnnotation.get(CoreAnnotations.TokensAnnotation.class).size()) {
-      CoreLabel origToken = originalAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(originalIdx);
-      if (origToken.endPosition() > nerTokenizedToken.endPosition()) {
-        nerTokenizedIdx++;
-        nerTokenizedToken = nerTokenizedAnnotation.get(CoreAnnotations.TokensAnnotation.class).get(nerTokenizedIdx);
-      }
-      // list of all NER related keys
-      List<Class> nerKeys = Arrays.asList(CoreAnnotations.NamedEntityTagAnnotation.class,
-          CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
-          CoreAnnotations.NamedEntityTagProbsAnnotation.class,
-          CoreAnnotations.FineGrainedNamedEntityTagAnnotation.class,
-          CoreAnnotations.CoarseNamedEntityTagAnnotation.class, TimeAnnotations.TimexAnnotation.class,
-          CoreAnnotations.NumericValueAnnotation.class, CoreAnnotations.NumericTypeAnnotation.class,
-          CoreAnnotations.NumericCompositeValueAnnotation.class, CoreAnnotations.NumericCompositeTypeAnnotation.class);
+    while (originalIdx < originalTokens.size()) {
+      // get current tokens to align
+      CoreLabel origToken = originalTokens.get(originalIdx);
+      CoreLabel nerTokenizedToken = nerTokenizedTokens.get(nerTokenizedIdx);
+      // copy data
       for (Class c : nerKeys) {
         if (nerTokenizedToken.get(c) != null)
           origToken.set(c, nerTokenizedToken.get(c));
       }
-      // move on to next original token
+      // increment index into original
       originalIdx++;
+      // increment index into ner tokenization list, if on a merged token, stay on this till exhausted
+      // check if first time on merged token
+      if (mergeCount == 0 && nerTokenizedToken.get(TokenMergeCountAnnotation.class) != null) {
+        mergeCount = nerTokenizedToken.get(TokenMergeCountAnnotation.class);
+      } else if (mergeCount > 1) {
+        // check if in middle of processing merged token
+        // drop the mergeIdx, but dont leave this token in the ner tokenized list
+        mergeCount--;
+      } else {
+        // move on if mergeIdx exhausted or this isn't a merge token
+        mergeCount = 0;
+        nerTokenizedIdx++;
+      }
     }
   }
 
