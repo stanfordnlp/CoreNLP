@@ -211,6 +211,38 @@ public class NERTokenizationITest extends TestCase {
         "den", "Utopieverlust", "in", "der", "Soziologie", ":"));
     labels.add(Arrays.asList("PERSON", "PERSON", "PERSON", "PERSON", "O", "O", "O", "O", "O", "O", "O", "O", "O",
         "O"));
+    // example with MWT preceding a named entity
+    docs.add("Der Filmhersteller Kodak übernimmt rückwirkend zum 1. Juli sein früheres Werk in Berlin-Köpenick.");
+    words.add(Arrays.asList("Der", "Filmhersteller", "Kodak", "übernimmt", "rückwirkend", "zu", "dem", "1.", "Juli",
+        "sein", "früheres", "Werk", "in", "Berlin", "-", "Köpenick", "."));
+    labels.add(Arrays.asList("O", "O", "ORGANIZATION", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "LOCATION",
+        "LOCATION", "LOCATION", "O"));
+    for (int i = 0 ; i < words.size() ; i++) {
+      goldTokens.add(stringListsToCoreLabels(words.get(i), labels.get(i)));
+    }
+    for (int i = 0 ; i < docs.size() ; i++) {
+      CoreDocument exampleDoc = new CoreDocument(docs.get(i));
+      pipeline.annotate(exampleDoc);
+      processTestExample(exampleDoc, goldTokens.get(i));
+    }
+  }
+
+  /** Run full test on French with NER tokenization turned on, handle MWT preceding entity case**/
+  public void testFrenchNERTokenization() {
+    // set up pipeline
+    Properties props = StringUtils.argsToProperties("-props", "french");
+    props.setProperty("annotators", "tokenize,ssplit,mwt,pos,ner");
+    props.setProperty("ner.useNERTokenization", "true");
+    pipeline = new StanfordCoreNLP(props);
+    // set up data lists
+    List<String> docs = new ArrayList<>();
+    List<List<String>> words = new ArrayList<>();
+    List<List<String>> labels = new ArrayList<>();
+    List<List<CoreLabel>> goldTokens = new ArrayList<>();
+    // example with preceding MWT
+    docs.add("Ils se sont rendus aux États-Unis la semaine dernière.");
+    words.add(Arrays.asList("Ils", "se", "sont", "rendus", "à", "les", "États-Unis", "la", "semaine", "dernière", "."));
+    labels.add(Arrays.asList("O", "O", "O", "O", "O", "O", "I-LOC", "O", "O", "O", "O"));
     for (int i = 0 ; i < words.size() ; i++) {
       goldTokens.add(stringListsToCoreLabels(words.get(i), labels.get(i)));
     }
