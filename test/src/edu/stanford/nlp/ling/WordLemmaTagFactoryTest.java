@@ -35,7 +35,7 @@ public class WordLemmaTagFactoryTest {
   @Test
   public void newLabelTag() {
     WordLemmaTagFactory wTf = new WordLemmaTagFactory();
-    Label label = wTf.newLabel("t", WordLemmaTagFactory.LEMMA_LABEL);
+    Label label = wTf.newLabel("t", WordLemmaTagFactory.TAG_LABEL);
 
     WordLemmaTag wLt = (WordLemmaTag) label;
 
