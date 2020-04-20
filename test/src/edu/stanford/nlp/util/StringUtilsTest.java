@@ -16,10 +16,22 @@ public class StringUtilsTest {
   }
 
   @Test
-  public void testGetBaseName() {
+  public void testGetBaseNameNoSuffix() {
     Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt"), "foo.txt");
+  }
+
+  @Test
+  public void testGetBaseNameEmptySuffix() {
     Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ""), "foo.txt");
+  }
+
+  @Test
+  public void testGetBaseNameDotTxtSuffix() {
     Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ".txt"), "foo");
+  }
+
+  @Test
+  public void testGetBaseNamePdfSuffix() {
     Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ".pdf"), "foo.txt");
   }
 
@@ -314,5 +326,4 @@ public class StringUtilsTest {
     Assert.assertEquals(Arrays.asList("asdf", "\r\n", "sdf", "\n"), StringUtils.splitLinesKeepNewlines("asdf\r\nsdf\n"));
     Assert.assertEquals(Arrays.asList("asdf", "\r\n", "sdf", "\r\n", "\r\n"), StringUtils.splitLinesKeepNewlines("asdf\r\nsdf\r\n\r\n"));
   }
-  
 }
