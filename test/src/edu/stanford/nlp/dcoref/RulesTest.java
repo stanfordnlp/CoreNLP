@@ -19,12 +19,12 @@ public class RulesTest extends TestCase {
   List<CoreLabel> MIBM = SentenceUtils.toCoreLabelList("MIBM");
 
   public void testIsAcronym() {
-    assertTrue("Acronym IMB -> International Business Machines",Rules.isAcronym(IBM, IBM2));
-    assertTrue("Acronym International Business Machines -> IBM",Rules.isAcronym(IBM2, IBM));
-    assertFalse("Not Acronym IBM -> IBMM",Rules.isAcronym(IBM, IBMM));
-    assertFalse("Not Acronym International Business Machines -> IBMM",Rules.isAcronym(IBM2, IBMM));
-    assertFalse("Not Acronym IBM -> MIBM",Rules.isAcronym(IBM, MIBM));
-    assertFalse("Not acronym International Business Machines -> MIBM",Rules.isAcronym(IBM2, MIBM));
+    assertTrue("Acronym IMB -> International Business Machines", Rules.isAcronym(IBM, IBM2));
+    assertTrue("Acronym International Business Machines -> IBM", Rules.isAcronym(IBM2, IBM));
+    assertFalse("Not Acronym IBM -> IBMM", Rules.isAcronym(IBM, IBMM));
+    assertFalse("Not Acronym International Business Machines -> IBMM", Rules.isAcronym(IBM2, IBMM));
+    assertFalse("Not Acronym IBM -> MIBM", Rules.isAcronym(IBM, MIBM));
+    assertFalse("Not acronym International Business Machines -> MIBM", Rules.isAcronym(IBM2, MIBM));
   }
 
   public void testMentionMatchesSpeakerAnnotation() {

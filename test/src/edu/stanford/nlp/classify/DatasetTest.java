@@ -28,7 +28,7 @@ public class DatasetTest {
 
     data.applyFeatureCountThreshold(2);
 
-    Assert.assertEquals("test numFeatures after calling FeatureThreshhold",3, data.numFeatures());
+    Assert.assertEquals("test numFeatures after calling FeatureThreshhold", 3, data.numFeatures());
   }
 
   @Test
@@ -37,7 +37,7 @@ public class DatasetTest {
 
     data.applyFeatureCountThreshold(2);
 
-    Assert.assertEquals("test numFeatureTypes after calling FeatureThreshhold",3, data.numFeatureTypes());
+    Assert.assertEquals("test numFeatureTypes after calling FeatureThreshhold", 3, data.numFeatureTypes());
   }
 
   @Test
@@ -46,7 +46,7 @@ public class DatasetTest {
 
     data.applyFeatureCountThreshold(2);
 
-    Assert.assertEquals("test size after calling FeatureThreshhold",3,data.size());
+    Assert.assertEquals("test size after calling FeatureThreshhold", 3,data.size());
   }
 
   @Test
@@ -55,7 +55,7 @@ public class DatasetTest {
 
     data.applyFeatureCountThreshold(2);
 
-    Assert.assertEquals("test numFeatureTokens after calling FeatureThreshhold",7, data.numFeatureTokens());
+    Assert.assertEquals("test numFeatureTokens after calling FeatureThreshhold", 7, data.numFeatureTokens());
   }
 
   @Test
@@ -64,7 +64,7 @@ public class DatasetTest {
 
     data.applyFeatureCountThreshold(2);
 
-    Assert.assertEquals("test numClasses after calling FeatureThreshhold",2, data.numClasses());
+    Assert.assertEquals("test numClasses after calling FeatureThreshhold", 2, data.numClasses());
   }
 
   @Test
