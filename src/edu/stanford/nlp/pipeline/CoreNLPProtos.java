@@ -864,34 +864,34 @@ public final class CoreNLPProtos {
     boolean getHasCorefAnnotation();
 
     /**
-     * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
      * @return A list containing the corefMentionToEntityMentionMappings.
      */
     java.util.List<java.lang.Integer> getCorefMentionToEntityMentionMappingsList();
     /**
-     * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
      * @return The count of corefMentionToEntityMentionMappings.
      */
     int getCorefMentionToEntityMentionMappingsCount();
     /**
-     * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
      * @param index The index of the element to return.
      * @return The corefMentionToEntityMentionMappings at the given index.
      */
     int getCorefMentionToEntityMentionMappings(int index);
 
     /**
-     * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
      * @return A list containing the entityMentionToCorefMentionMappings.
      */
     java.util.List<java.lang.Integer> getEntityMentionToCorefMentionMappingsList();
     /**
-     * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
      * @return The count of entityMentionToCorefMentionMappings.
      */
     int getEntityMentionToCorefMentionMappingsCount();
     /**
-     * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
      * @param index The index of the element to return.
      * @return The entityMentionToCorefMentionMappings at the given index.
      */
@@ -1081,7 +1081,7 @@ public final class CoreNLPProtos {
                 corefMentionToEntityMentionMappings_ = newIntList();
                 mutable_bitField0_ |= 0x00010000;
               }
-              corefMentionToEntityMentionMappings_.addInt(input.readUInt32());
+              corefMentionToEntityMentionMappings_.addInt(input.readInt32());
               break;
             }
             case 138: {
@@ -1092,7 +1092,7 @@ public final class CoreNLPProtos {
                 mutable_bitField0_ |= 0x00010000;
               }
               while (input.getBytesUntilLimit() > 0) {
-                corefMentionToEntityMentionMappings_.addInt(input.readUInt32());
+                corefMentionToEntityMentionMappings_.addInt(input.readInt32());
               }
               input.popLimit(limit);
               break;
@@ -1102,7 +1102,7 @@ public final class CoreNLPProtos {
                 entityMentionToCorefMentionMappings_ = newIntList();
                 mutable_bitField0_ |= 0x00020000;
               }
-              entityMentionToCorefMentionMappings_.addInt(input.readUInt32());
+              entityMentionToCorefMentionMappings_.addInt(input.readInt32());
               break;
             }
             case 146: {
@@ -1113,7 +1113,7 @@ public final class CoreNLPProtos {
                 mutable_bitField0_ |= 0x00020000;
               }
               while (input.getBytesUntilLimit() > 0) {
-                entityMentionToCorefMentionMappings_.addInt(input.readUInt32());
+                entityMentionToCorefMentionMappings_.addInt(input.readInt32());
               }
               input.popLimit(limit);
               break;
@@ -1777,7 +1777,7 @@ public final class CoreNLPProtos {
     public static final int COREFMENTIONTOENTITYMENTIONMAPPINGS_FIELD_NUMBER = 17;
     private com.google.protobuf.Internal.IntList corefMentionToEntityMentionMappings_;
     /**
-     * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
      * @return A list containing the corefMentionToEntityMentionMappings.
      */
     public java.util.List<java.lang.Integer>
@@ -1785,14 +1785,14 @@ public final class CoreNLPProtos {
       return corefMentionToEntityMentionMappings_;
     }
     /**
-     * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
      * @return The count of corefMentionToEntityMentionMappings.
      */
     public int getCorefMentionToEntityMentionMappingsCount() {
       return corefMentionToEntityMentionMappings_.size();
     }
     /**
-     * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+     * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
      * @param index The index of the element to return.
      * @return The corefMentionToEntityMentionMappings at the given index.
      */
@@ -1803,7 +1803,7 @@ public final class CoreNLPProtos {
     public static final int ENTITYMENTIONTOCOREFMENTIONMAPPINGS_FIELD_NUMBER = 18;
     private com.google.protobuf.Internal.IntList entityMentionToCorefMentionMappings_;
     /**
-     * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
      * @return A list containing the entityMentionToCorefMentionMappings.
      */
     public java.util.List<java.lang.Integer>
@@ -1811,14 +1811,14 @@ public final class CoreNLPProtos {
       return entityMentionToCorefMentionMappings_;
     }
     /**
-     * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
      * @return The count of entityMentionToCorefMentionMappings.
      */
     public int getEntityMentionToCorefMentionMappingsCount() {
       return entityMentionToCorefMentionMappings_.size();
     }
     /**
-     * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+     * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
      * @param index The index of the element to return.
      * @return The entityMentionToCorefMentionMappings at the given index.
      */
@@ -1942,10 +1942,10 @@ public final class CoreNLPProtos {
         output.writeBool(16, hasCorefAnnotation_);
       }
       for (int i = 0; i < corefMentionToEntityMentionMappings_.size(); i++) {
-        output.writeUInt32(17, corefMentionToEntityMentionMappings_.getInt(i));
+        output.writeInt32(17, corefMentionToEntityMentionMappings_.getInt(i));
       }
       for (int i = 0; i < entityMentionToCorefMentionMappings_.size(); i++) {
-        output.writeUInt32(18, entityMentionToCorefMentionMappings_.getInt(i));
+        output.writeInt32(18, entityMentionToCorefMentionMappings_.getInt(i));
       }
       extensionWriter.writeUntil(256, output);
       unknownFields.writeTo(output);
@@ -2022,7 +2022,7 @@ public final class CoreNLPProtos {
         int dataSize = 0;
         for (int i = 0; i < corefMentionToEntityMentionMappings_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-            .computeUInt32SizeNoTag(corefMentionToEntityMentionMappings_.getInt(i));
+            .computeInt32SizeNoTag(corefMentionToEntityMentionMappings_.getInt(i));
         }
         size += dataSize;
         size += 2 * getCorefMentionToEntityMentionMappingsList().size();
@@ -2031,7 +2031,7 @@ public final class CoreNLPProtos {
         int dataSize = 0;
         for (int i = 0; i < entityMentionToCorefMentionMappings_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-            .computeUInt32SizeNoTag(entityMentionToCorefMentionMappings_.getInt(i));
+            .computeInt32SizeNoTag(entityMentionToCorefMentionMappings_.getInt(i));
         }
         size += dataSize;
         size += 2 * getEntityMentionToCorefMentionMappingsList().size();
@@ -5636,7 +5636,7 @@ public final class CoreNLPProtos {
          }
       }
       /**
-       * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
        * @return A list containing the corefMentionToEntityMentionMappings.
        */
       public java.util.List<java.lang.Integer>
@@ -5645,14 +5645,14 @@ public final class CoreNLPProtos {
                  java.util.Collections.unmodifiableList(corefMentionToEntityMentionMappings_) : corefMentionToEntityMentionMappings_;
       }
       /**
-       * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
        * @return The count of corefMentionToEntityMentionMappings.
        */
       public int getCorefMentionToEntityMentionMappingsCount() {
         return corefMentionToEntityMentionMappings_.size();
       }
       /**
-       * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
        * @param index The index of the element to return.
        * @return The corefMentionToEntityMentionMappings at the given index.
        */
@@ -5660,7 +5660,7 @@ public final class CoreNLPProtos {
         return corefMentionToEntityMentionMappings_.getInt(index);
       }
       /**
-       * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
        * @param index The index to set the value at.
        * @param value The corefMentionToEntityMentionMappings to set.
        * @return This builder for chaining.
@@ -5673,7 +5673,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
        * @param value The corefMentionToEntityMentionMappings to add.
        * @return This builder for chaining.
        */
@@ -5684,7 +5684,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
        * @param values The corefMentionToEntityMentionMappings to add.
        * @return This builder for chaining.
        */
@@ -5697,7 +5697,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated uint32 corefMentionToEntityMentionMappings = 17;</code>
+       * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
        * @return This builder for chaining.
        */
       public Builder clearCorefMentionToEntityMentionMappings() {
@@ -5715,7 +5715,7 @@ public final class CoreNLPProtos {
          }
       }
       /**
-       * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
        * @return A list containing the entityMentionToCorefMentionMappings.
        */
       public java.util.List<java.lang.Integer>
@@ -5724,14 +5724,14 @@ public final class CoreNLPProtos {
                  java.util.Collections.unmodifiableList(entityMentionToCorefMentionMappings_) : entityMentionToCorefMentionMappings_;
       }
       /**
-       * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
        * @return The count of entityMentionToCorefMentionMappings.
        */
       public int getEntityMentionToCorefMentionMappingsCount() {
         return entityMentionToCorefMentionMappings_.size();
       }
       /**
-       * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
        * @param index The index of the element to return.
        * @return The entityMentionToCorefMentionMappings at the given index.
        */
@@ -5739,7 +5739,7 @@ public final class CoreNLPProtos {
         return entityMentionToCorefMentionMappings_.getInt(index);
       }
       /**
-       * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
        * @param index The index to set the value at.
        * @param value The entityMentionToCorefMentionMappings to set.
        * @return This builder for chaining.
@@ -5752,7 +5752,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
        * @param value The entityMentionToCorefMentionMappings to add.
        * @return This builder for chaining.
        */
@@ -5763,7 +5763,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
        * @param values The entityMentionToCorefMentionMappings to add.
        * @return This builder for chaining.
        */
@@ -5776,7 +5776,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated uint32 entityMentionToCorefMentionMappings = 18;</code>
+       * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
        * @return This builder for chaining.
        */
       public Builder clearEntityMentionToCorefMentionMappings() {
@@ -67074,8 +67074,8 @@ public final class CoreNLPProtos {
       "d.nlp.pipeline.Mention\022!\n\031hasCorefMentio" +
       "nAnnotation\030\017 \001(\010\022\032\n\022hasCorefAnnotation\030" +
       "\020 \001(\010\022+\n#corefMentionToEntityMentionMapp" +
-      "ings\030\021 \003(\r\022+\n#entityMentionToCorefMentio" +
-      "nMappings\030\022 \003(\r*\005\010d\020\200\002\"\216\017\n\010Sentence\022/\n\005t" +
+      "ings\030\021 \003(\005\022+\n#entityMentionToCorefMentio" +
+      "nMappings\030\022 \003(\005*\005\010d\020\200\002\"\216\017\n\010Sentence\022/\n\005t" +
       "oken\030\001 \003(\0132 .edu.stanford.nlp.pipeline.T" +
       "oken\022\030\n\020tokenOffsetBegin\030\002 \002(\r\022\026\n\016tokenO" +
       "ffsetEnd\030\003 \002(\r\022\025\n\rsentenceIndex\030\004 \001(\r\022\034\n" +

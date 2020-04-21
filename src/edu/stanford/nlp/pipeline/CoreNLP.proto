@@ -69,8 +69,8 @@ message Document {
   repeated Mention         mentionsForCoref                    = 14;
   optional bool hasCorefMentionAnnotation = 15;
   optional bool hasCorefAnnotation = 16;
-  repeated uint32 corefMentionToEntityMentionMappings = 17;
-  repeated uint32 entityMentionToCorefMentionMappings = 18;
+  repeated int32 corefMentionToEntityMentionMappings = 17;
+  repeated int32 entityMentionToCorefMentionMappings = 18;
 
   extensions 100 to 255;
 }
