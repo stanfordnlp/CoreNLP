@@ -1,7 +1,7 @@
 Stanford CoreNLP - Stanford's Suite of NLP Tools
 ------------------------------------------------
 
-Copyright © 2009-2015 The Board of Trustees of
+Copyright © 2009-2020 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
 DOCUMENTATION
@@ -14,7 +14,7 @@ LICENSE
 
 //
 // StanfordCoreNLP -- a suite of NLP tools
-// Copyright © 2009-2015 The Board of Trustees of
+// Copyright © 2009-2020 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -41,11 +41,11 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2020-04-16    4.0.0     Upgrade to UD tokenization standard; handling 
-                        of multi-word-tokens; improved taggers and 
-                        parsers for English, French, German, Spanish; 
-                        new French NER; new Chinese segmenter; library 
-                        updates, bug fixes 
+2020-04-19    4.0.0     Changed to UDv2 tokenization ("new" LDC Treebank,
+                        for English); handles multi-word-tokens;
+                        improved UDv2-based taggers and parsers for
+                        English, French, German, Spanish; new French NER;
+                        new Chinese segmenter; library updates, bug fixes
 
 2018-10-05    3.9.2     improved NER pipeline and entity mention 
                         confidences; support for Java 11; new POS 
