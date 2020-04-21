@@ -13,6 +13,36 @@ public class WordLemmaTagTest {
   }
 
   @Test
+  public void testWordLemmaConstructorLabelWord() {
+    WordLemmaTagFactory wLtF = new WordLemmaTagFactory();
+    Label label = wLtF.newLabel("running");
+
+    WordLemmaTag wLt = new WordLemmaTag(label);
+
+    checkWordLemmaTag(wLt, "running", null, null);
+  }
+
+  @Test
+  public void testWordLemmaConstructorLabelWordLabelTag() {
+    WordLemmaTagFactory wLtF = new WordLemmaTagFactory();
+    Label labelWord = wLtF.newLabel("running");
+    Label labelTag = wLtF.newLabel("r");
+
+    WordLemmaTag wLt = new WordLemmaTag(labelWord, labelTag);
+
+    checkWordLemmaTag(wLt, "running", "running", "r");
+  }
+
+  @Test
+  public void testWordLemmaConstructorWordTag() {
+    String word = "run";
+    String tag = "r";
+    WordLemmaTag wLt = new WordLemmaTag(word, tag);
+
+    checkWordLemmaTag(wLt, "run", "run", "r");
+  }
+
+  @Test
   public void testSetFromStringWordAndLemma() {
     WordLemmaTag wLT = new WordLemmaTag();
     wLT.setFromString("running/r");
