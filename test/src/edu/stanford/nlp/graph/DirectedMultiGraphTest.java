@@ -1,9 +1,9 @@
 package edu.stanford.nlp.graph;
 
-import java.util.*;
-
 import edu.stanford.nlp.util.CollectionUtils;
 import junit.framework.TestCase;
+
+import java.util.*;
 
 public class DirectedMultiGraphTest extends TestCase {
 
@@ -54,21 +54,34 @@ public class DirectedMultiGraphTest extends TestCase {
     assertEquals(graph.getNumEdges(), 7);
   }
 
-  public void testRemove() {
-    graph.removeVertex(2);
+  public void testRemoveEdges() {
+    assertTrue(graph.removeEdges(2, 3));
+
+    System.out.println("after deleting 2->3 edge\n" + graph.toString());
+
+    assertEquals(graph.getNumVertices(), 10);
+    assertEquals(graph.getNumEdges(), 6);
+  }
+
+  public void testRemoveNonExistingEdges() {
+    graph.removeEdges(2, 3);
+
+    assertFalse(graph.removeEdges(2, 3));
+  }
+
+  public void testRemoveVertex() {
+    assertTrue(graph.removeVertex(2));
+
     System.out.println("after deleting 2\n" + graph.toString());
+
     assertEquals(graph.getNumVertices(), 9);
     assertEquals(graph.getNumEdges(), 5);
+  }
+
+  public void testRemoveNonExistingVertex() {
     // vertex 11 doesn't exist in the graph and thus this function should return
     // false
     assertFalse(graph.removeVertex(11));
-
-    setUp();
-    assertTrue(graph.removeEdges(2, 3));
-    System.out.println("after deleting 2->3 edge\n" + graph.toString());
-    assertEquals(graph.getNumVertices(), 10);
-    assertEquals(graph.getNumEdges(), 6);
-    assertFalse(graph.removeEdges(2, 3));
   }
 
   public void testDelZeroDegreeNodes() {
