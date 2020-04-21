@@ -6,23 +6,33 @@ import junit.framework.TestCase;
 
 import java.util.*;
 
+/**
+ * Test for verifying that NER pipeline results match benchmark output results.
+ */
+
 public class NERPipelineEndToEndSlowITest extends TestCase {
 
   public static String DATA_PATH = "/u/nlp/data/stanford-corenlp-testing/data/ner";
 
   StanfordCoreNLP pipeline3Class;
+  StanfordCoreNLP pipeline4Class;
+  StanfordCoreNLP pipeline7Class;
 
   @Override
   public void setUp() {
-    // set up the pipeline with NER tokenization
-    Properties props3Class = new Properties();
-    props3Class.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
-    props3Class.setProperty("ssplit.eolonly", "true");
-    props3Class.setProperty("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
-    props3Class.setProperty("ner.applyNumericClassifiers", "false");
-    props3Class.setProperty("ner.applyFineGrained", "false");
-    props3Class.setProperty("ner.useSUTime", "false");
-    pipeline3Class = new StanfordCoreNLP(props3Class);
+    // set up the pipeline using 3-class model
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.setProperty("ssplit.eolonly", "true");
+    props.setProperty("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
+    props.setProperty("ner.statisticalOnly", "true");
+    pipeline3Class = new StanfordCoreNLP(props);
+    // set up the pipeline using 4-class model
+    props.setProperty("ner.model", "edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz");
+    pipeline4Class = new StanfordCoreNLP(props);
+    // set up thet pipeline using 7-class model
+    props.setProperty("ner.model", "edu/stanford/nlp/models/ner/english.muc.7class.distsim.crf.ser.gz");
+    pipeline7Class = new StanfordCoreNLP(props);
   }
 
   public List<List<String>> readInExpectedNERLabels(String expectedPath) {
@@ -45,15 +55,31 @@ public class NERPipelineEndToEndSlowITest extends TestCase {
     return expectedNERLabels;
   }
 
-  public void testEnglish3Class() {
-    String inputFile = "english.all.3class.distsim-regression.input";
-    String outputFile = "english.all.3class.distsim-regression.expected";
+  public void runModelTest(String inputFile, String outputFile) {
     List<String> inputSentences = IOUtils.linesFromFile(String.format("%s/%s", DATA_PATH, inputFile));
     List<List<String>> expectedLabels = readInExpectedNERLabels(outputFile);
     for (int i = 0; i < inputSentences.size() ; i++) {
       CoreDocument doc = new CoreDocument(pipeline3Class.process(inputSentences.get(i)));
       assertEquals(expectedLabels.get(i), doc.sentences().get(0).nerTags());
     }
+  }
+
+  public void testEnglish3Class() {
+    String threeClassInput = "english.all.3class.distsim-regression.input";
+    String threeClassOutput = "english.all.3class.distsim-regression.expected";
+    runModelTest(threeClassInput, threeClassOutput);
+  }
+
+  public void testEnglish4Class() {
+    String fourClassInput = "english.conll.4class.distsim-regression.input";
+    String fourClassOutput = "english.conll.4class.distsim-regression.expected";
+    runModelTest(fourClassInput, fourClassOutput);
+  }
+
+  public void testEnglish7Class() {
+    String sevenClassInput = "english.muc.7class.distsim-regression.input";
+    String sevenClassOutput = "english.muc.7class.distsim-regression.expected";
+    runModelTest(sevenClassInput, sevenClassOutput);
   }
 
 }
