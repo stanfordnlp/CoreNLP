@@ -53,7 +53,7 @@ higher-level and domain-specific text understanding applications.
 Stanford CoreNLP can be downloaded via the link below. This will download a large (~500 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks), (3) the libraries required to run CoreNLP, and (4)&nbsp;documentation / source code for the project. Unzip this file, open the folder that results and you're ready to use it.
 
 
-<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip">Download CoreNLP 3.9.2 </a> </div>
+<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-4.0.0.zip">Download CoreNLP 4.0.0 </a> </div>
 
 Alternatively, Stanford CoreNLP is [available on **Maven Central**](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22).
 Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
@@ -67,13 +67,13 @@ run relation extraction and entity linking.
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-2018-10-05-models.jar) | 3.9.2 |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2018-10-05-models.jar) | 3.9.2 |
-| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2018-10-05-models.jar) | 3.9.2 |
-| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-2018-10-05-models.jar) | 3.9.2 |
-| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2018-10-05-models.jar) | 3.9.2 |
-| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-2018-10-05-models.jar) | 3.9.2 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2018-10-05-models.jar) | 3.9.2 |
+| Arabic  | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-arabic.jar) | 4.0.0 |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-chinese.jar) | 4.0.0 |
+| English | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-english.jar) | 4.0.0 |
+| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-english-kbp.jar) | 4.0.0 |
+| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-french.jar) | 4.0.0 |
+| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-german.jar) | 4.0.0 |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-spanish.jar) | 4.0.0 |
 
 ## Human languages supported
 
