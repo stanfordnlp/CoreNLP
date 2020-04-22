@@ -13,7 +13,6 @@ import java.util.function.Function;
 * @author Angel Chang
 */
 public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatternTrigger<CoreMap> {
-  Collection<? extends SequencePattern<CoreMap>> patterns;
   Collection<SequencePattern<CoreMap>> alwaysTriggered = new LinkedHashSet<>();
   TwoDimensionalCollectionValuedMap<Class, Object, SequencePattern<CoreMap>> annotationTriggers =
           new TwoDimensionalCollectionValuedMap<>();
@@ -24,8 +23,6 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
     this(Arrays.asList(patterns));
   }
   public CoreMapNodePatternTrigger(Collection<? extends SequencePattern<CoreMap>> patterns) {
-    this.patterns = patterns;
-
     Function<NodePattern<CoreMap>, StringTriggerCandidate> stringTriggerFilter =
         in -> {
           if (in instanceof CoreMapNodePattern) {
