@@ -30,7 +30,18 @@ public class TwoDimensionalCollectionValuedMap<K1, K2, V> implements Serializabl
    * treat Collections as immutable.
    */
   public TwoDimensionalCollectionValuedMap() {
-    this(MapFactory.<K2,Collection<V>>hashMapFactory(), CollectionFactory.<V>hashSetFactory(), false);
+    this(false);
+  }
+
+
+  /**
+   * Creates a new empty TwoDimensionalCollectionValuedMap which uses a HashMap as the
+   * underlying Map, and HashSets as the Collections in each mapping.
+   * <br>
+   * @param treatCollectionsAsImmutable whether or not to treat collections as immutable
+   */
+  public TwoDimensionalCollectionValuedMap(boolean treatCollectionsAsImmutable) {
+    this(MapFactory.<K2,Collection<V>>hashMapFactory(), CollectionFactory.<V>hashSetFactory(), treatCollectionsAsImmutable);
   }
 
 
