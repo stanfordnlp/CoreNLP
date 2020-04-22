@@ -13,7 +13,7 @@ import java.util.function.Function;
 * @author Angel Chang
 */
 public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatternTrigger<CoreMap> {
-  Collection<SequencePattern<CoreMap>> alwaysTriggered = new LinkedHashSet<>();
+  final Collection<SequencePattern<CoreMap>> alwaysTriggered;
   TwoDimensionalCollectionValuedMap<Class, Object, SequencePattern<CoreMap>> annotationTriggers =
           new TwoDimensionalCollectionValuedMap<>();
   TwoDimensionalCollectionValuedMap<Class, String, SequencePattern<CoreMap>> lowercaseStringTriggers =
@@ -37,6 +37,7 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
           return null;
         };
 
+    LinkedHashSet<SequencePattern<CoreMap>> alwaysTriggeredTemp = new LinkedHashSet<>();
     for (SequencePattern<CoreMap> pattern:patterns) {
       // Look for first string...
       Collection<StringTriggerCandidate> triggerCandidates = pattern.findNodePatterns(stringTriggerFilter, false, true);
@@ -51,8 +52,17 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
           annotationTriggers.add(trigger.key, trigger.value, pattern);
         }
       } else {
-        alwaysTriggered.add(pattern);
+        alwaysTriggeredTemp.add(pattern);
       }
+    }
+    if (alwaysTriggeredTemp.size() == 0) {
+      alwaysTriggered = Collections.emptySet();
+    } else if (alwaysTriggeredTemp.size() == 1) {
+      alwaysTriggered = Collections.singleton(alwaysTriggeredTemp.iterator().next());
+    } else {
+      // the set filtering has already been done, so now we can keep
+      // them in a more efficient list
+      alwaysTriggered = Collections.unmodifiableList(new ArrayList<>(alwaysTriggeredTemp));
     }
   }
 
