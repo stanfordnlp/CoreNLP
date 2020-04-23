@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 
 public class CategoryWordTagFactoryTest extends TestCase {
 
-  public void testNewLabelMethodReturnsInstanceOfCategoryWordTag(){
+  public void testNewLabelMethodReturnsInstanceOfCategoryWordTag() {
     CategoryWordTag tag = new CategoryWordTag("A", "B", "C");
     CategoryWordTagFactory lf = new CategoryWordTagFactory();
     Label label = lf.newLabel(tag);

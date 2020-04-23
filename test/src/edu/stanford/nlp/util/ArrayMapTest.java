@@ -29,7 +29,7 @@ public class ArrayMapTest extends TestCase {
     hmap.put("Bar", 50);
     hmap.put("Baz", 500);
   }
- 
+
   public void testArrayMapEqualsMethod() {
     assertTrue(map.equals(map));
   }

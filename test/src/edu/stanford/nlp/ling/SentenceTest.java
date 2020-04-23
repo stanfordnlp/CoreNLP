@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *  Tests the static methods that turn sentences (lists of Labels)
- *  into strings.
+ * Tests the static methods that turn sentences (lists of Labels)
+ * into strings.
  *
- *  @author John Bauer
+ * @author John Bauer
  */
 public class SentenceTest {
 
@@ -91,5 +91,3 @@ public class SentenceTest {
   }
 
 }
-
-
