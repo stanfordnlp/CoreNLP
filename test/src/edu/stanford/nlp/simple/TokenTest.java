@@ -79,18 +79,11 @@ public class TokenTest {
   }
 
   @Test
-  public void testWhiteSpaceBefore() {
+  public void testWhiteSpace() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 0);
 
     assertEquals("", token.before());
-  }
-
-  @Test
-  public void testWhiteSpaceAfter() {
-    Sentence sentence = new Sentence(string);
-    Token token = new Token(sentence, 0);
-
     assertEquals(" ", token.after());
   }
 
