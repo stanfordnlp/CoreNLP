@@ -186,9 +186,6 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
   public StanfordCoreNLPServer(Properties props) throws IOException {
-    // check if englishSR.ser.gz can be found (standard models jar doesn't have this)
-    String defaultParserPath = findDefaultParser();
-
     // server default properties for a pipeline, these will be overwritten by file provided and command line
     // provided defaults...the precedence is 1.) command line, 2.) properties file, 3.) server defaults
     this.defaultProps = PropertiesUtils.asProperties(
@@ -199,7 +196,6 @@ public class StanfordCoreNLPServer implements Runnable {
         "inputFormat", "text",   // By default, treat the POST data like text
         "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
         "prettyPrint", "false",  // Don't bother pretty-printing
-        "parse.model", defaultParserPath,  // SR scales linearly with sentence length. Good for a server!
         "parse.binaryTrees", "true",  // needed for the Sentiment annotator
         "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
 
@@ -218,6 +214,13 @@ public class StanfordCoreNLPServer implements Runnable {
       }
     }
     PropertiesUtils.overWriteProperties(this.defaultProps, pipelinePropsFromCL);
+
+    if (!PropertiesUtils.hasProperty(this.defaultProps, "parse.model")) {
+      // check if englishSR.ser.gz can be found (standard models jar doesn't have this)
+      // SR scales linearly with sentence length. Good for a server!
+      String defaultParserPath = findDefaultParser();
+      this.defaultProps.setProperty("parse.model", defaultParserPath);
+    }
 
     this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
     this.corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
