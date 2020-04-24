@@ -139,7 +139,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   HasCliquePotentialFunction cliquePotentialFunctionHelper;
 
   /** Parameter weights of the classifier.  weights[featureIndex][labelIndex] */
-  double[][] weights;
+  float[][] weights;
 
   /** index the features of CRF */
   Index<String> featureIndex;
@@ -216,7 +216,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   public int getNumWeights() {
     if (weights == null) return 0;
     int numWeights = 0;
-    for (double[] wts : weights) {
+    for (float[] wts : weights) {
       numWeights += wts.length;
     }
     return numWeights;
@@ -308,10 +308,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     // Create new weights
-    double[][] newWeights = new double[numFeatures][];
+    float[][] newWeights = new float[numFeatures][];
     for (int i = 0; i < numFeatures; i++) {
       int length = labelIndices.get(map[i]).size();
-      newWeights[i] = new double[length];
+      newWeights[i] = new float[length];
       if (i < oldNumFeatures) {
         assert (length >= weights[i].length);
         System.arraycopy(weights[i], 0, newWeights[i], 0, weights[i].length);
@@ -1711,13 +1711,15 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
   }
 
-  public static double[][] to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map) {
-    double[][] newWeights = new double[map.length][];
+  public static float[][] to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map) {
+    float[][] newWeights = new float[map.length][];
     int index = 0;
     for (int i = 0; i < map.length; i++) {
-      newWeights[i] = new double[labelIndices.get(map[i]).size()];
-      System.arraycopy(weights, index, newWeights[i], 0, labelIndices.get(map[i]).size());
-      index += labelIndices.get(map[i]).size();
+      newWeights[i] = new float[labelIndices.get(map[i]).size()];
+      final int arrLength = labelIndices.get(map[i]).size();
+      for (int j = 0; j < arrLength; j++) {
+        newWeights[i][j] = (float) weights[index++];
+      }
     }
     return newWeights;
   }
@@ -2257,25 +2259,26 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       throw new RuntimeException("format error");
     }
     int weightsLength = Integer.parseInt(toks[1]);
-    weights = new double[weightsLength][];
+    weights = new float[weightsLength][];
     count = 0;
     while (count < weightsLength) {
       line = br.readLine();
 
       toks = line.split("\\t");
       int weights2Length = Integer.parseInt(toks[0]);
-      weights[count] = new double[weights2Length];
+      weights[count] = new float[weights2Length];
       String[] weightsValue = toks[1].split(" ");
       if (weights2Length != weightsValue.length) {
         throw new RuntimeException("weights format error");
       }
 
       for (int i2 = 0; i2 < weights2Length; i2++) {
-        weights[count][i2] = Double.parseDouble(weightsValue[i2]);
+        // TODO: check that this doesn't barf... why would it?
+        weights[count][i2] = Float.parseFloat(weightsValue[i2]);
       }
       count++;
     }
-    System.err.printf("DEBUG: double[%d][] weights loaded%n", weightsLength);
+    System.err.printf("DEBUG: float[%d][] weights loaded%n", weightsLength);
     line = br.readLine();
 
     if (line != null) {
@@ -2344,9 +2347,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     pw.printf("<windowSize> %d </windowSize>%n", windowSize);
 
     pw.printf("weights.length=\t%d%n", weights.length);
-    for (double[] ws : weights) {
-      ArrayList<Double> list = new ArrayList<>();
-      for (double w : ws) {
+    for (float[] ws : weights) {
+      ArrayList<Float> list = new ArrayList<>();
+      for (float w : ws) {
         list.add(w);
       }
       pw.printf("%d\t%s%n", ws.length, StringUtils.join(list, " "));
@@ -2579,7 +2582,20 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     windowSize = ois.readInt();
-    weights = (double[][]) ois.readObject();
+    Object tempWeights = ois.readObject();
+    if (tempWeights instanceof double[][]) {
+      // TODO: if slow, maybe use some temp variables for the arrays
+      double[][] dWeights = (double[][]) tempWeights;
+      weights = new float[dWeights.length][];
+      for (int i = 0; i < dWeights.length; ++i) {
+        weights[i] = new float[dWeights[i].length];
+        for (int j = 0; j < dWeights[i].length; ++j) {
+          weights[i][j] = (float) dWeights[i][j];
+        }
+      }
+    } else {
+      weights = (float[][]) tempWeights;
+    }
 
     // WordShapeClassifier.setKnownLowerCaseWords((Set) ois.readObject());
     Set<String> lcWords = (Set<String>) ois.readObject();
@@ -2707,7 +2723,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       int index = featureIndex.indexOf(feature);
       // line.add(feature+"["+(-p)+"]");
       // rowHeaders.add(feature + '[' + (-p) + ']');
-      double[] v = weights[index];
+      float[] v = weights[index];
       Index<CRFLabel> l = this.labelIndices.get(0);
       p.println(feature + "\t\t");
       for (CRFLabel label : l) {
@@ -2724,7 +2740,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       int index = featureIndex.indexOf(feature);
       // line.add(feature+"["+(-p)+"]");
       // rowHeaders.add(feature + '[' + (-p) + ']');
-      double[] v = weights[index];
+      float[] v = weights[index];
       Index<CRFLabel> l = this.labelIndices.get(0);
       for (CRFLabel label : l) {
         if(!w.containsKey(label.toString(classIndex)))

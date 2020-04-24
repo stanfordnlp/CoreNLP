@@ -90,9 +90,9 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
   private void addBiasFeature() {
     if ( ! featureIndex.contains(BIAS)) {
       featureIndex.add(BIAS);
-      double[][] newWeights = new double[weights.length+1][];
-      System.arraycopy (weights,0,newWeights,0,weights.length);
-      newWeights[weights.length] = new double[classIndex.size()];
+      float[][] newWeights = new float[weights.length+1][];
+      System.arraycopy(weights,0,newWeights,0,weights.length);
+      newWeights[weights.length] = new float[classIndex.size()];
       weights = newWeights;
     }
   }
@@ -105,7 +105,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  
   public void setBiasWeight(int cindex, double weight) {
     addBiasFeature();
     int fi = featureIndex.indexOf(BIAS);
-    weights[fi][cindex] = weight;
+    weights[fi][cindex] = (float) weight;
   }
 
   @Override
