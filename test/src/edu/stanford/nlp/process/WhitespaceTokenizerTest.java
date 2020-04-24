@@ -76,7 +76,7 @@ public class WhitespaceTokenizerTest extends TestCase {
               (factory, true),
             TEST, RESULTS_EOL);
   }
-  
+
   /* Tests the "whitespace only" bound */
   public void testPureWhiteSpaceTokenizer() {
     for (int i = 0; i < TEST_WHITESPACE_ONLY.length; ++i) {
@@ -98,17 +98,6 @@ public class WhitespaceTokenizerTest extends TestCase {
     }
   }
 
-  /* Tests the "no whitespace at all" bound */
-  public void testNoWhiteSpaceTokenizer() {
-    for (int i = 0; i < TEST_NO_WHITESPACE.length; ++i) {
-      Tokenizer<? extends HasWord> tokenizer =
-        WhitespaceTokenizer.factory(true).getTokenizer(new StringReader(TEST_NO_WHITESPACE[i]));
-      List<? extends HasWord> tokens = tokenizer.tokenize();
-      int expectedNumberOfActualTokens = 1;
-      assertEquals(expectedNumberOfActualTokens, tokens.size());
-    }
-  }
-
   /* Tests the "whitespace only" bound */
   public void testNoTextWhiteSpaceTokenizer() {
     for (int i = 0; i < TEST_WHITESPACE_ONLY.length; ++i) {
@@ -120,4 +109,15 @@ public class WhitespaceTokenizerTest extends TestCase {
     }
   }
 
+  /* Tests the "no whitespace at all" bound */
+  public void testNoWhiteSpaceTokenizer() {
+    for (int i = 0; i < TEST_NO_WHITESPACE.length; ++i) {
+      Tokenizer<? extends HasWord> tokenizer =
+        WhitespaceTokenizer.factory(true).getTokenizer(new StringReader(TEST_NO_WHITESPACE[i]));
+      List<? extends HasWord> tokens = tokenizer.tokenize();
+      int expectedNumberOfActualTokens = 1;
+      assertEquals(expectedNumberOfActualTokens, tokens.size());
+      assertEquals(TEST_NO_WHITESPACE[i], tokens.get(0).word());
+    }
+  }
 }
