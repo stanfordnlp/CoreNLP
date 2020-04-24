@@ -715,9 +715,11 @@ public class Classifier  {
 
   private static void matrixMultiplySliceSum(double[] sum, double[][] matrix, double[] vector, int leftColumnOffset) {
     for (int i = 0; i < matrix.length; i++) {
+      double partial = sum[i];
       for (int j = 0; j < vector.length; j++) {
-        sum[i] += matrix[i][leftColumnOffset + j] * vector[j];
+        partial += matrix[i][leftColumnOffset + j] * vector[j];
       }
+      sum[i] = partial;
     }
   }
 
