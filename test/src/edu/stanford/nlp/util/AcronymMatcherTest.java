@@ -21,15 +21,6 @@ public class AcronymMatcherTest {
   }
 
   @Test
-  public void testBasicWithBoundaries() {
-    assertTrue(AcronymMatcher.isAcronym("B", "B".split("\\s+")));
-    assertFalse(AcronymMatcher.isAcronym("", "B".split("\\s+")));
-    // A is a stopword
-    // assertFalse(AcronymMatcher.isAcronym("", "A".split("\\s+")));
-    assertFalse(AcronymMatcher.isAcronym("UZH", "University of Zurich".split("\\s+")));
-  }
-
-  @Test
   public void testFilterStopWords() {
     assertTrue(AcronymMatcher.isAcronym("CML", "Council of Mortgage Lenders".split("\\s+")));
     assertTrue(AcronymMatcher.isAcronym("AAAS", "American Association for the Advancement of Science".split("\\s+")));
