@@ -102,7 +102,7 @@ public class Classifier  {
    */
   private final int numLabels;
 
-  private LeastRecentlyUsedCache<Integer, double[]> cache;
+  private LeastRecentlyUsedCache<Integer, float[]> cache;
 
   /**
    * Instantiate a classifier with previously learned parameters in
@@ -704,7 +704,7 @@ public class Classifier  {
           // TODO: can the cache be used when training, actually?
           matrixMultiplySliceSum(hidden, W1, E[tok], offset);
         } else {
-          double[] cached = cache.getOrDefault(index, null);
+          float[] cached = cache.getOrDefault(index, null);
           if (cached == null) {
             cached = matrixMultiplySlice(W1, E[tok], offset);
             cache.add(index, cached);
@@ -728,14 +728,14 @@ public class Classifier  {
     return result;
   }
 
-  private static double[] matrixMultiplySlice(double[][] matrix, double[] vector, int leftColumnOffset) {
-    double[] slice = new double[matrix.length];
+  private static float[] matrixMultiplySlice(double[][] matrix, double[] vector, int leftColumnOffset) {
+    float[] slice = new float[matrix.length];
     for (int i = 0; i < matrix.length; i++) {
       double partial = 0.0;
       for (int j = 0; j < vector.length; j++) {
         partial += matrix[i][leftColumnOffset + j] * vector[j];
       }
-      slice[i] = partial;
+      slice[i] = (float) partial;
     }
     return slice;
   }
