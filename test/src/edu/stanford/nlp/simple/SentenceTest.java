@@ -34,6 +34,15 @@ public class SentenceTest {
   public void testLength() {
     Sentence sent = new Sentence("the quick brown fox jumped over the lazy dog");
     assertEquals(9, sent.length());
+
+    sent = new Sentence(".");
+    assertEquals(1, sent.length());
+
+    sent = new Sentence("Aloha");
+    assertEquals(1, sent.length());
+
+    sent = new Sentence("Aloha.");
+    assertEquals(2, sent.length());
   }
 
   @Test
@@ -57,6 +66,10 @@ public class SentenceTest {
     assertEquals("(", sent.word(4));
     assertEquals(")", sent.word(6));
     assertEquals("'s", sent.word(8));
+
+    sent = new Sentence("Alice(female), Bob(male) are in contact.");
+    assertEquals("(", sent.word(1));
+    assertEquals(",", sent.word(4));
   }
 
   @Test
