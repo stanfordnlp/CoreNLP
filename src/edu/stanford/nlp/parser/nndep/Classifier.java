@@ -704,14 +704,17 @@ public class Classifier  {
           // TODO: can the cache be used when training, actually?
           matrixMultiplySliceSum(hidden, W1, E[tok], offset);
         } else {
+          float[] cached;
           synchronized (cache) {
-            float[] cached = cache.getOrDefault(index, null);
-            if (cached == null) {
-              cached = matrixMultiplySlice(W1, E[tok], offset);
+            cached = cache.getOrDefault(index, null);
+          }
+          if (cached == null) {
+            cached = matrixMultiplySlice(W1, E[tok], offset);
+            synchronized (cache) {
               cache.add(index, cached);
             }
-            ArrayMath.pairwiseAddInPlace(hidden, cached);
           }
+          ArrayMath.pairwiseAddInPlace(hidden, cached);
         }
       }
       offset += embeddingSize;
