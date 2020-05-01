@@ -49,7 +49,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class EnglishTreebankParserParams extends AbstractTreebankParserParams  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EnglishTreebankParserParams.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(EnglishTreebankParserParams.class);
 
   protected class EnglishSubcategoryStripper implements TreeTransformer {
 
@@ -156,9 +156,9 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams  {
 
   private HeadFinder headFinder;
 
-  private EnglishTrain englishTrain = new EnglishTrain();
+  private final EnglishTrain englishTrain = new EnglishTrain();
 
-  private EnglishTest englishTest = new EnglishTest();
+  private final EnglishTest englishTest = new EnglishTest();
 
   @Override
   public HeadFinder headFinder() {

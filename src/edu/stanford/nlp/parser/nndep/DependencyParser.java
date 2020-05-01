@@ -495,7 +495,9 @@ public class DependencyParser  {
    * @return Loaded and initialized (see {@link #initialize(boolean)} model
    */
   public static DependencyParser loadFromModelFile(String modelFile, Properties extraProperties) {
-    return DependencyParserCache.loadFromModelFile(modelFile, extraProperties);
+    DependencyParser parser = extraProperties == null ? new DependencyParser() : new DependencyParser(extraProperties);
+    parser.loadModelFile(modelFile, false);
+    return parser;
   }
 
   /** Load a parser model file, printing out some messages about the grammar in the file.
@@ -515,7 +517,7 @@ public class DependencyParser  {
     return firstLine.startsWith("language=");
   }
 
-  void loadModelFile(String modelFile, boolean verbose) {
+  private void loadModelFile(String modelFile, boolean verbose) {
     Timing t = new Timing();
     try (BufferedReader input = IOUtils.readerFromString(modelFile)) {
 

@@ -2,7 +2,6 @@ package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.LeastRecentlyUsedCache;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
@@ -102,8 +101,6 @@ public class Classifier  {
    */
   private final int numLabels;
 
-  private LeastRecentlyUsedCache<Integer, float[]> cache;
-
   /**
    * Instantiate a classifier with previously learned parameters in
    * order to perform new inference.
@@ -154,8 +151,6 @@ public class Classifier  {
       jobHandler = new MulticoreWrapper<>(config.trainingThreads, new CostFunction(), false);
     else
       jobHandler = null;
-
-    cache = new LeastRecentlyUsedCache<>(config.numCached);
   }
 
   /**
@@ -700,17 +695,7 @@ public class Classifier  {
       if (idInteger != null) {
         ArrayMath.pairwiseAddInPlace(hidden, saved[idInteger]);
       } else {
-        if (isTraining || config.numCached == 0) {
-          // TODO: can the cache be used when training, actually?
-          matrixMultiplySliceSum(hidden, W1, E[tok], offset);
-        } else {
-          float[] cached = cache.getOrDefault(index, null);
-          if (cached == null) {
-            cached = matrixMultiplySlice(W1, E[tok], offset);
-            cache.add(index, cached);
-          }
-          ArrayMath.pairwiseAddInPlace(hidden, cached);
-        }
+        matrixMultiplySliceSum(hidden, W1, E[tok], offset);
       }
       offset += embeddingSize;
     }
@@ -726,18 +711,6 @@ public class Classifier  {
       result[i] = ArrayMath.dotProduct(matrix[i], vector);
     }
     return result;
-  }
-
-  private static float[] matrixMultiplySlice(double[][] matrix, double[] vector, int leftColumnOffset) {
-    float[] slice = new float[matrix.length];
-    for (int i = 0; i < matrix.length; i++) {
-      double partial = 0.0;
-      for (int j = 0; j < vector.length; j++) {
-        partial += matrix[i][leftColumnOffset + j] * vector[j];
-      }
-      slice[i] = (float) partial;
-    }
-    return slice;
   }
 
   private static void matrixMultiplySliceSum(double[] sum, double[][] matrix, double[] vector, int leftColumnOffset) {

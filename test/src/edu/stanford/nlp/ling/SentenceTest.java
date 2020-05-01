@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tests the static methods that turn sentences (lists of Labels)
- * into strings.
+ *  Tests the static methods that turn sentences (lists of Labels)
+ *  into strings.
  *
- * @author <a href=horatio@gmail.com>John Bauer</a>
+ *  @author John Bauer
  */
 public class SentenceTest {
 
