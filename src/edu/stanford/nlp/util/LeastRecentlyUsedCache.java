@@ -93,18 +93,26 @@ public class LeastRecentlyUsedCache<K, V> {
     if (node == null) {
       return defaultValue;
     }
-    // move the node to the back
-    list.remove(node);
-    list.push(node);
+    synchronized(list) {
+      // move the node to the back
+      list.remove(node);
+      list.push(node);
+    }
     return node.value;
   }
 
   public void add(K key, V value) {
-    Node<K, V> node = list.push(key, value);
-    map.put(key, node);
-    if (list.size > maxSize) {
-      node = list.pop();
-      map.remove(node.key);
+    synchronized(list) {
+      Node<K, V> node = map.getOrDefault(key, null);
+      if (node != null) {
+        list.remove(node);
+      }
+      node = list.push(key, value);
+      map.put(key, node);
+      if (list.size > maxSize) {
+        node = list.pop();
+        map.remove(node.key);
+      }
     }
   }
 
