@@ -47,6 +47,7 @@ import edu.stanford.nlp.util.StringUtils;
  * reusable, make sure to change the way they are constructed as well.
  *
  * @author Kristina Toutanova
+ * @author Christoper Manning
  * @version 1.0
  */
 public class Extractor implements Serializable  {
