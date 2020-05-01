@@ -320,6 +320,20 @@ public class ArrayMath {
     }
   }
 
+  /**
+   * Add the two 1d arrays in place of {@code to}.
+   *
+   * @throws java.lang.IllegalArgumentException If {@code to} and {@code from} are not of the same dimensions
+   */
+  public static void pairwiseAddInPlace(double[] to, float[] from) {
+    if (to.length != from.length) {
+      throw new IllegalArgumentException("to length:" + to.length + " from length:" + from.length);
+    }
+    for (int i = 0; i < to.length; i++) {
+      to[i] += from[i];
+    }
+  }
+
   public static void pairwiseAddInPlace(double[] to, int[] from) {
     if (to.length != from.length) {
       throw new IllegalArgumentException();

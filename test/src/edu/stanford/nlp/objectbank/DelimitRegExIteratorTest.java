@@ -28,19 +28,30 @@ public class DelimitRegExIteratorTest {
   };
 
   @Test
-  public void testFunctionality() {
-    assertEquals(testCases.length, delimiterCases.length);
-    assertEquals(testCases.length, answerCases.length);
+  public void testAnswer() {
     for (int i = 0; i < testCases.length; i++) {
       String s = testCases[i];
       DelimitRegExIterator<String> di = DelimitRegExIterator.defaultDelimitRegExIterator(
-              new StringReader(s), delimiterCases[i]);
+              new StringReader(s), delimiterCases[i]
+      );
+
       List<String> answer = new ArrayList<>();
+
       while (di.hasNext()) {
         answer.add(di.next());
       }
+
       assertEquals(answerCases[i], answer);
     }
   }
 
+  @Test
+  public void testDelimiterLength() {
+    assertEquals(testCases.length, delimiterCases.length);
+  }
+
+  @Test
+  public void testAnswerLength() {
+    assertEquals(testCases.length, answerCases.length);
+  }
 }

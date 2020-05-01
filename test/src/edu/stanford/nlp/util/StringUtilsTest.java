@@ -16,10 +16,22 @@ public class StringUtilsTest {
   }
 
   @Test
-  public void testGetBaseName() {
+  public void testGetBaseNameNoSuffix() {
     Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt"), "foo.txt");
+  }
+
+  @Test
+  public void testGetBaseNameEmptySuffix() {
     Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ""), "foo.txt");
+  }
+
+  @Test
+  public void testGetBaseNameDotTxtSuffix() {
     Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ".txt"), "foo");
+  }
+
+  @Test
+  public void testGetBaseNamePdfSuffix() {
     Assert.assertEquals(StringUtils.getBaseName("/u/wcmac/foo.txt", ".pdf"), "foo.txt");
   }
 
@@ -31,7 +43,7 @@ public class StringUtilsTest {
     Properties p2 = new Properties();
     p2.setProperty("fred", "true");
     p2.setProperty("2", "joe");
-    Map<String,Integer> argNums = new HashMap<>();
+    Map<String, Integer> argNums = new HashMap<>();
     argNums.put("fred", 1);
     Assert.assertEquals(p2, StringUtils.argsToProperties("-fred", "-2", "joe"));
     Assert.assertEquals(StringUtils.argsToProperties(new String[]{"-fred", "-2", "joe"}, argNums), p1);
@@ -48,13 +60,13 @@ public class StringUtilsTest {
     List<String> ans2 = Arrays.asList("", "arg(a,b)", "foo(d,e,f)");
     Assert.assertEquals("Split failed", ans2, vals1);
     List<String> vals3 = StringUtils.valueSplit("\"quoted,comma\",\"with \\\"\\\" quote\" , \"stuff\",or not,quoted,",
-             "\"(?:[^\"\\\\]+|\\\\\")*\"|[^,\"]+", "\\s*,\\s*");
+                                                "\"(?:[^\"\\\\]+|\\\\\")*\"|[^,\"]+", "\\s*,\\s*");
     List<String> ans3 = Arrays.asList("\"quoted,comma\"", "\"with \\\"\\\" quote\"", "\"stuff\"", "or not", "quoted");
     Assert.assertEquals("Split failed", ans3, vals3);
   }
 
   @Test
-  public void testLongestCommonSubstring(){
+  public void testLongestCommonSubstring() {
     Assert.assertEquals(12, StringUtils.longestCommonSubstring("Jo3seph Smarr!", "Joseph R Smarr"));
     Assert.assertEquals(12, StringUtils.longestCommonSubstring("Joseph R Smarr", "Jo3seph Smarr!"));
   }
@@ -171,10 +183,10 @@ public class StringUtilsTest {
           {"", "foo", "bar"},
           {"foo", "bar"},
           {"foo,foo2"},
-          {"1997"," Ford ","E350"},
+          {"1997", " Ford ", "E350"},
           {"foo", "", "bar"},
 
-          {"1999", "Chevy", "Venture \"Extended Edition, Large\"","", "5000.00"},
+          {"1999", "Chevy", "Venture \"Extended Edition, Large\"", "", "5000.00"},
           {"\",foo,"},
           {"\"", "foo"},
   };
@@ -243,12 +255,12 @@ public class StringUtilsTest {
     Assert.assertEquals(tempFile1, decodedArray[0]);
     Assert.assertEquals(tempFile2, decodedArray[1]);
 
-    String[] test10 = { "\"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt\"",
-                        "[\"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt\"]" };
-    String[] ans10 = { "C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt" };
-    String[] test11 = { "C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt",
-                        "[C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt]" };
-    String[] ans11 = { "C:UsersBELLCH~1AppDataLocalTempbill-ie5804201486895318826regex_rules.txt" };
+    String[] test10 = {"\"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt\"",
+                       "[\"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt\"]"};
+    String[] ans10 = {"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt"};
+    String[] test11 = {"C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt",
+                       "[C:\\Users\\BELLCH~1\\AppData\\Local\\Temp\\bill-ie5804201486895318826regex_rules.txt]"};
+    String[] ans11 = {"C:UsersBELLCH~1AppDataLocalTempbill-ie5804201486895318826regex_rules.txt"};
 
     for (String s : test10) {
       Assert.assertEquals(Arrays.asList(ans10), Arrays.asList(StringUtils.decodeArray(s)));
@@ -314,5 +326,4 @@ public class StringUtilsTest {
     Assert.assertEquals(Arrays.asList("asdf", "\r\n", "sdf", "\n"), StringUtils.splitLinesKeepNewlines("asdf\r\nsdf\n"));
     Assert.assertEquals(Arrays.asList("asdf", "\r\n", "sdf", "\r\n", "\r\n"), StringUtils.splitLinesKeepNewlines("asdf\r\nsdf\r\n\r\n"));
   }
-  
 }
