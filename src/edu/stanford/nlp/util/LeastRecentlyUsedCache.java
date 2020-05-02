@@ -80,9 +80,9 @@ public class LeastRecentlyUsedCache<K, V> {
     }
   }
 
-  Map<K, Node<K, V>> map = new HashMap<>();
-  LinkedList<K, V> list = new LinkedList<>();
-  final int maxSize;
+  private Map<K, Node<K, V>> map = new HashMap<>();
+  private LinkedList<K, V> list = new LinkedList<>();
+  private final int maxSize;
 
   public LeastRecentlyUsedCache(int maxSize) {
     this.maxSize = maxSize;
@@ -93,26 +93,22 @@ public class LeastRecentlyUsedCache<K, V> {
     if (node == null) {
       return defaultValue;
     }
-    synchronized(list) {
-      // move the node to the back
-      list.remove(node);
-      list.push(node);
-    }
+    // move the node to the back
+    list.remove(node);
+    list.push(node);
     return node.value;
   }
 
   public void add(K key, V value) {
-    synchronized(list) {
-      Node<K, V> node = map.getOrDefault(key, null);
-      if (node != null) {
-        list.remove(node);
-      }
-      node = list.push(key, value);
-      map.put(key, node);
-      if (list.size > maxSize) {
-        node = list.pop();
-        map.remove(node.key);
-      }
+    Node<K, V> node = map.getOrDefault(key, null);
+    if (node != null) {
+      list.remove(node);
+    }
+    node = list.push(key, value);
+    map.put(key, node);
+    if (list.size > maxSize) {
+      node = list.pop();
+      map.remove(node.key);
     }
   }
 
