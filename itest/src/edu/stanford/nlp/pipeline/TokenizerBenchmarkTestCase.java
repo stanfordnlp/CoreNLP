@@ -252,8 +252,8 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         System.err.println("Precision: "+f1Scores.getCount("precision"));
         System.err.println("Recall: "+f1Scores.getCount("recall"));
         System.err.println("F1: "+f1Scores.getCount("f1"));
-        Assert.assertTrue("Test failure: System F1 of " + f1Scores.getCount("f1") + " below expected value of " +
-                expectedF1, f1Scores.getCount("f1") >= expectedF1);
+        assertTrue("Test failure: System F1 of " + f1Scores.getCount("f1") + " below expected value of " +
+                expectedF1,f1Scores.getCount("f1") >= expectedF1);
     }
 
 }
