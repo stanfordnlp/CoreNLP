@@ -8,13 +8,13 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import java.util.*;
 import java.util.stream.*;
 
-import org.junit.Assert;
+import junit.framework.TestCase;
 
 /**
  * Utilities for benchmarking tokenizers
  **/
 
-public class TokenizerBenchmarkTestCase {
+public class TokenizerBenchmarkTestCase extends TestCase {
 
     public static class MWTTokenCharacterOffsetBeginAnnotation implements CoreAnnotation<Integer> {
         @Override
