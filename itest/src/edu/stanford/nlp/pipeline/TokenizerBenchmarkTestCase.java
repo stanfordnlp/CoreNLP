@@ -8,13 +8,13 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import java.util.*;
 import java.util.stream.*;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
 
 /**
  * Utilities for benchmarking tokenizers
  **/
 
-public class TokenizerBenchmarkTestCase extends TestCase {
+public class TokenizerBenchmarkTestCase {
 
     public static class MWTTokenCharacterOffsetBeginAnnotation implements CoreAnnotation<Integer> {
         @Override
@@ -40,9 +40,9 @@ public class TokenizerBenchmarkTestCase extends TestCase {
     /** nested class for holding test example info such as text and gold tokens **/
     class TestExample {
 
-        private String sentenceID;
-        private String sentenceText;
-        private List<CoreLabel> goldTokensList;
+        private final String sentenceID;
+        private final String sentenceText;
+        private final List<CoreLabel> goldTokensList;
         private List<CoreLabel> systemTokensList;
 
         int CONLL_U_TOKEN_START = 2;
@@ -52,7 +52,7 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             sentenceID = conllLines.get(0).substring(LENGTH_OF_SENTENCE_ID_PREFIX);
             int LENGTH_OF_TEXT_PREFIX = "# text = ".length();
             sentenceText = conllLines.get(1).substring(LENGTH_OF_TEXT_PREFIX);
-            goldTokensList = new ArrayList<CoreLabel>();
+            goldTokensList = new ArrayList<>();
             int charBegin = 0;
             int charEnd = 0;
             // if a mwt line is encountered, the next currMWT tokens need to be special cased
@@ -110,18 +110,18 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         /** return the merged string of all the gold tokens **/
         public String goldTokensString() {
             return String.join("",
-                    goldTokensList.stream().map(tok -> tok.word()).collect(Collectors.joining()));
+                    goldTokensList.stream().map(CoreLabel::word).collect(Collectors.joining()));
         }
 
         /** return the merged string of all the system token **/
         public String systemTokensString() {
             return String.join("",
-                    systemTokensList.stream().map(tok -> tok.word()).collect(Collectors.joining()));
+                    systemTokensList.stream().map(CoreLabel::word).collect(Collectors.joining()));
         }
 
         /** tokenize text with pipeline, populate systemTokensList **/
         public void tokenizeSentenceText() {
-            systemTokensList = new ArrayList<CoreLabel>();
+            systemTokensList = new ArrayList<>();
             CoreLabel currMWTToken = null;
             CoreDocument exampleTokensDoc = new CoreDocument(pipeline.process(sentenceText));
             for (CoreLabel tok : exampleTokensDoc.tokens()) {
@@ -159,11 +159,7 @@ public class TokenizerBenchmarkTestCase extends TestCase {
 
         /** check if a token is split off from a multi word token **/
         public boolean containedByMultiWordToken(CoreLabel tok) {
-            if (tok.get(CoreAnnotations.MWTTokenTextAnnotation.class) != null) {
-                return true;
-            } else {
-                return false;
-            }
+            return tok.get(CoreAnnotations.MWTTokenTextAnnotation.class) != null;
         }
 
         /** check if a token is a split off token of another **/
@@ -174,15 +170,11 @@ public class TokenizerBenchmarkTestCase extends TestCase {
             int mwtPlaceholderEnd = multiWordPlaceholderToken.get(
                     TokenizerBenchmarkTestCase.MWTTokenCharacterOffsetEndAnnotation.class
             );
-            if (splitToken.get(CoreAnnotations.MWTTokenTextAnnotation.class).equals(multiWordPlaceholderToken.word())
+            return splitToken.get(CoreAnnotations.MWTTokenTextAnnotation.class).equals(multiWordPlaceholderToken.word())
                     && mwtPlaceholderBegin <= splitToken.beginPosition()
                     && mwtPlaceholderBegin <= splitToken.endPosition()
                     && mwtPlaceholderEnd >= splitToken.beginPosition()
-                    && mwtPlaceholderEnd >= splitToken.endPosition()) {
-                return true;
-            } else {
-                return false;
-            }
+                    && mwtPlaceholderEnd >= splitToken.endPosition();
         }
 
         /** return TP, FP, FN stats for this example **/
@@ -212,8 +204,8 @@ public class TokenizerBenchmarkTestCase extends TestCase {
     /** load all tokenizer test examples **/
     public void loadTokenizerTestExamples() {
         List<String> allLines = IOUtils.linesFromFile(goldFilePath);
-        testExamples = new ArrayList<TokenizerBenchmarkTestCase.TestExample>();
-        List<String> currSentence = new ArrayList<String>();
+        testExamples = new ArrayList<>();
+        List<String> currSentence = new ArrayList<>();
         for (String conllLine : allLines) {
             if (conllLine.trim().equals("")) {
                 testExamples.add(new TokenizerBenchmarkTestCase.TestExample(currSentence));
@@ -240,15 +232,15 @@ public class TokenizerBenchmarkTestCase extends TestCase {
     /** run the test and display report **/
     public void runTest(String evalSet, String lang, double expectedF1) {
         loadTokenizerTestExamples();
-        ClassicCounter<String> allF1Stats = new ClassicCounter<String>();
+        ClassicCounter<String> allF1Stats = new ClassicCounter<>();
         for (TokenizerBenchmarkTestCase.TestExample testExample : testExamples) {
             System.err.println("---");
             System.err.println("sentence id: "+testExample.sentenceID);
             System.err.println("sentence text: "+testExample.sentenceText);
-            System.err.println("gold tokens: "+testExample.goldTokensList.stream().map(
-                    cl -> cl.word()).collect(Collectors.toList()));
-            System.err.println("system tokens: "+testExample.systemTokensList.stream().map(
-                    cl -> cl.word()).collect(Collectors.toList()));
+            System.err.println("gold tokens: "+testExample.goldTokensList.stream()
+                    .map(CoreLabel::word).collect(Collectors.toList()));
+            System.err.println("system tokens: "+testExample.systemTokensList.stream()
+                    .map(CoreLabel::word).collect(Collectors.toList()));
             System.err.println(testExample.f1Stats());
             allF1Stats.addAll(testExample.f1Stats());
         }
@@ -260,8 +252,8 @@ public class TokenizerBenchmarkTestCase extends TestCase {
         System.err.println("Precision: "+f1Scores.getCount("precision"));
         System.err.println("Recall: "+f1Scores.getCount("recall"));
         System.err.println("F1: "+f1Scores.getCount("f1"));
-        assertTrue("Test failure: System F1 of " + f1Scores.getCount("f1") + " below expected value of " +
-                expectedF1,f1Scores.getCount("f1") >= expectedF1);
+        Assert.assertTrue("Test failure: System F1 of " + f1Scores.getCount("f1") + " below expected value of " +
+                expectedF1, f1Scores.getCount("f1") >= expectedF1);
     }
 
 }
