@@ -3,7 +3,6 @@ package edu.stanford.nlp.tagger.maxent;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** @author Christopher Manning */
 public class ExtractorTest {
 
   @Test

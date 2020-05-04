@@ -5,25 +5,18 @@ package edu.stanford.nlp.ie.crf;
  */
 public class LinearCliquePotentialFunction implements CliquePotentialFunction {
 
-  private final float[][] fWeights;
-  private final double[][] dWeights;
-
-  LinearCliquePotentialFunction(float[][] weights) {
-    this.fWeights = weights;
-    this.dWeights = null;
-  }
+  private final double[][] weights;
 
   LinearCliquePotentialFunction(double[][] weights) {
-    this.fWeights = null;
-    this.dWeights = weights;
+    this.weights = weights;
   }
 
   @Override
   public double computeCliquePotential(int cliqueSize, int labelIndex,
-                                       int[] cliqueFeatures, double[] featureVal, int posInSent) {
+      int[] cliqueFeatures, double[] featureVal, int posInSent) {
     double output = 0.0;
     for (int m = 0; m < cliqueFeatures.length; m++) {
-      double dotProd = fWeights == null ? dWeights[cliqueFeatures[m]][labelIndex] : fWeights[cliqueFeatures[m]][labelIndex];
+      double dotProd = weights[cliqueFeatures[m]][labelIndex];
       if (featureVal != null) {
         dotProd *= featureVal[m];
       }

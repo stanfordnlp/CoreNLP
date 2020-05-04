@@ -30,11 +30,10 @@ public class ArrayMapTest extends TestCase {
     hmap.put("Baz", 500);
   }
  
-  public void testArrayMapEqualsHashMap() {
+  public void testEquals() {
+    assertEquals(map, map);
     assertTrue(map.equals(map));
-  }
-
-  public void testHashMapEqualsArrayMap() {
+    assertEquals(map, hmap);
     assertEquals(hmap, map);
   }
 
@@ -44,15 +43,13 @@ public class ArrayMapTest extends TestCase {
     assertTrue(map.isEmpty());
     map.put("aaa", 5);
     assertEquals(1, map.size());
-    assertFalse(map.isEmpty());
   }
 
   public void testPutAll() {
     map.clear();
     assertTrue(map.isEmpty());
     map.putAll(hmap);
-    testArrayMapEqualsHashMap();
-    testHashMapEqualsArrayMap();
+    testEquals();
     HashMap<String, Integer> newmap = new HashMap<>();
     newmap.putAll(map);
     assertEquals(newmap, map);

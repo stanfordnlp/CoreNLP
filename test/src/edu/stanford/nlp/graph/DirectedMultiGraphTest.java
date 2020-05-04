@@ -42,15 +42,9 @@ public class DirectedMultiGraphTest extends TestCase {
     }
   }
 
-  public void testNumVertices() {
+  public void testForm() {
     System.out.println("Graph is \n" + graph.toString());
-
     assertEquals(graph.getNumVertices(), 10);
-  }
-
-  public void testNumEdges() {
-    System.out.println("Graph is \n" + graph.toString());
-
     assertEquals(graph.getNumEdges(), 7);
   }
 

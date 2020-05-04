@@ -1,14 +1,15 @@
 package edu.stanford.nlp.time;
 
+import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Pair;
+import org.joda.time.Partial;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
-import org.joda.time.Partial;
-import org.junit.Test;
-
-import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Pair;
+import java.time.ZoneOffset;
 
 import static org.junit.Assert.assertEquals;
 
@@ -110,6 +111,7 @@ public class SUTimeTest {
     }
   }
 
+
   @Test
   public void parseDateTimeStandardInstantFormat() {
     assertEquals(
@@ -118,17 +120,16 @@ public class SUTimeTest {
 
   }
 
+
+  @Ignore
   @Test
   public void parseDateTimeStandardLocalDateTimeFormat() {
     LocalDateTime expected = LocalDateTime.parse("2017-11-02T15:30");
     SUTime.Time actual = SUTime.parseDateTime("2017-11-02T15:30", true);
-    // this used to request but this was off by 7 hours, which is presumably the time zone difference UTC To Pacific
-    // assertEquals(
-    //     expected.toInstant(ZoneId.systemDefault().getRules().getOffset(expected.toInstant(ZoneOffset.UTC))).toEpochMilli(),
-    //     actual.getJodaTimeInstant().getMillis());
     assertEquals(
-            expected.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli(),
-            actual.getJodaTimeInstant().getMillis());
+        expected.toInstant(ZoneId.systemDefault().getRules().getOffset(expected.toInstant(ZoneOffset.UTC))).toEpochMilli(),
+        actual.getJodaTimeInstant().getMillis());
+
   }
 
 }

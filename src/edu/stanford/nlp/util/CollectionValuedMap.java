@@ -76,15 +76,12 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    */
   public void add(K key, V value) {
     if (treatCollectionsAsImmutable) {
-      Collection<V> newC;
+      Collection<V> newC = cf.newCollection();
       Collection<V> c = map.get(key);
       if (c != null) {
-        newC = cf.newCollection();
         newC.addAll(c);
-        newC.add(value);
-      } else {
-        newC = cf.newSingletonCollection(value);
       }
+      newC.add(value);
       map.put(key, newC); // replacing the old collection
     } else {
       Collection<V> c = map.get(key);
@@ -100,13 +97,6 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    * Adds the values to the Collection mapped to by the key.
    */
   public void addAll(K key, Collection<V> values) {
-    if (values.size() == 0) {
-      return;
-    }
-    if (values.size() == 1) {
-      add(key, values.iterator().next());
-      return;
-    }
     if (treatCollectionsAsImmutable) {
       Collection<V> newC = cf.newCollection();
       Collection<V> c = map.get(key);
@@ -158,11 +148,6 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
           newCollection.addAll(currentCollection);
         }
         newCollection.addAll(newValues);
-        if (newCollection.size() == 0) {
-          newCollection = cf.newEmptyCollection();
-        } else if (newCollection.size() == 1) {
-          newCollection = cf.newSingletonCollection(newCollection.iterator().next());
-        }
         map.put(key, newCollection); // replacing the old collection
       } else {
         boolean needToAdd = false;
@@ -214,11 +199,6 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
         Collection<V> newC = cf.newCollection();
         newC.addAll(c);
         newC.remove(value);
-        if (newC.size() == 0) {
-          newC = cf.newEmptyCollection();
-        } else if (newC.size() == 1) {
-          newC = cf.newSingletonCollection(newC.iterator().next());
-        }
         map.put(key, newC);
       }
 
