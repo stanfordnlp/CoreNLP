@@ -59,7 +59,7 @@ If using a build of the latest code, make sure to use the latest models as well.
 
 ### Useful resources
 
-You can find releases of Stanford CoreNLP on [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/3.9.2/jar).
+You can find releases of Stanford CoreNLP on [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.0.0/jar).
 
 You can find more explanation and documentation on [the Stanford CoreNLP homepage](http://stanfordnlp.github.io/CoreNLP/).
 

@@ -80,9 +80,9 @@ public class LeastRecentlyUsedCache<K, V> {
     }
   }
 
-  private Map<K, Node<K, V>> map = new HashMap<>();
-  private LinkedList<K, V> list = new LinkedList<>();
-  private final int maxSize;
+  Map<K, Node<K, V>> map = new HashMap<>();
+  LinkedList<K, V> list = new LinkedList<>();
+  final int maxSize;
 
   public LeastRecentlyUsedCache(int maxSize) {
     this.maxSize = maxSize;
@@ -100,11 +100,7 @@ public class LeastRecentlyUsedCache<K, V> {
   }
 
   public void add(K key, V value) {
-    Node<K, V> node = map.getOrDefault(key, null);
-    if (node != null) {
-      list.remove(node);
-    }
-    node = list.push(key, value);
+    Node<K, V> node = list.push(key, value);
     map.put(key, node);
     if (list.size > maxSize) {
       node = list.pop();
