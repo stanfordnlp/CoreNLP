@@ -42,15 +42,19 @@ At present, [the current released version of the code](https://stanfordnlp.githu
 3. When using the latest version of the code make sure to download the latest versions of the [corenlp-models](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar), [english-models](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar), and [english-models-kbp](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) and include them in your CLASSPATH.  If you are processing languages other than English, make sure to download the latest version of the models jar for the language you are interested in.  
 4. If you want to use Stanford CoreNLP as part of a Maven project you need to install the models jars into your Maven repository.  Below is a sample command for installing the Spanish models jar.  For other languages just change the language name in the command.  To install `stanford-corenlp-models-current.jar` you will need to set `-Dclassifier=models`.  Here is the sample command for Spanish: `mvn install:install-file -Dfile=/location/of/stanford-spanish-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=4.0.0 -Dclassifier=models-spanish -Dpackaging=jar` 
 
-#### Latest Models
+#### Models
 
-If using a build of the latest code, make sure to use the latest models as well.
+Some of the larger (English) models -- like the shift-reduce parser and WikiDict -- are not distributed with our default models jar.
+These require downloading the English (extra) and English (kbp) jars. Resources for other languages require usage of the corresponding
+models jar.
+
+The models jars that correspond to the latest code can be found in the table below.
 
 | Language | Model Jar | Last Updated |
 | --- | --- | --- |
 | Arabic | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar) | 4.0.0 |
 | English (default) | [download](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar) | 4.0.0 |
-| English (full) | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar) | 4.0.0 |
+| English (extra) | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar) | 4.0.0 |
 | English (kbp) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) | 4.0.0 |
 | Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar) | 4.0.0 |
 | French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar) | 4.0.0 |
@@ -64,15 +68,6 @@ You can find releases of Stanford CoreNLP on [Maven Central](https://search.mave
 You can find more explanation and documentation on [the Stanford CoreNLP homepage](http://stanfordnlp.github.io/CoreNLP/).
 
 The most recent models associated with the code in the HEAD of this repository can be found [here](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar).
-
-Some of the larger (English) models -- like the shift-reduce parser and WikiDict -- are not distributed with our default models jar.
-The most recent version of these models can be found [here](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar).
-
-We distribute resources for other languages as well, including [Arabic models](http://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar),
-[Chinese models](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar),
-[French models](http://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar),
-[German models](http://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar),
-and [Spanish models](http://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar).
 
 For information about making contributions to Stanford CoreNLP, see the file [CONTRIBUTING.md](CONTRIBUTING.md).
 
