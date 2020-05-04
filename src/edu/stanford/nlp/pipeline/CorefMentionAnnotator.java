@@ -19,6 +19,7 @@ import edu.stanford.nlp.coref.md.CorefMentionFinder;
 import edu.stanford.nlp.coref.md.DependencyCorefMentionFinder;
 import edu.stanford.nlp.coref.md.HybridCorefMentionFinder;
 import edu.stanford.nlp.coref.md.RuleBasedCorefMentionFinder;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -67,21 +68,20 @@ public class CorefMentionAnnotator extends TextAnnotationCreator implements Anno
       //System.out.println("got head finder");
       md = getMentionFinder(props, headFinder);
       log.info("Using mention detector type: " + mdName);
-      mentionAnnotatorRequirements.addAll(Arrays.asList(
-          CoreAnnotations.TokensAnnotation.class,
-          CoreAnnotations.SentencesAnnotation.class,
-          CoreAnnotations.PartOfSpeechAnnotation.class,
-          CoreAnnotations.NamedEntityTagAnnotation.class,
-          CoreAnnotations.EntityTypeAnnotation.class,
-          CoreAnnotations.IndexAnnotation.class,
-          CoreAnnotations.TextAnnotation.class,
-          CoreAnnotations.ValueAnnotation.class,
-          SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-          SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class
-      ));
-    } catch (Exception e) {
-      log.info("Error with building coref mention annotator!");
-      log.info(e);
+      mentionAnnotatorRequirements.addAll(Arrays.asList(CoreAnnotations.TokensAnnotation.class,
+                                                        CoreAnnotations.SentencesAnnotation.class,
+                                                        CoreAnnotations.PartOfSpeechAnnotation.class,
+                                                        CoreAnnotations.NamedEntityTagAnnotation.class,
+                                                        CoreAnnotations.EntityTypeAnnotation.class,
+                                                        CoreAnnotations.IndexAnnotation.class,
+                                                        CoreAnnotations.TextAnnotation.class,
+                                                        CoreAnnotations.ValueAnnotation.class,
+                                                        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+                                                        SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 

@@ -131,7 +131,12 @@ public class Config {
    *
    * If zero, the parser will skip the pre-computation step.
    */
-  public int numPreComputed = 100000;
+  public int numPreComputed = 20000;
+
+  /**
+   * Number of hidden layer activations to cache.  Only applies at test time.
+   */
+  public int numCached = 5000;
 
   /**
    * During training, run a full UAS evaluation after every
@@ -225,6 +230,7 @@ public class Config {
     hiddenSize = PropertiesUtils.getInt(props, "hiddenSize", hiddenSize);
     embeddingSize = PropertiesUtils.getInt(props, "embeddingSize", embeddingSize);
     numPreComputed = PropertiesUtils.getInt(props, "numPreComputed", numPreComputed);
+    numCached = PropertiesUtils.getInt(props, "numCached", numCached);
     evalPerIter = PropertiesUtils.getInt(props, "evalPerIter", evalPerIter);
     clearGradientsPerIter = PropertiesUtils.getInt(props, "clearGradientsPerIter", clearGradientsPerIter);
     saveIntermediate = PropertiesUtils.getBool(props, "saveIntermediate", saveIntermediate);
@@ -287,6 +293,7 @@ public class Config {
     System.err.printf("hiddenSize = %d%n", hiddenSize);
     System.err.printf("embeddingSize = %d%n", embeddingSize);
     System.err.printf("numPreComputed = %d%n", numPreComputed);
+    System.err.printf("numCached = %d%n", numCached);
     System.err.printf("evalPerIter = %d%n", evalPerIter);
     System.err.printf("clearGradientsPerIter = %d%n", clearGradientsPerIter);
     System.err.printf("saveItermediate = %b%n", saveIntermediate);

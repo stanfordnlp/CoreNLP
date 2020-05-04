@@ -64,18 +64,21 @@ public class NERPipelineEndToEndSlowITest extends TestCase {
     }
   }
 
+  /** Test English 3-class model **/
   public void testEnglish3Class() {
     String threeClassInput = "english.all.3class.distsim-regression.input";
     String threeClassOutput = "english.all.3class.distsim-regression.expected";
     runModelTest(threeClassInput, threeClassOutput, pipeline3Class);
   }
 
+  /** Test English 4-class model **/
   public void testEnglish4Class() {
     String fourClassInput = "english.conll.4class.distsim-regression.input";
     String fourClassOutput = "english.conll.4class.distsim-regression.expected";
     runModelTest(fourClassInput, fourClassOutput, pipeline4Class);
   }
 
+  /** Test English 7-class model **/
   public void testEnglish7Class() {
     String sevenClassInput = "english.muc.7class.distsim-regression.input";
     String sevenClassOutput = "english.muc.7class.distsim-regression.expected";

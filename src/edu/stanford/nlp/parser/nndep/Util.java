@@ -175,8 +175,10 @@ public class Util  {
         }
       }
 
-    } catch (Exception e) {
-
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
     }
 
     /*try (BufferedReader reader = IOUtils.readerFromString(inFile)) {

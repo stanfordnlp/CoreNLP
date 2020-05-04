@@ -2848,7 +2848,7 @@ public class SUTime  {
       Duration d = getDuration();
       if (d != null) {
         int padType = (flags & RANGE_FLAGS_PAD_MASK);
-        Time start = this;
+        Time start; // initialized in switch;
         Duration granularity = inputGranularity;
         switch (padType) {
         case RANGE_FLAGS_PAD_NONE:
@@ -3536,15 +3536,15 @@ public class SUTime  {
   private static final Pattern PATTERN_ISO = Pattern.compile("(\\d\\d\\d\\d)-?(\\d\\d?)-?(\\d\\d?)(-?(?:T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?))?");
   private static final Pattern PATTERN_ISO_DATETIME = Pattern.compile("(\\d\\d\\d\\d)(\\d\\d)(\\d\\d):(\\d\\d)(\\d\\d)");
   private static final Pattern PATTERN_ISO_TIME = Pattern.compile("T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?");
-  private static final Pattern PATTERN_ISO_DATE_1 = Pattern.compile(".*(\\d\\d\\d\\d)\\/(\\d\\d?)\\/(\\d\\d?).*");
-  private static final Pattern PATTERN_ISO_DATE_2 = Pattern.compile(".*(\\d\\d\\d\\d)\\-(\\d\\d?)\\-(\\d\\d?).*");
+  private static final Pattern PATTERN_ISO_DATE_1 = Pattern.compile(".*(\\d\\d\\d\\d)/(\\d\\d?)/(\\d\\d?).*");
+  private static final Pattern PATTERN_ISO_DATE_2 = Pattern.compile(".*(\\d\\d\\d\\d)-(\\d\\d?)-(\\d\\d?).*");
   private static final Pattern PATTERN_ISO_DATE_PARTIAL = Pattern.compile("([0-9X]{4})[-]?([0-9X][0-9X])[-]?([0-9X][0-9X])");
 
   // Ambiguous pattern - interpret as MM/DD/YY(YY)
-  private static final Pattern PATTERN_ISO_AMBIGUOUS_1 = Pattern.compile(".*(\\d\\d?)\\/(\\d\\d?)\\/(\\d\\d(\\d\\d)?).*");
+  private static final Pattern PATTERN_ISO_AMBIGUOUS_1 = Pattern.compile(".*(\\d\\d?)/(\\d\\d?)/(\\d\\d(\\d\\d)?).*");
 
   // Ambiguous pattern - interpret as MM-DD-YY(YY)
-  private static final Pattern PATTERN_ISO_AMBIGUOUS_2 = Pattern.compile(".*(\\d\\d?)\\-(\\d\\d?)\\-(\\d\\d(\\d\\d)?).*");
+  private static final Pattern PATTERN_ISO_AMBIGUOUS_2 = Pattern.compile(".*(\\d\\d?)-(\\d\\d?)-(\\d\\d(\\d\\d)?).*");
 
   // Euro date
   // Ambiguous pattern - interpret as DD.MM.YY(YY)
@@ -3662,8 +3662,7 @@ public class SUTime  {
    * @param dateStr The serialized date we are parsing to a document date.
    * @param allowPartial (allow partial ISO)
    */
-  public static SUTime.Time parseDateTime(String dateStr, boolean allowPartial)
-  {
+  public static SUTime.Time parseDateTime(String dateStr, boolean allowPartial) {
     if (dateStr == null) return null;
 
     Optional<java.time.Instant> refInstant = parseInstant(dateStr, Optional.empty());
@@ -3969,7 +3968,7 @@ public class SUTime  {
       }
       Time minTime = refTime.subtract(this);
       Time maxTime = refTime.add(this);
-      Range likelyRange = null;
+      Range likelyRange; // initialized below
       if ((flags & (DUR_RESOLVE_FROM_AS_REF | RESOLVE_TO_FUTURE)) != 0) {
         likelyRange = new Range(refTime, maxTime, this);
       } else if ((flags & (DUR_RESOLVE_TO_AS_REF | RESOLVE_TO_PAST)) != 0) {
@@ -4194,7 +4193,7 @@ public class SUTime  {
           p.add(field, oldVal - remainder);
           if (remainder != 0) {
             DurationFieldType f;
-            int standardUnit = 1;
+            int standardUnit; // initialized below
             // TODO: This seems silly, how to do this with jodatime???
             if (DurationFieldType.centuries().equals(field)) {
               f = DurationFieldType.years();

@@ -159,27 +159,33 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   /**
+   * Look for the english SR parser, use it as default if it exists <br>
+   * Otherwise complain and use the PCFG as the default
+   */
+  private String findDefaultParser() {
+    String SR_PARSER = "edu/stanford/nlp/models/srparser/englishSR.ser.gz";
+    String PCFG_PARSER = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
+    ClassLoader classLoader = getClass().getClassLoader();
+    URL srResource = classLoader.getResource(SR_PARSER);
+    if (srResource != null) {
+      log("Setting default constituency parser to SR parser: " + SR_PARSER);
+      return SR_PARSER;
+    } else {
+      log("Warning: cannot find " + SR_PARSER);
+      log("Setting default constituency parser to PCFG parser: " + PCFG_PARSER);
+      log("To use shift reduce parser download English models jar from:");
+      log("https://stanfordnlp.github.io/CoreNLP/download.html");
+      return PCFG_PARSER;
+    }
+  }
+
+  /**
    * Create a new Stanford CoreNLP Server with the default parameters and
    * pass in properties (server_id, ...).
    *
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
   public StanfordCoreNLPServer(Properties props) throws IOException {
-    // check if englishSR.ser.gz can be found (standard models jar doesn't have this)
-    String defaultParserPath;
-    ClassLoader classLoader = getClass().getClassLoader();
-    URL srResource = classLoader.getResource("edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-    if (srResource != null) {
-      defaultParserPath = "edu/stanford/nlp/models/srparser/englishSR.ser.gz";
-      log("Setting default constituency parser to SR parser: edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-    } else {
-      defaultParserPath = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
-      log("Warning: cannot find edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-      log("Setting default constituency parser to PCFG parser: edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
-      log("To use shift reduce parser download English models jar from:");
-      log("https://stanfordnlp.github.io/CoreNLP/download.html");
-    }
-
     // server default properties for a pipeline, these will be overwritten by file provided and command line
     // provided defaults...the precedence is 1.) command line, 2.) properties file, 3.) server defaults
     this.defaultProps = PropertiesUtils.asProperties(
@@ -190,7 +196,6 @@ public class StanfordCoreNLPServer implements Runnable {
         "inputFormat", "text",   // By default, treat the POST data like text
         "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
         "prettyPrint", "false",  // Don't bother pretty-printing
-        "parse.model", defaultParserPath,  // SR scales linearly with sentence length. Good for a server!
         "parse.binaryTrees", "true",  // needed for the Sentiment annotator
         "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
 
@@ -209,6 +214,13 @@ public class StanfordCoreNLPServer implements Runnable {
       }
     }
     PropertiesUtils.overWriteProperties(this.defaultProps, pipelinePropsFromCL);
+
+    if (!PropertiesUtils.hasProperty(this.defaultProps, "parse.model")) {
+      // check if englishSR.ser.gz can be found (standard models jar doesn't have this)
+      // SR scales linearly with sentence length. Good for a server!
+      String defaultParserPath = findDefaultParser();
+      this.defaultProps.setProperty("parse.model", defaultParserPath);
+    }
 
     this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
     this.corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);

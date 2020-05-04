@@ -798,6 +798,10 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return to2D(weights, this.labelIndices, this.map);
   }
 
+  public float[][] to2Dfloat(double[] weights) {
+    return CRFClassifier.to2D(weights, this.labelIndices, this.map);
+  }
+
   /**
    * Takes a double array of weights and populates a 2D array where:
    *

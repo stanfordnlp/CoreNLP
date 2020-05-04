@@ -189,12 +189,11 @@ public class QuoteAttributionAnnotator implements Annotator {
     useCoref = PropertiesUtils.getBool(props, "useCoref", useCoref);
     
     // setup dependency parser 
-    String DEPENDENCY_PARSER_MODEL = props.getProperty("depparse.model", 
-        DependencyParser.DEFAULT_MODEL);
-    Properties depparseProperties = PropertiesUtils.extractPrefixedProperties(props,
-        Annotator.STANFORD_DEPENDENCIES + '.');
-	parser = DependencyParser.loadFromModelFile(DEPENDENCY_PARSER_MODEL, 
-        depparseProperties);
+    String DEPENDENCY_PARSER_MODEL =
+      props.getProperty(Annotator.STANFORD_DEPENDENCIES + ".model", DependencyParser.DEFAULT_MODEL);
+    Properties depparseProperties =
+      PropertiesUtils.extractPrefixedProperties(props, Annotator.STANFORD_DEPENDENCIES + '.');
+    parser = DependencyParser.loadFromModelFile(DEPENDENCY_PARSER_MODEL, depparseProperties);
     
     if (VERBOSE) {
       timer.stop("done.");

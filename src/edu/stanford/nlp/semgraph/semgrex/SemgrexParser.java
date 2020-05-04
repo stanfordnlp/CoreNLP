@@ -23,9 +23,7 @@ class SemgrexParser implements SemgrexParserConstants {
 
   private static final Redwood.RedwoodChannels log = Redwood.channels(SemgrexParser.class);
   private boolean deprecatedAmp = false;
-  private static boolean warnedAmp = false;
   private boolean deprecatedNodeConj = false;
-  private static boolean warnedNodeConj = false;
 
   private String fullExpression(Token startToken) {
     StringBuilder result = new StringBuilder();
@@ -96,16 +94,10 @@ children.add(node);
 if (children.size() > 1)
       node = new CoordinationPattern(true, children, true, true);
     if (deprecatedAmp) {
-      if (!warnedAmp) {
-        warnDeprecated("Use of & in semgrex patterns is deprecated and will be removed in a future release.  It is equivalent to the same expression without the &.  Offending expression: ", startToken);
-        warnedAmp = true;
-      }
+      {if (true) throw new SemgrexParseException("Use of & in semgrex patterns is now illegal.  It is equivalent to the same expression without the &.  Offending expression: " + startToken);}
     }
     if (deprecatedNodeConj) {
-      if (!warnedNodeConj) {
-        warnDeprecated("Use of node conjugation (expressions such as '< [foo bar]' or '< [foo & bar]') is deprecated and will be removed in a future release.  The issue is that expressions such as '[foo bar] < zzz' may intuitively mean that foo < zzz, bar < zzz, zzz the same for both cases, but that is not the way the parser interprets this expression.  Changing the functionality might break existing expressions, and anyway this can be rewritten in various ways such as 'zzz > foo > bar' or 'foo < zzz=a : bar < zzz=a'.  Offending expression: ", startToken);
-        warnedNodeConj = true;
-      }
+      {if (true) throw new SemgrexParseException("Use of node conjugation (expressions such as '< [foo bar]' or '< [foo & bar]') is now illegal.  The issue is that expressions such as '[foo bar] < zzz' may intuitively mean that foo < zzz, bar < zzz, zzz the same for both cases, but that is not the way the parser interpreted this expression.  Changing the functionality might break existing expressions, and anyway this can be rewritten in various ways such as 'zzz > foo > bar' or 'foo < zzz=a : bar < zzz=a'.  Offending expression: " + startToken);}
     }
     {if ("" != null) return node;}
     throw new Error("Missing return statement in function");

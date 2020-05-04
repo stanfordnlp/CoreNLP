@@ -863,6 +863,39 @@ public class SemgrexTest extends TestCase {
             "[ate/NN subj>Bill/NN obj>[muffins compound>blueberry]]");
   }
 
+  /** 
+   * Test a couple expressions which should now be illegal.
+   * <br>
+   * Node conjugation is now illegal, as it has unclear semantics.
+   * <br>
+   * &amp; on relations is now illegal as it is both redundant and confusing.
+   */
+  public void testIllegal() {
+    try {
+      String pattern = "{word:unban} > [{word:mox} {word:opal}]";
+      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+      throw new RuntimeException("This expression is now illegal");
+    } catch (SemgrexParseException e) {
+      // yay
+    }
+
+    try {
+      String pattern = "{word:unban} > [{word:mox} & {word:opal}]";
+      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+      throw new RuntimeException("This expression is now illegal");
+    } catch (SemgrexParseException e) {
+      // yay
+    }
+
+    try {
+      String pattern = "{}=unban ![>det {}] & > {word:/^(?!mox).*$/}=opal";
+      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+      throw new RuntimeException("This expression is now illegal");
+    } catch (SemgrexParseException e) {
+      // yay
+    }
+  }
+
   /** Various bracketing tests: | and &amp; */
   public void testBrackets() {
     runTest("{word:ate} [ > {word:Bill} | > {word:muffins}]",
@@ -897,14 +930,11 @@ public class SemgrexTest extends TestCase {
             "[ate/VBD subj>foo/NNP obj>[bar compound>blueberry]]");
 
     // These should be equivalent expressions
-    pattern = "{word:ate} > [{word:Bill} & {word:muffins}]";
-    pattern2 = "{word:ate} [ > {word:Bill} & > {word:muffins}]";
-    String pattern3 = "{word:ate} > {word:Bill} > {word:muffins}";
+    pattern = "{word:ate} [ > {word:Bill} > {word:muffins}]";
+    pattern2 = "{word:ate} > {word:Bill} > {word:muffins}";
     semgrex = SemgrexPattern.compile(pattern);
     semgrex2 = SemgrexPattern.compile(pattern2);
-    SemgrexPattern semgrex3 = SemgrexPattern.compile(pattern3);
-    assertEquals(semgrex.toString(), semgrex3.toString());
-    assertEquals(semgrex2.toString(), semgrex3.toString());
+    assertEquals(semgrex.toString(), semgrex2.toString());
 
     runTest(semgrex,
             "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]",
@@ -916,24 +946,14 @@ public class SemgrexTest extends TestCase {
     runTest(semgrex,
             "[ate/VBD subj>foo/NNP obj>[bar compound>blueberry]]");
 
-    runTest(semgrex2,
+    runTest(pattern2,
             "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]",
             "ate/VBD");
-    runTest(semgrex2,
+    runTest(pattern2,
             "[ate/VBD subj>foo/NNP obj>[muffins compound>blueberry]]");
-    runTest(semgrex2,
+    runTest(pattern2,
             "[ate/VBD subj>Bill/NNP obj>[bar compound>blueberry]]");
-    runTest(semgrex2,
-            "[ate/VBD subj>foo/NNP obj>[bar compound>blueberry]]");
-
-    runTest(pattern3,
-            "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]",
-            "ate/VBD");
-    runTest(pattern3,
-            "[ate/VBD subj>foo/NNP obj>[muffins compound>blueberry]]");
-    runTest(pattern3,
-            "[ate/VBD subj>Bill/NNP obj>[bar compound>blueberry]]");
-    runTest(pattern3,
+    runTest(pattern2,
             "[ate/VBD subj>foo/NNP obj>[bar compound>blueberry]]");
 
     // An OR pattern leading to some nesting
