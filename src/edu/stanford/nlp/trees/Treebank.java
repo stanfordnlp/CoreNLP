@@ -449,7 +449,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
         }
       }
       if (numNullLabel > 0) {
-        pw.println("  Warning!  " + numNullLabel + " tree nodes with null or empty string labels, e.g.:");
+        pw.println("  Warning! " + numNullLabel + " tree nodes with null or empty string labels, e.g.:");
         pw.println("    " + nullLabelEg);
       }
       if (numPreTerminalWithMultipleChildren > 0) {
@@ -478,13 +478,13 @@ public abstract class Treebank extends AbstractCollection<Tree> {
       }
       for (String cat : cats.keySet()) {
         if (cat != null && cat.contains("@")) {
-          pw.println("  Warning!!  Stanford Parser does not work with categories containing '@' like: " + cat);
+          pw.println("  Warning!! Stanford Parser does not work with categories containing '@' like: " + cat);
           break;
         }
       }
       for (String cat : tags.keySet()) {
         if (cat != null && cat.contains("@")) {
-          pw.println("  Warning!!  Stanford Parser does not work with tags containing '@' like: " + cat);
+          pw.println("  Warning!! Stanford Parser does not work with tags containing '@' like: " + cat);
           break;
         }
       }
