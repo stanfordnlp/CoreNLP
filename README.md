@@ -44,11 +44,11 @@ At present, [the current released version of the code](https://stanfordnlp.githu
 
 #### Models
 
+The models jars that correspond to the latest code can be found in the table below.
+
 Some of the larger (English) models -- like the shift-reduce parser and WikiDict -- are not distributed with our default models jar.
 These require downloading the English (extra) and English (kbp) jars. Resources for other languages require usage of the corresponding
 models jar.
-
-The models jars that correspond to the latest code can be found in the table below.
 
 | Language | Model Jar | Last Updated |
 | --- | --- | --- |
@@ -66,8 +66,6 @@ The models jars that correspond to the latest code can be found in the table bel
 You can find releases of Stanford CoreNLP on [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.0.0/jar).
 
 You can find more explanation and documentation on [the Stanford CoreNLP homepage](http://stanfordnlp.github.io/CoreNLP/).
-
-The most recent models associated with the code in the HEAD of this repository can be found [here](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar).
 
 For information about making contributions to Stanford CoreNLP, see the file [CONTRIBUTING.md](CONTRIBUTING.md).
 
