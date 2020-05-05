@@ -112,7 +112,7 @@ The pattern is the same for the other supported languages.
 
 Currently French, German, and Spanish work off of the UD 2.3 tokenization standard. This means among other things that words are split into multiword tokens. For instance the French word `"des"` will be tokenized in some circumstances as `"de" "les"`. All tagging, parsing, and named entity recognition models will work off of that tokenization standard, so it is necessary to use the `mwt` annotator which performs the multiword tokenization. For instance, in Spanish, the annotators required to run dependency parsing would be `tokenize,ssplit,mwt,pos,lemma,ner,depparse`. The part of speech tags and dependency labels are from the UD 2.3 sets for each language.
 
-### Models for other languages
+#### Models for other languages
 
 Other people have developed models using or compatible with CoreNLP for several further languages. They may or may not be compatible with the most recent release of CoreNLP that we provide.
 
