@@ -55,11 +55,11 @@ public class NERPipelineEndToEndSlowITest extends TestCase {
     return expectedNERLabels;
   }
 
-  public void runModelTest(String inputFile, String outputFile) {
+  public void runModelTest(String inputFile, String outputFile, StanfordCoreNLP pipeline) {
     List<String> inputSentences = IOUtils.linesFromFile(String.format("%s/%s", DATA_PATH, inputFile));
     List<List<String>> expectedLabels = readInExpectedNERLabels(outputFile);
     for (int i = 0; i < inputSentences.size() ; i++) {
-      CoreDocument doc = new CoreDocument(pipeline3Class.process(inputSentences.get(i)));
+      CoreDocument doc = new CoreDocument(pipeline.process(inputSentences.get(i)));
       assertEquals(expectedLabels.get(i), doc.sentences().get(0).nerTags());
     }
   }
@@ -68,21 +68,21 @@ public class NERPipelineEndToEndSlowITest extends TestCase {
   public void testEnglish3Class() {
     String threeClassInput = "english.all.3class.distsim-regression.input";
     String threeClassOutput = "english.all.3class.distsim-regression.expected";
-    runModelTest(threeClassInput, threeClassOutput);
+    runModelTest(threeClassInput, threeClassOutput, pipeline3Class);
   }
 
   /** Test English 4-class model **/
   public void testEnglish4Class() {
     String fourClassInput = "english.conll.4class.distsim-regression.input";
     String fourClassOutput = "english.conll.4class.distsim-regression.expected";
-    runModelTest(fourClassInput, fourClassOutput);
+    runModelTest(fourClassInput, fourClassOutput, pipeline4Class);
   }
 
   /** Test English 7-class model **/
   public void testEnglish7Class() {
     String sevenClassInput = "english.muc.7class.distsim-regression.input";
     String sevenClassOutput = "english.muc.7class.distsim-regression.expected";
-    runModelTest(sevenClassInput, sevenClassOutput);
+    runModelTest(sevenClassInput, sevenClassOutput, pipeline7Class);
   }
 
 }
