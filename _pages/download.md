@@ -41,12 +41,12 @@ parts beyond the tokenizer and sentence splitter) and so you need to specify bot
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.9.2</version>
+    <version>4.0.0</version>
 </dependency>
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.9.2</version>
+    <version>4.0.0</version>
     <classifier>models</classifier>
 </dependency>
 </dependencies>
@@ -59,7 +59,7 @@ Chinese, German, or Spanish, also add this inside `dependencies` to your `pom.xm
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.9.2</version>
+    <version>4.0.0</version>
     <classifier>models-chinese</classifier>
 </dependency>
 ```
