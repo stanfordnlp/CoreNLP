@@ -22,10 +22,6 @@ Out-of-the-box, Stanford CoreNLP expects and processes English language text. Bu
 | Coreference |    | ✔  | ✔ |  |  |     |
 | Open IE |    |   | ✔ |  |  |     |
 
-To get CoreNLP to work with another human language, you need a language pack of appropriate models for that language. You can find them on Maven Central or on [the download page](download.html). You could then manually specify to use all those resources, but that is impractical. You also want to have a properties file appropriate for the language that you are processing. A default one is included with the models jar for each language.  You can override individual properties on the command-line, as usual, or make a customized language-specific properties file appropriate to your processing needs.
-
-Below are a few examples of commands for processing text in different languages. Many of the other languages do not have all the components that are available for English. Also note that at the moment for Chinese you use `segment` rather than `tokenize`. We'll aim to unify them eventually
-
 #### Models
 
 To run Stanford CoreNLP on a supported language, you have to include the models jar for that language in your CLASSPATH.
