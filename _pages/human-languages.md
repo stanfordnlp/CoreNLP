@@ -106,7 +106,7 @@ The pattern is the same for the other supported languages.
 
 #### UD supported languages
 
-Currently French, German, and Spanish work off of the UD 2.0 tokenization standard. This means among other things that words are split into multiword tokens. For instance the French word `"des"` will be tokenized in some circumstances as `"de" "les"`. All tagging, parsing, and named entity recognition models will work off of that tokenization standard, so it is necessary to use the `mwt` annotator which performs the multiword tokenization. For instance, in Spanish, the annotators required to run dependency parsing would be `tokenize,ssplit,mwt,pos,lemma,ner,depparse`. The part of speech tags and dependency labels are from the UD 2.0 sets for each language.
+Currently French, German, and Spanish work off of the UD 2.0 tokenization standard. This means among other things that words are split into multiword tokens. For instance the French word `"des"` will be tokenized in some circumstances as `"de" "les"`. All tagging, parsing, and named entity recognition models will work off of that tokenization standard, so it is necessary to use the `mwt` annotator which performs the multiword tokenization. For instance, in Spanish, the annotators required to run dependency parsing would be `tokenize,ssplit,mwt,pos,lemma,depparse`. The part of speech tags and dependency labels are from the UD 2.0 sets for each language.
 
 #### Models for other languages
 
