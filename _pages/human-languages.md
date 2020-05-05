@@ -14,7 +14,7 @@ Out-of-the-box, Stanford CoreNLP expects and processes English language text. Bu
 | Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |
 | Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |
 | Lemma |   |   | ✔ |   |   |    |
-| Named Entities |   | ✔  | ✔ |    | ✔ | ✔ |
+| Named Entities |   | ✔  | ✔ | ✔ | ✔ | ✔ |
 | Constituency Parsing | ✔ | ✔  | ✔ | ✔ | ✔ | ✔ |
 | Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     |
 | Sentiment Analysis |    |    | ✔ |  |  |     |
@@ -26,100 +26,91 @@ To get CoreNLP to work with another human language, you need a language pack of 
 
 Below are a few examples of commands for processing text in different languages. Many of the other languages do not have all the components that are available for English. Also note that at the moment for Chinese you use `segment` rather than `tokenize`. We'll aim to unify them eventually
 
-### Chinese
+#### Models
 
-You can process Chinese with a command line like this:
+To run Stanford CoreNLP on a supported language, you have to include the models jar for that language in your CLASSPATH.
+
+The jars for each language can be found here:
+
+| Language | model jar | version |
+| :------- | :-------- | | :----- |
+| Arabic  | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-arabic.jar) | 4.0.0 |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-chinese.jar) | 4.0.0 |
+| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-french.jar) | 4.0.0 |
+| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-german.jar) | 4.0.0 |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-spanish.jar) | 4.0.0 |
+
+#### Running pipelines
+
+There are sets of default properties that can be used to run pipelines for every supported language.
+
+For instance, to run a Spanish pipeline, one could execute this command from the command line:
 
 ```sh
-java -mx3g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-chinese.properties -file chinese.txt -outputFormat text
+java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -props spanish -file example.txt
 ```
 
-The crucial `StanfordCoreNLP-chinese.properties` file sets up models for Chinese. Its contents might be something like this (but this version in the documentation may well be dated, so extract the version from the jar file that you are using if you really want to be sure of its contents!):
-
-```
-# Pipeline options - lemma is no-op for Chinese but currently needed because coref 
-# demands it (bad old requirements system)
-annotators = tokenize, ssplit, pos, lemma, ner, parse, mention, coref
-
-# segment
-tokenize.language = zh
-segment.model = edu/stanford/nlp/models/segmenter/chinese/ctb.gz
-segment.sighanCorporaDict = edu/stanford/nlp/models/segmenter/chinese
-segment.serDictionary = edu/stanford/nlp/models/segmenter/chinese/dict-chris6.ser.gz
-segment.sighanPostProcessing = true
-
-# sentence split
-ssplit.boundaryTokenRegex = [.。]|[!?！？]+
-
-# pos
-pos.model = edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger
-
-# ner
-ner.language = chinese
-ner.model = edu/stanford/nlp/models/ner/chinese.misc.distsim.crf.ser.gz
-ner.applyNumericClassifiers = true
-ner.useSUTime = false
-
-# regexner
-regexner.mapping = edu/stanford/nlp/models/kbp/cn_regexner_mapping.tab
-regexner.validpospattern = ^(NR|NN|JJ).*
-regexner.ignorecase = true
-regexner.noDefaultOverwriteLabels = CITY
-
-# parse
-parse.model = edu/stanford/nlp/models/srparser/chineseSR.ser.gz
-
-# depparse
-depparse.model    = edu/stanford/nlp/models/parser/nndep/UD_Chinese.gz
-depparse.language = chinese
-
-# coref
-coref.sieves = ChineseHeadMatch, ExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, PronounMatch
-coref.input.type = raw
-coref.postprocessing = true
-coref.calculateFeatureImportance = false
-coref.useConstituencyTree = true
-coref.useSemantics = false
-coref.algorithm = hybrid
-coref.path.word2vec =
-coref.language = zh
-coref.defaultPronounAgreement = true
-coref.zh.dict = edu/stanford/nlp/models/dcoref/zh-attributes.txt.gz
-coref.print.md.log = false
-coref.md.type = RULE
-coref.md.liberalChineseMD = false
-
-# kbp
-kbp.semgrex = edu/stanford/nlp/models/kbp/chinese/semgrex
-kbp.tokensregex = edu/stanford/nlp/models/kbp/chinese/tokensregex
-kbp.model = none
-
-# entitylink
-entitylink.wikidict = edu/stanford/nlp/models/kbp/wikidict_chinese.tsv.gz
-```
-
-In code, an example would look something like this:
+Or build and run a pipeline in Java in this manner:
 
 ```java
-String text = "克林顿说，华盛顿将逐步落实对韩国的经济援助。"
-        + "金大中对克林顿的讲话报以掌声：克林顿总统在会谈中重申，他坚定地支持韩国摆脱经济危机。";
-Annotation document = new Annotation(text);
-// Setup Chinese Properties by loading them from classpath resources
-Properties props = new Properties();
-props.load(IOUtils.readerFromString("StanfordCoreNLP-chinese.properties"));
-// Or this way of doing it also works
-// Properties props = StringUtils.argsToProperties(new String[]{"-props", "StanfordCoreNLP-chinese.properties"});
-StanfordCoreNLP corenlp = new StanfordCoreNLP(props);
-corenlp.annotate(document);
+String text = "La Universidad de Stanford se encuentra en Palo Alto.";
+StanfordCoreNLP pipeline = new StanfordCoreNLP("spanish");
+CoreDocument doc = pipeline.processToCoreDocument(text);
 ```
 
-### Another language
-
-The pattern for other languages is much the same, except that you substitute the appropriate language name and that for European languages, you are still using the `tokenize` annotator. So for Spanish, it would be:
+These examples would use the following sets of properties (found in `StanfordCoreNLP-spanish.properties`)
 
 ```sh
-java -mx3g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-spanish.properties -file spanish.txt -outputFormat json
+# annotators
+annotators = tokenize, ssplit, mwt, pos, lemma, ner, depparse, kbp
+
+# tokenize
+tokenize.language = es
+
+# mwt
+mwt.mappingFile = edu/stanford/nlp/models/mwt/spanish/spanish-mwt.tsv
+
+# pos
+pos.model = edu/stanford/nlp/models/pos-tagger/spanish-ud.tagger
+
+# ner
+ner.model = edu/stanford/nlp/models/ner/spanish.ancora.distsim.s512.crf.ser.gz
+ner.applyNumericClassifiers = true
+ner.useSUTime = true
+ner.language = es
+
+# sutime
+sutime.language = spanish
+
+# parse
+parse.model = edu/stanford/nlp/models/srparser/spanishSR.beam.ser.gz
+
+# depparse
+depparse.model = edu/stanford/nlp/models/parser/nndep/UD_Spanish.gz
+depparse.language = spanish
+
+# regexner
+ner.fine.regexner.mapping = edu/stanford/nlp/models/kbp/spanish/gazetteers/kbp_regexner_mapping_sp.tag
+ner.fine.regexner.validpospattern = ^(NOUN|ADJ|PROPN).*
+ner.fine.regexner.ignorecase = true
+ner.fine.regexner.noDefaultOverwriteLabels = CITY,COUNTRY,STATE_OR_PROVINCE
+
+# kbp
+kbp.semgrex = edu/stanford/nlp/models/kbp/spanish/semgrex
+kbp.tokensregex = edu/stanford/nlp/models/kbp/spanish/tokensregex
+kbp.model = none
+kbp.language = es
+
+# entitylink
+entitylink.caseless = true
+entitylink.wikidict = edu/stanford/nlp/models/kbp/spanish/wikidict_spanish.tsv
 ```
+
+The pattern is the same for the other supported languages.
+
+#### UD supported languages
+
+Currently French, German, and Spanish work off of the UD 2.3 tokenization standard. This means among other things that words are split into multiword tokens. For instance the French word `"des"` will be tokenized in some circumstances as `"de" "les"`. All tagging, parsing, and named entity recognition models will work off of that tokenization standard, so it is necessary to use the `mwt` annotator which performs the multiword tokenization. For instance, in Spanish, the annotators required to run dependency parsing would be `tokenize,ssplit,mwt,pos,lemma,ner,depparse`. The part of speech tags and dependency labels are from the UD 2.3 sets for each language.
 
 ### Models for other languages
 
