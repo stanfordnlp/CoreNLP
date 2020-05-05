@@ -1773,8 +1773,10 @@ public class UniversalEnglishGrammaticalRelations {
     /* Check for obl subtypes which are not stored in the `obls` map. */
     if (prepositionString.equals("npmod")) {
       return NP_ADVERBIAL_MODIFIER;
-    } else if(prepositionString.equals("tmod")) {
+    } else if (prepositionString.equals("tmod")) {
       return TEMPORAL_MODIFIER;
+    } else if (prepositionString.equals("agent")) {
+      return AGENT;
     }
 
     GrammaticalRelation result = obls.get(prepositionString);
