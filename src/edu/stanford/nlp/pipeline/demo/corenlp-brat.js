@@ -148,6 +148,9 @@ function sentimentColor(sentiment) {
  */
 function annotators() {
   var annotators = "tokenize,ssplit";
+  if ($('#language').val() === 'de' | $('#language').val() === 'fr' | $('#language').val() === 'es') {
+    annotators += ",mwt";
+  }
   $('#annotators').find('option:selected').each(function () {
     annotators += "," + $(this).val();
   });
