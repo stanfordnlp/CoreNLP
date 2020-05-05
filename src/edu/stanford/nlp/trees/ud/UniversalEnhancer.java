@@ -22,96 +22,88 @@ import java.util.regex.Pattern;
 
 public class UniversalEnhancer {
 
+  private static boolean isEmptyNode(IndexedWord iw) {
+    return (iw.pseudoPosition() * 10) % 10 > 0;
+  }
 
-    private static boolean isEmptyNode(IndexedWord iw) {
-        return (iw.pseudoPosition() * 10) % 10 > 0;
+  public static void copyEmptyNodes(SemanticGraph source, SemanticGraph target) {
+    for (IndexedWord node : source.vertexSet()) {
+      if (isEmptyNode(node)) {
+        target.addVertex(node);
+        System.err.println("added vertex" + node);
+      }
     }
 
-    public static void copyEmptyNodes(SemanticGraph source, SemanticGraph target) {
-        for (IndexedWord node : source.vertexSet()) {
-            if (isEmptyNode(node)) {
-                target.addVertex(node);
-                System.err.println("added vertex" + node);
-            }
-        }
+    //remove all orphan dependencies
+    for (SemanticGraphEdge edge: target.edgeListSorted()) {
+      if (edge.getRelation().getShortName().equals("orphan")) {
+        target.removeEdge(edge);
+        System.err.println("removed edge" + edge);
 
-        //remove all orphan dependencies
-        for (SemanticGraphEdge edge: target.edgeListSorted()) {
-            if (edge.getRelation().getShortName().equals("orphan")) {
-                target.removeEdge(edge);
-                System.err.println("removed edge" + edge);
+      }
+    }
+    for (SemanticGraphEdge edge : source.edgeIterable()) {
+      if (edge.getRelation().getShortName().equals("orphan") || isEmptyNode(edge.getDependent()) || isEmptyNode(edge.getGovernor())) {
+        target.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
+        System.err.println("added edge" + edge);
+      }
+    }
+  }
 
-            }
-        }
-        for (SemanticGraphEdge edge : source.edgeIterable()) {
-            if (edge.getRelation().getShortName().equals("orphan") || isEmptyNode(edge.getDependent()) || isEmptyNode(edge.getGovernor())) {
-                target.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
-                System.err.println("added edge" + edge);
-            }
-        }
+
+  public static void main(String[] args) {
+    Properties props = StringUtils.argsToProperties(args);
+
+    String conlluFileName = props.getProperty("conlluFile");
+
+    String relativePronounsPatternStr = props.getProperty("relativePronouns");
+
+    String embeddingsFilename = props.getProperty("embeddings");
+
+    boolean keepEmptyNodes = PropertiesUtils.getBool(props, "keepEmpty", false);
+
+    Pattern relativePronounPattern = Pattern.compile(relativePronounsPatternStr);
+
+    Iterator<Pair<SemanticGraph, SemanticGraph>> sgIterator; // = null;
+
+    CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
+    CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
+    try {
+      sgIterator = reader.getIterator(IOUtils.readerFromString(conlluFileName));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
 
-
-    public static void main(String args[]) {
-        Properties props = StringUtils.argsToProperties(args);
-
-        String conlluFileName = props.getProperty("conlluFile");
-
-        String relativePronounsPatternStr = props.getProperty("relativePronouns");
-
-        String embeddingsFilename = props.getProperty("embeddings");
-
-        boolean keepEmptyNodes = PropertiesUtils.getBool(props, "keepEmpty", false);
-
-
-
-        Pattern relativePronounPattern = Pattern.compile(relativePronounsPatternStr);
-
-        Iterator<Pair<SemanticGraph, SemanticGraph>> sgIterator; // = null;
-
-
-        CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
-        CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
-        try {
-            sgIterator = reader.getIterator(IOUtils.readerFromString(conlluFileName));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-
-        Embedding embeddings = null;
-        if (embeddingsFilename != null) {
-            embeddings = new Embedding(embeddingsFilename);
-        }
-
-        while (sgIterator.hasNext()) {
-            Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
-            SemanticGraph basic = sgs.first();
-
-            SemanticGraph originalEnhanced = sgs.second();
-
-
-            SemanticGraph enhanced = new SemanticGraph(basic.typedDependencies());
-
-            if (keepEmptyNodes) {
-                copyEmptyNodes(originalEnhanced, enhanced);
-            }
-
-
-            if (embeddings != null) {
-                UniversalGappingEnhancer.addEnhancements(enhanced, embeddings);
-            }
-            UniversalGrammaticalStructure.addRef(enhanced, relativePronounPattern);
-            UniversalGrammaticalStructure.collapseReferent(enhanced);
-            UniversalGrammaticalStructure.propagateConjuncts(enhanced);
-            UniversalGrammaticalStructure.addExtraNSubj(enhanced);
-            UniversalGrammaticalStructure.addCaseMarkerInformation(enhanced);
-            UniversalGrammaticalStructure.addCaseMarkerForConjunctions(enhanced);
-            UniversalGrammaticalStructure.addConjInformation(enhanced);
-            System.out.print(writer.printSemanticGraph(basic, enhanced));
-
-        }
-
+    Embedding embeddings = null;
+    if (embeddingsFilename != null) {
+      embeddings = new Embedding(embeddingsFilename);
     }
+
+    while (sgIterator.hasNext()) {
+      Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
+      SemanticGraph basic = sgs.first();
+
+      SemanticGraph originalEnhanced = sgs.second();
+
+      SemanticGraph enhanced = new SemanticGraph(basic.typedDependencies());
+
+      if (keepEmptyNodes) {
+        copyEmptyNodes(originalEnhanced, enhanced);
+      }
+
+      if (embeddings != null) {
+        UniversalGappingEnhancer.addEnhancements(enhanced, embeddings);
+      }
+      UniversalGrammaticalStructure.addRef(enhanced, relativePronounPattern);
+      UniversalGrammaticalStructure.collapseReferent(enhanced);
+      UniversalGrammaticalStructure.propagateConjuncts(enhanced);
+      UniversalGrammaticalStructure.addExtraNSubj(enhanced);
+      UniversalGrammaticalStructure.addCaseMarkerInformation(enhanced);
+      UniversalGrammaticalStructure.addCaseMarkerForConjunctions(enhanced);
+      UniversalGrammaticalStructure.addConjInformation(enhanced);
+      System.out.print(writer.printSemanticGraph(basic, enhanced));
+    }
+
+  } // end main()
 
 }
