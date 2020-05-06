@@ -8,7 +8,7 @@ public class TokenTest {
   private String string = "the quick brown fox jumped over the lazy dog";
 
   @Test
-    public void testNotNull() {
+  public void testNotNull() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 0);
 
@@ -16,7 +16,7 @@ public class TokenTest {
   }
 
   @Test
-    public void testWord() {
+  public void testWord() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 0);
 
@@ -24,7 +24,7 @@ public class TokenTest {
   }
 
   @Test
-    public void testPreviousWord() {
+  public void testPreviousWord() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 1);
 
@@ -32,7 +32,7 @@ public class TokenTest {
   }
 
   @Test
-    public void testNextWord() {
+  public void testNextWord() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 0);
 
@@ -40,7 +40,7 @@ public class TokenTest {
   }
 
   @Test
-    public void testOriginalSentence() {
+  public void testOriginalSentence() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 0);
 
@@ -48,7 +48,7 @@ public class TokenTest {
   }
 
   @Test
-    public void testCharacterOffsetBegin() {
+  public void testCharacterOffsetBegin() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 0);
     Token last =  new Token(new Sentence("last"), 0);
@@ -59,10 +59,11 @@ public class TokenTest {
     assertEquals(4, token.next().characterOffsetBegin());
     assertEquals(10, token.next().next().characterOffsetBegin());
     assertEquals(16, token.next().next().next().characterOffsetBegin());
+
   }
 
   @Test
-    public void testCharacterOffsetEnd() {
+  public void testCharacterOffsetEnd() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 0);
     Token last =  new Token(new Sentence("last"), 0);
@@ -76,16 +77,17 @@ public class TokenTest {
   }
 
   @Test
-    public void testWhiteSpace() {
+  public void testWhiteSpace() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 0);
 
     assertEquals("", token.before());
     assertEquals(" ", token.after());
+
   }
 
   @Test
-    public void testIndices() {
+  public void testIndices() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 0);
 
@@ -94,7 +96,7 @@ public class TokenTest {
   }
 
   @Test
-    public void testBeginPosition() {
+  public void testBeginPosition() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 3);
 
@@ -102,7 +104,7 @@ public class TokenTest {
   }
 
   @Test
-    public void testEndPosition() {
+  public void testEndPosition() {
     Sentence sentence = new Sentence(string);
     Token token = new Token(sentence, 6);
 
