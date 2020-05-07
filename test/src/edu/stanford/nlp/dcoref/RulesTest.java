@@ -75,7 +75,7 @@ public class RulesTest extends TestCase {
     assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g2, m1));
     assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g3, m1));
     assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g4, m1));
-    
+
     // not symmetrical
     // also, shouldn't blow up if the annotation isn't set
     assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(m1, g1));
