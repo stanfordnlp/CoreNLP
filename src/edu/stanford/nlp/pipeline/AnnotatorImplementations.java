@@ -257,6 +257,11 @@ public class AnnotatorImplementations  {
   public Annotator dependencies(Properties properties) {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_DEPENDENCIES + '.');
+    if (!relevantProperties.containsKey("nthreads") &&
+        properties.containsKey("nthreads")) {
+      relevantProperties.setProperty("nthreads", properties.getProperty("nthreads"));
+    }
+
     return new DependencyParseAnnotator(relevantProperties);
   }
 

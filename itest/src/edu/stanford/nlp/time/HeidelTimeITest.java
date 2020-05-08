@@ -5,18 +5,18 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.PropertiesUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
 /**
  * Created by chaganty on 7/12/17.
  */
-public class HeidelTimeTest {
+public class HeidelTimeITest {
+
+  public static final String DEFAULT_HEIDELTIME_LOCATION = "/u/nlp/packages/heideltime/";
 
   @Test
   public void runHeidelTimeEnglish() throws Exception {
@@ -26,11 +26,17 @@ public class HeidelTimeTest {
     String date = "2017-07-07";
     ann.set(CoreAnnotations.DocDateAnnotation.class, date);
 
+    String heideltimeEnv = System.getenv("HEIDELTIME_PATH");
+    if (heideltimeEnv == null) {
+      heideltimeEnv = DEFAULT_HEIDELTIME_LOCATION;
+    }
+
     Properties defaultProps = new Properties();
     defaultProps.load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP.properties"));
+
     Properties props = new Properties(defaultProps);
     props.setProperty("customAnnotatorClass.heideltime", "edu.stanford.nlp.time.HeidelTimeAnnotator");
-    props.setProperty(HeidelTimeAnnotator.HEIDELTIME_PATH_PROPERTY, System.getenv("HEIDELTIME_PATH"));
+    props.setProperty(HeidelTimeAnnotator.HEIDELTIME_PATH_PROPERTY, heideltimeEnv);
     props.setProperty(HeidelTimeAnnotator.HEIDELTIME_LANGUAGE_PROPERTY, "english");
     props.setProperty("annotators", "tokenize,ssplit,heideltime");
 
@@ -55,11 +61,17 @@ public class HeidelTimeTest {
     String date = "2017-07-07";
     ann.set(CoreAnnotations.DocDateAnnotation.class, date);
 
+    String heideltimeEnv = System.getenv("HEIDELTIME_PATH");
+    if (heideltimeEnv == null) {
+      heideltimeEnv = DEFAULT_HEIDELTIME_LOCATION;
+    }
+
     Properties defaultProps = new Properties();
     defaultProps.load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/StanfordCoreNLP-spanish.properties"));
+
     Properties props = new Properties(defaultProps);
     props.setProperty("customAnnotatorClass.heideltime", "edu.stanford.nlp.time.HeidelTimeAnnotator");
-    props.setProperty(HeidelTimeAnnotator.HEIDELTIME_PATH_PROPERTY, System.getenv("HEIDELTIME_PATH"));
+    props.setProperty(HeidelTimeAnnotator.HEIDELTIME_PATH_PROPERTY, heideltimeEnv);
     props.setProperty(HeidelTimeAnnotator.HEIDELTIME_LANGUAGE_PROPERTY, "spanish");
     props.setProperty("annotators", "tokenize,ssplit,heideltime");
 
