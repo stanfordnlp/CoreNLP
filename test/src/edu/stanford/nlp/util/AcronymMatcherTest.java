@@ -14,19 +14,11 @@ public class AcronymMatcherTest {
 
   @Test
   public void testBasic() {
+    assertTrue(AcronymMatcher.isAcronym("B", "B".split("\\s+")));
     assertTrue(AcronymMatcher.isAcronym("IBM", "International Business Machines".split("\\s+")));
     assertTrue(AcronymMatcher.isAcronym("SIWI", "Stockholm International Water Institute".split("\\s+")));
     assertTrue(AcronymMatcher.isAcronym("CBRC", "China Banking Regulatory Commission".split("\\s+")));
     assertTrue(AcronymMatcher.isAcronym("ECC", "Election Complaints Commission".split("\\s+")));
-  }
-
-  @Test
-  public void testBasicWithBoundaries() {
-    assertTrue(AcronymMatcher.isAcronym("B", "B".split("\\s+")));
-    assertFalse(AcronymMatcher.isAcronym("", "B".split("\\s+")));
-    // A is a stopword
-    // assertFalse(AcronymMatcher.isAcronym("", "A".split("\\s+")));
-    assertFalse(AcronymMatcher.isAcronym("UZH", "University of Zurich".split("\\s+")));
   }
 
   @Test
