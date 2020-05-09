@@ -15,17 +15,20 @@ import java.util.Random;
 import static org.junit.Assert.*;
 
 /**
+ * This does its best to quick check our optimizers. The strategy here is to generate convex functions that are solvable
+ * in closed form, and then test that our optimizer is able to achieve a nearly optimal solution at convergence.
+ * <p>
  * Created on 8/26/15.
  * @author keenon
- * <p>
- * This does its best to Quickcheck our optimizers. The strategy here is to generate convex functions that are solvable
- * in closed form, and then test that our optimizer is able to achieve a nearly optimal solution at convergence.
  */
 @RunWith(Theories.class)
 public class OptimizerTests {
+
+  @SuppressWarnings("unused") // This is somehow used in the theories stuff, though I don't quite understand...
   @DataPoint
   public static AbstractBatchOptimizer backtrackingAdaGrad = new BacktrackingAdaGradOptimizer();
 
+  @SuppressWarnings("DefaultAnnotationParam")
   @Theory
   public void testOptimizeLogLikelihood(AbstractBatchOptimizer optimizer,
                                         @ForAll(sampleSize = 5) @From(LogLikelihoodFunctionTest.GraphicalModelDatasetGenerator.class) GraphicalModel[] dataset,
@@ -59,12 +62,13 @@ public class OptimizerTests {
       // Check that we're within a very small margin of error (around 3 decimal places) of the randomly
       // discovered value
 
-      if (logLikelihood < randomPerturbedLogLikelihood - (1.0e-3 * Math.max(1.0, Math.abs(logLikelihood)))) {
+      double allowedDeviation = randomPerturbedLogLikelihood - (1.0e-3 * Math.max(1.0, Math.abs(logLikelihood)));
+      if (logLikelihood < allowedDeviation) {
         System.err.println("Thought optimal point was: " + logLikelihood);
         System.err.println("Discovered better point: " + randomPerturbedLogLikelihood);
       }
 
-      assertTrue(logLikelihood >= randomPerturbedLogLikelihood - (1.0e-3 * Math.max(1.0, Math.abs(logLikelihood))));
+      assertTrue(logLikelihood >= allowedDeviation);
     }
   }
 
