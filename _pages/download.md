@@ -99,19 +99,19 @@ This example goes over how to set up CoreNLP from the latest official release. T
 
 1. Download the CoreNLP zip file at: http://stanfordnlp.github.io/CoreNLP/index.html#download:
 ```
-wget http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip
+wget http://nlp.stanford.edu/software/stanford-corenlp-latest.zip
 ```
 Or using curl (what you get by default on macOS):
 ```
-curl -O -L http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip
+curl -O -L http://nlp.stanford.edu/software/stanford-corenlp-latest.zip
 ```
 1. Unzip the release:
 ```
-unzip stanford-corenlp-full-2018-10-05.zip
+unzip stanford-corenlp-latest.zip
 ```
 1. Enter the newly unzipped directory:
 ```
-cd stanford-corenlp-full-2018-10-05
+cd stanford-corenlp-4.0.0
 ```
 1. Set up your classpath. If you're using an IDE, you should set the
    classpath in your IDE. If you are using bash or a bash-like shell,
