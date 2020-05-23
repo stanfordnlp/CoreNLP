@@ -181,11 +181,6 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("lemma", token.lemma());
               l3.set("characterOffsetBegin", token.beginPosition());
               l3.set("characterOffsetEnd", token.endPosition());
-              if (token.containsKey(CoreAnnotations.CodepointOffsetBeginAnnotation.class) &&
-                  token.containsKey(CoreAnnotations.CodepointOffsetEndAnnotation.class)) {
-                l3.set("codepointOffsetBegin", token.beginPosition());
-                l3.set("codepointOffsetEnd", token.endPosition());
-              }
               l3.set("pos", token.tag());
               l3.set("ner", token.ner());
               l3.set("normalizedNER", token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));

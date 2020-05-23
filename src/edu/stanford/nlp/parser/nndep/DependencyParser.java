@@ -11,7 +11,6 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.DocumentPreprocessor;
-import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
@@ -1138,12 +1137,7 @@ public class DependencyParser  {
     preprocessor.setSentenceFinalPuncWords(config.tlp.sentenceFinalPunctuationWords());
     preprocessor.setEscaper(config.escaper);
     preprocessor.setSentenceDelimiter(config.sentenceDelimiter);
-    if (config.preTokenized) {
-      preprocessor.setTokenizerFactory(
-          edu.stanford.nlp.process.WhitespaceTokenizer.factory());
-    } else {
-      preprocessor.setTokenizerFactory(config.tlp.getTokenizerFactory());
-    }
+    preprocessor.setTokenizerFactory(config.tlp.getTokenizerFactory());
 
     Timing timer = new Timing();
 

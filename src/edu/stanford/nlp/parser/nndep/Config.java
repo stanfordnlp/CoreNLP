@@ -213,12 +213,6 @@ public class Config {
    */
   public String tagger = MaxentTagger.DEFAULT_JAR_PATH;
 
-  /**
-   * Provided text is tokenized by whitespace.
-   */
-  public boolean preTokenized = false;
-
-
   public Config(Properties properties) {
     setProperties(properties);
   }
@@ -257,7 +251,6 @@ public class Config {
                ? getLanguage(props.getProperty("language"))
                : language;
     tlp = language.params.treebankLanguagePack();
-    preTokenized = PropertiesUtils.getBool(props, "tokenized", preTokenized);
 
     // if a tlp was specified go with that
     String tlpCanonicalName = props.getProperty("tlp");

@@ -37,8 +37,7 @@ public class EntityMentionsAnnotatorITest {
   }
 
   protected static Properties getDefaultProperties() {
-    Properties props = new Properties();
-    return props;
+    return new Properties();
   }
 
   private static EntityMentionsAnnotator getMentionsAnnotator() {

@@ -7,6 +7,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author Jason Bolton
+ * @author Christopher Manning
+ */
 public class EntityMentionCorefITest {
 
   private static final String apostropheText = "President Barack Obama's presidency started in 2009. " +
@@ -36,13 +40,23 @@ public class EntityMentionCorefITest {
     // System.err.println(sampleAnnotation.get(CoreAnnotations.MentionsAnnotation.class));
     CoreMap entityMention =
         sampleAnnotation.get(CoreAnnotations.MentionsAnnotation.class).get(3); // gets "Obama" in second (index 1) sentence
+    for (CoreLabel word : entityMention.get(CoreAnnotations.TokensAnnotation.class)) {
+      Assert.assertEquals("Obama", word.word());
+      Assert.assertEquals("PERSON", word.ner());
+    }
     int matchingEntityMentionIndex =
         entityMention.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class);
     Assert.assertTrue(matchingEntityMentionIndex == 1 || matchingEntityMentionIndex == 3);
+
     CoreMap entityMention2 =
             sampleAnnotation.get(CoreAnnotations.MentionsAnnotation.class).get(1); // gets "Obama" in first (index 0) sentence
+    for (CoreLabel word : entityMention2.get(CoreAnnotations.TokensAnnotation.class)) {
+      Assert.assertTrue("Obama".equals(word.word()) || "Barack".equals(word.word()));
+      Assert.assertEquals("PERSON", word.ner());
+    }
     int matchingEntityMentionIndex2 =
             entityMention2.get(CoreAnnotations.CanonicalEntityMentionIndexAnnotation.class);
+
     Assert.assertTrue(matchingEntityMentionIndex2 == 1 || matchingEntityMentionIndex2 == 3);
   }
 
