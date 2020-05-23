@@ -51,7 +51,21 @@ tokenize,cleanxml,ssplit,pos,lemma,ner,parse,coref,quote -file
 news-story.txt -outputFormat json -clean.sentenceendingtags p
 ```
 
-A much more complex example appears below.
+**Example 3:** For a somewhat more complex newspaper XML page, the
+  title is in a `<h1>` element and the text of the article is in `<p>`
+  elements, but there are also a bunch of other elements for tracking,
+  ads, etc. to be deleted, and one wants to treat the end of the above
+  two elements as also being a sentence boundary. Finally, the article
+  was published on 2020-05-23. One might use a command like:
+
+```
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -file wapo-coronavirus.txt
+  -annotators "tokenize, cleanxml, ssplit, pos, lemma, ner, depparse, coref, quote"
+  -outputFormat xml -clean.sentenceendingtags "p|h1" -clean.xmltags "p|h1"
+  -ner.docdate.useFixedDate 2020-05-23
+```
+
+Another much more complex example appears below.
 
 
 ## Options
