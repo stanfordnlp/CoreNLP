@@ -135,7 +135,7 @@ public class XMLOutputter extends AnnotationOutputter  {
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
         for(int j = 0; j < tokens.size(); j ++){
           Element wordInfo = new Element("token", NAMESPACE_URI);
-          addWordInfo(wordInfo, tokens.get(j), j + 1, NAMESPACE_URI);
+          addWordInfo(wordInfo, tokens.get(j), j + 1, NAMESPACE_URI, options);
           wordTable.appendChild(wordInfo);
         }
         sentElem.appendChild(wordTable);
@@ -410,12 +410,18 @@ public class XMLOutputter extends AnnotationOutputter  {
     chainElem.appendChild(mentionElem);
   }
 
-  private static void addWordInfo(Element wordInfo, CoreMap token, int id, String curNS) {
+  private static void addWordInfo(Element wordInfo, CoreMap token, int id, String curNS, Options options) {
     // store the position of this word in the sentence
     wordInfo.addAttribute(new Attribute("id", Integer.toString(id)));
 
     setSingleElement(wordInfo, "word", curNS, token.get(CoreAnnotations.TextAnnotation.class));
     setSingleElement(wordInfo, "lemma", curNS, token.get(CoreAnnotations.LemmaAnnotation.class));
+
+    if (options.includeText) {
+      setSingleElement(wordInfo, "before", curNS, token.get(CoreAnnotations.BeforeAnnotation.class));
+      setSingleElement(wordInfo, "after", curNS, token.get(CoreAnnotations.AfterAnnotation.class));
+      setSingleElement(wordInfo, "originalText", curNS, token.get(CoreAnnotations.OriginalTextAnnotation.class));
+    }
 
     if (token.containsKey(CoreAnnotations.CharacterOffsetBeginAnnotation.class) && token.containsKey(CoreAnnotations.CharacterOffsetEndAnnotation.class)) {
       setSingleElement(wordInfo, "CharacterOffsetBegin", curNS, Integer.toString(token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class)));
