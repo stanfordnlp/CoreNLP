@@ -56,7 +56,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    * Apply NER-specific tokenization before running NER modules (e.g. merge together tokens split by hyphen)
    */
   private boolean useNERSpecificTokenization = true;
-  private static HashSet<String> nerSpecificTokenizationExceptions =
+  private static final HashSet<String> nerSpecificTokenizationExceptions =
       new HashSet<>(Arrays.asList("based", "area", "registered", "headquartered", "native", "born", "raised", 
                                   "backed", "controlled", "owned", "resident", "trained", "educated"));
 
@@ -181,9 +181,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // set up doc date finding if specified
     setUpDocDateAnnotator(properties);
 
-    log.info("Using numeric classifiers: " + applyNumericClassifiers);
-    log.info("Using SUTime: " + useSUTime);
-    log.info("Using fine grained: " + this.applyFineGrained);
+    log.info("numeric classifiers: " + applyNumericClassifiers +
+            "; SUTime: " + useSUTime + (docDateAnnotator != null ? " " + docDateAnnotator: " [no docDate]") +
+            "; fine grained: " + this.applyFineGrained);
 
     VERBOSE = verbose;
     this.ner = nerCombiner;
@@ -314,7 +314,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
    */
   private void setUpDocDateAnnotator(Properties properties) throws IOException {
     for (String property : properties.stringPropertyNames()) {
-      if (property.length() >= 11 && property.substring(0,11).equals("ner.docdate")) {
+      if (property.startsWith("ner.docdate")) {
         setDocDate = true;
         docDateAnnotator = new DocDateAnnotator("ner.docdate", properties);
         break;

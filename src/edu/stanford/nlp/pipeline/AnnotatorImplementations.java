@@ -22,7 +22,7 @@ import java.util.*;
 public class AnnotatorImplementations  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorImplementations.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotatorImplementations.class);
 
   /**
    * Tokenize, emulating the Penn Treebank
@@ -57,12 +57,7 @@ public class AnnotatorImplementations  {
    * Set document date
    */
   public Annotator docDate(Properties properties) {
-    String annotatorName = "docdate";
-    try {
-      return new DocDateAnnotator(annotatorName, properties);
-    } catch (IOException e) {
-      throw new RuntimeIOException("Error reading docdate mapping file.");
-    }
+    return new DocDateAnnotator("docdate", properties);
   }
 
   /**
