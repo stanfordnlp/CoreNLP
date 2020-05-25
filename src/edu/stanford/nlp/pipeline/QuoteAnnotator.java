@@ -768,6 +768,8 @@ public class QuoteAnnotator implements Annotator  {
         extended.addAll(gatherQuotes(quote));
       }
       extended.addAll(embedded);
+      // try sorting the quotes by beginIndex
+      extended.sort(Comparator.comparingInt(cm -> cm.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class)));
       return extended;
     } else {
       return Generics.newArrayList();
