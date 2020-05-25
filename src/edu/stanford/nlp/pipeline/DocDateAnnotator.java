@@ -100,8 +100,9 @@ public class DocDateAnnotator implements Annotator {
       Matcher m = fileDocDatePattern.matcher(docID);
       if (m.matches()) {
         foundDocDate = m.group(1);
-        if (DATE_NO_HYPHENS_PATTERN.matcher(foundDocDate).find() && foundDocDate.length() == 8)
+        if (foundDocDate.length() == 8 && DATE_NO_HYPHENS_PATTERN.matcher(foundDocDate).matches()) {
           foundDocDate = addHyphensToDate(foundDocDate);
+        }
       } else {
         log.warn("DocDate regex failed to match against " + docID);
         foundDocDate = "";
@@ -111,8 +112,9 @@ public class DocDateAnnotator implements Annotator {
     }
     // check date has proper format
     Matcher properDateFormat = DATE_PROPER_FORMAT.matcher(foundDocDate);
-    if (properDateFormat.matches())
+    if (properDateFormat.matches()) {
       annotation.set(CoreAnnotations.DocDateAnnotation.class, foundDocDate);
+    }
   }
 
   /** helper for return current date **/
