@@ -744,14 +744,15 @@ ABBREVSN = So\.|No\.
 /* See also a couple of special cases for pty. in the code below. */
 
 
+HYPHEN = [-\u058A\u2010\u2011]
+HYPHENS = {HYPHEN}+
+SSN = [0-9]{3}{HYPHEN}[0-9]{2}{HYPHEN}[0-9]{4}
 /* phone numbers. keep multi dots pattern separate, so not confused with decimal numbers. And for new treebank tokenization 346-8792. 1st digit can't be 0 or 1 in NANP. */
 PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{1,4}[\- \u00A0])?[0-9]{2,4}[\- \u00A0/])[0-9]{3,4}[\- \u00A0]?[0-9]{3,5}|((\+\+?)?[0-9]{1,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}|[2-9][0-9]{2}-[0-9]{4}
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
 FAKEDUCKFEET = <<|>>
 LESSTHAN = <|&lt;
 GREATERTHAN = >|&gt;
-HYPHEN = [-\u058A\u2010\u2011]
-HYPHENS = {HYPHEN}+
 LDOTS = \.\.\.+|[\u0085\u2026]
 SPACEDLDOTS = \.[ \u00A0](\.[ \u00A0])+\.
 ATS = @+
@@ -1091,6 +1092,7 @@ RM/{NUM}        { String txt = yytext();
                           if (DEBUG) { logger.info("Used {WORD} (3) to recognize " + origTok + " as " + norm); }
                           return getNext(norm, origTok);
                         }
+{SSN}                   { return getNext(); }
 {PHONE}                 { String txt = yytext();
                           String norm = txt;
 			  if (normalizeSpace) {
