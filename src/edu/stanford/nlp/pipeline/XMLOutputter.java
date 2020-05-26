@@ -217,10 +217,7 @@ public class XMLOutputter extends AnnotationOutputter  {
         // Adds sentiment as an attribute of this sentence.
         Tree sentimentTree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
         if (sentimentTree != null) {
-          int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
-          sentElem.addAttribute(new Attribute("sentimentValue", Integer.toString(sentiment)));
-          String sentimentClass = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
-          sentElem.addAttribute(new Attribute("sentiment", sentimentClass.replaceAll(" ", "")));
+          addSentiment(sentence, sentimentTree, sentElem, NAMESPACE_URI);
         }
 
         // add the sentence to the root
@@ -245,6 +242,34 @@ public class XMLOutputter extends AnnotationOutputter  {
     //
 
     return xmlDoc;
+  }
+
+  /**
+   * Add an element to the sentence with the sentiment class and a
+   * list of scores for each of the possible classes
+   */
+  private static void addSentiment(CoreMap sentence, Tree sentimentTree, Element sentElem, String namespaceUri) {
+    int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
+    sentElem.addAttribute(new Attribute("sentimentValue", Integer.toString(sentiment)));
+    String sentimentClass = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
+    sentElem.addAttribute(new Attribute("sentiment", sentimentClass.replaceAll(" ", "")));
+
+    Element sentimentElem = new Element("sentiment", namespaceUri);
+
+    setSingleElement(sentimentElem, "sentiment", namespaceUri, sentimentClass);
+    setSingleElement(sentimentElem, "sentimentValue", namespaceUri, Integer.toString(sentiment));
+    List<Double> sentimentPredictions = RNNCoreAnnotations.getPredictionsAsStringList(sentimentTree);
+    Element predictionsElem = new Element("predictions", namespaceUri);
+    for (int i = 0; i < sentimentPredictions.size(); ++i) {
+      double score = sentimentPredictions.get(i);
+      Element predElem = new Element("prediction", namespaceUri);
+      setSingleElement(predElem, "classIndex", namespaceUri, Integer.toString(i));
+      setSingleElement(predElem, "score", namespaceUri, Double.toString(score));
+      predictionsElem.appendChild(predElem);
+    }
+    sentimentElem.appendChild(predictionsElem);
+
+    sentElem.appendChild(sentimentElem);
   }
 
   /**
