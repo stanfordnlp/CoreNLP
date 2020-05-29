@@ -6,6 +6,7 @@ import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.io.IOException;
 import java.io.DataInputStream;
@@ -320,7 +321,7 @@ public class TTags {
   public synchronized String[] getOpenTagsArray() {
     if (openTagsArr == null) {
       Set<String> open = getOpenTags();
-      openTagsArr = deterministicallyExpandTags(open.toArray(new String[open.size()]));
+      openTagsArr = deterministicallyExpandTags(open.toArray(StringUtils.EMPTY_STRING_ARRAY));
     }
     return openTagsArr;
   }
@@ -402,6 +403,7 @@ public class TTags {
     }
   }
 
+  @SuppressWarnings("unused")
   public void setLearnClosedTags(boolean learn) {
     learnClosedTags = learn;
   }
