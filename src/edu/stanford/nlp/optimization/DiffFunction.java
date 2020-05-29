@@ -11,11 +11,13 @@ package edu.stanford.nlp.optimization;
  * @since 1.0
  */
 public interface DiffFunction extends Function {
+
   /**
    * Returns the first-derivative vector at the input location.
    *
-   * @param x a <code>double[]</code> input vector
+   * @param x a {@code double[]} input vector
    * @return the vector of first partial derivatives.
    */
   double[] derivativeAt(double[] x);
+
 }
