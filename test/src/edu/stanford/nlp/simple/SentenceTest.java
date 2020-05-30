@@ -145,7 +145,7 @@ public class SentenceTest {
 
   @Test
   public void testFromCoreMapCorrectnessCheck() {
-	Annotation ann = new Annotation("This is a sentence.");
+    Annotation ann = new Annotation("This is a sentence.");
     Sentence s = tokenizeAndSplitAnnotation(ann);
     assertEquals(ann.get(CoreAnnotations.TextAnnotation.class), s.text());
     assertEquals("This", s.word(0));
@@ -229,5 +229,52 @@ public class SentenceTest {
 
     assertTrue(wasWrittenTo);
     assertTrue(wasNotClosed);
+  }
+
+  @Test
+  public void testDeserializeFromInputStream () throws IOException {
+    final class MockOutputStream extends OutputStream {
+      ArrayList<Integer> receivedBytes = new ArrayList<Integer>();
+      @Override
+      public void write(int arg0) throws IOException {
+        this.receivedBytes.add(arg0);
+      }
+      @Override
+      public void close () throws IOException {
+        super.close();
+      }
+      public List<Integer> getWrittenBytes () { return this.receivedBytes; }
+    }
+    final class MockedInputStream extends InputStream {
+      int counter = 0;
+      /* Array of bytes representing deserialized
+       * Sentence "This is a test"
+       */
+      public ArrayList<Integer> serializedSentence = new ArrayList<Integer>();
+      public MockedInputStream(ArrayList<Integer> bytes) {
+        this.serializedSentence = bytes;
+      }
+      public int getReadCount() {
+        return counter;
+      }
+      boolean allBytesRead() {
+        return counter == this.serializedSentence.size();
+      }
+      @Override
+      public int read() throws IOException {
+        return serializedSentence.get(counter++);
+      }
+    }
+    Sentence sent = new Sentence("This was previously serialized");
+    MockOutputStream mockedOutStream = new MockOutputStream();
+    sent.serialize(mockedOutStream);
+    ArrayList<Integer> previouslySerialized = mockedOutStream.receivedBytes;
+
+    MockedInputStream mockedInput = new MockedInputStream(previouslySerialized);
+    Sentence deserialized = Sentence.deserialize(mockedInput);
+    boolean inputWasConsumedCompletely = mockedInput.allBytesRead();
+
+    assertEquals("This was previously serialized", deserialized.toString());
+    assertTrue(inputWasConsumedCompletely);
   }
 }

@@ -41,10 +41,6 @@ public class TextAnnotationPatterns {
   private static final Redwood.RedwoodChannels logger = Redwood.channels(TextAnnotationPatterns.class);
 
   public TextAnnotationPatterns() throws IOException {
-//    if(testPropertiesFile!= null && new File(testPropertiesFile).exists()){
-//      logger.info("Loading test properties from " + testPropertiesFile);
-//      testProps.load(new FileReader(testPropertiesFile));
-//    }
   }
 
   public String getAllAnnotations() {

@@ -29,6 +29,19 @@ public class Ports {
       ss.setReuseAddress(true);
       ds = new DatagramSocket(port);
       ds.setReuseAddress(true);
+
+      int ssPort = ss.getLocalPort();
+      int dsPort = ds.getLocalPort();
+      boolean osPickedSpecifiedPort = port == ssPort && port == dsPort;
+      if(!osPickedSpecifiedPort) {
+        /*
+         * For some ports in the reserved port range certain operating systems
+         * will not 'complain' but they will ignore the desired port and
+         * use an arbitrary one. This will throw an exception so that 
+         * it is clear that the requested port is ambiguous.
+         */
+        throw new IllegalArgumentException();
+      }
       return true;
     } catch (IOException e) {
     } finally {
