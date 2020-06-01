@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 
 public class DirectedMultiGraphTest extends TestCase {
 
-  DirectedMultiGraph<Integer, String> graph = 
+  DirectedMultiGraph<Integer, String> graph =
     new DirectedMultiGraph<Integer, String>();
 
   public void setUp() {
@@ -158,21 +158,21 @@ public class DirectedMultiGraphTest extends TestCase {
       System.out.println("Connected component: " + cc);
     }
     assertEquals(ccs.size(), 4);
-    assertEquals(CollectionUtils.sorted(ccs.get(0)), 
+    assertEquals(CollectionUtils.sorted(ccs.get(0)),
                  Arrays.asList(1, 2, 3, 4));
   }
 
   public void testEdgesNodes() {
     assertTrue(graph.isEdge(1, 2));
     assertFalse(graph.isEdge(2, 1));
-    assertTrue(graph.isNeighbor(2, 1));    
+    assertTrue(graph.isNeighbor(2, 1));
 
     List<String> incomingEdges = graph.getEdges(4, 1);
-    assertEquals(CollectionUtils.sorted(incomingEdges), 
+    assertEquals(CollectionUtils.sorted(incomingEdges),
                  Arrays.asList("4->1"));
 
     Set<Integer> neighbors = graph.getNeighbors(2);
-    assertEquals(CollectionUtils.sorted(neighbors), 
+    assertEquals(CollectionUtils.sorted(neighbors),
                  CollectionUtils.sorted(Arrays.asList(1, 3)));
 
     Set<Integer> parents = graph.getParents(4);
@@ -187,7 +187,7 @@ public class DirectedMultiGraphTest extends TestCase {
 
 
   public void testAdd() {
-    DirectedMultiGraph<Integer, String> g = 
+    DirectedMultiGraph<Integer, String> g =
       new DirectedMultiGraph<Integer, String>();
     assertEquals(0, g.getNumVertices());
     assertEquals(0, g.getNumEdges());
@@ -195,7 +195,7 @@ public class DirectedMultiGraphTest extends TestCase {
     g.addVertex(1);
     assertEquals(1, g.getNumVertices());
     assertEquals(0, g.getNumEdges());
-    
+
     g.addVertex(2);
     assertEquals(2, g.getNumVertices());
     assertEquals(0, g.getNumEdges());
@@ -207,7 +207,7 @@ public class DirectedMultiGraphTest extends TestCase {
     g.add(1, 2, "bar");
     assertEquals(2, g.getNumVertices());
     assertEquals(2, g.getNumEdges());
-    
+
     // repeated adds should not clobber vertices or edges
     g.addVertex(2);
     assertEquals(2, g.getNumVertices());
@@ -237,7 +237,7 @@ public class DirectedMultiGraphTest extends TestCase {
   }
 
   public void testSmallAddRemove() {
-    DirectedMultiGraph<Integer, String> g = 
+    DirectedMultiGraph<Integer, String> g =
       new DirectedMultiGraph<Integer, String>();
     g.addVertex(1);
     g.addVertex(2);
@@ -267,7 +267,7 @@ public class DirectedMultiGraphTest extends TestCase {
   }
 
   public void testSmallRemoveVertex() {
-    DirectedMultiGraph<Integer, String> g = 
+    DirectedMultiGraph<Integer, String> g =
       new DirectedMultiGraph<Integer, String>();
     g.addVertex(1);
     g.addVertex(2);
@@ -288,7 +288,7 @@ public class DirectedMultiGraphTest extends TestCase {
    * passed, then containsVertex is the only new thing tested here
    */
   public void testSmallContains() {
-    DirectedMultiGraph<Integer, String> g = 
+    DirectedMultiGraph<Integer, String> g =
       new DirectedMultiGraph<Integer, String>();
     g.addVertex(1);
     g.addVertex(2);
@@ -310,7 +310,7 @@ public class DirectedMultiGraphTest extends TestCase {
   }
 
   public void testAddRemove() {
-    DirectedMultiGraph<Integer, String> g = 
+    DirectedMultiGraph<Integer, String> g =
       new DirectedMultiGraph<Integer, String>();
     g.addVertex(1);
     g.addVertex(2);
@@ -348,7 +348,7 @@ public class DirectedMultiGraphTest extends TestCase {
     assertTrue(g.removeEdge(1, 3, "bar"));
     assertEquals(4, g.getNumVertices());
     assertEquals(1, g.getNumEdges());
-    
+
     assertFalse(g.removeEdge(2, 4, "arg"));
     assertTrue(g.removeEdge(2, 4, "baz"));
     assertEquals(4, g.getNumVertices());
@@ -377,7 +377,7 @@ public class DirectedMultiGraphTest extends TestCase {
 
     g.clear();
     assertEquals(0, g.getNumVertices());
-    assertEquals(0, g.getNumEdges());    
+    assertEquals(0, g.getNumEdges());
 
     // reuse the graph, run some more tests
     g.addVertex(1);
@@ -399,8 +399,8 @@ public class DirectedMultiGraphTest extends TestCase {
   }
 
   public void testAddRemove2() {
-    DirectedMultiGraph<Integer, String> g = 
-      new DirectedMultiGraph<Integer, String>();    
+    DirectedMultiGraph<Integer, String> g =
+      new DirectedMultiGraph<Integer, String>();
     g.clear();
     g.addVertex(1);
     g.addVertex(2);
@@ -422,8 +422,8 @@ public class DirectedMultiGraphTest extends TestCase {
   }
 
   public void testAddRemove3() {
-    DirectedMultiGraph<Integer, String> g = 
-      new DirectedMultiGraph<Integer, String>();    
+    DirectedMultiGraph<Integer, String> g =
+      new DirectedMultiGraph<Integer, String>();
     g.clear();
     g.addVertex(1);
     g.addVertex(2);
@@ -457,10 +457,10 @@ public class DirectedMultiGraphTest extends TestCase {
     g.removeVertex(3);
     assertTrue(g.isEmpty());
   }
-  
+
   public void testGetAllVertices() {
-    DirectedMultiGraph<Integer, String> g = 
-      new DirectedMultiGraph<Integer, String>();    
+    DirectedMultiGraph<Integer, String> g =
+      new DirectedMultiGraph<Integer, String>();
     g.addVertex(1);
     assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getAllVertices());
@@ -475,7 +475,7 @@ public class DirectedMultiGraphTest extends TestCase {
     g.add(1, 3, "bar");
     g.add(2, 3, "foo");
     g.add(2, 3, "baz");
-    g.add(2, 4, "baz");    
+    g.add(2, 4, "baz");
     assertEquals(new HashSet<Integer>(Arrays.asList(1, 2, 3, 4)),
                  g.getAllVertices());
     g.removeEdges(2, 3);
@@ -493,7 +493,7 @@ public class DirectedMultiGraphTest extends TestCase {
                  g.getAllVertices());
     g.removeZeroDegreeNodes();
     assertEquals(new HashSet<Integer>(Arrays.asList(1, 4)),
-                 g.getAllVertices());    
+                 g.getAllVertices());
   }
 
   /**
@@ -502,7 +502,7 @@ public class DirectedMultiGraphTest extends TestCase {
    */
   @SuppressWarnings("AssertEqualsBetweenInconvertibleTypes")
   public void testNeighbors() {
-    DirectedMultiGraph<Integer, String> g = 
+    DirectedMultiGraph<Integer, String> g =
       new DirectedMultiGraph<Integer, String>();
     g.addVertex(1);
     assertEquals(Collections.emptySet(), g.getParents(1));
@@ -541,149 +541,149 @@ public class DirectedMultiGraphTest extends TestCase {
     g.add(2, 3, "foo");
     g.add(2, 3, "baz");
     assertEquals(Collections.emptySet(), g.getParents(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)),
                  g.getChildren(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)),
                  g.getNeighbors(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getParents(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(3)),
                  g.getChildren(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1, 3)),
                  g.getNeighbors(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1, 2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1, 2)),
                  g.getParents(3));
     assertEquals(Collections.emptySet(), g.getChildren(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1, 2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1, 2)),
                  g.getNeighbors(3));
 
     g.add(2, 4, "baz");
     assertEquals(Collections.emptySet(), g.getParents(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)),
                  g.getChildren(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)),
                  g.getNeighbors(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getParents(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(3, 4)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(3, 4)),
                  g.getChildren(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1, 3, 4)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1, 3, 4)),
                  g.getNeighbors(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1, 2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1, 2)),
                  g.getParents(3));
     assertEquals(Collections.emptySet(), g.getChildren(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1, 2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1, 2)),
                  g.getNeighbors(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2)),
                  g.getParents(4));
     assertEquals(Collections.emptySet(), g.getChildren(4));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2)),
                  g.getNeighbors(4));
 
     g.removeEdges(2, 3);
     assertEquals(Collections.emptySet(), g.getParents(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)),
                  g.getChildren(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)),
                  g.getNeighbors(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getParents(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(4)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(4)),
                  g.getChildren(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1, 4)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1, 4)),
                  g.getNeighbors(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getParents(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getNeighbors(3));
     assertEquals(Collections.emptySet(), g.getChildren(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2)),
                  g.getParents(4));
     assertEquals(Collections.emptySet(), g.getChildren(4));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2)),
                  g.getNeighbors(4));
 
     g.removeEdge(1, 2, "foo");
     assertEquals(Collections.emptySet(), g.getParents(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)),
                  g.getChildren(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)),
                  g.getNeighbors(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getParents(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(4)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(4)),
                  g.getChildren(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1, 4)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1, 4)),
                  g.getNeighbors(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getParents(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getNeighbors(3));
     assertEquals(Collections.emptySet(), g.getChildren(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2)),
                  g.getParents(4));
     assertEquals(Collections.emptySet(), g.getChildren(4));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2)),
                  g.getNeighbors(4));
 
     g.removeEdge(1, 2, "bar");
     assertEquals(Collections.emptySet(), g.getParents(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(3)),
                  g.getChildren(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(3)),
                  g.getNeighbors(1));
     assertEquals(Collections.emptySet(), g.getParents(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(4)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(4)),
                  g.getChildren(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(4)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(4)),
                  g.getNeighbors(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getParents(3));
     assertEquals(Collections.emptySet(), g.getChildren(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getNeighbors(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2)),
                  g.getParents(4));
     assertEquals(Collections.emptySet(), g.getChildren(4));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2)),
                  g.getNeighbors(4));
 
     g.add(1, 2, "bar");
     assertEquals(Collections.emptySet(), g.getParents(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)),
                  g.getChildren(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2, 3)),
                  g.getNeighbors(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getParents(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(4)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(4)),
                  g.getChildren(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1, 4)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1, 4)),
                  g.getNeighbors(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getParents(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getNeighbors(3));
     assertEquals(Collections.emptySet(), g.getChildren(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2)),
                  g.getParents(4));
     assertEquals(Collections.emptySet(), g.getChildren(4));
-    assertEquals(new HashSet<Integer>(Arrays.asList(2)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(2)),
                  g.getNeighbors(4));
 
     g.removeVertex(2);
     assertEquals(Collections.emptySet(), g.getParents(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(3)),
                  g.getChildren(1));
-    assertEquals(new HashSet<Integer>(Arrays.asList(3)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(3)),
                  g.getNeighbors(1));
     assertEquals(null, g.getParents(2));
     assertEquals(null, g.getChildren(2));
     assertEquals(null, g.getNeighbors(2));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getParents(3));
     assertEquals(Collections.emptySet(), g.getChildren(3));
-    assertEquals(new HashSet<Integer>(Arrays.asList(1)), 
+    assertEquals(new HashSet<Integer>(Arrays.asList(1)),
                  g.getNeighbors(3));
     assertEquals(Collections.emptySet(), g.getParents(4));
     assertEquals(Collections.emptySet(), g.getChildren(4));
@@ -691,8 +691,8 @@ public class DirectedMultiGraphTest extends TestCase {
   }
 
   public void testIsNeighbor() {
-    DirectedMultiGraph<Integer, String> g = 
-      new DirectedMultiGraph<Integer, String>();    
+    DirectedMultiGraph<Integer, String> g =
+      new DirectedMultiGraph<Integer, String>();
     g.addVertex(1);
     g.addVertex(2);
     assertFalse(g.isNeighbor(1, 2));
@@ -778,8 +778,8 @@ public class DirectedMultiGraphTest extends TestCase {
    * different graph shapes
    */
   public void testDegree() {
-    DirectedMultiGraph<Integer, String> g = 
-      new DirectedMultiGraph<Integer, String>();    
+    DirectedMultiGraph<Integer, String> g =
+      new DirectedMultiGraph<Integer, String>();
     g.addVertex(1);
     g.addVertex(2);
     assertEquals(0, g.getOutDegree(1));
@@ -900,8 +900,8 @@ public class DirectedMultiGraphTest extends TestCase {
   }
 
   public void testIterables() {
-    DirectedMultiGraph<Integer, String> g = 
-      new DirectedMultiGraph<Integer, String>();    
+    DirectedMultiGraph<Integer, String> g =
+      new DirectedMultiGraph<Integer, String>();
     g.addVertex(1);
     g.addVertex(2);
     checkIterator(g.incomingEdgeIterable(1));
@@ -983,7 +983,7 @@ public class DirectedMultiGraphTest extends TestCase {
 
     g.add(1, 1, "1-1");
     checkIterator(g.incomingEdgeIterable(1), "1-1");
-    checkIterator(g.outgoingEdgeIterable(1), 
+    checkIterator(g.outgoingEdgeIterable(1),
                   "1-1", "1-2", "1-2b", "1-3", "1-3b");
     checkIterator(g.incomingEdgeIterable(2), "1-2", "1-2b");
     checkIterator(g.outgoingEdgeIterable(2));
@@ -993,13 +993,13 @@ public class DirectedMultiGraphTest extends TestCase {
 
     g.add(2, 1, "2-1");
     checkIterator(g.incomingEdgeIterable(1), "1-1", "2-1");
-    checkIterator(g.outgoingEdgeIterable(1), 
+    checkIterator(g.outgoingEdgeIterable(1),
                   "1-1", "1-2", "1-2b", "1-3", "1-3b");
     checkIterator(g.incomingEdgeIterable(2), "1-2", "1-2b");
     checkIterator(g.outgoingEdgeIterable(2), "2-1");
     checkIterator(g.incomingEdgeIterable(3), "1-3", "1-3b");
     checkIterator(g.outgoingEdgeIterable(3));
-    checkIterator(g.edgeIterable(), 
+    checkIterator(g.edgeIterable(),
                   "1-1", "1-2", "1-2b", "1-3", "1-3b", "2-1");
     checkIterator(g.getEdges(1, 1), "1-1");
     checkIterator(g.getEdges(1, 2), "1-2", "1-2b");
@@ -1090,10 +1090,10 @@ public class DirectedMultiGraphTest extends TestCase {
 
   /**
    * A few loops get tested in testIterables; this exercises them more
-   */  
+   */
   public void testLoops() {
-    DirectedMultiGraph<Integer, String> g = 
-      new DirectedMultiGraph<Integer, String>();    
+    DirectedMultiGraph<Integer, String> g =
+      new DirectedMultiGraph<Integer, String>();
     g.addVertex(1);
     g.addVertex(2);
     g.add(1, 1, "1-1");
