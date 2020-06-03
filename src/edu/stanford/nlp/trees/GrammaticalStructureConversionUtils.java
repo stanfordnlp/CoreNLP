@@ -948,15 +948,20 @@ public class GrammaticalStructureConversionUtils {
             return true;
           } else {
             try {
-              line = iReader.readLine();
+              do {
+                line = iReader.readLine();
+                if (line != null) {
+                  line = line.trim();
+                }
+              } while ("".equals(line));
             } catch (IOException e) {
-              throw new RuntimeException(e);
+              throw new RuntimeIOException(e);
             }
             if (line == null) {
               try {
                 if (reader == null) iReader.close();
-              } catch (Exception e) {
-                throw new RuntimeException(e);
+              } catch (IOException e) {
+                throw new RuntimeIOException(e);
               }
               return false;
             }
