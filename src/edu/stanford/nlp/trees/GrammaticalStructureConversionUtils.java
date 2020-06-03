@@ -542,8 +542,8 @@ public class GrammaticalStructureConversionUtils {
    * sentence per se anymore will be annotated with "erased" as grammatical relation
    * and attached to the fake "ROOT" node with index 0.
    * <p>
-   * There is also an option to retain dependencies involving punctuation:
-   * {@code -keepPunct}
+   * Keeping punctuation is the default behavior.  This can be stopped with
+   * {@code -keepPunct false}
    * <p>
    * The {@code -extraSep} option used with -nonCollapsed will print the basic
    * dependencies first, then a separator ======, and then the extra
@@ -691,7 +691,7 @@ public class GrammaticalStructureConversionUtils {
     boolean extraSep = props.getProperty("extraSep") != null;
     boolean parseTree = props.getProperty("parseTree") != null;
     boolean test = props.getProperty("test") != null;
-    boolean keepPunct = true; //always keep punctuation marks
+    boolean keepPunct = PropertiesUtils.getBool(props, "keepPunct", true);
     boolean conllx = props.getProperty("conllx") != null;
     // todo: Support checkConnected on more options (including basic)
     boolean checkConnected = props.getProperty("checkConnected") != null;
