@@ -6,6 +6,8 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -145,7 +147,7 @@ public class SentenceTest {
 
   @Test
   public void testFromCoreMapCorrectnessCheck() {
-	Annotation ann = new Annotation("This is a sentence.");
+    Annotation ann = new Annotation("This is a sentence.");
     Sentence s = tokenizeAndSplitAnnotation(ann);
     assertEquals(ann.get(CoreAnnotations.TextAnnotation.class), s.text());
     assertEquals("This", s.word(0));
@@ -200,11 +202,11 @@ public class SentenceTest {
     final class MockOutputStream extends OutputStream {
       int writeCount = 0;
         boolean closed = false;
-		
+
         protected int getWriteCount () {
           return writeCount;
         }
-		
+
         protected boolean gotClosed() {
           return closed;
         }
@@ -214,7 +216,7 @@ public class SentenceTest {
         }
         @Override
         public void close () throws IOException {
-          this.closed = true;	
+          this.closed = true;
           super.close();
         }
     }
@@ -238,49 +240,29 @@ public class SentenceTest {
       /* Array of bytes representing deserialized
        * Sentence "This is a test"
        */
-      int[] serializedSentence = {
-        -70, 1, 10, 39, 10, 4, 84, 104,
-        105, 115, 26, 4, 84, 104, 105, 115,
-        42, 0, 50, 1, 32, 58, 4, 84,
-        104, 105, 115, 88, 0, 96, 4, -120,
-        1, 0, -112, 1, 1, -88, 1, 0,
-        -80, 2, 0, 10, 34, 10, 2, 105,
-        115, 26, 2, 105, 115, 42, 1, 32,
-        50, 1, 32, 58, 2, 105, 115, 88,
-        5, 96, 7, -120, 1, 1, -112, 1,
-        2, -88, 1, 0, -80, 2, 0, 10,
-        31, 10, 1, 97, 26, 1, 97, 42,
-        1, 32, 50, 1, 32, 58, 1, 97,
-        88, 8, 96, 9, -120, 1, 2, -112,
-        1, 3, -88, 1, 0, -80, 2, 0,
-        10, 39, 10, 4, 116, 101, 115, 116,
-        26, 4, 116, 101, 115, 116, 42, 1,
-        32, 50, 0, 58, 4, 116, 101, 115,
-        116, 88, 10, 96, 14, -120, 1, 3,
-        -112, 1, 4, -88, 1, 0, -80, 2,
-        0, 16, 0, 24, 4, 32, 0, 40,
-        0, 48, 14, 98, 14, 84, 104, 105,
-        115, 32, 105, 115, 32, 97, 32, 116,
-        101, 115, 116, -104, 3, 0, -80, 3,
-        0, -120, 4, 0
-      };
-
+      public ArrayList<Integer> serializedSentence = new ArrayList<Integer>();
+      public MockedInputStream(ArrayList<Integer> bytes) {
+        this.serializedSentence = bytes;
+      }
       public int getReadCount() {
         return counter;
       }
       boolean allBytesRead() {
-        return counter == serializedSentence.length;
+        return counter == this.serializedSentence.size();
       }
       @Override
       public int read() throws IOException {
-        return serializedSentence[counter++];
+        return serializedSentence.get(counter++);
       }
     }
-    MockedInputStream mockedInput = new MockedInputStream();
-    Sentence deserialized = Sentence.deserialize(mockedInput);
-    boolean inputWasConsumedCompletely = mockedInput.allBytesRead();
+    Sentence sent = new Sentence("This was previously serialized");
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    sent.serialize(out);
+    byte[] previouslySerialized = out.toByteArray();
 
-    assertEquals("This is a test", deserialized.toString());
-    assertTrue(inputWasConsumedCompletely);
+    ByteArrayInputStream in = new ByteArrayInputStream(previouslySerialized);
+    Sentence deserialized = Sentence.deserialize(in);
+
+    assertEquals("This was previously serialized", deserialized.toString());
   }
 }

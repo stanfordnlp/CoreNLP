@@ -62,14 +62,13 @@ public class WordLemmaTagFactoryTest {
     checkWordLemmaTag(wLt, "running", "running", "r");
   }
 
-  ////Failing test!
-//  @Test
-//  public void newLabelFromStringWord() {
-//    WordLemmaTagFactory wTf = new WordLemmaTagFactory();
-//    Label label = wTf.newLabelFromString("run");
-//
-//    WordLemmaTag wLt = (WordLemmaTag) label;
-//
-//    checkWordLemmaTag(wLt, "run", "run", "run");
-//  }
+  @Test
+  public void newLabelFromStringWord() {
+    WordLemmaTagFactory wTf = new WordLemmaTagFactory();
+    Label label = wTf.newLabelFromString("run");
+
+    WordLemmaTag wLt = (WordLemmaTag) label;
+
+    checkWordLemmaTag(wLt, "run", null, null);
+  }
 }

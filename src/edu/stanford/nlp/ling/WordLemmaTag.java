@@ -166,18 +166,18 @@ public class WordLemmaTag implements Label, Comparable<WordLemmaTag>, HasWord, H
   public void setFromString(String labelStr, String divider) {
     int first = labelStr.indexOf(divider);
     int second = labelStr.lastIndexOf(divider);
-    if (first == second) {
-      setWord(labelStr.substring(0, first));
-      setTag(labelStr.substring(first + 1));
-      setLemma(Morphology.lemmaStatic(labelStr.substring(0, first), labelStr.substring(first + 1)));
-    } else if (first >= 0) {
-      setWord(labelStr.substring(0, first));
-      setLemma(labelStr.substring(first + 1, second));
-      setTag(labelStr.substring(second + 1));
-    } else {
+    if (first < 0) {
       setWord(labelStr);
       setLemma(null);
       setTag(null);
+    } else if (first == second) {  // first >= 0, second >= 0
+      setWord(labelStr.substring(0, first));
+      setTag(labelStr.substring(first + 1));
+      setLemma(Morphology.lemmaStatic(labelStr.substring(0, first), labelStr.substring(first + 1)));
+    } else {  // first >= 0, second >= 0, first != second
+      setWord(labelStr.substring(0, first));
+      setLemma(labelStr.substring(first + 1, second));
+      setTag(labelStr.substring(second + 1));
     }
   }
 

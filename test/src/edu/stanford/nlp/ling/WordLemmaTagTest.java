@@ -58,12 +58,11 @@ public class WordLemmaTagTest {
     checkWordLemmaTag(wLT, "studying", "study", "s");
   }
 
-///// Failing TEST
-//  @Test
-//  public void testSetFromStringWord() {
-//    WordLemmaTag wLT = new WordLemmaTag();
-//    wLT.setFromString("running");
-//
-//    checkWordLemmaTag(wLT, "running", null, null);
-//  }
-}
+  @Test
+  public void testSetFromStringWord() {
+    WordLemmaTag wLT = new WordLemmaTag();
+    wLT.setFromString("running");
+
+    checkWordLemmaTag(wLT, "running", null, null);
+  }
+} 

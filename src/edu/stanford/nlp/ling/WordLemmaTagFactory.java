@@ -90,12 +90,12 @@ public class WordLemmaTagFactory implements LabelFactory {
   public Label newLabelFromString(String labelStr) {
     int first = labelStr.indexOf(divider);
     int second = labelStr.lastIndexOf(divider);
-    if (first == second) {
-      return new WordLemmaTag(labelStr.substring(0, first), Morphology.lemmaStatic(labelStr.substring(0, first), labelStr.substring(first + 1)), labelStr.substring(first + 1));
-    } else if (first >= 0) {
-      return new WordLemmaTag(labelStr.substring(0, first), labelStr.substring(first + 1, second), labelStr.substring(second + 1));
-    } else {
+    if (first < 0) {
       return new WordLemmaTag(labelStr);
+    } else if (first == second) {
+      return new WordLemmaTag(labelStr.substring(0, first), Morphology.lemmaStatic(labelStr.substring(0, first), labelStr.substring(first + 1)), labelStr.substring(first + 1));
+    } else { // first >= 0, second >= 0, first != second
+      return new WordLemmaTag(labelStr.substring(0, first), labelStr.substring(first + 1, second), labelStr.substring(second + 1));
     }
   }
 

@@ -26,8 +26,8 @@ public class DocumentTest {
 
   @Test
   public void testCreateFromText() {
-    Document doc = oneSentenceDocument;
-    assertNotNull(doc);
+    assertNotNull(oneSentenceDocument);
+    assertNotNull(twoSentenceDocument);
   }
 
   @Test
