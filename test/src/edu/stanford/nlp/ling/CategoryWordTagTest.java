@@ -1,9 +1,12 @@
 package edu.stanford.nlp.ling;
 
-import junit.framework.TestCase;
 import org.junit.Test;
 
-public class CategoryWordTagTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class CategoryWordTagTest {
+
+  @Test
   public void testCategoryWordTagConstructorWithExistingLabel() {
     CategoryWordTag tag = new CategoryWordTag("A", "B", "C");
 

@@ -6,11 +6,6 @@ import static org.junit.Assert.assertEquals;
 
 public class ADMathTest {
 
-  private void testCompareValues(DoubleAD correctResult, DoubleAD result, Double delta) {
-    assertEquals("Incorrect val", correctResult.getval(), result.getval(), delta);
-    assertEquals("Incorrect dot", correctResult.getdot(), result.getdot(), delta);
-  }
-
   @Test
   public void testMult() {
     DoubleAD v1 = new DoubleAD(2.0, 4.0);
@@ -19,7 +14,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.mult(v1, v2);
 
     DoubleAD correctResult = new DoubleAD(6.0, 16.0);
-    testCompareValues(correctResult, result, 0.0);
+    assertEquals(correctResult, result);
   }
 
   @Test
@@ -30,7 +25,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.multConst(v1, constant);
 
     DoubleAD correctResult = new DoubleAD(8.0, 16.0);
-    testCompareValues(correctResult, result, 0.0);
+    assertEquals(correctResult, result);
   }
 
   @Test
@@ -41,7 +36,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.divide(v1, v2);
 
     DoubleAD correctResult = new DoubleAD(2.0, 1);
-    testCompareValues(correctResult, result, 0.0);
+    assertEquals(correctResult, result);
   }
 
   @Test
@@ -52,7 +47,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.divideConst(v1, constant);
 
     DoubleAD correctResult = new DoubleAD(3.5, 1.5);
-    testCompareValues(correctResult, result, 0.0);
+    assertEquals(correctResult, result);
   }
 
   @Test
@@ -61,8 +56,8 @@ public class ADMathTest {
 
     DoubleAD result = ADMath.exp(v1);
 
-    DoubleAD correctResult = new DoubleAD(20.08, 80.34);
-    testCompareValues(correctResult, result, 0.01);
+    DoubleAD correctResult = new DoubleAD(20.085536923187668, 80.34214769275067);
+    assertEquals(correctResult, result);
   }
 
   @Test
@@ -71,8 +66,8 @@ public class ADMathTest {
 
     DoubleAD result = ADMath.log(v1);
 
-    DoubleAD correctResult = new DoubleAD(1.60, 0.6);
-    testCompareValues(correctResult, result, 0.01);
+    DoubleAD correctResult = new DoubleAD(1.6094379124341003, 0.6);
+    assertEquals(correctResult, result);
   }
 
   @Test
@@ -83,7 +78,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.plus(v1, v2);
 
     DoubleAD correctResult = new DoubleAD(6.0, 6.0);
-    testCompareValues(correctResult, result, 0.0);
+    assertEquals(correctResult, result);
   }
 
   @Test
@@ -94,7 +89,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.plusConst(v1, constant);
 
     DoubleAD correctResult = new DoubleAD(9.0, 3.0);
-    testCompareValues(correctResult, result, 0.0);
+    assertEquals(correctResult, result);
   }
 
   @Test
@@ -105,7 +100,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.minus(v1, v2);
 
     DoubleAD correctResult = new DoubleAD(2.0, 4.0);
-    testCompareValues(correctResult, result, 0.0);
+    assertEquals(correctResult, result);
   }
 
   @Test
@@ -116,6 +111,6 @@ public class ADMathTest {
     DoubleAD result = ADMath.minusConst(v1, constant);
 
     DoubleAD correctResult = new DoubleAD(5.0, 3.0);
-    testCompareValues(correctResult, result, 0.0);
+    assertEquals(correctResult, result);
   }
 }
