@@ -19,7 +19,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.mult(v1, v2);
 
     DoubleAD correctResult = new DoubleAD(6.0, 16.0);
-    testCompareValues(correctResult, result, 0.0);
+    testCompareValues(correctResult, result, 0.0000001);
   }
 
   @Test
@@ -30,7 +30,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.multConst(v1, constant);
 
     DoubleAD correctResult = new DoubleAD(8.0, 16.0);
-    testCompareValues(correctResult, result, 0.0);
+    testCompareValues(correctResult, result, 0.0000001);
   }
 
   @Test
@@ -41,7 +41,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.divide(v1, v2);
 
     DoubleAD correctResult = new DoubleAD(2.0, 1);
-    testCompareValues(correctResult, result, 0.0);
+    testCompareValues(correctResult, result, 0.0000001);
   }
 
   @Test
@@ -52,7 +52,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.divideConst(v1, constant);
 
     DoubleAD correctResult = new DoubleAD(3.5, 1.5);
-    testCompareValues(correctResult, result, 0.0);
+    testCompareValues(correctResult, result, 0.0000001);
   }
 
   @Test
@@ -83,7 +83,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.plus(v1, v2);
 
     DoubleAD correctResult = new DoubleAD(6.0, 6.0);
-    testCompareValues(correctResult, result, 0.0);
+    testCompareValues(correctResult, result, 0.0000001);
   }
 
   @Test
@@ -94,7 +94,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.plusConst(v1, constant);
 
     DoubleAD correctResult = new DoubleAD(9.0, 3.0);
-    testCompareValues(correctResult, result, 0.0);
+    testCompareValues(correctResult, result, 0.0000001);
   }
 
   @Test
@@ -105,7 +105,7 @@ public class ADMathTest {
     DoubleAD result = ADMath.minus(v1, v2);
 
     DoubleAD correctResult = new DoubleAD(2.0, 4.0);
-    testCompareValues(correctResult, result, 0.0);
+    testCompareValues(correctResult, result, 0.0000001);
   }
 
   @Test
@@ -116,6 +116,6 @@ public class ADMathTest {
     DoubleAD result = ADMath.minusConst(v1, constant);
 
     DoubleAD correctResult = new DoubleAD(5.0, 3.0);
-    testCompareValues(correctResult, result, 0.0);
+    testCompareValues(correctResult, result, 0.0000001);
   }
 }
