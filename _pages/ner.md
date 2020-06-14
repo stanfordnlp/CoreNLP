@@ -43,8 +43,8 @@ system.
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
 | ner.model | List(String) | null | A comma-separated list of NER model names (or just a single name is okay). If none are specified, a default list of English models is used (3class, 7class, and MISCclass, in that order). The names will be looked for as classpath resources, filenames, or URLs. |
-| ner.rulesOnly | boolean | false | Whether or not to only run rules based NER.  (Note: this option only available in latest GitHub version of code) |
-| ner.statisticalOnly | boolean | false | Whether or not to only run statistical NER.  (Note: this option only available in latest GitHub version of code) |
+| ner.rulesOnly | boolean | false | Whether or not to only run rules based NER. |
+| ner.statisticalOnly | boolean | false | Whether or not to only run statistical NER. |
 | ner.applyNumericClassifiers | boolean | true | Whether or not to use numeric classifiers, for money, percent, numbers, including [SUTime](http://nlp.stanford.edu/software/regexner/).  These are hardcoded for English, so if using a different language, this should be set to false. |
 | ner.applyFineGrained | boolean | true | whether or not to apply fine-grained NER tags (e.g. LOCATION --> CITY) ; this will slow down performance |
 | ner.buildEntityMentions | boolean | true | whether or not to build entity mentions from token NER tags |
@@ -272,13 +272,11 @@ java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokeni
 
 ```bash
 # only run rules based NER (numeric classifiers, SUTime, TokensRegexNER, TokensRegex)
-# NOTE: this is currently only available in the current version of the code on GitHub
 java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.rulesOnly -file example.txt 
 ```
 
 ```bash
 # only run statistical NER
-# NOTE: this is currently only available in the current version of the code on GitHub
 java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.statisticalOnly -file example.txt 
 ```
 
