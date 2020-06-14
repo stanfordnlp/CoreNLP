@@ -10,7 +10,8 @@ permalink: '/migration.html'
 
 Annotators, models, and rules for English, French, German, and Spanish now work with UD 2.0
 tokenization by default. This includes models for tagging, parsing, named entity recognition,
-and KBP relation extraction.
+and KBP relation extraction. For example, the English tokenizer now splits most hyphenated
+tokens and does not normalize quotation marks.
 
 Custom models trained with version 3.9.2 or earlier may suffer performance issues since they
 expect a different tokenization standard. It is advised to retrain models with tokenization
