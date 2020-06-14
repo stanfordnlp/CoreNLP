@@ -4,6 +4,50 @@ keywords: migration
 permalink: '/migration.html'
 ---
 
+## 4.0.0
+
+### Tokenization has been upgraded to UD 2.0 for English, French, German, and Spanish.
+
+Annotators, models, and rules for English, French, German, and Spanish now work with UD 2.0
+tokenization by default. This includes models for tagging, parsing, named entity recognition,
+and KBP relation extraction.
+
+Custom models trained with version 3.9.2 or earlier may suffer performance issues since they
+expect a different tokenization standard. It is advised to retrain models with tokenization
+that follows the UD 2.0 standard.
+
+The tokenization process for these languages has been designed to maximize F1 on dev/test
+sets from the CoNLL 2018 shared task, similar to [Stanza](https://stanfordnlp.github.io/stanza/).
+
+Examples of UD 2.0 tokenization for these languages can be found [here](https://universaldependencies.org/).
+
+### MWT annotator required for French, German, and Spanish
+
+Related to the tokenization change, French, German, and Spanish now require the use
+of the MWTAnnotator which splits some tokens into multiple words with rules and
+statistical models. For instance the French token "des" is sometimes split into the
+words "de" and "les".
+
+Some multi-word token splitting for these languages used to occur in the `tokenize`
+annotator, but now this annotator focuses on creating tokens, and the `mwt` annotator
+is used to make token splitting decisions, sometimes via a dictionary and other times
+via a statistical model.
+
+These languages require the `mwt` annotator be run immediately after the `ssplit`
+annotator.
+
+For example, the German default annotators list has changed from
+
+```bash
+tokenize, ssplit, pos, ner, depparse
+```
+
+to
+
+```bash
+tokenize, ssplit, mwt, pos, ner, depparse
+```
+
 ## 3.9.0
 
 ### Annotator renaming
