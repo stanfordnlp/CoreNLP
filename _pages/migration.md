@@ -9,10 +9,13 @@ permalink: '/migration.html'
 ### Tokenization has been upgraded to UD 2.0 for English, French, German, and Spanish.
 
 Annotators, models, and rules for English, French, German, and Spanish now work with UD 2.0
-tokenization by default. This includes models for tagging, parsing, named entity recognition,
-and KBP relation extraction. For example, the English tokenizer now splits most hyphenated
-tokens, does not normalize parentheses (e.g. turn `(` into `-LRB-`), and does not normalize
-quotation marks.
+tokenization by default. This includes models for tagging, parsing, named entity recognition
+(with an important exception), and KBP relation extraction. For example, the English tokenizer 
+now splits most hyphenated tokens, does not normalize parentheses (e.g. turn `(` into `-LRB-`), 
+and does not normalize quotation marks.
+
+A specialized tokenization that is mostly the UD 2.0 version is used for named entity
+recognition (see below).
 
 Custom models trained with version 3.9.2 or earlier may suffer performance issues since they
 expect a different tokenization standard. It is advised to retrain models with tokenization
@@ -22,6 +25,19 @@ The tokenization process for these languages has been designed to maximize F1 on
 sets from the CoNLL 2018 shared task, similar to [Stanza](https://stanfordnlp.github.io/stanza/).
 
 Examples of UD 2.0 tokenization for these languages can be found [here](https://universaldependencies.org/).
+
+### NER Specific Tokenization
+
+A complication is that the UD 2.0 standard for English and German says to split tokens on
+hyphen, but this can lead to diminished performance. Consider the example of double barrel
+names such as `Daniel Day-Lewis` or hyphenated place names such as `Bergen-Enkheim`. It
+was found that splitting on hyphen dropped F1 score, so the hyphen splitting is not used
+for named entity recognition. 
+
+The NERAnnotator by default takes in UD 2.0 tokens, and then merges all tokens
+that were originally joined by a hyphen in the text. The model is run, and the labels
+are finally applied to the UD 2.0 tokens. This behavior can be turned off by setting
+`ner.useNERSpecificTokenization` to `false`.
 
 ### MWT annotator required for French, German, and Spanish
 
