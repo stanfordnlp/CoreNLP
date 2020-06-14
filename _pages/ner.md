@@ -49,6 +49,8 @@ system.
 | ner.applyFineGrained | boolean | true | whether or not to apply fine-grained NER tags (e.g. LOCATION --> CITY) ; this will slow down performance |
 | ner.buildEntityMentions | boolean | true | whether or not to build entity mentions from token NER tags |
 | ner.combinationMode | String | NORMAL | when set to NORMAL each tag can only be applied by the first CRF classifier that applies that tag ; when set to HIGH_RECALL all CRF classifiers can apply all of their tags |
+| ner.useNERSpecificTokenization | boolean | true | Whether or not to use NER-specific tokenization which merges tokens separated by 
+hyphens. Models released with Stanford CoreNLP 4.0.0 expect a tokenization standard that does NOT split on hyphens. |
 | ner.useSUTime | boolean | true | Whether or not to use SUTime. SUTime at present only supports English; if not processing English, make sure to set this to false. |
 | sutime.markTimeRanges | boolean | false | Tells SUTime whether to mark phrases such as “From January to March” as a range, instead of marking "January" and "March" separately. |
 | sutime.includeRange | boolean | false | If marking time ranges, set the time range in the TIMEX output from SUTime. |
