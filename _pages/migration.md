@@ -39,9 +39,9 @@ trained, educated`. So `Chicago-based` WILL be split into `Chicago` `-` `based` 
 for the token `Chicago` to be recognized as a `CITY`.
 
 The NERAnnotator by default takes in UD 2.0 tokens, and then merges all tokens
-that were originally joined by a hyphen in the text. The model is run, and the labels
-are finally applied to the UD 2.0 tokens. This behavior can be turned off by setting
-`ner.useNERSpecificTokenization` to `false`.
+that were originally joined by a hyphen in the text (except for cases like Chicago-based).
+The model is run on the modified tokens list, and the labels are finally applied to the original UD 2.0 tokens. 
+This behavior can be turned off by setting `ner.useNERSpecificTokenization` to `false`.
 
 ### MWT annotator required for French, German, and Spanish
 
