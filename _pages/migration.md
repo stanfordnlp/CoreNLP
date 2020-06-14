@@ -19,7 +19,8 @@ recognition (see below).
 
 Custom models trained with version 3.9.2 or earlier may suffer performance issues since they
 expect a different tokenization standard. It is advised to retrain models with tokenization
-that follows the UD 2.0 standard.
+that follows the UD 2.0 standard. If retraining an NER model, note that the training data
+should not split tokens on hyphen.
 
 The tokenization process for these languages has been designed to maximize F1 on dev/test
 sets from the CoNLL 2018 shared task, similar to [Stanza](https://stanfordnlp.github.io/stanza/).
@@ -31,8 +32,11 @@ Examples of UD 2.0 tokenization for these languages can be found [here](https://
 A complication is that the UD 2.0 standard for English and German says to split tokens on
 hyphen, but this can lead to diminished performance. Consider the example of double barrel
 names such as `Daniel Day-Lewis` or hyphenated place names such as `Bergen-Enkheim`. It
-was found that splitting on hyphen dropped F1 score, so the hyphen splitting is not used
-for named entity recognition. 
+was found that splitting on hyphen dropped F1 score, so the hyphen splitting is mostly
+deactivated for named entity recognition. The only exceptions are the following key words:
+`based, area, registered, headquartered, native, born, raised, backed, controlled, owned, resident, 
+trained, educated`. So `Chicago-based` WILL be split into `Chicago` `-` `based` to allow
+for the token `Chicago` to be recognized as a `CITY`.
 
 The NERAnnotator by default takes in UD 2.0 tokens, and then merges all tokens
 that were originally joined by a hyphen in the text. The model is run, and the labels
