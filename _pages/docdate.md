@@ -6,11 +6,9 @@ permalink: '/docdate.html'
 
 ## Description
 
-Provides several methods for setting the date of documents.  As of version 3.9.2 this annotator must be used as 
-a sub-annotator of `ner`, or as a custom annotator.  Its main purpose is to provide document dates for SUTime, 
-which is generally used as a sub-annotator of `ner` as well.  If you wish to set document dates without running
-`ner` you can specify `docdate` as a custom annotator.  This issue has been fixed in the latest version of the
-code on GitHub, so in future versions you won't have to set up `docdate` as a custom annotator.
+Provides several methods for setting the date of documents. One can use the standalone `docdate` annotator
+or use the sub-annotator `ner.docdate` that is contained by the `ner` annotator. If using the sub-annotator
+in `ner` do not also use the standalone annotator.
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
@@ -21,8 +19,8 @@ code on GitHub, so in future versions you won't have to set up `docdate` as a cu
 ### Command Line
 
 ```
-# as a custom annotator
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -customAnnotatorClass.docdate edu.stanford.nlp.pipeline.DocDateAnnotator -annotators tokenize,ssplit,docdate -docdate.useFixedDate 2019-01-01 -file example.txt
+# as a standalone annotator
+java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP edu.stanford.nlp.pipeline.DocDateAnnotator -annotators tokenize,ssplit,docdate -docdate.useFixedDate 2019-01-01 -file example.txt
 ```
 
 ```
