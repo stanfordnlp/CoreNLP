@@ -1,11 +1,11 @@
-Stanford NER - v3.9.2 - 2018-10-16
+Stanford NER - v4.0.0 - 2020-05-10
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
 entity recognition system, including facilities to train models from
 supervised training data and pre-trained models for English.
 
-(c) 2002-2015.  The Board of Trustees of The Leland
+(c) 2002-2020.  The Board of Trustees of The Leland
     Stanford Junior University. All Rights Reserved.
 
 Original CRF code by Jenny Finkel.
@@ -232,6 +232,8 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
+
+2020-05-10    4.0.0     Update to UDv2.0 tokenization 
 
 2018-10-16    3.9.2     Update for compatibility 
 
