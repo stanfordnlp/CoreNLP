@@ -16,6 +16,7 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.naturalli.*;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.quoteattribution.ChapterAnnotator;
+import edu.stanford.nlp.quoteattribution.QuoteAttributionUtils.EnhancedSentenceAnnotation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
@@ -603,7 +604,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // add boolean flag if sentence is quoted
     if (keySet.contains(QuotedAnnotation.class)) builder.setSectionQuoted(getAndRegister(sentence, keysToSerialize, QuotedAnnotation.class));
-
+    // quote annotator can also add an "enhanced sentence" if multiple sentences are treated as a single sentence
+    if (keySet.contains(EnhancedSentenceAnnotation.class)) {
+      keysToSerialize.remove(EnhancedSentenceAnnotation.class);
+      CoreMap enhanced = sentence.get(EnhancedSentenceAnnotation.class);
+      builder.setEnhancedSentence(toProto(enhanced));
+    }
+    
     // add chapter index if there is one
     if (keySet.contains(ChapterAnnotator.ChapterAnnotation.class)) builder.setChapterIndex(getAndRegister(sentence, keysToSerialize, ChapterAnnotator.ChapterAnnotation.class));
 

@@ -593,6 +593,13 @@ public class MachineReading  {
 
       Annotation predicted = (MachineReadingProperties.testRelationsUsingPredictedEntities ? predictions[ENTITY_LEVEL][partitionIndex] : AnnotationUtils.deepMentionCopy(testing));
       // make sure the entities have the syntactic head and span set. we need this for relation extraction features
+
+      // TODO(AngledLuffa): this call to assignSyntacticHeadToEntities
+      // is changing the annotations for the original annotation.
+      // This is probably not right?  It can result in changes in the
+      // dependencies when run in the pipeline.  For example:
+      //  "They are such as interested Thomas Aquinas and Bonaventura, Anselm and Bernard."
+      // https://github.com/stanfordnlp/CoreNLP/issues/1053
       assignSyntacticHeadToEntities(predicted);
       relationExtractor.annotate(predicted);
 

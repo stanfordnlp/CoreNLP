@@ -1,5 +1,5 @@
-Stanford POS Tagger, v3.9.2 - 2018-10-16
-Copyright (c) 2002-2012 The Board of Trustees of
+Stanford POS Tagger, v4.0.0 - 2020-05-22
+Copyright (c) 2002-2020 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
 Original tagger author: Kristina Toutanova
@@ -104,7 +104,19 @@ To test a model
 
 java -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -testFile testFile
 
+Using models for French, German, and Spanish
+===========================================
 
+Starting with version 4.0.0, French, German, and Spanish are tokenized according to the UD 2.0 standard. This includes creating
+multiword tokens. This functionality requires the pipeline functionality only available in the full Stanford CoreNLP distribution.
+To tag French, German, or Spanish, one must provide UD 2.0 tokenized text, or upgrade to the full Stanford CoreNLP package to get
+UD 2.0 tokenization for these languages.
+
+To run on pretokenized text, add "-tokenize false" to your command.
+
+Example:
+
+java -mx300m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/french-ud.tagger -tokenize false -textFile sample-input.txt > sample-tagged.txt
 
 CONTENTS
 -----------------------------------------------
@@ -192,6 +204,8 @@ processing.
 
 CHANGES
 -----------------------------------------------
+
+2020-05-22    4.0.0     Model tokenization updated to UDv2.0 
 
 2018-10-16    3.9.2     New English models, better currency symbol 
                         handling 

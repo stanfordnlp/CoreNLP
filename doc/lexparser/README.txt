@@ -1,7 +1,7 @@
-Stanford Lexicalized Parser v3.9.2 - 2018-10-16
+Stanford Lexicalized Parser v4.0.0 - 2020-05-22
 -----------------------------------------------
 
-Copyright (c) 2002-2017 The Board of Trustees of The Leland Stanford Junior
+Copyright (c) 2002-2020 The Board of Trustees of The Leland Stanford Junior
 University. All Rights Reserved.
 
 Original core parser code by Dan Klein.  Support code, additional
@@ -81,7 +81,7 @@ a language specific POS tagger.  Here is an example for Chinese:
 
     java -Xmx2g -cp "*" edu.stanford.nlp.parser.nndep.DependencyParser \
     -model edu/stanford/nlp/models/parser/nndep/UD_Chinese.gz \
-    -tagger.model edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger \
+    -tagger.model edu/stanford/nlp/models/pos-tagger/chinese-distsim.tagger \
     -textFile data/chinese-onesent-utf8.txt -outFile data/chinese-onesent-utf8.txt.out
 
 OTHER USE CASES
@@ -149,15 +149,81 @@ input encoding is GB18030.
 
 French
 
-Trained on the functionally annotated section of the French Treebank
-(FTB) using the pre-processing described in (Green et al., 2011). For raw text input,
-a tokenizer is enabled by default that produces FTB tokenization. To disable this
-tokenizer, use the "-tokenized" option. To tokenize raw text separately, see
-the usage information in edu.stanford.nlp.international.french.process.FrenchTokenizer.
+The standalone parser distribution comes with a neural dependency parser
+model trained on the French-GSD data set (version 2.2). The standalone
+parser distribution does not include functionality for producing UD 2.2
+tokenization, so pre-tokenized text (text tokenized by whitespace) must
+be provided when running the neural dependency parser, and the "-tokenized"
+flag must be used. 
+
+Example command:
+
+    java -Xmx2g -cp "*" edu.stanford.nlp.parser.nndep.DependencyParser \
+    -model edu/stanford/nlp/models/parser/nndep/UD_French.gz \
+    -tagger.model edu/stanford/nlp/models/pos-tagger/french-ud.tagger \
+    -tokenized -textFile example.txt -outFile example.txt.out
+
+Note that "example.txt" should contain UD 2.2 tokens, separated by whitespace.
+
+The only provided French constituency parser is a shift-reduce parser. At this
+time running the shift-reduce parser on French text requires running a pipeline 
+with the full Stanford CoreNLP package.
+
+To use the shift-reduce constituency parser on text and the UD 2.2 tokenization, 
+upgrade to the full Stanford CoreNLP package and run a French pipeline.
 
 German
 
-Trained on the Negra corpus. Details are included in (Rafferty and Manning, 2008).
+The constituency parser was trained on the Negra corpus. Details are included in 
+(Rafferty and Manning, 2008). This parser expects UD 2.2 tokenization. Input
+text files must be UD 2.2 tokens separated by whitespace. The "-tokenized" flag
+must be used.
+
+The neural dependency parser was trained on the German-GSD data set (version 2.2).
+The standalone parser distribution does not include functionality for producing 
+UD 2.2 tokenization, so pre-tokenized text (text tokenized by whitespace) must
+be provided when running the neural dependency parser, and the "-tokenized"
+flag must be used. 
+
+Example command:
+
+    java -Xmx2g -cp "*" edu.stanford.nlp.parser.nndep.DependencyParser \
+    -model edu/stanford/nlp/models/parser/nndep/UD_German.gz \
+    -tagger.model edu/stanford/nlp/models/pos-tagger/german-ud.tagger \
+    -tokenized -textFile example.txt -outFile example.txt.out
+
+German shift reduce parsers are available, but running them on input German text
+requires the use of a full Stanford CoreNLP pipeline. The lower accuracy lexicalized
+parsers have options for running on input text.
+
+To use the shift-reduce constituency parser on text and the UD 2.2 tokenization, upgrade
+to the full Stanford CoreNLP package and run a German pipeline.
+
+Spanish
+
+The constituency parser was trained on the Spanish AnCora treebank and
+LDC provided discussion forum and newswire treebanks. This parser expects UD 2.0
+tokenization. 
+
+The neural dependency parser was trained on the Spanish AnCora data set (version 2.0).
+The standalone parser distribution does not include functionality for producing
+UD 2.0 tokenization, so pre-tokenized text (text tokenized by whitespace) must
+be provided when running the neural dependency parser, and the "-tokenized"
+flag must be used.
+
+Example command:
+
+    java -Xmx2g -cp "*" edu.stanford.nlp.parser.nndep.DependencyParser \
+    -model edu/stanford/nlp/models/parser/nndep/UD_Spanish.gz \
+    -tagger.model edu/stanford/nlp/models/pos-tagger/spanish-ud.tagger \
+    -tokenized -textFile example.txt -outFile example.txt.out
+
+Spanish shift reduce parsers are available, but running them on input Spanish text
+requires the use of a full Stanford CoreNLP pipeline. The lower accuracy lexicalized
+parsers have options for running on input text.
+
+To use the shift-reduce constituency parser on text and the UD 2.2 tokenization, upgrade
+to the full Stanford CoreNLP package and run a Spanish pipeline.
 
 TREEBANK PREPROCESSING
 
@@ -216,7 +282,7 @@ to obtain original Stanford Dependencies.
 LICENSE
 
 // StanfordLexicalizedParser -- a probabilistic lexicalized NL CFG parser
-// Copyright (c) 2002-2017 The Board of Trustees of
+// Copyright (c) 2002-2020 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -244,6 +310,8 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
+
+2020-05-22    4.0.0     Model tokenization updated to UDv2.0 
 
 2018-10-16    3.9.2     Update for compatibility 
 

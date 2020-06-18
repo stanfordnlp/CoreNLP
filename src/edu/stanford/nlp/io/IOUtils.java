@@ -415,13 +415,13 @@ public class IOUtils  {
     // ms 10-04-2010:
     // - even though this may look like a regular file, it may be a path inside a jar in the CLASSPATH
     // - check for this first. This takes precedence over the file system.
-    InputStream is = IOUtils.class.getClassLoader().getResourceAsStream(name);
+    InputStream is = ClassLoader.getSystemResourceAsStream(name);
     // windows File.separator is \, but getting resources only works with /
     if (is == null) {
-      is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
+      is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/"));
       // Classpath doesn't like double slashes (e.g., /home/user//foo.txt)
       if (is == null) {
-        is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
+        is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
       }
     }
     // if not found in the CLASSPATH, load from the file system
@@ -438,11 +438,11 @@ public class IOUtils  {
    * @return true if a call to {@link IOUtils#getBufferedReaderFromClasspathOrFileSystem(String)} would return a valid stream.
    */
   public static boolean existsInClasspathOrFileSystem(String name) {
-    InputStream is = IOUtils.class.getClassLoader().getResourceAsStream(name);
+    InputStream is = ClassLoader.getSystemResourceAsStream(name);
     if (is == null) {
-      is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
+      is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/"));
       if (is == null) {
-        is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
+        is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
       }
     }
     return is != null || new File(name).exists();

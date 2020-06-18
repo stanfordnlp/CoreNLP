@@ -1,7 +1,7 @@
-Tregex v3.9.2 - 2018-10-16
+Tregex v4.0.0 - 2020-05-10
 ----------------------------------------------
 
-Copyright (c) 2003-2012 The Board of Trustees of 
+Copyright (c) 2003-2020 The Board of Trustees of 
 The Leland Stanford Junior University. All Rights Reserved.
 
 Original core Tregex code by Roger Levy and Galen Andrew.
