@@ -32,7 +32,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
 public class EnglishGrammaticalStructure extends GrammaticalStructure  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EnglishGrammaticalStructure.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(EnglishGrammaticalStructure.class);
 
   private static final long serialVersionUID = -1866362375001969402L;
 
@@ -1243,8 +1243,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
         continue; // This one has been dealt with successfully
       } // end same prepositions
 
-      // case of "Lufthansa flies to and from Serbia". Make it look like next
-      // case :-)
+      // case of "Lufthansa flies to and from Serbia". Make it look like next case :-)
       // that is, the prepOtherDep should be the same as prepDep !
       for (Triple<TypedDependency, TypedDependency, Boolean> trip : conjs) {
         if (trip.first() != null && trip.second() == null) {
@@ -1257,16 +1256,18 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
       // in this case we need to add a node
       // "Bill jumped over the fence and through the hoop"
       // prep_over(jumped, fence)
-      // conj_and(jumped, jumped)
-      // prep_through(jumped, hoop)
+      // conj_and(jumped, jumped')
+      // prep_through(jumped', hoop)
       // Extra complication:
       // If "jumped" is already part of a conjunction, we should add the new one off that rather than chaining
-      IndexedWord conjHead = td1.gov();
-      for (TypedDependency td3 : list) {
-        if (td3.dep().equals(td1.gov()) && td3.reln().equals(CONJUNCT)) {
-          conjHead = td3.gov();
-        }
-      }
+      // [cdm June 2020] This bit of code below was a no-op, since conjHead was never further used anywhere, and the
+      // case above is handled correctly without it included, so I've just commented it out.
+      // IndexedWord conjHead = td1.gov();
+      // for (TypedDependency td3 : list) {
+      //   if (td3.dep().equals(td1.gov()) && td3.reln().equals(CONJUNCT)) {
+      //     conjHead = td3.gov();
+      //   }
+      // }
 
       GrammaticalRelation reln = determinePrepRelation(map, vmod, td1, td1, prepDep.second());
       TypedDependency tdNew = new TypedDependency(reln, td1.gov(), prepDep.first().dep());

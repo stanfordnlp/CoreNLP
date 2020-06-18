@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.Pointer;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
-import java.text.NumberFormat;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -500,19 +500,9 @@ public class JSONOutputter extends AnnotationOutputter {
       } else if (value instanceof Character) {
         writer.write(Character.toString((Character) value));
       } else if (value instanceof Float) {
-        // Use the US Locale so that we can conform with json output format
-        // The decimal separator is always supposed to be . for example
-        Locale locale = Locale.US;
-        NumberFormat formatter = NumberFormat.getInstance(locale);
-        formatter.setMaximumFractionDigits(7);
-        formatter.setMinimumFractionDigits(0);
-        writer.write(formatter.format(value));
+        writer.write(new DecimalFormat("0.#######").format(value));
       } else if (value instanceof Double) {
-        Locale locale = Locale.US;
-        NumberFormat formatter = NumberFormat.getInstance(locale);
-        formatter.setMaximumFractionDigits(14);
-        formatter.setMinimumFractionDigits(0);
-        writer.write(formatter.format(value));
+        writer.write(new DecimalFormat("0.##############").format(value));
       } else if (value instanceof Boolean) {
         writer.write(Boolean.toString((Boolean) value));
       } else if (int.class.isAssignableFrom(value.getClass())) {

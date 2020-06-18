@@ -53,7 +53,6 @@ message Document {
   repeated Token      character = 10;
 
   repeated Quote      quote = 6;
-
   /**
    * This field is for entity mentions across the document.
    */
@@ -133,8 +132,6 @@ message Sentence {
   // quote stuff
   optional uint32             chapterIndex                     = 66;
   optional uint32             paragraphIndex                   = 67;
-  // the quote annotator can soometimes add merged sentences
-  optional Sentence           enhancedSentence                 = 70;
 
   extensions 100 to 255;
 }
