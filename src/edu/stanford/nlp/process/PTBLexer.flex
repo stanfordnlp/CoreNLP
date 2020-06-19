@@ -559,8 +559,8 @@ SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-
 
 // <STORYID cat=w pri=u>
 // SGML1 allows attribute value match over newline; SGML2 does not.
-SGML1 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^']*'|\"[^\"]*\"|[A-Za-z][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
-SGML2 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^'\r\n]*'|\"[^\"\r\n]*\"|[A-Za-z][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
+SGML1 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^']*'|\"[^\"]*\"|[A-Za-z_][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
+SGML2 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^'\r\n]*'|\"[^\"\r\n]*\"|[A-Za-z_][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
 SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
 SPAMP = &amp;
 SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
