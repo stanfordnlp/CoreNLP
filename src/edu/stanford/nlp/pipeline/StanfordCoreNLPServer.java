@@ -80,16 +80,16 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static String serverPropertiesPath = null;
   @ArgumentParser.Option(name="maxCharLength", gloss="Max length string that will be processed (non-positive means no limit)")
   protected static int maxCharLength = 100000;
-  @ArgumentParser.Option(name="blacklist", gloss="A file containing subnets that should be blacklisted from accessing the server. Each line is a subnet. They are specified as an IPv4 address followed by a slash followed by how many leading bits to maintain as the subnet mask. E.g., '54.240.225.0/24'.")
-  protected static String blacklist = null;
-  @ArgumentParser.Option(name="stanford", gloss="If true, do special options (blacklist, timeout modifications) for public Stanford server")
+  @ArgumentParser.Option(name="badList", gloss="A file containing subnets that should be forbidden from accessing the server. Each line is a subnet. They are specified as an IPv4 address followed by a slash followed by how many leading bits to maintain as the subnet mask. E.g., '54.240.225.0/24'.")
+  protected static String badList = null;
+  @ArgumentParser.Option(name="stanford", gloss="If true, do special options (domain badList, timeout modifications) for public Stanford server")
   protected boolean stanford = false;
 
   /** Default annotators for a server **/
-  private static String serverDefaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,natlog,openie,kbp";
+  private static final String serverDefaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,natlog,openie,kbp";
 
   /** List of server specific properties **/
-  private static List<String> serverSpecificProperties = ArgumentParser.listOptions(StanfordCoreNLPServer.class);
+  private static final List<String> serverSpecificProperties = ArgumentParser.listOptions(StanfordCoreNLPServer.class);
 
   private final String shutdownKey;
 
@@ -113,9 +113,9 @@ public class StanfordCoreNLPServer implements Runnable {
 
 
   /**
-   * A list of blacklisted subnets -- these cannot call the server.
+   * A list of bad subnets -- these cannot call the server.
    */
-  private final List<Pair<Inet4Address, Integer>> blacklistSubnets;
+  private final List<Pair<Inet4Address, Integer>> badListSubnets;
 
 
   /**
@@ -208,9 +208,11 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // extract pipeline specific properties from command line and overwrite server and file provided properties
     Properties pipelinePropsFromCL = new Properties();
-    for (String key : props.stringPropertyNames()) {
-      if (!serverSpecificProperties.contains(key)) {
-        pipelinePropsFromCL.setProperty(key, props.getProperty(key));
+    if (props != null) {
+      for (String key : props.stringPropertyNames()) {
+        if (!serverSpecificProperties.contains(key)) {
+          pipelinePropsFromCL.setProperty(key, props.getProperty(key));
+        }
       }
     }
     PropertiesUtils.overWriteProperties(this.defaultProps, pipelinePropsFromCL);
@@ -249,14 +251,14 @@ public class StanfordCoreNLPServer implements Runnable {
     } else if (props != null && props.containsKey("port")) {
       this.statusPort = Integer.parseInt(props.getProperty("port"));
     }
-    // parse blacklist
-    if (blacklist == null) {
-      this.blacklistSubnets = Collections.emptyList();
+    // parse badList
+    if (badList == null) {
+      this.badListSubnets = Collections.emptyList();
     } else {
-      this.blacklistSubnets = new ArrayList<>();
-      for (String subnet : IOUtils.readLines(blacklist)) {
+      this.badListSubnets = new ArrayList<>();
+      for (String subnet : IOUtils.readLines(badList)) {
         try {
-          this.blacklistSubnets.add(parseSubnet(subnet));
+          this.badListSubnets.add(parseSubnet(subnet));
         } catch (IllegalArgumentException e) {
           warn("Could not parse subnet: " + subnet);
         }
@@ -595,10 +597,10 @@ public class StanfordCoreNLPServer implements Runnable {
    *
    * @param addr The address to check.
    *
-   * @return True if the address is <b>not</b> in any blacklisted subnet. That is, we can accept connections from it.
+   * @return True if the address is <b>not</b> in any forbidden subnet. That is, we can accept connections from it.
    */
-  private boolean onBlacklist(Inet4Address addr) {
-    for (Pair<Inet4Address, Integer> subnet : blacklistSubnets) {
+  private boolean onBadList(Inet4Address addr) {
+    for (Pair<Inet4Address, Integer> subnet : badListSubnets) {
       if (netMatch(subnet, addr)) {
         return true;
       }
@@ -606,16 +608,16 @@ public class StanfordCoreNLPServer implements Runnable {
     return false;
   }
 
-  /** @see #onBlacklist(Inet4Address) */
-  private boolean onBlacklist(HttpExchange exchange) {
+  /** @see #onBadList(Inet4Address) */
+  private boolean onBadList(HttpExchange exchange) {
     if ( ! stanford) {
       return false;
     }
     InetAddress addr = exchange.getRemoteAddress().getAddress();
     if (addr instanceof Inet4Address) {
-      return onBlacklist((Inet4Address) addr);
+      return onBadList((Inet4Address) addr);
     } else {
-      log("Not checking IPv6 address against blacklist: " + addr);
+      log("Not checking IPv6 address against badList: " + addr);
       return false;  // TODO(gabor) we should eventually check ipv6 addresses too
     }
   }
@@ -627,7 +629,9 @@ public class StanfordCoreNLPServer implements Runnable {
   public static class FinishedRequest {
     public final Properties props;
     public final Annotation document;
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public final Optional<String> tokensregex;
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public final Optional<String> semgrex;
 
     public FinishedRequest(Properties props, Annotation document) {
@@ -872,7 +876,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (onBadList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1006,7 +1010,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (onBadList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1134,7 +1138,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (onBadList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1262,7 +1266,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (onBadList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1454,6 +1458,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @param context The context to enable authentication for.
    * @param credentials The optional credentials to enforce. This is a (key,value) pair
    */
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private static void withAuth(HttpContext context, Optional<Pair<String,String>> credentials) {
     credentials.ifPresent(c -> context.setAuthenticator(new BasicAuthenticator("corenlp") {
       @Override
@@ -1468,6 +1473,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * Run the server.
    * This method registers the handlers, and initializes the HTTP server.
    */
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   public void run(Optional<Pair<String,String>> basicAuth,
                   Predicate<Properties> authenticator,
                   Consumer<FinishedRequest> callback,
