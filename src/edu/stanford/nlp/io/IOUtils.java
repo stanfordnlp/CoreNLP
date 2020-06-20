@@ -10,6 +10,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -510,13 +511,15 @@ public class IOUtils  {
    * FileInputStream.
    */
   public static InputStream inputStreamFromFile(File file) throws RuntimeIOException {
+    InputStream is = null;
     try {
-      InputStream is = new BufferedInputStream(new FileInputStream(file));
+      is = new BufferedInputStream(new FileInputStream(file));
       if (file.getName().endsWith(".gz")) {
         is = new GZIPInputStream(is);
       }
       return is;
     } catch (IOException e) {
+      IOUtils.closeIgnoringExceptions(is);
       throw new RuntimeIOException(e);
     }
   }
@@ -532,14 +535,8 @@ public class IOUtils  {
    * @throws RuntimeIOException If there is an I/O problem
    */
   public static BufferedReader readerFromFile(File file) {
-    InputStream is = null;
-    try {
-      is = inputStreamFromFile(file);
-      return new BufferedReader(new InputStreamReader(is, "UTF-8"));
-    } catch (IOException ioe) {
-      IOUtils.closeIgnoringExceptions(is);
-      throw new RuntimeIOException(ioe);
-    }
+    InputStream is = inputStreamFromFile(file);
+    return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
   }
 
 
@@ -615,7 +612,7 @@ public class IOUtils  {
   public static BufferedReader readerFromString(String textFileOrUrl)
           throws IOException {
     return new BufferedReader(new InputStreamReader(
-            getInputStreamFromURLOrClasspathOrFileSystem(textFileOrUrl), "UTF-8"));
+            getInputStreamFromURLOrClasspathOrFileSystem(textFileOrUrl), StandardCharsets.UTF_8));
   }
 
   /**
@@ -923,8 +920,8 @@ public class IOUtils  {
         private String next;
         private boolean done = false;
 
-        private StringBuilder sb = new StringBuilder(80);
-        private char[] charBuffer = new char[bufferSize];
+        private final StringBuilder sb = new StringBuilder(80);
+        private final char[] charBuffer = new char[bufferSize];
         private int charBufferPos = -1;
         private int charsInBuffer = 0;
         boolean lastWasLF = false;
@@ -1376,9 +1373,8 @@ public class IOUtils  {
    * @param quoteChar - character for enclosing strings, defaults to "
    * @param escapeChar - character for escaping quotes appearing in quoted strings; defaults to " (i.e. "" is used for " inside quotes, consistent with Excel)
    * @return a list of maps representing the rows of the csv. The maps' keys are the header strings and their values are the row contents
-   * @throws IOException If any IO problem
    */
-  public static List<Map<String,String>> readCSVWithHeader(String path, char quoteChar, char escapeChar) throws IOException {
+  public static List<Map<String,String>> readCSVWithHeader(String path, char quoteChar, char escapeChar) {
     String[] labels = null;
     List<Map<String,String>> rows = Generics.newArrayList();
     for (String line : IOUtils.readLines(path)) {
@@ -1395,7 +1391,7 @@ public class IOUtils  {
     }
     return rows;
   }
-  public static List<Map<String,String>> readCSVWithHeader(String path) throws IOException {
+  public static List<Map<String,String>> readCSVWithHeader(String path) {
     return readCSVWithHeader(path, '"', '"');
   }
 
@@ -1586,12 +1582,13 @@ public class IOUtils  {
   }
 
   private static final Pattern tab = Pattern.compile("\t");
+
   /**
    * Read column as set
-   * @param infile - filename
+   * @param infile filename
    * @param field  index of field to read
    * @return a set of the entries in column field
-   * @throws IOException
+   * @throws IOException If I/O error
    */
   public static Set<String> readColumnSet(String infile, int field) throws IOException {
     BufferedReader br = IOUtils.readerFromString(infile);
@@ -1632,7 +1629,7 @@ public class IOUtils  {
     return list;
   }
 
-  public static Map<String,String> readMap(String filename) throws IOException {
+  public static Map<String,String> readMap(String filename) {
     Map<String,String> map = Generics.newHashMap();
     try {
       BufferedReader br = IOUtils.readerFromString(filename);
@@ -1643,7 +1640,7 @@ public class IOUtils  {
       }
       br.close();
     } catch (IOException ex) {
-      throw new RuntimeException(ex);
+      throw new RuntimeIOException(ex);
     }
     return map;
   }
@@ -2008,7 +2005,7 @@ public class IOUtils  {
   public static String[] tail(File f, int n) throws IOException { return tail(f, n, "utf-8"); }
 
   /** Bare minimum sanity checks */
-  private static Set<String> blacklistedPathsToRemove = new HashSet<String>(){{
+  private static final Set<String> blacklistedPathsToRemove = new HashSet<String>(){{
     add("/");
     add("/u"); add("/u/");
     add("/u/nlp"); add("/u/nlp/");
