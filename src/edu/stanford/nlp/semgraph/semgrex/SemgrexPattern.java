@@ -245,8 +245,7 @@ public abstract class SemgrexPattern implements Serializable  {
   /**
    * Get a {@link SemgrexMatcher} for this pattern in this graph.
    *
-   * @param sg
-   *          the SemanticGraph to match on
+   * @param sg The SemanticGraph to match on
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg) {
@@ -257,10 +256,8 @@ public abstract class SemgrexPattern implements Serializable  {
   /**
    * Get a {@link SemgrexMatcher} for this pattern in this graph.
    *
-   * @param sg
-   *          the SemanticGraph to match on
-   * @param root
-   *         the IndexedWord from which to start the search
+   * @param sg The SemanticGraph to match on
+   * @param root The IndexedWord from which to start the search
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg, IndexedWord root) {
@@ -279,10 +276,8 @@ public abstract class SemgrexPattern implements Serializable  {
   /**
    * Get a {@link SemgrexMatcher} for this pattern in this graph.
    *
-   * @param sg
-   *          the SemanticGraph to match on
-   * @param ignoreCase
-   *          will ignore case for matching a pattern with a node; not
+   * @param sg The SemanticGraph to match on
+   * @param ignoreCase Will ignore case for matching a pattern with a node; not
    *          implemented by Coordination Pattern
    * @return a SemgrexMatcher
    */
@@ -452,7 +447,6 @@ public abstract class SemgrexPattern implements Serializable  {
     flagMap.put(CONLLU_FILE, 1);
     flagMap.put(OUTPUT_FORMAT_OPTION, 1);
 
-
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
     // args = argsMap.get(null);
 
@@ -477,7 +471,7 @@ public abstract class SemgrexPattern implements Serializable  {
 
     boolean useExtras = true;
     if (argsMap.containsKey(EXTRAS) && argsMap.get(EXTRAS).length > 0) {
-      useExtras = Boolean.valueOf(argsMap.get(EXTRAS)[0]);
+      useExtras = Boolean.parseBoolean(argsMap.get(EXTRAS)[0]);
     }
 
     List<SemanticGraph> graphs = Generics.newArrayList();
@@ -508,7 +502,6 @@ public abstract class SemgrexPattern implements Serializable  {
         }
       }
     }
-
 
     for (SemanticGraph graph : graphs) {
       SemgrexMatcher matcher = semgrex.matcher(graph);
