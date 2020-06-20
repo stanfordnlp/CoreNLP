@@ -1,7 +1,6 @@
 package edu.stanford.nlp.quoteattribution.Sieves.QMSieves;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.QuoteAttributionAnnotator;
@@ -40,8 +39,8 @@ public class DependencyParseSieve extends QMSieve {
   //using quote-removed depparses
   public void dependencyParses(Annotation doc) {
     List<CoreMap> quotes = doc.get(CoreAnnotations.QuotationsAnnotation.class);
-    List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
-    List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
+    // List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
+    // List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
     for (CoreMap quote : quotes) {
       if (quote.get(QuoteAttributionAnnotator.MentionAnnotation.class) != null) {
         continue;
@@ -81,7 +80,7 @@ public class DependencyParseSieve extends QMSieve {
         }
         if (nsubj != null) {
           for (IndexedWord dep : deps) {
-            subjVerbPairs.add(new Pair(nsubj, dep));
+            subjVerbPairs.add(new Pair<>(nsubj, dep));
           }
         }
       }
@@ -117,4 +116,5 @@ public class DependencyParseSieve extends QMSieve {
       }
     }
   }
+
 }
