@@ -197,6 +197,9 @@ message Token {
   optional string chineseSeg      = 55;
   optional string chineseXMLChar  = 60;
 
+  //  Arabic character info
+  optional string arabicSeg       = 76;
+
   // Section info
   optional string sectionName     = 56;
   optional string sectionAuthor   = 57;

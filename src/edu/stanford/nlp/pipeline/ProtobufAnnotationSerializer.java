@@ -387,6 +387,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(ChineseSegAnnotation.class)) { builder.setChineseSeg(getAndRegister(coreLabel, keysToSerialize, ChineseSegAnnotation.class)); }
     if (keySet.contains(SegmenterCoreAnnotations.XMLCharAnnotation.class)) { builder.setChineseXMLChar(getAndRegister(coreLabel, keysToSerialize, SegmenterCoreAnnotations.XMLCharAnnotation.class)); }
 
+    // Arabic character related stuff
+    if (keySet.contains(ArabicSegAnnotation.class)) { builder.setArabicSeg(getAndRegister(coreLabel, keysToSerialize, ArabicSegAnnotation.class)); }
+
     // French tokens potentially have ParentAnnotation
     if (keySet.contains(ParentAnnotation.class)) { builder.setParent(getAndRegister(coreLabel, keysToSerialize, ParentAnnotation.class)); }
 
@@ -1398,6 +1401,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasChineseChar()) { word.set(ChineseCharAnnotation.class, proto.getChineseChar()) ; }
     if (proto.hasChineseSeg()) { word.set(ChineseSegAnnotation.class, proto.getChineseSeg()) ; }
     if (proto.hasChineseXMLChar()) { word.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, proto.getChineseXMLChar()); }
+
+    // Arabic char info
+    if (proto.hasArabicSeg()) { word.set(ArabicSegAnnotation.class, proto.getArabicSeg()) ; }
 
     // Non-default annotators
     if (proto.hasGender()) { word.set(CoreAnnotations.GenderAnnotation.class, proto.getGender()); }
