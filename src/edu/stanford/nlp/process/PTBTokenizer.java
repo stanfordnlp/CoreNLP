@@ -159,6 +159,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  *      (Exception: for only "U.S." the treebank does have the two tokens
  *      "U.S." and "." like our default; strictTreebank3 now does that too.)
  *      The default is false.
+ * <li>strictAcronym: control only the acronym portion of strictTreebank3
+ * <li>strictFraction: control only the fraction portion of strictTreebank3
  *  <li>splitHyphenated: whether or not to tokenize segments of hyphenated words
  *      separately ("school" "-" "aged", "frog" "-" "lipped"), keeping the exceptions
  *      in Supplementary Guidelines for ETTB 2.0 by Justin Mott, Colin Warner, Ann Bies,

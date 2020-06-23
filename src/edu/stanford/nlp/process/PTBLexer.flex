@@ -240,7 +240,12 @@ import edu.stanford.nlp.util.logging.Redwood;
             throw new IllegalArgumentException("PTBLexer: Invalid option value in constructor: " + key + ": " + value);
         }
       } else if ("strictTreebank3".equals(key)) {
-        strictTreebank3 = val;
+        strictFraction = val;
+        strictAcronym = val;
+      } else if ("strictFraction".equals(key)) {
+        strictFraction = val;
+      } else if ("strictAcronym".equals(key)) {
+        strictAcronym = val;
       } else {
         throw new IllegalArgumentException("PTBLexer: Invalid options key in constructor: " + key);
       }
@@ -292,7 +297,11 @@ import edu.stanford.nlp.util.logging.Redwood;
   private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.NOT_CP1252;
   private LexerUtils.DashesEnum dashesStyle = LexerUtils.DashesEnum.NOT_CP1252;
   private boolean escapeForwardSlashAsterisk = false; // this is true in Penn Treebank 3 but we don't do it now
-  private boolean strictTreebank3 = false;
+  // strictTreebank3 represents 2 separate modifications:
+  //   stricter handling of acronyms
+  //   stricter handling of fractions
+  private boolean strictAcronym = false;
+  private boolean strictFraction = false;
   private boolean splitAssimilations = true;
   private boolean splitHyphenated = true; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
   private boolean splitForwardSlash = true; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
@@ -515,7 +524,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     if (yylength() == 2) { // "I.", etc.
       yypushback(1); // return a period next time;
       s = yytext(); // return the word without the final period
-    } else if (strictTreebank3 && ! "U.S.".equals(yytext())) {
+    } else if (strictAcronym && ! "U.S.".equals(yytext())) {
       yypushback(1); // return a period for next time
       s = yytext(); // return the word without the final period
     } else {
@@ -532,7 +541,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
   private Object processAbbrev1() {
     String s;
-    if (strictTreebank3 && ! "U.S.".equals(yytext())) {
+    if (strictAcronym && ! "U.S.".equals(yytext())) {
       yypushback(1); // return a period for next time
       s = yytext();
     } else {
@@ -586,7 +595,7 @@ NUM = {DIGIT}*([.,\u066B\u066C]{DIGIT}+)+|{DIGIT}+([.:,\u00AD\u066B\u066C\u2009\
    NUMBER = [\-+]?{NUM}|\({NUM}\) */
 NUMBER = [\-+]?{NUM}
 SUBSUPNUM = [\u207A\u207B\u208A\u208B]?([\u2070\u00B9\u00B2\u00B3\u2074-\u2079]+|[\u2080-\u2089]+)
-/* Constrain fraction to only match likely fractions. Full one allows hyphen, space, or non-breaking space between integer and fraction part, but strictTreebank3 allows only hyphen. */
+/* Constrain fraction to only match likely fractions. Full one allows hyphen, space, or non-breaking space between integer and fraction part, but strictFraction allows only hyphen. */
 FRAC = ({DIGIT}{1,4}[- \u00A0])?{DIGIT}{1,4}(\\?\/|\u2044){DIGIT}{1,4}
 FRAC2 = [\u00BC\u00BD\u00BE\u2153-\u215E]
 DOLSIGN = ([A-Z]*\$|#)
@@ -968,13 +977,13 @@ RM/{NUM}        { String txt = yytext();
                   return getNext(txt, txt);
                 }
 {FRAC}          { String txt = yytext();
-                  // if we are in strictTreebank3 mode, we need to reject everything after a space or non-breaking space...
-                  if (strictTreebank3) {
+                  // if we are in strictFraction mode, we need to reject everything after a space or non-breaking space...
+                  if (strictFraction) {
                     int spaceIndex = indexOfSpace(txt);
                     if (spaceIndex >= 0) {
                       yypushback(txt.length() - spaceIndex);
                       txt = yytext();
-                      if (DEBUG) { logger.info("Used {FRAC} (strictTreebank3) to recognize " + txt); }
+                      if (DEBUG) { logger.info("Used {FRAC} (strictFraction) to recognize " + txt); }
                       return getNext(txt, txt);
                     }
                   }
