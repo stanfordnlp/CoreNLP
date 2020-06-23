@@ -324,6 +324,7 @@ DIGIT = [:digit:]|[\u0660-\u0669\u06F0-\u06F9]
 DIGITS = {DIGIT}+
 /* If a number ends with +, ., etc, chop that off instead of keeping it. */
 NUMBER = {DIGITS}([_\-,\+/\\\.\u066B\u066C\u060C\u060D]+{DIGITS}+)*
+LATINWORD = ([a-zA-Z]|{DIGIT})+
 
 /* Some of these single punctuations get their own token, although note that ... is covered earlier by ELLIPSIS */
 PERIOD = \.
@@ -366,6 +367,7 @@ PAREN = -LRB-|-RRB-
 {EMAIL}     |
 {ARNUMWORD} |
 {NUMBER}    |
+{LATINWORD} |
 {PERIOD}    |
 {COMMA}     |
 {EXCLAM}    |
