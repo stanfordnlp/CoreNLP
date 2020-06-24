@@ -1405,6 +1405,12 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     }
     // Run the pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    if (PropertiesUtils.getBool(props, "memoryUsage", false)) {
+      System.gc();
+      System.gc();
+      logger.info("Finished loading pipeline.  Current memory usage: " +
+                  SystemUtils.getMemoryInUse() + "mb");
+    }
     pipeline.run(true);
   }
 
