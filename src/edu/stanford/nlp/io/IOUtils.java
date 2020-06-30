@@ -2005,7 +2005,7 @@ public class IOUtils  {
   public static String[] tail(File f, int n) throws IOException { return tail(f, n, "utf-8"); }
 
   /** Bare minimum sanity checks */
-  private static final Set<String> badListPathsToRemove = new HashSet<String>(){{
+  private static final Set<String> blockListPathsToRemove = new HashSet<String>(){{
     add("/");
     add("/u"); add("/u/");
     add("/u/nlp"); add("/u/nlp/");
@@ -2029,7 +2029,7 @@ public class IOUtils  {
    */
   public static void deleteRecursively(File file) {
     // Sanity checks
-    if (badListPathsToRemove.contains(file.getPath())) {
+    if (blockListPathsToRemove.contains(file.getPath())) {
       throw new IllegalArgumentException("You're trying to delete " + file + "! I _really_ don't think you want to do that...");
     }
     int count = 0;
