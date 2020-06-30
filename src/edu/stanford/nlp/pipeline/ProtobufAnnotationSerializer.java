@@ -632,6 +632,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   public CoreNLPProtos.Document toProto(Annotation doc) {
     Set<Class<?>> keysToSerialize = new HashSet<>(doc.keySet());
     keysToSerialize.remove(TokensAnnotation.class);  // note(gabor): tokens are saved in the sentence
+    keysToSerialize.remove(UseMarkedDiscourseAnnotation.class);  // this is only used as internal communication between annotators?
     CoreNLPProtos.Document.Builder builder = toProtoBuilder(doc, keysToSerialize);
     // Completeness Check
     if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {

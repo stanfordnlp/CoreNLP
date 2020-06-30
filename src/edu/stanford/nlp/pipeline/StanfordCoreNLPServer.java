@@ -80,9 +80,9 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static String serverPropertiesPath = null;
   @ArgumentParser.Option(name="maxCharLength", gloss="Max length string that will be processed (non-positive means no limit)")
   protected static int maxCharLength = 100000;
-  @ArgumentParser.Option(name="blockList", gloss="A file containing subnets that should be forbidden from accessing the server. Each line is a subnet. They are specified as an IPv4 address followed by a slash followed by how many leading bits to maintain as the subnet mask. E.g., '54.240.225.0/24'.")
-  protected static String blockList = null;
-  @ArgumentParser.Option(name="stanford", gloss="If true, do special options (domain blockList, timeout modifications) for public Stanford server")
+  @ArgumentParser.Option(name="badList", gloss="A file containing subnets that should be forbidden from accessing the server. Each line is a subnet. They are specified as an IPv4 address followed by a slash followed by how many leading bits to maintain as the subnet mask. E.g., '54.240.225.0/24'.")
+  protected static String badList = null;
+  @ArgumentParser.Option(name="stanford", gloss="If true, do special options (domain badList, timeout modifications) for public Stanford server")
   protected boolean stanford = false;
 
   /** Default annotators for a server **/
@@ -113,9 +113,9 @@ public class StanfordCoreNLPServer implements Runnable {
 
 
   /**
-   * A list of blocked subnets -- these cannot call the server.
+   * A list of bad subnets -- these cannot call the server.
    */
-  private final List<Pair<Inet4Address, Integer>> blockListSubnets;
+  private final List<Pair<Inet4Address, Integer>> badListSubnets;
 
 
   /**
@@ -251,14 +251,14 @@ public class StanfordCoreNLPServer implements Runnable {
     } else if (props != null && props.containsKey("port")) {
       this.statusPort = Integer.parseInt(props.getProperty("port"));
     }
-    // parse blockList
-    if (blockList == null) {
-      this.blockListSubnets = Collections.emptyList();
+    // parse badList
+    if (badList == null) {
+      this.badListSubnets = Collections.emptyList();
     } else {
-      this.blockListSubnets = new ArrayList<>();
-      for (String subnet : IOUtils.readLines(blockList)) {
+      this.badListSubnets = new ArrayList<>();
+      for (String subnet : IOUtils.readLines(badList)) {
         try {
-          this.blockListSubnets.add(parseSubnet(subnet));
+          this.badListSubnets.add(parseSubnet(subnet));
         } catch (IllegalArgumentException e) {
           warn("Could not parse subnet: " + subnet);
         }
@@ -599,8 +599,8 @@ public class StanfordCoreNLPServer implements Runnable {
    *
    * @return True if the address is <b>not</b> in any forbidden subnet. That is, we can accept connections from it.
    */
-  private boolean onBlockList(Inet4Address addr) {
-    for (Pair<Inet4Address, Integer> subnet : blockListSubnets) {
+  private boolean onBadList(Inet4Address addr) {
+    for (Pair<Inet4Address, Integer> subnet : badListSubnets) {
       if (netMatch(subnet, addr)) {
         return true;
       }
@@ -608,16 +608,16 @@ public class StanfordCoreNLPServer implements Runnable {
     return false;
   }
 
-  /** @see #onBlockList(Inet4Address) */
-  private boolean onBlockList(HttpExchange exchange) {
+  /** @see #onBadList(Inet4Address) */
+  private boolean onBadList(HttpExchange exchange) {
     if ( ! stanford) {
       return false;
     }
     InetAddress addr = exchange.getRemoteAddress().getAddress();
     if (addr instanceof Inet4Address) {
-      return onBlockList((Inet4Address) addr);
+      return onBadList((Inet4Address) addr);
     } else {
-      log("Not checking IPv6 address against blockList: " + addr);
+      log("Not checking IPv6 address against badList: " + addr);
       return false;  // TODO(gabor) we should eventually check ipv6 addresses too
     }
   }
@@ -876,7 +876,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlockList(httpExchange)) {
+      if (onBadList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1010,7 +1010,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlockList(httpExchange)) {
+      if (onBadList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1138,7 +1138,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlockList(httpExchange)) {
+      if (onBadList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1266,7 +1266,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlockList(httpExchange)) {
+      if (onBadList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
