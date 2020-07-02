@@ -362,6 +362,10 @@ public class ExtractorFramesRare {
         extrs.add(new ExtractorDistsimConjunction(path, lWindow, rWindow));
       } else if (arg.equalsIgnoreCase("lctagfeatures")) {
         extrs.addAll(Arrays.asList(lcTagFeatures(ttags)));
+      } else if (args.equals("rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorNonAlphanumeric)")) {
+        // This is separate so that the class dependency scripts can
+        // figure out it needs to include ExtractorNonAlphanumeric
+        extrs.add(new ExtractorNonAlphanumeric());
       } else if (arg.startsWith("rareExtractor(")) {
         String className = Extractor.getParenthesizedArg(arg, 1);
         try {
@@ -1328,9 +1332,7 @@ class ExtractorsConjunction extends RareExtractor {
 
 
 /** Returns true ("1") if and only if this word has no alphanumeric characters in it.
- *  This class is loaded by reflection in some POS taggers.
  */
-@SuppressWarnings("unused")
 class ExtractorNonAlphanumeric extends RareExtractor {
 
   public ExtractorNonAlphanumeric() { }
