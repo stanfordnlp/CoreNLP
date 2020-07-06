@@ -20,14 +20,14 @@ public class TokenizerSpanishBenchmarkITest extends TokenizerBenchmarkTestCase {
 
   @Test
   public void testOnDev() {
-    goldFilePath = "/u/nlp/data/stanford-corenlp-testing/data/tokenize/es_ancora-ud-dev.conllu";
-    runTest("dev", "es", 0.994);
+    goldFilePath = "/u/nlp/data/stanford-corenlp/testing/data/tokenize/es_ancora-ud-dev.conllu";
+    runTest("dev", "es", 0.9955);
   }
 
   @Test
   public void testOnTest() {
-    goldFilePath = "/u/nlp/data/stanford-corenlp-testing/data/tokenize/es_ancora-ud-test.conllu";
-    runTest("test", "es", 0.994);
+    goldFilePath = "/u/nlp/data/stanford-corenlp/testing/data/tokenize/es_ancora-ud-test.conllu";
+    runTest("test", "es", 0.996);
   }
 
 }
