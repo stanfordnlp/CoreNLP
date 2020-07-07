@@ -406,9 +406,10 @@ public class StanfordCoreNLPServer implements Runnable {
   private Properties getProperties(HttpExchange httpExchange) throws UnsupportedEncodingException {
     Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
 
-    // Load the default properties
+    // Load the default properties if resetDefault is false
     Properties props = new Properties();
-    defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
+    if (!urlParams.getOrDefault("resetDefault", "false").toLowerCase().equals("true"))
+      defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
 
     // Add GET parameters as properties
     urlParams.entrySet().stream()
