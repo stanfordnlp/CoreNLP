@@ -74,8 +74,9 @@ public class StanfordCoreNLPServer implements Runnable {
   protected String username = null;
   @ArgumentParser.Option(name="password", gloss="The password component of a username/password basic auth credential")
   protected String password = null;
-  @ArgumentParser.Option(name="preload", gloss="Cache the following annotators on startup")
-  protected static String preloadedAnnotators = "";
+  @ArgumentParser.Option(name="preload", gloss="Cache all default annotators (if no list provided), or optionally " +
+      "provide comma separated list of annotators to preload (e.g. tokenize,ssplit,pos)")
+  protected static String preloadedAnnotators = null;
   @ArgumentParser.Option(name="serverProperties", gloss="Default properties file for server's StanfordCoreNLP instance")
   protected static String serverPropertiesPath = null;
   @ArgumentParser.Option(name="maxCharLength", gloss="Max length string that will be processed (non-positive means no limit)")
@@ -159,52 +160,33 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   /**
-   * Look for the english SR parser, use it as default if it exists <br>
-   * Otherwise complain and use the PCFG as the default
-   */
-  private String findDefaultParser() {
-    String SR_PARSER = "edu/stanford/nlp/models/srparser/englishSR.ser.gz";
-    String PCFG_PARSER = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
-    ClassLoader classLoader = getClass().getClassLoader();
-    URL srResource = classLoader.getResource(SR_PARSER);
-    if (srResource != null) {
-      log("Setting default constituency parser to SR parser: " + SR_PARSER);
-      return SR_PARSER;
-    } else {
-      log("Warning: cannot find " + SR_PARSER);
-      log("Setting default constituency parser to PCFG parser: " + PCFG_PARSER);
-      log("To use shift reduce parser download English models jar from:");
-      log("https://stanfordnlp.github.io/CoreNLP/download.html");
-      return PCFG_PARSER;
-    }
-  }
-
-  /**
    * Create a new Stanford CoreNLP Server with the default parameters and
    * pass in properties (server_id, ...).
    *
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
   public StanfordCoreNLPServer(Properties props) throws IOException {
-    // server default properties for a pipeline, these will be overwritten by file provided and command line
-    // provided defaults...the precedence is 1.) command line, 2.) properties file, 3.) server defaults
-    this.defaultProps = PropertiesUtils.asProperties(
-        "annotators", serverDefaultAnnotators,  // Run these annotators by default
-        "coref.mention.type", "dep",  // Use dependency trees with coref by default
-        "coref.mode", "statistical",  // Use the new coref
-        "coref.language", "en",  // We're English by default
-        "inputFormat", "text",   // By default, treat the POST data like text
-        "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
-        "prettyPrint", "false",  // Don't bother pretty-printing
-        "parse.binaryTrees", "true",  // needed for the Sentiment annotator
-        "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
-
-    // overwrite all default properties with provided server properties
-    // for instance you might want to provide a default ner model
+    // Initialize server properties either from a provided properties file/language name or
+    // a set of default English properties ; any command line provided settings will override
     if (serverPropertiesPath != null) {
-      Properties pipelinePropsFromFile = StringUtils.argsToProperties("-props", serverPropertiesPath);
-      PropertiesUtils.overWriteProperties(this.defaultProps, pipelinePropsFromFile);
+      this.defaultProps = StringUtils.argsToProperties("-props", serverPropertiesPath);
+    } else {
+      this.defaultProps = PropertiesUtils.asProperties(
+          "annotators", serverDefaultAnnotators,  // Run these annotators by default
+          "coref.mention.type", "dep",  // Use dependency trees with coref by default
+          "coref.mode", "statistical",  // Use the new coref
+          "coref.language", "en",  // We're English by default
+          "openie.strip_entailments", "true"
+      );
     }
+
+    // set some extra defaults if they haven't already been specified
+    if (!this.defaultProps.containsKey("inputFormat")) // By default, treat the POST data like text
+      this.defaultProps.setProperty("inputFormat", "text");
+    if (!this.defaultProps.containsKey("outputFormat")) // By default, return in JSON -- this is a server, after all.
+      this.defaultProps.setProperty("outputFormat", "json");
+    if (!this.defaultProps.containsKey("prettyPrint")) // Don't bother pretty-printing
+      this.defaultProps.setProperty("prettyPrint", "false");
 
     // extract pipeline specific properties from command line and overwrite server and file provided properties
     Properties pipelinePropsFromCL = new Properties();
@@ -217,12 +199,11 @@ public class StanfordCoreNLPServer implements Runnable {
     }
     PropertiesUtils.overWriteProperties(this.defaultProps, pipelinePropsFromCL);
 
-    if (!PropertiesUtils.hasProperty(this.defaultProps, "parse.model")) {
-      // check if englishSR.ser.gz can be found (standard models jar doesn't have this)
-      // SR scales linearly with sentence length. Good for a server!
-      String defaultParserPath = findDefaultParser();
-      this.defaultProps.setProperty("parse.model", defaultParserPath);
-    }
+    // log server's default properties
+    TreeSet<String> defaultPropertyKeys = new TreeSet(this.defaultProps.keySet());
+    log("Server default properties:\n\t\t\t(Note: unspecified annotator properties are English defaults)\n" +
+        String.join("\n", defaultPropertyKeys.stream().map(
+            k -> String.format("\t\t\t%s = %s", k, this.defaultProps.get(k))).collect(Collectors.toList())));
 
     this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
     this.corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
@@ -1541,7 +1522,7 @@ public class StanfordCoreNLPServer implements Runnable {
     if ( ! serverProperties.containsKey("status_port") && serverProperties.containsKey("port")) {
       server.statusPort = Integer.parseInt(serverProperties.getProperty("port"));
     }
-    log("    Threads: " + ArgumentParser.threads);
+    log("Threads: " + ArgumentParser.threads);
 
     // Start the liveness server
     AtomicBoolean live = new AtomicBoolean(false);
@@ -1556,10 +1537,14 @@ public class StanfordCoreNLPServer implements Runnable {
     }
 
     // Pre-load the models
-    if (StanfordCoreNLPServer.preloadedAnnotators != null && ! StanfordCoreNLPServer.preloadedAnnotators.trim().isEmpty()) {
+    if (StanfordCoreNLPServer.preloadedAnnotators != null) {
       Properties props = new Properties();
       server.defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
-      props.setProperty("annotators", StanfordCoreNLPServer.preloadedAnnotators);
+      // -preload flag alone means to load all default annotators
+      // -preload flag with a list of annotators means to preload just that list (e.g. tokenize,ssplit,pos)
+      String annotatorsToLoad = (StanfordCoreNLPServer.preloadedAnnotators.trim().equals("true")) ?
+          server.defaultProps.getProperty("annotators") : StanfordCoreNLPServer.preloadedAnnotators;
+      props.setProperty("annotators", annotatorsToLoad);
       try {
         new StanfordCoreNLP(props);
       } catch (Throwable throwable) {
