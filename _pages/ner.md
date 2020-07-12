@@ -28,7 +28,8 @@ NUMBER, ORDINAL, PERCENT), and temporal (DATE, TIME, DURATION, SET)
 entities (12 classes). Adding the `regexner` annotator and using the supplied [RegexNER](regexner.html) pattern
 files adds support for the fine-grained and additional entity classes
 EMAIL, URL, CITY, STATE\_OR\_PROVINCE, COUNTRY, NATIONALITY, RELIGION,
-(job) TITLE, IDEOLOGY, CRIMINAL\_CHARGE, CAUSE\_OF\_DEATH, HANDLE (12 classes)
+(job) TITLE, IDEOLOGY, CRIMINAL\_CHARGE, CAUSE\_OF\_DEATH, (Twitter,
+etc.) HANDLE (12 classes)
 for a total of 24 classes. Named entities are recognized using a combination of three
 CRF sequence taggers trained on various corpora, including CoNLL, ACE,
 MUC, and ERE corpora. Numerical entities are recognized using a rule-based

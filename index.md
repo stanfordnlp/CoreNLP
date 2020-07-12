@@ -45,7 +45,7 @@ tools. Moreover, an annotator pipeline can include additional custom or third-pa
 CoreNLP’s analyses provide the foundational building blocks for
 higher-level and domain-specific text understanding applications.
 
-![CoreNLP screenshot]({{ site.github.url }}/images/Xi-Jinping.png)
+![CoreNLP screenshot]({{ site.github.url }}/images/Xi-Jinping-4.jpg)
 
 
 ## Download
