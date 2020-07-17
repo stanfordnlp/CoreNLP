@@ -400,11 +400,15 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // Load the default properties if resetDefault is false
     // If resetDefault is true, ignore server properties this server was started with,
-    // with the exception of the serverIOProperties
+    // with the exception of the keys in serverIOProperties (i.e. don't reset IO properties)
     Properties props = new Properties();
-    props.putAll(this.serverIOProps);
     if (!urlParams.getOrDefault("resetDefault", "false").toLowerCase().equals("true"))
       defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
+    else {
+      // if resetDefault is called, still maintain the serverIO properties (e.g. inputFormat, outputFormat, prettyPrint)
+      for (String ioKey : serverIOProps.stringPropertyNames())
+        props.setProperty(ioKey, defaultProps.getProperty(ioKey));
+    }
 
     // Add GET parameters as properties
     urlParams.entrySet().stream()
