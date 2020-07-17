@@ -91,6 +91,8 @@ public class StanfordCoreNLPServer implements Runnable {
 
   private final String shutdownKey;
 
+  private final Properties serverIOProps;
+
   private final Properties defaultProps;
 
   /**
@@ -163,21 +165,20 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
   public StanfordCoreNLPServer(Properties props) throws IOException {
-    // Initialize server properties either from a provided properties file/language name or
-    // a set of default English properties ; any command line provided settings will override
-    if (serverPropertiesPath != null) {
-      this.defaultProps = StringUtils.argsToProperties("-props", serverPropertiesPath);
-    } else {
-      this.defaultProps = new Properties();
-    }
+    // set up default IO properties
+    this.serverIOProps = new Properties();
+    this.serverIOProps.setProperty("inputFormat", "text");
+    this.serverIOProps.setProperty("outputFormat", "json");
+    this.serverIOProps.setProperty("prettyPrint", "false");
 
-    // set some extra defaults if they haven't already been specified
-    if (!this.defaultProps.containsKey("inputFormat")) // By default, treat the POST data like text
-      this.defaultProps.setProperty("inputFormat", "text");
-    if (!this.defaultProps.containsKey("outputFormat")) // By default, return in JSON -- this is a server, after all.
-      this.defaultProps.setProperty("outputFormat", "json");
-    if (!this.defaultProps.containsKey("prettyPrint")) // Don't bother pretty-printing
-      this.defaultProps.setProperty("prettyPrint", "false");
+    // set up default properties
+    this.defaultProps = new Properties();
+    this.defaultProps.putAll(this.serverIOProps);
+
+    // overwrite with any properties provided by a props file
+    if (serverPropertiesPath != null) {
+      this.defaultProps.putAll(StringUtils.argsToProperties("-props", serverPropertiesPath));
+    }
 
     // extract pipeline specific properties from command line and overwrite server and file provided properties
     Properties pipelinePropsFromCL = new Properties();
@@ -398,7 +399,10 @@ public class StanfordCoreNLPServer implements Runnable {
     Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
 
     // Load the default properties if resetDefault is false
+    // If resetDefault is true, ignore server properties this server was started with,
+    // with the exception of the serverIOProperties
     Properties props = new Properties();
+    props.putAll(this.serverIOProps);
     if (!urlParams.getOrDefault("resetDefault", "false").toLowerCase().equals("true"))
       defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
 

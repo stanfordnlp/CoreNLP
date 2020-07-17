@@ -14,11 +14,13 @@ import java.util.*;
  */
 public abstract class QMSieve extends Sieve {
 
-  protected static Set<String> beforeQuotePunctuation = new HashSet<>(Arrays.asList(new String[]{",", ":"}));
+  protected static Set<String> beforeQuotePunctuation =
+      new HashSet<String>(Arrays.asList(new String[]{",", ":"}));
 
   protected static final SemgrexPattern subjVerbPattern = SemgrexPattern.compile("{pos:/VB.*/}=VERB >nsubj {}=SUBJ");
-  protected static Set<String> commonSpeechWords = new HashSet<>(
-          Arrays.asList(new String[]{"say", "cry", "reply", "add", "think", "observe", "call", "answer"}));
+  protected static Set<String> commonSpeechWords = new HashSet<String>(
+      Arrays.asList(new String[]{"say", "cry", "reply", "add", "think",
+          "observe", "call", "answer"}));
 
   protected String sieveName;
 
@@ -51,5 +53,4 @@ public abstract class QMSieve extends Sieve {
     String type = quote.get(QuoteAttributionAnnotator.MentionTypeAnnotation.class);
     return new MentionData(begin, end, text, type);
   }
-
 }

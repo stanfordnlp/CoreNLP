@@ -1346,7 +1346,7 @@ RM/{NUM}        { String txt = yytext();
                         if (DEBUG) { logger.info("Used {CP1252_MISC_SYMBOL} to recognize " + tok + " as " + norm); }
                         return getNext(norm, tok);
                       }
-{SPACES}|&nbsp;|[\u0000\u0008\u007F\u200B\u200E-\u200F\uFEFF]
+{SPACES}|&nbsp;|[\x0\x8\x7F\u200B\u200E-\u200F\uFEFF]
                 { if (invertible) {
                     prevWordAfter.append(yytext());
                   }
