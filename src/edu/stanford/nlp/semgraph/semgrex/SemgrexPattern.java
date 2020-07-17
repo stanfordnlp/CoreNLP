@@ -31,10 +31,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * curly braces: {attr1:value1;attr2:value2;...}.  Therefore, {} represents any
  * node in the graph.  Attributes must be plain strings; values can be strings
  * or regular expressions blocked off by "/".  Regular expressions must
- * match the whole attribute value, so that /NN/ matches "NN" only, while /NN.* /
+ * match the whole attribute value, so that /NN/ matches "NN" only, while /NN.*&#47;
  * matches "NN", "NNS", "NNP", etc.
  * <p>
- * For example, {@code {lemma:slice;tag:/VB.*\/}} represents any verb nodes
+ * For example, {@code {lemma:slice;tag:/VB.*&#47;}} represents any verb nodes
  * with "slice" as their lemma.  Attributes are extracted using
  * {@code edu.stanford.nlp.ling.AnnotationLookup}.
  * <p>
