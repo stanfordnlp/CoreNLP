@@ -61,11 +61,11 @@ ctb7.train.chris6.ser.gz: dict-chris6.ser.gz
 
 # train on train CTB9 + extras, with all external lexicons, without training lexicon
 ctb9.train.chris6.ser.gz: dict-chris6.ser.gz
-	time java -mx20g edu.stanford.nlp.ie.crf.CRFClassifier -prop ctb9-chris6.prop -serDictionary $+ -sighanCorporaDict /u/nlp/data/chinese-segmenter/gale2007/ctb6/ -trainFile $(CTB9_ALL) -serializeTo $@ > $@.log 2> $@.err
+	time java -mx60g edu.stanford.nlp.ie.crf.CRFClassifier -prop ctb9-chris6.prop -serDictionary $+ -sighanCorporaDict /u/nlp/data/chinese-segmenter/gale2007/ctb6/ -trainFile $(CTB9_ALL) -serializeTo $@ > $@.log 2> $@.err
 
 # train on train CTB9 + extras, with all external lexicons, without training lexicon, use the threshold to make it smaller
 ctb9.train-small.chris6.ser.gz: dict-chris6.ser.gz
-	time java -mx20g edu.stanford.nlp.ie.crf.CRFClassifier -prop ctb9-chris6.prop -serDictionary $+ -sighanCorporaDict /u/nlp/data/chinese-segmenter/gale2007/ctb6/ -featureDiffThresh=0.015 -trainFile $(CTB9_ALL) -serializeTo $@ > $@.log 2> $@.err
+	time java -mx60g edu.stanford.nlp.ie.crf.CRFClassifier -prop ctb9-chris6.prop -serDictionary $+ -sighanCorporaDict /u/nlp/data/chinese-segmenter/gale2007/ctb6/ -featureDiffThresh=0.015 -trainFile $(CTB9_ALL) -serializeTo $@ > $@.log 2> $@.err
 
 # train on all CTB7, with all external lexicons, without training lexicon
 bolt.chris6.ser.gz: dict-chris6.ser.gz
