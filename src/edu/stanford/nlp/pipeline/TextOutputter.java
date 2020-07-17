@@ -165,7 +165,7 @@ public class TextOutputter extends AnnotationOutputter {
             String nerConfidenceKey =
                     nerConfidences.keySet().size() > 0 ? (String) nerConfidences.keySet().toArray()[0] : "" ;
             if (!nerConfidenceKey.equals("") && !nerConfidenceKey.equals("O"))
-              nerConfidenceEntry = nerConfidenceKey+":"+Double.toString(nerConfidences.get(nerConfidenceKey));
+              nerConfidenceEntry = nerConfidenceKey + ":" + nerConfidences.get(nerConfidenceKey);
             else
               nerConfidenceEntry = "-";
             if (entityMention.get(CoreAnnotations.EntityTypeAnnotation.class) != null) {
@@ -278,7 +278,7 @@ public class TextOutputter extends AnnotationOutputter {
     // display quotes if available
     if (annotation.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
       pw.println();
-      pw.println("Extracted quotes: ");
+      pw.println("Extracted quotes:");
       List<CoreMap> allQuotes = QuoteAnnotator.gatherQuotes(annotation);
       for (CoreMap quote : allQuotes) {
         String speakerString;
@@ -289,12 +289,12 @@ public class TextOutputter extends AnnotationOutputter {
         } else {
           speakerString = "Unknown";
         }
-        pw.printf("[QuotationIndex=%d, CharacterOffsetBegin=%d, Text=%s, Speaker=%s]%n",
-            quote.get(CoreAnnotations.QuotationIndexAnnotation.class),
-            quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-            quote.get(CoreAnnotations.TextAnnotation.class), speakerString
-            );
-
+        pw.printf("%s:\t%s\t[index=%d, charOffsetBegin=%d]%n",
+                speakerString,
+                quote.get(CoreAnnotations.TextAnnotation.class),
+                quote.get(CoreAnnotations.QuotationIndexAnnotation.class),
+                quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class)
+        );
       }
     }
 
