@@ -73,6 +73,10 @@ import java.util.regex.Pattern;
  *         Compares that word with the dictionary in filename.</td></tr>
  * <tr><td>distsimconjunction</td><td>filename, left, right</td>
  *     <td>A concatenation of distsim features from left ... right.</td></tr>
+ * <tr><td>nonalphanumeric</td><td>-</td>
+ *     <td>A single boolean: whether or not the word is non-alphanumeric.</td></tr>
+ * <tr><td>numeric</td><td>-</td>
+ *     <td>A single boolean: whether or not the word is entirely numeric.</td></tr>
  * </table>
  * Also available are the macros "naacl2003unknowns",
  * "lnaacl2003unknowns", and "naacl2003conjunctions".
@@ -362,10 +366,10 @@ public class ExtractorFramesRare {
         extrs.add(new ExtractorDistsimConjunction(path, lWindow, rWindow));
       } else if (arg.equalsIgnoreCase("lctagfeatures")) {
         extrs.addAll(Arrays.asList(lcTagFeatures(ttags)));
-      } else if (args.equals("rareExtractor(edu.stanford.nlp.tagger.maxent.ExtractorNonAlphanumeric)")) {
-        // This is separate so that the class dependency scripts can
-        // figure out it needs to include ExtractorNonAlphanumeric
+      } else if (arg.equalsIgnoreCase("nonalphanumeric)")) {
         extrs.add(new ExtractorNonAlphanumeric());
+      } else if (arg.equalsIgnoreCase("numeric)")) {
+        extrs.add(new ExtractorNumeric());
       } else if (arg.startsWith("rareExtractor(")) {
         String className = Extractor.getParenthesizedArg(arg, 1);
         try {
@@ -1354,8 +1358,7 @@ class ExtractorNonAlphanumeric extends RareExtractor {
 }
 
 
-/** This class is loaded by reflection in some POS taggers. */
-@SuppressWarnings("unused")
+/** Returns true ("1") if and only if this word is entirely numeric */
 class ExtractorNumeric extends RareExtractor {
 
   public ExtractorNumeric() { }
