@@ -86,9 +86,6 @@ public class StanfordCoreNLPServer implements Runnable {
   @ArgumentParser.Option(name="stanford", gloss="If true, do special options (domain blockList, timeout modifications) for public Stanford server")
   protected boolean stanford = false;
 
-  /** Default annotators for a server **/
-  private static final String serverDefaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,natlog,openie,kbp";
-
   /** List of server specific properties **/
   private static final List<String> serverSpecificProperties = ArgumentParser.listOptions(StanfordCoreNLPServer.class);
 
@@ -171,13 +168,7 @@ public class StanfordCoreNLPServer implements Runnable {
     if (serverPropertiesPath != null) {
       this.defaultProps = StringUtils.argsToProperties("-props", serverPropertiesPath);
     } else {
-      this.defaultProps = PropertiesUtils.asProperties(
-          "annotators", serverDefaultAnnotators,  // Run these annotators by default
-          "coref.mention.type", "dep",  // Use dependency trees with coref by default
-          "coref.mode", "statistical",  // Use the new coref
-          "coref.language", "en",  // We're English by default
-          "openie.strip_entailments", "true"
-      );
+      this.defaultProps = new Properties();
     }
 
     // set some extra defaults if they haven't already been specified
