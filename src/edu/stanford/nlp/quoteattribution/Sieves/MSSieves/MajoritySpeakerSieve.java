@@ -20,16 +20,14 @@ import java.util.Set;
  */
 public class MajoritySpeakerSieve extends MSSieve {
 
-  private Counter<String> topSpeakerList;
+  private final Counter<String> topSpeakerList;
 
-  public Counter<String> getTopSpeakerList()
-  {
+  public Counter<String> getTopSpeakerList() {
     Counter<String> characters = new ClassicCounter<>();
 
     ArrayList<String> names = scanForNames(new Pair<>(0, doc.get(CoreAnnotations.TokensAnnotation.class).size() - 1)).first;
 
-    for(String name : names)
-    {
+    for(String name : names) {
       characters.incrementCount(characterMap.get(name).get(0).name);
     }
     return characters;
@@ -41,11 +39,12 @@ public class MajoritySpeakerSieve extends MSSieve {
   }
 
   public void doMentionToSpeaker(Annotation doc) {
-    for(CoreMap quote : doc.get(CoreAnnotations.QuotationsAnnotation.class)) {
-      if(quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) == null) {
+    for (CoreMap quote : doc.get(CoreAnnotations.QuotationsAnnotation.class)) {
+      if (quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) == null) {
         quote.set(QuoteAttributionAnnotator.SpeakerAnnotation.class, characterMap.get(Counters.toSortedList(topSpeakerList).get(0)).get(0).name);
         quote.set(QuoteAttributionAnnotator.SpeakerSieveAnnotation.class, "majority speaker baseline");
       }
     }
   }
+
 }

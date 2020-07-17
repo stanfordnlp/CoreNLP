@@ -17,7 +17,6 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -27,8 +26,6 @@ import java.util.*;
  * Created by mjfang on 12/1/16.
  */
 public class SupervisedSieveTraining {
-
-  private static Sieve sieve; // use to access functions
 
   // Take in a training Annotated document:
   // convert document to dataset & featurize
@@ -94,10 +91,9 @@ public class SupervisedSieveTraining {
         leftoverRanges.add(leftRange);
       }
 
-      if(currRange.second == exRange.second) {
+      if (currRange.second.equals(exRange.second)) {
         break;
-      }
-      else {
+      } else {
         currRange = new Pair<>(exRange.second + 1, currRange.second);
       }
     }
@@ -117,6 +113,7 @@ public class SupervisedSieveTraining {
       this.dataset = dataset;
     }
   }
+
   public static class SieveData {
     Annotation doc;
     Map<String, List<Person>> characterMap;
@@ -137,7 +134,8 @@ public class SupervisedSieveTraining {
 
     Annotation doc = sd.doc;
 
-    sieve = new Sieve(doc, sd.characterMap, sd.pronounCorefMap, sd.animacyList);
+    // use to access functions
+    Sieve sieve = new Sieve(doc, sd.characterMap, sd.pronounCorefMap, sd.animacyList);
 
     List<CoreMap> quotes = doc.get(CoreAnnotations.QuotationsAnnotation.class);
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
@@ -154,7 +152,7 @@ public class SupervisedSieveTraining {
       throw new RuntimeException("Gold Quote List size doesn't match quote list size!");
     }
 
-    for(int quoteIdx = 0; quoteIdx < quotes.size(); quoteIdx++) {
+    for (int quoteIdx = 0; quoteIdx < quotes.size(); quoteIdx++) {
 
       int initialSize = dataset.size();
 
@@ -162,7 +160,7 @@ public class SupervisedSieveTraining {
       XMLToAnnotation.GoldQuoteInfo gold = null;
       if(isTraining) {
         gold = goldList.get(quoteIdx);
-        if (gold.speaker == "") {
+        if (gold.speaker.equals("")) {
           continue;
         }
       }
@@ -189,7 +187,7 @@ public class SupervisedSieveTraining {
         }
       }
 
-      List<Sieve.MentionData> mentionsInPreviousParagraph = new ArrayList<Sieve.MentionData>();
+      List<Sieve.MentionData> mentionsInPreviousParagraph = new ArrayList<>();
       if (leftValue > -1 && rightValue > -1)
         mentionsInPreviousParagraph = eliminateDuplicates(sieve.findClosestMentionsInSpanBackward(new Pair<>(leftValue, rightValue)));
 
@@ -209,7 +207,7 @@ public class SupervisedSieveTraining {
         }
       }
 
-      List<Sieve.MentionData> mentionsInNextParagraph = new ArrayList<Sieve.MentionData>();
+      List<Sieve.MentionData> mentionsInNextParagraph = new ArrayList<>();
       if (leftValue < tokens.size() && rightValue < tokens.size())
         mentionsInNextParagraph = sieve.findClosestMentionsInSpanForward(new Pair<>(leftValue, rightValue));
 
@@ -511,32 +509,26 @@ public class SupervisedSieveTraining {
   {
     List<Sieve.MentionData> newList = new ArrayList<>();
     Set<String> seenText = new HashSet<>();
-    for(int i = 0; i < mentionCandidates.size(); i++)
-    {
-      Sieve.MentionData mentionCandidate = mentionCandidates.get(i);
+    for (Sieve.MentionData mentionCandidate : mentionCandidates) {
       String text = mentionCandidate.text;
-      if(!seenText.contains(text) || mentionCandidate.type.equals("Pronoun"))
+      if (!seenText.contains(text) || mentionCandidate.type.equals("Pronoun"))
         newList.add(mentionCandidate);
       seenText.add(text);
     }
     return newList;
   }
 
-
+  // todo [cdm Nov 2020: Isn't there already a method like this for Classifier?
   public static void outputModel(String fileName, Classifier<String, String> clf) {
-    FileOutputStream fo = null;
     try {
-      fo = new FileOutputStream(fileName);
+      FileOutputStream fo = new FileOutputStream(fileName);
       ObjectOutputStream so = new ObjectOutputStream(fo);
       so.writeObject(clf);
       so.flush();
       so.close();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
-
   }
 
   public static void train(XMLToAnnotation.Data data, Properties props) {
@@ -577,4 +569,5 @@ public class SupervisedSieveTraining {
     ca.annotate(data.doc);
     train(data, annotatorProps);
   }
+
 }
