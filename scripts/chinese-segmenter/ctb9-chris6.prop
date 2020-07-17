@@ -81,3 +81,7 @@ separateAsciiAndRange=false
 keepEnglishWhitespaces=true
 keepAllWhitespaces = true
 sighanPostProcessing = true
+
+# This would make the resulting model smaller
+# It can also be set as a command line arg, which is what the Makefile does
+# featureDiffThresh=0.015
