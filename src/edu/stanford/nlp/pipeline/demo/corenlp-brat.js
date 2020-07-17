@@ -66,7 +66,8 @@ var tokensMap = {
 };
 
 /**
- * A mapping from part of speech tag to the associated visualization color
+ * A mapping from part of speech tag to the associated
+ * visualization color
  */
 function posColor(posTag) {
   if (posTag.startsWith('N')) {
@@ -97,7 +98,8 @@ function posColor(posTag) {
 }
 
 /**
- * A mapping from named entity tag to the associated visualization color
+ * A mapping from named entity tag to the associated
+ * visualization color
  */
 function nerColor(nerTag) {
   if (nerTag === 'PERSON') {
@@ -106,9 +108,9 @@ function nerColor(nerTag) {
     return '#8FB2FF';
   } else if (nerTag === 'MISC') {
     return '#F1F447';
-  } else if (nerTag === 'LOCATION' || nerTag === 'COUNTRY' ||| nerTag === 'STATE_OR_PROVINCE' ||| nerTag === 'CITY') {
+  } else if (nerTag === 'LOCATION') {
     return '#95DFFF';
-  } else if (nerTag === 'DATE' || nerTag === 'TIME' || nerTag === 'DURATION' || nerTag === 'SET') {
+  } else if (nerTag === 'DATE' || nerTag === 'TIME' || nerTag === 'SET') {
     return '#9AFFE6';
   } else if (nerTag === 'MONEY') {
     return '#FFFFFF';
