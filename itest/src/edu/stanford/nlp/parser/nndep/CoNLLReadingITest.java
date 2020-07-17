@@ -24,7 +24,7 @@ import edu.stanford.nlp.util.CoreMap;
 
 public class CoNLLReadingITest {
 
-    String exampleCoNLLXPath = "/u/nlp/data/stanford-corenlp-testing/data/conllu/fr_gsd-ud-train.conllu.clean";
+    String exampleCoNLLXPath = "/u/nlp/data/stanford-corenlp/testing/data/conllu/fr_gsd-ud-train.conllu.clean";
     String exampleCoNLLUPath = "";
 
     public static void loadConllFileOriginal(String inFile, List<CoreMap> sents, List<DependencyTree> trees, boolean unlabeled, boolean cPOS)
