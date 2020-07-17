@@ -390,7 +390,7 @@ public class JSONOutputter extends AnnotationOutputter {
       this.options = options;
     }
 
-    @SuppressWarnings({"unchecked", "UnnecessaryBoxing"})
+    @SuppressWarnings({"unchecked", "UnnecessaryBoxing", "RawUseOfParameterized"})
     private void routeObject(int indent, Object value) {
       if (value instanceof String) {
         // Case: simple string (this is easy!)

@@ -81,7 +81,6 @@ public class QuoteAnnotator implements Annotator  {
   private static final Redwood.RedwoodChannels log = Redwood.channels(QuoteAnnotator.class);
 
   private final boolean VERBOSE;
-  private final boolean DEBUG = false;
 
   // whether or not to consider single single quotes as quote-marking
   public boolean USE_SINGLE = false;
@@ -206,8 +205,7 @@ public class QuoteAnnotator implements Annotator  {
       }
     }
     // add white space for all non-token content after last token
-    cleanedText += documentText.substring(
-        cleanedText.length(), documentText.length()).replaceAll("\\S", " ");
+    cleanedText += documentText.substring(cleanedText.length()).replaceAll("\\S", " ");
     return cleanedText;
   }
 
@@ -323,13 +321,10 @@ public class QuoteAnnotator implements Annotator  {
   }
 
   public static Comparator<CoreMap> getQuoteComparator() {
-   return new Comparator<CoreMap>() {
-     @Override
-     public int compare(CoreMap o1, CoreMap o2) {
-       int s1 = o1.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-       int s2 = o2.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-       return s1 - s2;
-     }
+   return (o1, o2) -> {
+     int s1 = o1.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+     int s2 = o2.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+     return Integer.compare(s1, s2);
    };
   }
 
@@ -389,7 +384,7 @@ public class QuoteAnnotator implements Annotator  {
 
     // sort quotes by beginning index
     Comparator<CoreMap> quoteComparator = getQuoteComparator();
-    Collections.sort(cmQuotes, quoteComparator);
+    cmQuotes.sort(quoteComparator);
 
     // embed quotes
     List<CoreMap> toRemove = new ArrayList<>();
@@ -600,7 +595,7 @@ public class QuoteAnnotator implements Annotator  {
       if (EXTRACT_UNCLOSED) {
         unclosedQuotes.add(new Pair<>(start, text.length()));
       }
-      String toPass = text.substring(start + quote.length(), text.length());
+      String toPass = text.substring(start + quote.length());
       Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> embedded = recursiveQuotes(toPass, offset, null);
       // these are the good quotes
       for (Pair<Integer, Integer> e : embedded.first()) {
@@ -759,7 +754,7 @@ public class QuoteAnnotator implements Annotator  {
   }
 
 
-  // helper method to recursively gather all embedded quotes
+  /** Helper method to recursively gather all embedded quotes. */
   public static List<CoreMap> gatherQuotes(CoreMap curr) {
     List<CoreMap> embedded = curr.get(CoreAnnotations.QuotationsAnnotation.class);
     if (embedded != null) {
