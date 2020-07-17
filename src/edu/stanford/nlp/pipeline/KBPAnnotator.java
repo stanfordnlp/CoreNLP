@@ -35,12 +35,12 @@ import edu.stanford.nlp.coref.data.CorefChain;
 @SuppressWarnings("FieldCanBeLocal")
 public class KBPAnnotator implements Annotator {
 
-  private String NOT_PROVIDED = "none";
+  private static final String NOT_PROVIDED = "none";
 
-  private Properties kbpProperties;
+  private final Properties kbpProperties;
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(KBPAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(KBPAnnotator.class);
 
   //@ArgumentParser.Option(name="kbp.language", gloss="language for kbp")
   //private String language = "english";
@@ -57,7 +57,7 @@ public class KBPAnnotator implements Annotator {
   @ArgumentParser.Option(name="kbp.verbose", gloss="Print out KBP logging info")
   private boolean VERBOSE = false;
 
-  private LanguageInfo.HumanLanguage kbpLanguage;
+  private final LanguageInfo.HumanLanguage kbpLanguage;
   /**
    * The extractor implementation.
    */
@@ -90,8 +90,8 @@ public class KBPAnnotator implements Annotator {
   TokenSequencePattern titlePersonPattern =
       TokenSequencePattern.compile("[pos:JJ & ner:O]? [ner: TITLE]+ ([ner: PERSON]+)");
 
-  /** map for converting KBP relation names to latest names **/
-  private HashMap<String,String> relationNameConversionMap;
+  /** Map for converting KBP relation names to latest names. **/
+  private final HashMap<String,String> relationNameConversionMap;
 
   /**
    * Create a new KBP annotator from the given properties.
@@ -106,7 +106,7 @@ public class KBPAnnotator implements Annotator {
                     //Locale.CHINESE : Locale.ENGLISH ;
     kbpProperties = props;
     try {
-      ArrayList<KBPRelationExtractor> extractors = new ArrayList<KBPRelationExtractor>();
+      ArrayList<KBPRelationExtractor> extractors = new ArrayList<>();
       // add tokensregex rules
       if (!tokensregexdir.equals(NOT_PROVIDED))
         extractors.add(new KBPTokensregexExtractor(tokensregexdir, VERBOSE));
@@ -129,9 +129,7 @@ public class KBPAnnotator implements Annotator {
         extractors.add(statisticalExtractor);
       }
       // build extractor
-      this.extractor =
-              new KBPEnsembleExtractor(extractors.toArray(
-                      new KBPRelationExtractor[extractors.size()]));
+      this.extractor = new KBPEnsembleExtractor(extractors.toArray(new KBPRelationExtractor[0]));
       // set maximum length of sentence to operate on
       maxLength = Integer.parseInt(props.getProperty("kbp.maxlen", "-1"));
     } catch (IOException | ClassNotFoundException e) {
@@ -139,7 +137,7 @@ public class KBPAnnotator implements Annotator {
     }
 
     // set up map for converting between older and new KBP relation names
-    relationNameConversionMap = new HashMap<String,String>();
+    relationNameConversionMap = new HashMap<>();
     relationNameConversionMap.put("org:dissolved", "org:date_dissolved");
     relationNameConversionMap.put("org:founded", "org:date_founded");
     relationNameConversionMap.put("org:number_of_employees/members", "org:number_of_employees_members");
@@ -268,7 +266,7 @@ public class KBPAnnotator implements Annotator {
           if (overallMatch.size() == corefMentionTokens.size()) {
             int personBeginOffset = ((CoreLabel) personWithinMatch.get(0)).beginPosition();
             int personEndOffset = ((CoreLabel) personWithinMatch.get(personWithinMatch.size()-1)).endPosition();
-            Pair<Integer,Integer> personOffsets = new Pair(personBeginOffset, personEndOffset);
+            Pair<Integer,Integer> personOffsets = new Pair<>(personBeginOffset, personEndOffset);
             kbpMentionFound = kbpMentions.get(personOffsets);
           }
         }
@@ -283,23 +281,18 @@ public class KBPAnnotator implements Annotator {
         Collectors.toList());
     int bestIndex = kbpMentionLengths.indexOf(kbpMentionLengths.stream().reduce(0, (a, b) -> Math.max(a, b)));
     // return the first occurrence of the kbp mention with max length (possibly null)
-    return new Pair(kbpMentionsForCorefChain, kbpMentionsForCorefChain.get(bestIndex));
+    return new Pair<>(kbpMentionsForCorefChain, kbpMentionsForCorefChain.get(bestIndex));
   }
 
   /**
-   * Convert between older naming convention and current for relation names
+   * Convert between older naming convention and current for relation names.
+   *
    * @param relationName the original relation name.
    * @return the converted relation name
    *
    */
   private String convertRelationNameToLatest(String relationName) {
-
-    if (relationNameConversionMap.containsKey(relationName)) {
-      return relationNameConversionMap.get(relationName);
-    } else {
-      return relationName;
-    }
-
+    return relationNameConversionMap.getOrDefault(relationName, relationName);
   }
 
   /**
@@ -490,7 +483,7 @@ public class KBPAnnotator implements Annotator {
           (acronymNERTag.equals(KBPRelationExtractor.NERTag.ORGANIZATION.name) ||
               acronymNERTag.equals(KBPRelationExtractor.NERTag.LOCATION.name))) {
         String acronymText = acronymMention.get(CoreAnnotations.TextAnnotation.class);
-        List<CoreMap> coreferentMentions = new ArrayList<CoreMap>();
+        // List<CoreMap> coreferentMentions = new ArrayList<>();
         // define acronyms as not containing spaces (e.g. ACLU)
         if (!acronymText.contains(" ")) {
           int numCoreferentsChecked = 0;
@@ -507,7 +500,7 @@ public class KBPAnnotator implements Annotator {
               continue;
             numCoreferentsChecked++;
             List<String> coreferentTokenStrings = coreferentMention.get(
-                CoreAnnotations.TokensAnnotation.class).stream().map(coreferentToken -> coreferentToken.word()).collect(
+                CoreAnnotations.TokensAnnotation.class).stream().map(CoreLabel::word).collect(
                 Collectors.toList());
             // when an acronym match is found:
             // store every mention (that isn't ACLU) that matches with ACLU in acronymClusters
@@ -515,9 +508,9 @@ public class KBPAnnotator implements Annotator {
             // afterwards find the best mention in acronymClusters, and match it to every mention in acronymInstances
             if (AcronymMatcher.isAcronym(acronymText, coreferentTokenStrings)) {
               if (!acronymClusters.containsKey(acronymText))
-                acronymClusters.put(acronymText, new ArrayList<CoreMap>());
+                acronymClusters.put(acronymText, new ArrayList<>());
               if (!acronymInstances.containsKey(acronymText))
-                acronymInstances.put(acronymText, new ArrayList<CoreMap>());
+                acronymInstances.put(acronymText, new ArrayList<>());
               acronymClusters.get(acronymText).add(coreferentMention);
               acronymInstances.get(acronymText).add(acronymMention);
             }
@@ -696,7 +689,7 @@ public class KBPAnnotator implements Annotator {
   public static void main(String[] args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,regexner,parse,mention,coref,kbp");
-    props.setProperty("regexner.mapping", "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/regexner_caseless.tab;edu/stanford/nlp/models/kbp/regexner_cased.tab");
+    props.setProperty("regexner.mapping", "ignorecase=true,validpospattern=(NN|JJ|ADD).*,edu/stanford/nlp/models/kbp/regexner_caseless.tab;edu/stanford/nlp/models/kbp/regexner_cased.tab");
 
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     IOUtils.console("sentence> ", line -> {

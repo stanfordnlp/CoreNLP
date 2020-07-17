@@ -160,7 +160,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     if (language.equals(LanguageInfo.HumanLanguage.SPANISH)) {
       Properties spanishNumberRegexNerProperties = new Properties();
       spanishNumberRegexNerProperties.setProperty("spanish.number.regexner.mapping", spanishNumberRegexRules);
-      spanishNumberRegexNerProperties.setProperty("spanish.number.regexner.validpospattern", "^(NUM).*");
+      spanishNumberRegexNerProperties.setProperty("spanish.number.regexner.validpospattern", "NUM.*");
       spanishNumberRegexNerProperties.setProperty("spanish.number.regexner.ignorecase", "true");
       spanishNumberAnnotator = new TokensRegexNERAnnotator("spanish.number.regexner",
           spanishNumberRegexNerProperties);

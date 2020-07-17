@@ -568,7 +568,7 @@ SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-
 
 // <STORYID cat=w pri=u>
 // SGML1 allows attribute value match over newline; SGML2 does not.
-SGML1 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^']*'|\"[^\"]*\"|[A-Za-z_][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
+SGML1 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ \r\n]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ \r\n]*=[ \r\n]*('[^']*'|\"[^\"]*\"|[A-Za-z_][A-Za-z0-9_:\.\-]*)))*[ \r\n]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ \r\n]*\>
 SGML2 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^'\r\n]*'|\"[^\"\r\n]*\"|[A-Za-z_][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
 SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
 SPAMP = &amp;
@@ -665,7 +665,7 @@ SREDAUX = n{APOSETCETERA}t
 APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[1-9]0s|[1-9]0{APOS}s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeioulA-Z][:letter:]*|{APOS}cause|cont'd\.?|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|ass't|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
 /* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
-FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?,;:&`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
+FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?¡¿,·;:&`\"\'\*\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
 LIKELYURL = ((www\.([^ \t\n\f\r`<>|.!?,\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r`<>|.!?,:\/$\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r`<>|]+[^ \t\n\f\r`<>|.!?,;:&\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
@@ -1123,9 +1123,6 @@ RM/{NUM}        { String txt = yytext();
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
-\x7F                    { if (invertible) {
-                            prevWordAfter.append(yytext());
-                        } }
 {SMILEY}/[^\p{Alpha}\p{Digit}] { String txt = yytext();
                   String origText = txt;
 		  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
@@ -1349,8 +1346,9 @@ RM/{NUM}        { String txt = yytext();
                         if (DEBUG) { logger.info("Used {CP1252_MISC_SYMBOL} to recognize " + tok + " as " + norm); }
                         return getNext(norm, tok);
                       }
-\0|{SPACES}|[\u200B\u200E-\u200F\uFEFF] { if (invertible) {
-                     prevWordAfter.append(yytext());
+{SPACES}|&nbsp;|[\x0\x8\x7F\u200B\u200E-\u200F\uFEFF]
+                { if (invertible) {
+                    prevWordAfter.append(yytext());
                   }
                 }
 {NEWLINE}       { if (tokenizeNLs) {
@@ -1358,10 +1356,6 @@ RM/{NUM}        { String txt = yytext();
                   } else if (invertible) {
                     // System.err.println("Appending newline: |" + yytext() + "|");
                     prevWordAfter.append(yytext());
-                  }
-                }
-&nbsp;          { if (invertible) {
-                     prevWordAfter.append(yytext());
                   }
                 }
 .       { String str = yytext();

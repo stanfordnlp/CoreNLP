@@ -108,7 +108,8 @@ import java.util.regex.Pattern;
  *      </td>
  *      <td>{@code MATCH_AT_LEAST_ONE_TOKEN}</td>
  *   </tr>
- *   <tr><td>{@code validpospattern}</td><td>Regular expression pattern for matching POS tags.</td>
+ *   <tr><td>{@code validpospattern}</td><td>Regular expression pattern for matching POS tags
+ *      (with {@code .matches()}).</td>
  *      <td>{@code}</td>
  *   </tr>
  *   <tr><td>{@code noDefaultOverwriteLabels}</td>
@@ -606,10 +607,10 @@ public class TokensRegexNERAnnotator implements Annotator  {
                                          boolean verbose,
                                          String[] annotationFieldnames,
                                          String... mappings) {
-    // Unlike RegexNERClassifier, we don't bother sorting the entries
+    // Unlike RegexNERClassifier, we don't bother sorting the entries.
     // We leave it to TokensRegex NER to sort out the priorities and matches
-    // (typically after all the matches has been made since for some TokenRegex expression,
-    // we don't know how many tokens are matched until after the matching is done)
+    // (typically after all the matches has been made since for some TokensRegex expressions,
+    // we don't know how many tokens are matched until after the matching is done).
     List<Entry> entries = new ArrayList<>();
     TrieMap<String,Entry> seenRegexes = new TrieMap<>();
     // Arrays.sort(mappings);
@@ -880,13 +881,13 @@ public class TokensRegexNERAnnotator implements Annotator  {
     }
   }
   private static String[] processPerFileOptions(String annotatorName, String[] mappings, List<Boolean> ignoreCaseList, List<Pattern> validPosPatternList, List<String[]> headerList, boolean ignoreCase, Pattern validPosPattern, String[] headerFields, String[] annotationFieldnames, List<Class> annotationFields) {
-    Integer numMappingFiles = mappings.length;
+    int numMappingFiles = mappings.length;
     for (int index = 0; index < numMappingFiles; index++) {
       boolean ignoreCaseSet = false;
       boolean validPosPatternSet = false;
       boolean headerSet = false;
       String[] allOptions = COMMA_DELIMITERS_PATTERN.split(mappings[index].trim());
-      Integer numOptions = allOptions.length;
+      int numOptions = allOptions.length;
       String filePath = allOptions[allOptions.length - 1];
       if (numOptions > 1) { // there are some per file options here
         for (int i = 0; i < numOptions-1; i++) {
