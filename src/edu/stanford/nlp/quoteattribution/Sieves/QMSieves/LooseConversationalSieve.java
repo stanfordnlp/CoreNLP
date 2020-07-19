@@ -18,7 +18,7 @@ import java.util.Set;
 public class LooseConversationalSieve extends QMSieve {
 
   public LooseConversationalSieve(Annotation doc, Map<String, List<Person>> characterMap,
-                                  Map<Integer, String> pronounCorefMap, Set<String> animacySet) {
+                                  Map<Integer,String> pronounCorefMap, Set<String> animacySet) {
     super(doc, characterMap, pronounCorefMap, animacySet, "loose");
   }
 
@@ -28,30 +28,30 @@ public class LooseConversationalSieve extends QMSieve {
     List<Pair<Integer, Integer>> currChain = new ArrayList<>(); //Pairs are (quote_idx, paragraph_idx)
     //same as conversational, but make it less restrictive.
     //look for patterns: are they consecutive in paragraph? group those that are in
-    for(int quote_idx = 0; quote_idx < quotes.size(); quote_idx++) {
+    for (int quote_idx = 0; quote_idx < quotes.size(); quote_idx++) {
       CoreMap quote = quotes.get(quote_idx);
-      if(quote.get(QuoteAttributionAnnotator.MentionAnnotation.class) == null) {
+      if (quote.get(QuoteAttributionAnnotator.MentionAnnotation.class) == null) {
         int para_idx = getQuoteParagraph(quote);
 
-        if(currChain.size() != 0 && currChain.get(currChain.size() - 1).second != para_idx - 2) {
+        if (currChain.size() != 0 && currChain.get(currChain.size() - 1).second != para_idx - 2) {
           skipChains.add(currChain);
           currChain = new ArrayList<>();
         }
         currChain.add(new Pair<>(quote_idx, para_idx));
       }
     }
-    if(currChain.size() != 0) {
+    if (currChain.size() != 0) {
       skipChains.add(currChain);
     }
 
     for (List<Pair<Integer, Integer>> skipChain : skipChains) {
       Pair<Integer, Integer> firstQuoteAndParagraphIdx = skipChain.get(0);
       int firstParagraph = firstQuoteAndParagraphIdx.second;
-      boolean chainAttributed = false;
-      for(int prevQuoteIdx = firstQuoteAndParagraphIdx.first - 1; prevQuoteIdx >= 0; prevQuoteIdx--) {
+      // boolean chainAttributed = false;
+      for (int prevQuoteIdx = firstQuoteAndParagraphIdx.first - 1; prevQuoteIdx >= 0; prevQuoteIdx--) {
         CoreMap prevQuote = quotes.get(prevQuoteIdx);
-        if(getQuoteParagraph(prevQuote) == firstParagraph - 2 && prevQuote.get(QuoteAttributionAnnotator.MentionAnnotation.class) != null) {
-          for(Pair<Integer, Integer> quoteAndParagraphIdx : skipChain) {
+        if (getQuoteParagraph(prevQuote) == firstParagraph - 2 && prevQuote.get(QuoteAttributionAnnotator.MentionAnnotation.class) != null) {
+          for (Pair<Integer, Integer> quoteAndParagraphIdx : skipChain) {
             CoreMap quote = quotes.get(quoteAndParagraphIdx.first);
             fillInMention(quote, getMentionData(prevQuote), sieveName);
           }
@@ -59,4 +59,5 @@ public class LooseConversationalSieve extends QMSieve {
       }
     }
   }
+
 }
