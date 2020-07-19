@@ -28,7 +28,6 @@ package edu.stanford.nlp.coref.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -121,11 +120,11 @@ public class CorefChain implements Serializable {
     public final Animacy animacy;
 
     /**
-     * Starting word number, indexed from 1
+     * Starting word number within the sentence, indexed from 1
      */
     public final int startIndex;
     /**
-     * One past the end word number, indexed from 1
+     * One past the end word number within the sentence, indexed from 1
      */
     public final int endIndex;
     /**
@@ -234,10 +233,8 @@ public class CorefChain implements Serializable {
     }
 
     @Override
-    public String toString(){
-      StringBuilder s = new StringBuilder();
-      s.append('"').append(mentionSpan).append('"').append(" in sentence ").append(sentNum);
-      return s.toString();
+    public String toString() {
+      return '"' + mentionSpan + '"' + " in sentence " + sentNum;
       //      return "(sentence:" + sentNum + ", startIndex:" + startIndex + "-endIndex:" + endIndex + ")";
     }
 
@@ -276,7 +273,7 @@ public class CorefChain implements Serializable {
         if(m1.startIndex < m2.startIndex) return -1;
         else if(m1.startIndex > m2.startIndex) return 1;
         else {
-          if(m1.endIndex > m2.endIndex) return -1;
+          if( m1.endIndex > m2.endIndex) return -1;
           else if(m1.endIndex < m2.endIndex) return 1;
           else return 0;
         }
@@ -287,13 +284,13 @@ public class CorefChain implements Serializable {
   public static class MentionComparator implements Comparator<Mention> {
     @Override
     public int compare(Mention m1, Mention m2) {
-      if(m1.sentNum < m2.sentNum) return -1;
-      else if(m1.sentNum > m2.sentNum) return 1;
+      if (m1.sentNum < m2.sentNum) return -1;
+      else if (m1.sentNum > m2.sentNum) return 1;
       else{
-        if(m1.startIndex < m2.startIndex) return -1;
-        else if(m1.startIndex > m2.startIndex) return 1;
+        if (m1.startIndex < m2.startIndex) return -1;
+        else if (m1.startIndex > m2.startIndex) return 1;
         else {
-          if(m1.endIndex > m2.endIndex) return -1;
+          if (m1.endIndex > m2.endIndex) return -1;
           else if(m1.endIndex < m2.endIndex) return 1;
           else return 0;
         }
@@ -311,11 +308,11 @@ public class CorefChain implements Serializable {
       CorefMention men = new CorefMention(m, positions.get(m));
       mentions.add(men);
     }
-    Collections.sort(mentions, new CorefMentionComparator());
+    mentions.sort(new CorefMentionComparator());
     // Find representative mention
     for (CorefMention men : mentions) {
       IntPair position = new IntPair(men.sentNum, men.headIndex);
-      if (!mentionMap.containsKey(position)) mentionMap.put(position, Generics.<CorefMention>newHashSet());
+      if (!mentionMap.containsKey(position)) mentionMap.put(position, Generics.newHashSet());
       mentionMap.get(position).add(men);
       if (men.moreRepresentativeThan(represents)) {
         represents = men;
@@ -332,12 +329,10 @@ public class CorefChain implements Serializable {
     this.representative = representative;
     this.mentionMap = mentionMap;
     this.mentions = new ArrayList<>();
-    for (Set<CorefMention> ms: mentionMap.values()) {
-      for (CorefMention m: ms) {
-        this.mentions.add(m);
-      }
+    for (Set<CorefMention> ms : mentionMap.values()) {
+      this.mentions.addAll(ms);
     }
-    Collections.sort(mentions, new CorefMentionComparator());
+    mentions.sort(new CorefMentionComparator());
   }
 
   /**

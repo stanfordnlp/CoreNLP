@@ -674,8 +674,8 @@ public class Classifier  {
       int pos = x % numTokens;
       matrixMultiplySliceSum(saved[mapX], W1, E[tok], pos * embeddingSize);
     }
-    log.info("PreComputed " + toPreCompute.size() + ", Elapsed Time: " +
-            (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+    log.info("PreComputed " + toPreCompute.size() + " vectors, elapsed Time: " +
+            (System.currentTimeMillis() - startTime) / 1000.0 + " sec");
   }
 
 

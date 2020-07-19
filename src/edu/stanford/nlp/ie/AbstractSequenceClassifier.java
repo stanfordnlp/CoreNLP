@@ -93,7 +93,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public List<FeatureFactory<IN>> featureFactories;
 
   protected IN pad;
-  private CoreTokenFactory<IN> tokenFactory;
+  private final CoreTokenFactory<IN> tokenFactory;
   public int windowSize;
 
   /** Different threads can add or query knownLCWords at the same time,
