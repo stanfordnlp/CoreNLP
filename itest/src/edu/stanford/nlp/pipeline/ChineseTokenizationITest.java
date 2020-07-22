@@ -46,7 +46,7 @@ public class ChineseTokenizationITest {
   @Test
   public void testXMLDocWithNewlines() throws Exception {
     // set up properties
-    String RESOURCE_DIR = "/u/scr/nlp/data/stanford-corenlp/testing/";
+    String RESOURCE_DIR = "/u/scr/nlp/data/stanford-corenlp-testing/";
     Properties props = StringUtils.argsToProperties("-args",
         RESOURCE_DIR+"test-props/kbp-2017-chinese.properties");
     props.setProperty("annotators", "tokenize,cleanxml,ssplit,pos");

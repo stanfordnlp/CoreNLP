@@ -14,7 +14,7 @@ import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
 public class TrainCRFClassifierSlowITest {
 
-  private static final String crfTrainingWorkingDir = "/u/scr/nlp/data/stanford-corenlp/testing/crf-classifier-training";
+  private static final String crfTrainingWorkingDir = "/u/scr/nlp/data/stanford-corenlp-testing/crf-classifier-training";
 
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
