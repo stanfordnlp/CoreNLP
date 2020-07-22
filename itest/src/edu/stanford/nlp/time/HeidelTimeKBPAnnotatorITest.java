@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 public class HeidelTimeKBPAnnotatorITest extends TestCase {
 
   public StanfordCoreNLP pipeline;
-  public String WORKING_DIR = "/u/nlp/data/stanford-corenlp-testing/working-dirs/spanish-heideltime";
+  public String WORKING_DIR = "/u/nlp/data/stanford-corenlp/testing/working-dirs/spanish-heideltime";
   public Set<String> GOLD_RESULTS = new HashSet<>(
       Arrays.asList("Rusia\tCOUNTRY", "Japón\tCOUNTRY", "hoy\tDATE","rusa\tLOCATION", "Vicente Fox\tPERSON",
           "el 2 de julio de 1942\tDATE", "Esta semana\tDATE", "ING\tORGANIZATION",
@@ -44,7 +44,7 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
     props.setProperty("ner.fine.regexner.noDefaultOverwriteLabels", "CITY,COUNTRY,STATE_OR_PROVINCE");
     // add heideltime
     props.setProperty("customAnnotatorClass.heideltime", "edu.stanford.nlp.time.HeidelTimeKBPAnnotator");
-    props.setProperty("heideltime.path", "/u/scr/nlp/data/stanford-corenlp-testing/spanish-heideltime/heideltime");
+    props.setProperty("heideltime.path", "/u/scr/nlp/data/stanford-corenlp/testing/spanish-heideltime/heideltime");
     props.setProperty("heideltime.language", "spanish");
     // depparse
     props.setProperty("depparse.model", "edu/stanford/nlp/models/parser/nndep/UD_Spanish.gz");

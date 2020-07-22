@@ -12,7 +12,7 @@ import java.util.*;
 
 public class NERPipelineEndToEndSlowITest extends TestCase {
 
-  public static String DATA_PATH = "/u/nlp/data/stanford-corenlp-testing/data/ner";
+  public static String DATA_PATH = "/u/nlp/data/stanford-corenlp/testing/data/ner";
 
   StanfordCoreNLP pipeline3Class;
   StanfordCoreNLP pipeline4Class;
