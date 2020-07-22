@@ -11,6 +11,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.DocumentPreprocessor;
+import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
@@ -140,7 +141,7 @@ public class DependencyParser  {
 
   /**
    * Get an integer ID for the given word. This ID can be used to index
-   * into the embeddings {@link Classifier} embeddings (E).
+   * into the embeddings {@link Classifier#E}.
    *
    * @return An ID for the given word, or an ID referring to a generic
    *         "unknown" word if the word is unknown
@@ -519,15 +520,18 @@ public class DependencyParser  {
     Timing t = new Timing();
     try (BufferedReader input = IOUtils.readerFromString(modelFile)) {
 
+      log.info("Loading depparse model: " + modelFile + " ... ");
+      String s;
+
       // first line in newer saved models is language, legacy models don't store this
-      String s = input.readLine();
+      s = input.readLine();
       // check if language was stored
       if (isModelNewFormat(s)) {
         // set up language
         config.language = Config.getLanguage(s.substring(9, s.length() - 1));
         // set up tlp
         s = input.readLine();
-        String tlpCanonicalName = s.substring(4);
+        String tlpCanonicalName = s.substring(4, s.length());
         try {
           config.tlp = ReflectionLoading.loadByReflection(tlpCanonicalName);
           log.info("Loaded TreebankLanguagePack: " + tlpCanonicalName);
@@ -617,7 +621,7 @@ public class DependencyParser  {
       config.hiddenSize = hSize;
       config.embeddingSize = eSize;
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
-      t.report(log, "Loading depparse model: " + modelFile);
+      t.report(log, "Done reading from disk");
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }

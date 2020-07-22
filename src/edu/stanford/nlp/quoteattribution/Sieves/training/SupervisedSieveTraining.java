@@ -41,11 +41,12 @@ public class SupervisedSieveTraining {
   private static int getParagraphBeginToken(CoreMap sentence, List<CoreMap> sentences) {
     int paragraphId = sentence.get(CoreAnnotations.ParagraphIndexAnnotation.class);
     int paragraphBeginToken = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
-    for (int i = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class) - 1; i >= 0; i--) {
+    for(int i = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class) - 1; i >= 0; i--) {
       CoreMap currSentence = sentences.get(i);
       if(currSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class) == paragraphId) {
         paragraphBeginToken = currSentence.get(CoreAnnotations.TokenBeginAnnotation.class);
-      } else {
+      }
+      else {
         break;
       }
     }
@@ -55,11 +56,12 @@ public class SupervisedSieveTraining {
   private static int getParagraphEndToken(CoreMap sentence, List<CoreMap> sentences) {
     int quoteParagraphId = sentence.get(CoreAnnotations.ParagraphIndexAnnotation.class);
     int paragraphEndToken = sentence.get(CoreAnnotations.TokenEndAnnotation.class) - 1;
-    for (int i = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class); i < sentences.size(); i++) {
+    for(int i = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class); i < sentences.size(); i++) {
       CoreMap currSentence = sentences.get(i);
-      if (currSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class) == quoteParagraphId) {
+      if(currSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class) == quoteParagraphId) {
         paragraphEndToken = currSentence.get(CoreAnnotations.TokenEndAnnotation.class) - 1;
-      } else {
+      }
+      else {
         break;
       }
     }
@@ -83,9 +85,9 @@ public class SupervisedSieveTraining {
 
     List<Pair<Integer, Integer>> leftoverRanges = new ArrayList<>();
     Pair<Integer, Integer> currRange = originalRange;
-    for (Pair<Integer, Integer> exRange : exclusionList) {
+    for(Pair<Integer, Integer> exRange : exclusionList) {
       Pair<Integer, Integer> leftRange = new Pair<>(currRange.first, exRange.first - 1);
-      if (leftRange.second - leftRange.first >= 0) {
+      if(leftRange.second - leftRange.first >= 0) {
         leftoverRanges.add(leftRange);
       }
 
@@ -113,15 +115,12 @@ public class SupervisedSieveTraining {
   }
 
   public static class SieveData {
-    final Annotation doc;
-    final Map<String, List<Person>> characterMap;
-    final Map<Integer,String> pronounCorefMap;
-    final Set<String> animacyList;
+    Annotation doc;
+    Map<String, List<Person>> characterMap;
+    Map<Integer, String> pronounCorefMap;
+    Set<String> animacyList;
 
-    public SieveData(Annotation doc,
-                     Map<String, List<Person>> characterMap,
-                     Map<Integer,String> pronounCorefMap,
-                     Set<String> animacyList) {
+    public SieveData(Annotation doc, Map<String, List<Person>> characterMap, Map<Integer, String> pronounCorefMap, Set<String> animacyList) {
       this.doc = doc;
       this.characterMap = characterMap;
       this.pronounCorefMap = pronounCorefMap;
@@ -161,7 +160,7 @@ public class SupervisedSieveTraining {
       XMLToAnnotation.GoldQuoteInfo gold = null;
       if(isTraining) {
         gold = goldList.get(quoteIdx);
-        if (gold.speaker.isEmpty()) {
+        if (gold.speaker.equals("")) {
           continue;
         }
       }
@@ -220,10 +219,10 @@ public class SupervisedSieveTraining {
       int rankedDistance = 1;
       int numBackwards = mentionsInPreviousParagraph.size();
 
-      for (Sieve.MentionData mention : candidateMentions) {
+      for(Sieve.MentionData mention : candidateMentions) {
 
-//        List<CoreLabel> mentionCandidateTokens = doc.get(CoreAnnotations.TokensAnnotation.class).subList(mention.begin, mention.end + 1);
-//        CoreMap mentionCandidateSentence = sentences.get(mentionCandidateTokens.get(0).sentIndex());
+        List<CoreLabel> mentionCandidateTokens = doc.get(CoreAnnotations.TokensAnnotation.class).subList(mention.begin, mention.end + 1);
+        CoreMap mentionCandidateSentence = sentences.get(mentionCandidateTokens.get(0).sentIndex());
 //        if (mentionCandidateSentence.get(ChapterAnnotator.ChapterAnnotation.class) != quoteChapter) {
 //          continue;
 //        }
@@ -534,7 +533,7 @@ public class SupervisedSieveTraining {
 
   public static void train(XMLToAnnotation.Data data, Properties props) {
     Map<String, List<Person>> characterMap = QuoteAttributionUtils.readPersonMap(props.getProperty("charactersPath"));
-    Map<Integer,String> pronounCorefMap =
+    Map<Integer, String> pronounCorefMap =
             QuoteAttributionUtils.setupCoref(props.getProperty("booknlpCoref"), characterMap, data.doc);
     Set<String> animacyList = QuoteAttributionUtils.readAnimacyList(QuoteAttributionAnnotator.ANIMACY_WORD_LIST);
     FeaturesData fd = featurize(new SieveData(data.doc, characterMap, pronounCorefMap, animacyList), data.goldList, true);

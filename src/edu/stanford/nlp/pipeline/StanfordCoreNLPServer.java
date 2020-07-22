@@ -463,12 +463,13 @@ public class StanfordCoreNLPServer implements Runnable {
     // Get the annotators
     String annotators = props.getProperty("annotators");
     // If the properties contains a custom annotator, then do not enforceRequirements.
-    if (!PropertiesUtils.hasPropertyPrefix(props, CUSTOM_ANNOTATOR_PREFIX) && PropertiesUtils.getBool(props, "enforceRequirements", true)) {
+    if (annotators != null && !PropertiesUtils.hasPropertyPrefix(props, CUSTOM_ANNOTATOR_PREFIX) && PropertiesUtils.getBool(props, "enforceRequirements", true)) {
       annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"), props);
     }
 
     // Make sure the properties compile
-    props.setProperty("annotators", annotators);
+    if (annotators != null)
+      props.setProperty("annotators", annotators);
 
     return props;
   }
@@ -1544,7 +1545,8 @@ public class StanfordCoreNLPServer implements Runnable {
       // -preload flag with a list of annotators means to preload just that list (e.g. tokenize,ssplit,pos)
       String annotatorsToLoad = (StanfordCoreNLPServer.preloadedAnnotators.trim().equals("true")) ?
           server.defaultProps.getProperty("annotators") : StanfordCoreNLPServer.preloadedAnnotators;
-      props.setProperty("annotators", annotatorsToLoad);
+      if (annotatorsToLoad != null)
+        props.setProperty("annotators", annotatorsToLoad);
       try {
         new StanfordCoreNLP(props);
       } catch (Throwable throwable) {

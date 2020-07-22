@@ -33,10 +33,7 @@ public class MajoritySpeakerSieve extends MSSieve {
     return characters;
   }
 
-  public MajoritySpeakerSieve(Annotation doc,
-                              Map<String, List<Person>> characterMap,
-                              Map<Integer,String> pronounCorefMap,
-                              Set<String> animacySet ) {
+  public MajoritySpeakerSieve(Annotation doc, Map<String, List<Person>> characterMap, Map<Integer, String> pronounCorefMap, Set<String> animacySet ) {
     super(doc, characterMap, pronounCorefMap, animacySet);
     this.topSpeakerList = getTopSpeakerList();
   }

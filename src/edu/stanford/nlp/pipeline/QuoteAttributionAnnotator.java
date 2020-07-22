@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.*;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -23,7 +24,7 @@ import java.util.*;
 
 
 /**
- * This annotator connects quotes in a text to their speakers. It uses a two-stage process that first links quotes
+ * An annotator uses attributes quotes in a text to their speakers. It uses a two-stage process that first links quotes
  * to mentions and then mentions to speakers. Each stage consists in a series of sieves that each try to make
  * predictions on the quote or mentions that have not been linked by previous sieves.
  *
@@ -122,7 +123,7 @@ public class QuoteAttributionAnnotator implements Annotator {
     }
   }
 
-  private final static Redwood.RedwoodChannels log = Redwood.channels(QuoteAttributionAnnotator.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(QuoteAttributionAnnotator.class);
 
   // settings
   public static final String DEFAULT_QMSIEVES = "tri,dep,onename,voc,paraend,conv,sup,loose";
@@ -130,27 +131,25 @@ public class QuoteAttributionAnnotator implements Annotator {
   public static final String DEFAULT_MODEL_PATH = "edu/stanford/nlp/models/quoteattribution/quoteattribution_model.ser";
 
   // these paths go in the props file
-  // cdm 2020: But they shouldn't be static, as they are set by properties per annotator.
-  // todo [cdm 2020]: sort it out properly with default strings and actual value
-  private String FAMILY_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/family_words.txt";
+  public static String FAMILY_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/family_words.txt";
   public static String ANIMACY_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/animate.unigrams.txt";
-  private String GENDER_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/gender_filtered.txt";
-  public static String COREF_PATH = null; // used to be "" but seemed wrong
+  public static String GENDER_WORD_LIST = "edu/stanford/nlp/models/quoteattribution/gender_filtered.txt";
+  public static String COREF_PATH = "";
   public static String MODEL_PATH = "edu/stanford/nlp/models/quoteattribution/quoteattribution_model.ser";
-  public static String CHARACTERS_FILE = null; // used to be "";
+  public static String CHARACTERS_FILE = "";
   public boolean buildCharacterMapPerAnnotation = false;
   public boolean useCoref = true;
 
-  public final boolean VERBOSE;
+  public Boolean VERBOSE = false;
 
   // fields
-  private final Set<String> animacyList;
-  private final Set<String> familyRelations;
-  private final Map<String, Person.Gender> genderMap;
+  private Set<String> animacyList;
+  private Set<String> familyRelations;
+  private Map<String, Person.Gender> genderMap;
   private Map<String, List<Person>> characterMap;
-  private final String qmSieveList;
-  private final String msSieveList;
-  private final DependencyParser parser;
+  private String qmSieveList;
+  private String msSieveList;
+  private DependencyParser parser;
 
   public QuoteAttributionAnnotator(Properties props) {
 
@@ -158,7 +157,7 @@ public class QuoteAttributionAnnotator implements Annotator {
 
     Timing timer = null;
     COREF_PATH = props.getProperty("booknlpCoref", null);
-    if (COREF_PATH == null && VERBOSE) {
+    if(COREF_PATH == null && VERBOSE) {
       log.err("Warning: no coreference map!");
     }
     MODEL_PATH = props.getProperty("modelPath", DEFAULT_MODEL_PATH);
@@ -181,13 +180,12 @@ public class QuoteAttributionAnnotator implements Annotator {
     familyRelations = QuoteAttributionUtils.readFamilyRelations(FAMILY_WORD_LIST);
     genderMap = QuoteAttributionUtils.readGenderedNounList(GENDER_WORD_LIST);
     animacyList = QuoteAttributionUtils.readAnimacyList(ANIMACY_WORD_LIST);
-    if (characterMap != null) { // todo [cdm 2020]: Shouldn't this be testing against CHARACTERS_FILE?
+    if (characterMap != null) {
       characterMap = QuoteAttributionUtils.readPersonMap(CHARACTERS_FILE);
     } else {
       buildCharacterMapPerAnnotation = true;
     }
     // use Stanford CoreNLP coref to map mentions to canonical mentions
-    // (at present this only determines requirements, CoreNLP coref is used if no booknlpCoref)
     useCoref = PropertiesUtils.getBool(props, "useCoref", useCoref);
     
     // setup dependency parser 
@@ -204,12 +202,13 @@ public class QuoteAttributionAnnotator implements Annotator {
 
   /** if no character list is provided, produce a list of person names from entity mentions annotation **/
   public void entityMentionsToCharacterMap(Annotation annotation) {
-    characterMap = new HashMap<>();
+    characterMap = new HashMap<String, List<Person>>();
     for (CoreMap entityMention : annotation.get(CoreAnnotations.MentionsAnnotation.class)) {
       String entityMentionString = entityMention.toString();
       if (entityMention.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals("PERSON")) {
         Person newPerson = new Person(entityMentionString, "UNK", new ArrayList<>());
-        List<Person> newPersonList = Collections.singletonList(newPerson);
+        List<Person> newPersonList = new ArrayList<Person>();
+        newPersonList.add(newPerson);
         characterMap.put(entityMentionString, newPersonList);
       }
     }
@@ -217,10 +216,9 @@ public class QuoteAttributionAnnotator implements Annotator {
 
   @Override
   public void annotate(Annotation annotation) {
-    // boolean perDocumentCharacterMap = false;
+    boolean perDocumentCharacterMap = false;
     if (buildCharacterMapPerAnnotation) {
       if (annotation.containsKey(CoreAnnotations.MentionsAnnotation.class)) {
-        // Put all mentions from this key that are NER type PERSON into the characterMap
         entityMentionsToCharacterMap(annotation);
       }
     }
@@ -233,9 +231,8 @@ public class QuoteAttributionAnnotator implements Annotator {
 
     // 1. preprocess the text
     // a) setup coref
-    Map<Integer,String> pronounCorefMap =
+    Map<Integer, String> pronounCorefMap =
         QuoteAttributionUtils.setupCoref(COREF_PATH, characterMap, annotation);
-    // log.info("Pronoun coref map is " + pronounCorefMap);
 
     //annotate chapter numbers in sentences. Useful for denoting chapter boundaries
     new ChapterAnnotator().annotate(annotation);
@@ -247,13 +244,13 @@ public class QuoteAttributionAnnotator implements Annotator {
 
     // 2. Quote->Mention annotation
     Map<String, QMSieve> qmSieves = getQMMapping(preprocessed, pronounCorefMap);
-    for (String sieveName : qmSieveList.split(",")) {
+    for(String sieveName : qmSieveList.split(",")) {
       qmSieves.get(sieveName).doQuoteToMention(preprocessed);
     }
 
     // 3. Mention->Speaker annotation
     Map<String, MSSieve> msSieves = getMSMapping(preprocessed, pronounCorefMap);
-    for (String sieveName : msSieveList.split(",")) {
+    for(String sieveName : msSieveList.split(",")) {
       msSieves.get(sieveName).doMentionToSpeaker(preprocessed);
     }
 
@@ -294,7 +291,7 @@ public class QuoteAttributionAnnotator implements Annotator {
     }
   }
 
-  private Map<String, QMSieve> getQMMapping(Annotation doc, Map<Integer,String> pronounCorefMap) {
+  private Map<String, QMSieve> getQMMapping(Annotation doc, Map<Integer, String> pronounCorefMap) {
     Map<String, QMSieve> map = new HashMap<>();
     map.put("tri", new TrigramSieve(doc, characterMap, pronounCorefMap, animacyList));
     map.put("dep", new DependencyParseSieve(doc, characterMap, pronounCorefMap, animacyList));
@@ -310,7 +307,7 @@ public class QuoteAttributionAnnotator implements Annotator {
     return map;
   }
 
-  private Map<String, MSSieve> getMSMapping(Annotation doc, Map<Integer,String> pronounCorefMap) {
+  private Map<String, MSSieve> getMSMapping(Annotation doc, Map<Integer, String> pronounCorefMap) {
     Map<String, MSSieve> map = new HashMap<>();
     map.put("det", new DeterministicSpeakerSieve(doc, characterMap, pronounCorefMap, animacyList));
     map.put("loose", new LooseConversationalSpeakerSieve(doc, characterMap, pronounCorefMap, animacyList));
