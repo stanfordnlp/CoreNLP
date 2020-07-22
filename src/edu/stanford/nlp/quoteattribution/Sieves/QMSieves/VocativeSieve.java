@@ -18,7 +18,10 @@ import java.util.Set;
  */
 public class VocativeSieve extends QMSieve {
 
-  public VocativeSieve(Annotation doc, Map<String, List<Person>> characterMap, Map<Integer, String> pronounCorefMap, Set<String> animacySet) {
+  public VocativeSieve(Annotation doc,
+                       Map<String, List<Person>> characterMap,
+                       Map<Integer,String> pronounCorefMap,
+                       Set<String> animacySet) {
     super(doc, characterMap, pronounCorefMap, animacySet, "");
   }
 
@@ -100,8 +103,7 @@ public class VocativeSieve extends QMSieve {
         Pair<Integer, Integer> quoteRun = new Pair<>(prevQuote.get(CoreAnnotations.TokenBeginAnnotation.class), prevQuote.get(CoreAnnotations.TokenEndAnnotation.class));
         List<Integer> animates = scanForAnimates(quoteRun);
         List<Pair<String, Integer>> animateVocatives = new ArrayList<>();
-        for (int i = 0; i < animates.size(); i++) {
-          int animateIndex = animates.get(i);
+        for (int animateIndex : animates) {
           String prevToken = toks.get(animateIndex - 1).word();
           String prevPrevToken = toks.get(animateIndex - 2).word();
           String nextToken = toks.get(animateIndex + 1).word();

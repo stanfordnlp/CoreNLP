@@ -201,6 +201,9 @@ public class TokenizerBenchmarkTestCase {
   /** load all tokenizer test examples **/
   public void loadTokenizerTestExamples() {
     List<String> allLines = IOUtils.linesFromFile(goldFilePath);
+    if (allLines == null) {
+      throw new RuntimeException("Could not read file " + goldFilePath);
+    }
     testExamples = new ArrayList<>();
     List<String> currSentence = new ArrayList<>();
     for (String conllLine : allLines) {

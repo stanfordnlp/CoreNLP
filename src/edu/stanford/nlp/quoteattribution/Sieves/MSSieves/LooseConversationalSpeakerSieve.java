@@ -16,9 +16,14 @@ import java.util.Set;
  * Created by mjfang on 7/8/16.
  */
 public class LooseConversationalSpeakerSieve extends MSSieve {
-  public LooseConversationalSpeakerSieve(Annotation doc, Map<String, List<Person>> characterMap, Map<Integer, String> pronounCorefMap, Set<String> animacySet) {
+
+  public LooseConversationalSpeakerSieve(Annotation doc,
+                                         Map<String, List<Person>> characterMap,
+                                         Map<Integer,String> pronounCorefMap,
+                                         Set<String> animacySet) {
     super(doc, characterMap, pronounCorefMap, animacySet);
   }
+
   public void doMentionToSpeaker(Annotation doc) {
     List<CoreMap> quotes = doc.get(CoreAnnotations.QuotationsAnnotation.class);
     List<List<Pair<Integer, Integer>>> skipChains = new ArrayList<>();
@@ -28,17 +33,13 @@ public class LooseConversationalSpeakerSieve extends MSSieve {
       CoreMap quote = quotes.get(quote_idx);
       if(quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null) {
         int para_idx = getQuoteParagraph(quote);
-        if (currChain.size() == 0) {
-          currChain.add(new Pair<>(quote_idx, para_idx));
-        } else {
-          if (currChain.get(currChain.size() - 1).second == para_idx - 2) {
-            currChain.add(new Pair<>(quote_idx, para_idx));
-          } else {
+        if (currChain.size() != 0) {
+          if (currChain.get(currChain.size() - 1).second != para_idx - 2) {
             skipChains.add(currChain);
             currChain = new ArrayList<>();
-            currChain.add(new Pair<>(quote_idx, para_idx));
           }
         }
+        currChain.add(new Pair<>(quote_idx, para_idx));
       }
     }
     if(currChain.size() != 0) {

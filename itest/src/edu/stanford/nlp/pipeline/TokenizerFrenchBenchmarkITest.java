@@ -21,13 +21,13 @@ public class TokenizerFrenchBenchmarkITest extends TokenizerBenchmarkTestCase {
 
   @Test
   public void testOnDev() {
-    goldFilePath = "/u/nlp/data/stanford-corenlp-testing/data/tokenize/fr_gsd-ud-dev.conllu";
+    goldFilePath = "/u/nlp/data/stanford-corenlp/testing/data/tokenize/fr_gsd-ud-dev.conllu";
     runTest("dev", "fr", 0.991);
   }
 
   @Test
   public void testOnTest() {
-    goldFilePath = "/u/nlp/data/stanford-corenlp-testing/data/tokenize/fr_gsd-ud-test.conllu";
+    goldFilePath = "/u/nlp/data/stanford-corenlp/testing/data/tokenize/fr_gsd-ud-test.conllu";
     runTest("test", "fr", 0.985);
   }
 

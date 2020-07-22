@@ -2,6 +2,7 @@ package edu.stanford.nlp.util;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 import edu.stanford.nlp.util.logging.PrettyLoggable;
 import edu.stanford.nlp.util.logging.PrettyLogger;
@@ -15,7 +16,7 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  *
  * @author Teg Grenager (grenager@stanford.edu)
  */
-public class Triple<T1, T2, T3> implements Comparable<Triple<T1,T2,T3>>, Serializable, PrettyLoggable {
+public class Triple<T1,T2,T3> implements Comparable<Triple<T1,T2,T3>>, Serializable, PrettyLoggable {
 
   private static final long serialVersionUID = -4182871682751645440L;
   public T1 first;
@@ -60,23 +61,14 @@ public class Triple<T1, T2, T3> implements Comparable<Triple<T1,T2,T3>>, Seriali
       return true;
     }
 
-    if (!(o instanceof Triple)) {
+    if ( ! (o instanceof Triple)) {
       return false;
     }
 
-    final Triple triple = (Triple) o;
+    final Triple<T1,T2,T3> triple = (Triple<T1,T2,T3>) o;
 
-    if (first != null ? !first.equals(triple.first) : triple.first != null) {
-      return false;
-    }
-    if (second != null ? !second.equals(triple.second) : triple.second != null) {
-      return false;
-    }
-    if (third != null ? !third.equals(triple.third) : triple.third != null) {
-      return false;
-    }
-
-    return true;
+    return Objects.equals(first, triple.first) && Objects.equals(second, triple.second) &&
+            Objects.equals(third, triple.third);
   }
 
   @Override
@@ -129,4 +121,5 @@ public class Triple<T1, T2, T3> implements Comparable<Triple<T1,T2,T3>>, Seriali
       }
     }
   }
+
 }

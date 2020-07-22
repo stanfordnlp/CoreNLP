@@ -20,7 +20,7 @@ import java.util.Set;
 public class ParagraphEndQuoteClosestSieve extends QMSieve {
 
   public ParagraphEndQuoteClosestSieve(Annotation doc, Map<String, List<Person>> characterMap,
-                      Map<Integer, String> pronounCorefMap, Set<String> animacySet) {
+                                       Map<Integer,String> pronounCorefMap, Set<String> animacySet) {
     super(doc, characterMap, pronounCorefMap, animacySet, "Deterministic endQuoteClosestBefore");
   }
 
@@ -38,7 +38,7 @@ public class ParagraphEndQuoteClosestSieve extends QMSieve {
         continue;
       }
       Pair<Integer, Integer> range = QuoteAttributionUtils.getRemainderInSentence(doc, quote);
-      if(range == null) {
+      if (range == null) {
         continue;
       }
       //search for mentions in the first run
