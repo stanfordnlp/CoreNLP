@@ -106,7 +106,7 @@ function nerColor(nerTag) {
     return '#8FB2FF';
   } else if (nerTag === 'MISC') {
     return '#F1F447';
-  } else if (nerTag === 'LOCATION' || nerTag === 'COUNTRY' ||| nerTag === 'STATE_OR_PROVINCE' ||| nerTag === 'CITY') {
+  } else if (nerTag === 'LOCATION' || nerTag === 'COUNTRY' || nerTag === 'STATE_OR_PROVINCE' || nerTag === 'CITY') {
     return '#95DFFF';
   } else if (nerTag === 'DATE' || nerTag === 'TIME' || nerTag === 'DURATION' || nerTag === 'SET') {
     return '#9AFFE6';
