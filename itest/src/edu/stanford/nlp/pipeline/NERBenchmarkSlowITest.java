@@ -23,7 +23,7 @@ import edu.stanford.nlp.util.StringUtils;
 
 public class NERBenchmarkSlowITest {
 
-  String NER_BENCHMARK_WORKING_DIR = "/u/scr/nlp/data/stanford-corenlp/testing/ner-benchmark-working-dir";
+  String NER_BENCHMARK_WORKING_DIR = "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir";
 
   private static final Pattern FB1_Pattern = Pattern.compile("FB1:  (\\d+\\.\\d+)");
 
@@ -137,7 +137,7 @@ public class NERBenchmarkSlowITest {
   @Test
   public void testChineseNEROnOntoNotesDev() throws IOException {
     String conllTestPath =
-        "/u/scr/nlp/data/stanford-corenlp/testing/ner-benchmark-working-dir/ontonotes5-chinese-ner-7class.dev";
+        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes5-chinese-ner-7class.dev";
     Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-chinese.properties");
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
@@ -152,7 +152,7 @@ public class NERBenchmarkSlowITest {
   @Test
   public void testChineseNEROnOntoNotesTest() throws IOException {
     String conllTestPath =
-        "/u/scr/nlp/data/stanford-corenlp/testing/ner-benchmark-working-dir/ontonotes5-chinese-ner-7class.test";
+        "/u/scr/nlp/data/stanford-corenlp-testing/ner-benchmark-working-dir/ontonotes5-chinese-ner-7class.test";
     Properties props = StringUtils.argsToProperties("-props", "StanfordCoreNLP-chinese.properties");
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
     props.setProperty("tokenize.whitespace", "true");
