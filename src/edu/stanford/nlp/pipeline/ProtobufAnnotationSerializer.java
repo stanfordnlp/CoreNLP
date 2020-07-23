@@ -1352,7 +1352,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized protobuf to read the CoreLabel from.
    * @return A CoreLabel, missing the fields that are not stored in the CoreLabel protobuf.
    */
-  public CoreLabel fromProto(CoreNLPProtos.Token proto) {
+  public static CoreLabel fromProto(CoreNLPProtos.Token proto) {
     if (Thread.interrupted()) {
       throw new RuntimeInterruptedException();
     }
@@ -1497,7 +1497,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     CoreMap lossySentence = fromProtoNoTokens(proto);
     // Add tokens -- missing by default as they're populated as sublists of the document tokens
-    List<CoreLabel> tokens = proto.getTokenList().stream().map(this::fromProto).collect(Collectors.toList());
+    List<CoreLabel> tokens = proto.getTokenList().stream().map(ProtobufAnnotationSerializer::fromProto).collect(Collectors.toList());
     lossySentence.set(TokensAnnotation.class, tokens);
     // Add dependencies
     if (proto.hasBasicDependencies()) {
@@ -1538,7 +1538,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Add chinese characters
     if (proto.getCharacterCount() > 0) {
       List<CoreLabel> sentenceCharacters =
-              proto.getCharacterList().stream().map(this::fromProto).collect(Collectors.toList());
+              proto.getCharacterList().stream().map(ProtobufAnnotationSerializer::fromProto).collect(Collectors.toList());
       lossySentence.set(SegmenterCoreAnnotations.CharactersAnnotation.class, sentenceCharacters);
     }
     // Add text -- missing by default as it's populated from the Document
@@ -2528,7 +2528,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized protocol buffer to read from.
    * @return A timex, with as much information filled in as was gleaned from the protocol buffer.
    */
-  private Timex fromProto(CoreNLPProtos.Timex proto) {
+  private static Timex fromProto(CoreNLPProtos.Timex proto) {
     return new Timex(
         proto.hasType() ? proto.getType() : null,
         proto.hasValue() ? proto.getValue() : null,
