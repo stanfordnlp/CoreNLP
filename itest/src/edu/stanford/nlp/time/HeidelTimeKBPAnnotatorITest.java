@@ -44,7 +44,7 @@ public class HeidelTimeKBPAnnotatorITest extends TestCase {
     props.setProperty("ner.fine.regexner.noDefaultOverwriteLabels", "CITY,COUNTRY,STATE_OR_PROVINCE");
     // add heideltime
     props.setProperty("customAnnotatorClass.heideltime", "edu.stanford.nlp.time.HeidelTimeKBPAnnotator");
-    props.setProperty("heideltime.path", "/u/scr/nlp/data/stanford-corenlp/testing/spanish-heideltime/heideltime");
+    props.setProperty("heideltime.path", "/u/scr/nlp/data/stanford-corenlp-testing/spanish-heideltime/heideltime");
     props.setProperty("heideltime.language", "spanish");
     // depparse
     props.setProperty("depparse.model", "edu/stanford/nlp/models/parser/nndep/UD_Spanish.gz");
