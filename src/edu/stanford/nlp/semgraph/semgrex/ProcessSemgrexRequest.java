@@ -22,13 +22,14 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 
 public class ProcessSemgrexRequest {
   public static CoreNLPProtos.SemgrexResponse processRequest(CoreNLPProtos.SemgrexRequest request) {
+    ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
     CoreNLPProtos.SemgrexResponse.Builder responseBuilder = CoreNLPProtos.SemgrexResponse.newBuilder();
 
     List<SemgrexPattern> patterns = request.getSemgrexList().stream().map(SemgrexPattern::compile).collect(Collectors.toList());
     for (CoreNLPProtos.SemgrexRequest.Dependencies sentence : request.getQueryList()) {
       CoreNLPProtos.SemgrexResponse.GraphResult.Builder graphResultBuilder = CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder();
 
-      List<CoreLabel> tokens = sentence.getTokenList().stream().map(ProtobufAnnotationSerializer::fromProto).collect(Collectors.toList());
+      List<CoreLabel> tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
       SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, "semgrex");
       for (SemgrexPattern pattern : patterns) {
         CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder semgrexResultBuilder = CoreNLPProtos.SemgrexResponse.SemgrexResult.newBuilder();
