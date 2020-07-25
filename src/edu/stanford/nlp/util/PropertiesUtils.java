@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /** Utilities methods for standard (but woeful) Java Properties objects.
  *
@@ -452,4 +453,13 @@ public class PropertiesUtils {
     return sb.toString();
   }
 
+  /**
+   * Convert the given properties to a json string
+   */
+  public static String propsAsJsonString(Properties props) {
+    List<String> jsonProperties = props.stringPropertyNames().stream().map(key -> '"' + StringUtils.escapeJsonString(key) +
+      "\": \"" + StringUtils.escapeJsonString(props.getProperty(key)) + '"')
+      .collect(Collectors.toList());
+    return "{ " + StringUtils.join(jsonProperties, ", ") + " }";
+  }
 }

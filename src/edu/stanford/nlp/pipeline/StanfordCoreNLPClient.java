@@ -4,6 +4,7 @@ import edu.stanford.nlp.io.FileSequentialCollection;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
@@ -273,12 +274,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     serverProperties.setProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
     serverProperties.setProperty("outputSerializer", ProtobufAnnotationSerializer.class.getName());
 
-    // Create a list of all the properties, as JSON map elements
-    List<String> jsonProperties = serverProperties.stringPropertyNames().stream().map(key -> '"' + StringUtils.escapeJsonString(key) +
-            "\": \"" + StringUtils.escapeJsonString(serverProperties.getProperty(key)) + '"')
-        .collect(Collectors.toList());
-    // Create the JSON object
-    this.propsAsJSON = "{ " + StringUtils.join(jsonProperties, ", ") + " }";
+    this.propsAsJSON = PropertiesUtils.propsAsJsonString(serverProperties);
 
     // Start 'er up
     this.scheduler.start();
