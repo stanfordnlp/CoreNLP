@@ -243,6 +243,8 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
   private boolean fallbackToLocalPipeline;
 
+  private int timeoutMilliseconds=0;
+
   /**
    * The main constructor. Create a client from a properties file and a list of backends.
    * Note that this creates at least one Daemon thread.
@@ -382,6 +384,10 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     return backends;
   }
 
+  public void setTimeoutMilliseconds(int timeout) {
+    this.timeoutMilliseconds = timeout;
+  }
+
   /**
    * {@inheritDoc}
    *
@@ -445,14 +451,12 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
         byte[] message = os.toByteArray();
         // 1.2 Create the query params
 
-        String queryParams = String.format(
-            "properties=%s",
-            URLEncoder.encode(StanfordCoreNLPClient.this.propsAsJSON, "utf-8"));
+        String queryParams = String.format("properties=%s",
+                                           URLEncoder.encode(StanfordCoreNLPClient.this.propsAsJSON, "utf-8"));
 
         // 2. Create a connection
-        URL serverURL = new URL(backend.protocol, backend.host,
-            backend.port,
-            StanfordCoreNLPClient.this.path + '?' + queryParams);
+        URL serverURL = new URL(backend.protocol, backend.host, backend.port,
+                                StanfordCoreNLPClient.this.path + '?' + queryParams);
 
         // 3. Do the annotation
         //    This method has two contracts:
@@ -505,6 +509,10 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
         connection.setRequestProperty("Content-Length", Integer.toString(message.length));
         connection.setRequestProperty("Accept-Charset", "utf-8");
         connection.setRequestProperty("User-Agent", StanfordCoreNLPClient.class.getName());
+        if (timeoutMilliseconds > 0) {
+          connection.setConnectTimeout(timeoutMilliseconds);
+          connection.setReadTimeout(timeoutMilliseconds);
+        }
         // 1.3 Set some protocol-dependent properties
         switch (backend.protocol) {
           case "https":
