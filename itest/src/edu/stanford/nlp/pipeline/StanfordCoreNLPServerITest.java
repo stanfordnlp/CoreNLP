@@ -20,6 +20,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Test launching a server and running a few random commands
@@ -98,11 +99,11 @@ public class StanfordCoreNLPServerITest {
     String response = IOUtils.slurpInputStream(connection.getInputStream(), "utf-8");
     return response;
   }
-  
+
   @Test
   public void testTregexJson() throws IOException {
     String expected="{\"sentences\":[{\"0\": { \"match\": \"(NN dog)\\n\", \"spanString\": \"dog\", \"namedNodes\": [ ] }, \"1\": { \"match\": \"(NN fish)\\n\", \"spanString\": \"fish\", \"namedNodes\": [ ] } } ]}".replaceAll(" ", "");
-    
+
     String query = "The dog ate a fish";
     byte[] message = query.getBytes("utf-8");
     Properties props = new Properties();
@@ -110,6 +111,23 @@ public class StanfordCoreNLPServerITest {
     String queryParams = String.format("pattern=NN&properties=%s",
                                        URLEncoder.encode(PropertiesUtils.propsAsJsonString(props), "utf-8"));
     URL serverURL = new URL("http", "localhost", port, "/tregex?" + queryParams);
+    String response = postURL(serverURL, message);
+
+    Assert.assertEquals(expected, response.replaceAll(" ", "").replaceAll("\n", ""));
+  }
+
+  @Test
+  public void testSemgrexJson() throws IOException {
+    String expected="{ \"sentences\": [ { \"0\": { \"text\": \"ate\", \"begin\": 2, \"end\": 3, \"$obj\": { \"text\": \"fish\", \"begin\": 4, \"end\": 5 }, \"$verb\": { \"text\": \"ate\", \"begin\": 2, \"end\": 3 } }, \"length\": 1 }  ]}".replaceAll(" ", "");
+
+    String query = "The dog ate a fish";
+    byte[] message = query.getBytes("utf-8");
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,parse");
+    String queryParams = String.format("pattern=%s&properties=%s",
+                                       URLEncoder.encode("{}=verb >obj {}=obj"),
+                                       URLEncoder.encode(PropertiesUtils.propsAsJsonString(props), "utf-8"));
+    URL serverURL = new URL("http", "localhost", port, "/semgrex?" + queryParams);
     String response = postURL(serverURL, message);
 
     Assert.assertEquals(expected, response.replaceAll(" ", "").replaceAll("\n", ""));
