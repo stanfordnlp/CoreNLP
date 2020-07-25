@@ -458,7 +458,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
         //    This method has two contracts:
         //    1. It should call the two relevant callbacks
         //    2. It must not throw an exception
-        doAnnotation(annotation, backend, serverURL, message, 0);
+        doAnnotation(annotation, backend, serverURL, message);
       } catch (Throwable t) {
         log.err("Could not annotate via server!", t);
         if (fallbackToLocalPipeline) {
@@ -475,10 +475,11 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     }).start());
   }
 
+  static final int MAX_TRIES=3;
 
   /**
    * Actually try to perform the annotation on the server side.
-   * This is factored out so that we can retry up to 3 times.
+   * Tries up to 3 times if the first couple don't succeed.
    *
    * @param annotation The annotation we need to fill.
    * @param backend The backend we are querying against.
@@ -487,53 +488,55 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    * @param tries The number of times we've tried already.
    */
   @SuppressWarnings("unchecked")
-  private void doAnnotation(Annotation annotation, Backend backend, URL serverURL, byte[] message, int tries) {
+  private void doAnnotation(Annotation annotation, Backend backend, URL serverURL, byte[] message) {
+    for (int tries = 0; tries < MAX_TRIES; ++tries) {
+      try {
+        // 1. Set up the connection
+        URLConnection connection = serverURL.openConnection();
+        // 1.1 Set authentication
+        if (apiKey != null && apiSecret != null) {
+          String userpass = apiKey + ':' + apiSecret;
+          String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
+          connection.setRequestProperty("Authorization", basicAuth);
+        }
+        // 1.2 Set some protocol-independent properties
+        connection.setDoOutput(true);
+        connection.setRequestProperty("Content-Type", "application/x-protobuf");
+        connection.setRequestProperty("Content-Length", Integer.toString(message.length));
+        connection.setRequestProperty("Accept-Charset", "utf-8");
+        connection.setRequestProperty("User-Agent", StanfordCoreNLPClient.class.getName());
+        // 1.3 Set some protocol-dependent properties
+        switch (backend.protocol) {
+          case "https":
+          case "http":
+            ((HttpURLConnection) connection).setRequestMethod("POST");
+            break;
+          default:
+            throw new IllegalStateException("Haven't implemented protocol: " + backend.protocol);
+        }
 
-    try {
-      // 1. Set up the connection
-      URLConnection connection = serverURL.openConnection();
-      // 1.1 Set authentication
-      if (apiKey != null && apiSecret != null) {
-        String userpass = apiKey + ':' + apiSecret;
-        String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
-        connection.setRequestProperty("Authorization", basicAuth);
-      }
-      // 1.2 Set some protocol-independent properties
-      connection.setDoOutput(true);
-      connection.setRequestProperty("Content-Type", "application/x-protobuf");
-      connection.setRequestProperty("Content-Length", Integer.toString(message.length));
-      connection.setRequestProperty("Accept-Charset", "utf-8");
-      connection.setRequestProperty("User-Agent", StanfordCoreNLPClient.class.getName());
-      // 1.3 Set some protocol-dependent properties
-      switch (backend.protocol) {
-        case "https":
-        case "http":
-          ((HttpURLConnection) connection).setRequestMethod("POST");
-          break;
-        default:
-          throw new IllegalStateException("Haven't implemented protocol: " + backend.protocol);
-      }
+        // 2. Annotate
+        // 2.1. Fire off the request
+        connection.connect();
+        connection.getOutputStream().write(message);
+        connection.getOutputStream().flush();
+        // 2.2 Await a response
+        // -- It might be possible to send more than one message, but we are not going to do that.
+        Annotation response = serializer.read(connection.getInputStream()).first;
+        // 2.3. Copy response over to original annotation
+        for (Class key : response.keySet()) {
+          annotation.set(key, response.get(key));
+        }
 
-      // 2. Annotate
-      // 2.1. Fire off the request
-      connection.connect();
-      connection.getOutputStream().write(message);
-      connection.getOutputStream().flush();
-      // 2.2 Await a response
-      // -- It might be possible to send more than one message, but we are not going to do that.
-      Annotation response = serializer.read(connection.getInputStream()).first;
-      // 2.3. Copy response over to original annotation
-      for (Class key : response.keySet()) {
-        annotation.set(key, response.get(key));
-      }
+        //Succeeded!  Can break out of the loop now
+        return;
+      } catch (Throwable t) {
+        // 3. We encountered an error -- retry
+        if (tries == MAX_TRIES - 1) {
+          throw new RuntimeException(t);
+        }
 
-    } catch (Throwable t) {
-      // 3. We encountered an error -- retry
-      if (tries < 3) {
         log.warn(t);
-        doAnnotation(annotation, backend, serverURL, message, tries + 1);
-      } else {
-        throw new RuntimeException(t);
       }
     }
   }
