@@ -1514,7 +1514,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // Fill arguments
     ArgumentParser.fillOptions(StanfordCoreNLPServer.class, args);
-    // get server properties from command line, right now only property used is server_id
+    // get server properties from command line
     Properties serverProperties = StringUtils.argsToProperties(args);
     StanfordCoreNLPServer server = new StanfordCoreNLPServer(serverProperties);  // must come after filling global options
     ArgumentParser.fillOptions(server, args);
