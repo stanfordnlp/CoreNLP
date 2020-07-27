@@ -125,7 +125,7 @@ public class StanfordCoreNLPServerITest {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,parse");
     String queryParams = String.format("pattern=%s&properties=%s",
-                                       URLEncoder.encode("{}=verb >obj {}=obj"),
+                                       URLEncoder.encode("{}=verb >obj {}=obj", "utf-8"),
                                        URLEncoder.encode(PropertiesUtils.propsAsJsonString(props), "utf-8"));
     URL serverURL = new URL("http", "localhost", port, "/semgrex?" + queryParams);
     String response = postURL(serverURL, message);
@@ -146,7 +146,7 @@ public class StanfordCoreNLPServerITest {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,parse");
     String queryParams = String.format("pattern=%s&properties=%s&filter=true",
-                                       URLEncoder.encode("{}=verb >obj {}=obj"),
+                                       URLEncoder.encode("{}=verb >obj {}=obj", "utf-8"),
                                        URLEncoder.encode(PropertiesUtils.propsAsJsonString(props), "utf-8"));
     URL serverURL = new URL("http", "localhost", port, "/semgrex?" + queryParams);
     String response = postURL(serverURL, message);
