@@ -1,7 +1,10 @@
 ---
-title: NaturalLogicAnnotator 
-keywords: natlog
+layout: page
+title: Natural Logic
+keywords: natural logic
 permalink: '/natlog.html'
+nav_order: 3
+parent: Full List Of Annotators
 ---
 
 ## Description

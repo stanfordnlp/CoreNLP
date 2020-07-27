@@ -1,7 +1,10 @@
 ---
-title: EntityMentionsAnnotator 
-keywords: entitymentions
+layout: page
+title: Entity Mentions
+keywords: entity mentions
 permalink: '/entitymentions.html'
+nav_order: 2
+parent: Full List Of Annotators
 ---
 
 ## Description
