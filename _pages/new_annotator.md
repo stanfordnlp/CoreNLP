@@ -1,7 +1,10 @@
 ---
-title: Adding a new annotator 
-keywords: new-annotator
+layout: page
+title: Custom Annotators
+keywords: custom annotators
 permalink: '/new_annotator.html'
+nav_order: 5
+parent: Pipeline
 ---
 
 Users can add custom annotators to StanfordCoreNLP.
