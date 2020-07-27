@@ -10,7 +10,9 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.semgrex.ProcessSemgrexRequest;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.Tree;
@@ -1134,7 +1136,7 @@ public class StanfordCoreNLPServer implements Runnable {
       }
       Map<String, String> params = getURLParams(httpExchange.getRequestURI());
 
-      Future<Pair<String, Annotation>> response = corenlpExecutor.submit(() -> {
+      Future<Pair<byte[], Annotation>> response = corenlpExecutor.submit(() -> {
         try {
           // Get the document
           Annotation doc = getDocument(props, httpExchange);
@@ -1147,7 +1149,7 @@ public class StanfordCoreNLPServer implements Runnable {
           // (get the pattern)
           if (!params.containsKey("pattern")) {
             respondBadInput("Missing required parameter 'pattern'", httpExchange);
-            return Pair.makePair("", null);
+            return Pair.makePair("".getBytes(), null);
           }
           String pattern = params.get("pattern");
           // (get whether to filter / find)
@@ -1161,8 +1163,12 @@ public class StanfordCoreNLPServer implements Runnable {
           final SemanticGraphCoreAnnotations.DependenciesType dependenciesType =
             SemanticGraphCoreAnnotations.DependenciesType.valueOf(params.getOrDefault("dependenciesType", "enhancedPlusPlus").toUpperCase());
 
-          // Run Semgrex
-          String content = JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
+          StanfordCoreNLP.OutputFormat of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat", "json").toUpperCase());
+
+          switch(of) {
+          case JSON:
+            // Run Semgrex
+            String content = JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
             if (filter) {
               // Case: just filter sentences
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence ->
@@ -1195,7 +1201,30 @@ public class StanfordCoreNLPServer implements Runnable {
               }));
             }
             });
-          return Pair.makePair(content, doc);
+            return Pair.makePair(content.getBytes(), doc);
+          case SERIALIZED:
+            if (filter) {
+              respondBadInput("Interface semgrex does not support 'filter' for output format " + of, httpExchange);
+              return Pair.makePair("".getBytes(), null);
+            }
+
+            CoreNLPProtos.SemgrexResponse.Builder responseBuilder = CoreNLPProtos.SemgrexResponse.newBuilder();
+            for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
+              SemanticGraph graph = sentence.get(dependenciesType.annotation());
+              CoreNLPProtos.SemgrexResponse.GraphResult.Builder graphResultBuilder = CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder();
+              graphResultBuilder.addResult(ProcessSemgrexRequest.matchSentence(regex, graph));
+              responseBuilder.addResult(graphResultBuilder.build());
+            }
+
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            responseBuilder.build().writeTo(os);
+            os.close();
+
+            return Pair.makePair(os.toByteArray(), doc);
+          default:
+            respondBadInput("Interface semgrex does not handle output format " + of, httpExchange);
+            return Pair.makePair("".getBytes(), null);
+          }
         } catch (Exception e) {
           warn(e);
           try {
@@ -1203,7 +1232,7 @@ public class StanfordCoreNLPServer implements Runnable {
           } catch (IOException ignored) {
           }
         }
-        return Pair.makePair("", null);
+        return Pair.makePair("".getBytes(), null);
       });
 
       // Send response
@@ -1212,9 +1241,9 @@ public class StanfordCoreNLPServer implements Runnable {
         if (lastPipeline.get() == null) {
           timeout = timeout + 60000; // add 60 seconds for loading a pipeline if needed
         }
-        Pair<String, Annotation> pair = response.get(timeout, TimeUnit.MILLISECONDS);
+        Pair<byte[], Annotation> pair = response.get(timeout, TimeUnit.MILLISECONDS);
         Annotation completedAnnotation = pair.second;
-        byte[] content = pair.first.getBytes();
+        byte[] content = pair.first;
         sendAndGetResponse(httpExchange, content);
         if (completedAnnotation != null && ! StringUtils.isNullOrEmpty(props.getProperty("annotators"))) {
           callback.accept(new FinishedRequest(props, completedAnnotation, params.get("pattern"), null));
