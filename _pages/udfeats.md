@@ -1,7 +1,10 @@
 ---
+layout: page
 title: UDFeatureAnnotator
 keywords: udfeats
 permalink: '/udfeats.html'
+nav_order: 8
+parent: Full List Of Annotators
 ---
 
 ## Description

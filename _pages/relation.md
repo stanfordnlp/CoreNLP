@@ -1,7 +1,10 @@
 ---
-title: RelationExtractorAnnotator 
+layout: page
+title: RelationExtractorAnnotator
 keywords: relation
 permalink: '/relation.html'
+nav_order: 6
+parent: Full List Of Annotators
 ---
 
 ## Description

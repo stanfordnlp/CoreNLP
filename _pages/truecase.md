@@ -1,7 +1,10 @@
 ---
-title: TrueCaseAnnotator 
+layout: page
+title: TrueCaseAnnotator
 keywords: truecase
 permalink: '/truecase.html'
+nav_order: 7
+parent: Full List Of Annotators
 ---
 
 ## Description

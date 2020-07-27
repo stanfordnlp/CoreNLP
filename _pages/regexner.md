@@ -1,7 +1,10 @@
 ---
-title: TokensRegexNERAnnotator 
-keywords: regexner
+layout: page
+title: TokensRegexNERAnnotator
+keywords: tokensregex ner
 permalink: '/regexner.html'
+nav_order: 5
+parent: Full List Of Annotators
 ---
 
 ## NERCombinerAnnotator Runs TokensRegexNERAnnotator As A Sub-Annotator
