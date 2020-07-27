@@ -79,13 +79,13 @@ CoreNLP generates a variety of linguistic annotations, including:
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-arabic.jar) | 4.0.0 |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-chinese.jar) | 4.0.0 |
-| English | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-english.jar) | 4.0.0 |
-| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-english-kbp.jar) | 4.0.0 |
-| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-french.jar) | 4.0.0 |
-| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-german.jar) | 4.0.0 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-spanish.jar) | 4.0.0 |
+| Arabic  | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.1.0-models-arabic.jar) | 4.1.0 |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.1.0-models-chinese.jar) | 4.1.0 |
+| English | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.1.0-models-english.jar) | 4.1.0 |
+| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.1.0-models-english-kbp.jar) | 4.1.0 |
+| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.1.0-models-french.jar) | 4.1.0 |
+| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.1.0-models-german.jar) | 4.1.0 |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.1.0-models-spanish.jar) | 4.1.0 |
 
 ```bash
 mv /path/to/stanford-corenlp-4.0.0-models-french.jar /path/to/stanford-corenlp-4.0.0
