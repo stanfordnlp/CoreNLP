@@ -1,0 +1,67 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole site, values
+# which you are expected to set up once and rarely edit after that. If you find
+# yourself editing these this file very often, consider using Jekyll's data files
+# feature for the data you need to update frequently.
+#
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+# These are used to personalize your new site. If you look in the HTML files,
+# you will see them accessed via {{ site.title }}, {{ site.github_repo }}, and so on.
+# You can create any custom variable you would like, and they will be accessible
+# in the templates via {{ site.myvariable }}.
+title: CoreNLP
+description: NLP Processing In Java
+url: https://stanfordnlp.github.io
+
+permalink: pretty
+exclude: ["node_modules/", "*.gemspec", "*.gem", "Gemfile", "Gemfile.lock", "package.json", "package-lock.json",  "script/", "LICENSE.txt", "lib/", "bin/", "README.md", "Rakefile", "configs/", "_site", "di_multi*"]
+
+include:
+  - _pages
+
+# Set a path/url to a logo that will be displayed instead of the title
+logo: assets/images/corenlp-logo.png
+
+# Enable or disable the site search
+search_enabled: true
+
+# Set the search token separator for hyphenated-word search:
+search_tokenizer_separator: /[\s/]+/
+
+# Enable or disable heading anchors
+heading_anchors: true
+
+# Aux links for the upper right navigation
+#aux_links:
+#    "<img alt='PyPI Version' src='https://img.shields.io/pypi/v/stanza.svg?colorB=bc4545' />"
+#      - "//pypi.org/project/stanza/"
+#    "<img alt='Conda Versions' src='https://img.shields.io/conda/vn/stanfordnlp/stanza?color=bc4545&label=conda' />"
+#      - "//anaconda.org/stanfordnlp/stanza"
+#    "<img alt='Python Versions' src='https://img.shields.io/pypi/pyversions/stanza.svg?colorB=bc4545' />"
+#      - "//pypi.org/project/stanza/"
+
+# Footer content appears at the bottom of every page's main content
+footer_content: "Copyright &copy; 2020 Stanford NLP Group."
+
+# Color scheme currently only supports "dark" or nil (default)
+color_scheme: nil
+
+# Google Analytics Tracking (optional)
+# e.g, UA-1234567-89
+ga_tracking: UA-133356038-1
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-relative-links
+
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: []
+  blanklines: false
+  profile: false
