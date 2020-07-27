@@ -192,7 +192,7 @@ public class StanfordCoreNLPServer implements Runnable {
     PropertiesUtils.overWriteProperties(this.defaultProps, pipelinePropsFromCL);
 
     // log server's default properties
-    TreeSet<String> defaultPropertyKeys = new TreeSet(this.defaultProps.keySet());
+    TreeSet<String> defaultPropertyKeys = new TreeSet<>(this.defaultProps.stringPropertyNames());
     log("Server default properties:\n\t\t\t(Note: unspecified annotator properties are English defaults)\n" +
         String.join("\n", defaultPropertyKeys.stream().map(
             k -> String.format("\t\t\t%s = %s", k, this.defaultProps.get(k))).collect(Collectors.toList())));
