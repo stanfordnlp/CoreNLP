@@ -1158,18 +1158,20 @@ public class StanfordCoreNLPServer implements Runnable {
           final boolean unique = uniqueStr.trim().isEmpty() || "true".equalsIgnoreCase(uniqueStr.toLowerCase());
           // (create the matcher)
           final SemgrexPattern regex = SemgrexPattern.compile(pattern);
+          final SemanticGraphCoreAnnotations.DependenciesType dependenciesType =
+            SemanticGraphCoreAnnotations.DependenciesType.valueOf(params.getOrDefault("dependenciesType", "enhancedPlusPlus").toUpperCase());
 
           // Run Semgrex
           return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
             if (filter) {
               // Case: just filter sentences
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence ->
-                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)).matches()
+                      regex.matcher(sentence.get(dependenciesType.annotation())).matches()
               ).collect(Collectors.toList()));
             } else {
               // Case: find matches
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
-                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class));
+                SemgrexMatcher matcher = regex.matcher(sentence.get(dependenciesType.annotation()));
                 int i = 0;
                 // Case: find either next node or next unique node
                 while (unique ? matcher.findNextMatchingNode() : matcher.find()) {
