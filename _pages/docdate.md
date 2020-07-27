@@ -1,8 +1,10 @@
 ---
-title: DocDateAnnotator 
+layout: page
+title: Document Date
 keywords: docdate
 permalink: '/docdate.html'
-Parent: Full List Of Annotators
+nav_order: 1
+parent: Full List Of Annotators
 ---
 
 ## Description
