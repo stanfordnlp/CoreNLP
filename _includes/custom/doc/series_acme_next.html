@@ -1,0 +1,10 @@
+<p>{% assign series_pages = site.tags.series_acme %}
+    {% for p in pages %}
+    {% if p.series == "ACME series" %}
+    {% assign nextTopic = page.weight | plus: "0.1"  %}
+    {% if p.weight == nextTopic  %}
+    <a href="{{p.url | replace: '/',''}}"><button type="button" class="btn btn-primary">Next: {{p.weight}}  {{p.title}}</button></a>
+    {% endif %}
+    {% endif %}
+    {% endfor %}
+</p>

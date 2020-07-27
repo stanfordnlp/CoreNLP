@@ -1,0 +1,23 @@
+
+<script language="JavaScript" type="text/javascript">
+
+    $( document ).ready(function() {
+        if (top.location == location)  {
+            $(".escapeMe").remove();
+        }
+
+    });
+
+            function breakout_of_frame() {
+                if (top.location != location) {
+                    window.open(window.location.href, '_blank');
+
+                }
+
+            }
+</script>
+
+<li class="escapeMe">
+    <a href="#" onclick="breakout_of_frame()" ><i class="fa fa-sign-out"></i> Pop-out</a>
+</li>
+
