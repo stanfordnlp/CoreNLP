@@ -1162,7 +1162,7 @@ public class StanfordCoreNLPServer implements Runnable {
             SemanticGraphCoreAnnotations.DependenciesType.valueOf(params.getOrDefault("dependenciesType", "enhancedPlusPlus").toUpperCase());
 
           // Run Semgrex
-          return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
+          String content = JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
             if (filter) {
               // Case: just filter sentences
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence ->
@@ -1194,7 +1194,8 @@ public class StanfordCoreNLPServer implements Runnable {
                 sentWriter.set("length", i);
               }));
             }
-          }), doc);
+            });
+          return Pair.makePair(content, doc);
         } catch (Exception e) {
           warn(e);
           try {
