@@ -88,13 +88,13 @@ CoreNLP generates a variety of linguistic annotations, including:
 | Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.1.0-models-spanish.jar) | 4.1.0 |
 
 ```bash
-mv /path/to/stanford-corenlp-4.0.0-models-french.jar /path/to/stanford-corenlp-4.0.0
+mv /path/to/stanford-corenlp-4.1.0-models-french.jar /path/to/stanford-corenlp-4.1.0
 ```
 
 * Include the distribution directory in your CLASSPATH.
 
 ```bash
-export CLASSPATH=$CLASSPATH:/path/to/stanford-corenlp-4.0.0/*:
+export CLASSPATH=$CLASSPATH:/path/to/stanford-corenlp-4.1.0/*:
 ```
 
 * You're ready to go! There are many ways to run a CoreNLP pipeline. For instance here's how to run a pipeline on a text file.
