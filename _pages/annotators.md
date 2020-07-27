@@ -5,7 +5,6 @@ keywords: annotators
 permalink: '/annotators.html'
 nav_order: 4
 parent: Pipeline
-has_children: true
 ---
 
 ## Annotator Descriptions
