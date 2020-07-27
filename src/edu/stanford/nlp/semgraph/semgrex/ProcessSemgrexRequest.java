@@ -21,6 +21,35 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 
 public class ProcessSemgrexRequest {
+  /**
+   * Builds a single inner SemgrexResult structure from the pair of a SemgrexPattern and a SemanticGraph
+   */
+  public static CoreNLPProtos.SemgrexResponse.SemgrexResult matchSentence(SemgrexPattern pattern, SemanticGraph graph) {
+    CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder semgrexResultBuilder = CoreNLPProtos.SemgrexResponse.SemgrexResult.newBuilder();
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    while (matcher.find()) {
+      CoreNLPProtos.SemgrexResponse.Match.Builder matchBuilder = CoreNLPProtos.SemgrexResponse.Match.newBuilder();
+      matchBuilder.setMatchIndex(matcher.getMatch().index());
+
+      for (String nodeName : matcher.getNodeNames()) {
+        CoreNLPProtos.SemgrexResponse.NamedNode.Builder nodeBuilder = CoreNLPProtos.SemgrexResponse.NamedNode.newBuilder();
+        nodeBuilder.setName(nodeName);
+        nodeBuilder.setMatchIndex(matcher.getNode(nodeName).index());
+        matchBuilder.addNode(nodeBuilder.build());
+      }
+
+      for (String relnName : matcher.getRelationNames()) {
+        CoreNLPProtos.SemgrexResponse.NamedRelation.Builder relnBuilder = CoreNLPProtos.SemgrexResponse.NamedRelation.newBuilder();
+        relnBuilder.setName(relnName);
+        relnBuilder.setReln(matcher.getRelnString(relnName));
+        matchBuilder.addReln(relnBuilder.build());
+      }
+
+      semgrexResultBuilder.addMatch(matchBuilder.build());
+    }
+    return semgrexResultBuilder.build();
+  }
+
   public static CoreNLPProtos.SemgrexResponse processRequest(CoreNLPProtos.SemgrexRequest request) {
     ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
     CoreNLPProtos.SemgrexResponse.Builder responseBuilder = CoreNLPProtos.SemgrexResponse.newBuilder();
@@ -32,29 +61,7 @@ public class ProcessSemgrexRequest {
       List<CoreLabel> tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
       SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, "semgrex");
       for (SemgrexPattern pattern : patterns) {
-        CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder semgrexResultBuilder = CoreNLPProtos.SemgrexResponse.SemgrexResult.newBuilder();
-        SemgrexMatcher matcher = pattern.matcher(graph);
-        while (matcher.find()) {
-          CoreNLPProtos.SemgrexResponse.Match.Builder matchBuilder = CoreNLPProtos.SemgrexResponse.Match.newBuilder();
-          matchBuilder.setMatchIndex(matcher.getMatch().index());
-
-          for (String nodeName : matcher.getNodeNames()) {
-            CoreNLPProtos.SemgrexResponse.NamedNode.Builder nodeBuilder = CoreNLPProtos.SemgrexResponse.NamedNode.newBuilder();
-            nodeBuilder.setName(nodeName);
-            nodeBuilder.setMatchIndex(matcher.getNode(nodeName).index());
-            matchBuilder.addNode(nodeBuilder.build());
-          }
-
-          for (String relnName : matcher.getRelationNames()) {
-            CoreNLPProtos.SemgrexResponse.NamedRelation.Builder relnBuilder = CoreNLPProtos.SemgrexResponse.NamedRelation.newBuilder();
-            relnBuilder.setName(relnName);
-            relnBuilder.setReln(matcher.getRelnString(relnName));
-            matchBuilder.addReln(relnBuilder.build());
-          }
-
-          semgrexResultBuilder.addMatch(matchBuilder.build());
-        }
-        graphResultBuilder.addResult(semgrexResultBuilder.build());
+        graphResultBuilder.addResult(matchSentence(pattern, graph));
       }
 
       responseBuilder.addResult(graphResultBuilder.build());
