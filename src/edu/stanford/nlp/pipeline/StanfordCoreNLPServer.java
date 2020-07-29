@@ -242,8 +242,7 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   /**
-   * Parse the URL parameters into a map of (key, value) pairs. <br>
-   * https://codereview.stackexchange.com/questions/175332/splitting-url-query-string-to-key-value-pairs
+   * Parse the URL parameters into a map of (key, value) pairs.
    *
    * @param uri The URL that was requested.
    *
@@ -252,22 +251,22 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws UnsupportedEncodingException Thrown if we could not decode the URL with utf8.
    */
   private static Map<String, String> getURLParams(URI uri) throws UnsupportedEncodingException {
-    String query = uri.getRawQuery();
-    if (query != null) {
-      try {
-        Map<String, String> params = new HashMap<>();
-        for (String param : query.split("&")) {
-          String[] keyValue = param.split("=", 2);
-          String key = URLDecoder.decode(keyValue[0], "UTF-8");
-          String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], "UTF-8") : "";
-          if (!key.isEmpty()) {
-            params.put(key, value);
-          }
-        }
-        return params;
-      } catch (UnsupportedEncodingException e) {
-        throw new IllegalStateException(e); // Cannot happen with UTF-8 encoding.
+    if (uri.getQuery() != null) {
+      Map<String, String> urlParams = new HashMap<>();
+
+      String query = uri.getQuery();
+      String[] queryFields = query
+          .replaceAll("\\\\&", "___AMP___")
+          .replaceAll("\\\\\\+", "___PLUS___")
+          .split("&");
+      for (String queryField : queryFields) {
+        int firstEq = queryField.indexOf('=');
+        // Convention uses "+" for spaces.
+        String key = URLDecoder.decode(queryField.substring(0, firstEq), "utf8").replaceAll("___AMP___", "&").replaceAll("___PLUS___", "+");
+        String value = URLDecoder.decode(queryField.substring(firstEq + 1), "utf8").replaceAll("___AMP___", "&").replaceAll("___PLUS___", "+");
+        urlParams.put(key, value);
       }
+      return urlParams;
     } else {
       return Collections.emptyMap();
     }

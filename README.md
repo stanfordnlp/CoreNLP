@@ -52,14 +52,14 @@ models jar.
 
 | Language | Model Jar | Last Updated |
 | --- | --- | --- |
-| Arabic | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar) | 4.0.0 |
-| English (default) | [download](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar) | 4.0.0 |
-| English (extra) | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar) | 4.0.0 |
-| English (kbp) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) | 4.0.0 |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar) | 4.0.0 |
-| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar) | 4.0.0 |
-| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar) | 4.0.0 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar) | 4.0.0 |
+| Arabic | [download](http://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar) | 4.1.0 |
+| English (default) | [download](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar) | 4.1.0 |
+| English (extra) | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar) | 4.1.0 |
+| English (kbp) | [download](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) | 4.1.0 |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar) | 4.1.0 |
+| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar) | 4.1.0 |
+| German | [download](http://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar) | 4.1.0 |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar) | 4.1.0 |
 
 ### Useful resources
 
