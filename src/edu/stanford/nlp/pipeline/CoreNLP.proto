@@ -605,6 +605,9 @@ message Section {
 // A message for requesting a semgrex
 // Each sentence stores information about the tokens making up the
 // corresponding graph
+// An alternative would have been to use the existing Document or
+// Sentence classes, but the problem with that is it would be
+// ambiguous which dependency object to use.
 message SemgrexRequest {
   message Dependencies {
     repeated Token           token       = 1;
