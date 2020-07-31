@@ -41,6 +41,9 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2020-07-31    4.1.0     Improved server interface, improved memory 
+                        usage of sutime, spanish tokenization upgrades 
+
 2020-04-19    4.0.0     Changed to UDv2 tokenization ("new" LDC Treebank,
                         for English); handles multi-word-tokens;
                         improved UDv2-based taggers and parsers for
