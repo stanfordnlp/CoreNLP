@@ -98,12 +98,11 @@ Other choices are now probably best avoided:
 
 ### Python
 
-#### Official StanfordNLP Package
+#### Official Stanza Package by the Stanford NLP Group
 
-We are actively developing a Python package called StanfordNLP.  This package includes an API for starting and making requests to a
-Stanford CoreNLP server.  It is the recommended way to use Stanford CoreNLP in Python.
+We are actively developing a Python package called Stanza, with state-of-the-art NLP performance enabled by deep learning. Besides, this package also includes an API for starting and making requests to a Stanford CoreNLP server.  It is the recommended way to use Stanford CoreNLP in Python.
 
-* [StanfordNLP](https://stanfordnlp.github.io/stanfordnlp/) Official Stanford NLP Python package, covering 70+ languages
+* [Stanza](https://stanfordnlp.github.io/stanza/): Official Stanford NLP Python package, covering 70+ human languages, as well as biomedical English text.
 
 #### Packages using the Stanford CoreNLP server
 
