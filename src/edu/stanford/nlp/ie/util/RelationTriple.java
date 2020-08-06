@@ -1,6 +1,5 @@
 package edu.stanford.nlp.ie.util;
 
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.ToIntFunction;
@@ -23,9 +22,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.err;
  * @author Gabor Angeli
  */
 @SuppressWarnings("UnusedDeclaration")
-public class RelationTriple implements Comparable<RelationTriple>, Iterable<CoreLabel>, Serializable {
-
-  private static final long serialVersionUID = 43758623469716523L;
+public class RelationTriple implements Comparable<RelationTriple>, Iterable<CoreLabel> {
 
   /** The subject (first argument) of this triple */
   public final List<CoreLabel> subject;

@@ -14,8 +14,8 @@
     </license>
   </licenses>
   <scm>
-    <url>https://nlp.stanford.edu/software/stanford-corenlp-4.1.0.zip</url>
-    <connection>https://nlp.stanford.edu/software/stanford-corenlp-4.1.0.zip</connection>
+    <url>https://nlp.stanford.edu/software/stanford-corenlp-full-2020-07-31.zip</url>
+    <connection>https://nlp.stanford.edu/software/stanford-corenlp-full-2020-07-31.zip</connection>
   </scm>
   <developers>
     <developer>
