@@ -44,11 +44,11 @@ public class InlineXMLOutputter extends AnnotationOutputter {
             pw.printf("<%s>%s", entities.get(entityIdx).entityType(), token.word());
             // handle single token entities
             if (entities.get(entityIdx).charOffsets().second() == token.endPosition()) {
-              pw.printf("<%s>", entities.get(entityIdx).entityType());
+              pw.printf("</%s>", entities.get(entityIdx).entityType());
               entityIdx++;
             }
           } else if (entities.get(entityIdx).charOffsets().second() == token.endPosition()) {
-            pw.printf("%s<%s>", token.word(), entities.get(entityIdx).entityType());
+            pw.printf("%s</%s>", token.word(), entities.get(entityIdx).entityType());
             entityIdx++;
           } else {
             pw.printf("%s", token.word());
