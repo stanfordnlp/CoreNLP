@@ -40,9 +40,14 @@ public class InlineXMLOutputter extends AnnotationOutputter {
           pw.printf(" ");
         }
         if (numEntities > entityIdx) {
-          if (entities.get(entityIdx).charOffsets().first() == token.beginPosition())
+          if (entities.get(entityIdx).charOffsets().first() == token.beginPosition()) {
             pw.printf("<%s>%s", entities.get(entityIdx).entityType(), token.word());
-          else if (entities.get(entityIdx).charOffsets().second() == token.endPosition()) {
+            // handle single token entities
+            if (entities.get(entityIdx).charOffsets().second() == token.endPosition()) {
+              pw.printf("<%s>", entities.get(entityIdx).entityType());
+              entityIdx++;
+            }
+          } else if (entities.get(entityIdx).charOffsets().second() == token.endPosition()) {
             pw.printf("%s<%s>", token.word(), entities.get(entityIdx).entityType());
             entityIdx++;
           } else {
