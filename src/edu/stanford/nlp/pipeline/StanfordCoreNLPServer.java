@@ -273,18 +273,17 @@ public class StanfordCoreNLPServer implements Runnable {
     }
   }
 
+  // TODO(AngledLuffa): this must be a constant somewhere, but I couldn't find it
+  static final String URL_ENCODED = "application/x-www-form-urlencoded";
+
   /**
    * Reads the POST contents of the request and parses it into an Annotation object, ready to be annotated.
    * This method can also read a serialized document, if the input format is set to be serialized.
    *
-   * The POST contents will be treated as UTF-8 unless the strict property is set to true (in which case they will
+   * The POST contents will be treated as UTF-8 unless the strict property is set to true, in which case they will
    * be treated as ISO-8859-1. They should be application/x-www-form-urlencoded, and decoding will be done via the
-   * java.net.URLDecoder.decode(String, String) function. This will attempt to decode each
-   * percent sign followed by two characters as a byte in hexadecimal. Other characters are passed through unchanged.
-   * However, it normally also works fine to simple pass text to this method in a POST. Our method doesn't accept
-   * encoding ' ' as '+' (a plus will be hex encoded) and converts any '%' not followed by a hex digit to "%25".
-   * The only thing you really must do is to escape a '%' character that is a percent followed by two potential
-   * hex digit characters as "%25".
+   * java.net.URLDecoder.decode(String, String) function.  It is also allowed to send in text/plain requests,
+   * which will not be decoded.  In fact, nothing other than x-www-form-urlencoded will be decoded.
    *
    * @param props The properties we are annotating with. This is where the input format is retrieved from.
    * @param httpExchange The exchange we are reading POST data from.
@@ -303,10 +302,16 @@ public class StanfordCoreNLPServer implements Runnable {
         // real users of CoreNLP would likely assume UTF-8 by default.
         String defaultEncoding = this.strict ? "ISO-8859-1" : "UTF-8";
         // Get the encoding
-        Headers h = httpExchange.getRequestHeaders();
+        Headers headers = httpExchange.getRequestHeaders();
         String encoding;
-        if (h.containsKey("Content-type")) {
-          String[] charsetPair = Arrays.stream(h.getFirst("Content-type").split(";"))
+        // the original default behavior of the server was to
+        // unescape, so let's assume by default that the input text is
+        // escaped.  if the Content-type is set to text we will know
+        // we shouldn't unescape after all
+        String contentType = URL_ENCODED;
+        if (headers.containsKey("Content-type")) {
+          contentType = headers.getFirst("Content-type").split(";")[0].trim();
+          String[] charsetPair = Arrays.stream(headers.getFirst("Content-type").split(";"))
               .map(x -> x.split("="))
               .filter(x -> x.length > 0 && "charset".equals(x[0]))
               .findFirst().orElse(new String[]{"charset", defaultEncoding});
@@ -320,14 +325,9 @@ public class StanfordCoreNLPServer implements Runnable {
         }
 
         String text = IOUtils.slurpReader(IOUtils.encodedInputStreamReader(httpExchange.getRequestBody(), encoding));
-        // System.err.println("The text I got was |" + text + '|');
-
-        // Remove the % and + characters that mess up the URL decoding.
-        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25"); // Escape a percent that isn't followed by a hex byte
-        text = text.replaceAll("\\+", "%2B");
-        // System.err.println("The text fiddled:  |" + text + '|');
-        text = URLDecoder.decode(text, encoding);
-        // System.err.println("The text decoded: |" + text + '|');
+        if (contentType.equals(URL_ENCODED)) {
+          text = URLDecoder.decode(text, encoding);
+        }
         // We use to trim. But now we don't. It seems like doing that is illegitimate. text = text.trim();
 
         // Read the annotation
