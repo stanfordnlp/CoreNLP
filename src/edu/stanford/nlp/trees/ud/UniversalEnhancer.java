@@ -50,6 +50,29 @@ public class UniversalEnhancer {
     }
   }
 
+  public static SemanticGraph enhanceGraph(SemanticGraph basic, SemanticGraph originalEnhanced,
+                                           boolean keepEmptyNodes,
+                                           Embedding embeddings,
+                                           Pattern relativePronounsPattern) {
+
+    SemanticGraph enhanced = new SemanticGraph(basic.typedDependencies());
+
+    if (keepEmptyNodes) {
+      copyEmptyNodes(originalEnhanced, enhanced);
+    }
+
+    if (embeddings != null) {
+      UniversalGappingEnhancer.addEnhancements(enhanced, embeddings);
+    }
+    UniversalGrammaticalStructure.addRef(enhanced, relativePronounsPattern);
+    UniversalGrammaticalStructure.collapseReferent(enhanced);
+    UniversalGrammaticalStructure.propagateConjuncts(enhanced);
+    UniversalGrammaticalStructure.addExtraNSubj(enhanced);
+    UniversalGrammaticalStructure.addCaseMarkerInformation(enhanced);
+    UniversalGrammaticalStructure.addCaseMarkerForConjunctions(enhanced);
+    UniversalGrammaticalStructure.addConjInformation(enhanced);
+    return enhanced;
+  }
 
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args);
@@ -62,7 +85,7 @@ public class UniversalEnhancer {
 
     boolean keepEmptyNodes = PropertiesUtils.getBool(props, "keepEmpty", false);
 
-    Pattern relativePronounPattern = Pattern.compile(relativePronounsPatternStr);
+    Pattern relativePronounsPattern = Pattern.compile(relativePronounsPatternStr);
 
     Iterator<Pair<SemanticGraph, SemanticGraph>> sgIterator; // = null;
 
@@ -82,25 +105,9 @@ public class UniversalEnhancer {
     while (sgIterator.hasNext()) {
       Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
       SemanticGraph basic = sgs.first();
-
       SemanticGraph originalEnhanced = sgs.second();
 
-      SemanticGraph enhanced = new SemanticGraph(basic.typedDependencies());
-
-      if (keepEmptyNodes) {
-        copyEmptyNodes(originalEnhanced, enhanced);
-      }
-
-      if (embeddings != null) {
-        UniversalGappingEnhancer.addEnhancements(enhanced, embeddings);
-      }
-      UniversalGrammaticalStructure.addRef(enhanced, relativePronounPattern);
-      UniversalGrammaticalStructure.collapseReferent(enhanced);
-      UniversalGrammaticalStructure.propagateConjuncts(enhanced);
-      UniversalGrammaticalStructure.addExtraNSubj(enhanced);
-      UniversalGrammaticalStructure.addCaseMarkerInformation(enhanced);
-      UniversalGrammaticalStructure.addCaseMarkerForConjunctions(enhanced);
-      UniversalGrammaticalStructure.addConjInformation(enhanced);
+      SemanticGraph enhanced = enhanceGraph(basic, originalEnhanced, keepEmptyNodes, embeddings, relativePronounsPattern);
       System.out.print(writer.printSemanticGraph(basic, enhanced));
     }
 
