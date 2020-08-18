@@ -7,6 +7,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
@@ -1279,6 +1280,26 @@ public class StanfordCoreNLPServer implements Runnable {
       this.authenticator = authenticator;
     }
 
+    public void setTregexOffsets(JSONOutputter.Writer writer, Tree match) {
+      List<Tree> leaves = match.getLeaves();
+      Label label = leaves.get(0).label();
+      if (label instanceof CoreLabel) {
+        CoreLabel core = (CoreLabel) label;
+        writer.set("characterOffsetBegin", core.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+        if (core.containsKey(CoreAnnotations.CodepointOffsetBeginAnnotation.class)) {
+          writer.set("codepointOffsetBegin", core.get(CoreAnnotations.CodepointOffsetBeginAnnotation.class));
+        }
+      }
+      label = leaves.get(leaves.size() - 1).label();
+      if (label instanceof CoreLabel) {
+        CoreLabel core = (CoreLabel) label;
+        writer.set("characterOffsetEnd", core.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+        if (core.containsKey(CoreAnnotations.CodepointOffsetEndAnnotation.class)) {
+          writer.set("codepointOffsetEnd", core.get(CoreAnnotations.CodepointOffsetEndAnnotation.class));
+        }
+      }
+    }
+
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       if (onBlockList(httpExchange)) {
@@ -1318,6 +1339,7 @@ public class StanfordCoreNLPServer implements Runnable {
           // Run Tregex
           return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) ->
             docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
+                int sentIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
                 Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
                 //sentWriter.set("tree", tree.pennString());
                 TregexMatcher matcher = p.matcher(tree);
@@ -1325,10 +1347,13 @@ public class StanfordCoreNLPServer implements Runnable {
                 int i = 0;
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i++), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
+                    matchWriter.set("sentIndex", sentIndex);
+                    setTregexOffsets(matchWriter, matcher.getMatch());
                     matchWriter.set("match", matcher.getMatch().pennString());
                     matchWriter.set("spanString", matcher.getMatch().spanString());
                     matchWriter.set("namedNodes", matcher.getNodeNames().stream().map(nodeName -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeWriter) -> 
                       namedNodeWriter.set(nodeName, (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeSubWriter) -> {
+                        setTregexOffsets(namedNodeSubWriter, matcher.getNode(nodeName));
                         namedNodeSubWriter.set("match", matcher.getNode(nodeName).pennString());
                         namedNodeSubWriter.set("spanString", matcher.getNode(nodeName).spanString());
                       })
