@@ -11,6 +11,7 @@ import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ScoredObject;
 
@@ -23,6 +24,8 @@ public abstract class BaseModel implements Serializable {
   final Set<String> rootStates;
   final Set<String> rootOnlyStates;
 
+  final Set<String> punctuationTags;
+
   public BaseModel(ShiftReduceOptions op, Index<Transition> transitionIndex,
                    Set<String> knownStates, Set<String> rootStates, Set<String> rootOnlyStates) {
     this.transitionIndex = transitionIndex;
@@ -32,6 +35,7 @@ public abstract class BaseModel implements Serializable {
     this.rootStates = rootStates;
     this.rootOnlyStates = rootOnlyStates;
 
+    this.punctuationTags = Collections.unmodifiableSet(new ArraySet<String>(op.langpack().punctuationTags()));
   }
 
   public BaseModel(BaseModel other) {
@@ -41,6 +45,8 @@ public abstract class BaseModel implements Serializable {
     this.knownStates = other.knownStates;
     this.rootStates = other.rootStates;
     this.rootOnlyStates = other.rootOnlyStates;
+
+    this.punctuationTags = other.punctuationTags;
   }
 
   /*
@@ -104,8 +110,8 @@ public abstract class BaseModel implements Serializable {
         for (String label : knownStates) {
           if (constraint.state.matcher(label).matches()) {
             return ((op.compoundUnaries) ?
-                    new CompoundUnaryTransition(Collections.singletonList(label), false) :
-                    new UnaryTransition(label, false));
+                    new CompoundUnaryTransition(Collections.singletonList(label), false, null) :
+                    new UnaryTransition(label, false, null));
           }
         }
       }
@@ -114,8 +120,8 @@ public abstract class BaseModel implements Serializable {
     if (ShiftReduceUtils.isTemporary(state.stack.peek()) &&
         (state.stack.size() == 1 || ShiftReduceUtils.isTemporary(state.stack.pop().peek()))) {
       return ((op.compoundUnaries) ?
-              new CompoundUnaryTransition(Collections.singletonList(state.stack.peek().value().substring(1)), false) :
-              new UnaryTransition(state.stack.peek().value().substring(1), false));
+              new CompoundUnaryTransition(Collections.singletonList(state.stack.peek().value().substring(1)), false, null) :
+              new UnaryTransition(state.stack.peek().value().substring(1), false, null));
     }
 
     if (state.stack.size() == 1 && state.tokenPosition >= state.sentence.size()) {
@@ -123,8 +129,8 @@ public abstract class BaseModel implements Serializable {
       if (!rootStates.contains(state.stack.peek().value())) {
         String root = rootStates.iterator().next();
         return ((op.compoundUnaries) ?
-                new CompoundUnaryTransition(Collections.singletonList(root), false) :
-                new UnaryTransition(root, false));
+                new CompoundUnaryTransition(Collections.singletonList(root), false, null) :
+                new UnaryTransition(root, false, null));
       }
     }
 

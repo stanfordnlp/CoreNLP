@@ -1,7 +1,9 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.Tree;
@@ -25,12 +27,16 @@ public class CompoundUnaryTransition implements Transition {
   /** root transitions are illegal in the middle of the tree, naturally */
   public final boolean isRoot;
 
-  public CompoundUnaryTransition(List<String> labels, boolean isRoot) {
+  /** do not unary transition from punctuation tags */
+  public final Set<String> punctuationTags;
+
+  public CompoundUnaryTransition(List<String> labels, boolean isRoot, Set<String> punctuationTags) {
     this.labels = new String[labels.size()];
     for (int i = 0; i < labels.size(); ++i) {
       this.labels[i] = labels.get(i);
     }
     this.isRoot = isRoot;
+    this.punctuationTags = (punctuationTags == null) ? Collections.emptySet() : punctuationTags;
   }
 
   /**
@@ -65,6 +71,13 @@ public class CompoundUnaryTransition implements Transition {
       return false;
     }
     if (isRoot && (state.stack.size() > 1 || !state.endOfQueue())) {
+      return false;
+    }
+    if (punctuationTags.contains(top.label().value()) &&
+        (state.stack.size() > 1 || !state.endOfQueue())) {
+      // if the state stack size is 1 and we are at the end of the
+      // queue, then we should allow unary transitions such as to the
+      // ROOT state
       return false;
     }
 

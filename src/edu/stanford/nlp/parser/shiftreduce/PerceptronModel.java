@@ -529,7 +529,7 @@ public class PerceptronModel extends BaseModel  {
 
     Oracle oracle = null;
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.ORACLE) {
-      oracle = new Oracle(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
+      oracle = new Oracle(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates, punctuationTags);
     }
 
     List<Update> updates = Generics.newArrayList();

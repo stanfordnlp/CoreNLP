@@ -13,6 +13,7 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -40,7 +41,7 @@ public class ReorderingOracleTest extends TestCase {
   BinaryTransition leftS = new BinaryTransition("S", BinaryTransition.Side.LEFT, false);
   BinaryTransition tempLeftS = new BinaryTransition("@S", BinaryTransition.Side.LEFT, false);
 
-  UnaryTransition unaryADVP = new UnaryTransition("ADVP", false);
+  UnaryTransition unaryADVP = new UnaryTransition("ADVP", false, null);
 
   String[] WORDS = { "My", "dog", "also", "likes", "eating", "sausage" };
   String[] TAGS = { "PRP$", "NN", "RB", "VBZ", "VBZ", "NN" };
@@ -92,7 +93,7 @@ public class ReorderingOracleTest extends TestCase {
   public void testReorderIncorrectShiftResultingTree() {
     for (int testcase = 0; testcase < correctTrees.length; ++testcase) {
       State state = ShiftReduceParser.initialStateFromGoldTagTree(correctTrees[testcase]);
-      List<Transition> gold = CreateTransitionSequence.createTransitionSequence(binarizedTrees.get(testcase));
+      List<Transition> gold = CreateTransitionSequence.createTransitionSequence(binarizedTrees.get(testcase), true, Collections.singleton("ROOT"), Collections.singleton("ROOT"), new ArraySet<String>(".", ",", "PU"));
       // System.err.println(correctTrees[testcase]);
       // System.err.println(gold);
 

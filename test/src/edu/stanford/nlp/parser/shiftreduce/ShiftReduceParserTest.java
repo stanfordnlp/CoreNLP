@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.BinaryHeadFinder;
@@ -13,6 +14,7 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Trees;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CollectionUtils;
 import java.util.function.Function;
 
@@ -27,6 +29,7 @@ public class ShiftReduceParserTest extends TestCase {
     commaTreeString,
   };
 
+  static final Set<String> punctuationTags = new ArraySet<String>(".", ",");
 
   /**
    * Test that the entire transition process is working: get the
@@ -37,7 +40,7 @@ public class ShiftReduceParserTest extends TestCase {
   public void testUnaryTransitions() {
     for (String treeText : treeStrings) {
       Tree tree = convertTree(treeText);
-      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, false, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
+      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, false, Collections.singleton("ROOT"), Collections.singleton("ROOT"), punctuationTags);
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       for (Transition transition : transitions) {
         state = transition.apply(state);
@@ -52,7 +55,7 @@ public class ShiftReduceParserTest extends TestCase {
   public void testCompoundUnaryTransitions() {
     for (String treeText : treeStrings) {
       Tree tree = convertTree(treeText);
-      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
+      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"), punctuationTags);
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       for (Transition transition : transitions) {
         state = transition.apply(state);
@@ -72,7 +75,7 @@ public class ShiftReduceParserTest extends TestCase {
 
   public void testSeparators() {
     Tree tree = convertTree(commaTreeString);
-    List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
+    List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"), punctuationTags);
     List<String> expectedTransitions = Arrays.asList(new String[] { "Shift", "Shift", "Shift", "Shift", "RightBinary(@ADJP)", "RightBinary(ADJP)", "Shift", "RightBinary(@NP)", "RightBinary(NP)", "CompoundUnary*([ROOT, FRAG])", "Finalize", "Idle" });
     assertEquals(expectedTransitions, CollectionUtils.transformAsList(transitions, (Transition t)->{ return t.toString();}));
 

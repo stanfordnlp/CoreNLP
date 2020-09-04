@@ -7,6 +7,7 @@ import java.util.Set;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.Generics;
 
 public class CreateTransitionSequence {
@@ -14,30 +15,26 @@ public class CreateTransitionSequence {
   // we could change this if we wanted to include options.
   private CreateTransitionSequence() {}
 
-  public static List<List<Transition>> createTransitionSequences(List<Tree> binarizedTrees, boolean compoundUnary, Set<String> rootStates, Set<String> rootOnlyStates) {
+  public static List<List<Transition>> createTransitionSequences(List<Tree> binarizedTrees, boolean compoundUnary, Set<String> rootStates, Set<String> rootOnlyStates, Set<String> punctuationTags) {
     List<List<Transition>> transitionLists = Generics.newArrayList();
     for (Tree tree : binarizedTrees) {
-      List<Transition> transitions = createTransitionSequence(tree, compoundUnary, rootStates, rootOnlyStates);
+      List<Transition> transitions = createTransitionSequence(tree, compoundUnary, rootStates, rootOnlyStates, punctuationTags);
       transitionLists.add(transitions);
     }
     return transitionLists;
   }
 
-  public static List<Transition> createTransitionSequence(Tree tree) {
-    return createTransitionSequence(tree, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
-  }
-
-  public static List<Transition> createTransitionSequence(Tree tree, boolean compoundUnary, Set<String> rootStates, Set<String> rootOnlyStates) {
+  public static List<Transition> createTransitionSequence(Tree tree, boolean compoundUnary, Set<String> rootStates, Set<String> rootOnlyStates, Set<String> punctuationTags) {
     List<Transition> transitions = Generics.newArrayList();
 
-    createTransitionSequenceHelper(transitions, tree, compoundUnary, rootOnlyStates);
+    createTransitionSequenceHelper(transitions, tree, compoundUnary, rootOnlyStates, punctuationTags);
     transitions.add(new FinalizeTransition(rootStates));
     transitions.add(new IdleTransition());
 
     return transitions;
   }
 
-  private static void createTransitionSequenceHelper(List<Transition> transitions, Tree tree, boolean compoundUnary, Set<String> rootOnlyStates) {
+  private static void createTransitionSequenceHelper(List<Transition> transitions, Tree tree, boolean compoundUnary, Set<String> rootOnlyStates, Set<String> punctuationTags) {
     if (tree.isLeaf()) {
       // do nothing
     } else if (tree.isPreTerminal()) {
@@ -50,15 +47,15 @@ public class CreateTransitionSequence {
           labels.add(tree.label().value());
           tree = tree.children()[0];
         }
-        createTransitionSequenceHelper(transitions, tree, compoundUnary, rootOnlyStates);
-        transitions.add(new CompoundUnaryTransition(labels, isRoot));
+        createTransitionSequenceHelper(transitions, tree, compoundUnary, rootOnlyStates, punctuationTags);
+        transitions.add(new CompoundUnaryTransition(labels, isRoot, punctuationTags));
       } else {
-        createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary, rootOnlyStates);
-        transitions.add(new UnaryTransition(tree.label().value(), isRoot));
+        createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary, rootOnlyStates, punctuationTags);
+        transitions.add(new UnaryTransition(tree.label().value(), isRoot, punctuationTags));
       }
     } else if (tree.children().length == 2) {
-      createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary, rootOnlyStates);
-      createTransitionSequenceHelper(transitions, tree.children()[1], compoundUnary, rootOnlyStates);
+      createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary, rootOnlyStates, punctuationTags);
+      createTransitionSequenceHelper(transitions, tree.children()[1], compoundUnary, rootOnlyStates, punctuationTags);
 
       // This is the tricky part... need to decide if the binary
       // transition is a left or right transition.  This is done by
