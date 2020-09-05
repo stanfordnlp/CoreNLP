@@ -467,7 +467,45 @@ public class ArrayMath {
     return result;
   }
 
+  /**
+   * Dot product of a and b.
+   * <br>
+   * Assumes that both arrays have same length.  Sum is done using a double.
+   *
+   * @param a float vector
+   * @param b float vector
+   * @return a dot b
+   */
+  public static float dotProduct(float[] a, float[] b) {
+    if (a.length != b.length) {
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
+    }
+    double result = 0;
+    for (int i = 0; i < a.length; i++) {
+      result += a[i] * b[i];
+    }
+    return (float) result;
+  }
 
+  /**
+   * Dot product of a and b.
+   * <br>
+   * Assumes that both arrays have same length.  Sum is done using a double.
+   *
+   * @param a double vector
+   * @param b float vector
+   * @return a dot b
+   */
+  public static double dotProduct(double[] a, float[] b) {
+    if (a.length != b.length) {
+      throw new ArrayIndexOutOfBoundsException("Arrays do not have the same length.");
+    }
+    double result = 0;
+    for (int i = 0; i < a.length; i++) {
+      result += a[i] * b[i];
+    }
+    return result;
+  }
 
   /**
    * Assumes that both arrays have same length.
