@@ -46,8 +46,8 @@ public class Classifier  {
   // W2: numLabels x hiddenSize
 
   // Weight matrices
-  private final double[][] W1, W2, E;
-  private final double[] b1;
+  private final float[][] W1, W2, E;
+  private final float[] b1;
 
   // Global gradSaved
   private double[][] gradSaved;
@@ -115,7 +115,7 @@ public class Classifier  {
    * @param W2
    * @param preComputed
    */
-  public Classifier(Config config, double[][] E, double[][] W1, double[] b1, double[][] W2, List<Integer> preComputed) {
+  public Classifier(Config config, float[][] E, float[][] W1, float[] b1, float[][] W2, List<Integer> preComputed) {
     this(config, null, E, W1, b1, W2, preComputed);
   }
 
@@ -131,7 +131,7 @@ public class Classifier  {
    * @param W2
    * @param preComputed
    */
-  public Classifier(Config config, Dataset dataset, double[][] E, double[][] W1, double[] b1, double[][] W2,
+  public Classifier(Config config, Dataset dataset, float[][] E, float[][] W1, float[] b1, float[][] W2,
                     List<Integer> preComputed) {
     this.config = config;
     this.dataset = dataset;
@@ -725,7 +725,7 @@ public class Classifier  {
 
   // extracting these small methods makes things faster; hotspot likes them
 
-  private static double[] matrixMultiply(double[][] matrix, double[] vector) {
+  private static double[] matrixMultiply(double[][] matrix, float[] vector) {
     double[] result = new double[matrix.length];
     for (int i = 0; i < matrix.length; i++) {
       result[i] = ArrayMath.dotProduct(matrix[i], vector);
@@ -733,7 +733,7 @@ public class Classifier  {
     return result;
   }
 
-  private static float[] matrixMultiplySlice(double[][] matrix, double[] vector, int leftColumnOffset) {
+  private static float[] matrixMultiplySlice(float[][] matrix, float[] vector, int leftColumnOffset) {
     float[] slice = new float[matrix.length];
     for (int i = 0; i < matrix.length; i++) {
       double partial = 0.0;
@@ -745,7 +745,15 @@ public class Classifier  {
     return slice;
   }
 
-  private static void matrixMultiplySliceSum(double[] sum, double[][] matrix, double[] vector, int leftColumnOffset) {
+  private static double[] matrixMultiply(float[][] matrix, double[] vector) {
+    double[] result = new double[matrix.length];
+    for (int i = 0; i < matrix.length; i++) {
+      result[i] = ArrayMath.dotProduct(vector, matrix[i]);
+    }
+    return result;
+  }
+
+  private static void matrixMultiplySliceSum(double[] sum, float[][] matrix, float[] vector, int leftColumnOffset) {
     for (int i = 0; i < matrix.length; i++) {
       double partial = sum[i];
       for (int j = 0; j < vector.length; j++) {
@@ -755,7 +763,7 @@ public class Classifier  {
     }
   }
 
-  private static void addCubeInPlace(double[] vector, double [] bias) {
+  private static void addCubeInPlace(double[] vector, float [] bias) {
     for (int i = 0; i < vector.length; i++) {
       vector[i] += bias[i]; // add bias
       vector[i] = vector[i] * vector[i] * vector[i];  // cube nonlinearity
@@ -763,19 +771,19 @@ public class Classifier  {
   }
 
 
-  public double[][] getW1() {
+  public float[][] getW1() {
     return W1;
   }
 
-  public double[] getb1() {
+  public float[] getb1() {
     return b1;
   }
 
-  public double[][] getW2() {
+  public float[][] getW2() {
     return W2;
   }
 
-  public double[][] getE() {
+  public float[][] getE() {
     return E;
   }
 

@@ -398,10 +398,10 @@ public class DependencyParser  {
 
   public void writeModelFile(String modelFile) {
     try {
-      double[][] W1 = classifier.getW1();
-      double[] b1 = classifier.getb1();
-      double[][] W2 = classifier.getW2();
-      double[][] E = classifier.getE();
+      float[][] W1 = classifier.getW1();
+      float[] b1 = classifier.getb1();
+      float[][] W2 = classifier.getW2();
+      float[][] E = classifier.getE();
 
       Writer output = IOUtils.getPrintWriter(modelFile);
 
@@ -467,7 +467,7 @@ public class DependencyParser  {
     }
   }
 
-  private static int writeEmbedding(double[] doubles, Writer output, int index, String word) throws IOException {
+  private static int writeEmbedding(float[] doubles, Writer output, int index, String word) throws IOException {
     output.write(word);
     for (double aDouble : doubles) {
       output.write(" " + aDouble);
@@ -553,7 +553,7 @@ public class DependencyParser  {
       knownWords = new ArrayList<>();
       knownPos = new ArrayList<>();
       knownLabels = new ArrayList<>();
-      double[][] E = new double[nDict + nPOS + nLabel][eSize];
+      float[][] E = new float[nDict + nPOS + nLabel][eSize];
       String[] splits;
       int index = 0;
 
@@ -562,7 +562,7 @@ public class DependencyParser  {
         splits = s.split(" ");
         knownWords.add(splits[0]);
         for (int i = 0; i < eSize; ++i)
-          E[index][i] = Double.parseDouble(splits[i + 1]);
+          E[index][i] = Float.parseFloat(splits[i + 1]);
         index = index + 1;
       }
       for (int k = 0; k < nPOS; ++k) {
@@ -570,7 +570,7 @@ public class DependencyParser  {
         splits = s.split(" ");
         knownPos.add(splits[0]);
         for (int i = 0; i < eSize; ++i)
-          E[index][i] = Double.parseDouble(splits[i + 1]);
+          E[index][i] = Float.parseFloat(splits[i + 1]);
         index = index + 1;
       }
       for (int k = 0; k < nLabel; ++k) {
@@ -578,31 +578,31 @@ public class DependencyParser  {
         splits = s.split(" ");
         knownLabels.add(splits[0]);
         for (int i = 0; i < eSize; ++i)
-          E[index][i] = Double.parseDouble(splits[i + 1]);
+          E[index][i] = Float.parseFloat(splits[i + 1]);
         index = index + 1;
       }
       generateIDs();
 
-      double[][] W1 = new double[hSize][eSize * nTokens];
+      float[][] W1 = new float[hSize][eSize * nTokens];
       for (int j = 0; j < W1[0].length; ++j) {
         s = input.readLine();
         splits = s.split(" ");
         for (int i = 0; i < W1.length; ++i)
-          W1[i][j] = Double.parseDouble(splits[i]);
+          W1[i][j] = Float.parseFloat(splits[i]);
       }
 
-      double[] b1 = new double[hSize];
+      float[] b1 = new float[hSize];
       s = input.readLine();
       splits = s.split(" ");
       for (int i = 0; i < b1.length; ++i)
-        b1[i] = Double.parseDouble(splits[i]);
+        b1[i] = Float.parseFloat(splits[i]);
 
-      double[][] W2 = new double[nLabel * 2 - 1][hSize];
+      float[][] W2 = new float[nLabel * 2 - 1][hSize];
       for (int j = 0; j < W2[0].length; ++j) {
         s = input.readLine();
         splits = s.split(" ");
         for (int i = 0; i < W2.length; ++i)
-          W2[i][j] = Double.parseDouble(splits[i]);
+          W2[i][j] = Float.parseFloat(splits[i]);
       }
 
       preComputed = new ArrayList<>();
@@ -616,6 +616,11 @@ public class DependencyParser  {
 
       config.hiddenSize = hSize;
       config.embeddingSize = eSize;
+      log.debug("Read in dep parse matrices:");
+      log.debug("   E: " + E.length * E[0].length);
+      log.debug("  b1: " + b1.length);
+      log.debug("  W1: " + W1.length * W1[0].length);
+      log.debug("  W2: " + W2.length * W2[0].length);
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
       t.report(log, "Loading depparse model: " + modelFile);
     } catch (IOException e) {
@@ -790,27 +795,27 @@ public class DependencyParser  {
    * Prepare a classifier for training with the given dataset.
    */
   private void setupClassifierForTraining(List<CoreMap> trainSents, List<DependencyTree> trainTrees, String embedFile, String preModel) {
-    double[][] E = new double[knownWords.size() + knownPos.size() + knownLabels.size()][config.embeddingSize];
-    double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
-    double[] b1 = new double[config.hiddenSize];
-    double[][] W2 = new double[system.numTransitions()][config.hiddenSize];
+    float[][] E = new float[knownWords.size() + knownPos.size() + knownLabels.size()][config.embeddingSize];
+    float[][] W1 = new float[config.hiddenSize][config.embeddingSize * config.numTokens];
+    float[] b1 = new float[config.hiddenSize];
+    float[][] W2 = new float[system.numTransitions()][config.hiddenSize];
 
     // Randomly initialize weight matrices / vectors
     Random random = Util.getRandom();
     for (int i = 0; i < W1.length; ++i)
       for (int j = 0; j < W1[i].length; ++j)
-        W1[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
+        W1[i][j] = (float) (random.nextDouble() * 2 * config.initRange - config.initRange);
 
     for (int i = 0; i < b1.length; ++i)
-      b1[i] = random.nextDouble() * 2 * config.initRange - config.initRange;
+      b1[i] = (float) (random.nextDouble() * 2 * config.initRange - config.initRange);
 
     for (int i = 0; i < W2.length; ++i)
       for (int j = 0; j < W2[i].length; ++j)
-        W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
+        W2[i][j] = (float) (random.nextDouble() * 2 * config.initRange - config.initRange);
 
     // Read embeddings into `embedID`, `embeddings`
-     Map<String, Integer> embedID = new HashMap<>();
-     double[][] embeddings = readEmbedFile(embedFile, embedID);
+    Map<String, Integer> embedID = new HashMap<>();
+    double[][] embeddings = readEmbedFile(embedFile, embedID);
 
     // Try to match loaded embeddings with words in dictionary
     int foundEmbed = 0;
@@ -824,13 +829,16 @@ public class DependencyParser  {
       }
       if (index >= 0) {
         ++foundEmbed;
-        System.arraycopy(embeddings[index], 0, E[i], 0, E[i].length);
+        for (int j = 0; j < E[i].length; ++j) {
+          E[i][j] = (float) embeddings[index][j];
+        }
       } else {
-        for (int j = 0; j < E[i].length; ++j)
+        for (int j = 0; j < E[i].length; ++j) {
           //E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
           //E[i][j] = random.nextDouble() * 0.2 - 0.1;
           //E[i][j] = random.nextGaussian() * Math.sqrt(0.1);
-          E[i][j] = random.nextDouble() * 0.02 - 0.01;
+          E[i][j] = (float) (random.nextDouble() * 0.02 - 0.01);
+        }
       }
     }
     log.info("Found embeddings: " + foundEmbed + " / " + knownWords.size());
@@ -861,7 +869,7 @@ public class DependencyParser  {
             if (wordIDs.containsKey(splits[0]) && eSize == config.embeddingSize) {
               int index = getWordID(splits[0]);
               for (int i = 0; i < eSize; ++i)
-                E[index][i] = Double.parseDouble(splits[i + 1]);
+                E[index][i] = Float.parseFloat(splits[i + 1]);
             }
           }
 
@@ -871,7 +879,7 @@ public class DependencyParser  {
             if (posIDs.containsKey(splits[0]) && eSize == config.embeddingSize) {
               int index = getPosID(splits[0]);
               for (int i = 0; i < eSize; ++i)
-                E[index][i] = Double.parseDouble(splits[i + 1]);
+                E[index][i] = Float.parseFloat(splits[i + 1]);
             }
           }
 
@@ -881,7 +889,7 @@ public class DependencyParser  {
             if (labelIDs.containsKey(splits[0]) && eSize == config.embeddingSize) {
               int index = getLabelID(splits[0]);
               for (int i = 0; i < eSize; ++i)
-                E[index][i] = Double.parseDouble(splits[i + 1]);
+                E[index][i] = Float.parseFloat(splits[i + 1]);
             }
           }
 
@@ -894,7 +902,7 @@ public class DependencyParser  {
             if (copyLayer1) {
               splits = s.split(" ");
               for (int i = 0; i < hSize; ++i)
-                    W1[i][j] = Double.parseDouble(splits[i]);
+                    W1[i][j] = Float.parseFloat(splits[i]);
             }
           }
 
@@ -902,7 +910,7 @@ public class DependencyParser  {
           if (copyLayer1) {
             splits = s.split(" ");
             for (int i = 0; i < hSize; ++i)
-              b1[i] = Double.parseDouble(splits[i]);
+              b1[i] = Float.parseFloat(splits[i]);
           }
 
           boolean copyLayer2 = (nLabel * 2 - 1 == system.numTransitions()) && hSize == config.hiddenSize;
@@ -913,7 +921,7 @@ public class DependencyParser  {
               if (copyLayer2) {
                 splits = s.split(" ");
                 for (int i = 0; i < nLabel * 2 - 1; ++i)
-                  W2[i][j] = Double.parseDouble(splits[i]);
+                  W2[i][j] = Float.parseFloat(splits[i]);
               }
           }
         } catch (IOException e) {
