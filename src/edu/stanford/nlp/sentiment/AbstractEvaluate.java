@@ -59,7 +59,7 @@ public abstract class AbstractEvaluate  {
                 confusionMatrix.add(j, i, confusion[i][j]);
             }
         }
-        log.info(confusionMatrix);
+        log.info("\n" + confusionMatrix);
     }
 
     protected static double[] approxAccuracy(int[][] confusion, int[][] classes) {
