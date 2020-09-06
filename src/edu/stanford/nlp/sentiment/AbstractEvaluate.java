@@ -240,7 +240,6 @@ public abstract class AbstractEvaluate  {
         log.info("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
       }
       log.info("Combined approximate root label accuracy: " + NF.format(approxCombinedAccuracy(rootLabelConfusion, equivalenceClasses)));
-      log.info();
     }
     if (op.testOptions.ngramRecordSize > 0) {
       log.info(ngrams);
