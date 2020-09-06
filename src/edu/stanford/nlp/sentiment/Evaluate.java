@@ -35,8 +35,8 @@ public class Evaluate extends AbstractEvaluate  {
    * For example <br>
    * <code>
    *  java edu.stanford.nlp.sentiment.Evaluate
-   *   edu/stanford/nlp/models/sentiment/sentiment.ser.gz
-   *   /u/nlp/data/sentiment/trees/dev.txt
+   *   -model edu/stanford/nlp/models/sentiment/sentiment.ser.gz
+   *   -treebank /u/nlp/data/sentiment/sentiment-treebank/fiveclass/dev.txt
    * </code>
    *
    * Other arguments are available, for example <code> -numClasses</code>.
