@@ -117,7 +117,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     sentence.add(IETestUtils.mkWord("play", -1));
     sentence.add(IETestUtils.mkWord("with", -1));
     sentence.add(IETestUtils.mkWord("yarn", -1));
-    return new RelationTriple(sentence.subList(0, 2), sentence.subList(2, 4), sentence.subList(4, 5));
+    return new RelationTriple(sentence.subList(0, 2), sentence.subList(2, 4), sentence.subList(4, 5), true);
   }
 
   private static RelationTriple blueCatsPlayWithYarn() {
@@ -127,7 +127,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     sentence.add(IETestUtils.mkWord("play", 2));
     sentence.add(IETestUtils.mkWord("with", 3));
     sentence.add(IETestUtils.mkWord("yarn", 4));
-    return new RelationTriple(sentence.subList(0, 2), sentence.subList(2, 4), sentence.subList(4, 5));
+    return new RelationTriple(sentence.subList(0, 2), sentence.subList(2, 4), sentence.subList(4, 5), true);
   }
 
   private static RelationTriple yarnBlueCatsPlayWith() {
@@ -137,7 +137,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     sentence.add(IETestUtils.mkWord("cats", 2));
     sentence.add(IETestUtils.mkWord("play", 3));
     sentence.add(IETestUtils.mkWord("with", 4));
-    return new RelationTriple(sentence.subList(1, 3), sentence.subList(3, 5), sentence.subList(0, 1));
+    return new RelationTriple(sentence.subList(1, 3), sentence.subList(3, 5), sentence.subList(0, 1), true);
   }
 
 

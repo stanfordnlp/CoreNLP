@@ -201,7 +201,7 @@ public class RelationTripleSegmenter {
           // Add extraction
           String relationGloss = StringUtils.join(relationTokens.stream().map(CoreLabel::word), " ");
           if (!alreadyExtracted.contains(Triple.makeTriple(subjectSpan, relationGloss, objectSpan))) {
-            RelationTriple extraction = new RelationTriple(subjectTokens, relationTokens, objectTokens);
+            RelationTriple extraction = new RelationTriple(subjectTokens, relationTokens, objectTokens, true);
             //noinspection ConstantConditions
             extraction.isPrefixBe(missingPrefixBe);
             extraction.isSuffixOf(missingSuffixOf);
@@ -307,6 +307,7 @@ public class RelationTripleSegmenter {
           if (subjectTokens.size() > 0 && objectTokens.size() > 0) {
             LinkedList<IndexedWord> relationTokens = new LinkedList<>();
             IndexedWord relNode = matcher.getNode("relation");
+            final boolean isNominal;
             if (relNode != null) {
 
               // Case: we have a grounded relation span
@@ -322,6 +323,7 @@ public class RelationTripleSegmenter {
               if (expected.equalsIgnoreCase("tmod")) {
                 istmod = true;
               }
+              isNominal = false;
 
             } else {
 
@@ -343,6 +345,8 @@ public class RelationTripleSegmenter {
               if (allowNominalsWithoutNER && "of".equals(expected)) {
                 continue;  // prohibit things like "conductor of electricity" -> "conductor; be of; electricity"
               }
+              isNominal = true;
+
             }
 
 
@@ -352,7 +356,8 @@ public class RelationTripleSegmenter {
               RelationTriple extraction = new RelationTriple(
                   subjectTokens.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
                   relationTokens.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
-                  objectTokens.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()));
+                  objectTokens.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
+                  isNominal);
               extraction.istmod(istmod);
               extraction.isPrefixBe(missingPrefixBe);
               extraction.isSuffixBe(missingSuffixBe);
@@ -731,7 +736,7 @@ public class RelationTripleSegmenter {
               subjectSpan.get().stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
               relation.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
               objectSpan.get().stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
-              parse, confidence.orElse(1.0));
+              true, parse, confidence.orElse(1.0));
           extraction.istmod(istmod);
           return Optional.of(extraction);
         }

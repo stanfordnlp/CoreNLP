@@ -27,6 +27,8 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
 
   private static final long serialVersionUID = 43758623469716523L;
 
+  public final boolean isNominal;
+
   /** The subject (first argument) of this triple */
   public final List<CoreLabel> subject;
 
@@ -68,20 +70,21 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * @param object The object of this triple; e.g., "yarn".
    */
   public RelationTriple(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object,
-                        double confidence) {
+                        boolean isNominal, double confidence) {
     this.subject = subject;
     this.canonicalSubject = subject;
     this.relation = relation;
     this.object = object;
     this.canonicalObject = object;
+    this.isNominal = isNominal;
     this.confidence = confidence;
   }
 
   /**
-   * @see edu.stanford.nlp.ie.util.RelationTriple#RelationTriple(java.util.List, java.util.List, java.util.List, double)
+   * @see edu.stanford.nlp.ie.util.RelationTriple#RelationTriple(java.util.List, java.util.List, java.util.List, boolean, double)
    */
-  public RelationTriple(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object) {
-    this(subject, relation, object, 1.0);
+  public RelationTriple(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object, boolean isNominal) {
+    this(subject, relation, object, isNominal, 1.0);
   }
 
   /**
@@ -96,12 +99,14 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
                         List<CoreLabel> relation,
                         List<CoreLabel> object,
                         List<CoreLabel> canonicalObject,
+                        boolean isNominal,
                         double confidence) {
     this.subject = subject;
     this.canonicalSubject = canonicalSubject;
     this.relation = relation;
     this.object = object;
     this.canonicalObject = canonicalObject;
+    this.isNominal = isNominal;
     this.confidence = confidence;
   }
 
@@ -112,8 +117,9 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
                         List<CoreLabel> canonicalSubject,
                         List<CoreLabel> relation,
                         List<CoreLabel> canonicalObject,
-                        List<CoreLabel> object) {
-    this(subject, canonicalSubject, relation, object, canonicalObject, 1.0);
+                        List<CoreLabel> object,
+                        boolean isNominal) {
+    this(subject, canonicalSubject, relation, object, canonicalObject, isNominal, 1.0);
   }
 
   /**
@@ -529,8 +535,8 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
      * @param tree     The tree this extraction was created from; we create a deep copy of the tree.
      */
     public WithTree(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object, SemanticGraph tree,
-                    double confidence) {
-      super(subject, relation, object, confidence);
+                    boolean isNominal, double confidence) {
+      super(subject, relation, object, isNominal, confidence);
       this.sourceTree = new SemanticGraph(tree);
     }
 
@@ -540,13 +546,14 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
      * For example, "(cats, play with, yarn)"
      */
     public WithTree(List<CoreLabel> subject,
-                          List<CoreLabel> canonicalSubject,
-                          List<CoreLabel> relation,
-                          List<CoreLabel> object,
-                          List<CoreLabel> canonicalObject,
-                          double confidence,
+                    List<CoreLabel> canonicalSubject,
+                    List<CoreLabel> relation,
+                    List<CoreLabel> object,
+                    List<CoreLabel> canonicalObject,
+                    boolean isNominal,
+                    double confidence,
                     SemanticGraph tree) {
-      super(subject, canonicalSubject, relation, object, canonicalObject, confidence);
+      super(subject, canonicalSubject, relation, object, canonicalObject, isNominal, confidence);
       this.sourceTree = tree;
     }
 
@@ -626,12 +633,13 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     public final Optional<String> objectLink;
 
     /** Create a new relation triple */
-    public WithLink(List<CoreLabel> subject, List<CoreLabel> canonicalSubject, List<CoreLabel> relation, List<CoreLabel> object, List<CoreLabel> canonicalObject, double confidence,
+    public WithLink(List<CoreLabel> subject, List<CoreLabel> canonicalSubject, List<CoreLabel> relation, List<CoreLabel> object, List<CoreLabel> canonicalObject,
+                    boolean isNominal, double confidence,
                     SemanticGraph tree,
                     String subjectLink,
                     String objectLink
                     ) {
-      super(subject, canonicalSubject, relation, object, canonicalObject, confidence, tree);
+      super(subject, canonicalSubject, relation, object, canonicalObject, isNominal, confidence, tree);
       this.subjectLink = Optional.ofNullable(subjectLink);
       this.objectLink = Optional.ofNullable(objectLink);
     }
