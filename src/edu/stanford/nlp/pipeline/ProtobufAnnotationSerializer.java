@@ -34,7 +34,6 @@ import edu.stanford.nlp.time.TimeAnnotations.*;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import edu.stanford.nlp.coref.CorefCoreAnnotations.*;
 
 import edu.stanford.nlp.coref.data.CorefChain;
@@ -324,6 +323,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(LemmaAnnotation.class)) { builder.setLemma(coreLabel.lemma()); keysToSerialize.remove(LemmaAnnotation.class); }
     if (keySet.contains(UtteranceAnnotation.class)) { builder.setUtterance(getAndRegister(coreLabel, keysToSerialize, UtteranceAnnotation.class)); }
     if (keySet.contains(SpeakerAnnotation.class)) { builder.setSpeaker(getAndRegister(coreLabel, keysToSerialize, SpeakerAnnotation.class)); }
+    if (keySet.contains(SpeakerTypeAnnotation.class)) { builder.setSpeakerType(getAndRegister(coreLabel, keysToSerialize, SpeakerTypeAnnotation.class)); }
     if (keySet.contains(BeginIndexAnnotation.class)) { builder.setBeginIndex(getAndRegister(coreLabel, keysToSerialize, BeginIndexAnnotation.class)); }
     if (keySet.contains(EndIndexAnnotation.class)) { builder.setEndIndex(getAndRegister(coreLabel, keysToSerialize, EndIndexAnnotation.class)); }
     if (keySet.contains(TokenBeginAnnotation.class)) { builder.setTokenBeginIndex(getAndRegister(coreLabel, keysToSerialize, TokenBeginAnnotation.class)); }
@@ -619,6 +619,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // add paragraph index info
     if (keySet.contains(ParagraphIndexAnnotation.class)) builder.setParagraphIndex(getAndRegister(sentence, keysToSerialize, ParagraphIndexAnnotation.class));
+
+    // add speaker annotaiton
+    if (keySet.contains(SpeakerAnnotation.class)) { builder.setSpeaker(getAndRegister(sentence, keysToSerialize, SpeakerAnnotation.class)); }
+    if (keySet.contains(SpeakerTypeAnnotation.class)) { builder.setSpeakerType(getAndRegister(sentence, keysToSerialize, SpeakerTypeAnnotation.class)); }
+
     // Return
     return builder;
   }
@@ -1375,6 +1380,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasCodepointOffsetBegin()) { word.set(CoreAnnotations.CodepointOffsetBeginAnnotation.class, proto.getCodepointOffsetBegin()); }
     if (proto.hasCodepointOffsetEnd()) { word.set(CoreAnnotations.CodepointOffsetEndAnnotation.class, proto.getCodepointOffsetEnd()); }
     if (proto.hasSpeaker()) { word.set(SpeakerAnnotation.class, proto.getSpeaker()); }
+    if (proto.hasSpeakerType()) { word.set(SpeakerTypeAnnotation.class, proto.getSpeakerType()); }
     if (proto.hasUtterance()) { word.set(UtteranceAnnotation.class, proto.getUtterance()); }
     if (proto.hasBeginIndex()) { word.set(BeginIndexAnnotation.class, proto.getBeginIndex()); }
     if (proto.hasEndIndex()) { word.set(EndIndexAnnotation.class, proto.getEndIndex()); }
@@ -1559,6 +1565,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasParagraphIndex())
       lossySentence.set(ParagraphIndexAnnotation.class, proto.getParagraphIndex());
 
+    // speaker info
+    if (proto.hasSpeaker()) { lossySentence.set(SpeakerAnnotation.class, proto.getSpeaker()); }
+    if (proto.hasSpeakerType()) { lossySentence.set(SpeakerTypeAnnotation.class, proto.getSpeakerType()); }
+
     // Return
     return lossySentence;
   }
@@ -1626,6 +1636,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       sentence.set(ChapterAnnotator.ChapterAnnotation.class, proto.getChapterIndex());
     if (proto.hasParagraphIndex())
       sentence.set(ParagraphIndexAnnotation.class, proto.getParagraphIndex());
+
+    // speaker info
+    if (proto.hasSpeaker()) { sentence.set(SpeakerAnnotation.class, proto.getSpeaker()); }
+    if (proto.hasSpeakerType()) { sentence.set(SpeakerTypeAnnotation.class, proto.getSpeakerType()); }
 
     // Return
     return sentence;

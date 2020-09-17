@@ -1,14 +1,14 @@
 package edu.stanford.nlp.coref.data;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.coref.docreader.CoNLLDocumentReader;
+import edu.stanford.nlp.coref.docreader.CoreNLPDocumentReader;
 import edu.stanford.nlp.coref.docreader.DocReader;
 import edu.stanford.nlp.coref.md.CorefMentionFinder;
 import edu.stanford.nlp.coref.md.DependencyCorefMentionFinder;
@@ -21,6 +21,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
@@ -50,14 +51,21 @@ public class DocumentMaker {
     if (corpusPath == null) {
       return null;
     }
-    CoNLLDocumentReader.Options options = new CoNLLDocumentReader.Options();
-    if (!PropertiesUtils.getBool(props,"coref.printConLLLoadingMessage",true))
-      options.printConLLLoadingMessage = false;
-    options.annotateTokenCoref = false;
-    String conllFileFilter = props.getProperty("coref.conllFileFilter", ".*_auto_conll$");
-    options.setFilter(conllFileFilter);
-    options.lang = CorefProperties.getLanguage(props);
-    return new CoNLLDocumentReader(corpusPath, options);
+    if ("corenlp".equalsIgnoreCase(props.getProperty("coref.reader"))) {
+      CoreNLPDocumentReader.Options options = new CoreNLPDocumentReader.Options();
+      options.filterCorefMentions = CorefProperties.getCorefMentionFilter(props);
+      options.lang = CorefProperties.getLanguage(props);
+      return new CoreNLPDocumentReader(corpusPath, options);
+    } else {
+      CoNLLDocumentReader.Options options = new CoNLLDocumentReader.Options();
+      if (!PropertiesUtils.getBool(props, "coref.printConLLLoadingMessage", true))
+        options.printConLLLoadingMessage = false;
+      options.annotateTokenCoref = false;
+      String conllFileFilter = props.getProperty("coref.conllFileFilter", ".*_auto_conll$");
+      options.setFilter(conllFileFilter);
+      options.lang = CorefProperties.getLanguage(props);
+      return new CoNLLDocumentReader(corpusPath, options);
+    }
   }
 
   public Document makeDocument(Annotation anno) throws Exception {
@@ -113,8 +121,9 @@ public class DocumentMaker {
               "lemma, ner" : "lemma") + (CorefProperties.useGoldMentions(props) ? "" : ", coref.mention"));
       pipelineProps.setProperty("ner.applyFineGrained", "false");
     } else {
-      pipelineProps.setProperty("annotators", "pos, lemma, ner, " +
-              (CorefProperties.useConstituencyParse(props) ? "parse" : "depparse") +
+      pipelineProps.setProperty("annotators",
+              (CorefProperties.useConstituencyParse(props)? "parse" : "pos") + ", lemma, ner " +
+              (CorefProperties.useConstituencyParse(props) ? "" : ", depparse") +
               (CorefProperties.useGoldMentions(props) ? "" : ", coref.mention"));
       pipelineProps.setProperty("ner.applyFineGrained", "false");
     }
@@ -130,6 +139,12 @@ public class DocumentMaker {
     if (!CorefProperties.useConstituencyParse(props)) {
       for (CoreMap sentence : input.annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         sentence.remove(TreeCoreAnnotations.TreeAnnotation.class);
+      }
+    } else {
+      for (CoreMap sentence : input.annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+          token.remove(CoreAnnotations.PartOfSpeechAnnotation.class);
+        }
       }
     }
 

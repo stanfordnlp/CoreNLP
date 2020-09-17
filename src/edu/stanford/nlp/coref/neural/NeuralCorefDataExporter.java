@@ -133,7 +133,7 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
 
       JsonArrayBuilder builder = Json.createArrayBuilder();
       for (int val : CategoricalFeatureExtractor.pairwiseFeatures(
-          document, m1, m2, dictionaries, conll)) {
+          document, m1, m2, dictionaries)) {
         builder.add(val);
       }
       features.add(key, builder.build());

@@ -6,6 +6,7 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.StringOutputStream;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
@@ -75,6 +76,9 @@ public class JSONOutputter extends AnnotationOutputter {
           l2.set("id", sentence.get(CoreAnnotations.SentenceIDAnnotation.class));
           l2.set("index", sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
           l2.set("line", sentence.get(CoreAnnotations.LineNumberAnnotation.class));
+          l2.set("paragraph", sentence.get(CoreAnnotations.ParagraphIndexAnnotation.class));
+          l2.set("speaker", sentence.get(CoreAnnotations.SpeakerAnnotation.class));
+          l2.set("speakerType", sentence.get(CoreAnnotations.SpeakerTypeAnnotation.class));
           // (constituency tree)
           StringWriter treeStrWriter = new StringWriter();
           TreePrint treePrinter = options.constituencyTreePrinter;
@@ -191,6 +195,7 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("ner", token.ner());
               l3.set("normalizedNER", token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
               l3.set("speaker", token.get(CoreAnnotations.SpeakerAnnotation.class));
+              l3.set("speakerType", token.get(CoreAnnotations.SpeakerTypeAnnotation.class));
               l3.set("truecase", token.get(CoreAnnotations.TrueCaseAnnotation.class));
               l3.set("truecaseText", token.get(CoreAnnotations.TrueCaseTextAnnotation.class));
               l3.set("before", token.get(CoreAnnotations.BeforeAnnotation.class));
