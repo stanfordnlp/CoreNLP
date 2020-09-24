@@ -53,7 +53,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
   /* Keeps temporary tags created by extractor */
   private boolean keepTags = false;
   /* Collapses extraction rules - use with care */
-  private boolean collapseExtractionRules = false;
+  private final boolean collapseExtractionRules;
   private final Class<CoreAnnotation<List<? extends CoreMap>>> tokensAnnotationKey;
   private final Map<Integer, Stage<T>> stages;
 
@@ -134,12 +134,13 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     this.stages = new HashMap<>();//Generics.newHashMap();
     this.env = env;
     this.tokensAnnotationKey = EnvLookup.getDefaultTokensAnnotationKey(env);
-    this.collapseExtractionRules = false;
     if (env != null) {
       this.collapseExtractionRules = Objects.equals((Boolean) env.get("collapseExtractionRules"), true);
       if (env.get("verbose") != null)
         verbose =  (env.get("verbose") != null) &&
                 Objects.equals((Boolean) env.get("verbose"), true);
+    } else {
+      this.collapseExtractionRules = false;
     }
   }
 
