@@ -2,9 +2,11 @@ package edu.stanford.nlp.coref.data;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import edu.stanford.nlp.coref.docreader.CoNLLDocumentReader.CoNLLDocument;
 import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.util.Triple;
 
 /**
  * An input document read from a input source (CoNLL, ACE, MUC, or raw text).
@@ -30,6 +32,7 @@ public class InputDoc {
    * This is optional.
    */
   public List<List<Mention>> goldMentions;
+  public Set<Triple<Integer,Integer,Integer>> filterMentionSet;
 
   /** optional for CoNLL document */
   public CoNLLDocument conllDoc;

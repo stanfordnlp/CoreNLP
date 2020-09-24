@@ -74,22 +74,34 @@ public class KBPEnsembleExtractor implements KBPRelationExtractor {
     RedwoodConfiguration.standard().apply();  // Disable SLF4J crap.
     ArgumentParser.fillOptions(KBPEnsembleExtractor.class, args);
 
-    Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(STATISTICAL_MODEL);
     KBPRelationExtractor statisticalExtractor;
-    if (object instanceof LinearClassifier) {
-      //noinspection unchecked
-      statisticalExtractor = new KBPStatisticalExtractor((Classifier<String, String>) object);
-    } else if (object instanceof KBPStatisticalExtractor) {
-      statisticalExtractor = (KBPStatisticalExtractor) object;
+    if (STATISTICAL_MODEL.length() == 0) {
+        logger.info("No statistical model will be used.");
+        statisticalExtractor = null;
     } else {
-      throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPStatisticalExtractor.class);
+        Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(STATISTICAL_MODEL);
+        if (object instanceof LinearClassifier) {
+          //noinspection unchecked
+          statisticalExtractor = new KBPStatisticalExtractor((Classifier<String, String>) object);
+        } else if (object instanceof KBPStatisticalExtractor) {
+          statisticalExtractor = (KBPStatisticalExtractor) object;
+        } else {
+          throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPStatisticalExtractor.class);
+        }
+        logger.info("Read statistical model from " + STATISTICAL_MODEL);
     }
-    logger.info("Read statistical model from " + STATISTICAL_MODEL);
-    KBPRelationExtractor extractor = new KBPEnsembleExtractor(
-        new KBPTokensregexExtractor(TOKENSREGEX_DIR),
-        new KBPSemgrexExtractor(SEMGREX_DIR),
-        statisticalExtractor
-    );
+
+    KBPRelationExtractor extractor;
+    if (statisticalExtractor == null) {
+        extractor = new KBPEnsembleExtractor(
+            new KBPTokensregexExtractor(TOKENSREGEX_DIR),
+            new KBPSemgrexExtractor(SEMGREX_DIR));
+    } else {
+        extractor = new KBPEnsembleExtractor(
+            new KBPTokensregexExtractor(TOKENSREGEX_DIR),
+            new KBPSemgrexExtractor(SEMGREX_DIR),
+            statisticalExtractor);
+    }
 
     List<Pair<KBPInput, String>> testExamples = KBPRelationExtractor.readDataset(TEST_FILE);
 

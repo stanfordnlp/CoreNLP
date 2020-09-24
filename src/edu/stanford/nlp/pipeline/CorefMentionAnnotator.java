@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.CorefProperties;
+import edu.stanford.nlp.coref.CorefUtils;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.coref.md.CorefMentionFinder;
@@ -154,6 +155,9 @@ public class CorefMentionAnnotator extends TextAnnotationCreator implements Anno
       corefProperties.setProperty("removeNestedMentions", "true");
     }
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
+    if (CorefProperties.removeXmlMentions(corefProperties)) {
+      mentions = CorefUtils.filterXmlTagsFromMentions(mentions);
+    }
     // build list of coref mentions in this document
     annotation.set(CorefCoreAnnotations.CorefMentionsAnnotation.class , new ArrayList<Mention>());
     // initialize indexes

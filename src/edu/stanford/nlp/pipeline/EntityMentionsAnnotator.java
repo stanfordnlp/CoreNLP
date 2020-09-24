@@ -222,9 +222,12 @@ public class EntityMentionsAnnotator implements Annotator {
 
   public static HashMap<String,Double> determineEntityMentionConfidences(CoreMap entityMention) {
     // get a list of labels that have probability values from the first token
-    Set<String> labelsWithProbs =
-        entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0).get(
-            CoreAnnotations.NamedEntityTagProbsAnnotation.class).keySet();
+    Map<String,Double> tagProbs = entityMention.get(CoreAnnotations.TokensAnnotation.class).get(0).get(
+            CoreAnnotations.NamedEntityTagProbsAnnotation.class);
+    if (tagProbs == null) {
+      return null;
+    }
+    Set<String> labelsWithProbs = tagProbs.keySet();
     // build the label values hash map for the entity mention
     HashMap<String,Double> entityLabelProbVals = new HashMap<>();
     // initialize to 1.1

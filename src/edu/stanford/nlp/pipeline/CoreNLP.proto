@@ -136,6 +136,10 @@ message Sentence {
   // the quote annotator can soometimes add merged sentences
   optional Sentence           enhancedSentence                 = 70;
 
+  // speaker stuff
+  optional string          speaker                             = 71;  // The speaker speaking this sentence
+  optional string          speakerType                         = 72;  // The type of speaker speaking this sentence
+
   extensions 100 to 255;
 }
 
@@ -161,6 +165,7 @@ message Token {
   optional uint32 endChar           = 12;   // The character offset end, in the document
   optional uint32 utterance         = 13;   // The utterance tag used in dcoref
   optional string speaker           = 14;   // The speaker speaking this word
+  optional string speakerType       = 77;   // The type of speaker speaking this word
   optional uint32 beginIndex        = 15;   // The begin index of, e.g., a span
   optional uint32 endIndex          = 16;   // The begin index of, e.g., a span
   optional uint32 tokenBeginIndex   = 17;   // The begin index of the token

@@ -15,37 +15,27 @@ public class ConfusionMatrixTSV  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(ConfusionMatrixTSV.class);
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     if (args.length < 1) {
-      System.err.printf("Usage: java %s answers_file%n", ConfusionMatrix.class.getName());
+      System.err.printf("Usage: java %s answers_file%n", ConfusionMatrixTSV.class.getName());
       System.exit(-1);
     }
 
-    try {
-      ConfusionMatrix<String> cm = new ConfusionMatrix<>();
+    ConfusionMatrix<String> cm = new ConfusionMatrix<>();
 
-      String answersFile = args[0];
-      BufferedReader br = new BufferedReader(
-        new InputStreamReader(new FileInputStream(answersFile), "UTF-8"));
+    String answersFile = args[0];
+    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(answersFile), "UTF-8"));
 
-      String line = br.readLine();
-      for (; line != null; line = br.readLine()) {
-        String[] tokens = line.split("\\s");
-        if (tokens.length != 3) {
-          System.err.printf("ignoring bad line");
-          continue;
-          //System.exit(-1);
-        }
-        cm.add(tokens[2], tokens[1]);
+    String line = br.readLine();
+    for (; line != null; line = br.readLine()) {
+      String[] tokens = line.split("\\s");
+      if (tokens.length != 3) {
+        System.err.printf("ignoring bad line");
+        continue;
       }
-
-      System.out.println(cm.toString());
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
+      cm.add(tokens[2], tokens[1]);
     }
+
+    System.out.println(cm.toString());
   }
 }

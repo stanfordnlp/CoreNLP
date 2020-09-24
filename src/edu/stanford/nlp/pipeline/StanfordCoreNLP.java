@@ -389,6 +389,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * @return A sanitized annotators string with all prerequisites met.
    */
   public static String ensurePrerequisiteAnnotators(String[] annotators, Properties props) {
+    int posIndex = ArrayUtils.indexOf(annotators, Annotator.STANFORD_POS);
+    int parseIndex = ArrayUtils.indexOf(annotators, Annotator.STANFORD_PARSE);
+    boolean useParseForPos = ((parseIndex >= 0) && (posIndex < 0)); // Already doing the parsing, use the parsing for the pos tag
+
     // Get an unordered set of annotators
     Set<String> unorderedAnnotators = new LinkedHashSet<>();  // linked to preserve order
     Collections.addAll(unorderedAnnotators, annotators);
@@ -416,6 +420,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       }
     }
 
+    if (useParseForPos) {
+      unorderedAnnotators.remove(Annotator.STANFORD_POS);
+    }
+
     // Order the annotators
     List<String> orderedAnnotators = new ArrayList<>();
     while (!unorderedAnnotators.isEmpty()) {
@@ -427,7 +435,11 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         // Are the requirements satisfied?
         boolean canAdd = true;
         for (String prereq : Annotator.DEFAULT_REQUIREMENTS.get(candidate.toLowerCase())) {
-          if (!orderedAnnotators.contains(prereq)) {
+          // Weird hack to replace POS with POS tags from PARSE if we are already doing parse (and just parse)
+          if (useParseForPos && Annotator.STANFORD_POS.equals(prereq)) {
+            prereq = Annotator.STANFORD_PARSE;
+          }
+          if (!prereq.equals(candidate) && !orderedAnnotators.contains(prereq)) {
             canAdd = false;
             break;
           }

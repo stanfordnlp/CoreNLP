@@ -902,6 +902,34 @@ public class ArrayUtils  {
   }
    */
 
+  /**
+   * Returns the index of the first occurrence of the specified element in this array starting at the specified index,
+   *   or -1 if this array does not contain the element.
+   * @param array Array to search
+   * @param object Object to look for
+   * @param startIndex Start index
+   * @return index of the specified element in the array, or -1 if the array does not contain the element
+   */
+  public static <T> int indexOf(T[] array, T object, int startIndex) {
+    for (int i = startIndex; i < array.length; i++) {
+      if (object.equals(array[i])) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Returns the index of the first occurrence of the specified element in this array,
+   *   or -1 if this array does not contain the element.
+   * @param array Array to search
+   * @param object Object to look for
+   * @return index of the specified element in the array, or -1 if the array does not contain the element
+   */
+  public static <T> int indexOf(T[] array, T object) {
+    return indexOf(array, object, 0);
+  }
+
   public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens){
      return getSubListIndex(tofind, tokens, (o1) -> o1.first().equals(o1.second()));
   }

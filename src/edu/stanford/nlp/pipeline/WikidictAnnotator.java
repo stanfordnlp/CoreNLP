@@ -66,10 +66,14 @@ public class WikidictAnnotator extends SentenceAnnotator {
     try {
       int i = 0;
       String[] fields = new String[3];
-      // Note that using our own Interner means that there will be no
-      // overlap with other models which store large amounts of words.
-      // However, this is much faster at loading
-      Interner<String> interner = new Interner<>();
+      // Keeping track of the previous link will let us reuse String
+      // objects, assuming the file is sorted by the second column.
+      // TODO: we actually didn't know where the dictionary creation
+      // code is.  If it gets updated later and the dictionary is
+      // rebuilt, please remember to change the code to update it by
+      // the second column.
+      String previousLink = "";
+      int reuse = 0;
       for (String line : IOUtils.readLines(wikidictPath, "UTF-8")) {
         if (line.charAt(0) == '\t') {
           continue;
@@ -89,11 +93,21 @@ public class WikidictAnnotator extends SentenceAnnotator {
         String surfaceForm = fields[0];
         if (wikidictCaseless)
           surfaceForm = surfaceForm.toLowerCase();
-        String link = interner.intern(fields[1]);  // intern, as most entities have multiple surface forms
+        // save memory by reusing the string without using an interner
+        // requires that the dictionary be sorted by link
+        String link = fields[1];
+        if (link.equals(previousLink)) {
+          link = previousLink;
+          reuse++;
+        }
         // Add the entry
         dictionary.put(surfaceForm, link);
+        previousLink = link;
       }
-      log.info("Done reading Wikidict (" + dictionary.size() + " links read; " + interner.size() + " unique entities; " + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + " elapsed)");
+      log.info("Done reading Wikidict (" + dictionary.size() + " links read; " + (dictionary.size() - reuse) + " unique entities; " + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + " elapsed)");
+      if ((dictionary.size() - reuse) / (float) dictionary.size() > 0.35) {
+        log.error("We expected a much higher fraction of key reuse in the dictionary.  It is possible the dictionary was recreated and then not sorted.  Please sort the dictionary by the second column and update the dictionary creation code to sort this way before writing.  This will save quite a bit of time loading without sacrificing memory performance.");
+      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
