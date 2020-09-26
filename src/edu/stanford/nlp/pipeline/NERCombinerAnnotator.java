@@ -366,6 +366,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // create new sentences with NER-specific tokenization
     copyAnnotation.set(CoreAnnotations.SentencesAnnotation.class, new ArrayList<>());
     copyAnnotation.set(CoreAnnotations.DocDateAnnotation.class, originalAnnotation.get(CoreAnnotations.DocDateAnnotation.class));
+    copyAnnotation.set(CoreAnnotations.DocIDAnnotation.class, originalAnnotation.get(CoreAnnotations.DocIDAnnotation.class));
     for (CoreMap sentence : originalAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {
       List<CoreLabel> originalTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> copyTokens = new ArrayList<>();
