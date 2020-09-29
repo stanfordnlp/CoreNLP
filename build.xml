@@ -30,6 +30,11 @@
         <include name="*.jar"/>
         <exclude name="javanlp*"/>
       </fileset>
+    </path>
+  </target>
+
+  <target name="models.classpath" description="Sets the models classpath, for itests and such">
+    <path id="models.classpath">
       <fileset dir="${env.CORENLP_MODELS_HOME}">
         <include name="*.jar"/>
       </fileset>
@@ -162,12 +167,13 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
 
-  <target name="itest" depends="classpath,compile"
+  <target name="itest" depends="classpath,compile,models.classpath"
           description="Run core integration tests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="12g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no"
            haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
+      <classpath refid="models.classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
       <classpath path="${source.path}"/>
