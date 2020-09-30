@@ -140,7 +140,7 @@ public class DocumentMaker {
       for (CoreMap sentence : input.annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         sentence.remove(TreeCoreAnnotations.TreeAnnotation.class);
       }
-    } else {
+    } else if (!CorefProperties.conll(props)) {
       for (CoreMap sentence : input.annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
           token.remove(CoreAnnotations.PartOfSpeechAnnotation.class);
