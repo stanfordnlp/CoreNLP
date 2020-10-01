@@ -8,11 +8,17 @@ import org.ejml.simple.SimpleMatrix;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
+import edu.stanford.nlp.util.ArgumentParser;
 
 public class ModelSerializer {
-  private static final String LANGUAGE = "chinese";
-  private static final String NAME = "default";
-  private static final String DATA_PATH =
+  @ArgumentParser.Option(name="language", gloss="What language settings were used to train the model")
+  private static String LANGUAGE = "english";
+
+  @ArgumentParser.Option(name="name", gloss="Model name")
+  private static String NAME = "default";
+
+  @ArgumentParser.Option(name="path", gloss="Directory where the saved matrices can be found")
+  private static String DATA_PATH =
     "data/models/reward_rescaling/exported_weights";
 
   private static final String PRETRAINED = "vectors_pretrained_all";
@@ -21,6 +27,8 @@ public class ModelSerializer {
   private static final String PAIRWISE = "pairwise_weights";
 
   public static void main(String[] args) throws Exception {
+    ArgumentParser.fillOptions(ModelSerializer.class, args);
+
     final String baseDir;
     final String savedLanguageParticle;
     if (LANGUAGE != null && !LANGUAGE.equals("")) {
