@@ -188,7 +188,7 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
 
-  <target name="itest-many-docs" depends="classpath"
+  <target name="itest-many-docs" depends="classpath,compile,models.classpath"
           description="Run StanfordCoreNLP on a large volume of documents.">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
@@ -207,7 +207,7 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-coreference" depends="classpath"
+  <target name="itest-coreference" depends="classpath,compile,models.classpath"
           description="Coreference related slow itests.">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="7g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
@@ -229,7 +229,7 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-protobuf" depends="classpath"
+  <target name="itest-protobuf" depends="classpath,compile,models.classpath"
           description="Protocol buffer related slow itests.">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
@@ -248,7 +248,7 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-kbp" depends="classpath"
+  <target name="itest-kbp" depends="classpath,compile,models.classpath"
           description="KBP related slow itests.">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
@@ -267,7 +267,7 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-ner" depends="classpath"
+  <target name="itest-ner" depends="classpath,compile,models.classpath"
           description="NER related slow itests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
@@ -289,7 +289,7 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-misc" depends="classpath"
+  <target name="itest-misc" depends="classpath,compile,models.classpath"
           description="Other assorted slow itests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
@@ -309,7 +309,7 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-debug" depends="classpath"
+  <target name="itest-debug" depends="classpath,compile,models.classpath"
            description="target for debug purposes">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
