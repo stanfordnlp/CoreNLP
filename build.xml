@@ -254,6 +254,7 @@
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
         haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
+      <classpath refid="models.classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
       <classpath path="${source.path}"/>
