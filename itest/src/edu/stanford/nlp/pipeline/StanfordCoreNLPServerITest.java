@@ -108,7 +108,8 @@ public class StanfordCoreNLPServerITest {
 
   @Test
   public void testTregexJson() throws IOException {
-    String expected="{\"sentences\":[{\"0\": { \"match\": \"(NN dog)\\n\", \"spanString\": \"dog\", \"namedNodes\": [ ] }, \"1\": { \"match\": \"(NN fish)\\n\", \"spanString\": \"fish\", \"namedNodes\": [ ] } } ]}".replaceAll(" ", "");
+
+    String expected="{\"sentences\":[{\"0\":{\"sentIndex\":0,\"characterOffsetBegin\":4,\"characterOffsetEnd\":7,\"match\":\"(NNdog)\\n\",\"spanString\":\"dog\",\"namedNodes\":[]},\"1\":{\"sentIndex\":0,\"characterOffsetBegin\":14,\"characterOffsetEnd\":18,\"match\":\"(NNfish)\\n\",\"spanString\":\"fish\",\"namedNodes\":[]}}]}".replaceAll(" ", "");
 
     String query = "The dog ate a fish";
     byte[] message = query.getBytes("utf-8");

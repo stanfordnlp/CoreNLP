@@ -253,9 +253,9 @@ public class StanfordCoreNLPITest extends TestCase {
     return properties;
   }
   */
-
-
-  public void testSerialization()
+  
+  /* This test no longer suppported. */
+  /*public void testSerialization()
     throws Exception {
     // Test that an annotation can be serialized and deserialized
 
@@ -286,7 +286,7 @@ public class StanfordCoreNLPITest extends TestCase {
         newSentence.get(CoreAnnotations.TokensAnnotation.class));
     }
     assertTrue(document.equals(newDocument));
-  }
+  }*/
 
   private static Object processSerialization(Object input)
     throws Exception {
