@@ -12,7 +12,7 @@ import edu.stanford.nlp.trees.Tree;
  */
 public class SentimentTrainingITest {
 
-  private static final String TRAIN_PATH = "projects/core/data/edu/stanford/nlp/sentiment/onesent.txt";
+  private static final String TRAIN_PATH = "data/edu/stanford/nlp/sentiment/onesent.txt";
 
   @Test
   public void testGradientCheck() {

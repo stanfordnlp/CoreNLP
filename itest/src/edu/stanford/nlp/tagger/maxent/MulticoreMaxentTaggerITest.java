@@ -20,9 +20,9 @@ public class MulticoreMaxentTaggerITest extends TestCase {
   private static MaxentTagger singleTagger = null;
   private static MaxentTagger multiTagger = null;
 
-  private static final String taggedText = "projects/core/data/edu/stanford/nlp/tagger/sample_tagged.txt";
-  private static final String plainText = "projects/core/data/edu/stanford/nlp/tagger/sample_plain.txt";
-  private static final String xmlText = "projects/core/data/edu/stanford/nlp/tagger/sample_xml.xml";
+  private static final String taggedText = "data/edu/stanford/nlp/tagger/sample_tagged.txt";
+  private static final String plainText = "data/edu/stanford/nlp/tagger/sample_plain.txt";
+  private static final String xmlText = "data/edu/stanford/nlp/tagger/sample_xml.xml";
 
   @Override
   public void setUp() throws Exception {
