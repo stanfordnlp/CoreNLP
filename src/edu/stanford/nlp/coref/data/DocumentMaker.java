@@ -15,7 +15,6 @@ import edu.stanford.nlp.coref.md.DependencyCorefMentionFinder;
 import edu.stanford.nlp.coref.md.RuleBasedCorefMentionFinder;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -104,7 +103,7 @@ public class DocumentMaker {
   }
 
   private static void findGoldMentionHeads(Document doc) {
-    List<CoreMap> sentences = doc.annotation.get(SentencesAnnotation.class);
+    List<CoreMap> sentences = doc.annotation.get(CoreAnnotations.SentencesAnnotation.class);
     for (int i=0 ; i<sentences.size() ; i++ ) {
       DependencyCorefMentionFinder.findHeadInDependency(sentences.get(i), doc.goldMentions.get(i));
     }
