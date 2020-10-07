@@ -16,7 +16,7 @@ import java.util.Properties;
  */
 public class HeidelTimeITest {
 
-  public static final String DEFAULT_HEIDELTIME_LOCATION = "/u/nlp/packages/heideltime/";
+  public static final String DEFAULT_HEIDELTIME_LOCATION = "/u/nlp/data/stanford-corenlp/testing/packages/heideltime/";
 
   @Test
   public void runHeidelTimeEnglish() throws Exception {
