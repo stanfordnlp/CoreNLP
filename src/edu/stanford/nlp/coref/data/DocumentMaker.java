@@ -13,6 +13,7 @@ import edu.stanford.nlp.coref.docreader.DocReader;
 import edu.stanford.nlp.coref.md.CorefMentionFinder;
 import edu.stanford.nlp.coref.md.DependencyCorefMentionFinder;
 import edu.stanford.nlp.coref.md.RuleBasedCorefMentionFinder;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -110,7 +111,7 @@ public class DocumentMaker {
   }
 
   private StanfordCoreNLP coreNLP;
-  private StanfordCoreNLP getStanfordCoreNLP(Properties props) {
+  private synchronized StanfordCoreNLP getStanfordCoreNLP(Properties props) {
     if (coreNLP != null) {
       return coreNLP;
     }
@@ -120,14 +121,28 @@ public class DocumentMaker {
       pipelineProps.setProperty("annotators", (CorefProperties.getLanguage(props) == Locale.CHINESE ?
               "lemma, ner" : "lemma") + (CorefProperties.useGoldMentions(props) ? "" : ", coref.mention"));
       pipelineProps.setProperty("ner.applyFineGrained", "false");
+      coreNLP = new StanfordCoreNLP(pipelineProps, false);
     } else {
       pipelineProps.setProperty("annotators",
-              (CorefProperties.useConstituencyParse(props)? "parse" : "pos") + ", lemma, ner " +
+              (CorefProperties.useConstituencyParse(props) ? "parse" : "pos") + ", lemma, ner " +
               (CorefProperties.useConstituencyParse(props) ? "" : ", depparse") +
               (CorefProperties.useGoldMentions(props) ? "" : ", coref.mention"));
       pipelineProps.setProperty("ner.applyFineGrained", "false");
+      coreNLP = new StanfordCoreNLP(pipelineProps, false);
+      if (CorefProperties.useConstituencyParse(props)) {
+        // The first annotator is now known to be the parse annotator.
+        // It is possible that this parse annotator needs POS tags to work.
+        // If so, we need to add a tagger.
+        // Hopefully the annotator cache will save us from doing a ton
+        // of extra annotator loading.
+        Set<Class<? extends CoreAnnotation>> requirements = coreNLP.requires();
+        if (requirements.contains(CoreAnnotations.PartOfSpeechAnnotation.class)) {
+          pipelineProps.setProperty("annotators", "pos, " + pipelineProps.getProperty("annotators"));
+          coreNLP = new StanfordCoreNLP(pipelineProps, false);
+        }
+      }
     }
-    return (coreNLP = new StanfordCoreNLP(pipelineProps, false));
+    return coreNLP;
   }
 
   public Document nextDoc() throws Exception {
