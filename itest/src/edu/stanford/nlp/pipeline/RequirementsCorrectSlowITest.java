@@ -56,6 +56,7 @@ public class RequirementsCorrectSlowITest {
         used.remove(CoreAnnotations.GoldAnswerAnnotation.class);
         used.remove(CoreAnnotations.NamedEntityTagProbsAnnotation.class);
         used.remove(CoreAnnotations.AnswerProbAnnotation.class);
+        used.remove(CoreAnnotations.DocDateAnnotation.class);
       }
       // these are created by quote but used by quote.attribution
       // causing an error
