@@ -2,7 +2,8 @@ package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.tokensregex.*;
+import edu.stanford.nlp.ling.tokensregex.CoreMapExpressionExtractor;
+import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
