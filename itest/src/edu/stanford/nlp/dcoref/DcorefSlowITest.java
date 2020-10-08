@@ -17,6 +17,10 @@ import edu.stanford.nlp.util.StringUtils;
 
 public class DcorefSlowITest extends TestCase {
 
+  public static String COREF_SCORER_PATH =
+      System.getenv().keySet().contains("COREF_SCORER_PATH") ? System.getenv().get("COREF_SCORER_PATH") :
+          "/u/scr/nlp/data/conll-2011/scorer/v4/scorer.pl";
+
   protected void makePropsFile(String path, String workDir, String scorer) throws IOException {
     PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(path)));
 
@@ -35,13 +39,13 @@ public class DcorefSlowITest extends TestCase {
   }
 
   public void testDcorefCoNLLResultV4() throws Exception {
-    double finalScore = runDcoref("/u/scr/nlp/data/conll-2011/scorer/v4/scorer.pl");
+    double finalScore = runDcoref(COREF_SCORER_PATH);
     System.out.printf("Final Score (CoNLL 2011, scorer v4): (MUC+B^3+ceafe)/3 = %.2f%n", finalScore);
     assertEquals(59.3, finalScore, 0.3); // 2016-07: 59.45
   }
 
   public void testDcorefCoNLLResultV801() throws Exception {
-    double finalScore = runDcoref("/u/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl");
+    double finalScore = runDcoref(COREF_SCORER_PATH);
     System.out.printf("Final Score (CoNLL 2011, scorer v8): (MUC+B^3+ceafe)/3 = %.2f%n", finalScore);
     assertEquals(54.0, finalScore, 0.3); // 2016-07: 54.13
   }
