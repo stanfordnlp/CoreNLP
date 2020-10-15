@@ -285,7 +285,6 @@
       <batchtest fork="yes">
         <fileset dir="${itests.path}">
           <include name="**/NERBenchmark*SlowITest.java"/>
-          <include name="**/TrainCRFClassifierSlowITest.java"/>
           <include name="**/NERPipelineEndToEndSlowITest.java"/>
           <include name="**/NERTokenizationSlowITest.java"/>
         </fileset>
