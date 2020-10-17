@@ -12,7 +12,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/tomcat/jsp-api.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/tomcat/tomcat-api.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar" sourcepath="libsrc/commons-logging-1.1.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/junit.jar" sourcepath="libsrc/junit-4.5-src.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/junit-4.13.1.jar" sourcepath="libsrc/junit-4.13.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javax.servlet.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/AppleJavaExtensions.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jflex-1.6.1.jar" sourcepath="libsrc/jflex-1.6.1-src.zip"/>
@@ -38,7 +38,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/ejml-ddense-0.38.jar" sourcepath="libsrc/projects/core/libsrc/ejml-ddense-0.38-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ejml-simple-0.38.jar" sourcepath="libsrc/projects/core/libsrc/ejml-simple-0.38-sources.jar"/>
 	<classpathentry kind="lib" path="liblocal/antlr-runtime.jar"/>
-	<classpathentry kind="lib" path="liblocal/java-hamcrest.jar" sourcepath="libsrc/java-hamcrest-sources.jar"/>
+	<classpathentry kind="lib" path="liblocal/hamcrest-2.2.jar " sourcepath="libsrc/hamcrest-2.2-sources.jar"/>
 	<classpathentry kind="lib" path="liblocal/javaruntype.jar"/>
 	<classpathentry kind="lib" path="liblocal/junit-quickcheck-core.jar"/>
 	<classpathentry kind="lib" path="liblocal/junit-quickcheck-generators.jar"/>
