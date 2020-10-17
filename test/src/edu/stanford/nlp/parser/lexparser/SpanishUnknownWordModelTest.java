@@ -3,12 +3,16 @@ package edu.stanford.nlp.parser.lexparser;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
-import junit.framework.TestCase;
 
-public class SpanishUnknownWordModelTest extends TestCase {
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+public class SpanishUnknownWordModelTest {
 
   private SpanishUnknownWordModel uwm;
 
+  @Before
   public void setUp() {
     // Build dummy UWM
     Options op = new Options();
@@ -21,22 +25,23 @@ public class SpanishUnknownWordModelTest extends TestCase {
                                       wordIndex, tagIndex, new ClassicCounter<IntTaggedWord>());
   }
 
+  @Test
   public void testGetSignature() throws Exception {
-    assertEquals("UNK-cond-c", uwm.getSignature("marcaría", 0));
+    Assert.assertEquals("UNK-cond-c", uwm.getSignature("marcaría", 0));
 
-    assertEquals("UNK-imp-c", uwm.getSignature("marcaba", 0));
-    assertEquals("UNK-imp-c", uwm.getSignature("marcábamos", 0));
-    assertEquals("UNK-imp-c", uwm.getSignature("vivías", 0));
-    assertEquals("UNK-imp-c", uwm.getSignature("vivíamos", 0));
+    Assert.assertEquals("UNK-imp-c", uwm.getSignature("marcaba", 0));
+    Assert.assertEquals("UNK-imp-c", uwm.getSignature("marcábamos", 0));
+    Assert.assertEquals("UNK-imp-c", uwm.getSignature("vivías", 0));
+    Assert.assertEquals("UNK-imp-c", uwm.getSignature("vivíamos", 0));
 
-    assertEquals("UNK-inf-c", uwm.getSignature("brindar", 0));
+    Assert.assertEquals("UNK-inf-c", uwm.getSignature("brindar", 0));
 
-    assertEquals("UNK-adv-c", uwm.getSignature("rápidamente", 0));
+    Assert.assertEquals("UNK-adv-c", uwm.getSignature("rápidamente", 0));
 
     // Broad-coverage patterns
-    assertEquals("UNK-vb1p-c", uwm.getSignature("mandamos", 0));
-    assertEquals("UNK-s-c", uwm.getSignature("últimos", 0));
-    assertEquals("UNK-ger-c", uwm.getSignature("marcando", 0));
-    assertEquals("UNK-s-c", uwm.getSignature("marcados", 0));
+    Assert.assertEquals("UNK-vb1p-c", uwm.getSignature("mandamos", 0));
+    Assert.assertEquals("UNK-s-c", uwm.getSignature("últimos", 0));
+    Assert.assertEquals("UNK-ger-c", uwm.getSignature("marcando", 0));
+    Assert.assertEquals("UNK-s-c", uwm.getSignature("marcados", 0));
   }
 }
