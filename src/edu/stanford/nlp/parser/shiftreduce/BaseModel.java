@@ -11,7 +11,6 @@ import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ScoredObject;
 
