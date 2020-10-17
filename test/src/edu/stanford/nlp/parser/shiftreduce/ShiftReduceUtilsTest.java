@@ -21,11 +21,11 @@ public class ShiftReduceUtilsTest extends TestCase {
     ShiftTransition shift = new ShiftTransition();
     state = shift.apply(shift.apply(state));
 
-    BinaryTransition transition = new BinaryTransition("NP", BinaryTransition.Side.RIGHT);
+    BinaryTransition transition = new BinaryTransition("NP", BinaryTransition.Side.RIGHT, false);
     State next = transition.apply(state);
     assertEquals(BinaryTransition.Side.RIGHT, ShiftReduceUtils.getBinarySide(next.stack.peek()));
 
-    transition = new BinaryTransition("NP", BinaryTransition.Side.LEFT);
+    transition = new BinaryTransition("NP", BinaryTransition.Side.LEFT, false);
     next = transition.apply(state);
     assertEquals(BinaryTransition.Side.LEFT, ShiftReduceUtils.getBinarySide(next.stack.peek()));
   }

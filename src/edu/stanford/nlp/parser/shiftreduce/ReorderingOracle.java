@@ -2,6 +2,7 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import edu.stanford.nlp.util.Generics;
 
@@ -14,10 +15,13 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class ReorderingOracle {
-  ShiftReduceOptions op;
+  final ShiftReduceOptions op;
 
-  public ReorderingOracle(ShiftReduceOptions op) {
+  final Set<String> rootOnlyStates;
+
+  public ReorderingOracle(ShiftReduceOptions op, Set<String> rootOnlyStates) {
     this.op = op;
+    this.rootOnlyStates = rootOnlyStates;
   }
 
   /**
@@ -115,7 +119,7 @@ public class ReorderingOracle {
     return false;
   }
 
-  static boolean reorderIncorrectBinaryTransition(List<Transition> transitions) {
+  boolean reorderIncorrectBinaryTransition(List<Transition> transitions) {
     int shiftCount = 0;
     ListIterator<Transition> cursor = transitions.listIterator();
     do {
@@ -164,7 +168,7 @@ public class ReorderingOracle {
    * Sadly, this does not seem to help - the parser gets worse when it
    * learns these states
    */
-  static boolean reorderIncorrectShiftTransition(List<Transition> transitions) {
+  boolean reorderIncorrectShiftTransition(List<Transition> transitions) {
     List<BinaryTransition> leftoverBinary = Generics.newArrayList();
     while (transitions.size() > 0) {
       Transition head = transitions.remove(0);
@@ -213,16 +217,16 @@ public class ReorderingOracle {
       // we add a bunch of temporary binary transitions with a right
       // head, ending up with a binary transition with a right head
       for (int i = 0; i < leftoverBinary.size(); ++i) {
-        cursor.add(new BinaryTransition("@" + label, BinaryTransition.Side.RIGHT));
+        cursor.add(new BinaryTransition("@" + label, BinaryTransition.Side.RIGHT, rootOnlyStates.contains(label)));
       }
       // use lastBinary.label in case the last transition is temporary
-      cursor.add(new BinaryTransition(lastBinary.label, BinaryTransition.Side.RIGHT));
+      cursor.add(new BinaryTransition(lastBinary.label, BinaryTransition.Side.RIGHT, rootOnlyStates.contains(label)));
     } else {
-      cursor.add(new BinaryTransition("@" + label, BinaryTransition.Side.LEFT));
+      cursor.add(new BinaryTransition("@" + label, BinaryTransition.Side.LEFT, rootOnlyStates.contains(label)));
       for (int i = 0; i < leftoverBinary.size() - 1; ++i) {
-        cursor.add(new BinaryTransition("@" + label, leftoverBinary.get(i).side));
+        cursor.add(new BinaryTransition("@" + label, leftoverBinary.get(i).side, rootOnlyStates.contains(label)));
       }
-      cursor.add(new BinaryTransition(lastBinary.label, leftoverBinary.get(leftoverBinary.size() - 1).side));
+      cursor.add(new BinaryTransition(lastBinary.label, leftoverBinary.get(leftoverBinary.size() - 1).side, rootOnlyStates.contains(lastBinary.label)));
     }
     return true;
   }
