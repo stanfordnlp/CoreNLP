@@ -15,18 +15,14 @@ import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ScoredObject;
 
-// TODO: remove when models are rebuilt
-import java.io.*;
-import edu.stanford.nlp.util.HashIndex;
-
 public abstract class BaseModel implements Serializable {
 
-  /*final*/ ShiftReduceOptions op;
+  final ShiftReduceOptions op;
 
-  /*final*/ Index<Transition> transitionIndex;
-  /*final*/ Set<String> knownStates; // the set of goal categories of a reduce = the set of phrasal categories in a grammar
-  /*final*/ Set<String> rootStates;
-  /*final*/ Set<String> rootOnlyStates;
+  final Index<Transition> transitionIndex;
+  final Set<String> knownStates; // the set of goal categories of a reduce = the set of phrasal categories in a grammar
+  final Set<String> rootStates;
+  final Set<String> rootOnlyStates;
 
   public BaseModel(ShiftReduceOptions op, Index<Transition> transitionIndex,
                    Set<String> knownStates, Set<String> rootStates, Set<String> rootOnlyStates) {
@@ -48,7 +44,10 @@ public abstract class BaseModel implements Serializable {
     this.rootOnlyStates = other.rootOnlyStates;
   }
 
-  // TODO: get rid of this when the models are rebuilt
+  /*
+  // This chunk of code can read a model where the BinaryTransitions
+  // aren't protected from going to root in the middle of a tree and
+  // fix those models so that can't happen
   private void readObject(ObjectInputStream in)
     throws IOException, ClassNotFoundException
   {
@@ -68,9 +67,13 @@ public abstract class BaseModel implements Serializable {
       BinaryTransition bt = (BinaryTransition) t;
       boolean isRoot = ((bt.isBinarized() && rootOnlyStates.contains(bt.label.substring(1))) ||
                         rootOnlyStates.contains(bt.label));
+      if (isRoot) {
+        System.out.println("Updating a transition: " + bt);
+      }
       transitionIndex.add(new BinaryTransition(bt.label, bt.side, isRoot));
     }
   }
+  */
   
   /**
    * Returns a transition which might not even be part of the model,
