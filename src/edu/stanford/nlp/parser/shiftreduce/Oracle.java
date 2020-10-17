@@ -25,15 +25,15 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 class Oracle {
-  List<Tree> binarizedTrees;
+  final List<Tree> binarizedTrees;
 
-  List<IdentityHashMap<Tree, Tree>> parentMaps;
+  final List<IdentityHashMap<Tree, Tree>> parentMaps;
 
-  List<List<Tree>> leafLists;
+  final List<List<Tree>> leafLists;
 
-  boolean compoundUnaries;
+  final boolean compoundUnaries;
 
-  Set<String> rootStates;
+  final Set<String> rootStates;
 
   Oracle(List<Tree> binarizedTrees, boolean compoundUnaries, Set<String> rootStates) {
     this.binarizedTrees = binarizedTrees;
@@ -46,6 +46,7 @@ class Oracle {
     }
 
     this.compoundUnaries = compoundUnaries;
+    this.rootStates = rootStates;
   }
 
   static IdentityHashMap<Tree, Tree> buildParentMap(Tree tree) {
