@@ -528,8 +528,16 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
         nodeVector = NeuralUtils.elementwiseApplyTanh(W.mult(childrenVector));
       }
     } else {
-      log.info("SentimentCostAndGradient: warning: Tree not correctly binarized: " + tree);
-      throw new AssertionError("Tree not correctly binarized");
+      StringBuilder error = new StringBuilder();
+      error.append("SentimentCostAndGradient: Tree not correctly binarized:\n   ");
+      error.append(tree);
+      error.append("\nToo many top level constituents present: ");
+      error.append("(" + tree.value());
+      for (Tree child : tree.children()) {
+        error.append(" (" + child.value() + " ...)");
+      }
+      error.append(")");
+      throw new ForwardPropagationException(error.toString());
     }
 
     SimpleMatrix predictions = NeuralUtils.softmax(classification.mult(NeuralUtils.concatenateWithBias(nodeVector)));
