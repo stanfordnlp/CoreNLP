@@ -503,7 +503,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
     log.info("Known states: " + knownStates);
     log.info("States which occur at the root: " + rootStates);
-    log.info("States which only occur at the root: " + rootStates);
+    log.info("States which only occur at the root: " + rootOnlyStates);
 
     Timing transitionTimer = new Timing();
     List<List<Transition>> transitionLists = CreateTransitionSequence.createTransitionSequences(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
