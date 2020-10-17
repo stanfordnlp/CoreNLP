@@ -38,7 +38,7 @@ public class BinaryTransitionTest extends TestCase {
 
   public void testLeftTransition() {
     State state = buildState(2);
-    BinaryTransition transition = new BinaryTransition("NP", BinaryTransition.Side.LEFT);
+    BinaryTransition transition = new BinaryTransition("NP", BinaryTransition.Side.LEFT, false);
     state = transition.apply(state);
     assertEquals(2, state.tokenPosition);
     assertEquals(1, state.stack.size());
@@ -49,7 +49,7 @@ public class BinaryTransitionTest extends TestCase {
 
   public void testRightTransition() {
     State state = buildState(2);
-    BinaryTransition transition = new BinaryTransition("NP", BinaryTransition.Side.RIGHT);
+    BinaryTransition transition = new BinaryTransition("NP", BinaryTransition.Side.RIGHT, false);
     state = transition.apply(state);
     assertEquals(2, state.tokenPosition);
     assertEquals(1, state.stack.size());
