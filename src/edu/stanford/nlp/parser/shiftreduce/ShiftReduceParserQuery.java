@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -132,15 +133,17 @@ public class ShiftReduceParserQuery implements ParserQuery  {
         break;
       }
     }
-    if (beam.size() == 0) {
+
+    bestParses = beam.stream().filter((state) -> state.isFinished())
+      .collect(Collectors.toList());
+
+    if (bestParses.size() == 0) {
       success = false;
       unparsable = true;
       debinarized = null;
       finalState = null;
       bestParses = Collections.emptyList();
     } else {
-      // TODO: filter out beam elements that aren't finished
-      bestParses = Generics.newArrayList(beam);
       Collections.sort(bestParses, beam.comparator());
       Collections.reverse(bestParses);
       finalState = bestParses.get(0);
