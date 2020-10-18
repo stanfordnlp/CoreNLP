@@ -299,7 +299,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
   }
 
   /**
-   * If an internal node goes directly to a preterminal, that is an illegal tree.
+   * If an internal node goes directly to a leaf, that is an illegal tree.
    * Otherwise, accept the tree.
    * <br>
    * Example:
