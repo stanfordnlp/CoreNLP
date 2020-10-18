@@ -44,6 +44,11 @@ public class TreeCollinizer implements TreeTransformer {
     this.whOption = whOption;
   }
 
+  public String toString() {
+    return ("TreeCollinizer(tlp: " + tlp.getClass() + ", deletePunct: " + deletePunct +
+            ", fixCollinsBaseNP: " + fixCollinsBaseNP + ", whOption: " + whOption + ")");
+  }
+
   public Tree transformTree(Tree tree) {
     if (tree == null) return null;
     TreeFactory tf = tree.treeFactory();
