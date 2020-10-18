@@ -148,26 +148,26 @@ LAST UPDATE BY: Jeff Michels
 
 
 -----------------------------------------------------------------------
-junit.jar
+junit-4.13.1.jar
 
-ORIGINAL JAR NAME: junit-4.12.jar
+ORIGINAL JAR NAME: junit-4.13.1.jar
 
-VERSION: 4.12
+VERSION: 4.13.1
 
-RELEASE DATE: 2015/02/19
+RELEASE DATE: 2020/10/11
 
 SOURCE AVAILABLE: yes
 
 DESCRIPTION: JUnit is a simple framework to write repeatable unit tests.
 
-URL: http://www.junit.org/
+URL: https://www.junit.org/
 
 USED BY: Our junit tests.
 Not needed by CoreNLP distributions.
 
-LAST UPDATE: 2015/08/28
+LAST UPDATE: 2020/10/17
 
-LAST UPDATE BY: Ilya Sherman
+LAST UPDATE BY: Christopher Manning
 
 ----------------------------------------------------------------------
 AppleJavaExtensions.jar

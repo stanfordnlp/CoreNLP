@@ -40,8 +40,8 @@
 	<classpathentry kind="lib" path="liblocal/antlr-runtime.jar"/>
 	<classpathentry kind="lib" path="liblocal/hamcrest-2.2.jar " sourcepath="libsrc/hamcrest-2.2-sources.jar"/>
 	<classpathentry kind="lib" path="liblocal/javaruntype.jar"/>
-	<classpathentry kind="lib" path="liblocal/junit-quickcheck-core.jar"/>
-	<classpathentry kind="lib" path="liblocal/junit-quickcheck-generators.jar"/>
+-       <classpathentry kind="lib" path="liblocal/junit-quickcheck-core-0.4.jar" sourcepath="libsrc/junit-quickcheck-core-0.4-sources.jar"/>
+-       <classpathentry kind="lib" path="liblocal/junit-quickcheck-generators-0.4.jar" sourcepath="libsrc/junit-quickcheck-generators-0.4-sources.jar"/>
 	<classpathentry kind="lib" path="liblocal/junit-theories.jar"/>
 	<classpathentry kind="lib" path="liblocal/ognl.jar"/>
 	<classpathentry kind="output" path="classes"/>
