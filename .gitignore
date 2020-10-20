@@ -8,3 +8,8 @@
 
 # stuff gets built here
 classes/**
+.idea
+*.iml
+target
+.gradle
+build

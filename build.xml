@@ -2,12 +2,12 @@
 
 <project name="core" default="compile" basedir=".">
 
-  <property name="build.path"      value="${basedir}/classes" />
-  <property name="source.path"     value="${basedir}/src" />
+  <property name="build.path"      value="${basedir}/target" />
+  <property name="source.path"     value="${basedir}/src/main/java" />
   <property name="doc.path"        value="${basedir}/doc" />
   <property name="data.path"       value="${basedir}/data" />
-  <property name="tests.path"      value="${basedir}/test/src" />
-  <property name="itests.path"     value="${basedir}/itest/src" />
+  <property name="tests.path"      value="${basedir}/src/test/java" />
+  <property name="itests.path"     value="${basedir}/src/integration-test/java" />
 
   <!-- included tasks may use project.core as a property name -->
   <property name="project.core"    value="${basedir}" />

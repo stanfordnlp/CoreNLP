@@ -35,10 +35,14 @@ uploadArchives {
 
 // Add src-extra build target
 sourceSets {
-  main {
-    java.srcDirs = ['src/']
-    resources.srcDirs = ['src/']
-  }
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integration-test/java')
+        }
+        resources.srcDir file('src/integration-test/resources')
+    }
 }
 
 task listDeps {
