@@ -2,7 +2,7 @@
 
 <project name="core" default="compile" basedir=".">
 
-  <property name="build.path"      value="${basedir}/target" />
+  <property name="build.path"      value="${basedir}/target/classes" />
   <property name="source.path"     value="${basedir}/src/main/java" />
   <property name="doc.path"        value="${basedir}/doc" />
   <property name="data.path"       value="${basedir}/data" />
@@ -378,7 +378,7 @@
 
   <target name="jar" depends="compile">
     <jar destfile="javanlp-core.jar">
-      <fileset dir="${project.core}/classes" />
+      <fileset dir="${build.path}" />
     </jar>
   </target>
 
