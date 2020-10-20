@@ -75,9 +75,11 @@ public class ShiftReduceParserQuery implements ParserQuery  {
 
     success = true;
     unparsable = false;
+    PriorityQueue<State> oldBeam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
     PriorityQueue<State> beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+    // nextBeam will keep track of an unused PriorityQueue to cut down on the number of PriorityQueue objects created
+    PriorityQueue<State> nextBeam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
     beam.add(initialState);
-    // TODO: don't construct as many PriorityQueues
     while (beam.size() > 0) {
       if (Thread.interrupted()) { // Allow interrupting the parser
         throw new RuntimeInterruptedException();
@@ -85,8 +87,12 @@ public class ShiftReduceParserQuery implements ParserQuery  {
       // log.info("================================================");
       // log.info("Current beam:");
       // log.info(beam);
-      PriorityQueue<State> oldBeam = beam;
-      beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      PriorityQueue<State> temp = oldBeam;
+      oldBeam = beam;
+      beam = nextBeam;
+      beam.clear();
+      nextBeam = temp;
+
       State bestState = null;
       for (State state : oldBeam) {
         if (Thread.interrupted()) {  // Allow interrupting the parser
