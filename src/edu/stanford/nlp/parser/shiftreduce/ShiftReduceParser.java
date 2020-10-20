@@ -299,13 +299,13 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
   }
 
   /**
-   * If an internal node goes directly to a preterminal, that is an illegal tree.
+   * If an internal node goes directly to a leaf, that is an illegal tree.
    * Otherwise, accept the tree.
    * <br>
    * Example:
    * <pre>(ROOT (sentence (S (morfema.pronominal (PRON Se)) -----(sn (spec (PRON los)) grup.nom)----- (grup.verb (PROPN trago')) (sn (spec (PROPN la)) (grup.nom (DET tierra)))) (NOUN ....) (S (sadv (grup.adv (PROPN ya))) (neg (ADV no)) (grup.verb (ADV viven)) (sp (prep (VERB en)) (sn (grup.nom (ADP Cuba)))) (PROPN ...)) (conj (PUNCT y)) (S (sp (prep (CCONJ a)) (sn (grup.nom (ADP nadie)))) (sn (grup.nom (PRON le))) (grup.verb (PRON importa)) (sn (spec (VERB la)) (grup.nom (S (relatiu (DET que)) (grup.verb (PRON esten) (gerundi (VERB pasando))))))) (VERB ....)))</pre>
    */
-  public static boolean checkTreeBranching(Tree tree) {
+  public static boolean checkLeafBranching(Tree tree) {
     if (tree == null) {
       return false;
     }
@@ -313,7 +313,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
       return true;
     }
     for (Tree child : tree.children()) {
-      if (!checkTreeBranching(child)) {
+      if (!checkLeafBranching(child)) {
         return false;
       }
       if (child.isLeaf()) {
@@ -324,12 +324,24 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
   }
 
   /**
+   * Some trees in the English datasets have a binary transition at
+   * the top, which we don't like as it teaches the parser to
+   * sometimes make binary transitions in normal trees
+   */
+  public static boolean checkRootTransition(Tree tree) {
+    return (tree.numChildren() == 1);
+  }
+
+  /**
    * Returns false if the tree is obviously unacceptable for the sr parser training.
    * <br>
-   * Currently that only means trees where internal nodes go directly to leaves instead of preterminals.
+   * Disallowed: <ul>
+   * <li> trees where internal nodes go directly to leaves instead of preterminals.
+   * <li> trees which don't start with a unary transition
+   * </ul>
    */
   public static boolean isLegalTree(Tree tree) {
-    return checkTreeBranching(tree);
+    return checkLeafBranching(tree) && checkRootTransition(tree);
   }
 
   public static List<Tree> binarizeTreebank(Treebank treebank, Options op) {

@@ -12,6 +12,7 @@ import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.trees.treebank.EnglishPTBTreebankCorrector;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
