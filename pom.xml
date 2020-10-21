@@ -98,19 +98,19 @@
     <dependency>
       <groupId>org.ejml</groupId>
       <artifactId>ejml-core</artifactId>
-      <version>0.38</version>
+      <version>0.39</version>
     </dependency>
 
     <dependency>
       <groupId>org.ejml</groupId>
       <artifactId>ejml-ddense</artifactId>
-      <version>0.38</version>
+      <version>0.39</version>
     </dependency>
 
     <dependency>
       <groupId>org.ejml</groupId>
       <artifactId>ejml-simple</artifactId>
-      <version>0.38</version>
+      <version>0.39</version>
     </dependency>
 
     <dependency>
