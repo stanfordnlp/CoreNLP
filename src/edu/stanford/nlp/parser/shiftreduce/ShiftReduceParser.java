@@ -492,6 +492,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
                      Pair<String, FileFilter> devTreebankPath,
                      String serializedPath) {
     log.info("Training method: " + op.trainOptions().trainingMethod);
+    log.debug("Headfinder used to binarize trees: " + getTLPParams().headFinder().getClass());
 
     List<Tree> binarizedTrees = Generics.newArrayList();
     for (Pair<String, FileFilter> treebank : trainTreebankPath) {
