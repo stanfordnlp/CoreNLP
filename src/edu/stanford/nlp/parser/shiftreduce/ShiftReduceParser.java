@@ -293,7 +293,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
   public List<Tree> readBinarizedTreebank(String treebankPath, FileFilter treebankFilter) {
     Treebank treebank = readTreebank(treebankPath, treebankFilter);
-    List<Tree> binarized = binarizeTreebank(treebank, op);
+    List<Tree> filtered = filterTreebank(treebank);
+    List<Tree> binarized = binarizeTreebank(filtered, op);
     log.info("Converted trees to binarized format");
     return binarized;
   }
@@ -332,6 +333,18 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     return (tree.numChildren() == 1);
   }
 
+  public List<Tree> filterTreebank(Treebank treebank) {
+    List<Tree> filteredTrees = new ArrayList<>();
+    for (Tree tree : treebank) {
+      if (isLegalTree(tree)) {
+        filteredTrees.add(tree);
+      } else {
+        log.error("Found an illegal tree, skipping: " + tree);
+      }
+    }
+    return filteredTrees;
+  }
+
   /**
    * Returns false if the tree is obviously unacceptable for the sr parser training.
    * <br>
@@ -344,16 +357,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     return checkLeafBranching(tree) && checkRootTransition(tree);
   }
 
-  public static List<Tree> binarizeTreebank(Treebank treebank, Options op) {
-    List<Tree> filteredTrees = new ArrayList<>();
-    for (Tree tree : treebank) {
-      if (isLegalTree(tree)) {
-        filteredTrees.add(tree);
-      } else {
-        log.error("Found an illegal tree, skipping: " + tree);
-      }
-    }
-
+  public static List<Tree> binarizeTreebank(Iterable<Tree> treebank, Options op) {
     TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack());
     BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
     CompositeTreeTransformer transformer = new CompositeTreeTransformer();
@@ -361,7 +365,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     transformer.addTransformer(basicTransformer);
 
     List<Tree> transformedTrees = new ArrayList<>();
-    for (Tree tree : filteredTrees) {
+    for (Tree tree : treebank) {
       transformedTrees.add(transformer.transformTree(tree));
     }
 
