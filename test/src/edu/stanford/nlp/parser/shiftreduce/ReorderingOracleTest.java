@@ -10,6 +10,7 @@ import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.Debinarizer;
 import edu.stanford.nlp.parser.lexparser.Options;
+import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.Generics;
@@ -64,7 +65,7 @@ public class ReorderingOracleTest extends TestCase {
 
   public void setUp() {
     Options op = new Options();
-    Treebank treebank = op.tlpParams.memoryTreebank();
+    MemoryTreebank treebank = op.tlpParams.memoryTreebank();
     
     treebank.addAll(Arrays.asList(correctTrees));
     binarizedTrees = ShiftReduceParser.binarizeTreebank(treebank, op);
