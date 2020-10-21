@@ -274,7 +274,7 @@
   <target name="itest-ner" depends="classpath,compile,models.classpath"
           description="NER related slow itests">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
+    <junit fork="yes" maxmemory="10g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
         haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
       <classpath refid="models.classpath"/>
@@ -287,6 +287,7 @@
           <include name="**/NERBenchmark*SlowITest.java"/>
           <include name="**/NERPipelineEndToEndSlowITest.java"/>
           <include name="**/NERTokenizationSlowITest.java"/>
+          <include name="**/TrainCRFClassifierSlowITest.java"/>
         </fileset>
       </batchtest>
     </junit>
