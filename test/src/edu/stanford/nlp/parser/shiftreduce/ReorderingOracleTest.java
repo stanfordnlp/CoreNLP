@@ -65,7 +65,7 @@ public class ReorderingOracleTest extends TestCase {
 
   public void setUp() {
     Options op = new Options();
-    MemoryTreebank treebank = op.tlpParams.memoryTreebank();
+    Treebank treebank = op.tlpParams.memoryTreebank();
     
     treebank.addAll(Arrays.asList(correctTrees));
     binarizedTrees = ShiftReduceParser.binarizeTreebank(treebank, op);
