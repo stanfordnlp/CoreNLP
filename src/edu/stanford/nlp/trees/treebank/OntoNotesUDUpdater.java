@@ -15,7 +15,7 @@ import java.util.*;
 public class OntoNotesUDUpdater {
 
   /** Trees to filter out **/
-  public static TregexPattern badLabelsPattern = TregexPattern.compile("/X|EDITED|EMBEDq/ < /.*/");
+  public static TregexPattern badLabelsPattern = TregexPattern.compile("/X|EDITED|EMBED/ < /.*/");
   public static TregexPattern substitutionLabelsPattern =
       TregexPattern.compile("/-LCB-|-RCB-|-LSB-|-RSB-|TOP/ < /.*/");
 
