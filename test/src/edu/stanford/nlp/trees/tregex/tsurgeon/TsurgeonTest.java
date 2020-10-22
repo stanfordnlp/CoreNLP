@@ -565,6 +565,12 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, tree, expected);
   }
 
+  public void testMove() {
+    TregexPattern tregex = TregexPattern.compile("__ !> __ <1 /``/=bad <2 S=good");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("[move bad >1 good]");
+    runTest(tregex, tsurgeon, "(TOP (`` ``) (S foo))", "(TOP (S (`` ``) foo))");
+  }
+
   public void testExcise() {
     // TODO: needs more meat to this test
     TregexPattern tregex = TregexPattern.compile("__=repeat <: (~repeat < __)");
