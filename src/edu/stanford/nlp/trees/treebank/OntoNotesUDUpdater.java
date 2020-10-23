@@ -25,12 +25,12 @@ public class OntoNotesUDUpdater {
     updates.add(new Pair<>(TregexPattern.compile("__ !> __ <1 /``/=bad <2 S=good"),
                            Tsurgeon.parseOperation("[move bad >1 good]")));
     // also the final punct sometimes is outside the proper subtree
-    updates.add(new Pair<>(TregexPattern.compile("__ !> __ <2 /[.]/=bad <1 /S|SQ|SINV/=good"),
+    updates.add(new Pair<>(TregexPattern.compile("__ !> __ <2 /[.]/=bad <1 /S|SQ|SINV|PP/=good"),
                            Tsurgeon.parseOperation("[move bad >-1 good]")));
   }
 
   public static TregexPattern substitutionLabelsPattern =
-      TregexPattern.compile("/-LCB-|-RCB-|-LSB-|-RSB-|TOP/ < /.*/");
+    TregexPattern.compile("/-LCB-|-RCB-|-LSB-|-RSB-|TOP/ < /.*/");
 
   /** Label substitutions to make **/
   public static HashMap<String,String> labelSubstitutions = new HashMap<>();
