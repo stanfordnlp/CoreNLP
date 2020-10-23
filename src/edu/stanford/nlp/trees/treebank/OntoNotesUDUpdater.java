@@ -42,6 +42,9 @@ public class OntoNotesUDUpdater {
     labelSubstitutions.put("TOP", "");
   }
 
+  public static TregexPattern weirdRootPattern =
+    TregexPattern.compile("__ !> __ $++ __");
+
   public static void main(String[] args) throws IOException {
 
     // set up tree reader
@@ -51,7 +54,7 @@ public class OntoNotesUDUpdater {
 
     // iterate through trees, replace labels that need updating for UD
     Tree t = tr.readTree();
-    while(t != null) {
+    while (t != null) {
       if (!badLabelsPattern.matcher(t).find()) {
         for (Pair<TregexPattern, TsurgeonPattern> update : updates) {
           t = Tsurgeon.processPattern(update.first, update.second, t);
@@ -64,7 +67,12 @@ public class OntoNotesUDUpdater {
           replacementTree.label().setValue(newLabel);
         }
 
-        System.out.println(t);
+        TregexMatcher rootMatcher = weirdRootPattern.matcher(t);
+        if (rootMatcher.find()) {
+          System.err.println("Matched and eliminating \n" + t + "\nat\n" + rootMatcher.getMatch());
+        } else {
+          System.out.println(t);
+        }
       }
       t = tr.readTree();
     }
