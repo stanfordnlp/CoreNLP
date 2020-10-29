@@ -8,7 +8,7 @@ option java_outer_classname = "CoreNLPProtos";
 //
 // From JAVANLP_HOME, you can build me with the command:
 //
-//  protoc -I=projects/core/src/edu/stanford/nlp/pipeline/ --java_out=projects/core/src projects/core/src/edu/stanford/nlp/pipeline/CoreNLP.proto
+//  protoc -I=src/edu/stanford/nlp/pipeline/ --java_out=src src/edu/stanford/nlp/pipeline/CoreNLP.proto
 //
 
 //
