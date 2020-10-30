@@ -8,7 +8,7 @@ option java_outer_classname = "CoreNLPProtos";
 //
 // From JAVANLP_HOME, you can build me with the command:
 //
-//  protoc -I=projects/core/src/edu/stanford/nlp/pipeline/ --java_out=projects/core/src projects/core/src/edu/stanford/nlp/pipeline/CoreNLP.proto
+//  protoc -I=src/edu/stanford/nlp/pipeline/ --java_out=src src/edu/stanford/nlp/pipeline/CoreNLP.proto
 //
 
 //
@@ -655,3 +655,34 @@ message SemgrexResponse {
   repeated GraphResult       result      = 1;
 }
 
+
+// It's possible to send in a whole document, but we
+// only care about the Sentences and Tokens
+message TokensRegexRequest {
+  required Document          doc         = 1;
+  repeated string            pattern     = 2;
+}
+
+// The result will be a nested structure:
+// repeated PatternMatch, one for each pattern
+// each PatternMatch has a repeated Match,
+//   which tells you which sentence matched and where
+message TokensRegexResponse {
+  message MatchLocation {
+    optional string          text        = 1;
+    optional int32           begin       = 2;
+    optional int32           end         = 3;
+  }
+
+  message Match {
+    required int32           sentence    = 1;
+    required MatchLocation   match       = 2;
+    repeated MatchLocation   group       = 3;
+  }
+
+  message PatternMatch {
+    repeated Match           match       = 1;
+  }
+
+  repeated PatternMatch      match       = 1;
+}
