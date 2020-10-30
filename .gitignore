@@ -13,3 +13,6 @@ classes/**
 *.eml
 *.iml
 .idea/**
+
+# emacs
+*~
