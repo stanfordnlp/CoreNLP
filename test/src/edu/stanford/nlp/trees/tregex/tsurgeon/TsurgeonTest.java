@@ -359,10 +359,26 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (blah 0) (C 1))");
     runTest(tregex, tsurgeon, "(A (B 0) (B 1))", "(A (blah 0) (blah 1))");
 
+    // test a few simple expressions with unusual characters
     tsurgeon = Tsurgeon.parseOperation("relabel foo /\\//");
     tregex = TregexPattern.compile("B=foo");
     runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (/ 0) (C 1))");
     runTest(tregex, tsurgeon, "(A (B 0) (B 1))", "(A (/ 0) (/ 1))");
+
+    tsurgeon = Tsurgeon.parseOperation("relabel foo /{/");
+    tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A ({ 0) (C 1))");
+    runTest(tregex, tsurgeon, "(A (B 0) (B 1))", "(A ({ 0) ({ 1))");
+
+    tsurgeon = Tsurgeon.parseOperation("relabel foo /[/");
+    tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A ([ 0) (C 1))");
+    runTest(tregex, tsurgeon, "(A (B 0) (B 1))", "(A ([ 0) ([ 1))");
+
+    tsurgeon = Tsurgeon.parseOperation("relabel foo /\\]/");
+    tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (] 0) (C 1))");
+    runTest(tregex, tsurgeon, "(A (B 0) (B 1))", "(A (] 0) (] 1))");
 
     tsurgeon = Tsurgeon.parseOperation("relabel foo /.*(voc.*)/$1/");
     tregex = TregexPattern.compile("/^a.*t/=foo");
