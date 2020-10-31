@@ -43,7 +43,7 @@ public class OntoNotesUDUpdater {
   }
 
   public static TregexPattern weirdRootPattern =
-    TregexPattern.compile("__ !> __ $++ __");
+    TregexPattern.compile("__ !> __ <2 __");
 
   public static void main(String[] args) throws IOException {
 
@@ -56,6 +56,14 @@ public class OntoNotesUDUpdater {
     Tree t = tr.readTree();
     while (t != null) {
       if (!badLabelsPattern.matcher(t).find()) {
+        // this tool is used on both ontonotes and ewt trees
+        // ewt can have blank top labels which get read in as null,
+        // which is super confusing to tregex.
+        // ontonotes has TOP at the root which gets replaced later
+        if (t.value() == null) {
+          t.label().setValue("");
+        }
+
         for (Pair<TregexPattern, TsurgeonPattern> update : updates) {
           t = Tsurgeon.processPattern(update.first, update.second, t);
         }
@@ -63,8 +71,10 @@ public class OntoNotesUDUpdater {
         TregexMatcher replacementTreesMatcher = substitutionLabelsPattern.matcher(t);
         while (replacementTreesMatcher.find()) {
           Tree replacementTree = replacementTreesMatcher.getMatch();
-          String newLabel = labelSubstitutions.get(replacementTree);
+          String newLabel = labelSubstitutions.get(replacementTree.value());
           replacementTree.label().setValue(newLabel);
+          // ghetto tsurgeon
+          replacementTreesMatcher = substitutionLabelsPattern.matcher(t);
         }
 
         TregexMatcher rootMatcher = weirdRootPattern.matcher(t);
