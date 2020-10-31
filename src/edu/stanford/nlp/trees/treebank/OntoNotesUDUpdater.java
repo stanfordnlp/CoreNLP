@@ -27,19 +27,8 @@ public class OntoNotesUDUpdater {
     // also the final punct sometimes is outside the proper subtree
     updates.add(new Pair<>(TregexPattern.compile("__ !> __ <2 /[.]/=bad <1 /S|SQ|SINV|PP/=good"),
                            Tsurgeon.parseOperation("[move bad >-1 good]")));
-  }
-
-  public static TregexPattern substitutionLabelsPattern =
-    TregexPattern.compile("/-LCB-|-RCB-|-LSB-|-RSB-|TOP/ < /.*/");
-
-  /** Label substitutions to make **/
-  public static HashMap<String,String> labelSubstitutions = new HashMap<>();
-  static {
-    labelSubstitutions.put("-LCB-", "{");
-    labelSubstitutions.put("-RCB-", "}");
-    labelSubstitutions.put("-LSB-", "[");
-    labelSubstitutions.put("-RSB-", "]");
-    labelSubstitutions.put("TOP", "");
+    updates.add(new Pair<>(TregexPattern.compile("TOP=top < /.*/"),
+                           Tsurgeon.parseOperation("[relabel top //]")));
   }
 
   public static TregexPattern weirdRootPattern =
@@ -66,15 +55,6 @@ public class OntoNotesUDUpdater {
 
         for (Pair<TregexPattern, TsurgeonPattern> update : updates) {
           t = Tsurgeon.processPattern(update.first, update.second, t);
-        }
-
-        TregexMatcher replacementTreesMatcher = substitutionLabelsPattern.matcher(t);
-        while (replacementTreesMatcher.find()) {
-          Tree replacementTree = replacementTreesMatcher.getMatch();
-          String newLabel = labelSubstitutions.get(replacementTree.value());
-          replacementTree.label().setValue(newLabel);
-          // ghetto tsurgeon
-          replacementTreesMatcher = substitutionLabelsPattern.matcher(t);
         }
 
         TregexMatcher rootMatcher = weirdRootPattern.matcher(t);
