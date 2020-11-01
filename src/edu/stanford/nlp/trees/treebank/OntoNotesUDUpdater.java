@@ -29,6 +29,14 @@ public class OntoNotesUDUpdater {
                            Tsurgeon.parseOperation("[move bad >-1 good]")));
     updates.add(new Pair<>(TregexPattern.compile("TOP=top < /.*/"),
                            Tsurgeon.parseOperation("[relabel top //]")));
+    updates.add(new Pair<>(TregexPattern.compile("/-LSB-/=leaf !< /.*/"),
+                           Tsurgeon.parseOperation("[relabel leaf /[/]")));
+    updates.add(new Pair<>(TregexPattern.compile("/-RSB-/=leaf !< /.*/"),
+                           Tsurgeon.parseOperation("[relabel leaf /\\]/]")));
+    updates.add(new Pair<>(TregexPattern.compile("/-LCB-/=leaf !< /.*/"),
+                           Tsurgeon.parseOperation("[relabel leaf /{/]")));
+    updates.add(new Pair<>(TregexPattern.compile("/-RCB-/=leaf !< /.*/"),
+                           Tsurgeon.parseOperation("[relabel leaf /}/]")));
   }
 
   public static TregexPattern weirdRootPattern =
