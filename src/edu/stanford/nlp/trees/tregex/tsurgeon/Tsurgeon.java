@@ -182,8 +182,12 @@ public class Tsurgeon  {
    * There are three possible forms: <br>
    * {@code relabel nodeX VP} - for changing a node label to an
    * alphanumeric string <br>
-   * {@code relabel nodeX /''/} - for relabeling a node to
+   * {@code relabel nodeX /<new-label>/} - for relabeling a node to
    * something that isn't a valid identifier without quoting <br>
+   *
+   * With this method, some replacement texts also require escaping.
+   * For example, {@code relabel nodeX /{/} works but you need to do
+   * {@code relabel nodeX /\\]/} in order to get a single close bracket.
    *
    * {@code relabel nodeX /^VB(.*)$/verb\\/$1/} - for regular
    * expression based relabeling. In this case, all matches of the
