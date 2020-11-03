@@ -109,7 +109,7 @@ public class SentimentModel implements Serializable  {
   private void writeObject(ObjectOutputStream out)
     throws IOException
   {
-    Function<SimpleMatrix, List<List<Double>>> f = (SimpleMatrix x) -> ConvertSimpleMatrix.fromMatrix(x);
+    Function<SimpleMatrix, List<List<Double>>> f = (SimpleMatrix x) -> ConvertModels.fromMatrix(x);
     out.writeObject(binaryTransform.transform(f));
     out.writeObject(binaryTensors);
     out.writeObject(binaryClassification.transform(f));
