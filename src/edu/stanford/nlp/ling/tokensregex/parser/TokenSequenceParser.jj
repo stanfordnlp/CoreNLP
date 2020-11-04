@@ -1,3 +1,5 @@
+// javacc "-OUTPUT_DIRECTORY=src/edu/stanford/nlp/ling/tokensregex/parser" src/edu/stanford/nlp/ling/tokensregex/parser/TokenSequenceParser.jj
+
 options {
     UNICODE_INPUT = true;
     // Option for multiple instances
