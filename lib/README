@@ -336,8 +336,8 @@ LAST UPDATE BY: John Bauer
 -----------------------------------------------------------------------
 javacc.jar
 ORIGINAL JAR NAME: javacc.jar
-VERSION: 6.0.1
-RELEASE DATE: June 2014
+VERSION: 7.0.9
+RELEASE DATE: June 2020
 SOURCE AVAILABLE: no
 DESCRIPTION: JavaCC is a parser/scanner generator for java
              compiles .jj and .jjt files to .java
@@ -345,7 +345,7 @@ URL: https://java.net/projects/javacc
 USED BY: Needed for compiling tregex, tsurgeon, semgrex
 Not needed by CoreNLP distributions
 
-LAST UPDATE: 2014-07-08
+LAST UPDATE: 2020-11-04
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------
