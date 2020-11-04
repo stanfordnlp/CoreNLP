@@ -1,6 +1,7 @@
 package edu.stanford.nlp.coref.neural;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import edu.stanford.nlp.neural.Embedding;
@@ -28,9 +29,9 @@ public class NeuralCorefModel implements Serializable {
   private /*final*/ Embedding wordEmbeddings;
 
   public NeuralCorefModel(SimpleMatrix antecedentMatrix, SimpleMatrix anaphorMatrix,
-      SimpleMatrix pairFeaturesMatrix, SimpleMatrix pairwiseFirstLayerBias,
-      List<SimpleMatrix> anaphoricityModel, List<SimpleMatrix> pairwiseModel,
-      Embedding wordEmbeddings) {
+                          SimpleMatrix pairFeaturesMatrix, SimpleMatrix pairwiseFirstLayerBias,
+                          List<SimpleMatrix> anaphoricityModel, List<SimpleMatrix> pairwiseModel,
+                          Embedding wordEmbeddings) {
     this.antecedentMatrix = antecedentMatrix;
     this.anaphorMatrix = anaphorMatrix;
     this.pairFeaturesMatrix = pairFeaturesMatrix;
@@ -135,7 +136,33 @@ public class NeuralCorefModel implements Serializable {
     return antecedentMatrix.mult(mentionEmbedding);
   }
 
+  // note that we assume the user won't be hostile and change the
+  // values using these accessors
   public Embedding getWordEmbeddings() {
     return wordEmbeddings;
+  }
+
+  public SimpleMatrix getAntecedentMatrix() {
+    return antecedentMatrix;
+  }
+
+  public SimpleMatrix getAnaphorMatrix() {
+    return anaphorMatrix;
+  }
+
+  public SimpleMatrix getPairFeaturesMatrix() {
+    return pairFeaturesMatrix;
+  }
+
+  public SimpleMatrix getPairwiseFirstLayerBias() {
+    return pairwiseFirstLayerBias;
+  }
+
+  public List<SimpleMatrix> getAnaphoricityModel() {
+    return Collections.unmodifiableList(anaphoricityModel);
+  }
+
+  public List<SimpleMatrix> getPairwiseModel() {
+    return Collections.unmodifiableList(pairwiseModel);
   }
 }
