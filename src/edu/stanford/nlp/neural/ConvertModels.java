@@ -331,7 +331,7 @@ public class ConvertModels {
     try {
       modelType = Model.valueOf(props.getProperty("model").toUpperCase());
     } catch (IllegalArgumentException | NullPointerException e) {
-      throw new IllegalArgumentException("Please specify -model, either SENTIMENT or DVPARSER");
+      throw new IllegalArgumentException("Please specify -model, either SENTIMENT, DVPARSER, EMBEDDING, COREF");
     }
 
     if (!props.containsKey("input")) {
@@ -347,34 +347,33 @@ public class ConvertModels {
 
     if (modelType == Model.SENTIMENT) {
       if (stage == Stage.OLD) {
-        SentimentModel model = SentimentModel.loadSerialized(props.getProperty("input"));
-        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(props.getProperty("output")));
+        SentimentModel model = SentimentModel.loadSerialized(inputPath);
+        ObjectOutputStream out = IOUtils.writeStreamFromString(outputPath);
         writeSentiment(model, out);
         out.close();
       } else {
-        ObjectInputStream in = new ObjectInputStream(new FileInputStream(props.getProperty("input")));
+        ObjectInputStream in = IOUtils.readStreamFromString(inputPath);
         SentimentModel model = readSentiment(in);
         in.close();
-        model.saveSerialized(props.getProperty("output"));
+        model.saveSerialized(outputPath);
       }
     } else if (modelType == Model.DVPARSER) {
       if (stage == Stage.OLD) {
-        String inFile = props.getProperty("input");
-        LexicalizedParser model = LexicalizedParser.loadModel(inFile);
+        LexicalizedParser model = LexicalizedParser.loadModel(inputPath);
         if (model.reranker == null) {
-          System.out.println("Nothing to do for " + inFile);
+          System.out.println("Nothing to do for " + inputPath);
         } else {
           DVModelReranker reranker = (DVModelReranker) model.reranker; // will barf if not successful
           model.reranker = null;
-          ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(props.getProperty("output")));
+          ObjectOutputStream out = IOUtils.writeStreamFromString(outputPath);
           writeParser(model, reranker, out);
           out.close();
         }
       } else {
-        ObjectInputStream in = new ObjectInputStream(new FileInputStream(props.getProperty("input")));
+        ObjectInputStream in = IOUtils.readStreamFromString(inputPath);
         LexicalizedParser model = readParser(in);
         in.close();
-        model.saveParserToSerialized(props.getProperty("output"));
+        model.saveParserToSerialized(outputPath);
       }
     } else if (modelType == Model.EMBEDDING) {
       if (stage == Stage.OLD) {
