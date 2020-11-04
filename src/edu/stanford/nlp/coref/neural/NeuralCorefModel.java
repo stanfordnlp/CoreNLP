@@ -41,7 +41,8 @@ public class NeuralCorefModel implements Serializable {
     this.wordEmbeddings = wordEmbeddings;
   }
 
-  // TODO: remove when ejml is upgraded
+  /*
+  // TODO: remove when ejml 0.38 is upgraded
   private void readObject(ObjectInputStream in)
     throws IOException, ClassNotFoundException
   {
@@ -58,6 +59,7 @@ public class NeuralCorefModel implements Serializable {
       .map(x->new SimpleMatrix(x))
       .collect(Collectors.toList());
   }
+  */
 
   /*
   private void readObject(ObjectInputStream in)

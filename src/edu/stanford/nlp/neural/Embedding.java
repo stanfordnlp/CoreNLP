@@ -85,6 +85,8 @@ public class Embedding implements Serializable  {
     loadWordVectors(wordFile, vectorFile);
   }
 
+  /*
+  // This hack was for ejml 0.38
   private void readObject(ObjectInputStream in)
     throws IOException, ClassNotFoundException
   {
@@ -92,6 +94,7 @@ public class Embedding implements Serializable  {
 
     ConvertModels.transformMap(wordVectors, x -> new SimpleMatrix(x));
   }
+  */
 
   /*
   private void readObject(ObjectInputStream in)

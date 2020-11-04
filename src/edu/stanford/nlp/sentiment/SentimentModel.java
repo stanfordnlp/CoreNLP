@@ -182,6 +182,7 @@ public class SentimentModel implements Serializable  {
   }
   */
 
+  /*
   private void readObject(ObjectInputStream in)
     throws IOException, ClassNotFoundException
   {
@@ -201,6 +202,7 @@ public class SentimentModel implements Serializable  {
     unaryClassification.replaceAll((x, y) -> new SimpleMatrix(y));
     wordVectors.replaceAll((x, y) -> new SimpleMatrix(y));
   }
+  */
 
 
   /**
