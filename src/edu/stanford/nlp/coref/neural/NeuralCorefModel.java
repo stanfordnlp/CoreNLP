@@ -8,25 +8,20 @@ import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
 import org.ejml.simple.SimpleMatrix;
 
-// TODO: remove when ejml is upgraded
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.stream.Collectors;
-
 /**
  * Stores the weights and implements the matrix operations used by a {@link NeuralCorefAlgorithm}
  * @author Kevin Clark
  */
 public class NeuralCorefModel implements Serializable {
   private static final long serialVersionUID = 2139427931784505653L;
-  // TODO: restore /*final*/ when ejml is upgraded
-  private /*final*/ SimpleMatrix antecedentMatrix;
-  private /*final*/ SimpleMatrix anaphorMatrix;
-  private /*final*/ SimpleMatrix pairFeaturesMatrix;
-  private /*final*/ SimpleMatrix pairwiseFirstLayerBias;
-  private /*final*/ List<SimpleMatrix> anaphoricityModel;
-  private /*final*/ List<SimpleMatrix> pairwiseModel;
-  private /*final*/ Embedding wordEmbeddings;
+
+  private SimpleMatrix antecedentMatrix;
+  private SimpleMatrix anaphorMatrix;
+  private SimpleMatrix pairFeaturesMatrix;
+  private SimpleMatrix pairwiseFirstLayerBias;
+  private List<SimpleMatrix> anaphoricityModel;
+  private List<SimpleMatrix> pairwiseModel;
+  private Embedding wordEmbeddings;
 
   public NeuralCorefModel(SimpleMatrix antecedentMatrix, SimpleMatrix anaphorMatrix,
                           SimpleMatrix pairFeaturesMatrix, SimpleMatrix pairwiseFirstLayerBias,
