@@ -15,14 +15,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.List;
-import java.util.function.Function;
-import edu.stanford.nlp.neural.ConvertModels;
-import edu.stanford.nlp.util.ErasureUtils;
-
 /**
  * @author Minh-Thang Luong {@code <lmthang@stanford.edu>}
  * @author John Bauer
