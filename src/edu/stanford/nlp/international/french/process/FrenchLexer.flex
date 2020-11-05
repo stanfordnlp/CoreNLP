@@ -253,7 +253,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
   private Object getNext(String txt, String originalText, String annotation) {
     txt = LexerUtils.removeSoftHyphens(txt);
-    Label w = (Label) tokenFactory.makeToken(txt, yychar, yylength());
+    Label w = (Label) tokenFactory.makeToken(txt, Math.toIntExact(yychar), yylength());
     if (invertible || annotation != null) {
       CoreLabel word = (CoreLabel) w;
       if (invertible) {
