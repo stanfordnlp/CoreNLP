@@ -14,6 +14,8 @@ import java.util.function.Function;
 
 import org.ejml.simple.SimpleMatrix;
 
+import edu.stanford.nlp.coref.fastneural.FastNeuralCorefModel;
+import edu.stanford.nlp.coref.neural.EmbeddingExtractor;
 import edu.stanford.nlp.coref.neural.NeuralCorefModel;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.parser.dvparser.DVModel;
@@ -34,7 +36,7 @@ public class ConvertModels {
   }
 
   public enum Model {
-    SENTIMENT, DVPARSER, COREF, EMBEDDING
+    SENTIMENT, DVPARSER, COREF, EMBEDDING, FASTCOREF
   }
 
   /**
@@ -222,6 +224,7 @@ public class ConvertModels {
   public static Embedding readEmbedding(ObjectInputStream in)
     throws IOException, ClassNotFoundException
   {
+
     Function<List<List<Double>>, SimpleMatrix> f = (x) -> toMatrix(x);
     Map<String, List<List<Double>>> map = ErasureUtils.uncheckedCast(in.readObject());
     Map<String, SimpleMatrix> vectors = transformMap(map, f);
@@ -265,6 +268,48 @@ public class ConvertModels {
                                                   anaphoricityModel, pairwiseModel,
                                                   embedding);
     return model;
+  }
+
+  public static void writeFastCoref(FastNeuralCorefModel model, ObjectOutputStream out)
+    throws IOException
+  {
+    Function<SimpleMatrix, List<List<Double>>> f = (SimpleMatrix x) -> fromMatrix(x);
+
+    EmbeddingExtractor embedding = model.getEmbeddingExtractor();
+    out.writeObject(embedding.isConll());
+    Embedding staticEmbedding = embedding.getStaticWordEmbeddings();
+    if (staticEmbedding == null) {
+      out.writeObject(false);
+    } else {
+      out.writeObject(true);
+      writeEmbedding(staticEmbedding, out);
+    }
+    writeEmbedding(embedding.getTunedWordEmbeddings(), out);
+    out.writeObject(embedding.getNAEmbedding());
+
+    out.writeObject(model.getPairFeatureIds());
+    out.writeObject(model.getMentionFeatureIds());
+    out.writeObject(CollectionUtils.transformAsList(model.getAllWeights(), f));
+  }
+
+  public static FastNeuralCorefModel readFastCoref(ObjectInputStream in)
+    throws IOException, ClassNotFoundException
+  {
+    Function<List<List<Double>>, SimpleMatrix> f = (x) -> toMatrix(x);
+
+    boolean conll = ErasureUtils.uncheckedCast(in.readObject());
+    boolean hasStatic = ErasureUtils.uncheckedCast(in.readObject());
+    Embedding staticEmbedding = (hasStatic) ? readEmbedding(in) : null;
+    Embedding tunedEmbedding = readEmbedding(in);
+    String naEmbedding = ErasureUtils.uncheckedCast(in.readObject());
+
+    EmbeddingExtractor embedding = new EmbeddingExtractor(conll, staticEmbedding, tunedEmbedding, naEmbedding);
+
+    Map<String, Integer> pairFeatures = ErasureUtils.uncheckedCast(in.readObject());
+    Map<String, Integer> mentionFeatures = ErasureUtils.uncheckedCast(in.readObject());
+    List<SimpleMatrix> weights = CollectionUtils.transformAsList(ErasureUtils.uncheckedCast(in.readObject()), f);
+
+    return new FastNeuralCorefModel(embedding, pairFeatures, mentionFeatures, weights);
   }
 
   /**
@@ -314,6 +359,12 @@ public class ConvertModels {
    * <br>
    * <code> java edu.stanford.nlp.neural.ConvertModels -stage NEW -model EMBEDDING -input /scr/nlp/data/coref/models/neural/english/english-embeddings.INT.ser.gz -output /scr/nlp/data/coref/models/neural/english/english-embeddings.e39.ser.gz</code>
    * <br>
+   * There is another coref model which isn't used in corenlp, but it might be in the future.  To upgrade this, use <code>-model FASTCOREF</code>
+   * <br>
+   * <code> java edu.stanford.nlp.neural.ConvertModels -stage OLD -model FASTCOREF -input /scr/nlp/data/coref/models/fastneural/fast-english-model.e38.ser.gz -output /scr/nlp/data/coref/models/fastneural/fast-english-model.INT.ser.gz</code>
+   * <br>
+   * <code> java edu.stanford.nlp.neural.ConvertModels -stage NEW -model FASTCOREF -input /scr/nlp/data/coref/models/fastneural/fast-english-model.INT.ser.gz -output /scr/nlp/data/coref/models/fastneural/fast-english-model.e39.ser.gz</code>
+   * <br>
    *
    * @author <a href=horatio@gmail.com>John Bauer</a>
    */
@@ -331,7 +382,7 @@ public class ConvertModels {
     try {
       modelType = Model.valueOf(props.getProperty("model").toUpperCase());
     } catch (IllegalArgumentException | NullPointerException e) {
-      throw new IllegalArgumentException("Please specify -model, either SENTIMENT, DVPARSER, EMBEDDING, COREF");
+      throw new IllegalArgumentException("Please specify -model, either SENTIMENT, DVPARSER, EMBEDDING, COREF, FASTCOREF");
     }
 
     if (!props.containsKey("input")) {
@@ -396,6 +447,18 @@ public class ConvertModels {
       } else {
         ObjectInputStream in = IOUtils.readStreamFromString(inputPath);
         NeuralCorefModel model = readCoref(in);
+        in.close();
+        IOUtils.writeObjectToFile(model, outputPath);
+      }
+    } else if (modelType == Model.FASTCOREF) {
+      if (stage == Stage.OLD) {
+        FastNeuralCorefModel model = ErasureUtils.uncheckedCast(IOUtils.readObjectFromURLOrClasspathOrFileSystem(inputPath));
+        ObjectOutputStream out = IOUtils.writeStreamFromString(outputPath);
+        writeFastCoref(model, out);
+        out.close();
+      } else {
+        ObjectInputStream in = IOUtils.readStreamFromString(inputPath);
+        FastNeuralCorefModel model = readFastCoref(in);
         in.close();
         IOUtils.writeObjectToFile(model, outputPath);
       }
