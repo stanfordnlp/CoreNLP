@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.coref.neural.CategoricalFeatureExtractor;
@@ -143,26 +142,6 @@ public class FastNeuralCorefModel implements Serializable {
           antecedent.sentNum == anaphor.sentNum &&
               antecedent.endIndex > anaphor.startIndex ? 1 : 0}})
     );
-  }
-
-  // TODO: remove when ejml is upgraded
-  public FastNeuralCorefModel getCopyWithNewWeights() {
-    List<SimpleMatrix> weights = new ArrayList<>();
-    weights.add(new SimpleMatrix(anaphorKernel));
-    weights.add(new SimpleMatrix(anaphorBias));
-    weights.add(new SimpleMatrix(antecedentKernel));
-    weights.add(new SimpleMatrix(anaphorBias));
-    weights.add(new SimpleMatrix(pairFeaturesKernel));
-    weights.add(new SimpleMatrix(pairFeaturesBias));
-    weights.add(new SimpleMatrix(NARepresentation));
-    weights.addAll(networkLayers.stream()
-        .map(x->new SimpleMatrix(x))
-        .collect(Collectors.toList()));
-    return new FastNeuralCorefModel(
-        embeddingExtractor,
-        pairFeatureIds,
-        mentionFeatureIds,
-        weights);
   }
 
   public static FastNeuralCorefModel loadFromTextFiles(String path) {
