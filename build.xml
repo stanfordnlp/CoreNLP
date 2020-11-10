@@ -274,7 +274,7 @@
   <target name="itest-ner" depends="classpath,compile,models.classpath"
           description="NER related slow itests">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="10g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
+    <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
         haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
       <classpath refid="models.classpath"/>
