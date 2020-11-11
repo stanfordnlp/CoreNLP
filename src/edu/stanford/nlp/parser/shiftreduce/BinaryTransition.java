@@ -46,6 +46,8 @@ public class BinaryTransition implements Transition {
     if (ShiftReduceUtils.isTemporary(state.stack.peek()) && ShiftReduceUtils.isTemporary(state.stack.pop().peek())) {
       return false;
     }
+    // If the first node on the stack is temporary, you can only make
+    // right-headed binary transitions, and they must be to the same category
     if (ShiftReduceUtils.isTemporary(state.stack.peek())) {
       if (side == Side.LEFT) {
         return false;
@@ -54,6 +56,8 @@ public class BinaryTransition implements Transition {
         return false;
       }
     }
+    // If the second node on the stack is temporary, you can only make
+    // left-headed binary transitions, and they must be to the same category
     if (ShiftReduceUtils.isTemporary(state.stack.pop().peek())) {
       if (side == Side.RIGHT) {
         return false;
