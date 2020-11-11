@@ -351,6 +351,17 @@ public class PerceptronModel extends BaseModel  {
           break;
         }
 
+        if (highestScoringState == null) {
+          System.err.println("Unable to find a best transition!");
+          System.err.println("Previous agenda:");
+          for (State state : agenda) {
+            System.err.println(state);
+          }
+          System.err.println("Gold transitions:");
+          System.err.println(transitionLists.get(index));
+          break;
+        }
+
         State newGoldState = goldTransition.apply(goldState, 0.0);
 
         // if highest scoring state used the correct transition, no training
