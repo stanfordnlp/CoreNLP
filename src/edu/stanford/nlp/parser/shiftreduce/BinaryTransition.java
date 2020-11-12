@@ -71,23 +71,28 @@ public class BinaryTransition implements Transition {
     if (state.stack.size() == 2 && isBinarized() && state.endOfQueue()) {
       return false;
     }
-    // when the stack contains only two nodes, temporary resulting
-    // nodes from binary reduce must be left-headed
-    if (state.stack.size() == 2 && isBinarized() && side == Side.RIGHT) {
-      return false;
-    }
+
     // when the queue is empty and the stack contains more than two
     // nodes, with the third node from the top being temporary, binary
     // reduce can be applied only if the resulting node is non-temporary
     if (state.endOfQueue() && state.stack.size() > 2 && ShiftReduceUtils.isTemporary(state.stack.pop().pop().peek()) && isBinarized()) {
       return false;
     }
+
+    // when the stack contains only two nodes, temporary resulting
+    // nodes from binary reduce must be left-headed
+    // TODO: why is this true?  see what happens if removed
+    // if (state.stack.size() == 2 && isBinarized() && side == Side.RIGHT) {
+    //   return false;
+    // }
+
     // when the stack contains more than two nodes, with the third
     // node from the top being temporary, temporary resulting nodes
     // from binary reduce must be left-headed
-    if (state.stack.size() > 2 && ShiftReduceUtils.isTemporary(state.stack.pop().pop().peek()) && isBinarized() && side == Side.RIGHT) {
-      return false;
-    }
+    // TODO: this is equivalent to the above rule, and it is unclear why it is true
+    // if (state.stack.size() > 2 && ShiftReduceUtils.isTemporary(state.stack.pop().pop().peek()) && isBinarized() && side == Side.RIGHT) {
+    //   return false;
+    // }
 
     // if this transition is only allowed at the root node, and the
     // model tries to apply it elsewhere, that must be rejected unless

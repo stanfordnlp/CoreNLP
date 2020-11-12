@@ -49,10 +49,14 @@ public class CompoundUnaryTransition implements Transition {
       // Disallow unary transitions after we've already had a unary transition
       return false;
     }
-    if (top.label().value().equals(labels[0])) {
-      // Disallow unary transitions where the final label doesn't change
-      return false;
-    }
+
+    // we allow unary transitions back to self as sometimes that's
+    // what is left after hidden notes are discarded
+    //if (top.label().value().equals(labels[0])) {
+    //  // Disallow unary transitions where the final label doesn't change
+    //  return false;
+    //}
+
     // TODO: need to think more about when a unary transition is
     // allowed if the top of the stack is temporary
     if (top.label().value().startsWith("@") && !labels[labels.length - 1].equals(top.label().value().substring(1))) {
