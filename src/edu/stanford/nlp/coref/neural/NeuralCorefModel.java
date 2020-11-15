@@ -1,16 +1,12 @@
 package edu.stanford.nlp.coref.neural;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
 import org.ejml.simple.SimpleMatrix;
-
-// TODO: remove when ejml is upgraded
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.stream.Collectors;
 
 /**
  * Stores the weights and implements the matrix operations used by a {@link NeuralCorefAlgorithm}
@@ -18,19 +14,19 @@ import java.util.stream.Collectors;
  */
 public class NeuralCorefModel implements Serializable {
   private static final long serialVersionUID = 2139427931784505653L;
-  // TODO: restore /*final*/ when ejml is upgraded
-  private /*final*/ SimpleMatrix antecedentMatrix;
-  private /*final*/ SimpleMatrix anaphorMatrix;
-  private /*final*/ SimpleMatrix pairFeaturesMatrix;
-  private /*final*/ SimpleMatrix pairwiseFirstLayerBias;
-  private /*final*/ List<SimpleMatrix> anaphoricityModel;
-  private /*final*/ List<SimpleMatrix> pairwiseModel;
-  private /*final*/ Embedding wordEmbeddings;
+
+  private SimpleMatrix antecedentMatrix;
+  private SimpleMatrix anaphorMatrix;
+  private SimpleMatrix pairFeaturesMatrix;
+  private SimpleMatrix pairwiseFirstLayerBias;
+  private List<SimpleMatrix> anaphoricityModel;
+  private List<SimpleMatrix> pairwiseModel;
+  private Embedding wordEmbeddings;
 
   public NeuralCorefModel(SimpleMatrix antecedentMatrix, SimpleMatrix anaphorMatrix,
-      SimpleMatrix pairFeaturesMatrix, SimpleMatrix pairwiseFirstLayerBias,
-      List<SimpleMatrix> anaphoricityModel, List<SimpleMatrix> pairwiseModel,
-      Embedding wordEmbeddings) {
+                          SimpleMatrix pairFeaturesMatrix, SimpleMatrix pairwiseFirstLayerBias,
+                          List<SimpleMatrix> anaphoricityModel, List<SimpleMatrix> pairwiseModel,
+                          Embedding wordEmbeddings) {
     this.antecedentMatrix = antecedentMatrix;
     this.anaphorMatrix = anaphorMatrix;
     this.pairFeaturesMatrix = pairFeaturesMatrix;
@@ -40,7 +36,8 @@ public class NeuralCorefModel implements Serializable {
     this.wordEmbeddings = wordEmbeddings;
   }
 
-  // TODO: remove when ejml is upgraded
+  /*
+  // TODO: remove when ejml 0.38 is upgraded
   private void readObject(ObjectInputStream in)
     throws IOException, ClassNotFoundException
   {
@@ -57,6 +54,7 @@ public class NeuralCorefModel implements Serializable {
       .map(x->new SimpleMatrix(x))
       .collect(Collectors.toList());
   }
+  */
 
   /*
   private void readObject(ObjectInputStream in)
@@ -135,7 +133,33 @@ public class NeuralCorefModel implements Serializable {
     return antecedentMatrix.mult(mentionEmbedding);
   }
 
+  // note that we assume the user won't be hostile and change the
+  // values using these accessors
   public Embedding getWordEmbeddings() {
     return wordEmbeddings;
+  }
+
+  public SimpleMatrix getAntecedentMatrix() {
+    return antecedentMatrix;
+  }
+
+  public SimpleMatrix getAnaphorMatrix() {
+    return anaphorMatrix;
+  }
+
+  public SimpleMatrix getPairFeaturesMatrix() {
+    return pairFeaturesMatrix;
+  }
+
+  public SimpleMatrix getPairwiseFirstLayerBias() {
+    return pairwiseFirstLayerBias;
+  }
+
+  public List<SimpleMatrix> getAnaphoricityModel() {
+    return Collections.unmodifiableList(anaphoricityModel);
+  }
+
+  public List<SimpleMatrix> getPairwiseModel() {
+    return Collections.unmodifiableList(pairwiseModel);
   }
 }

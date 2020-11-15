@@ -359,10 +359,26 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (blah 0) (C 1))");
     runTest(tregex, tsurgeon, "(A (B 0) (B 1))", "(A (blah 0) (blah 1))");
 
+    // test a few simple expressions with unusual characters
     tsurgeon = Tsurgeon.parseOperation("relabel foo /\\//");
     tregex = TregexPattern.compile("B=foo");
     runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (/ 0) (C 1))");
     runTest(tregex, tsurgeon, "(A (B 0) (B 1))", "(A (/ 0) (/ 1))");
+
+    tsurgeon = Tsurgeon.parseOperation("relabel foo /{/");
+    tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A ({ 0) (C 1))");
+    runTest(tregex, tsurgeon, "(A (B 0) (B 1))", "(A ({ 0) ({ 1))");
+
+    tsurgeon = Tsurgeon.parseOperation("relabel foo /[/");
+    tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A ([ 0) (C 1))");
+    runTest(tregex, tsurgeon, "(A (B 0) (B 1))", "(A ([ 0) ([ 1))");
+
+    tsurgeon = Tsurgeon.parseOperation("relabel foo /\\]/");
+    tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (] 0) (C 1))");
+    runTest(tregex, tsurgeon, "(A (B 0) (B 1))", "(A (] 0) (] 1))");
 
     tsurgeon = Tsurgeon.parseOperation("relabel foo /.*(voc.*)/$1/");
     tregex = TregexPattern.compile("/^a.*t/=foo");
@@ -563,6 +579,12 @@ public class TsurgeonTest extends TestCase {
     tregex = TregexPattern.compile("__ !> __ <- (__=top <- (__ <<- (/[.]|PU/=punc < /[.!?。！？]/ ?> (__=single <: =punc))))");
     tsurgeon = Tsurgeon.parseOperation("[move punc >-1 top] [if exists single prune single]");
     runTest(tregex, tsurgeon, tree, expected);
+  }
+
+  public void testMove() {
+    TregexPattern tregex = TregexPattern.compile("__ !> __ <1 /``/=bad <2 S=good");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("[move bad >1 good]");
+    runTest(tregex, tsurgeon, "(TOP (`` ``) (S foo))", "(TOP (S (`` ``) foo))");
   }
 
   public void testExcise() {

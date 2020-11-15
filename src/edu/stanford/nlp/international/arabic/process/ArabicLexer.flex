@@ -289,14 +289,14 @@ import edu.stanford.nlp.util.PropertiesUtils;
     if (invertible) {
       String str = prevWordAfter.toString();
       prevWordAfter.setLength(0);
-      CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, yychar, yylength());
+      CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, Math.toIntExact(yychar), yylength());
       word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
       word.set(CoreAnnotations.BeforeAnnotation.class, str);
       prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
       prevWord = word;
       return word;
     } else {
-      return tokenFactory.makeToken(txt, yychar, yylength());
+      return tokenFactory.makeToken(txt, Math.toIntExact(yychar), yylength());
     }
   }
   

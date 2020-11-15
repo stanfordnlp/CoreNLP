@@ -293,19 +293,20 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
   public List<Tree> readBinarizedTreebank(String treebankPath, FileFilter treebankFilter) {
     Treebank treebank = readTreebank(treebankPath, treebankFilter);
-    List<Tree> binarized = binarizeTreebank(treebank, op);
+    List<Tree> filtered = filterTreebank(treebank);
+    List<Tree> binarized = binarizeTreebank(filtered, op);
     log.info("Converted trees to binarized format");
     return binarized;
   }
 
   /**
-   * If an internal node goes directly to a preterminal, that is an illegal tree.
+   * If an internal node goes directly to a leaf, that is an illegal tree.
    * Otherwise, accept the tree.
    * <br>
    * Example:
    * <pre>(ROOT (sentence (S (morfema.pronominal (PRON Se)) -----(sn (spec (PRON los)) grup.nom)----- (grup.verb (PROPN trago')) (sn (spec (PROPN la)) (grup.nom (DET tierra)))) (NOUN ....) (S (sadv (grup.adv (PROPN ya))) (neg (ADV no)) (grup.verb (ADV viven)) (sp (prep (VERB en)) (sn (grup.nom (ADP Cuba)))) (PROPN ...)) (conj (PUNCT y)) (S (sp (prep (CCONJ a)) (sn (grup.nom (ADP nadie)))) (sn (grup.nom (PRON le))) (grup.verb (PRON importa)) (sn (spec (VERB la)) (grup.nom (S (relatiu (DET que)) (grup.verb (PRON esten) (gerundi (VERB pasando))))))) (VERB ....)))</pre>
    */
-  public static boolean checkTreeBranching(Tree tree) {
+  public static boolean checkLeafBranching(Tree tree) {
     if (tree == null) {
       return false;
     }
@@ -313,7 +314,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
       return true;
     }
     for (Tree child : tree.children()) {
-      if (!checkTreeBranching(child)) {
+      if (!checkLeafBranching(child)) {
         return false;
       }
       if (child.isLeaf()) {
@@ -324,15 +325,15 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
   }
 
   /**
-   * Returns false if the tree is obviously unacceptable for the sr parser training.
-   * <br>
-   * Currently that only means trees where internal nodes go directly to leaves instead of preterminals.
+   * Some trees in the English datasets have a binary transition at
+   * the top, which we don't like as it teaches the parser to
+   * sometimes make binary transitions in normal trees
    */
-  public static boolean isLegalTree(Tree tree) {
-    return checkTreeBranching(tree);
+  public static boolean checkRootTransition(Tree tree) {
+    return (tree.numChildren() == 1);
   }
 
-  public static List<Tree> binarizeTreebank(Treebank treebank, Options op) {
+  public List<Tree> filterTreebank(Treebank treebank) {
     List<Tree> filteredTrees = new ArrayList<>();
     for (Tree tree : treebank) {
       if (isLegalTree(tree)) {
@@ -341,7 +342,22 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
         log.error("Found an illegal tree, skipping: " + tree);
       }
     }
+    return filteredTrees;
+  }
 
+  /**
+   * Returns false if the tree is obviously unacceptable for the sr parser training.
+   * <br>
+   * Disallowed: <ul>
+   * <li> trees where internal nodes go directly to leaves instead of preterminals.
+   * <li> trees which don't start with a unary transition
+   * </ul>
+   */
+  public static boolean isLegalTree(Tree tree) {
+    return checkLeafBranching(tree) && checkRootTransition(tree);
+  }
+
+  public static List<Tree> binarizeTreebank(Iterable<Tree> treebank, Options op) {
     TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack());
     BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
     CompositeTreeTransformer transformer = new CompositeTreeTransformer();
@@ -349,7 +365,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     transformer.addTransformer(basicTransformer);
 
     List<Tree> transformedTrees = new ArrayList<>();
-    for (Tree tree : filteredTrees) {
+    for (Tree tree : treebank) {
       transformedTrees.add(transformer.transformTree(tree));
     }
 
@@ -480,6 +496,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
                      Pair<String, FileFilter> devTreebankPath,
                      String serializedPath) {
     log.info("Training method: " + op.trainOptions().trainingMethod);
+    log.debug("Headfinder used to binarize trees: " + getTLPParams().headFinder().getClass());
 
     List<Tree> binarizedTrees = Generics.newArrayList();
     for (Pair<String, FileFilter> treebank : trainTreebankPath) {
@@ -503,7 +520,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
     log.info("Known states: " + knownStates);
     log.info("States which occur at the root: " + rootStates);
-    log.info("States which only occur at the root: " + rootStates);
+    log.info("States which only occur at the root: " + rootOnlyStates);
 
     Timing transitionTimer = new Timing();
     List<List<Transition>> transitionLists = CreateTransitionSequence.createTransitionSequences(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);

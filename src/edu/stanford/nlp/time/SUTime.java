@@ -265,6 +265,29 @@ public class SUTime  {
     public int addToIndexTemporalFunc(Temporal t) {
       return temporalFuncIndex.addToIndex(t);
     }
+
+    public String toString() {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("Temporal expressions:");
+      int index = 0;
+      for (TimeExpression exp : temporalExprIndex) {
+        builder.append("\n  " + index++ + ": " + exp);
+      }
+
+      builder.append("\nTemporals:");
+      index = 0;
+      for (Temporal exp : temporalIndex) {
+        builder.append("\n  " + index++ + ": " + exp);
+      }
+
+      builder.append("\nTemporal functions:");
+      index = 0;
+      for (Temporal exp : temporalFuncIndex) {
+        builder.append("\n  " + index++ + ": " + exp);
+      }
+      return builder.toString();
+    }
   }
 
   /**

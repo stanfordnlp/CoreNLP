@@ -33,6 +33,14 @@
     </path>
   </target>
 
+  <target name="models.classpath" description="Sets the models classpath, for itests and such">
+    <path id="models.classpath">
+      <fileset dir="${env.CORENLP_MODELS_HOME}">
+        <include name="*.jar"/>
+      </fileset>
+    </path>
+  </target>
+
   <target name="clean" description="Delete old classes">
     <echo message="${ant.project.name}" />
     <delete dir="${build.path}"/>
@@ -69,7 +77,7 @@
 
     <taskdef classname="jflex.anttask.JFlexTask" name="jflex">
       <classpath>
-        <pathelement location="${project.core}/lib/jflex-1.6.1.jar"/>
+        <pathelement location="${project.core}/lib/jflex-full-1.8.2.jar"/>
       </classpath>
     </taskdef>
 
@@ -159,12 +167,13 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
 
-  <target name="itest" depends="classpath,compile"
+  <target name="itest" depends="classpath,compile,models.classpath"
           description="Run core integration tests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="12g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no"
            haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
+      <classpath refid="models.classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
       <classpath path="${source.path}"/>
@@ -179,12 +188,13 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
 
-  <target name="itest-many-docs" depends="classpath"
+  <target name="itest-many-docs" depends="classpath,compile,models.classpath"
           description="Run StanfordCoreNLP on a large volume of documents.">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
         haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
+      <classpath refid="models.classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
       <classpath path="${source.path}"/>
@@ -198,12 +208,13 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-coreference" depends="classpath"
+  <target name="itest-coreference" depends="classpath,compile,models.classpath"
           description="Coreference related slow itests.">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="7g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
         haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
+      <classpath refid="models.classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
       <classpath path="${source.path}"/>
@@ -220,12 +231,13 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-protobuf" depends="classpath"
+  <target name="itest-protobuf" depends="classpath,compile,models.classpath"
           description="Protocol buffer related slow itests.">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
         haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
+      <classpath refid="models.classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
       <classpath path="${source.path}"/>
@@ -239,12 +251,13 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-kbp" depends="classpath"
+  <target name="itest-kbp" depends="classpath,compile,models.classpath"
           description="KBP related slow itests.">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
         haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
+      <classpath refid="models.classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
       <classpath path="${source.path}"/>
@@ -258,12 +271,13 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-ner" depends="classpath"
+  <target name="itest-ner" depends="classpath,compile,models.classpath"
           description="NER related slow itests">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
+    <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
         haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
+      <classpath refid="models.classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
       <classpath path="${source.path}"/>
@@ -271,21 +285,22 @@
       <batchtest fork="yes">
         <fileset dir="${itests.path}">
           <include name="**/NERBenchmark*SlowITest.java"/>
-          <include name="**/TrainCRFClassifierSlowITest.java"/>
           <include name="**/NERPipelineEndToEndSlowITest.java"/>
           <include name="**/NERTokenizationSlowITest.java"/>
+          <include name="**/TrainCRFClassifierSlowITest.java"/>
         </fileset>
       </batchtest>
     </junit>
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-misc" depends="classpath"
+  <target name="itest-misc" depends="classpath,compile,models.classpath"
           description="Other assorted slow itests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 
         haltonerror="no" failureproperty="test.failed" errorproperty="test.failed">
       <classpath refid="classpath"/>
+      <classpath refid="models.classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>
       <classpath path="${source.path}"/>
@@ -300,7 +315,7 @@
     <fail message="Test error or failure detected, check test results." if="test.failed" />
   </target>
   
-  <target name="itest-debug" depends="classpath"
+  <target name="itest-debug" depends="classpath,compile,models.classpath"
            description="target for debug purposes">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="14g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="no" 

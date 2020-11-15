@@ -74,9 +74,9 @@ public class ColumnDataClassifierITest {
   @Test
   public void testNoArgClassify()
     throws IOException {
-    runAndTestCDC("projects/core/data/edu/stanford/nlp/classify/iris.gold",
+    runAndTestCDC("edu/stanford/nlp/classify/iris.gold",
                   "-prop",
-                  "projects/core/data/edu/stanford/nlp/classify/iris.prop");
+                  "edu/stanford/nlp/classify/iris.prop");
   }
 
 }

@@ -256,7 +256,7 @@ public class PerceptronModel extends BaseModel  {
     ReorderingOracle reorderer = null;
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
         op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
-      reorderer = new ReorderingOracle(op);
+      reorderer = new ReorderingOracle(op, rootOnlyStates);
     }
 
     // TODO.  This training method seems to be working in that it
@@ -348,6 +348,17 @@ public class PerceptronModel extends BaseModel  {
         // happen for the BEAM method because in that case the correct
         // state (eg one with ROOT) isn't on the agenda so it stops.
         if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM && highestScoringTransitionFromGoldState == null) {
+          break;
+        }
+
+        if (highestScoringState == null) {
+          System.err.println("Unable to find a best transition!");
+          System.err.println("Previous agenda:");
+          for (State state : agenda) {
+            System.err.println(state);
+          }
+          System.err.println("Gold transitions:");
+          System.err.println(transitionLists.get(index));
           break;
         }
 
@@ -510,7 +521,7 @@ public class PerceptronModel extends BaseModel  {
 
     Oracle oracle = null;
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.ORACLE) {
-      oracle = new Oracle(binarizedTrees, op.compoundUnaries, rootStates);
+      oracle = new Oracle(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
     }
 
     List<Update> updates = Generics.newArrayList();

@@ -18,13 +18,17 @@ public class BinaryTransition implements Transition {
   /** Which side the head is on */
   public final Side side;
 
+  /** root transitions are illegal in the middle of the tree, naturally */
+  public final boolean isRoot;
+
   public enum Side {
     LEFT, RIGHT
   }
 
-  public BinaryTransition(String label, Side side) {
+  public BinaryTransition(String label, Side side, boolean isRoot) {
     this.label = label;
     this.side = side;
+    this.isRoot = isRoot;
   }
 
   /**
@@ -42,6 +46,8 @@ public class BinaryTransition implements Transition {
     if (ShiftReduceUtils.isTemporary(state.stack.peek()) && ShiftReduceUtils.isTemporary(state.stack.pop().peek())) {
       return false;
     }
+    // If the first node on the stack is temporary, you can only make
+    // right-headed binary transitions, and they must be to the same category
     if (ShiftReduceUtils.isTemporary(state.stack.peek())) {
       if (side == Side.LEFT) {
         return false;
@@ -50,6 +56,8 @@ public class BinaryTransition implements Transition {
         return false;
       }
     }
+    // If the second node on the stack is temporary, you can only make
+    // left-headed binary transitions, and they must be to the same category
     if (ShiftReduceUtils.isTemporary(state.stack.pop().peek())) {
       if (side == Side.RIGHT) {
         return false;
@@ -79,6 +87,19 @@ public class BinaryTransition implements Transition {
     // from binary reduce must be left-headed
     if (state.stack.size() > 2 && ShiftReduceUtils.isTemporary(state.stack.pop().pop().peek()) && isBinarized() && side == Side.RIGHT) {
       return false;
+    }
+
+    // if this transition is only allowed at the root node, and the
+    // model tries to apply it elsewhere, that must be rejected unless
+    // the transition is a temporary aka "binarized" transition
+    if (isRoot && !isBinarized()) {
+      if (state.stack.size() > 2) {
+        // stuff to the left
+        return false;
+      } else if (state.stack.size() == 2 && !state.endOfQueue()) {
+        // stuff to the right
+        return false;
+      }
     }
 
     if (constraints == null) {
@@ -218,9 +239,9 @@ public class BinaryTransition implements Transition {
   public String toString() {
     switch(side) {
     case LEFT:
-      return "LeftBinary(" + label + ")";
+      return "LeftBinary" + (isRoot ? "*" : "") + "(" + label + ")";
     case RIGHT:
-      return "RightBinary(" + label + ")";
+      return "RightBinary" + (isRoot ? "*" : "") + "(" + label + ")";
     default:
       throw new IllegalArgumentException("Unknown side " + side);
     }

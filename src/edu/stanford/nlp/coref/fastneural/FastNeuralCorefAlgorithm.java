@@ -50,9 +50,8 @@ public class FastNeuralCorefAlgorithm implements CorefAlgorithm {
     maxMentionDistanceWithStringMatch = CorefProperties.maxMentionDistanceWithStringMatch(props);
     featureExtractor = new FeatureExtractor(props, dictionaries, null,
         StatisticalCorefProperties.wordCountsPath(props));
-    FastNeuralCorefModel loadedModel = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
+    model = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
         log, "Loading coref model...", FastNeuralCorefProperties.modelPath(props));
-    model = loadedModel.getCopyWithNewWeights();  // TODO: remove when ejml upgraded
   }
 
   @Override

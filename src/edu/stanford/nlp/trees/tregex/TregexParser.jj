@@ -1,4 +1,4 @@
-// javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/trees/tregex" projects/core/src/edu/stanford/nlp/trees/tregex/TregexParser.jj
+// javacc "-OUTPUT_DIRECTORY=src/edu/stanford/nlp/trees/tregex" src/edu/stanford/nlp/trees/tregex/TregexParser.jj
 
 options { UNICODE_INPUT = true;
           SUPPORT_CLASS_VISIBILITY_PUBLIC = false;

@@ -60,7 +60,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public abstract class Tree extends AbstractCollection<Tree> implements Label, Labeled, Scored, Serializable  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Tree.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Tree.class);
 
   private static final long serialVersionUID = 5441849457648722744L;
 
@@ -191,11 +191,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     if (kids.length > 2) {
       return false;
     }
-    if (!kids[0].isBinarized())
+    if ( ! kids[0].isBinarized()) {
       return false;
-    if (kids.length == 2 && !kids[1].isBinarized())
-      return false;
-    return true;
+    }
+    return kids.length != 2 || kids[1].isBinarized();
   }
 
   /**
@@ -218,9 +217,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     String value1 = this.value();
     String value2 = t.value();
     if (value1 != null || value2 != null) {
-    	if (value1 == null || value2 == null || !value1.equals(value2)) {
-    		return false;
-    	}
+      if (value1 == null || ! value1.equals(value2)) {
+        return false;
+      }
     }
     Tree[] myKids = children();
     Tree[] theirKids = t.children();
@@ -680,7 +679,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
   public static String updateBrackets(String text) {
     if (text == null) {
-      return text;
+      return null;
     }
     text = LRB_PATTERN.matcher(text).replaceAll("-LRB-");
     text = RRB_PATTERN.matcher(text).replaceAll("-RRB-");
@@ -1446,17 +1445,18 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *
    * @return a {@code List} of the data in the tree's leaves.
    */
+  // todo [2020]: Maybe rename all "yield()" methods to leafLabels() or similar due to yield keyword in Java 14
   public ArrayList<Label> yield() {
-    return yield(new ArrayList<>());
+    return this.yield(new ArrayList<>());
   }
 
   /**
    * Gets the yield of the tree.  The {@code Label} of all leaf nodes
-   * is returned
-   * as a list ordered by the natural left to right order of the
+   * is returned as a list ordered by the natural left to right order of the
    * leaves.  Null values, if any, are inserted into the list like any
    * other value.
-   * <p><i>Implementation notes:</i> c. 2003: This has been rewritten to thread, so only one List
+   * <p>
+   * <i>Implementation notes:</i> c. 2003: This has been rewritten to thread, so only one List
    * is used. 2007: This method was duplicated to start to give type safety to Sentence.
    * This method will now make a Word for any Leaf which does not itself implement HasWord, and
    * put the Word into the Sentence, so the Sentence elements MUST implement HasWord.
@@ -1469,7 +1469,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   public ArrayList<Label> yield(ArrayList<Label> y) {
     if (isLeaf()) {
       y.add(label());
-
     } else {
       Tree[] kids = children();
       for (Tree kid : kids) {
@@ -1904,15 +1903,12 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return A Tree that is a deep copy of the tree structure and
    *         Labels of the original tree.
    */
-
-  @SuppressWarnings({"unchecked"})
   public Tree deepCopy(TreeFactory tf, LabelFactory lf) {
     Label label = lf.newLabel(label());
     if (isLeaf()) {
       return tf.newLeaf(label);
     }
     Tree[] kids = children();
-    // NB: The below list may not be of type Tree but TreeGraphNode, so we leave it untyped
     List<Tree> newKids = new ArrayList<>(kids.length);
     for (Tree kid : kids) {
       newKids.add(kid.deepCopy(tf, lf));
@@ -1965,6 +1961,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * cases such as the dependency converter, which wants to finish
    * with the same labels in the dependencies as the parse tree.
    */
+  @SuppressWarnings("unused")
   public Tree treeSkeletonConstituentCopy() {
     return treeSkeletonConstituentCopy(treeFactory(), label().labelFactory());
   }
@@ -1974,9 +1971,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       // Reuse the current label for a leaf.  This way, trees which
       // are based on tokens in a sentence can have the same tokens
       // even after a "deep copy".
-      // TODO: the LabeledScoredTreeFactory copies the label for a new
-      // leaf.  Perhaps we could add a newLeafNoCopy or something like
-      // that for efficiency.
+      // TODO: the LabeledScoredTreeFactory copies the label for a new leaf.
+      // Perhaps we could add a newLeafNoCopy or something like that for efficiency.
       Tree newLeaf = tf.newLeaf(label());
       newLeaf.setLabel(label());
       return newLeaf;

@@ -152,7 +152,6 @@ public class ParserAnnotatorITest extends TestCase {
     pipeline = new StanfordCoreNLP(props);
     document = new Annotation(TEXT);
     pipeline.annotate(document);
-
     assertEquals(ANSWER[0], document.get(CoreAnnotations.SentencesAnnotation.class).get(0).get(TreeCoreAnnotations.TreeAnnotation.class).toString());
 
     props.setProperty("annotators", "tokenize, ssplit, parse");
@@ -282,8 +281,8 @@ public class ParserAnnotatorITest extends TestCase {
 
   static final String[] ANSWER = {
       // TODO: this is actually the wrong parse!
-      "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (PRP him)) (S (VP (VBG ordering) (NP (PRP them)) (PP (IN to) (NP (NN saw)))))) (. .)))",
-      "(ROOT (S (NP (NP (NNP Jack) (POS 's)) (NN father)) (VP (VBZ has) (RB n't) (VP (VBN played) (NP (NP (NN golf)) (PP (IN since) (NP (CD 20) (NNS years)))) (PP (IN ago)))) (. .)))",
+      "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (PRP him)) (S (VP (VBG ordering) (NP (PRP them)) (S (VP (TO to) (VP (VB saw))))))) (. .)))",
+      "(ROOT (S (NP (NP (NNP Jack) (POS 's)) (NN father)) (VP (VBZ has) (RB n't) (VP (VBN played) (NP (NN golf)) (ADVP (IN since) (NP (CD 20) (NNS years)) (RB ago)))) (. .)))",
       "(ROOT (S (NP (PRP I)) (VP (VBP 'm) (VP (VBG going) (PP (IN to) (NP (DT the) (NN bookstore))) (S (VP (TO to) (VP (VB return) (NP (NP (DT a) (NN book)) (SBAR (S (NP (NP (NNP Jack)) (CC and) (NP (PRP$ his) (NNS friends))) (VP (VBD bought) (NP (PRP me))))))))))) (. .)))"
   };
 

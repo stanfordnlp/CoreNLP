@@ -6,7 +6,8 @@ import edu.stanford.nlp.util.Generics;
 import java.util.*;
 
 /** Token Manager. */
-@SuppressWarnings("unused")class TsurgeonParserTokenManager implements TsurgeonParserConstants {
+@SuppressWarnings ("unused")
+class TsurgeonParserTokenManager implements TsurgeonParserConstants {
 
   /** Debug output. */
   public  java.io.PrintStream debugStream = System.out;
@@ -973,23 +974,6 @@ private int jjMoveNfa_1(int startState, int curPos)
       catch(java.io.IOException e) { return curPos; }
    }
 }
-static final int[] jjnextStates = {
-   38, 39, 40, 52, 53, 54, 28, 35, 17, 18, 6, 7, 8, 38, 39, 40, 
-   41, 43, 45, 41, 42, 43, 45, 41, 43, 44, 45, 46, 47, 48, 52, 53, 
-   54, 9, 10, 49, 50, 51, 55, 56, 57, 
-};
-private static final boolean jjCanMove_0(int hiByte, int i1, int i2, long l1, long l2)
-{
-   switch(hiByte)
-   {
-      case 0:
-         return ((jjbitVec2[i2] & l2) != 0L);
-      default :
-         if ((jjbitVec0[i1] & l1) != 0L)
-            return true;
-         return false;
-   }
-}
 
 /** Token literal values. */
 public static final String[] jjstrLiteralImages = {
@@ -1022,6 +1006,23 @@ protected Token jjFillToken()
 
    return t;
 }
+static final int[] jjnextStates = {
+   38, 39, 40, 52, 53, 54, 28, 35, 17, 18, 6, 7, 8, 38, 39, 40, 
+   41, 43, 45, 41, 42, 43, 45, 41, 43, 44, 45, 46, 47, 48, 52, 53, 
+   54, 9, 10, 49, 50, 51, 55, 56, 57, 
+};
+private static final boolean jjCanMove_0(int hiByte, int i1, int i2, long l1, long l2)
+{
+   switch(hiByte)
+   {
+      case 0:
+         return ((jjbitVec2[i2] & l2) != 0L);
+      default :
+         if ((jjbitVec0[i1] & l1) != 0L)
+            return true;
+         return false;
+   }
+}
 
 int curLexState = 2;
 int defaultLexState = 2;
@@ -1043,7 +1044,7 @@ public Token getNextToken()
    {
       curChar = input_stream.BeginToken();
    }
-   catch(java.io.IOException e)
+   catch(Exception e)
    {
       jjmatchedKind = 0;
       jjmatchedPos = -1;
@@ -1125,6 +1126,31 @@ public Token getNextToken()
   }
 }
 
+void SkipLexicalActions(Token matchedToken)
+{
+   switch(jjmatchedKind)
+   {
+      default :
+         break;
+   }
+}
+void MoreLexicalActions()
+{
+   jjimageLen += (lengthOfMatch = jjmatchedPos + 1);
+   switch(jjmatchedKind)
+   {
+      default :
+         break;
+   }
+}
+void TokenLexicalActions(Token matchedToken)
+{
+   switch(jjmatchedKind)
+   {
+      default :
+         break;
+   }
+}
 private void jjCheckNAdd(int state)
 {
    if (jjrounds[state] != jjround)
@@ -1168,9 +1194,14 @@ private void jjCheckNAddStates(int start, int end)
   }
 
   /** Reinitialise parser. */
+  
   public void ReInit(SimpleCharStream stream)
   {
-    jjmatchedPos = jjnewStateCnt = 0;
+
+
+    jjmatchedPos =
+    jjnewStateCnt =
+    0;
     curLexState = defaultLexState;
     input_stream = stream;
     ReInitRounds();
@@ -1186,6 +1217,7 @@ private void jjCheckNAddStates(int start, int end)
 
   /** Reinitialise parser. */
   public void ReInit(SimpleCharStream stream, int lexState)
+  
   {
     ReInit(stream);
     SwitchTo(lexState);
@@ -1199,6 +1231,7 @@ private void jjCheckNAddStates(int start, int end)
     else
       curLexState = lexState;
   }
+
 
 /** Lexer state names. */
 public static final String[] lexStateNames = {
@@ -1218,11 +1251,19 @@ static final long[] jjtoToken = {
 static final long[] jjtoSkip = {
    0x1eL, 
 };
+static final long[] jjtoSpecial = {
+   0x0L, 
+};
+static final long[] jjtoMore = {
+   0x0L, 
+};
     protected SimpleCharStream  input_stream;
 
     private final int[] jjrounds = new int[58];
     private final int[] jjstateSet = new int[2 * 58];
-
-    
-    protected char curChar;
+    private final StringBuilder jjimage = new StringBuilder();
+    private StringBuilder image = jjimage;
+    private int jjimageLen;
+    private int lengthOfMatch;
+    protected int curChar;
 }

@@ -95,7 +95,7 @@ public class PatternsSimpleThreadedITest {
     final Path tempPath;
     try {
       tempPath = Files.createTempDirectory(null);
-      spiedProperties.load(new InputStreamReader(new FileInputStream(new File("projects/core/data/edu/stanford/nlp/patterns/patterns_itest.properties")),
+      spiedProperties.load(new InputStreamReader(new FileInputStream(new File("data/edu/stanford/nlp/patterns/patterns_itest.properties")),
                                                  StandardCharsets.UTF_8));
     } catch (IOException e) {
       throw new RuntimeIOException(e);
@@ -106,7 +106,7 @@ public class PatternsSimpleThreadedITest {
     Path docsentsPath = Paths.get(tempPath.toString(), "docsents.ser");
     System.out.println("Test " + numThreads + " writing to " + tempPath);
 
-    spiedProperties.setProperty("seedWordsFiles", "VACCINE_PREVENTABLE_DISEASE,projects/core/data/edu/stanford/nlp/patterns/VACCINE_PREVENTABLE_DISEASE.txt");
+    spiedProperties.setProperty("seedWordsFiles", "VACCINE_PREVENTABLE_DISEASE,data/edu/stanford/nlp/patterns/VACCINE_PREVENTABLE_DISEASE.txt");
     spiedProperties.setProperty("file", docsentsPath.toString()); // We generate this file below
     spiedProperties.setProperty("fileFormat", "ser");
     spiedProperties.setProperty("outDir", outputPath.toString());

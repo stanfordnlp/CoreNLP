@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -74,9 +75,11 @@ public class ShiftReduceParserQuery implements ParserQuery  {
 
     success = true;
     unparsable = false;
+    PriorityQueue<State> oldBeam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
     PriorityQueue<State> beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+    // nextBeam will keep track of an unused PriorityQueue to cut down on the number of PriorityQueue objects created
+    PriorityQueue<State> nextBeam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
     beam.add(initialState);
-    // TODO: don't construct as many PriorityQueues
     while (beam.size() > 0) {
       if (Thread.interrupted()) { // Allow interrupting the parser
         throw new RuntimeInterruptedException();
@@ -84,8 +87,12 @@ public class ShiftReduceParserQuery implements ParserQuery  {
       // log.info("================================================");
       // log.info("Current beam:");
       // log.info(beam);
-      PriorityQueue<State> oldBeam = beam;
-      beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      PriorityQueue<State> temp = oldBeam;
+      oldBeam = beam;
+      beam = nextBeam;
+      beam.clear();
+      nextBeam = temp;
+
       State bestState = null;
       for (State state : oldBeam) {
         if (Thread.interrupted()) {  // Allow interrupting the parser
@@ -132,15 +139,17 @@ public class ShiftReduceParserQuery implements ParserQuery  {
         break;
       }
     }
-    if (beam.size() == 0) {
+
+    bestParses = beam.stream().filter((state) -> state.isFinished())
+      .collect(Collectors.toList());
+
+    if (bestParses.size() == 0) {
       success = false;
       unparsable = true;
       debinarized = null;
       finalState = null;
       bestParses = Collections.emptyList();
     } else {
-      // TODO: filter out beam elements that aren't finished
-      bestParses = Generics.newArrayList(beam);
       Collections.sort(bestParses, beam.comparator());
       Collections.reverse(bestParses);
       finalState = bestParses.get(0);

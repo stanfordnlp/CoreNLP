@@ -404,6 +404,39 @@ public class IOUtils  {
   }
 
   /**
+   * Locates a file in the CLASSPATH if it exists.  Checks both the
+   * System classloader and the IOUtils classloader, since we had
+   * separate users asking for both of those changes.
+   */
+  private static InputStream findStreamInClassLoader(String name) {
+    InputStream is = ClassLoader.getSystemResourceAsStream(name);
+    if (is != null)
+      return is;
+
+    // windows File.separator is \, but getting resources only works with /
+    is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/"));
+    if (is != null)
+      return is;
+
+    // Classpath doesn't like double slashes (e.g., /home/user//foo.txt)
+    is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
+    if (is != null)
+      return is;
+
+    is = IOUtils.class.getClassLoader().getResourceAsStream(name);
+    if (is != null)
+      return is;
+
+    is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
+    if (is != null)
+      return is;
+
+    is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
+    // at this point we've tried everything
+    return is;
+  }
+
+  /**
    * Locates this file either in the CLASSPATH or in the file system. The CLASSPATH takes priority.
    * Note that this method uses the ClassLoader methods, so that classpath resources must be specified as
    * absolute resource paths without a leading "/".
@@ -416,15 +449,7 @@ public class IOUtils  {
     // ms 10-04-2010:
     // - even though this may look like a regular file, it may be a path inside a jar in the CLASSPATH
     // - check for this first. This takes precedence over the file system.
-    InputStream is = ClassLoader.getSystemResourceAsStream(name);
-    // windows File.separator is \, but getting resources only works with /
-    if (is == null) {
-      is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/"));
-      // Classpath doesn't like double slashes (e.g., /home/user//foo.txt)
-      if (is == null) {
-        is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
-      }
-    }
+    InputStream is = findStreamInClassLoader(name);
     // if not found in the CLASSPATH, load from the file system
     if (is == null) {
       is = new FileInputStream(name);
@@ -439,13 +464,7 @@ public class IOUtils  {
    * @return true if a call to {@link IOUtils#getBufferedReaderFromClasspathOrFileSystem(String)} would return a valid stream.
    */
   public static boolean existsInClasspathOrFileSystem(String name) {
-    InputStream is = ClassLoader.getSystemResourceAsStream(name);
-    if (is == null) {
-      is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/"));
-      if (is == null) {
-        is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
-      }
-    }
+    InputStream is = findStreamInClassLoader(name);
     return is != null || new File(name).exists();
   }
 

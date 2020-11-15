@@ -119,6 +119,20 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
   }
 
   /**
+   * Transforms this map into a new map using the given transform function. <br>
+   * Assumes that the map factory which produced &lt;K1, K2, V&gt; maps will
+   * happily produce &lt;K1, K2, V2&gt; maps.  If that is not true, then
+   * this will fail horribly, hopefully right away.
+   */
+  public <V2> TwoDimensionalMap<K1, K2, V2> transform(Function<V, V2> function) {
+    MapFactory<K1, Map<K2, V2>> newMF1 = ErasureUtils.uncheckedCast(mf1);
+    MapFactory<K2, V2> newMF2 = ErasureUtils.uncheckedCast(mf2);
+    TwoDimensionalMap<K1, K2, V2> newMap = new TwoDimensionalMap<K1, K2, V2>(newMF1, newMF2);
+    newMap.addAll(this, function);
+    return newMap;
+  }
+
+  /**
    * Replace each of the elements with the application of a function.
    *
    * TODO: use a TriFunction?  Such a thing does not exist

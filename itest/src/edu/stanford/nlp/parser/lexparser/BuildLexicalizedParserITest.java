@@ -84,21 +84,21 @@ public class BuildLexicalizedParserITest extends TestCase {
   // public static final String PERF_EVAL = "factor LP/LR summary evalb: LP: ";
 
 
-  public static final String englishOneTree = "projects/core/data/edu/stanford/nlp/parser/trees/en-onetree.txt";
-  public static final String englishSecondTree = "projects/core/data/edu/stanford/nlp/parser/trees/en-secondtree.txt";
-  public static final String englishThreeTrees = "projects/core/data/edu/stanford/nlp/parser/trees/en-threetrees.txt";
+  public static final String englishOneTree = "data/edu/stanford/nlp/parser/trees/en-onetree.txt";
+  public static final String englishSecondTree = "data/edu/stanford/nlp/parser/trees/en-secondtree.txt";
+  public static final String englishThreeTrees = "data/edu/stanford/nlp/parser/trees/en-threetrees.txt";
 
-  public static final String chineseOneTree = "projects/core/data/edu/stanford/nlp/parser/trees/zh-onetree.txt";
-  public static final String chineseThreeTrees = "projects/core/data/edu/stanford/nlp/parser/trees/zh-threetrees.txt";
+  public static final String chineseOneTree = "data/edu/stanford/nlp/parser/trees/zh-onetree.txt";
+  public static final String chineseThreeTrees = "data/edu/stanford/nlp/parser/trees/zh-threetrees.txt";
 
-  public static final String germanOneTree = "projects/core/data/edu/stanford/nlp/parser/trees/de-onesent.txt";
-  public static final String germanThreeTrees = "projects/core/data/edu/stanford/nlp/parser/trees/de-threesents.txt";
+  public static final String germanOneTree = "data/edu/stanford/nlp/parser/trees/de-onesent.txt";
+  public static final String germanThreeTrees = "data/edu/stanford/nlp/parser/trees/de-threesents.txt";
 
-  public static final String frenchOneTree = "projects/core/data/edu/stanford/nlp/parser/trees/fr-onetree.txt";
-  public static final String frenchThreeTrees = "projects/core/data/edu/stanford/nlp/parser/trees/fr-threetrees.txt";
+  public static final String frenchOneTree = "data/edu/stanford/nlp/parser/trees/fr-onetree.txt";
+  public static final String frenchThreeTrees = "data/edu/stanford/nlp/parser/trees/fr-threetrees.txt";
 
-  public static final String arabicOneTree = "projects/core/data/edu/stanford/nlp/parser/trees/ar-onetree.txt";
-  public static final String arabicThreeTrees = "projects/core/data/edu/stanford/nlp/parser/trees/ar-threetrees.txt";
+  public static final String arabicOneTree = "data/edu/stanford/nlp/parser/trees/ar-onetree.txt";
+  public static final String arabicThreeTrees = "data/edu/stanford/nlp/parser/trees/ar-threetrees.txt";
 
   public static class ParserTestCase {
     public final String[] trainCommandLine;

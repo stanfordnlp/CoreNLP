@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 
 /**
- * Created on 8/11/15.
+ * This is a really tricky thing to test in the quickcheck way, since we basically don't know what we want out of
+ * random graphs unless we run the routines that we're trying to test. The trick here is to implement exhaustive
+ * factor multiplication, which is normally super intractable but easy to get right, as ground truth.
+ *
+ * @version 8/11/15
  * @author keenon
- * <p>
- * This is a really tricky thing to test in the quickcheck way, since we basically don't know what we want out of random
- * graphs unless we run the routines that we're trying to test. The trick here is to implement exhaustive factor
- * multiplication, which is normally super intractable but easy to get right, as ground truth.
  */
 @RunWith(Theories.class)
 public class CliqueTreeTest {

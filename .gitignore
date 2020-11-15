@@ -8,3 +8,11 @@
 
 # stuff gets built here
 classes/**
+
+# IntelliJ IDEA
+*.eml
+*.iml
+.idea/**
+
+# emacs
+*~

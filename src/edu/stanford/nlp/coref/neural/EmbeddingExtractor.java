@@ -28,11 +28,27 @@ public class EmbeddingExtractor implements Serializable {
   private final String naEmbedding;
 
   public EmbeddingExtractor(boolean conll, Embedding staticWordEmbeddings,
-      Embedding tunedWordEmbeddings, String naEmbedding) {
+                            Embedding tunedWordEmbeddings, String naEmbedding) {
     this.conll = conll;
     this.staticWordEmbeddings = staticWordEmbeddings;
     this.tunedWordEmbeddings = tunedWordEmbeddings;
     this.naEmbedding = naEmbedding;
+  }
+
+  public boolean isConll() {
+    return conll;
+  }
+
+  public Embedding getStaticWordEmbeddings() {
+    return staticWordEmbeddings;
+  }
+
+  public Embedding getTunedWordEmbeddings() {
+    return tunedWordEmbeddings;
+  }
+
+  public String getNAEmbedding() {
+    return naEmbedding;
   }
 
   public SimpleMatrix getDocumentEmbedding(Document document) {

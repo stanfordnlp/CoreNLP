@@ -2,10 +2,10 @@ package edu.stanford.nlp.coref.fastneural;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.coref.neural.CategoricalFeatureExtractor;
@@ -37,8 +37,9 @@ public class FastNeuralCorefModel implements Serializable {
   private List<SimpleMatrix> networkLayers;
 
   public FastNeuralCorefModel(EmbeddingExtractor embeddingExtractor,
-      Map<String, Integer> pairFeatureIds, Map<String, Integer> mentionFeatureIds,
-      List<SimpleMatrix> weights) {
+                              Map<String, Integer> pairFeatureIds,
+                              Map<String, Integer> mentionFeatureIds,
+                              List<SimpleMatrix> weights) {
     this.embeddingExtractor = embeddingExtractor;
     this.pairFeatureIds = pairFeatureIds;
     this.mentionFeatureIds = mentionFeatureIds;
@@ -51,6 +52,31 @@ public class FastNeuralCorefModel implements Serializable {
     pairFeaturesBias = weights.get(5);
     NARepresentation = weights.get(6);
     networkLayers = new ArrayList<>(weights.subList(7, weights.size()));
+  }
+
+  public EmbeddingExtractor getEmbeddingExtractor() {
+    return embeddingExtractor;
+  }
+
+  public Map<String, Integer> getPairFeatureIds() {
+    return Collections.unmodifiableMap(pairFeatureIds);
+  }
+
+  public Map<String, Integer> getMentionFeatureIds() {
+    return Collections.unmodifiableMap(mentionFeatureIds);
+  }
+
+  public List<SimpleMatrix> getAllWeights() {
+    List<SimpleMatrix> weights = new ArrayList<>();
+    weights.add(anaphorKernel);
+    weights.add(anaphorBias);
+    weights.add(antecedentKernel);
+    weights.add(anaphorBias);
+    weights.add(pairFeaturesKernel);
+    weights.add(pairFeaturesBias);
+    weights.add(NARepresentation);
+    weights.addAll(networkLayers);
+    return Collections.unmodifiableList(weights);
   }
 
   public double score(Mention antecedent, Mention anaphor, Counter<String> antecedentFeatures,
@@ -116,26 +142,6 @@ public class FastNeuralCorefModel implements Serializable {
           antecedent.sentNum == anaphor.sentNum &&
               antecedent.endIndex > anaphor.startIndex ? 1 : 0}})
     );
-  }
-
-  // TODO: remove when ejml is upgraded
-  public FastNeuralCorefModel getCopyWithNewWeights() {
-    List<SimpleMatrix> weights = new ArrayList<>();
-    weights.add(new SimpleMatrix(anaphorKernel));
-    weights.add(new SimpleMatrix(anaphorBias));
-    weights.add(new SimpleMatrix(antecedentKernel));
-    weights.add(new SimpleMatrix(anaphorBias));
-    weights.add(new SimpleMatrix(pairFeaturesKernel));
-    weights.add(new SimpleMatrix(pairFeaturesBias));
-    weights.add(new SimpleMatrix(NARepresentation));
-    weights.addAll(networkLayers.stream()
-        .map(x->new SimpleMatrix(x))
-        .collect(Collectors.toList()));
-    return new FastNeuralCorefModel(
-        embeddingExtractor,
-        pairFeatureIds,
-        mentionFeatureIds,
-        weights);
   }
 
   public static FastNeuralCorefModel loadFromTextFiles(String path) {

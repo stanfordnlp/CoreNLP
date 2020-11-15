@@ -179,10 +179,27 @@ public class NeuralCorefDataExporter implements CorefDocumentProcessor {
         goldClusterPath + dataset.toString().toLowerCase()).run(props, dictionaries);
   }
 
+  /**
+   * Can be run in one of two ways:
+   * <br>
+   * java edu.stanford.nlp.coref.neural.NeuralCorefDataExporter coref.properties output.path
+   * <br>
+   * java edu.stanford.nlp.coref.neural.NeuralCorefDataExporter -props coref.properties -outputPath output.path otherargs...
+   * <br>
+   * The first formulation is for backwards compatibility with the documentation in clarkkev/deep-coref.
+   *
+   */
   public static void main(String[] args) throws Exception {
-    Properties props = StringUtils.argsToProperties("-props", args[0]);
+    final Properties props;
+    final String outputPath;
+    if (args.length == 2 && !args[0].startsWith("-")) {
+      props = StringUtils.argsToProperties("-props", args[0]);
+      outputPath = args[1];
+    } else {
+      props = StringUtils.argsToProperties(args);
+      outputPath = props.getProperty("outputPath");
+    }
     Dictionaries dictionaries = new Dictionaries(props);
-    String outputPath = args[1];
     exportData(outputPath, Dataset.TRAIN, props, dictionaries);
     exportData(outputPath, Dataset.DEV, props, dictionaries);
     exportData(outputPath, Dataset.TEST, props, dictionaries);

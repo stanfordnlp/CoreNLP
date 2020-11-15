@@ -1,4 +1,4 @@
-package edu.stanford.nlp.trees; 
+package edu.stanford.nlp.trees.treebank;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
+import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.tregex.Macros;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;

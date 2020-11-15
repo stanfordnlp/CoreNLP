@@ -78,10 +78,12 @@ public class DVModel implements Serializable  {
 
   private static final Function<DMatrixRMaj, SimpleMatrix> convertDenseMatrix = matrix -> SimpleMatrix.wrap(matrix);
 
+  /*
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     in.defaultReadObject();
 
     // TODO: get rid of this when ejml is upgraded to a version which can deserialize SimpleMatrix
+    // ejml 0.38 had a bug when reading matrices
     binaryTransform.replaceAll(x -> new SimpleMatrix(x));
     unaryTransform.replaceAll((x, y) -> new SimpleMatrix(y));
     binaryScore.replaceAll(x -> new SimpleMatrix(x));
@@ -90,6 +92,7 @@ public class DVModel implements Serializable  {
 
     identity = SimpleMatrix.identity(numRows);
   }
+  */
 
 
   /**

@@ -102,7 +102,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
    *
    * @return The TreeReaderFactory
    */
-  protected TreeReaderFactory treeReaderFactory() {
+  public TreeReaderFactory treeReaderFactory() {
     return trf;
   }
 
