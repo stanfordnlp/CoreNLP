@@ -1,4 +1,4 @@
-Stanford POS Tagger, v4.1.0 - 2020-08-06
+Stanford POS Tagger, v4.2.0 - 2020-11-17
 Copyright (c) 2002-2020 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -204,6 +204,8 @@ processing.
 
 CHANGES
 -----------------------------------------------
+
+2020-11-17    4.2.0     Add currency data for English models. 
 
 2020-08-06    4.1.0     Add missing extractor, spanish tokenization 
                         upgrades 

@@ -1,4 +1,4 @@
-Stanford Lexicalized Parser v4.0.0 - 2020-05-22
+Stanford Lexicalized Parser v4.2.0 - 2020-11-17
 -----------------------------------------------
 
 Copyright (c) 2002-2020 The Board of Trustees of The Leland Stanford Junior
@@ -310,6 +310,8 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
+
+2020-11-17    4.2.0     Retrain English models with treebank fixes 
 
 2020-05-22    4.0.0     Model tokenization updated to UDv2.0 
 

@@ -41,6 +41,13 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2020-11-16    4.2.0     Bug fixes, Retrained English parser models 
+                        with improved trees, Updated dependencies 
+                        (ejml, junit, jflex), Speed up loading 
+                        Wikidict annotator, New features for server 
+                        handling of tokensregex and tregex requests, 
+                        Release built directly from GitHub repo 
+
 2020-07-31    4.1.0     Improved server interface, improved memory 
                         usage of sutime, spanish tokenization upgrades 
 

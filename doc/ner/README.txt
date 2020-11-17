@@ -1,4 +1,4 @@
-Stanford NER - v4.0.0 - 2020-05-10
+Stanford NER - v4.2.0 - 2020-11-17
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -232,6 +232,8 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
+
+2020-11-17    4.2.0     Update for compatibility 
 
 2020-05-10    4.0.0     Update to UDv2.0 tokenization 
 

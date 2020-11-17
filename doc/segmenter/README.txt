@@ -31,6 +31,8 @@ LICENSE
 CHANGES
 ------------------------------------
 
+2020-11-17    4.2.0     Update for compatibility 
+
 2020-05-10    4.0.0     New Chinese segmenter trained off of CTB 9.0 
 
 2018-10-16    3.9.2     Update for compatibility 
