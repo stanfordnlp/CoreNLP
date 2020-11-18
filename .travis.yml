@@ -14,6 +14,8 @@ install:
 - mvn install:install-file -Dfile=stanford-english-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=4.2.0 -Dclassifier=models-english -Dpackaging=jar
 
 - mv stanford-corenlp-models-current.jar stanford-corenlp-4.2.0-models.jar
+- pwd
+- ls -lhd *
 # necessary for `mvn install`
 
 script:
