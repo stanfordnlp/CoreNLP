@@ -247,6 +247,14 @@ public class PerceptronModel extends BaseModel  {
     }
   }
 
+  /**
+   * index: the tree to train
+   * binarizedTrees: a list of all the training trees we know about, binarized
+   * transitionLists: a list of pre-assembled transitions for the trees
+   * updates: a mutable list of updates which will be applied once all the trees are finished.
+   *   TODO: we could return a Triple instead of a Pair and not mutate this list
+   * oracle: if training method ORACLE is used, the oracle to use for predicting transitions
+   */
   private Pair<Integer, Integer> trainTree(int index, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle) {
     int numCorrect = 0;
     int numWrong = 0;
