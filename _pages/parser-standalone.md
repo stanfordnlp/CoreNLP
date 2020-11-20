@@ -64,4 +64,11 @@ The parser code is dual licensed (in a similar manner to MySQL, etc.). Open sour
 | [1.6.2](https://nlp.stanford.edu/software/stanford-parser-2010-02-26.tgz) | 2010-02-26 | Improvements to Arabic parser models, and to English and Chinese Stanford Dependencies | |
 | [1.6.1](https://nlp.stanford.edu/software/stanford-parser-2008-10-26.tgz) | 2008-10-26 | Slightly improved Arabic and German parsing, and Stanford Dependencies | |
 | [1.6](https://nlp.stanford.edu/software/stanford-parser-2007-08-19.tar.gz) | 2007-08-19 | Added Arabic, k-best PCCFG parsing; improved English grammatical relations | |
+| [1.5.1](https://nlp.stanford.edu/software/StanfordParser-2006-06-11.tar.gz) | 2006-06-11 | Improved English and Chinese grammatical relations; fixed UTF-8 handling | |
+| [1.5](https://nlp.stanford.edu/software/StanfordParser-2005-07-21.tar.gz) | 2005-07-21 | Added grammatical relations output; fixed bugs introduced in 1.4 | |
+| [1.4](https://nlp.stanford.edu/software/StanfordParser-1.4.tar.gz) | 2004-03-24 | Made PCFG faster again (by FSA minimization); added German support | |
+| [1.3](https://nlp.stanford.edu/software/StanfordParser-1.3.tar.gz) | 2003-09-06 | Made parser over twice as fast; added tokenization options | |
+| 1.2 | 2003-07-20 | Halved PCFG memory usage; added support for Chinese | |
+| 1.1 | 2003-03-25 | Improved parsing speed; included GUI, improved PCFG grammar | |
+| 1.0 | 2002-12-05 | Initial release | |
 
