@@ -54,3 +54,14 @@ The parser code is dual licensed (in a similar manner to MySQL, etc.). Open sour
 | [2.0.2](https://nlp.stanford.edu/software/stanford-parser-2012-05-22.tgz) | 2012-05-22 | Some models now support training with extra tagged, non-tree data | |
 | [2.0.1](https://nlp.stanford.edu/software/stanford-parser-2012-03-09.tgz) | 2012-03-09 | Caseless English model included, bugfix for enforced tags | |
 | [2.0](https://nlp.stanford.edu/software/stanford-parser-2012-02-03.tgz) | 2012-02-03 | Threadsafe! | |
+| [1.6.9](https://nlp.stanford.edu/software/stanford-parser-2011-09-14.tgz) | 2011-09-14 | Improved recognition of imperatives, dependencies now explicitely include a root, parser knows osprey is a noun | |
+| [1.6.8](https://nlp.stanford.edu/software/stanford-parser-2011-08-04.tgz) | 2011-08-04 | New French model, improved foreign language models, bug fixes | |
+| [1.6.7](https://nlp.stanford.edu/software/stanford-parser-2011-05-18.tgz) | 2011-05-18 | Minor bug fixes. | |
+| [1.6.6](https://nlp.stanford.edu/software/stanford-parser-2011-04-20.tgz) | 2011-04-20 | Internal code and API changes (ArrayLists rather than Sentence; use of CoreLabel objects) to match tagger and CoreNLP. | |
+| [1.6.5](https://nlp.stanford.edu/software/stanford-parser-2010-11-30.tgz) | 2010-11-30 | Further improvements to English Stanford Dependencies and other minor changes | |
+| [1.6.4](https://nlp.stanford.edu/software/stanford-parser-2010-08-20.tgz) | 2010-08-20 | More minor bug fixes and improvements to English Stanford Dependencies and question parsing | |
+| [1.6.3](https://nlp.stanford.edu/software/stanford-parser-2010-07-09.tgz) | 2010-07-09 | Improvements to English Stanford Dependencies and question parsing, minor bug fixes | |
+| [1.6.2](https://nlp.stanford.edu/software/stanford-parser-2010-02-26.tgz) | 2010-02-26 | Improvements to Arabic parser models, and to English and Chinese Stanford Dependencies | |
+| [1.6.1](https://nlp.stanford.edu/software/stanford-parser-2008-10-26.tgz) | 2008-10-26 | Slightly improved Arabic and German parsing, and Stanford Dependencies | |
+| [1.6](https://nlp.stanford.edu/software/stanford-parser-2007-08-19.tar.gz) | 2007-08-19 | Added Arabic, k-best PCCFG parsing; improved English grammatical relations | |
+
