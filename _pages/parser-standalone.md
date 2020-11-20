@@ -10,9 +10,15 @@ parent: Standalone Distributions
 
 ## About
 
-The Stanford Parser can be used to generate constituency and dependency parses of sentences for a variety of languages. The package includes PCFG, Shift Reduce, and Neural Dependency parsers.
+The Stanford Parser can be used to generate constituency and dependency parses of sentences for a variety of languages. The package includes PCFG, Shift Reduce, and Neural Dependency parsers. To fully utilize the parser, also make sure to download the models jar for the specific language you are interested in. Links to models jars provided below in History section or [here](https://stanfordnlp.github.io/CoreNLP/download.html). 
 
 [<i class="fab fa-java"></i> Download Stanford Parser 4.2.0](http://nlp.stanford.edu/software/stanford-parser-4.2.0.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
+
+## Differences between Standalone and CoreNLP
+
+If you are using Stanford NLP software for non-commercial purposes, you should use the full CoreNLP package.
+
+Parsing requires tokenization and in some cases part-of-speech tagging. The Stanford Parser distribution includes English tokenization, but does not provide tokenization used for French, German, and Spanish. Access to that tokenization requires using the full CoreNLP package. Likewise usage of the part-of-speech tagging models requires the license for the Stanford POS tagger or CoreNLP.
 
 ## License
 
