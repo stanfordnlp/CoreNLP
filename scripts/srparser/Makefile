@@ -49,8 +49,8 @@ SPANISH_DEV2 = /u/nlp/data/spanish/ldc/ldc-NW.dev
 SPANISH_DEV3 = /u/nlp/data/spanish/ldc/ldc-DF.dev
 SPANISH_DEV_TMP = /u/nlp/data/spanish/all.dev.tmp
 SPANISH_TEST  = /u/nlp/data/spanish/ancora/ancora.test
-SPANISH_TEST2 = /u/nlp/data/spanish/ldc/ldc-NW.train
-SPANISH_TEST3 = /u/nlp/data/spanish/ldc/ldc-DF.train
+SPANISH_TEST2 = /u/nlp/data/spanish/ldc/ldc-NW.test
+SPANISH_TEST3 = /u/nlp/data/spanish/ldc/ldc-DF.test
 SPANISH_TAGGER= /u/nlp/data/pos-tagger/distrib/spanish-distsim.tagger
 SPANISH_TLPP  = edu.stanford.nlp.parser.lexparser.SpanishTreebankParserParams
 
