@@ -14,11 +14,11 @@ The Stanford Parser can be used to generate constituency and dependency parses o
 
 [<i class="fab fa-java"></i> Download Stanford Parser 4.2.0](http://nlp.stanford.edu/software/stanford-parser-4.2.0.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 
+You can consult this legacy [FAQ](https://nlp.stanford.edu/software/parser-faq.html) for more info.
+
 ## Demo
 
 You can see demonstrations of the various parsers [here](https://corenlp.run).
-
-
 
 ## Differences between Standalone and CoreNLP
 
