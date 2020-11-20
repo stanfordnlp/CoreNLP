@@ -14,11 +14,25 @@ The Stanford Parser can be used to generate constituency and dependency parses o
 
 [<i class="fab fa-java"></i> Download Stanford Parser 4.2.0](http://nlp.stanford.edu/software/stanford-parser-4.2.0.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 
+## Demo
+
+You can see demonstrations of the various parsers [here](https://corenlp.run).
+
+
+
 ## Differences between Standalone and CoreNLP
 
 If you are using Stanford NLP software for non-commercial purposes, you should use the full CoreNLP package.
 
 Parsing requires tokenization and in some cases part-of-speech tagging. The Stanford Parser distribution includes English tokenization, but does not provide tokenization used for French, German, and Spanish. Access to that tokenization requires using the full CoreNLP package. Likewise usage of the part-of-speech tagging models requires the license for the Stanford POS tagger or full CoreNLP distribution.
+
+## Citing Stanford Parser in papers
+
+The main technical ideas behind how these parsers work appear in these papers. Feel free to cite one or more of the following papers or people depending on what you are using. Since the parser is regularly updated, we appreciate it if papers with numerical results reflecting parser performance mention the version of the parser being used!
+
+For the neural-network dependency parser:
+
+> Danqi Chen and Christopher D Manning. 2014. [A Fast and Accurate Dependency Parser using Neural Networks](http://cs.stanford.edu/~danqi/papers/emnlp2014.pdf) Proceedings of EMNLP 2014
 
 ## License
 
