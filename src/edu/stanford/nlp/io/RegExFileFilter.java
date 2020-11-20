@@ -12,7 +12,7 @@ import java.util.regex.*;
  */
 public class RegExFileFilter implements FileFilter {
 
-  private Pattern pattern = null;
+  private final Pattern pattern;
 
   /**
    * Sets up a RegExFileFilter which checks if the file name (not the
