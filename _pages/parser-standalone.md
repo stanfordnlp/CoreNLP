@@ -14,6 +14,9 @@ The Stanford Parser can be used to generate constituency and dependency parses o
 
 [<i class="fab fa-java"></i> Download Stanford Parser 4.2.0](http://nlp.stanford.edu/software/stanford-parser-4.2.0.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 
+## License
+
+The parser code is dual licensed (in a similar manner to MySQL, etc.). Open source licensing is under the full GPL, which allows many free uses. For distributors of proprietary software, commercial licensing is available. (Fine print: The traditional (dynamic programmed) Stanford Parser does part-of-speech tagging as it works, but the newer constituency and neural network dependency shift-reduce parsers require pre-tagged input. For convenience, we include the part-of-speech tagger code, but not models with the parser download. However, if you want to use these parsers under a commercial license, then you need a license to both the Stanford Parser and the Stanford POS tagger. Or you can get the whole bundle of Stanford CoreNLP.) If you don't need a commercial license, but would like to support maintenance of these tools, we welcome gift funding: use this form and write "Stanford NLP Group open source software" in the Special Instructions.
 
 ## History
 
