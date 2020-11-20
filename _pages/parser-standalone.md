@@ -26,14 +26,6 @@ If you are using Stanford NLP software for non-commercial purposes, you should u
 
 Parsing requires tokenization and in some cases part-of-speech tagging. The Stanford Parser distribution includes English tokenization, but does not provide tokenization used for French, German, and Spanish. Access to that tokenization requires using the full CoreNLP package. Likewise usage of the part-of-speech tagging models requires the license for the Stanford POS tagger or full CoreNLP distribution.
 
-## Citing Stanford Parser in papers
-
-The main technical ideas behind how these parsers work appear in these papers. Feel free to cite one or more of the following papers or people depending on what you are using. Since the parser is regularly updated, we appreciate it if papers with numerical results reflecting parser performance mention the version of the parser being used!
-
-For the neural-network dependency parser:
-
-> Danqi Chen and Christopher D Manning. 2014. [A Fast and Accurate Dependency Parser using Neural Networks](http://cs.stanford.edu/~danqi/papers/emnlp2014.pdf) Proceedings of EMNLP 2014
-
 ## License
 
 The parser code is dual licensed (in a similar manner to MySQL, etc.). Open source licensing is under the full GPL, which allows many free uses. For distributors of proprietary software, commercial licensing is available. (Fine print: The traditional (dynamic programmed) Stanford Parser does part-of-speech tagging as it works, but the newer constituency and neural network dependency shift-reduce parsers require pre-tagged input. For convenience, we include the part-of-speech tagger code, but not models with the parser download. However, if you want to use these parsers under a commercial license, then you need a license to both the Stanford Parser and the Stanford POS tagger. Or you can get the whole bundle of Stanford CoreNLP.) If you don't need a commercial license, but would like to support maintenance of these tools, we welcome gift funding: use [this form](https://makeagift.stanford.edu/get/page/makeagift?mop=CC&gfty=G&pgnTPC=399&stp=270&cturl=close&olc=21029) and write "Stanford NLP Group open source software" in the Special Instructions.
