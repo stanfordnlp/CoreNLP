@@ -50,3 +50,7 @@ The parser code is dual licensed (in a similar manner to MySQL, etc.). Open sour
 | [3.2.0](https://nlp.stanford.edu/software/stanford-parser-full-2013-06-20.zip) | 2013-06-20 | New CVG based English model with higher accuracy | |
 | [2.0.5](https://nlp.stanford.edu/software/stanford-parser-2013-04-05.zip) | 2013-04-05 | Dependency improvements, -nthreads option, ctb7 model | |
 | [2.0.4](https://nlp.stanford.edu/software/stanford-parser-2012-11-12.zip) | 2012-11-12 | Improved dependency code extraction efficiency, other dependency changes | |
+| [2.0.3](https://nlp.stanford.edu/software/stanford-parser-2012-07-09.tgz) | 2012-07-09 | Minor bug fixes | |
+| [2.0.2](https://nlp.stanford.edu/software/stanford-parser-2012-05-22.tgz) | 2012-05-22 | Some models now support training with extra tagged, non-tree data | |
+| [2.0.1](https://nlp.stanford.edu/software/stanford-parser-2012-03-09.tgz) | 2012-03-09 | Caseless English model included, bugfix for enforced tags | |
+| [2.0](https://nlp.stanford.edu/software/stanford-parser-2012-02-03.tgz) | 2012-02-03 | Threadsafe! | |
