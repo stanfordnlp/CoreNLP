@@ -22,7 +22,6 @@ import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
@@ -251,15 +250,15 @@ public class PerceptronModel extends BaseModel  {
    * index: the tree to train
    * binarizedTrees: a list of all the training trees we know about, binarized
    * transitionLists: a list of pre-assembled transitions for the trees
-   * updates: a mutable list of updates which will be applied once all the trees are finished.
-   *   TODO: we could return a Triple instead of a Pair and not mutate this list
    * oracle: if training method ORACLE is used, the oracle to use for predicting transitions
    */
-  private Pair<Integer, Integer> trainTree(int index, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle) {
+  private Triple<List<Update>, Integer, Integer> trainTree(int index, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Oracle oracle) {
     int numCorrect = 0;
     int numWrong = 0;
 
     Tree tree = binarizedTrees.get(index);
+
+    List<Update> updates = Generics.newArrayList();
 
     ReorderingOracle reorderer = null;
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
@@ -451,25 +450,23 @@ public class PerceptronModel extends BaseModel  {
       }
     }
 
-    return Pair.makePair(numCorrect, numWrong);
+    return Triple.makeTriple(updates, numCorrect, numWrong);
   }
 
-  private class TrainTreeProcessor implements ThreadsafeProcessor<Integer, Pair<Integer, Integer>> {
+  private class TrainTreeProcessor implements ThreadsafeProcessor<Integer, Triple<List<Update>, Integer, Integer>> {
     List<Tree> binarizedTrees;
     List<List<Transition>> transitionLists;
-    List<Update> updates; // this needs to be a synchronized list
     Oracle oracle;
 
-    public TrainTreeProcessor(List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle) {
+    public TrainTreeProcessor(List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Oracle oracle) {
       this.binarizedTrees = binarizedTrees;
       this.transitionLists = transitionLists;
-      this.updates = updates;
       this.oracle = oracle;
     }
 
     @Override
-    public Pair<Integer, Integer> process(Integer index) {
-      return trainTree(index, binarizedTrees, transitionLists, updates, oracle);
+    public Triple<List<Update>, Integer, Integer> process(Integer index) {
+      return trainTree(index, binarizedTrees, transitionLists, oracle);
     }
 
     @Override
@@ -490,14 +487,16 @@ public class PerceptronModel extends BaseModel  {
    * trees without updating any weights, which allows the results for
    * multithreaded training to be reproduced.
    */
-  private Triple<List<Update>, Integer, Integer> trainBatch(List<Integer> indices, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle, MulticoreWrapper<Integer, Pair<Integer, Integer>> wrapper) {
+  private Triple<List<Update>, Integer, Integer> trainBatch(List<Integer> indices, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Oracle oracle, MulticoreWrapper<Integer, Triple<List<Update>, Integer, Integer>> wrapper) {
     int numCorrect = 0;
     int numWrong = 0;
+    final List<Update> updates = Generics.newArrayList();
     if (op.trainOptions.trainingThreads == 1) {
       for (Integer index : indices) {
-        Pair<Integer, Integer> count = trainTree(index, binarizedTrees, transitionLists, updates, oracle);
-        numCorrect += count.first;
-        numWrong += count.second;
+        Triple<List<Update>, Integer, Integer> update = trainTree(index, binarizedTrees, transitionLists, oracle);
+        updates.addAll(update.first);
+        numCorrect += update.second;
+        numWrong += update.third;
       }
     } else {
       for (Integer index : indices) {
@@ -505,9 +504,10 @@ public class PerceptronModel extends BaseModel  {
       }
       wrapper.join(false);
       while (wrapper.peek()) {
-        Pair<Integer, Integer> result = wrapper.poll();
-        numCorrect += result.first;
-        numWrong += result.second;
+        Triple<List<Update>, Integer, Integer> result = wrapper.poll();
+        updates.addAll(result.first);
+        numCorrect += result.second;
+        numWrong += result.third;
       }
     }
     return new Triple<>(updates, numCorrect, numWrong);
@@ -532,11 +532,9 @@ public class PerceptronModel extends BaseModel  {
       oracle = new Oracle(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
     }
 
-    List<Update> updates = Generics.newArrayList();
-    MulticoreWrapper<Integer, Pair<Integer, Integer>> wrapper = null;
+    MulticoreWrapper<Integer, Triple<List<Update>, Integer, Integer>> wrapper = null;
     if (nThreads != 1) {
-      updates = Collections.synchronizedList(updates);
-      wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new TrainTreeProcessor(binarizedTrees, transitionLists, updates, oracle));
+      wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new TrainTreeProcessor(binarizedTrees, transitionLists, oracle));
     }
 
     IntCounter<String> featureFrequencies = null;
@@ -551,7 +549,7 @@ public class PerceptronModel extends BaseModel  {
       Collections.shuffle(indices, random);
       for (int start = 0; start < indices.size(); start += op.trainOptions.batchSize) {
         int end = Math.min(start + op.trainOptions.batchSize, indices.size());
-        Triple<List<Update>, Integer, Integer> result = trainBatch(indices.subList(start, end), binarizedTrees, transitionLists, updates, oracle, wrapper);
+        Triple<List<Update>, Integer, Integer> result = trainBatch(indices.subList(start, end), binarizedTrees, transitionLists, oracle, wrapper);
 
         numCorrect += result.second;
         numWrong += result.third;
@@ -574,7 +572,6 @@ public class PerceptronModel extends BaseModel  {
             }
           }
         }
-        updates.clear();
       }
       trainingTimer.done("Iteration " + iteration);
       log.info("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
