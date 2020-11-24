@@ -491,6 +491,27 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     }
   }
 
+  private void verifyTransitions(List<Tree> binarizedTrees, List<List<Transition>> transitionLists) {
+    if (binarizedTrees.size() != transitionLists.size()) {
+      throw new AssertionError("Expected the trees and transition lists to be the same size");
+    }
+
+    for (int i = 0; i < binarizedTrees.size(); ++i) {
+      State state = initialStateFromGoldTagTree(binarizedTrees.get(i));
+      List<Transition> transitions = transitionLists.get(i);
+      for (int j = 0; j < transitions.size(); ++j) {
+        if (!transitions.get(j).isLegal(state, null)) {
+          System.err.println("Transition list for a gold tree is illegal!");
+          System.err.println("  " + binarizedTrees.get(i));
+          System.err.println("  " + transitions);
+          System.err.println("  First illegal transition: " + j + ": " + transitions.get(j));
+          System.err.println("  State at this time: " + state);
+          break;
+        }
+        state = transitions.get(j).apply(state);
+      }
+    }
+  }
 
   private void train(List<Pair<String, FileFilter>> trainTreebankPath,
                      Pair<String, FileFilter> devTreebankPath,
@@ -528,6 +549,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     for (List<Transition> transitions : transitionLists) {
       transitionIndex.addAll(transitions);
     }
+
+    verifyTransitions(binarizedTrees, transitionLists);
+
     transitionTimer.done("Converting trees into transition lists");
     log.info("Number of transitions: " + transitionIndex.size());
 
