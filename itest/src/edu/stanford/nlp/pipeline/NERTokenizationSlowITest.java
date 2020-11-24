@@ -18,7 +18,7 @@ import java.util.stream.*;
 
 public class NERTokenizationSlowITest extends TestCase {
 
-  public static String DATA_PATH = "/u/nlp/data/stanford-corenlp-testing/data/ner";
+  public static String DATA_PATH = "/u/nlp/data/stanford-corenlp/testing/data/ner";
 
   public StanfordCoreNLP nerTokenizationPipeline;
   public StanfordCoreNLP standardTokenizationPipeline;

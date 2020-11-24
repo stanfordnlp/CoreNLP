@@ -10,7 +10,6 @@ import org.junit.Test;
  * Test of MulticoreWrapper.
  * 
  * @author Spence Green
- *
  */
 public class MulticoreWrapperTest {
 
@@ -25,7 +24,7 @@ public class MulticoreWrapperTest {
 
   @Test
   public void testSynchronization() {
-    wrapper = new MulticoreWrapper<Integer,Integer>(nThreads, new DelayedIdentityFunction());
+    wrapper = new MulticoreWrapper<>(nThreads, new DelayedIdentityFunction());
     int lastReturned = 0;
     final int nItems = 1000;
     for (int i = 0; i < nItems; ++i) {
@@ -48,7 +47,7 @@ public class MulticoreWrapperTest {
 
   @Test
   public void testUnsynchronized() {
-    wrapper = new MulticoreWrapper<Integer,Integer>(nThreads, new DelayedIdentityFunction(), false);
+    wrapper = new MulticoreWrapper<>(nThreads, new DelayedIdentityFunction(), false);
     int nReturned = 0;
     final int nItems = 1000;
     for (int i = 0; i < nItems; ++i) {
@@ -94,7 +93,7 @@ public class MulticoreWrapperTest {
       int sleepTime = nextSleepTime();
       try {
         Thread.sleep(sleepTime);
-      } catch (InterruptedException e) {}
+      } catch (InterruptedException ignored) {}
       return input;
     }
 
@@ -107,4 +106,5 @@ public class MulticoreWrapperTest {
       return this;
     }
   }
+
 }

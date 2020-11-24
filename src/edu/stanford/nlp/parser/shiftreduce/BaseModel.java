@@ -18,7 +18,6 @@ public abstract class BaseModel implements Serializable {
 
   final ShiftReduceOptions op;
 
-  // This is shared with the owning ShiftReduceParser (for now, at least)
   final Index<Transition> transitionIndex;
   final Set<String> knownStates; // the set of goal categories of a reduce = the set of phrasal categories in a grammar
   final Set<String> rootStates;
@@ -44,6 +43,37 @@ public abstract class BaseModel implements Serializable {
     this.rootOnlyStates = other.rootOnlyStates;
   }
 
+  /*
+  // This chunk of code can read a model where the BinaryTransitions
+  // aren't protected from going to root in the middle of a tree and
+  // fix those models so that can't happen
+  private void readObject(ObjectInputStream in)
+    throws IOException, ClassNotFoundException
+  {
+    ObjectInputStream.GetField fields = in.readFields();
+    this.op = ErasureUtils.uncheckedCast(fields.get("op", null));
+
+    Index<Transition> badIndex = ErasureUtils.uncheckedCast(fields.get("transitionIndex", null));
+    this.knownStates = ErasureUtils.uncheckedCast(fields.get("knownStates", null));
+    this.rootStates = ErasureUtils.uncheckedCast(fields.get("rootStates", null));
+    this.rootOnlyStates = ErasureUtils.uncheckedCast(fields.get("rootOnlyStates", null));
+    this.transitionIndex = new HashIndex<>();
+    for (Transition t : badIndex) {
+      if (!(t instanceof BinaryTransition)) {
+        transitionIndex.add(t);
+        continue;
+      }
+      BinaryTransition bt = (BinaryTransition) t;
+      boolean isRoot = ((bt.isBinarized() && rootOnlyStates.contains(bt.label.substring(1))) ||
+                        rootOnlyStates.contains(bt.label));
+      if (isRoot) {
+        System.out.println("Updating a transition: " + bt);
+      }
+      transitionIndex.add(new BinaryTransition(bt.label, bt.side, isRoot));
+    }
+  }
+  */
+  
   /**
    * Returns a transition which might not even be part of the model,
    * but will hopefully allow progress in an otherwise stuck parse
@@ -102,12 +132,27 @@ public abstract class BaseModel implements Serializable {
       return null;
     }
 
+    // TODO: don't emergency transition away from ROOT.
+    // Emergency transition to the ROOT instead
+    // TODO: all of the above transitions need to be checked to make
+    // sure they aren't creating an emergency transition to a ROOT in
+    // the middle of a tree
     if (ShiftReduceUtils.isTemporary(state.stack.peek())) {
-      return new BinaryTransition(state.stack.peek().value().substring(1), BinaryTransition.Side.RIGHT);
+      String newState = state.stack.peek().value().substring(1);
+      boolean isRoot = rootOnlyStates.contains(newState);
+      if (isRoot && state.endOfQueue() && state.stack.size() == 2) {
+        newState = state.stack.peek().value();
+      }
+      return new BinaryTransition(newState, BinaryTransition.Side.RIGHT, isRoot);
     }
 
     if (ShiftReduceUtils.isTemporary(state.stack.pop().peek())) {
-      return new BinaryTransition(state.stack.pop().peek().value().substring(1), BinaryTransition.Side.LEFT);
+      String newState = state.stack.pop().peek().value().substring(1);
+      boolean isRoot = rootOnlyStates.contains(newState);
+      if (isRoot && state.endOfQueue() && state.stack.size() == 2) {
+        newState = state.stack.pop().peek().value();
+      }
+      return new BinaryTransition(newState, BinaryTransition.Side.LEFT, isRoot);
     }
 
     return null;

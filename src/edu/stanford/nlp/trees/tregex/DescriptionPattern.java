@@ -380,14 +380,11 @@ public class DescriptionPattern extends TregexPattern  {
             break;
           }
         } else { // try to match the description pattern.
-          // cdm: Nov 2006: Check for null label, just make found false
-          // String value = (myNode.basicCatFunction == null ? nextTreeNodeMatchCandidate.value() : myNode.basicCatFunction.apply(nextTreeNodeMatchCandidate.value()));
-          // m = myNode.descPattern.matcher(value);
-          // boolean found = m.find();
           boolean found;
           value = nextTreeNodeMatchCandidate.value();
           if (value == null) {
-            found = false;
+            // treat null as a match only if if we are matching __, /.*/, or the like
+            found = myNode.descriptionMode == DescriptionMode.ANYTHING;
           } else {
             if (myNode.basicCatFunction != null) {
               value = myNode.basicCatFunction.apply(value);
@@ -451,6 +448,8 @@ public class DescriptionPattern extends TregexPattern  {
         } else if (value != null) {
           // commit using a set string (all groups are treated as the string)
           commitVariableGroups(value);
+        } else {
+          commitVariableGroups("");
         }
       }
       // finished is false exiting this if and only if nextChild exists

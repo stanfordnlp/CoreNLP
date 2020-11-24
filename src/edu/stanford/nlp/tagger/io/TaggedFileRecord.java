@@ -26,7 +26,7 @@ public class TaggedFileRecord {
     TREES // represents a file in PTB format
   }
 
-  final String file;
+  private final String file;
   final Format format;
   final String encoding;
   final String tagSeparator;

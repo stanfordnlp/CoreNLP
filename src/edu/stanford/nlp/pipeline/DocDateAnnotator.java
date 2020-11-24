@@ -3,8 +3,8 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.*;
@@ -12,32 +12,38 @@ import java.util.regex.*;
 
 public class DocDateAnnotator implements Annotator {
 
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(DocDateAnnotator.class);
+
   // property names
-  public static String DOC_DATE_FIXED_PROPERTY = "useFixedDate";
-  public static String DOC_DATE_MAPPING_FILE_PROPERTY = "useMappingFile";
-  public static String DOC_DATE_PRESENT_PROPERTY = "usePresent";
-  public static String DOC_DATE_REGEX_PROPERTY = "useRegex";
+  public static final String DOC_DATE_FIXED_PROPERTY = "useFixedDate";
+  public static final String DOC_DATE_MAPPING_FILE_PROPERTY = "useMappingFile";
+  public static final String DOC_DATE_PRESENT_PROPERTY = "usePresent";
+  public static final String DOC_DATE_REGEX_PROPERTY = "useRegex";
 
   // helpful regexes
-  public static Pattern DATE_PROPER_FORMAT = Pattern.compile("[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}");
-  public static Pattern DATE_NO_HYPHENS_PATTERN = Pattern.compile("[0-9]{8}");
+  public static final Pattern DATE_PROPER_FORMAT = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
+  public static final Pattern DATE_NO_HYPHENS_PATTERN = Pattern.compile("[0-9]{8}");
 
   // settings
-  public boolean useFixedDate = false;
-  public boolean useMappingFile = false;
-  public boolean usePresentDate = false;
-  public boolean useRegex = false;
+  private final boolean useFixedDate; // = false;
+  private final boolean useMappingFile; // = false;
+  private final boolean usePresentDate; // = false;
+  private final boolean useRegex; // = false;
 
   // fixed date user could provide
-  public String fixedDate;
+  private String fixedDate;
 
   // mapping from doc id to doc date
-  public HashMap<String, String> docIDToDocDate;
+  private HashMap<String, String> docIDToDocDate;
 
   // regex
-  public Pattern fileDocDatePattern;
+  private Pattern fileDocDatePattern;
 
-  public DocDateAnnotator(String name, Properties props) throws IOException {
+  private final String description;
+
+  public DocDateAnnotator(String name, Properties props) {
+    StringBuilder sb = new StringBuilder("DocDateAnnotator[");
     // if a mapping file is specified, build the hash map
     useFixedDate = props.containsKey(name+"."+DOC_DATE_FIXED_PROPERTY);
     useMappingFile = props.containsKey(name+"."+DOC_DATE_MAPPING_FILE_PROPERTY);
@@ -46,7 +52,9 @@ public class DocDateAnnotator implements Annotator {
     if (useMappingFile) {
       // if using mapping file, load the doc dates
       String mappingFilePath = props.getProperty(name + "." + DOC_DATE_MAPPING_FILE_PROPERTY);
-      docIDToDocDate = new HashMap<String,String>();
+      sb.append("mappingFile=");
+      sb.append(mappingFilePath);
+      docIDToDocDate = new HashMap<>();
       List<String> mappingEntries =
           IOUtils.linesFromFile(mappingFilePath);
       for (String fileNameAndDocDate : mappingEntries) {
@@ -55,10 +63,23 @@ public class DocDateAnnotator implements Annotator {
       }
     } else if (useFixedDate) {
       // if using fixed date, set that date
-      fixedDate = props.getProperty(name+"."+DOC_DATE_FIXED_PROPERTY);
+      fixedDate = props.getProperty(name + "." + DOC_DATE_FIXED_PROPERTY);
+      sb.append("fixedDate=");
+      sb.append(fixedDate);
+    } else if (usePresentDate) {
+      fixedDate = currentDate();
+      sb.append("presentDate=");
+      sb.append(fixedDate);
     } else if (useRegex) {
-      fileDocDatePattern = Pattern.compile(props.getProperty(name+"."+DOC_DATE_REGEX_PROPERTY));
+      String regex = props.getProperty(name+"."+DOC_DATE_REGEX_PROPERTY);
+      fileDocDatePattern = Pattern.compile(regex);
+      sb.append("regex=");
+      sb.append(regex);
+    } else {
+      sb.append("no docDate finder");
     }
+    sb.append(']');
+    description = sb.toString();
   }
 
   @Override
@@ -69,25 +90,31 @@ public class DocDateAnnotator implements Annotator {
     String foundDocDate;
     if (useMappingFile) {
       foundDocDate = docIDToDocDate.get(docID);
-      if (foundDocDate == null)
+      if (foundDocDate == null) {
+        log.warn("DocDate mapping file failed to match against " + docID);
         foundDocDate = "";
-    } else if (useFixedDate) {
+      }
+    } else if (useFixedDate || usePresentDate) {
       foundDocDate = fixedDate;
-    } else if (usePresentDate) {
-      foundDocDate = currentDate();
     } else if (useRegex) {
       Matcher m = fileDocDatePattern.matcher(docID);
-      m.matches();
-      foundDocDate = m.group(1);
-      if (DATE_NO_HYPHENS_PATTERN.matcher(foundDocDate).find() && foundDocDate.length() == 8)
-        foundDocDate = addHyphensToDate(foundDocDate);
+      if (m.matches()) {
+        foundDocDate = m.group(1);
+        if (foundDocDate.length() == 8 && DATE_NO_HYPHENS_PATTERN.matcher(foundDocDate).matches()) {
+          foundDocDate = addHyphensToDate(foundDocDate);
+        }
+      } else {
+        log.warn("DocDate regex failed to match against " + docID);
+        foundDocDate = "";
+      }
     } else {
       foundDocDate = "";
     }
     // check date has proper format
     Matcher properDateFormat = DATE_PROPER_FORMAT.matcher(foundDocDate);
-    if (properDateFormat.matches())
+    if (properDateFormat.matches()) {
       annotation.set(CoreAnnotations.DocDateAnnotation.class, foundDocDate);
+    }
   }
 
   /** helper for return current date **/
@@ -104,10 +131,17 @@ public class DocDateAnnotator implements Annotator {
   }
 
   @Override
+  public String toString() {
+    return description;
+  }
+
+  @SuppressWarnings("RawUseOfParameterized")
+  @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.emptySet();
   }
 
+  @SuppressWarnings("RawUseOfParameterized")
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     return Collections.emptySet();

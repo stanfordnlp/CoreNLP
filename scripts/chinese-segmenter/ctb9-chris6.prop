@@ -1,0 +1,87 @@
+# this file is modified from Sighan 2005 bakeoff (CTB) properties file
+
+#
+# training and test files
+#
+trainFile=/u/nlp/data/chinese/ctb9/seg/ctb9-seg-with-extra.txt
+
+# map [testMap, trainMap]
+#
+# you MUST call answer answer
+# if you use our reading/writing, call it "word"
+# if you write your own, you can call it whatever you want
+#
+map = char=0,answer=1
+backgroundSymbol=1
+removeBackgroundSingletonFeatures=true
+saveFeatureIndexToDisk=true
+
+#
+# how to read the input [keep this line]
+#
+readerAndWriter=edu.stanford.nlp.wordseg.Sighan2005DocumentReaderAndWriter
+
+plainTextDocumentReaderAndWriter=edu.stanford.nlp.wordseg.Sighan2005DocumentReaderAndWriter
+
+#
+# how to do optimization.
+# higher QNsize = less time, fewer iterations, more memory
+#
+useQN = true
+QNsize = 15
+
+# This value has been set to be roughly optimal
+sigma = 3.0
+
+
+# use the chinese feature factory
+#
+featureFactory = edu.stanford.nlp.wordseg.Gale2007ChineseSegmenterFeatureFactory
+
+inputEncoding = UTF-8
+outputEncoding = UTF-8
+
+# chinese features
+maxLeft=1
+useWord1=true
+useWord2=true
+useFeaturesC4gram=true
+useFeaturesCpC4gram=true
+useUnicodeType=true
+useUnicodeType4gram=true
+useUnicodeBlock=true
+useShapeStrings=true
+useShapeStrings1=true
+useShapeStrings3=true
+useShapeStrings4=true
+useShapeStrings5=true
+
+# useDict2=true
+useCTBChar2=true
+useRule2=true
+useWordn=true
+
+# It requires subdirectory dict under it!
+# used to be:
+# sighanCorporaDict = /juicy/u2/nlp2/data/chinese-segmenter/gale2007/ctb6/
+# perhaps that was moved to here?
+sighanCorporaDict = /u/nlp/data/chinese-segmenter/gale2007/ctb6/
+
+useDictionaryConjunctions=true
+expandMidDot=true
+
+# Leaving this turned off means it follows the CTB standard of not segmenting 2008年
+separateAsciiAndRange=false
+
+# useChPos=true
+
+# printFeatures = ctb-train
+
+# runtime testing
+keepEnglishWhitespaces=true
+keepAllWhitespaces = true
+sighanPostProcessing = true
+
+# This would make the resulting model smaller
+# It can also be set as a command line arg, which is what the Makefile does
+# featureDiffThresh=0.005

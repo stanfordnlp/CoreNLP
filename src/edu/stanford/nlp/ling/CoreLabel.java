@@ -828,7 +828,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       }
       break;
     case ALL:{
-      for(Class en: this.keySet()){
+      for (Class en: this.keySet()) {
         buf.append(';').append(en).append(':').append(this.get(en));
       }
       break;

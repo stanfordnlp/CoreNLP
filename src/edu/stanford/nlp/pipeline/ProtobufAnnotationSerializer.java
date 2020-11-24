@@ -16,6 +16,7 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.naturalli.*;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.quoteattribution.ChapterAnnotator;
+import edu.stanford.nlp.quoteattribution.QuoteAttributionUtils.EnhancedSentenceAnnotation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
@@ -33,7 +34,6 @@ import edu.stanford.nlp.time.TimeAnnotations.*;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import edu.stanford.nlp.coref.CorefCoreAnnotations.*;
 
 import edu.stanford.nlp.coref.data.CorefChain;
@@ -312,9 +312,18 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (keySet.contains(CharacterOffsetBeginAnnotation.class)) { builder.setBeginChar(coreLabel.beginPosition()); keysToSerialize.remove(CharacterOffsetBeginAnnotation.class); }
     if (keySet.contains(CharacterOffsetEndAnnotation.class)) { builder.setEndChar(coreLabel.endPosition()); keysToSerialize.remove(CharacterOffsetEndAnnotation.class); }
+    if (keySet.contains(CodepointOffsetBeginAnnotation.class)) {
+      builder.setCodepointOffsetBegin(coreLabel.get(CoreAnnotations.CodepointOffsetBeginAnnotation.class));
+      keysToSerialize.remove(CodepointOffsetBeginAnnotation.class);
+    }
+    if (keySet.contains(CodepointOffsetEndAnnotation.class)) {
+      builder.setCodepointOffsetEnd(coreLabel.get(CoreAnnotations.CodepointOffsetEndAnnotation.class));
+      keysToSerialize.remove(CodepointOffsetEndAnnotation.class);
+    }
     if (keySet.contains(LemmaAnnotation.class)) { builder.setLemma(coreLabel.lemma()); keysToSerialize.remove(LemmaAnnotation.class); }
     if (keySet.contains(UtteranceAnnotation.class)) { builder.setUtterance(getAndRegister(coreLabel, keysToSerialize, UtteranceAnnotation.class)); }
     if (keySet.contains(SpeakerAnnotation.class)) { builder.setSpeaker(getAndRegister(coreLabel, keysToSerialize, SpeakerAnnotation.class)); }
+    if (keySet.contains(SpeakerTypeAnnotation.class)) { builder.setSpeakerType(getAndRegister(coreLabel, keysToSerialize, SpeakerTypeAnnotation.class)); }
     if (keySet.contains(BeginIndexAnnotation.class)) { builder.setBeginIndex(getAndRegister(coreLabel, keysToSerialize, BeginIndexAnnotation.class)); }
     if (keySet.contains(EndIndexAnnotation.class)) { builder.setEndIndex(getAndRegister(coreLabel, keysToSerialize, EndIndexAnnotation.class)); }
     if (keySet.contains(TokenBeginAnnotation.class)) { builder.setTokenBeginIndex(getAndRegister(coreLabel, keysToSerialize, TokenBeginAnnotation.class)); }
@@ -377,6 +386,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(ChineseCharAnnotation.class)) { builder.setChineseChar(getAndRegister(coreLabel, keysToSerialize, ChineseCharAnnotation.class)); }
     if (keySet.contains(ChineseSegAnnotation.class)) { builder.setChineseSeg(getAndRegister(coreLabel, keysToSerialize, ChineseSegAnnotation.class)); }
     if (keySet.contains(SegmenterCoreAnnotations.XMLCharAnnotation.class)) { builder.setChineseXMLChar(getAndRegister(coreLabel, keysToSerialize, SegmenterCoreAnnotations.XMLCharAnnotation.class)); }
+
+    // Arabic character related stuff
+    if (keySet.contains(ArabicSegAnnotation.class)) { builder.setArabicSeg(getAndRegister(coreLabel, keysToSerialize, ArabicSegAnnotation.class)); }
 
     // French tokens potentially have ParentAnnotation
     if (keySet.contains(ParentAnnotation.class)) { builder.setParent(getAndRegister(coreLabel, keysToSerialize, ParentAnnotation.class)); }
@@ -595,12 +607,23 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // add boolean flag if sentence is quoted
     if (keySet.contains(QuotedAnnotation.class)) builder.setSectionQuoted(getAndRegister(sentence, keysToSerialize, QuotedAnnotation.class));
-
+    // quote annotator can also add an "enhanced sentence" if multiple sentences are treated as a single sentence
+    if (keySet.contains(EnhancedSentenceAnnotation.class)) {
+      keysToSerialize.remove(EnhancedSentenceAnnotation.class);
+      CoreMap enhanced = sentence.get(EnhancedSentenceAnnotation.class);
+      builder.setEnhancedSentence(toProto(enhanced));
+    }
+    
     // add chapter index if there is one
     if (keySet.contains(ChapterAnnotator.ChapterAnnotation.class)) builder.setChapterIndex(getAndRegister(sentence, keysToSerialize, ChapterAnnotator.ChapterAnnotation.class));
 
     // add paragraph index info
     if (keySet.contains(ParagraphIndexAnnotation.class)) builder.setParagraphIndex(getAndRegister(sentence, keysToSerialize, ParagraphIndexAnnotation.class));
+
+    // add speaker annotaiton
+    if (keySet.contains(SpeakerAnnotation.class)) { builder.setSpeaker(getAndRegister(sentence, keysToSerialize, SpeakerAnnotation.class)); }
+    if (keySet.contains(SpeakerTypeAnnotation.class)) { builder.setSpeakerType(getAndRegister(sentence, keysToSerialize, SpeakerTypeAnnotation.class)); }
+
     // Return
     return builder;
   }
@@ -614,6 +637,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   public CoreNLPProtos.Document toProto(Annotation doc) {
     Set<Class<?>> keysToSerialize = new HashSet<>(doc.keySet());
     keysToSerialize.remove(TokensAnnotation.class);  // note(gabor): tokens are saved in the sentence
+    keysToSerialize.remove(UseMarkedDiscourseAnnotation.class);  // this is only used as internal communication between annotators?
     CoreNLPProtos.Document.Builder builder = toProtoBuilder(doc, keysToSerialize);
     // Completeness Check
     if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
@@ -1353,7 +1377,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasLemma()) { word.setLemma(proto.getLemma()); }
     if (proto.hasBeginChar()) { word.setBeginPosition(proto.getBeginChar()); }
     if (proto.hasEndChar()) { word.setEndPosition(proto.getEndChar()); }
+    if (proto.hasCodepointOffsetBegin()) { word.set(CoreAnnotations.CodepointOffsetBeginAnnotation.class, proto.getCodepointOffsetBegin()); }
+    if (proto.hasCodepointOffsetEnd()) { word.set(CoreAnnotations.CodepointOffsetEndAnnotation.class, proto.getCodepointOffsetEnd()); }
     if (proto.hasSpeaker()) { word.set(SpeakerAnnotation.class, proto.getSpeaker()); }
+    if (proto.hasSpeakerType()) { word.set(SpeakerTypeAnnotation.class, proto.getSpeakerType()); }
     if (proto.hasUtterance()) { word.set(UtteranceAnnotation.class, proto.getUtterance()); }
     if (proto.hasBeginIndex()) { word.set(BeginIndexAnnotation.class, proto.getBeginIndex()); }
     if (proto.hasEndIndex()) { word.set(EndIndexAnnotation.class, proto.getEndIndex()); }
@@ -1381,6 +1408,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasChineseChar()) { word.set(ChineseCharAnnotation.class, proto.getChineseChar()) ; }
     if (proto.hasChineseSeg()) { word.set(ChineseSegAnnotation.class, proto.getChineseSeg()) ; }
     if (proto.hasChineseXMLChar()) { word.set(SegmenterCoreAnnotations.XMLCharAnnotation.class, proto.getChineseXMLChar()); }
+
+    // Arabic char info
+    if (proto.hasArabicSeg()) { word.set(ArabicSegAnnotation.class, proto.getArabicSeg()) ; }
 
     // Non-default annotators
     if (proto.hasGender()) { word.set(CoreAnnotations.GenderAnnotation.class, proto.getGender()); }
@@ -1513,8 +1543,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Add chinese characters
     if (proto.getCharacterCount() > 0) {
-      List<CoreLabel> sentenceCharacters =
-              proto.getCharacterList().stream().map(this::fromProto).collect(Collectors.toList());
+      List<CoreLabel> sentenceCharacters = proto.getCharacterList().stream().map(this::fromProto).collect(Collectors.toList());
       lossySentence.set(SegmenterCoreAnnotations.CharactersAnnotation.class, sentenceCharacters);
     }
     // Add text -- missing by default as it's populated from the Document
@@ -1535,6 +1564,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       lossySentence.set(ChapterAnnotator.ChapterAnnotation.class, proto.getChapterIndex());
     if (proto.hasParagraphIndex())
       lossySentence.set(ParagraphIndexAnnotation.class, proto.getParagraphIndex());
+
+    // speaker info
+    if (proto.hasSpeaker()) { lossySentence.set(SpeakerAnnotation.class, proto.getSpeaker()); }
+    if (proto.hasSpeakerType()) { lossySentence.set(SpeakerTypeAnnotation.class, proto.getSpeakerType()); }
 
     // Return
     return lossySentence;
@@ -1603,6 +1636,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       sentence.set(ChapterAnnotator.ChapterAnnotation.class, proto.getChapterIndex());
     if (proto.hasParagraphIndex())
       sentence.set(ParagraphIndexAnnotation.class, proto.getParagraphIndex());
+
+    // speaker info
+    if (proto.hasSpeaker()) { sentence.set(SpeakerAnnotation.class, proto.getSpeaker()); }
+    if (proto.hasSpeakerType()) { sentence.set(SpeakerTypeAnnotation.class, proto.getSpeakerType()); }
 
     // Return
     return sentence;
@@ -2504,7 +2541,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized protocol buffer to read from.
    * @return A timex, with as much information filled in as was gleaned from the protocol buffer.
    */
-  private Timex fromProto(CoreNLPProtos.Timex proto) {
+  private static Timex fromProto(CoreNLPProtos.Timex proto) {
     return new Timex(
         proto.hasType() ? proto.getType() : null,
         proto.hasValue() ? proto.getValue() : null,

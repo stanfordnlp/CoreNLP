@@ -33,7 +33,15 @@ public class Interner<T>  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(Interner.class);
 
-  protected static Interner<Object> interner = Generics.newInterner();
+  protected static Interner<Object> interner = new Interner<>();
+
+  public Interner() {
+    map = Generics.newWeakHashMap();
+  }
+
+  public Interner(int initialCapacity) {
+    map = Generics.newWeakHashMap(initialCapacity);
+  }
 
   /**
    * For getting the instance that global methods use.
@@ -64,9 +72,10 @@ public class Interner<T>  {
   }
 
 
-  protected Map<T,WeakReference<T>> map = Generics.newWeakHashMap();
+  protected Map<T,WeakReference<T>> map;
 
   public void clear() { map = Generics.newWeakHashMap(); }
+  public void clear(int initialCapacity) { map = Generics.newWeakHashMap(initialCapacity); }
   
   /**
    * Returns a unique object o' that .equals the argument o.  If o

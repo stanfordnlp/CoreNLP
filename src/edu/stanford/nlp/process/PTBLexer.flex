@@ -240,7 +240,12 @@ import edu.stanford.nlp.util.logging.Redwood;
             throw new IllegalArgumentException("PTBLexer: Invalid option value in constructor: " + key + ": " + value);
         }
       } else if ("strictTreebank3".equals(key)) {
-        strictTreebank3 = val;
+        strictFraction = val;
+        strictAcronym = val;
+      } else if ("strictFraction".equals(key)) {
+        strictFraction = val;
+      } else if ("strictAcronym".equals(key)) {
+        strictAcronym = val;
       } else {
         throw new IllegalArgumentException("PTBLexer: Invalid options key in constructor: " + key);
       }
@@ -292,7 +297,11 @@ import edu.stanford.nlp.util.logging.Redwood;
   private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.NOT_CP1252;
   private LexerUtils.DashesEnum dashesStyle = LexerUtils.DashesEnum.NOT_CP1252;
   private boolean escapeForwardSlashAsterisk = false; // this is true in Penn Treebank 3 but we don't do it now
-  private boolean strictTreebank3 = false;
+  // strictTreebank3 represents 2 separate modifications:
+  //   stricter handling of acronyms
+  //   stricter handling of fractions
+  private boolean strictAcronym = false;
+  private boolean strictFraction = false;
   private boolean splitAssimilations = true;
   private boolean splitHyphenated = true; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
   private boolean splitForwardSlash = true; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
@@ -480,14 +489,14 @@ import edu.stanford.nlp.util.logging.Redwood;
     if (invertible) {
       String str = prevWordAfter.toString();
       prevWordAfter.setLength(0);
-      CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, yychar, yylength());
+      CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, Math.toIntExact(yychar), yylength());
       word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
       word.set(CoreAnnotations.BeforeAnnotation.class, str);
       prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
       prevWord = word;
       return word;
     } else {
-      Object word = tokenFactory.makeToken(txt, yychar, yylength());
+      Object word = tokenFactory.makeToken(txt, Math.toIntExact(yychar), yylength());
       if (word instanceof CoreLabel) {
         prevWord = (CoreLabel) word;
       }
@@ -515,7 +524,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     if (yylength() == 2) { // "I.", etc.
       yypushback(1); // return a period next time;
       s = yytext(); // return the word without the final period
-    } else if (strictTreebank3 && ! "U.S.".equals(yytext())) {
+    } else if (strictAcronym && ! "U.S.".equals(yytext())) {
       yypushback(1); // return a period for next time
       s = yytext(); // return the word without the final period
     } else {
@@ -532,7 +541,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
   private Object processAbbrev1() {
     String s;
-    if (strictTreebank3 && ! "U.S.".equals(yytext())) {
+    if (strictAcronym && ! "U.S.".equals(yytext())) {
       yypushback(1); // return a period for next time
       s = yytext();
     } else {
@@ -559,8 +568,8 @@ SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-
 
 // <STORYID cat=w pri=u>
 // SGML1 allows attribute value match over newline; SGML2 does not.
-SGML1 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^']*'|\"[^\"]*\"|[A-Za-z][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
-SGML2 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^'\r\n]*'|\"[^\"\r\n]*\"|[A-Za-z][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
+SGML1 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ \r\n]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ \r\n]*=[ \r\n]*('[^']*'|\"[^\"]*\"|[A-Za-z_][A-Za-z0-9_:\.\-]*)))*[ \r\n]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ \r\n]*\>
+SGML2 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^'\r\n]*'|\"[^\"\r\n]*\"|[A-Za-z_][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
 SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
 SPAMP = &amp;
 SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
@@ -586,7 +595,7 @@ NUM = {DIGIT}*([.,\u066B\u066C]{DIGIT}+)+|{DIGIT}+([.:,\u00AD\u066B\u066C\u2009\
    NUMBER = [\-+]?{NUM}|\({NUM}\) */
 NUMBER = [\-+]?{NUM}
 SUBSUPNUM = [\u207A\u207B\u208A\u208B]?([\u2070\u00B9\u00B2\u00B3\u2074-\u2079]+|[\u2080-\u2089]+)
-/* Constrain fraction to only match likely fractions. Full one allows hyphen, space, or non-breaking space between integer and fraction part, but strictTreebank3 allows only hyphen. */
+/* Constrain fraction to only match likely fractions. Full one allows hyphen, space, or non-breaking space between integer and fraction part, but strictFraction allows only hyphen. */
 FRAC = ({DIGIT}{1,4}[- \u00A0])?{DIGIT}{1,4}(\\?\/|\u2044){DIGIT}{1,4}
 FRAC2 = [\u00BC\u00BD\u00BE\u2153-\u215E]
 DOLSIGN = ([A-Z]*\$|#)
@@ -656,7 +665,7 @@ SREDAUX = n{APOSETCETERA}t
 APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[1-9]0s|[1-9]0{APOS}s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeioulA-Z][:letter:]*|{APOS}cause|cont'd\.?|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|ass't|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
 /* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
-FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?,;:&`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
+FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?¡¿,·;:&`\"\'\*\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
 LIKELYURL = ((www\.([^ \t\n\f\r`<>|.!?,\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r`<>|.!?,:\/$\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r`<>|]+[^ \t\n\f\r`<>|.!?,;:&\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
 /* EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}\[\].,;:\u00A0]+)(&gt;|>)? */
@@ -744,14 +753,15 @@ ABBREVSN = So\.|No\.
 /* See also a couple of special cases for pty. in the code below. */
 
 
+HYPHEN = [-\u058A\u2010\u2011]
+HYPHENS = {HYPHEN}+
+SSN = [0-9]{3}{HYPHEN}[0-9]{2}{HYPHEN}[0-9]{4}
 /* phone numbers. keep multi dots pattern separate, so not confused with decimal numbers. And for new treebank tokenization 346-8792. 1st digit can't be 0 or 1 in NANP. */
 PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{1,4}[\- \u00A0])?[0-9]{2,4}[\- \u00A0/])[0-9]{3,4}[\- \u00A0]?[0-9]{3,5}|((\+\+?)?[0-9]{1,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}|[2-9][0-9]{2}-[0-9]{4}
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
 FAKEDUCKFEET = <<|>>
 LESSTHAN = <|&lt;
 GREATERTHAN = >|&gt;
-HYPHEN = [-\u058A\u2010\u2011]
-HYPHENS = {HYPHEN}+
 LDOTS = \.\.\.+|[\u0085\u2026]
 SPACEDLDOTS = \.[ \u00A0](\.[ \u00A0])+\.
 ATS = @+
@@ -764,7 +774,7 @@ QUOTES = {APOS}|[`\u2018-\u201F\u0082\u0084\u0091-\u0094\u2039\u203A\u00AB\u00BB
 DBLQUOT = \"|&quot;|[`'\u0091\u0092\u2018\u2019]'
 /* Cap'n for captain, c'est for french */
 TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
-SWEARING = f[-*][-c*]k(in[g']?|e[dr])?|f[-*](in[g']?|e[dr])|(bull|dip)?sh[-\*]t(ty|e|box)?|c[-*]nts?|p[-*]ss(e[sd]|ing)?|c[-*]ck|b[-*]tch|t[-*]ts|tw[-*]ts?|cr[-*]p|d[-*]cks?|b[-*][-*s]t[-*]rds?|pr[-*]ck|d[-*]mn|bl[-*]{2,2}dy
+SWEARING = f[-*][-c*]k(in[g']?|e[dr])?|f[-*](in[g']?|e[dr])|(bull|dip)?s[h@][-\*#]t(ty|e|box|s)?|c[-*]nts?|p[-*]ss(e[sd]|ing)?|c[-*]ck|b[-*]tch|t[-*]ts|tw[-*]ts?|cr[-*]p|d[-*]cks?|b[-*][-*s]t[-*]rds?|pr[-*]ck|d[-*]mn|bl[-*]{2,2}dy
 TBSPEC2 = {APOS}[0-9][0-9]
 BANGWORDS = (E|Yahoo|Jeopardy)\!
 BANGMAGAZINES = OK\!
@@ -967,13 +977,13 @@ RM/{NUM}        { String txt = yytext();
                   return getNext(txt, txt);
                 }
 {FRAC}          { String txt = yytext();
-                  // if we are in strictTreebank3 mode, we need to reject everything after a space or non-breaking space...
-                  if (strictTreebank3) {
+                  // if we are in strictFraction mode, we need to reject everything after a space or non-breaking space...
+                  if (strictFraction) {
                     int spaceIndex = indexOfSpace(txt);
                     if (spaceIndex >= 0) {
                       yypushback(txt.length() - spaceIndex);
                       txt = yytext();
-                      if (DEBUG) { logger.info("Used {FRAC} (strictTreebank3) to recognize " + txt); }
+                      if (DEBUG) { logger.info("Used {FRAC} (strictFraction) to recognize " + txt); }
                       return getNext(txt, txt);
                     }
                   }
@@ -1091,6 +1101,7 @@ RM/{NUM}        { String txt = yytext();
                           if (DEBUG) { logger.info("Used {WORD} (3) to recognize " + origTok + " as " + norm); }
                           return getNext(norm, origTok);
                         }
+{SSN}                   { return getNext(); }
 {PHONE}                 { String txt = yytext();
                           String norm = txt;
 			  if (normalizeSpace) {
@@ -1112,9 +1123,6 @@ RM/{NUM}        { String txt = yytext();
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
-\x7F                    { if (invertible) {
-                            prevWordAfter.append(yytext());
-                        } }
 {SMILEY}/[^\p{Alpha}\p{Digit}] { String txt = yytext();
                   String origText = txt;
 		  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
@@ -1338,8 +1346,9 @@ RM/{NUM}        { String txt = yytext();
                         if (DEBUG) { logger.info("Used {CP1252_MISC_SYMBOL} to recognize " + tok + " as " + norm); }
                         return getNext(norm, tok);
                       }
-\0|{SPACES}|[\u200B\u200E-\u200F\uFEFF] { if (invertible) {
-                     prevWordAfter.append(yytext());
+{SPACES}|&nbsp;|[\u0000\u0008\u007F\u200B\u200E-\u200F\uFEFF]
+                { if (invertible) {
+                    prevWordAfter.append(yytext());
                   }
                 }
 {NEWLINE}       { if (tokenizeNLs) {
@@ -1347,10 +1356,6 @@ RM/{NUM}        { String txt = yytext();
                   } else if (invertible) {
                     // System.err.println("Appending newline: |" + yytext() + "|");
                     prevWordAfter.append(yytext());
-                  }
-                }
-&nbsp;          { if (invertible) {
-                     prevWordAfter.append(yytext());
                   }
                 }
 .       { String str = yytext();

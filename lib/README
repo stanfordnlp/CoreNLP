@@ -148,26 +148,26 @@ LAST UPDATE BY: Jeff Michels
 
 
 -----------------------------------------------------------------------
-junit.jar
+junit-4.13.1.jar
 
-ORIGINAL JAR NAME: junit-4.12.jar
+ORIGINAL JAR NAME: junit-4.13.1.jar
 
-VERSION: 4.12
+VERSION: 4.13.1
 
-RELEASE DATE: 2015/02/19
+RELEASE DATE: 2020/10/11
 
 SOURCE AVAILABLE: yes
 
 DESCRIPTION: JUnit is a simple framework to write repeatable unit tests.
 
-URL: http://www.junit.org/
+URL: https://www.junit.org/
 
 USED BY: Our junit tests.
 Not needed by CoreNLP distributions.
 
-LAST UPDATE: 2015/08/28
+LAST UPDATE: 2020/10/17
 
-LAST UPDATE BY: Ilya Sherman
+LAST UPDATE BY: Christopher Manning
 
 ----------------------------------------------------------------------
 AppleJavaExtensions.jar
@@ -218,15 +218,15 @@ LAST UPDATE: 2013-11-12
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-jflex-1.6.1.jar
+jflex-full-1.8.2.jar
 
-ORIGINAL JAR NAME: jflex-1.6.1.jar
+ORIGINAL JAR NAME: jflex-full-1.8.2.jar
 
-VERSION: 1.6.1
+VERSION: 1.8.2
 
-RELEASE DATE: 2015-03-16
+RELEASE DATE: 2020-05-03
 
-SOURCE AVAILABLE: yes, jflex-1.6.1-src.zip
+SOURCE AVAILABLE: yes, jflex-1.8.2-src.zip
 
 DESCRIPTION: compiles .flex files into .java
 
@@ -235,9 +235,9 @@ URL: http://jflex.de/
 USED BY: Compiling PTBTokenizer, etc.
 Not needed by CoreNLP distributions
 
-LAST UPDATE: 2017-05-06
+LAST UPDATE: 2020-11-04
 
-LAST UPDATE BY: Chris Manning
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 log4j-1.2.16.jar
@@ -336,8 +336,8 @@ LAST UPDATE BY: John Bauer
 -----------------------------------------------------------------------
 javacc.jar
 ORIGINAL JAR NAME: javacc.jar
-VERSION: 6.0.1
-RELEASE DATE: June 2014
+VERSION: 7.0.9
+RELEASE DATE: June 2020
 SOURCE AVAILABLE: no
 DESCRIPTION: JavaCC is a parser/scanner generator for java
              compiles .jj and .jjt files to .java
@@ -345,7 +345,7 @@ URL: https://java.net/projects/javacc
 USED BY: Needed for compiling tregex, tsurgeon, semgrex
 Not needed by CoreNLP distributions
 
-LAST UPDATE: 2014-07-08
+LAST UPDATE: 2020-11-04
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------

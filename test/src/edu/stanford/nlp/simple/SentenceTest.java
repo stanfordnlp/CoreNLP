@@ -6,6 +6,9 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -31,9 +34,27 @@ public class SentenceTest {
   }
 
   @Test
-  public void testLength() {
+  public void testLengthOfMultiWordSentence() {
     Sentence sent = new Sentence("the quick brown fox jumped over the lazy dog");
     assertEquals(9, sent.length());
+  }
+
+  @Test
+  public void testLengthOfSpecialCharacterOnlySentence() {
+    Sentence sent = new Sentence(".");
+    assertEquals(1, sent.length());
+  }
+
+  @Test
+  public void testLengthOfOneWordSentence() {
+    Sentence sent = new Sentence("Aloha");
+    assertEquals(1, sent.length());
+  }
+
+  @Test
+  public void testLengthOfOneWordSentenceWithDot() {
+    Sentence sent = new Sentence("Aloha.");
+    assertEquals(2, sent.length());
   }
 
   @Test
@@ -57,6 +78,10 @@ public class SentenceTest {
     assertEquals("(", sent.word(4));
     assertEquals(")", sent.word(6));
     assertEquals("'s", sent.word(8));
+
+    sent = new Sentence("Alice(female), Bob(male) are in contact.");
+    assertEquals("(", sent.word(1));
+    assertEquals(",", sent.word(4));
   }
 
   @Test
@@ -102,28 +127,26 @@ public class SentenceTest {
     assertEquals(17, sentences.get(1).sentenceTokenOffsetEnd());
   }
 
-  @Test
-  public void testFromCoreMapCrashCheck() {
+  public Sentence tokenizeAndSplitAnnotation(Annotation ann) {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
       setProperty("annotators", "tokenize,ssplit");
     }});
-    Annotation ann = new Annotation("This is a sentence.");
+
     pipeline.annotate(ann);
     CoreMap map = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+    return new Sentence(map);
+  }
 
-    new Sentence(map);
+  @Test
+  public void testFromCoreMapCrashCheck() {
+    Annotation ann = new Annotation("This is a sentence.");
+    tokenizeAndSplitAnnotation(ann);
   }
 
   @Test
   public void testFromCoreMapCorrectnessCheck() {
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
-      setProperty("annotators", "tokenize,ssplit");
-    }});
-    Annotation ann = new Annotation("This is a sentence.");
-    pipeline.annotate(ann);
-    CoreMap map = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-
-    Sentence s = new Sentence(map);
+	Annotation ann = new Annotation("This is a sentence.");
+    Sentence s = tokenizeAndSplitAnnotation(ann);
     assertEquals(ann.get(CoreAnnotations.TextAnnotation.class), s.text());
     assertEquals("This", s.word(0));
     assertEquals(5, s.length());
@@ -144,4 +167,67 @@ public class SentenceTest {
     assertEquals("baz", s.word(2));
   }
 
+  @Test
+  public void testStringRepresentation() {
+    String initialSentence = "This is a sentence.";
+    Sentence sut = new Sentence(initialSentence);
+    String converted = sut.toString();
+    assertEquals(initialSentence, converted);
+  }
+
+  @Test
+  public void testSubstring() {
+    String initialSentence = "This is a sentence.";
+    Sentence sut = new Sentence(initialSentence);
+    String substring = sut.substring(1, 4);
+    assertEquals("is a sentence", substring);
+  }
+
+  @Test
+  public void testSentenceFromDocument() {
+    String initialDocument = "This is a sentence. "
+                           + "This is another sentence. "
+                           + "Together, they form a document!";
+    Document d = new Document(initialDocument);
+    int sentenceIndex = 2;
+    Sentence sut = new Sentence(d, sentenceIndex);
+    String sentence = sut.toString();
+    assertEquals("Together, they form a document!", sentence);
+  }
+
+  @Test
+  public void testSerializeToStream() throws IOException {
+    final class MockOutputStream extends OutputStream {
+      int writeCount = 0;
+        boolean closed = false;
+
+        protected int getWriteCount () {
+          return writeCount;
+        }
+
+        protected boolean gotClosed() {
+          return closed;
+        }
+        @Override
+        public void write(int arg0) throws IOException {
+          writeCount++;
+        }
+        @Override
+        public void close () throws IOException {
+          this.closed = true;
+          super.close();
+        }
+    }
+    Sentence sut = new Sentence("This is a sentence.");
+    MockOutputStream mockedOutStream = new MockOutputStream();
+    sut.serialize(mockedOutStream);
+
+    /* The serialize method should write but should not close the
+     * provided OutputStream as specified in Sentence.java. */
+    boolean wasWrittenTo = mockedOutStream.getWriteCount() > 0;
+    boolean wasNotClosed = !mockedOutStream.gotClosed();
+
+    assertTrue(wasWrittenTo);
+    assertTrue(wasNotClosed);
+  }
 }

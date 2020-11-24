@@ -1,13 +1,14 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.util.StringUtils;
-import java.util.HashMap;
 import java.util.Properties;
-import java.util.Set;
+
+import org.junit.Before;
+
+import edu.stanford.nlp.util.StringUtils;
 
 public class KBPAnnotatorChineseBenchmarkSlowITest  extends KBPAnnotatorBenchmark {
 
-  @Override
+  @Before
   public void setUp() {
     // set the English specific settings
     KBP_DOCS_DIR = "/u/nlp/data/kbp-resources/benchmark/chinese/kbp-docs-chinese";

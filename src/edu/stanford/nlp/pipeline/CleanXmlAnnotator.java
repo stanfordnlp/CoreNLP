@@ -100,8 +100,8 @@ public class CleanXmlAnnotator implements Annotator {
   public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
 
   /**
-   * A map of token level annotation keys (i.e., link, speaker) along with a pattern
-   *  indicating the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated).
+   * A map of token level annotation keys (i.e., link, speaker) along with a pattern indicating
+   *  the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated).
    */
   private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<>();
 
@@ -172,7 +172,7 @@ public class CleanXmlAnnotator implements Annotator {
     String allowFlawedString = properties.getProperty("clean.allowflawedxml");
     boolean allowFlawed = CleanXmlAnnotator.DEFAULT_ALLOW_FLAWS;
     if (allowFlawedString != null)
-      allowFlawed = Boolean.valueOf(allowFlawedString);
+      allowFlawed = Boolean.parseBoolean(allowFlawedString);
     String dateTags =
         properties.getProperty("clean.datetags",
             CleanXmlAnnotator.DEFAULT_DATE_TAGS);
@@ -514,7 +514,7 @@ public class CleanXmlAnnotator implements Annotator {
     List<CoreLabel> docIdTokens = new ArrayList<>();
 
     // Local variables for additional per token annotations
-    CoreMap tokenAnnotations = (tokenAnnotationPatterns != null && !tokenAnnotationPatterns.isEmpty())? new ArrayCoreMap():null;
+    CoreMap tokenAnnotations = tokenAnnotationPatterns.isEmpty() ? null : new ArrayCoreMap();
     Map<Class, Stack<Pair<String, String>>> savedTokenAnnotations = new ArrayMap<>();
 
     // Local variables for annotating sections

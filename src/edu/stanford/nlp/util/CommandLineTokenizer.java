@@ -6,6 +6,7 @@
 
 package edu.stanford.nlp.util;
 
+import java.util.ArrayList;
 import java.util.List;
 /**
  * <p>A utility class to parse a command line contained in a single String into
@@ -45,7 +46,7 @@ public class CommandLineTokenizer {
      * @param buf the StringBuilder storing the current argument.
      */
     private static void appendToBuffer(
-        List resultBuffer,
+        List<String> resultBuffer,
         StringBuilder buf) {
         if (buf.length() > 0) {
             resultBuffer.add(buf.toString());
@@ -64,7 +65,7 @@ public class CommandLineTokenizer {
      * @return an argument array representing the specified command line.
      */
     public static String[] tokenize(String commandLine) {
-        List resultBuffer = new java.util.ArrayList();
+        List<String> resultBuffer = new ArrayList<>();
 
         if (commandLine != null) {
             int z = commandLine.length();
@@ -102,6 +103,6 @@ public class CommandLineTokenizer {
         }
 
         String[] result = new String[resultBuffer.size()];
-        return ((String[]) resultBuffer.toArray(result));
+        return resultBuffer.toArray(result);
     }
 }

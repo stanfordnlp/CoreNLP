@@ -15,7 +15,7 @@ public class StanfordCoreNLPTest {
 
   @Test
   public void testPrereqAnnotatorsBasic() {
-    assertEquals("tokenize,ssplit,pos,parse",
+    assertEquals("tokenize,ssplit,parse",
         StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"parse"}, new Properties()));
     assertEquals("tokenize,ssplit,pos,depparse",
         StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"depparse"}, new Properties()));
@@ -68,7 +68,7 @@ public class StanfordCoreNLPTest {
   @Test
   public void testPrereqAnnotatorsCorefWithParse() {
     Properties props = new Properties();
-    assertEquals("tokenize,ssplit,pos,lemma,ner,parse,coref",
+    assertEquals("tokenize,ssplit,parse,lemma,ner,coref",
         StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"parse","coref"}, props));
     assertEquals("__empty__", props.getProperty("coref.md.type", "__empty__"));
   }

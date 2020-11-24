@@ -1,12 +1,11 @@
 package edu.stanford.nlp.dcoref;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.SentenceUtils;
 import junit.framework.TestCase;
 
 import java.util.List;
-
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 
 /**
  * Test some of the "rules" which compose the coref system
@@ -20,12 +19,12 @@ public class RulesTest extends TestCase {
   List<CoreLabel> MIBM = SentenceUtils.toCoreLabelList("MIBM");
 
   public void testIsAcronym() {
-    assertTrue(Rules.isAcronym(IBM, IBM2));
-    assertTrue(Rules.isAcronym(IBM2, IBM));
-    assertFalse(Rules.isAcronym(IBM, IBMM));
-    assertFalse(Rules.isAcronym(IBM2, IBMM));
-    assertFalse(Rules.isAcronym(IBM, MIBM));
-    assertFalse(Rules.isAcronym(IBM2, MIBM));
+    assertTrue("Acronym IMB -> International Business Machines", Rules.isAcronym(IBM, IBM2));
+    assertTrue("Acronym International Business Machines -> IBM", Rules.isAcronym(IBM2, IBM));
+    assertFalse("Not Acronym IBM -> IBMM", Rules.isAcronym(IBM, IBMM));
+    assertFalse("Not Acronym International Business Machines -> IBMM", Rules.isAcronym(IBM2, IBMM));
+    assertFalse("Not Acronym IBM -> MIBM", Rules.isAcronym(IBM, MIBM));
+    assertFalse("Not acronym International Business Machines -> MIBM", Rules.isAcronym(IBM2, MIBM));
   }
 
   public void testMentionMatchesSpeakerAnnotation() {
@@ -56,13 +55,13 @@ public class RulesTest extends TestCase {
 
     g2.headWord = new CoreLabel();
     g2.headWord.set(CoreAnnotations.SpeakerAnnotation.class, "john");
-    
+
     g3.headWord = new CoreLabel();
     g3.headWord.set(CoreAnnotations.SpeakerAnnotation.class, "joh");
-    
+
     g4.headWord = new CoreLabel();
     g4.headWord.set(CoreAnnotations.SpeakerAnnotation.class, "johnz");
-    
+
 
     assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m1));
     assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m2));
@@ -76,7 +75,7 @@ public class RulesTest extends TestCase {
     assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g2, m1));
     assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g3, m1));
     assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g4, m1));
-    
+
     // not symmetrical
     // also, shouldn't blow up if the annotation isn't set
     assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(m1, g1));

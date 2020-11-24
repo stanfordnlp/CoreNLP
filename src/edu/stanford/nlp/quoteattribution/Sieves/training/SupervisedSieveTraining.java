@@ -17,7 +17,6 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -27,8 +26,6 @@ import java.util.*;
  * Created by mjfang on 12/1/16.
  */
 public class SupervisedSieveTraining {
-
-  private static Sieve sieve; // use to access functions
 
   // Take in a training Annotated document:
   // convert document to dataset & featurize
@@ -44,12 +41,11 @@ public class SupervisedSieveTraining {
   private static int getParagraphBeginToken(CoreMap sentence, List<CoreMap> sentences) {
     int paragraphId = sentence.get(CoreAnnotations.ParagraphIndexAnnotation.class);
     int paragraphBeginToken = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
-    for(int i = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class) - 1; i >= 0; i--) {
+    for (int i = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class) - 1; i >= 0; i--) {
       CoreMap currSentence = sentences.get(i);
       if(currSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class) == paragraphId) {
         paragraphBeginToken = currSentence.get(CoreAnnotations.TokenBeginAnnotation.class);
-      }
-      else {
+      } else {
         break;
       }
     }
@@ -59,12 +55,11 @@ public class SupervisedSieveTraining {
   private static int getParagraphEndToken(CoreMap sentence, List<CoreMap> sentences) {
     int quoteParagraphId = sentence.get(CoreAnnotations.ParagraphIndexAnnotation.class);
     int paragraphEndToken = sentence.get(CoreAnnotations.TokenEndAnnotation.class) - 1;
-    for(int i = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class); i < sentences.size(); i++) {
+    for (int i = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class); i < sentences.size(); i++) {
       CoreMap currSentence = sentences.get(i);
-      if(currSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class) == quoteParagraphId) {
+      if (currSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class) == quoteParagraphId) {
         paragraphEndToken = currSentence.get(CoreAnnotations.TokenEndAnnotation.class) - 1;
-      }
-      else {
+      } else {
         break;
       }
     }
@@ -88,16 +83,15 @@ public class SupervisedSieveTraining {
 
     List<Pair<Integer, Integer>> leftoverRanges = new ArrayList<>();
     Pair<Integer, Integer> currRange = originalRange;
-    for(Pair<Integer, Integer> exRange : exclusionList) {
+    for (Pair<Integer, Integer> exRange : exclusionList) {
       Pair<Integer, Integer> leftRange = new Pair<>(currRange.first, exRange.first - 1);
-      if(leftRange.second - leftRange.first >= 0) {
+      if (leftRange.second - leftRange.first >= 0) {
         leftoverRanges.add(leftRange);
       }
 
-      if(currRange.second == exRange.second) {
+      if (currRange.second.equals(exRange.second)) {
         break;
-      }
-      else {
+      } else {
         currRange = new Pair<>(exRange.second + 1, currRange.second);
       }
     }
@@ -117,13 +111,17 @@ public class SupervisedSieveTraining {
       this.dataset = dataset;
     }
   }
-  public static class SieveData {
-    Annotation doc;
-    Map<String, List<Person>> characterMap;
-    Map<Integer, String> pronounCorefMap;
-    Set<String> animacyList;
 
-    public SieveData(Annotation doc, Map<String, List<Person>> characterMap, Map<Integer, String> pronounCorefMap, Set<String> animacyList) {
+  public static class SieveData {
+    final Annotation doc;
+    final Map<String, List<Person>> characterMap;
+    final Map<Integer,String> pronounCorefMap;
+    final Set<String> animacyList;
+
+    public SieveData(Annotation doc,
+                     Map<String, List<Person>> characterMap,
+                     Map<Integer,String> pronounCorefMap,
+                     Set<String> animacyList) {
       this.doc = doc;
       this.characterMap = characterMap;
       this.pronounCorefMap = pronounCorefMap;
@@ -137,7 +135,8 @@ public class SupervisedSieveTraining {
 
     Annotation doc = sd.doc;
 
-    sieve = new Sieve(doc, sd.characterMap, sd.pronounCorefMap, sd.animacyList);
+    // use to access functions
+    Sieve sieve = new Sieve(doc, sd.characterMap, sd.pronounCorefMap, sd.animacyList);
 
     List<CoreMap> quotes = doc.get(CoreAnnotations.QuotationsAnnotation.class);
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
@@ -154,7 +153,7 @@ public class SupervisedSieveTraining {
       throw new RuntimeException("Gold Quote List size doesn't match quote list size!");
     }
 
-    for(int quoteIdx = 0; quoteIdx < quotes.size(); quoteIdx++) {
+    for (int quoteIdx = 0; quoteIdx < quotes.size(); quoteIdx++) {
 
       int initialSize = dataset.size();
 
@@ -162,7 +161,7 @@ public class SupervisedSieveTraining {
       XMLToAnnotation.GoldQuoteInfo gold = null;
       if(isTraining) {
         gold = goldList.get(quoteIdx);
-        if (gold.speaker == "") {
+        if (gold.speaker.isEmpty()) {
           continue;
         }
       }
@@ -189,7 +188,7 @@ public class SupervisedSieveTraining {
         }
       }
 
-      List<Sieve.MentionData> mentionsInPreviousParagraph = new ArrayList<Sieve.MentionData>();
+      List<Sieve.MentionData> mentionsInPreviousParagraph = new ArrayList<>();
       if (leftValue > -1 && rightValue > -1)
         mentionsInPreviousParagraph = eliminateDuplicates(sieve.findClosestMentionsInSpanBackward(new Pair<>(leftValue, rightValue)));
 
@@ -209,7 +208,7 @@ public class SupervisedSieveTraining {
         }
       }
 
-      List<Sieve.MentionData> mentionsInNextParagraph = new ArrayList<Sieve.MentionData>();
+      List<Sieve.MentionData> mentionsInNextParagraph = new ArrayList<>();
       if (leftValue < tokens.size() && rightValue < tokens.size())
         mentionsInNextParagraph = sieve.findClosestMentionsInSpanForward(new Pair<>(leftValue, rightValue));
 
@@ -221,10 +220,10 @@ public class SupervisedSieveTraining {
       int rankedDistance = 1;
       int numBackwards = mentionsInPreviousParagraph.size();
 
-      for(Sieve.MentionData mention : candidateMentions) {
+      for (Sieve.MentionData mention : candidateMentions) {
 
-        List<CoreLabel> mentionCandidateTokens = doc.get(CoreAnnotations.TokensAnnotation.class).subList(mention.begin, mention.end + 1);
-        CoreMap mentionCandidateSentence = sentences.get(mentionCandidateTokens.get(0).sentIndex());
+//        List<CoreLabel> mentionCandidateTokens = doc.get(CoreAnnotations.TokensAnnotation.class).subList(mention.begin, mention.end + 1);
+//        CoreMap mentionCandidateSentence = sentences.get(mentionCandidateTokens.get(0).sentIndex());
 //        if (mentionCandidateSentence.get(ChapterAnnotator.ChapterAnnotation.class) != quoteChapter) {
 //          continue;
 //        }
@@ -511,37 +510,31 @@ public class SupervisedSieveTraining {
   {
     List<Sieve.MentionData> newList = new ArrayList<>();
     Set<String> seenText = new HashSet<>();
-    for(int i = 0; i < mentionCandidates.size(); i++)
-    {
-      Sieve.MentionData mentionCandidate = mentionCandidates.get(i);
+    for (Sieve.MentionData mentionCandidate : mentionCandidates) {
       String text = mentionCandidate.text;
-      if(!seenText.contains(text) || mentionCandidate.type.equals("Pronoun"))
+      if (!seenText.contains(text) || mentionCandidate.type.equals("Pronoun"))
         newList.add(mentionCandidate);
       seenText.add(text);
     }
     return newList;
   }
 
-
+  // todo [cdm Nov 2020: Isn't there already a method like this for Classifier?
   public static void outputModel(String fileName, Classifier<String, String> clf) {
-    FileOutputStream fo = null;
     try {
-      fo = new FileOutputStream(fileName);
+      FileOutputStream fo = new FileOutputStream(fileName);
       ObjectOutputStream so = new ObjectOutputStream(fo);
       so.writeObject(clf);
       so.flush();
       so.close();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
-
   }
 
   public static void train(XMLToAnnotation.Data data, Properties props) {
     Map<String, List<Person>> characterMap = QuoteAttributionUtils.readPersonMap(props.getProperty("charactersPath"));
-    Map<Integer, String> pronounCorefMap =
+    Map<Integer,String> pronounCorefMap =
             QuoteAttributionUtils.setupCoref(props.getProperty("booknlpCoref"), characterMap, data.doc);
     Set<String> animacyList = QuoteAttributionUtils.readAnimacyList(QuoteAttributionAnnotator.ANIMACY_WORD_LIST);
     FeaturesData fd = featurize(new SieveData(data.doc, characterMap, pronounCorefMap, animacyList), data.goldList, true);
@@ -577,4 +570,5 @@ public class SupervisedSieveTraining {
     ca.annotate(data.doc);
     train(data, annotatorProps);
   }
+
 }

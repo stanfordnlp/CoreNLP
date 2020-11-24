@@ -93,7 +93,7 @@ public class CoNLLUOutputter extends AnnotationOutputter {
    *
    * basic is the default
    */
-  private final String dependenciesType;
+  private final SemanticGraphCoreAnnotations.DependenciesType dependenciesType;
 
   public CoNLLUOutputter() {
     this(new Properties());
@@ -106,7 +106,7 @@ public class CoNLLUOutputter extends AnnotationOutputter {
   }
 
   public CoNLLUOutputter(Properties props) {
-    dependenciesType = props.getProperty("output.dependenciesType", "basic");
+    dependenciesType = SemanticGraphCoreAnnotations.DependenciesType.valueOf(props.getProperty("output.dependenciesType", "basic").toUpperCase());
   }
 
   @Override
@@ -117,15 +117,15 @@ public class CoNLLUOutputter extends AnnotationOutputter {
     for (CoreMap sentence : sentences) {
       SemanticGraph sg = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       if (sg != null) {
-        if (dependenciesType.equals("enhanced")) {
-          SemanticGraph enhancedSg = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-          writer.print(conllUWriter.printSemanticGraph(sg, enhancedSg));
-        } else if (dependenciesType.equals("enhancedPlusPlus")) {
-          SemanticGraph enhancedSg = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
-          writer.print(conllUWriter.printSemanticGraph(sg, enhancedSg));
-        } else if (dependenciesType.equals("basic")) {
+        switch (dependenciesType) {
+        case ENHANCED:
+        case ENHANCEDPLUSPLUS:
+          writer.print(conllUWriter.printSemanticGraph(sg, sentence.get(dependenciesType.annotation())));
+          break;
+        case BASIC:
           writer.print(conllUWriter.printSemanticGraph(sg));
-        } else {
+          break;
+        default:
           throw new IllegalArgumentException("CoNLLUOutputter: unknown dependencies type " + dependenciesType);
         }
       } else {

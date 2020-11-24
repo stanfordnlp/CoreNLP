@@ -4,24 +4,27 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.semgraph.*;
 import edu.stanford.nlp.util.*;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.*;
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test reading in a CoNLL-U document.  Compare the Annotation created from file to a gold one.
  */
-public class CoNLLUReaderITest extends TestCase {
+public class CoNLLUReaderITest {
 
   public String exampleDocument = "Pero la existencia de dos recién nacidos en la misma caja sólo podía deberse a un " +
       "descuido de fábrica.\nDe allí las rebajas.\n";
-  public String examplePath = "/u/nlp/data/stanford-corenlp-testing/data/conllu/es-example.conllu";
+  public String examplePath = "/u/nlp/data/stanford-corenlp/testing/data/conllu/es-example.conllu";
   public StanfordCoreNLP pipeline;
   public Annotation goldDocument;
   public Annotation readInDocument;
 
-  @Override
+  @Before
   public void setUp() throws IOException {
     // set up the pipeline
     Properties props = LanguageInfo.getLanguageProperties("spanish");
@@ -29,6 +32,7 @@ public class CoNLLUReaderITest extends TestCase {
     pipeline = new StanfordCoreNLP(props);
   }
 
+  @Test
   public void testReadingInCoNLLUFile() throws ClassNotFoundException, IOException {
     goldDocument = pipeline.process(exampleDocument);
     readInDocument = new CoNLLUReader(new Properties()).readCoNLLUFile(examplePath).get(0);

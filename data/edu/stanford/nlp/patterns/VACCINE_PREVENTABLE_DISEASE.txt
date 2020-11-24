@@ -1,0 +1,74 @@
+cholera
+vibrio cholerae
+vibrio cholerae infection
+malaria
+plasmodium infection
+polio
+poliomyelitis
+infantile paralysis
+tuberculosis
+phthisis
+typhoid fever
+typhoid
+gastric fever
+enteric fever
+abdominal typhus
+slow fever
+nervous fever
+pythogenic fever
+yellow fever
+yellow yack
+yellow plague
+dengue fever
+dengue
+breakbone fever
+tetanus
+lockjaw
+lock jaw
+measles
+morbilli
+rubeola
+diphtheria
+mumps
+parotitis
+whooping cough
+pertussis
+bordetella
+rubella
+german measles
+three-day measles
+three day measles
+human papillomavirus infection
+papillomavirus infection
+hepatitis a
+hepatitis type a
+hep a
+hepatitis e
+hepatitis type e
+hep e
+japanese encephalitis
+japanese b encephalitis
+tick-borne encephalitis
+central european encephalitis
+russian spring-summer encephalitis
+siberian tick-borne encephalitis
+taiga encephalitis
+western european tick-borne encephalitis
+west-siberian encephalitis
+meningococcal disease
+meningococcal septicaemia
+neisseria meningitidis infection
+hepatitis b
+serum hepatitis
+hepatitis type b
+hep b
+rabies
+lyssa
+chickenpox
+varicella
+chicken pox
+influenza
+pneumococcal infection
+streptococcus pneumoniae infection
+rotaviral gastroenteritis
+rotavirus enteritis

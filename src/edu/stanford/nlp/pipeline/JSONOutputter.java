@@ -6,6 +6,7 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.StringOutputStream;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
@@ -25,7 +26,7 @@ import edu.stanford.nlp.util.Pointer;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
-import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -47,7 +48,8 @@ public class JSONOutputter extends AnnotationOutputter {
 
 
   /** {@inheritDoc} */
-  @SuppressWarnings("RedundantCast")  // It's lying; we need the "redundant" casts (as of 2014-09-08)
+  @SuppressWarnings({"RedundantCast", "RedundantSuppression"})
+  // It's lying; we need the "redundant" casts (as of 2014-09-08)
   @Override
   public void print(Annotation doc, OutputStream target, Options options) throws IOException {
     PrintWriter writer = new PrintWriter(IOUtils.encodedOutputStreamWriter(target, options.encoding));
@@ -74,6 +76,9 @@ public class JSONOutputter extends AnnotationOutputter {
           l2.set("id", sentence.get(CoreAnnotations.SentenceIDAnnotation.class));
           l2.set("index", sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
           l2.set("line", sentence.get(CoreAnnotations.LineNumberAnnotation.class));
+          l2.set("paragraph", sentence.get(CoreAnnotations.ParagraphIndexAnnotation.class));
+          l2.set("speaker", sentence.get(CoreAnnotations.SpeakerAnnotation.class));
+          l2.set("speakerType", sentence.get(CoreAnnotations.SpeakerTypeAnnotation.class));
           // (constituency tree)
           StringWriter treeStrWriter = new StringWriter();
           TreePrint treePrinter = options.constituencyTreePrinter;
@@ -181,10 +186,16 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("lemma", token.lemma());
               l3.set("characterOffsetBegin", token.beginPosition());
               l3.set("characterOffsetEnd", token.endPosition());
+              if (token.containsKey(CoreAnnotations.CodepointOffsetBeginAnnotation.class) &&
+                  token.containsKey(CoreAnnotations.CodepointOffsetEndAnnotation.class)) {
+                l3.set("codepointOffsetBegin", token.beginPosition());
+                l3.set("codepointOffsetEnd", token.endPosition());
+              }
               l3.set("pos", token.tag());
               l3.set("ner", token.ner());
               l3.set("normalizedNER", token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
               l3.set("speaker", token.get(CoreAnnotations.SpeakerAnnotation.class));
+              l3.set("speakerType", token.get(CoreAnnotations.SpeakerTypeAnnotation.class));
               l3.set("truecase", token.get(CoreAnnotations.TrueCaseAnnotation.class));
               l3.set("truecaseText", token.get(CoreAnnotations.TrueCaseTextAnnotation.class));
               l3.set("before", token.get(CoreAnnotations.BeforeAnnotation.class));
@@ -323,7 +334,8 @@ public class JSONOutputter extends AnnotationOutputter {
   /**
    * Convert a dependency graph to a format expected as input to {@link Writer#set(String, Object)}.
    */
-  @SuppressWarnings("RedundantCast")  // It's lying; we need the "redundant" casts (as of 2014-09-08)
+  @SuppressWarnings({"RedundantCast", "RedundantSuppression"})
+  // It's lying; we need the "redundant" casts (as of 2014-09-08)
   private static Object buildDependencyTree(SemanticGraph graph) {
     if(graph != null) {
       return Stream.concat(
@@ -383,7 +395,7 @@ public class JSONOutputter extends AnnotationOutputter {
       this.options = options;
     }
 
-    @SuppressWarnings({"unchecked", "UnnecessaryBoxing"})
+    @SuppressWarnings({"unchecked", "UnnecessaryBoxing", "RawUseOfParameterized"})
     private void routeObject(int indent, Object value) {
       if (value instanceof String) {
         // Case: simple string (this is easy!)
@@ -493,9 +505,19 @@ public class JSONOutputter extends AnnotationOutputter {
       } else if (value instanceof Character) {
         writer.write(Character.toString((Character) value));
       } else if (value instanceof Float) {
-        writer.write(new DecimalFormat("0.#######").format(value));
+        // Use the US Locale so that we can conform with json output format
+        // The decimal separator is always supposed to be . for example
+        Locale locale = Locale.US;
+        NumberFormat formatter = NumberFormat.getInstance(locale);
+        formatter.setMaximumFractionDigits(7);
+        formatter.setMinimumFractionDigits(0);
+        writer.write(formatter.format(value));
       } else if (value instanceof Double) {
-        writer.write(new DecimalFormat("0.##############").format(value));
+        Locale locale = Locale.US;
+        NumberFormat formatter = NumberFormat.getInstance(locale);
+        formatter.setMaximumFractionDigits(14);
+        formatter.setMinimumFractionDigits(0);
+        writer.write(formatter.format(value));
       } else if (value instanceof Boolean) {
         writer.write(Boolean.toString((Boolean) value));
       } else if (int.class.isAssignableFrom(value.getClass())) {

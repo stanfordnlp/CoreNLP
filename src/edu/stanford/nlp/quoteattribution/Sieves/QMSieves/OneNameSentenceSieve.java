@@ -18,7 +18,7 @@ import java.util.Set;
 public class OneNameSentenceSieve extends QMSieve {
 
   public OneNameSentenceSieve(Annotation doc, Map<String, List<Person>> characterMap,
-                      Map<Integer, String> pronounCorefMap, Set<String> animacySet) {
+                              Map<Integer,String> pronounCorefMap, Set<String> animacySet) {
     super(doc, characterMap, pronounCorefMap, animacySet, "Deterministic oneNameSentence");
   }
 
@@ -29,12 +29,12 @@ public class OneNameSentenceSieve extends QMSieve {
 
   public void oneNameSentence(Annotation doc) {
     List<CoreMap> quotes = doc.get(CoreAnnotations.QuotationsAnnotation.class);
-    for(CoreMap quote : quotes) {
+    for (CoreMap quote : quotes) {
       if (quote.get(QuoteAttributionAnnotator.MentionAnnotation.class) != null) {
         continue;
       }
       Pair<Integer, Integer> range = QuoteAttributionUtils.getRemainderInSentence(doc, quote);
-      if(range == null) {
+      if (range == null) {
         continue;
       }
 
@@ -54,4 +54,5 @@ public class OneNameSentenceSieve extends QMSieve {
       }
     }
   }
+
 }

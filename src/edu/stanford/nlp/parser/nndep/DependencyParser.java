@@ -140,7 +140,7 @@ public class DependencyParser  {
 
   /**
    * Get an integer ID for the given word. This ID can be used to index
-   * into the embeddings {@link Classifier#E}.
+   * into the embeddings {@link Classifier} embeddings (E).
    *
    * @return An ID for the given word, or an ID referring to a generic
    *         "unknown" word if the word is unknown
@@ -495,9 +495,7 @@ public class DependencyParser  {
    * @return Loaded and initialized (see {@link #initialize(boolean)} model
    */
   public static DependencyParser loadFromModelFile(String modelFile, Properties extraProperties) {
-    DependencyParser parser = extraProperties == null ? new DependencyParser() : new DependencyParser(extraProperties);
-    parser.loadModelFile(modelFile, false);
-    return parser;
+    return DependencyParserCache.loadFromModelFile(modelFile, extraProperties);
   }
 
   /** Load a parser model file, printing out some messages about the grammar in the file.
@@ -517,22 +515,19 @@ public class DependencyParser  {
     return firstLine.startsWith("language=");
   }
 
-  private void loadModelFile(String modelFile, boolean verbose) {
+  void loadModelFile(String modelFile, boolean verbose) {
     Timing t = new Timing();
     try (BufferedReader input = IOUtils.readerFromString(modelFile)) {
 
-      log.info("Loading depparse model: " + modelFile + " ... ");
-      String s;
-
       // first line in newer saved models is language, legacy models don't store this
-      s = input.readLine();
+      String s = input.readLine();
       // check if language was stored
       if (isModelNewFormat(s)) {
         // set up language
         config.language = Config.getLanguage(s.substring(9, s.length() - 1));
         // set up tlp
         s = input.readLine();
-        String tlpCanonicalName = s.substring(4, s.length());
+        String tlpCanonicalName = s.substring(4);
         try {
           config.tlp = ReflectionLoading.loadByReflection(tlpCanonicalName);
           log.info("Loaded TreebankLanguagePack: " + tlpCanonicalName);
@@ -622,7 +617,7 @@ public class DependencyParser  {
       config.hiddenSize = hSize;
       config.embeddingSize = eSize;
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
-      t.report(log, "Done reading from disk");
+      t.report(log, "Loading depparse model: " + modelFile);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -1139,7 +1134,12 @@ public class DependencyParser  {
     preprocessor.setSentenceFinalPuncWords(config.tlp.sentenceFinalPunctuationWords());
     preprocessor.setEscaper(config.escaper);
     preprocessor.setSentenceDelimiter(config.sentenceDelimiter);
-    preprocessor.setTokenizerFactory(config.tlp.getTokenizerFactory());
+    if (config.preTokenized) {
+      preprocessor.setTokenizerFactory(
+          edu.stanford.nlp.process.WhitespaceTokenizer.factory());
+    } else {
+      preprocessor.setTokenizerFactory(config.tlp.getTokenizerFactory());
+    }
 
     Timing timer = new Timing();
 
@@ -1266,7 +1266,7 @@ public class DependencyParser  {
    *   <tr><td><tt>-escaper</tt></td><td>N/A</td><td>Only applicable for testing with <tt>-textFile</tt>. If provided, use this word-escaper when parsing raw sentences. Should be a fully-qualified class name like <tt>edu.stanford.nlp.trees.international.arabic.ATBEscaper</tt>.</td></tr>
    *   <tr><td><tt>-numPreComputed</tt></td><td>100000</td><td>The parser pre-computes hidden-layer unit activations for particular inputs words at both training and testing time in order to speed up feedforward computation in the neural network. This parameter determines how many words for which we should compute hidden-layer activations.</td></tr>
    *   <tr><td><tt>-sentenceDelimiter</tt></td><td>N/A</td><td>Only applicable for testing with <tt>-textFile</tt>.  If provided, assume that the given <tt>textFile</tt> has already been sentence-split, and that sentences are separated by this delimiter.</td></tr>
-   *   <tr><td><tt>-tagger.model</tt></td><td>edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger</td><td>Only applicable for testing with <tt>-textFile</tt>. Path to a part-of-speech tagger to use to pre-tag the raw sentences before parsing.</td></tr>
+   *   <tr><td><tt>-tagger.model</tt></td><td>edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger</td><td>Only applicable for testing with <tt>-textFile</tt>. Path to a part-of-speech tagger to use to pre-tag the raw sentences before parsing.</td></tr>
    * </table>
    */
   public static void main(String[] args) {

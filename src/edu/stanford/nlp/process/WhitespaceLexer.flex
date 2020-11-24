@@ -53,8 +53,8 @@ TEXT = [^ \t\u1680\u2000-\u2006\u2008-\u200A\u205F\u3000\r\n\u0085\u2028\u2029\u
 
 %%
 
-{CR}     { return tokenFactory.makeToken(NEWLINE, yychar, yylength()); }
-{OTHERSEP} { return tokenFactory.makeToken(NEWLINE, yychar, yylength()); }
+{CR}     { return tokenFactory.makeToken(NEWLINE, Math.toIntExact(yychar), yylength()); }
+{OTHERSEP} { return tokenFactory.makeToken(NEWLINE, Math.toIntExact(yychar), yylength()); }
 {SPACES} { }
-{TEXT}   { return tokenFactory.makeToken(yytext(), yychar, yylength()); }
+{TEXT}   { return tokenFactory.makeToken(yytext(), Math.toIntExact(yychar), yylength()); }
 <<EOF>>  { return null; }

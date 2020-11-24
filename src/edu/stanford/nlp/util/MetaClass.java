@@ -586,7 +586,7 @@ public class MetaClass {
       }
     } else if (BufferedReader.class.isAssignableFrom(clazz)) {
       try {
-        return (E) IOUtils.getBufferedReaderFromClasspathOrFileSystem(value);
+        return (E) IOUtils.readerFromString(value);
       } catch (IOException e) {
         throw new RuntimeIOException(e);
       }

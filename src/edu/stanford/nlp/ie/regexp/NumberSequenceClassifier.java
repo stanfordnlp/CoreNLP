@@ -608,6 +608,9 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   public static final Pattern PERCENT_WORD_PATTERN = Pattern.compile("percent", Pattern.CASE_INSENSITIVE);
   public static final Pattern PERCENT_SYMBOL_PATTERN = Pattern.compile("%");
 
+  /* TODO(AngledLuffa): shouldn't this be unified with the
+   * classifyWithSUTime from above?  Otherwise there will be some
+   * unintended divergence in the algorithms used */
   private List<CoreLabel> classifyOld(List<CoreLabel> document) {
     // if (DEBUG) { log.info("NumberSequenceClassifier tagging"); }
     PaddedList<CoreLabel> pl = new PaddedList<>(document, pad);

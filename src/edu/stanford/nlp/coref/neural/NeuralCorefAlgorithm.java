@@ -53,8 +53,9 @@ public class NeuralCorefAlgorithm implements CorefAlgorithm {
         log, "Loading coref model", NeuralCorefProperties.modelPath(props));
     embeddingExtractor = new EmbeddingExtractor(CorefProperties.conll(props),
         IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
-            log, "Loading coref embeddings", NeuralCorefProperties.pretrainedEmbeddingsPath(props)),
-        model.getWordEmbeddings());
+            log, "Loading coref embeddings",
+            NeuralCorefProperties.pretrainedEmbeddingsPath(props)),
+        model.getWordEmbeddings(), null);
     featureExtractor = new CategoricalFeatureExtractor(props, dictionaries);
   }
 
@@ -101,5 +102,4 @@ public class NeuralCorefAlgorithm implements CorefAlgorithm {
       }
     }
   }
-
 }

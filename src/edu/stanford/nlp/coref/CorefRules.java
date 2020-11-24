@@ -103,6 +103,19 @@ public class CorefRules {
     if(disagree) return true;
     else return false;
   }
+  public static boolean entityPersonCompatible(Document document, CorefCluster mentionCluster, CorefCluster potentialAntecedent, Dictionaries dict){
+    boolean disagree = false;
+    for(Mention m : mentionCluster.getCorefMentions()) {
+      for(Mention ant : potentialAntecedent.getCorefMentions()) {
+        if(!entityPersonCompatible(document, m, ant, dict)) {
+          disagree = true;
+          break;
+        }
+      }
+    }
+    if(disagree) return false;
+    else return true;
+  }
 
   private static final List<String> entityWordsToExclude =
           Arrays.asList(new String[]{ "the","this", "mr.", "miss", "mrs.", "dr.", "ms.", "inc.", "ltd.", "corp.", "'s"});
@@ -744,8 +757,12 @@ public class CorefRules {
       if ((m.person == Person.IT && ant.person == Person.THEY)
            || (m.person == Person.THEY && ant.person == Person.IT) || (m.person == Person.THEY && ant.person == Person.THEY)) {
         return false;
-      } else if (m.person != Person.UNKNOWN && ant.person != Person.UNKNOWN)
+      } else if (m.person != Person.UNKNOWN && ant.person != Person.UNKNOWN) {
         return true;
+      } else if (((m.person == Person.I || m.person == Person.YOU) && (dict.determiners.contains(ant.spanToString()))) ||
+              ((ant.person == Person.I || ant.person == Person.YOU) && (dict.determiners.contains(m.spanToString())))) {
+        return true;
+      }
     }
     if(sameSpeaker) {
       if(!ant.isPronominal()) {
@@ -788,6 +805,42 @@ public class CorefRules {
     return false;
   }
 
+  public static boolean entityPersonCompatible(Document document, Mention m, Mention ant, Dictionaries dict) {
+    // Returns if the entity person is compatible based on the speaker
+    boolean sameSpeaker = entitySameSpeaker(document, m, ant);
+
+    if (sameSpeaker && m.person!=ant.person) {
+      if ((m.person == Person.IT && ant.person == Person.THEY)
+              || (m.person == Person.THEY && ant.person == Person.IT) || (m.person == Person.THEY && ant.person == Person.THEY)) {
+        return true;
+      } else if (m.person != Person.UNKNOWN && ant.person != Person.UNKNOWN) {
+        return false;
+      } else if (((m.person == Person.I || m.person == Person.YOU) && (dict.determiners.contains(ant.spanToString().toLowerCase()))) ||
+              ((ant.person == Person.I || ant.person == Person.YOU) && (dict.determiners.contains(m.spanToString().toLowerCase())))) {
+        return false;
+      }
+    }
+    if(sameSpeaker) {
+      if(!ant.isPronominal()) {
+        if(m.person==Person.I || m.person==Person.WE || m.person==Person.YOU) return false;
+      } else if(!m.isPronominal()) {
+        if(ant.person==Person.I || ant.person==Person.WE || ant.person==Person.YOU) return false;
+      }
+    }
+    boolean differentSpeaker = entityDifferentSpeaker(document, m, ant);
+    if (differentSpeaker) {
+      if (ant.person == Person.I && m.person == Person.I) {
+        return false;
+      }
+      if (document.numberOfSpeakers() == 2) {
+        if (ant.person == Person.YOU && m.person == Person.YOU) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   /** Do the mentions share the same speaker? */
   public static boolean entitySameSpeaker(Document document, Mention m, Mention ant) {
     String mSpeakerStr = m.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
@@ -812,6 +865,19 @@ public class CorefRules {
         return false;
       }
     }
+  }
+
+  public static boolean entityDifferentSpeaker(Document document, Mention m, Mention ant) {
+    String mSpeakerStr = m.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
+    if (mSpeakerStr == null) {
+      return false;
+    }
+    String antSpeakerStr = ant.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
+    if (antSpeakerStr == null) {
+      return false;
+    }
+
+    return !entitySameSpeaker(document, m, ant);
   }
 
   /**
@@ -980,6 +1046,5 @@ public class CorefRules {
      context2.addAll(m2.getContext());
      return Sets.intersects(context1, context2);
    }
-
 
 }

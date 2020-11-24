@@ -1508,7 +1508,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     HashMap<String, HashSet<Integer>> bigrams = new HashMap<>();
     HashMap<String, HashSet<Integer>> trigrams = new HashMap<>();
 
-
     List<IndexedWord> vertexList = sg.vertexListSorted();
     int numWords = vertexList.size();
 
@@ -1820,7 +1819,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
   private static void demoteQmodMWEHelper(SemanticGraph sg, List<IndexedWord> otherDeps, IndexedWord gov, IndexedWord oldHead) {
-    createMultiWordExpression(sg, gov, QMOD, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
+    createMultiWordExpression(sg, gov, QMOD, otherDeps.toArray(new IndexedWord[0]));
   }
 
 

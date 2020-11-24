@@ -128,6 +128,9 @@ public abstract class TregexMatcher {
    */
   public boolean find() {
     if (findIterator == null) {
+      if (root == null) {
+        return false;
+      }
       findIterator = root.iterator();
     }
     if (findCurrent != null && matches()) {

@@ -44,7 +44,7 @@ public class PennTreeReaderTest extends TestCase {
     assertEquals(")", tree.children()[0].label().value());
 
     assertEquals(tree.toString(), treeText);
-    assertEquals(tree.pennString(), treeText + "\n");
+    assertEquals(tree.pennString(), treeText + System.lineSeparator());
 
     assertTrue(treeReader.readTree() == null);
   }

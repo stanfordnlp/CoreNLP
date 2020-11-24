@@ -102,4 +102,22 @@ public class SemanticGraphCoreAnnotations {
     }
   }
 
+  /**
+   * An enum to represent the three types of dependencies generally supported
+   */
+  public enum DependenciesType {
+    BASIC            (BasicDependenciesAnnotation.class),
+    ENHANCED         (EnhancedDependenciesAnnotation.class),
+    ENHANCEDPLUSPLUS (EnhancedPlusPlusDependenciesAnnotation.class);
+
+    private final Class<? extends CoreAnnotation<SemanticGraph>> annotation;
+
+    DependenciesType(Class<? extends CoreAnnotation<SemanticGraph>> annotation) {
+      this.annotation = annotation;
+    }
+
+    public Class<? extends CoreAnnotation<SemanticGraph>> annotation() {
+      return this.annotation;
+    }
+  }
 }

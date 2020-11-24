@@ -1,4 +1,4 @@
-// javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/trees/tregex" projects/core/src/edu/stanford/nlp/trees/tregex/TregexParser.jj
+// javacc "-OUTPUT_DIRECTORY=src/edu/stanford/nlp/trees/tregex" src/edu/stanford/nlp/trees/tregex/TregexParser.jj
 
 options { UNICODE_INPUT = true;
           SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
@@ -8,7 +8,7 @@ PARSER_BEGIN(TregexParser)
 package edu.stanford.nlp.trees.tregex;
 // all generated classes are in this package
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.trees.HeadFinder;

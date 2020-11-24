@@ -1,28 +1,38 @@
 package edu.stanford.nlp.ie;
 
-import junit.framework.TestCase;
-import java.io.*;
-import java.lang.ProcessBuilder;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import static org.junit.Assert.assertEquals;
 
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.ie.NERClassifierCombiner;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.AnnotationPipeline;
+import edu.stanford.nlp.pipeline.DefaultPaths;
+import edu.stanford.nlp.pipeline.NERCombinerAnnotator;
+import edu.stanford.nlp.pipeline.TokenizerAnnotator;
+import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
 import edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.logging.Redwood;
-import edu.stanford.nlp.util.CoreMap;
 
 
 /**
@@ -32,7 +42,7 @@ import edu.stanford.nlp.util.CoreMap;
  *
  * @author Mihail Eric
  */
-public class NERBenchmarkSlowITest extends TestCase{
+public class NERBenchmarkSlowITest {
     private static Redwood.RedwoodChannels log = Redwood.channels(NERBenchmarkSlowITest.class);
     // Conll paths
     private static final String CONLL_BASE_DIR = "/u/nlp/data/ner/conll/";
@@ -44,14 +54,16 @@ public class NERBenchmarkSlowITest extends TestCase{
     private static final String CONLL_OUTPUT_TEST = "conll_output_test.txt";
 
     // Onto paths
-    private static final String ONTO_BASE_DIR = "/u/nlp/data/ner/ontonotes";
+    private static final String ONTO_BASE_DIR = "/u/nlp/data/ner/ontonotes/";
     private static final String ONTO_DEV = ONTO_BASE_DIR + "onto-3class-dev.tsv";
     private static final String ONTO_TEST = ONTO_BASE_DIR + "onto-3class-test.tsv";
-    private static final String ONTO_OUTPUT_DEV = "onto_output_dev.txt";
-    private static final String ONTO_OUTPUT_TEST = "onto_output_test.txt";
 
-    // CoNLL eval shell script
-    private static final String CONLL_EVAL = "../../scripts/ner/eval_conll_cmd.sh";
+    // TODO: use the model directly to run the test
+    /** official CoNLL NER evaluation script **/
+    private static final String CONLL_EVAL = "/u/nlp/data/ner/benchmark/eval_conll.sh";
+    // private static final String CONLL_EVAL = (new File("projects/core/scripts/ner/eval_conll_cmd.sh").exists() ?
+    //                                           "projects/core/scripts/ner/eval_conll_cmd.sh" :
+    //                                           "../../scripts/ner/eval_conll_cmd.sh");
     private static final Pattern FB1_Pattern = Pattern.compile("FB1:  (\\d+\\.\\d+)");
 
     // Note we need two annotator pipelines because the datasets use different NER models
@@ -87,8 +99,8 @@ public class NERBenchmarkSlowITest extends TestCase{
 
     //TODO: Consider using NERFromConllAnnotator format
 
-    @Override
-    public void setUp() throws Exception{
+    @Before
+    public void setUp() throws IOException {
         if(conllNERAnnotator == null || ontoNERAnnotator == null){
             // Default properties are fine but need to provide a properties object in factory method
             Properties nerProps = new Properties();
@@ -160,7 +172,7 @@ public class NERBenchmarkSlowITest extends TestCase{
      * @param origTag Original tag
      * @return The convert tag format
      */
-    public String convert(String origTag) throws Exception{
+    public String convert(String origTag) {
         String converted;
         switch(origTag){
             case "ORGANIZATION":
@@ -197,7 +209,7 @@ public class NERBenchmarkSlowITest extends TestCase{
                 converted = "O";
                 break;
             default:
-                throw new Exception("System outputting invalid label " + origTag);
+                throw new RuntimeException("System outputting invalid label " + origTag);
         }
         return converted;
     }
@@ -208,7 +220,7 @@ public class NERBenchmarkSlowITest extends TestCase{
      * @param resultsFile
      * @return String with output of running perl eval script
      */
-    public String runEvalScript(String resultsFile) throws IOException{
+    public String runEvalScript(File resultsFile) throws IOException{
         String result = null;
         String cmd = CONLL_EVAL + " " + resultsFile;
         Process p = Runtime.getRuntime().exec(cmd);
@@ -233,30 +245,31 @@ public class NERBenchmarkSlowITest extends TestCase{
      * @return F1 computed for given dataset by model
      */
     // NOTE that CoNLL tests assume a 4-class classification scheme: ORG, PER, LOC, MISC
-    public HashMap<String, Double> evalConll(String dataset) throws IOException, Exception{
+    public HashMap<String, Double> evalConll(String dataset) throws IOException {
         SeqClassifierFlags flags = new SeqClassifierFlags();
         flags.entitySubclassification = "noprefix";
         CoNLLDocumentReaderAndWriter rw = new CoNLLDocumentReaderAndWriter();
         rw.init(flags);
 
         String inputFile;
-        String resultsFile;
+        File resultsFile;
         switch(dataset){
             case "train":
-                resultsFile = CONLL_OUTPUT_DEV;
+                resultsFile = File.createTempFile("conlldev", null);
                 inputFile = CONLL_DEV;
                 break;
             case "dev":
-                resultsFile = CONLL_OUTPUT_DEV;
+                resultsFile = File.createTempFile("conlldev", null);
                 inputFile = CONLL_DEV;
                 break;
             case "test":
-                resultsFile = CONLL_OUTPUT_TEST;
+                resultsFile = File.createTempFile("conlltest", null);
                 inputFile = CONLL_TEST;
                 break;
             default:
-                throw new Exception("Not a valid dataset name provided!");
+                throw new RuntimeException("Not a valid dataset name provided!");
         }
+        resultsFile.deleteOnExit();
 
         PrintWriter writer = new PrintWriter(resultsFile);
         for(Iterator<List<CoreLabel>> itr = rw.getIterator(IOUtils.readerFromString(inputFile)); itr.hasNext();){
@@ -312,9 +325,8 @@ public class NERBenchmarkSlowITest extends TestCase{
     public List<List<CoreLabel>> readTokensFromOntoFile(String file){
         List<List<CoreLabel>> sentences = new ArrayList<>();
         List<CoreLabel> currSentenceTokens = new ArrayList<CoreLabel>();
-        List<String> linesFromFile = IOUtils.linesFromFile(file);
         int wordsSeen = 0;
-        for (String line : linesFromFile) {
+        for (String line : IOUtils.readLines(file)) {
             String[] entries = line.split("\t");
             if (entries.length == 2) {
                 String word = entries[0];
@@ -334,21 +346,22 @@ public class NERBenchmarkSlowITest extends TestCase{
         return sentences;
     }
 
-    public HashMap<String, Double> evalOnto(String dataset) throws IOException, Exception {
+    public HashMap<String, Double> evalOnto(String dataset) throws IOException {
         String inputFile;
-        String resultsFile;
+        File resultsFile;
         switch(dataset){
             case "dev":
-                resultsFile = ONTO_OUTPUT_DEV;
+                resultsFile = File.createTempFile("ontodev", null);
                 inputFile = ONTO_DEV;
                 break;
             case "test":
-                resultsFile = ONTO_OUTPUT_TEST;
+                resultsFile = File.createTempFile("ontotest", null);
                 inputFile = ONTO_TEST;
                 break;
             default:
-                throw new Exception("Not a valid dataset name provided!");
+                throw new RuntimeException("Not a valid dataset name provided!");
         }
+        resultsFile.deleteOnExit();
         List<List<CoreLabel>> ontoSentences = readTokensFromOntoFile(inputFile);
         PrintWriter writer = new PrintWriter(resultsFile);
         // Run ner annotation pipeline on every sentence in dataset
@@ -386,7 +399,6 @@ public class NERBenchmarkSlowITest extends TestCase{
                         + goldPrefix + "\t"
                         + predictPrefix);
             }
-
         }
         writer.close();
 
@@ -397,6 +409,7 @@ public class NERBenchmarkSlowITest extends TestCase{
         return parsedF1;
     }
 
+    @Test
     public void testConLLDev() {
         try{
             log.log("Evaluating on CoNLL Dev");
@@ -421,6 +434,7 @@ public class NERBenchmarkSlowITest extends TestCase{
         }
     }
 
+    @Test
     public void testConLLTest() {
         try{
             log.log("Evaluating on CoNLL Test");
@@ -445,44 +459,46 @@ public class NERBenchmarkSlowITest extends TestCase{
         }
     }
 
-    public void testOntoDev() {
-        try{
-            HashMap<String, Double> parsedF1 = evalOnto("dev");
-            Double totalF1 = parsedF1.get("TOTAL");
-            Double locF1 = parsedF1.get("LOC");
-            Double orgF1 = parsedF1.get("ORG");
-            Double perF1 = parsedF1.get("PER");
-            assertEquals(String.format("Onto Total Test F1 should be %.2f but was %.2f",
-                    ONTO_DEV_TOTAL_F1, totalF1), ONTO_DEV_TOTAL_F1, totalF1, 1e-2);
-            assertEquals(String.format("Onto LOC Test F1 should be %.2f but was %.2f",
-                    ONTO_DEV_LOC_F1, locF1), ONTO_DEV_LOC_F1, locF1, 1e-2);
-            assertEquals(String.format("Onto ORG Test F1 should be %.2f but was %.2f",
-                    ONTO_DEV_ORG_F1, orgF1), ONTO_DEV_ORG_F1, orgF1, 1e-2);
-            assertEquals(String.format("Onto PER Test F1 should be %.2f but was %.2f",
-                    ONTO_DEV_PER_F1, perF1), ONTO_DEV_PER_F1, perF1, 1e-2);
-        }catch(Exception e){
-            log.log(e);
-        }
+    @Test
+    public void testOntoDev() throws IOException {
+      HashMap<String, Double> parsedF1 = evalOnto("dev");
+      Double totalF1 = parsedF1.get("TOTAL");
+      Double locF1 = parsedF1.get("LOC");
+      Double orgF1 = parsedF1.get("ORG");
+      Double perF1 = parsedF1.get("PER");
+      assertEquals(String.format("Onto Total Test F1 should be %.2f but was %.2f",
+                                 ONTO_DEV_TOTAL_F1, totalF1),
+                   ONTO_DEV_TOTAL_F1, totalF1, 1.0);
+      assertEquals(String.format("Onto LOC Test F1 should be %.2f but was %.2f",
+                                 ONTO_DEV_LOC_F1, locF1),
+                   ONTO_DEV_LOC_F1, locF1, 1.0);
+      assertEquals(String.format("Onto ORG Test F1 should be %.2f but was %.2f",
+                                 ONTO_DEV_ORG_F1, orgF1),
+                   ONTO_DEV_ORG_F1, orgF1, 1.0);
+      assertEquals(String.format("Onto PER Test F1 should be %.2f but was %.2f",
+                                 ONTO_DEV_PER_F1, perF1),
+                   ONTO_DEV_PER_F1, perF1, 1.0);
     }
 
-    public void testOntoTest() {
-        try{
-            HashMap<String, Double> parsedF1 = evalOnto("test");
-            Double totalF1 = parsedF1.get("TOTAL");
-            Double locF1 = parsedF1.get("LOC");
-            Double orgF1 = parsedF1.get("ORG");
-            Double perF1 = parsedF1.get("PER");
-            assertEquals(String.format("Onto Total Test F1 should be %.2f but was %.2f",
-                    ONTO_TEST_TOTAL_F1, totalF1), ONTO_TEST_TOTAL_F1, totalF1, 1e-2);
-            assertEquals(String.format("Onto LOC Test F1 should be %.2f but was %.2f",
-                    ONTO_TEST_LOC_F1, locF1), ONTO_TEST_LOC_F1, locF1, 1e-2);
-            assertEquals(String.format("Onto ORG Test F1 should be %.2f but was %.2f",
-                    ONTO_TEST_ORG_F1, orgF1), ONTO_TEST_ORG_F1, orgF1, 1e-2);
-            assertEquals(String.format("Onto PER Test F1 should be %.2f but was %.2f",
-                    ONTO_TEST_PER_F1, perF1), ONTO_TEST_PER_F1, perF1, 1e-2);
-        }catch(Exception e){
-            log.log(e);
-        }
+    @Test
+    public void testOntoTest() throws IOException {
+      HashMap<String, Double> parsedF1 = evalOnto("test");
+      Double totalF1 = parsedF1.get("TOTAL");
+      Double locF1 = parsedF1.get("LOC");
+      Double orgF1 = parsedF1.get("ORG");
+      Double perF1 = parsedF1.get("PER");
+      assertEquals(String.format("Onto Total Test F1 should be %.2f but was %.2f",
+                                 ONTO_TEST_TOTAL_F1, totalF1),
+                   ONTO_TEST_TOTAL_F1, totalF1, 1.0);
+      assertEquals(String.format("Onto LOC Test F1 should be %.2f but was %.2f",
+                                 ONTO_TEST_LOC_F1, locF1),
+                   ONTO_TEST_LOC_F1, locF1, 1.0);
+      assertEquals(String.format("Onto ORG Test F1 should be %.2f but was %.2f",
+                                 ONTO_TEST_ORG_F1, orgF1),
+                   ONTO_TEST_ORG_F1, orgF1, 1.0);
+      assertEquals(String.format("Onto PER Test F1 should be %.2f but was %.2f",
+                                 ONTO_TEST_PER_F1, perF1),
+                   ONTO_TEST_PER_F1, perF1, 1.0);
     }
 
 }

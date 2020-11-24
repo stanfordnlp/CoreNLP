@@ -51,7 +51,7 @@ public class CategoricalFeatureExtractor {
       Map<Integer, List<Mention>> mentionsByHeadIndex) {
     Mention m1 = document.predictedMentionsByID.get(pair.first);
     Mention m2 = document.predictedMentionsByID.get(pair.second);
-    List<Integer> featureVals = pairwiseFeatures(document, m1, m2, dictionaries, conll);
+    List<Integer> featureVals = pairwiseFeatures(document, m1, m2, dictionaries);
     SimpleMatrix features = new SimpleMatrix(featureVals.size(), 1);
     for (int i = 0; i < featureVals.size(); i++) {
       features.set(i, featureVals.get(i));
@@ -69,14 +69,15 @@ public class CategoricalFeatureExtractor {
   }
 
   public static List<Integer> pairwiseFeatures(Document document, Mention m1, Mention m2,
-      Dictionaries dictionaries, boolean isConll) {
+      Dictionaries dictionaries) {
     String speaker1 = m1.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
     String speaker2 = m2.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
+    boolean hasSpeakers = speaker1 != null && speaker2 != null;
     List<Integer> features = new ArrayList<>();
-    features.add(isConll ? (speaker1.equals(speaker2) ? 1 : 0) : 0);
-    features.add(isConll ?
+    features.add(hasSpeakers ? (speaker1.equals(speaker2) ? 1 : 0) : 0);
+    features.add(hasSpeakers ?
         (CorefRules.antecedentIsMentionSpeaker(document, m2, m1, dictionaries) ? 1 : 0) : 0);
-    features.add(isConll ?
+    features.add(hasSpeakers ?
         (CorefRules.antecedentIsMentionSpeaker(document, m1, m2, dictionaries) ? 1 : 0) : 0);
     features.add(m1.headsAgree(m2) ? 1 : 0);
     features.add(

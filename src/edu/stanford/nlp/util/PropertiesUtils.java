@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /** Utilities methods for standard (but woeful) Java Properties objects.
  *
@@ -234,6 +235,18 @@ public class PropertiesUtils {
   }
 
   /**
+   * Get the value of a property as a path to a directory.  If the key is not present, returns defaultValue.
+   * If the path doesn't terminate with '/', append '/' to the string.
+   */
+  public static String getDirPath(Properties props, String key, String defaultValue) {
+    String returnPath = props.getProperty(key, defaultValue);
+    if (returnPath != null && ! returnPath.endsWith("/")) {
+      returnPath += "/";
+    }
+    return returnPath;
+  }
+
+  /**
    * Get the value of a property.  If the key is not present, returns defaultValue.
    * This is just equivalent to props.getProperty(key, defaultValue).
    */
@@ -452,4 +465,13 @@ public class PropertiesUtils {
     return sb.toString();
   }
 
+  /**
+   * Convert the given properties to a json string
+   */
+  public static String propsAsJsonString(Properties props) {
+    List<String> jsonProperties = props.stringPropertyNames().stream().map(key -> '"' + StringUtils.escapeJsonString(key) +
+      "\": \"" + StringUtils.escapeJsonString(props.getProperty(key)) + '"')
+      .collect(Collectors.toList());
+    return "{ " + StringUtils.join(jsonProperties, ", ") + " }";
+  }
 }

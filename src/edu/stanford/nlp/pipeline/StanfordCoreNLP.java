@@ -85,7 +85,7 @@ import java.util.regex.Pattern;
 
 public class StanfordCoreNLP extends AnnotationPipeline  {
 
-  public enum OutputFormat { TEXT, TAGGED, XML, JSON, CONLL, CONLLU, SERIALIZED, CUSTOM }
+  public enum OutputFormat { TEXT, TAGGED, XML, JSON, CONLL, CONLLU, INLINEXML, SERIALIZED, CUSTOM }
 
   private static String getDefaultExtension(OutputFormat outputFormat) {
     switch (outputFormat) {
@@ -95,6 +95,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       case CONLLU: return ".conllu";
       case TEXT: return ".out";
       case TAGGED: return ".tag";
+      case INLINEXML: return ".inxml";
       case SERIALIZED: return ".ser.gz";
       case CUSTOM: return ".out";
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
@@ -388,6 +389,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * @return A sanitized annotators string with all prerequisites met.
    */
   public static String ensurePrerequisiteAnnotators(String[] annotators, Properties props) {
+    int posIndex = ArrayUtils.indexOf(annotators, Annotator.STANFORD_POS);
+    int parseIndex = ArrayUtils.indexOf(annotators, Annotator.STANFORD_PARSE);
+    boolean useParseForPos = ((parseIndex >= 0) && (posIndex < 0)); // Already doing the parsing, use the parsing for the pos tag
+
     // Get an unordered set of annotators
     Set<String> unorderedAnnotators = new LinkedHashSet<>();  // linked to preserve order
     Collections.addAll(unorderedAnnotators, annotators);
@@ -415,6 +420,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       }
     }
 
+    if (useParseForPos) {
+      unorderedAnnotators.remove(Annotator.STANFORD_POS);
+    }
+
     // Order the annotators
     List<String> orderedAnnotators = new ArrayList<>();
     while (!unorderedAnnotators.isEmpty()) {
@@ -426,7 +435,11 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         // Are the requirements satisfied?
         boolean canAdd = true;
         for (String prereq : Annotator.DEFAULT_REQUIREMENTS.get(candidate.toLowerCase())) {
-          if (!orderedAnnotators.contains(prereq)) {
+          // Weird hack to replace POS with POS tags from PARSE if we are already doing parse (and just parse)
+          if (useParseForPos && Annotator.STANFORD_POS.equals(prereq)) {
+            prereq = Annotator.STANFORD_PARSE;
+          }
+          if (!prereq.equals(candidate) && !orderedAnnotators.contains(prereq)) {
             canAdd = false;
             break;
           }
@@ -520,7 +533,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     Map<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> pool = new HashMap<>();
     pool.put(STANFORD_TOKENIZE, (props, impl) -> impl.tokenizer(props));
     pool.put(STANFORD_CLEAN_XML, (props, impl) -> impl.cleanXML(props));
-    pool.put(STANFORD_CODEPOINT, (props, impl) -> impl.codepoint(props));
     pool.put(STANFORD_SSPLIT, (props, impl) -> impl.wordToSentences(props));
     pool.put(STANFORD_MWT, (props, impl) -> impl.multiWordToken(props));
     pool.put(STANFORD_DOCDATE, (props, impl) -> impl.docDate(props));
@@ -833,12 +845,13 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     os.println("(if -props or -annotators is not passed in, default properties will be loaded via the classpath)");
     os.println("\t\"props\" - path to file with configuration properties");
     os.println("\t\"annotators\" - comma separated list of annotators");
-    os.println("\tThe following annotators are supported: cleanxml, tokenize, codepoint, quote, ssplit, pos, lemma, ner, truecase, parse, hcoref, relation");
+    os.println("\tThe following annotators are supported: cleanxml, tokenize, quote, ssplit, pos, lemma, ner, truecase, parse, hcoref, relation");
 
     os.println();
     os.println("\tIf annotator \"tokenize\" is defined:");
     os.println("\t\"tokenize.options\" - PTBTokenizer options (see edu.stanford.nlp.process.PTBTokenizer for details)");
     os.println("\t\"tokenize.whitespace\" - If true, just use whitespace tokenization");
+    os.println("\t\"tokenize.codepoint\" - If true, add codepoint offsets for counting non-BMP characters");
 
     os.println();
     os.println("\tIf annotator \"cleanxml\" is defined:");
@@ -1037,6 +1050,9 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         break;
       case CONLLU:
         new CoNLLUOutputter(properties).print(annotation, fos, outputOptions);
+        break;
+      case INLINEXML:
+        new InlineXMLOutputter().print(annotation, fos, outputOptions);
         break;
       case CUSTOM:
         AnnotationOutputter customOutputter = ReflectionLoading.loadByReflection(properties.getProperty("customOutputter"));
@@ -1405,6 +1421,12 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     }
     // Run the pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    if (PropertiesUtils.getBool(props, "memoryUsage", false)) {
+      System.gc();
+      System.gc();
+      logger.info("Finished loading pipeline.  Current memory usage: " +
+                  SystemUtils.getMemoryInUse() + "mb");
+    }
     pipeline.run(true);
   }
 

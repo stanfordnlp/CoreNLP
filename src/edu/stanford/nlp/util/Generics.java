@@ -27,10 +27,10 @@ import edu.stanford.nlp.util.concurrent.SynchronizedInterner;
  * painful and verbose.  For example, rather than declaring
  *
  * <pre>
- * {@code  Map<String,ClassicCounter<List<String>>> = new HashMap<String,ClassicCounter<List<String>>>()}
+ * {@code Map<String,ClassicCounter<List<String>>> = new HashMap<String,ClassicCounter<List<String>>>()}
  * </pre>
  *
- * you just call <code>Generics.newHashMap()</code>:
+ * you just call {@code Generics.newHashMap()}:
  *
  * <pre>
  * {@code Map<String,ClassicCounter<List<String>>> = Generics.newHashMap()}
@@ -49,7 +49,7 @@ import edu.stanford.nlp.util.concurrent.SynchronizedInterner;
 public class Generics  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Generics.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Generics.class);
 
   private Generics() {} // static class
 
@@ -233,6 +233,10 @@ public class Generics  {
 
   public static <K,V> WeakHashMap<K,V> newWeakHashMap() {
     return new WeakHashMap<>();
+  }
+
+  public static <K,V> WeakHashMap<K,V> newWeakHashMap(int initialCapacity) {
+    return new WeakHashMap<>(initialCapacity);
   }
 
   public static <K,V> ConcurrentHashMap<K,V> newConcurrentHashMap() {

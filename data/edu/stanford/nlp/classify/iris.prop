@@ -31,5 +31,5 @@ tolerance=1e-4
 #
 #trainFile=./examples/iris.train
 #testFile=./examples/iris.test
-trainFile=./projects/core/data/edu/stanford/nlp/classify/iris.train
-testFile=./projects/core/data/edu/stanford/nlp/classify/iris.test
+trainFile=data/edu/stanford/nlp/classify/iris.train
+testFile=data/edu/stanford/nlp/classify/iris.test

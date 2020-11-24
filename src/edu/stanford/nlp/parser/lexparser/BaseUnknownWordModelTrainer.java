@@ -1,6 +1,4 @@
 package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -10,6 +8,7 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.logging.Redwood;
 
 public class BaseUnknownWordModelTrainer
   extends AbstractUnknownWordModelTrainer
@@ -134,8 +133,9 @@ public class BaseUnknownWordModelTrainer
       wc.setCount(unknown, 1.0);
 
       /* inner iteration is over words */
-      for (String end : wc.keySet()) {
-        double prob = Math.log((wc.getCount(end)) / (tc.getCount(key)));  // p(sig|tag)
+      for (Map.Entry<String, Double> wEntry : wc.entrySet()) {
+        String end = wEntry.getKey();
+        double prob = Math.log(wEntry.getValue() / tc.getCount(key));  // p(sig|tag)
         tagHash.get(key).setCount(end, prob);
         //if (Test.verbose)
         //EncodingPrintWriter.out.println(tag + " rewrites as " + end + " endchar with probability " + prob,encoding);

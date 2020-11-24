@@ -37,8 +37,7 @@ public class EntityMentionsAnnotatorITest {
   }
 
   protected static Properties getDefaultProperties() {
-    Properties props = new Properties();
-    return props;
+    return new Properties();
   }
 
   private static EntityMentionsAnnotator getMentionsAnnotator() {
@@ -84,8 +83,8 @@ public class EntityMentionsAnnotatorITest {
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
     String[] expectedMentions = {
-        "[Text=Stanford University CharacterOffsetBegin=9 CharacterOffsetEnd=28 Tokens=[Stanford-4, University-5] TokenBegin=3 TokenEnd=5 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION SentenceIndex=0 EntityMentionIndex=0 CanonicalEntityMentionIndex=0 NamedEntityTagProbs={ORGANIZATION=0.9919133568741519}]",
-        "[Text=Albert Peacock CharacterOffsetBegin=29 CharacterOffsetEnd=43 Tokens=[Albert-6, Peacock-7] TokenBegin=5 TokenEnd=7 NamedEntityTag=PERSON EntityType=PERSON SentenceIndex=0 EntityMentionIndex=1 CanonicalEntityMentionIndex=1 NamedEntityTagProbs={PERSON=0.9913517492301768}]"
+        "[Text=Stanford University CharacterOffsetBegin=9 CharacterOffsetEnd=28 Tokens=[Stanford-4, University-5] TokenBegin=3 TokenEnd=5 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION SentenceIndex=0 EntityMentionIndex=0 CanonicalEntityMentionIndex=0 NamedEntityTagProbs={ORGANIZATION=0.9919133569959268}]",
+        "[Text=Albert Peacock CharacterOffsetBegin=29 CharacterOffsetEnd=43 Tokens=[Albert-6, Peacock-7] TokenBegin=5 TokenEnd=7 NamedEntityTag=PERSON EntityType=PERSON SentenceIndex=0 EntityMentionIndex=1 CanonicalEntityMentionIndex=1 NamedEntityTagProbs={PERSON=0.9913517505487812}]"
     };
     compareMentions("testBasicMentions", expectedMentions, mentions);
   }
@@ -98,7 +97,7 @@ public class EntityMentionsAnnotatorITest {
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
     String[] expectedMentions = {
-        "[Text=July 3rd CharacterOffsetBegin=0 CharacterOffsetEnd=8 Tokens=[July-1, 3rd-2] TokenBegin=0 TokenEnd=2 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-07-03 EntityType=DATE SentenceIndex=0 Timex=<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"XXXX-07-03\">July 3rd</TIMEX3> EntityMentionIndex=0 CanonicalEntityMentionIndex=0 NamedEntityTagProbs={DATE=0.9990718702558627}]",
+        "[Text=July 3rd CharacterOffsetBegin=0 CharacterOffsetEnd=8 Tokens=[July-1, 3rd-2] TokenBegin=0 TokenEnd=2 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-07-03 EntityType=DATE SentenceIndex=0 Timex=<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"XXXX-07-03\">July 3rd</TIMEX3> EntityMentionIndex=0 CanonicalEntityMentionIndex=0 NamedEntityTagProbs={DATE=0.9990718702329264}]",
         "[Text=July 4th CharacterOffsetBegin=9 CharacterOffsetEnd=17 Tokens=[July-3, 4th-4] TokenBegin=2 TokenEnd=4 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-07-04 EntityType=DATE SentenceIndex=0 Timex=<TIMEX3 tid=\"t2\" type=\"DATE\" value=\"XXXX-07-04\">July 4th</TIMEX3> EntityMentionIndex=1 CanonicalEntityMentionIndex=1 NamedEntityTagProbs={DATE=-1.0}]",
         "[Text=two CharacterOffsetBegin=22 CharacterOffsetEnd=25 Tokens=[two-6] TokenBegin=5 TokenEnd=6 NamedEntityTag=NUMBER NormalizedNamedEntityTag=2.0 EntityType=NUMBER SentenceIndex=0 EntityMentionIndex=2 CanonicalEntityMentionIndex=2 NamedEntityTagProbs={NUMBER=-1.0}]"
     };
@@ -145,8 +144,8 @@ public class EntityMentionsAnnotatorITest {
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
     String[] expectedMentions = {
-        "[Text=12% CharacterOffsetBegin=0 CharacterOffsetEnd=3 Tokens=[12-1, %-2] TokenBegin=0 TokenEnd=2 NamedEntityTag=PERCENT NormalizedNamedEntityTag=%12.0 EntityType=PERCENT SentenceIndex=0 EntityMentionIndex=0 CanonicalEntityMentionIndex=0 NamedEntityTagProbs={PERCENT=0.9987629548725888}]",
-        "[Text=13% CharacterOffsetBegin=4 CharacterOffsetEnd=7 Tokens=[13-3, %-4] TokenBegin=2 TokenEnd=4 NamedEntityTag=PERCENT NormalizedNamedEntityTag=%13.0 EntityType=PERCENT SentenceIndex=0 EntityMentionIndex=1 CanonicalEntityMentionIndex=1 NamedEntityTagProbs={PERCENT=0.9987629548725888}]"
+        "[Text=12% CharacterOffsetBegin=0 CharacterOffsetEnd=3 Tokens=[12-1, %-2] TokenBegin=0 TokenEnd=2 NamedEntityTag=PERCENT NormalizedNamedEntityTag=%12.0 EntityType=PERCENT SentenceIndex=0 EntityMentionIndex=0 CanonicalEntityMentionIndex=0 NamedEntityTagProbs={PERCENT=0.998762954773062}]",
+        "[Text=13% CharacterOffsetBegin=4 CharacterOffsetEnd=7 Tokens=[13-3, %-4] TokenBegin=2 TokenEnd=4 NamedEntityTag=PERCENT NormalizedNamedEntityTag=%13.0 EntityType=PERCENT SentenceIndex=0 EntityMentionIndex=1 CanonicalEntityMentionIndex=1 NamedEntityTagProbs={PERCENT=0.998762954773062}]"
     };
     compareMentions("testPercent", expectedMentions, mentions);
   }
@@ -166,24 +165,24 @@ public class EntityMentionsAnnotatorITest {
     // TODO: "nearly 5,500 square meters"? "10 million British pounds", "16.14 million U.S. dollars"
     // TODO: "China Center should definitely be an organization!
     String[] expectedMentions = {
-        "[Text=Duke CharacterOffsetBegin=0 CharacterOffsetEnd=4 Tokens=[Duke-1] TokenBegin=0 TokenEnd=1 NamedEntityTag=PERSON EntityType=PERSON SentenceIndex=0 EntityMentionIndex=0 CanonicalEntityMentionIndex=0 NamedEntityTagProbs={PERSON=0.6040365694245108}]",
-        "[Text=Cambridge CharacterOffsetBegin=8 CharacterOffsetEnd=17 Tokens=[Cambridge-3] TokenBegin=2 TokenEnd=3 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=0 EntityMentionIndex=1 CanonicalEntityMentionIndex=1 NamedEntityTagProbs={LOCATION=0.9214556223787627}]",
-        "[Text=William CharacterOffsetBegin=26 CharacterOffsetEnd=33 Tokens=[William-6] TokenBegin=5 TokenEnd=6 NamedEntityTag=PERSON EntityType=PERSON SentenceIndex=0 EntityMentionIndex=2 CanonicalEntityMentionIndex=2 NamedEntityTagProbs={PERSON=0.9737141648720948}]",
-        "[Text=China Center CharacterOffsetBegin=50 CharacterOffsetEnd=62 Tokens=[China-11, Center-12] TokenBegin=10 TokenEnd=12 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=0 EntityMentionIndex=3 CanonicalEntityMentionIndex=3 NamedEntityTagProbs={LOCATION=0.4710276256949829}]",
-        "[Text=University of Oxford CharacterOffsetBegin=70 CharacterOffsetEnd=90 Tokens=[University-15, of-16, Oxford-17] TokenBegin=14 TokenEnd=17 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION SentenceIndex=0 EntityMentionIndex=4 CanonicalEntityMentionIndex=4 NamedEntityTagProbs={ORGANIZATION=0.9995768698511065}]",
-        "[Text=Monday CharacterOffsetBegin=91 CharacterOffsetEnd=97 Tokens=[Monday-18] TokenBegin=17 TokenEnd=18 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-WXX-1 EntityType=DATE SentenceIndex=0 Timex=<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"XXXX-WXX-1\">Monday</TIMEX3> EntityMentionIndex=5 CanonicalEntityMentionIndex=5 NamedEntityTagProbs={DATE=0.7012320971361333}]",
+        "[Text=Duke CharacterOffsetBegin=0 CharacterOffsetEnd=4 Tokens=[Duke-1] TokenBegin=0 TokenEnd=1 NamedEntityTag=PERSON EntityType=PERSON SentenceIndex=0 EntityMentionIndex=0 CanonicalEntityMentionIndex=0 NamedEntityTagProbs={PERSON=0.6040365210265772}]",
+        "[Text=Cambridge CharacterOffsetBegin=8 CharacterOffsetEnd=17 Tokens=[Cambridge-3] TokenBegin=2 TokenEnd=3 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=0 EntityMentionIndex=1 CanonicalEntityMentionIndex=1 NamedEntityTagProbs={LOCATION=0.9214556405684146}]",
+        "[Text=William CharacterOffsetBegin=26 CharacterOffsetEnd=33 Tokens=[William-6] TokenBegin=5 TokenEnd=6 NamedEntityTag=PERSON EntityType=PERSON SentenceIndex=0 EntityMentionIndex=2 CanonicalEntityMentionIndex=2 NamedEntityTagProbs={PERSON=0.9737141642947746}]",
+        "[Text=China Center CharacterOffsetBegin=50 CharacterOffsetEnd=62 Tokens=[China-11, Center-12] TokenBegin=10 TokenEnd=12 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=0 EntityMentionIndex=3 CanonicalEntityMentionIndex=3 NamedEntityTagProbs={LOCATION=0.4710276807642457}]",
+        "[Text=University of Oxford CharacterOffsetBegin=70 CharacterOffsetEnd=90 Tokens=[University-15, of-16, Oxford-17] TokenBegin=14 TokenEnd=17 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION SentenceIndex=0 EntityMentionIndex=4 CanonicalEntityMentionIndex=4 NamedEntityTagProbs={ORGANIZATION=0.9995768696970976}]",
+        "[Text=Monday CharacterOffsetBegin=91 CharacterOffsetEnd=97 Tokens=[Monday-18] TokenBegin=17 TokenEnd=18 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-WXX-1 EntityType=DATE SentenceIndex=0 Timex=<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"XXXX-WXX-1\">Monday</TIMEX3> EntityMentionIndex=5 CanonicalEntityMentionIndex=5 NamedEntityTagProbs={DATE=0.7012320920477302}]",
         "[Text=5,500 CharacterOffsetBegin=123 CharacterOffsetEnd=128 Tokens=[5,500-5] TokenBegin=23 TokenEnd=24 NamedEntityTag=NUMBER NormalizedNamedEntityTag=~5500.0 EntityType=NUMBER SentenceIndex=1 EntityMentionIndex=6 CanonicalEntityMentionIndex=6 NamedEntityTagProbs={NUMBER=-1.0}]",
-        "[Text=Dickson Poon University of Oxford China Center CharacterOffsetBegin=152 CharacterOffsetEnd=198 Tokens=[Dickson-11, Poon-12, University-13, of-14, Oxford-15, China-16, Center-17] TokenBegin=29 TokenEnd=36 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION SentenceIndex=1 EntityMentionIndex=7 CanonicalEntityMentionIndex=7 NamedEntityTagProbs={ORGANIZATION=0.9937322825236473}]",
-        "[Text=St Hugh's College CharacterOffsetBegin=202 CharacterOffsetEnd=219 Tokens=[St-19, Hugh-20, 's-21, College-22] TokenBegin=37 TokenEnd=41 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION SentenceIndex=1 EntityMentionIndex=8 CanonicalEntityMentionIndex=8 NamedEntityTagProbs={ORGANIZATION=0.8819254348268689}]",
+        "[Text=Dickson Poon University of Oxford China Center CharacterOffsetBegin=152 CharacterOffsetEnd=198 Tokens=[Dickson-11, Poon-12, University-13, of-14, Oxford-15, China-16, Center-17] TokenBegin=29 TokenEnd=36 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION SentenceIndex=1 EntityMentionIndex=7 CanonicalEntityMentionIndex=7 NamedEntityTagProbs={ORGANIZATION=0.9937322804561051}]",
+        "[Text=St Hugh's College CharacterOffsetBegin=202 CharacterOffsetEnd=219 Tokens=[St-19, Hugh-20, 's-21, College-22] TokenBegin=37 TokenEnd=41 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION SentenceIndex=1 EntityMentionIndex=8 CanonicalEntityMentionIndex=8 NamedEntityTagProbs={ORGANIZATION=0.8819253990060462}]",
         "[Text=21 million pounds CharacterOffsetBegin=231 CharacterOffsetEnd=248 Tokens=[21-25, million-26, pounds-27] TokenBegin=43 TokenEnd=46 NamedEntityTag=MONEY NormalizedNamedEntityTag=~£2.1E7 EntityType=MONEY SentenceIndex=1 EntityMentionIndex=9 CanonicalEntityMentionIndex=9 NamedEntityTagProbs={MONEY=-1.0}]",
-        "[Text=Dickson Poon CharacterOffsetBegin=250 CharacterOffsetEnd=262 Tokens=[Dickson-1, Poon-2] TokenBegin=47 TokenEnd=49 NamedEntityTag=PERSON EntityType=PERSON SentenceIndex=2 EntityMentionIndex=10 CanonicalEntityMentionIndex=10 NamedEntityTagProbs={PERSON=0.9973724443382693}]",
-        "[Text=Hong Kong CharacterOffsetBegin=286 CharacterOffsetEnd=295 Tokens=[Hong-7, Kong-8] TokenBegin=53 TokenEnd=55 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=2 EntityMentionIndex=11 CanonicalEntityMentionIndex=11 NamedEntityTagProbs={LOCATION=0.9988976909923971}]",
-        "[Text=China CharacterOffsetBegin=297 CharacterOffsetEnd=302 Tokens=[China-10] TokenBegin=56 TokenEnd=57 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=2 EntityMentionIndex=12 CanonicalEntityMentionIndex=12 NamedEntityTagProbs={LOCATION=0.9976055936339759}]",
+        "[Text=Dickson Poon CharacterOffsetBegin=250 CharacterOffsetEnd=262 Tokens=[Dickson-1, Poon-2] TokenBegin=47 TokenEnd=49 NamedEntityTag=PERSON EntityType=PERSON SentenceIndex=2 EntityMentionIndex=10 CanonicalEntityMentionIndex=10 NamedEntityTagProbs={PERSON=0.9973724447807097}]",
+        "[Text=Hong Kong CharacterOffsetBegin=286 CharacterOffsetEnd=295 Tokens=[Hong-7, Kong-8] TokenBegin=53 TokenEnd=55 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=2 EntityMentionIndex=11 CanonicalEntityMentionIndex=11 NamedEntityTagProbs={LOCATION=0.9988976914526051}]",
+        "[Text=China CharacterOffsetBegin=297 CharacterOffsetEnd=302 Tokens=[China-10] TokenBegin=56 TokenEnd=57 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=2 EntityMentionIndex=12 CanonicalEntityMentionIndex=12 NamedEntityTagProbs={LOCATION=0.9976055940327417}]",
         "[Text=one CharacterOffsetBegin=311 CharacterOffsetEnd=314 Tokens=[one-14] TokenBegin=60 TokenEnd=61 NamedEntityTag=NUMBER NormalizedNamedEntityTag=1.0 EntityType=NUMBER SentenceIndex=2 EntityMentionIndex=13 CanonicalEntityMentionIndex=13 NamedEntityTagProbs={NUMBER=-1.0}]",
         "[Text=10 million CharacterOffsetBegin=366 CharacterOffsetEnd=376 Tokens=[10-25, million-26] TokenBegin=71 TokenEnd=73 NamedEntityTag=NUMBER NormalizedNamedEntityTag=1.0E7 EntityType=NUMBER SentenceIndex=2 EntityMentionIndex=14 CanonicalEntityMentionIndex=14 NamedEntityTagProbs={NUMBER=-1.0}]",
-        "[Text=British CharacterOffsetBegin=377 CharacterOffsetEnd=384 Tokens=[British-27] TokenBegin=73 TokenEnd=74 NamedEntityTag=MISC EntityType=MISC SentenceIndex=2 EntityMentionIndex=15 CanonicalEntityMentionIndex=15 NamedEntityTagProbs={MISC=0.9999989541920298}]",
+        "[Text=British CharacterOffsetBegin=377 CharacterOffsetEnd=384 Tokens=[British-27] TokenBegin=73 TokenEnd=74 NamedEntityTag=MISC EntityType=MISC SentenceIndex=2 EntityMentionIndex=15 CanonicalEntityMentionIndex=15 NamedEntityTagProbs={MISC=0.9999989541925414}]",
         "[Text=16.14 million CharacterOffsetBegin=393 CharacterOffsetEnd=406 Tokens=[16.14-30, million-31] TokenBegin=76 TokenEnd=78 NamedEntityTag=NUMBER NormalizedNamedEntityTag=1.614E7 EntityType=NUMBER SentenceIndex=2 EntityMentionIndex=16 CanonicalEntityMentionIndex=16 NamedEntityTagProbs={NUMBER=-1.0}]",
-        "[Text=U.S. CharacterOffsetBegin=407 CharacterOffsetEnd=411 Tokens=[U.S.-32] TokenBegin=78 TokenEnd=79 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=2 EntityMentionIndex=17 CanonicalEntityMentionIndex=17 NamedEntityTagProbs={LOCATION=0.7836362072308974}]"
+        "[Text=U.S. CharacterOffsetBegin=407 CharacterOffsetEnd=411 Tokens=[U.S.-32] TokenBegin=78 TokenEnd=79 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=2 EntityMentionIndex=17 CanonicalEntityMentionIndex=17 NamedEntityTagProbs={LOCATION=0.7836362279773935}]"
     };
         
     compareMentions("testNewsText", expectedMentions, mentions);

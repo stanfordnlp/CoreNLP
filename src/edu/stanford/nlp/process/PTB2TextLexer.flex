@@ -1,4 +1,4 @@
-Fpackage edu.stanford.nlp.process;
+package edu.stanford.nlp.process;
 
 /** Undoes the more common cases of Penn Treebank quoting to producing
  *  something resembling normal text.  That is, it is an approximate inverse

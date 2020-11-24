@@ -13,7 +13,7 @@ import java.io.*;
 abstract public class AbstractTextAnnotationCreator implements AnnotationCreator {
   @Override
   public Annotation createFromFile(String filename) throws IOException {
-    Reader r = IOUtils.getBufferedFileReader(filename);
+    Reader r = IOUtils.readerFromString(filename);
     Annotation anno = create(r);
     IOUtils.closeIgnoringExceptions(r);
     return anno;

@@ -33,11 +33,11 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.coref.docreader.CoNLLDocumentReader;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntTuple;
-import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.*;
 
 public class Document implements Serializable {
 
@@ -124,6 +124,7 @@ public class Document implements Serializable {
 
   /** Additional information about the document. Can be used as features */
   public Map<String, String> docInfo;
+    public Set<Triple<Integer,Integer,Integer>> filterMentionSet;
 
   public Document() {
     positions = Generics.newHashMap();
@@ -155,6 +156,33 @@ public class Document implements Serializable {
     this.docInfo = input.docInfo;
     this.numSentences = input.annotation.get(SentencesAnnotation.class).size();
     this.conllDoc = input.conllDoc;   // null if it's not conll input
+    this.filterMentionSet = input.filterMentionSet;
+  }
+
+  /**
+   * Returns list of sentences, where token in the sentence is a list of strings (tags) associated with the sentence
+   * @return
+   */
+  public List<List<String[]>> getSentenceWordLists() {
+    if (this.conllDoc != null) {
+      return this.conllDoc.sentenceWordLists;
+    } else {
+      List<List<String[]>> sentWordLists = new ArrayList<>();
+      List<CoreMap> sentences = this.annotation.get(CoreAnnotations.SentencesAnnotation.class);
+      String docId = this.annotation.get(CoreAnnotations.DocIDAnnotation.class);
+      for (CoreMap sentence : sentences) {
+        List<String[]> sentWordList = new ArrayList<>();
+        List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+        for (CoreLabel token : tokens) {
+          // Last column is coreference
+          String[] strs = {docId, "-", String.valueOf(token.index()), token.word(), token.tag(), "-", "-",
+                  token.getString(CoreAnnotations.SpeakerAnnotation.class, ""), token.ner(), "-"};
+          sentWordList.add(strs);
+        }
+        sentWordLists.add(sentWordList);
+      }
+      return sentWordLists;
+    }
   }
 
   public boolean isIncompatible(CorefCluster c1, CorefCluster c2) {

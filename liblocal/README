@@ -20,13 +20,13 @@ LAST UPDATE: 2015/10/5
 LAST UPDATE BY: Keenon Werling
 
 -----------------------------------------------------------------------
-java-hamcrest.jar
+hamcrest-2.2.jar
 
-ORIGINAL JAR NAME: java-hamcrest-2.0.0.0.jar
+ORIGINAL JAR NAME: hamcrest-2.2.jar
 
-VERSION: 2.0.0.0
+VERSION: 2.2
 
-RELEASE DATE: January 2015
+RELEASE DATE: 2019-10-16
 
 SOURCE AVAILABLE: Maven Central
 
@@ -36,9 +36,9 @@ URL: http://www.hamcrest.org
 
 USED BY: The JUnit library (not directly used in Stanford NLP code)
 
-LAST UPDATE: 2016-04-30
+LAST UPDATE: 2020-10-17
 
-LAST UPDATE BY: John Bauer
+LAST UPDATE BY: Christopher Manning
 
 -----------------------------------------------------------------------
 javaruntype.jar
@@ -62,13 +62,13 @@ LAST UPDATE: 2015/10/5
 LAST UPDATE BY: Keenon Werling
 
 -----------------------------------------------------------------------
-junit-quickcheck-core.jar
+junit-quickcheck-core-0.4.jar
 
-ORIGINAL JAR NAME: junit-quickcheck-core-0.4-beta-3.jar
+ORIGINAL JAR NAME: junit-quickcheck-core-0.4.jar
 
-VERSION: 0.4-beta-3
+VERSION: 0.4
 
-RELEASE DATE: Nov, 2013
+RELEASE DATE: 2014-12-30
 
 SOURCE AVAILABLE: Maven Central
 
@@ -78,18 +78,18 @@ URL: https://github.com/pholser/junit-quickcheck
 
 USED BY: loglinear package tests
 
-LAST UPDATE: 2015/10/5
+LAST UPDATE: 2020-10-18
 
-LAST UPDATE BY: Keenon Werling
+LAST UPDATE BY: Christopher Manning
 
 -----------------------------------------------------------------------
-junit-quickcheck-generators.jar
+junit-quickcheck-generators-0.4.jar
 
-ORIGINAL JAR NAME: junit-quickcheck-generators-0.4-beta-3.jar
+ORIGINAL JAR NAME: junit-quickcheck-generators-0.4.jar
 
-VERSION: 0.4-beta-3
+VERSION: 0.4
 
-RELEASE DATE: Nov, 2013
+RELEASE DATE: 2014-12-30
 
 SOURCE AVAILABLE: Maven Central
 
@@ -100,9 +100,9 @@ URL: https://github.com/pholser/junit-quickcheck
 USED BY:
 The Quickcheck library
 
-LAST UPDATE: 2015/10/5
+LAST UPDATE: 2020-10-18
 
-LAST UPDATE BY: Keenon Werling
+LAST UPDATE BY: Christopher Manning
 
 -----------------------------------------------------------------------
 junit-theories.jar

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Interner;
 import edu.stanford.nlp.util.Timing;
 
 
@@ -39,6 +40,11 @@ public class DistSimClassifier implements Serializable {
     this.numberEquivalence = numberEquivalence;
     this.unknownWordClass = unknownWordClass;
     Timing.startDoing("Loading distsim lexicon from " + filename);
+    // should work better than String.intern()
+    // interning the strings like this means they should be serialized
+    // in an interned manner, saving disk space and also memory when
+    // loading them back in
+    Interner<String> interner = new Interner<>();
     lexicon = Generics.newHashMap(1 << 15);  // make a reasonable starting size
     boolean terryKoo = "terryKoo".equals(format);
     for (String line : ObjectBank.getLineIterator(filename, encoding)) {
@@ -63,7 +69,7 @@ public class DistSimClassifier implements Serializable {
       if (numberEquivalence) {
         word = WordShapeClassifier.wordShape(word, WordShapeClassifier.WORDSHAPEDIGITS);
       }
-      lexicon.put(word, wordClass);
+      lexicon.put(word, interner.intern(wordClass));
     }
     Timing.endDoing();
   }

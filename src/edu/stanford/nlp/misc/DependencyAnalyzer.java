@@ -1,14 +1,19 @@
 package edu.stanford.nlp.misc; 
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Parses the output of DependencyExtractor into a tree, and constructs
@@ -298,11 +303,12 @@ public class DependencyAnalyzer  {
 
     // After reading the dependencies, as a post-processing step we
     // connect all inner classes and outer classes with each other.
-    for (String className : identifiers.keySet()) {
-      Identifier classId = identifiers.get(className);
+    for (Map.Entry<String, Identifier> entry : identifiers.entrySet()) {
+      Identifier classId = entry.getValue();
       if (!classId.isClass) {
         continue;
       }
+      String className = entry.getKey();
       int baseIndex = className.indexOf("$");
       if (baseIndex < 0) {
         continue;

@@ -123,6 +123,31 @@ public class BuildBinarizedDataset  {
    * <br>
    * (next block starts here) <br>
    * </code>
+   * <br>
+   * If you have an example sentence you want to label, you will need
+   * to manually label the subtrees from there.  For example, to build
+   * a 5 class dataset which matches the existing datasets, you would
+   * label the very negative phrases with 0, neutral phrases with 2,
+   * very positive phrases with 4.  The binary label dataset uses 0
+   * for negative, 1 for positive, and -1 for unlabeled (which can
+   * mean neutral, although the binary model will not predict
+   * neutral).
+   * <br>
+   * In order to determine which sub-phrases would need labeling, you
+   * can run the sentences through the same parser used to turn the
+   * sentences into trees.  For example, in the case of using the
+   * englishPCFG model, you can look at the main class of
+   * edu.stanford.nlp.parser.lexparser.LexicalizedParser .  You will
+   * definitely want to provide a label for the entire sentence.  Any
+   * subphrases which have a significantly different sentiment should
+   * be labeled, such as the previous example of "not a good day" vs
+   * "a good day".
+   * <br>
+   * Although it would be excessive to do so, a list of ALL of the
+   * subphrases contained in a parsed tree can be produced by first
+   * running the parser, then using the tool
+   * edu.stanford.nlp.trees.OutputSubtrees
+   * <br>
    * By default the englishPCFG parser is used.  This can be changed
    * with the {@code -parserModel} flag.  Specify an input file
    * with {@code -input}.

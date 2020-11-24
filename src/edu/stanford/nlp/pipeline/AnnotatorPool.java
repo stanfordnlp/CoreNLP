@@ -51,7 +51,7 @@ public class AnnotatorPool  {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       CachedAnnotator that = (CachedAnnotator) o;
-      return signature != null ? signature.equals(that.signature) : that.signature == null && (annotator != null ? annotator.equals(that.annotator) : that.annotator == null);
+      return Objects.equals(signature, that.signature) && (Objects.equals(annotator, that.annotator));
     }
 
     /** {@inheritDoc} */

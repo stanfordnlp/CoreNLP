@@ -7,10 +7,13 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.semgrex.ProcessSemgrexRequest;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.Tree;
@@ -74,24 +77,24 @@ public class StanfordCoreNLPServer implements Runnable {
   protected String username = null;
   @ArgumentParser.Option(name="password", gloss="The password component of a username/password basic auth credential")
   protected String password = null;
-  @ArgumentParser.Option(name="preload", gloss="Cache the following annotators on startup")
-  protected static String preloadedAnnotators = "";
+  @ArgumentParser.Option(name="preload", gloss="Cache all default annotators (if no list provided), or optionally " +
+      "provide comma separated list of annotators to preload (e.g. tokenize,ssplit,pos)")
+  protected static String preloadedAnnotators = null;
   @ArgumentParser.Option(name="serverProperties", gloss="Default properties file for server's StanfordCoreNLP instance")
   protected static String serverPropertiesPath = null;
   @ArgumentParser.Option(name="maxCharLength", gloss="Max length string that will be processed (non-positive means no limit)")
   protected static int maxCharLength = 100000;
-  @ArgumentParser.Option(name="blacklist", gloss="A file containing subnets that should be blacklisted from accessing the server. Each line is a subnet. They are specified as an IPv4 address followed by a slash followed by how many leading bits to maintain as the subnet mask. E.g., '54.240.225.0/24'.")
-  protected static String blacklist = null;
-  @ArgumentParser.Option(name="stanford", gloss="If true, do special options (blacklist, timeout modifications) for public Stanford server")
+  @ArgumentParser.Option(name="blockList", gloss="A file containing subnets that should be forbidden from accessing the server. Each line is a subnet. They are specified as an IPv4 address followed by a slash followed by how many leading bits to maintain as the subnet mask. E.g., '54.240.225.0/24'.")
+  protected static String blockList = null;
+  @ArgumentParser.Option(name="stanford", gloss="If true, do special options (domain blockList, timeout modifications) for public Stanford server")
   protected boolean stanford = false;
 
-  /** Default annotators for a server **/
-  private static String serverDefaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,natlog,openie,kbp";
-
   /** List of server specific properties **/
-  private static List<String> serverSpecificProperties = ArgumentParser.listOptions(StanfordCoreNLPServer.class);
+  private static final List<String> serverSpecificProperties = ArgumentParser.listOptions(StanfordCoreNLPServer.class);
 
   private final String shutdownKey;
+
+  private final Properties serverIOProps;
 
   private final Properties defaultProps;
 
@@ -113,9 +116,9 @@ public class StanfordCoreNLPServer implements Runnable {
 
 
   /**
-   * A list of blacklisted subnets -- these cannot call the server.
+   * A list of blocked subnets -- these cannot call the server.
    */
-  private final List<Pair<Inet4Address, Integer>> blacklistSubnets;
+  private final List<Pair<Inet4Address, Integer>> blockListSubnets;
 
 
   /**
@@ -165,50 +168,37 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not write the shutdown key to the a file.
    */
   public StanfordCoreNLPServer(Properties props) throws IOException {
-    // check if englishSR.ser.gz can be found (standard models jar doesn't have this)
-    String defaultParserPath;
-    ClassLoader classLoader = getClass().getClassLoader();
-    URL srResource = classLoader.getResource("edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-    if (srResource != null) {
-      defaultParserPath = "edu/stanford/nlp/models/srparser/englishSR.ser.gz";
-      log("Setting default constituency parser to SR parser: edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-    } else {
-      defaultParserPath = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
-      log("Warning: cannot find edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-      log("Setting default constituency parser to PCFG parser: edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
-      log("To use shift reduce parser download English models jar from:");
-      log("https://stanfordnlp.github.io/CoreNLP/download.html");
-    }
+    // set up default IO properties
+    this.serverIOProps = new Properties();
+    this.serverIOProps.setProperty("inputFormat", "text");
+    this.serverIOProps.setProperty("outputFormat", "json");
+    this.serverIOProps.setProperty("prettyPrint", "false");
 
-    // server default properties for a pipeline, these will be overwritten by file provided and command line
-    // provided defaults...the precedence is 1.) command line, 2.) properties file, 3.) server defaults
-    this.defaultProps = PropertiesUtils.asProperties(
-        "annotators", serverDefaultAnnotators,  // Run these annotators by default
-        "coref.mention.type", "dep",  // Use dependency trees with coref by default
-        "coref.mode", "statistical",  // Use the new coref
-        "coref.language", "en",  // We're English by default
-        "inputFormat", "text",   // By default, treat the POST data like text
-        "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
-        "prettyPrint", "false",  // Don't bother pretty-printing
-        "parse.model", defaultParserPath,  // SR scales linearly with sentence length. Good for a server!
-        "parse.binaryTrees", "true",  // needed for the Sentiment annotator
-        "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
+    // set up default properties
+    this.defaultProps = new Properties();
+    this.defaultProps.putAll(this.serverIOProps);
 
-    // overwrite all default properties with provided server properties
-    // for instance you might want to provide a default ner model
+    // overwrite with any properties provided by a props file
     if (serverPropertiesPath != null) {
-      Properties pipelinePropsFromFile = StringUtils.argsToProperties("-props", serverPropertiesPath);
-      PropertiesUtils.overWriteProperties(this.defaultProps, pipelinePropsFromFile);
+      this.defaultProps.putAll(StringUtils.argsToProperties("-props", serverPropertiesPath));
     }
 
     // extract pipeline specific properties from command line and overwrite server and file provided properties
     Properties pipelinePropsFromCL = new Properties();
-    for (String key : props.stringPropertyNames()) {
-      if (!serverSpecificProperties.contains(key)) {
-        pipelinePropsFromCL.setProperty(key, props.getProperty(key));
+    if (props != null) {
+      for (String key : props.stringPropertyNames()) {
+        if (!serverSpecificProperties.contains(key)) {
+          pipelinePropsFromCL.setProperty(key, props.getProperty(key));
+        }
       }
     }
     PropertiesUtils.overWriteProperties(this.defaultProps, pipelinePropsFromCL);
+
+    // log server's default properties
+    TreeSet<String> defaultPropertyKeys = new TreeSet<>(this.defaultProps.stringPropertyNames());
+    log("Server default properties:\n\t\t\t(Note: unspecified annotator properties are English defaults)\n" +
+        String.join("\n", defaultPropertyKeys.stream().map(
+            k -> String.format("\t\t\t%s = %s", k, this.defaultProps.get(k))).collect(Collectors.toList())));
 
     this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
     this.corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
@@ -237,14 +227,14 @@ public class StanfordCoreNLPServer implements Runnable {
     } else if (props != null && props.containsKey("port")) {
       this.statusPort = Integer.parseInt(props.getProperty("port"));
     }
-    // parse blacklist
-    if (blacklist == null) {
-      this.blacklistSubnets = Collections.emptyList();
+    // parse blockList
+    if (blockList == null) {
+      this.blockListSubnets = Collections.emptyList();
     } else {
-      this.blacklistSubnets = new ArrayList<>();
-      for (String subnet : IOUtils.readLines(blacklist)) {
+      this.blockListSubnets = new ArrayList<>();
+      for (String subnet : IOUtils.readLines(blockList)) {
         try {
-          this.blacklistSubnets.add(parseSubnet(subnet));
+          this.blockListSubnets.add(parseSubnet(subnet));
         } catch (IllegalArgumentException e) {
           warn("Could not parse subnet: " + subnet);
         }
@@ -253,7 +243,8 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   /**
-   * Parse the URL parameters into a map of (key, value) pairs.
+   * Parse the URL parameters into a map of (key, value) pairs. <br>
+   * https://codereview.stackexchange.com/questions/175332/splitting-url-query-string-to-key-value-pairs
    *
    * @param uri The URL that was requested.
    *
@@ -262,39 +253,38 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws UnsupportedEncodingException Thrown if we could not decode the URL with utf8.
    */
   private static Map<String, String> getURLParams(URI uri) throws UnsupportedEncodingException {
-    if (uri.getQuery() != null) {
-      Map<String, String> urlParams = new HashMap<>();
-
-      String query = uri.getQuery();
-      String[] queryFields = query
-          .replaceAll("\\\\&", "___AMP___")
-          .replaceAll("\\\\\\+", "___PLUS___")
-          .split("&");
-      for (String queryField : queryFields) {
-        int firstEq = queryField.indexOf('=');
-        // Convention uses "+" for spaces.
-        String key = URLDecoder.decode(queryField.substring(0, firstEq), "utf8").replaceAll("___AMP___", "&").replaceAll("___PLUS___", "+");
-        String value = URLDecoder.decode(queryField.substring(firstEq + 1), "utf8").replaceAll("___AMP___", "&").replaceAll("___PLUS___", "+");
-        urlParams.put(key, value);
+    String query = uri.getRawQuery();
+    if (query != null) {
+      try {
+        Map<String, String> params = new HashMap<>();
+        for (String param : query.split("&")) {
+          String[] keyValue = param.split("=", 2);
+          String key = URLDecoder.decode(keyValue[0], "UTF-8");
+          String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], "UTF-8") : "";
+          if (!key.isEmpty()) {
+            params.put(key, value);
+          }
+        }
+        return params;
+      } catch (UnsupportedEncodingException e) {
+        throw new IllegalStateException(e); // Cannot happen with UTF-8 encoding.
       }
-      return urlParams;
     } else {
       return Collections.emptyMap();
     }
   }
 
+  // TODO(AngledLuffa): this must be a constant somewhere, but I couldn't find it
+  static final String URL_ENCODED = "application/x-www-form-urlencoded";
+
   /**
    * Reads the POST contents of the request and parses it into an Annotation object, ready to be annotated.
    * This method can also read a serialized document, if the input format is set to be serialized.
    *
-   * The POST contents will be treated as UTF-8 unless the strict property is set to true (in which case they will
+   * The POST contents will be treated as UTF-8 unless the strict property is set to true, in which case they will
    * be treated as ISO-8859-1. They should be application/x-www-form-urlencoded, and decoding will be done via the
-   * java.net.URLDecoder.decode(String, String) function. This will attempt to decode each
-   * percent sign followed by two characters as a byte in hexadecimal. Other characters are passed through unchanged.
-   * However, it normally also works fine to simple pass text to this method in a POST. Our method doesn't accept
-   * encoding ' ' as '+' (a plus will be hex encoded) and converts any '%' not followed by a hex digit to "%25".
-   * The only thing you really must do is to escape a '%' character that is a percent followed by two potential
-   * hex digit characters as "%25".
+   * java.net.URLDecoder.decode(String, String) function.  It is also allowed to send in text/plain requests,
+   * which will not be decoded.  In fact, nothing other than x-www-form-urlencoded will be decoded.
    *
    * @param props The properties we are annotating with. This is where the input format is retrieved from.
    * @param httpExchange The exchange we are reading POST data from.
@@ -313,10 +303,16 @@ public class StanfordCoreNLPServer implements Runnable {
         // real users of CoreNLP would likely assume UTF-8 by default.
         String defaultEncoding = this.strict ? "ISO-8859-1" : "UTF-8";
         // Get the encoding
-        Headers h = httpExchange.getRequestHeaders();
+        Headers headers = httpExchange.getRequestHeaders();
         String encoding;
-        if (h.containsKey("Content-type")) {
-          String[] charsetPair = Arrays.stream(h.getFirst("Content-type").split(";"))
+        // the original default behavior of the server was to
+        // unescape, so let's assume by default that the input text is
+        // escaped.  if the Content-type is set to text we will know
+        // we shouldn't unescape after all
+        String contentType = URL_ENCODED;
+        if (headers.containsKey("Content-type")) {
+          contentType = headers.getFirst("Content-type").split(";")[0].trim();
+          String[] charsetPair = Arrays.stream(headers.getFirst("Content-type").split(";"))
               .map(x -> x.split("="))
               .filter(x -> x.length > 0 && "charset".equals(x[0]))
               .findFirst().orElse(new String[]{"charset", defaultEncoding});
@@ -330,14 +326,9 @@ public class StanfordCoreNLPServer implements Runnable {
         }
 
         String text = IOUtils.slurpReader(IOUtils.encodedInputStreamReader(httpExchange.getRequestBody(), encoding));
-        // System.err.println("The text I got was |" + text + '|');
-
-        // Remove the % and + characters that mess up the URL decoding.
-        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25"); // Escape a percent that isn't followed by a hex byte
-        text = text.replaceAll("\\+", "%2B");
-        // System.err.println("The text fiddled:  |" + text + '|');
-        text = URLDecoder.decode(text, encoding);
-        // System.err.println("The text decoded: |" + text + '|');
+        if (contentType.equals(URL_ENCODED)) {
+          text = URLDecoder.decode(text, encoding);
+        }
         // We use to trim. But now we don't. It seems like doing that is illegitimate. text = text.trim();
 
         // Read the annotation
@@ -411,9 +402,17 @@ public class StanfordCoreNLPServer implements Runnable {
   private Properties getProperties(HttpExchange httpExchange) throws UnsupportedEncodingException {
     Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
 
-    // Load the default properties
+    // Load the default properties if resetDefault is false
+    // If resetDefault is true, ignore server properties this server was started with,
+    // with the exception of the keys in serverIOProperties (i.e. don't reset IO properties)
     Properties props = new Properties();
-    defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
+    if (!urlParams.getOrDefault("resetDefault", "false").toLowerCase().equals("true"))
+      defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
+    else {
+      // if resetDefault is called, still maintain the serverIO properties (e.g. inputFormat, outputFormat, prettyPrint)
+      for (String ioKey : serverIOProps.stringPropertyNames())
+        props.setProperty(ioKey, defaultProps.getProperty(ioKey));
+    }
 
     // Add GET parameters as properties
     urlParams.entrySet().stream()
@@ -468,12 +467,13 @@ public class StanfordCoreNLPServer implements Runnable {
     // Get the annotators
     String annotators = props.getProperty("annotators");
     // If the properties contains a custom annotator, then do not enforceRequirements.
-    if (!PropertiesUtils.hasPropertyPrefix(props, CUSTOM_ANNOTATOR_PREFIX) && PropertiesUtils.getBool(props, "enforceRequirements", true)) {
+    if (annotators != null && !PropertiesUtils.hasPropertyPrefix(props, CUSTOM_ANNOTATOR_PREFIX) && PropertiesUtils.getBool(props, "enforceRequirements", true)) {
       annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"), props);
     }
 
     // Make sure the properties compile
-    props.setProperty("annotators", annotators);
+    if (annotators != null)
+      props.setProperty("annotators", annotators);
 
     return props;
   }
@@ -583,10 +583,10 @@ public class StanfordCoreNLPServer implements Runnable {
    *
    * @param addr The address to check.
    *
-   * @return True if the address is <b>not</b> in any blacklisted subnet. That is, we can accept connections from it.
+   * @return True if the address is <b>not</b> in any forbidden subnet. That is, we can accept connections from it.
    */
-  private boolean onBlacklist(Inet4Address addr) {
-    for (Pair<Inet4Address, Integer> subnet : blacklistSubnets) {
+  private boolean onBlockList(Inet4Address addr) {
+    for (Pair<Inet4Address, Integer> subnet : blockListSubnets) {
       if (netMatch(subnet, addr)) {
         return true;
       }
@@ -594,16 +594,16 @@ public class StanfordCoreNLPServer implements Runnable {
     return false;
   }
 
-  /** @see #onBlacklist(Inet4Address) */
-  private boolean onBlacklist(HttpExchange exchange) {
+  /** @see #onBlockList(Inet4Address) */
+  private boolean onBlockList(HttpExchange exchange) {
     if ( ! stanford) {
       return false;
     }
     InetAddress addr = exchange.getRemoteAddress().getAddress();
     if (addr instanceof Inet4Address) {
-      return onBlacklist((Inet4Address) addr);
+      return onBlockList((Inet4Address) addr);
     } else {
-      log("Not checking IPv6 address against blacklist: " + addr);
+      log("Not checking IPv6 address against blockList: " + addr);
       return false;  // TODO(gabor) we should eventually check ipv6 addresses too
     }
   }
@@ -615,7 +615,9 @@ public class StanfordCoreNLPServer implements Runnable {
   public static class FinishedRequest {
     public final Properties props;
     public final Annotation document;
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public final Optional<String> tokensregex;
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public final Optional<String> semgrex;
 
     public FinishedRequest(Properties props, Annotation document) {
@@ -860,7 +862,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (onBlockList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -994,7 +996,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (onBlockList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1122,7 +1124,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (onBlockList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1136,7 +1138,7 @@ public class StanfordCoreNLPServer implements Runnable {
       }
       Map<String, String> params = getURLParams(httpExchange.getRequestURI());
 
-      Future<Pair<String, Annotation>> response = corenlpExecutor.submit(() -> {
+      Future<Pair<byte[], Annotation>> response = corenlpExecutor.submit(() -> {
         try {
           // Get the document
           Annotation doc = getDocument(props, httpExchange);
@@ -1149,7 +1151,7 @@ public class StanfordCoreNLPServer implements Runnable {
           // (get the pattern)
           if (!params.containsKey("pattern")) {
             respondBadInput("Missing required parameter 'pattern'", httpExchange);
-            return Pair.makePair("", null);
+            return Pair.makePair("".getBytes(), null);
           }
           String pattern = params.get("pattern");
           // (get whether to filter / find)
@@ -1160,18 +1162,24 @@ public class StanfordCoreNLPServer implements Runnable {
           final boolean unique = uniqueStr.trim().isEmpty() || "true".equalsIgnoreCase(uniqueStr.toLowerCase());
           // (create the matcher)
           final SemgrexPattern regex = SemgrexPattern.compile(pattern);
+          final SemanticGraphCoreAnnotations.DependenciesType dependenciesType =
+            SemanticGraphCoreAnnotations.DependenciesType.valueOf(params.getOrDefault("dependenciesType", "enhancedPlusPlus").toUpperCase());
 
-          // Run Semgrex
-          return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
+          StanfordCoreNLP.OutputFormat of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat", "json").toUpperCase());
+
+          switch(of) {
+          case JSON:
+            // Run Semgrex
+            String content = JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
             if (filter) {
               // Case: just filter sentences
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence ->
-                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)).matches()
+                      regex.matcher(sentence.get(dependenciesType.annotation())).matches()
               ).collect(Collectors.toList()));
             } else {
               // Case: find matches
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
-                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class));
+                SemgrexMatcher matcher = regex.matcher(sentence.get(dependenciesType.annotation()));
                 int i = 0;
                 // Case: find either next node or next unique node
                 while (unique ? matcher.findNextMatchingNode() : matcher.find()) {
@@ -1194,7 +1202,31 @@ public class StanfordCoreNLPServer implements Runnable {
                 sentWriter.set("length", i);
               }));
             }
-          }), doc);
+            });
+            return Pair.makePair(content.getBytes(), doc);
+          case SERIALIZED:
+            if (filter) {
+              respondBadInput("Interface semgrex does not support 'filter' for output format " + of, httpExchange);
+              return Pair.makePair("".getBytes(), null);
+            }
+
+            CoreNLPProtos.SemgrexResponse.Builder responseBuilder = CoreNLPProtos.SemgrexResponse.newBuilder();
+            for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
+              SemanticGraph graph = sentence.get(dependenciesType.annotation());
+              CoreNLPProtos.SemgrexResponse.GraphResult.Builder graphResultBuilder = CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder();
+              graphResultBuilder.addResult(ProcessSemgrexRequest.matchSentence(regex, graph));
+              responseBuilder.addResult(graphResultBuilder.build());
+            }
+
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            responseBuilder.build().writeTo(os);
+            os.close();
+
+            return Pair.makePair(os.toByteArray(), doc);
+          default:
+            respondBadInput("Interface semgrex does not handle output format " + of, httpExchange);
+            return Pair.makePair("".getBytes(), null);
+          }
         } catch (Exception e) {
           warn(e);
           try {
@@ -1202,7 +1234,7 @@ public class StanfordCoreNLPServer implements Runnable {
           } catch (IOException ignored) {
           }
         }
-        return Pair.makePair("", null);
+        return Pair.makePair("".getBytes(), null);
       });
 
       // Send response
@@ -1211,9 +1243,9 @@ public class StanfordCoreNLPServer implements Runnable {
         if (lastPipeline.get() == null) {
           timeout = timeout + 60000; // add 60 seconds for loading a pipeline if needed
         }
-        Pair<String, Annotation> pair = response.get(timeout, TimeUnit.MILLISECONDS);
+        Pair<byte[], Annotation> pair = response.get(timeout, TimeUnit.MILLISECONDS);
         Annotation completedAnnotation = pair.second;
-        byte[] content = pair.first.getBytes();
+        byte[] content = pair.first;
         sendAndGetResponse(httpExchange, content);
         if (completedAnnotation != null && ! StringUtils.isNullOrEmpty(props.getProperty("annotators"))) {
           callback.accept(new FinishedRequest(props, completedAnnotation, params.get("pattern"), null));
@@ -1248,9 +1280,29 @@ public class StanfordCoreNLPServer implements Runnable {
       this.authenticator = authenticator;
     }
 
+    public void setTregexOffsets(JSONOutputter.Writer writer, Tree match) {
+      List<Tree> leaves = match.getLeaves();
+      Label label = leaves.get(0).label();
+      if (label instanceof CoreLabel) {
+        CoreLabel core = (CoreLabel) label;
+        writer.set("characterOffsetBegin", core.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+        if (core.containsKey(CoreAnnotations.CodepointOffsetBeginAnnotation.class)) {
+          writer.set("codepointOffsetBegin", core.get(CoreAnnotations.CodepointOffsetBeginAnnotation.class));
+        }
+      }
+      label = leaves.get(leaves.size() - 1).label();
+      if (label instanceof CoreLabel) {
+        CoreLabel core = (CoreLabel) label;
+        writer.set("characterOffsetEnd", core.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+        if (core.containsKey(CoreAnnotations.CodepointOffsetEndAnnotation.class)) {
+          writer.set("codepointOffsetEnd", core.get(CoreAnnotations.CodepointOffsetEndAnnotation.class));
+        }
+      }
+    }
+
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      if (onBlacklist(httpExchange)) {
+      if (onBlockList(httpExchange)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -1287,6 +1339,7 @@ public class StanfordCoreNLPServer implements Runnable {
           // Run Tregex
           return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) ->
             docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
+                int sentIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
                 Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
                 //sentWriter.set("tree", tree.pennString());
                 TregexMatcher matcher = p.matcher(tree);
@@ -1294,10 +1347,13 @@ public class StanfordCoreNLPServer implements Runnable {
                 int i = 0;
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i++), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
+                    matchWriter.set("sentIndex", sentIndex);
+                    setTregexOffsets(matchWriter, matcher.getMatch());
                     matchWriter.set("match", matcher.getMatch().pennString());
                     matchWriter.set("spanString", matcher.getMatch().spanString());
                     matchWriter.set("namedNodes", matcher.getNodeNames().stream().map(nodeName -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeWriter) -> 
                       namedNodeWriter.set(nodeName, (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeSubWriter) -> {
+                        setTregexOffsets(namedNodeSubWriter, matcher.getNode(nodeName));
                         namedNodeSubWriter.set("match", matcher.getNode(nodeName).pennString());
                         namedNodeSubWriter.set("spanString", matcher.getNode(nodeName).spanString());
                       })
@@ -1442,6 +1498,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @param context The context to enable authentication for.
    * @param credentials The optional credentials to enforce. This is a (key,value) pair
    */
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private static void withAuth(HttpContext context, Optional<Pair<String,String>> credentials) {
     credentials.ifPresent(c -> context.setAuthenticator(new BasicAuthenticator("corenlp") {
       @Override
@@ -1456,6 +1513,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * Run the server.
    * This method registers the handlers, and initializes the HTTP server.
    */
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   public void run(Optional<Pair<String,String>> basicAuth,
                   Predicate<Properties> authenticator,
                   Consumer<FinishedRequest> callback,
@@ -1503,7 +1561,7 @@ public class StanfordCoreNLPServer implements Runnable {
    *
    * @throws IOException Thrown if we could not start / run the server.
    */
-  public static void main(String[] args) throws IOException {
+  public static StanfordCoreNLPServer launchServer(String[] args) throws IOException {
     // Add a bit of logging
     log("--- " + StanfordCoreNLPServer.class.getSimpleName() + "#main() called ---");
     String build = System.getenv("BUILD");
@@ -1514,7 +1572,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // Fill arguments
     ArgumentParser.fillOptions(StanfordCoreNLPServer.class, args);
-    // get server properties from command line, right now only property used is server_id
+    // get server properties from command line
     Properties serverProperties = StringUtils.argsToProperties(args);
     StanfordCoreNLPServer server = new StanfordCoreNLPServer(serverProperties);  // must come after filling global options
     ArgumentParser.fillOptions(server, args);
@@ -1523,7 +1581,7 @@ public class StanfordCoreNLPServer implements Runnable {
     if ( ! serverProperties.containsKey("status_port") && serverProperties.containsKey("port")) {
       server.statusPort = Integer.parseInt(serverProperties.getProperty("port"));
     }
-    log("    Threads: " + ArgumentParser.threads);
+    log("Threads: " + ArgumentParser.threads);
 
     // Start the liveness server
     AtomicBoolean live = new AtomicBoolean(false);
@@ -1538,10 +1596,15 @@ public class StanfordCoreNLPServer implements Runnable {
     }
 
     // Pre-load the models
-    if (StanfordCoreNLPServer.preloadedAnnotators != null && ! StanfordCoreNLPServer.preloadedAnnotators.trim().isEmpty()) {
+    if (StanfordCoreNLPServer.preloadedAnnotators != null) {
       Properties props = new Properties();
       server.defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
-      props.setProperty("annotators", StanfordCoreNLPServer.preloadedAnnotators);
+      // -preload flag alone means to load all default annotators
+      // -preload flag with a list of annotators means to preload just that list (e.g. tokenize,ssplit,pos)
+      String annotatorsToLoad = (StanfordCoreNLPServer.preloadedAnnotators.trim().equals("true")) ?
+          server.defaultProps.getProperty("annotators") : StanfordCoreNLPServer.preloadedAnnotators;
+      if (annotatorsToLoad != null)
+        props.setProperty("annotators", annotatorsToLoad);
       try {
         new StanfordCoreNLP(props);
       } catch (Throwable throwable) {
@@ -1559,6 +1622,12 @@ public class StanfordCoreNLPServer implements Runnable {
     // Run the server
     log("Starting server...");
     server.run(credentials, req -> true, res -> {}, homepage, server.ssl, live);
-  } // end main()
 
+    return server;
+  } // end launchServer
+
+
+  public static void main(String[] args) throws IOException {
+    launchServer(args);
+  }
 }

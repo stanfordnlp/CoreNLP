@@ -17,7 +17,10 @@ import java.util.Set;
  */
 public class ConversationalSieve extends QMSieve {
 
-  public ConversationalSieve(Annotation doc, Map<String, List<Person>> characterMap, Map<Integer, String> pronounCorefMap, Set<String> animacySet) {
+  public ConversationalSieve(Annotation doc,
+                             Map<String, List<Person>> characterMap,
+                             Map<Integer,String> pronounCorefMap,
+                             Set<String> animacySet) {
     super(doc, characterMap, pronounCorefMap, animacySet, "conv");
   }
 
@@ -33,16 +36,19 @@ public class ConversationalSieve extends QMSieve {
       CoreMap currQuote = quotes.get(index);
       CoreMap prevQuote = quotes.get(index - 1);
       CoreMap twoPrevQuote = quotes.get(index - 2);
+      if (currQuote.get(QuoteAttributionAnnotator.MentionAnnotation.class) != null) {
+        // Chris added this in 2020: we've already found a speaker mention
+        continue;
+      }
 
       int twoPrevPara = getQuoteParagraph(twoPrevQuote);
       //default to first in quote that begins n-2
-      for(int i = index-3; i >= 0; i--)
-      {
-        if(getQuoteParagraph(quotes.get(i)) == twoPrevPara) {
+      for (int i = index-3; i >= 0; i--) {
+        if (getQuoteParagraph(quotes.get(i)) == twoPrevPara) {
           twoPrevQuote = quotes.get(i);
-        }
-        else
+        } else {
           break;
+        }
       }
       int tokenBeginIdx = currQuote.get(CoreAnnotations.TokenBeginAnnotation.class);
       int tokenEndIdx = currQuote.get(CoreAnnotations.TokenEndAnnotation.class);
@@ -64,22 +70,22 @@ public class ConversationalSieve extends QMSieve {
           currToken = tokens.get(tokenEndIdx + 1);
         }
         if (!currToken.isNewline()) {
-
           CoreMap nextSentence = sentences.get(currToken.get(CoreAnnotations.SentenceIndexAnnotation.class));
           if (nextSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class).equals(currQuoteBeginSentence.get(CoreAnnotations.ParagraphIndexAnnotation.class))) {
             isAloneInParagraph = false;
           }
         }
       }
-      if(twoPrevQuote.get(QuoteAttributionAnnotator.MentionAnnotation.class) == null
+      if (twoPrevQuote.get(QuoteAttributionAnnotator.MentionAnnotation.class) == null
               || !isAloneInParagraph
               || currQuote.get(QuoteAttributionAnnotator.MentionAnnotation.class) != null
               || twoPrevQuote.get(QuoteAttributionAnnotator.MentionTypeAnnotation.class).equals(Sieve.PRONOUN)) {
         continue;
       }
-      if(getQuoteParagraph(currQuote) == getQuoteParagraph(prevQuote) + 1 && getQuoteParagraph(prevQuote) == getQuoteParagraph(twoPrevQuote) + 1) {
+      if (getQuoteParagraph(currQuote) == getQuoteParagraph(prevQuote) + 1 && getQuoteParagraph(prevQuote) == getQuoteParagraph(twoPrevQuote) + 1) {
         fillInMention(currQuote, getMentionData(twoPrevQuote), sieveName);
       }
     }
   }
+
 }

@@ -148,7 +148,7 @@ public class QuantifiableEntityExtractor {
     pw.println("$SymUnits = CreateRegex(Keys(SYM_UNIT_MAP))");
     pw.println();
 
-    BufferedReader br = IOUtils.getBufferedFileReader(infile);
+    BufferedReader br = IOUtils.readerFromString(infile);
     String line;
     pw.println("ENV.defaults[\"stage\"] = 0");
     while ((line = br.readLine()) != null) {

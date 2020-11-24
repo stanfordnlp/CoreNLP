@@ -278,7 +278,7 @@ public class CoNLL2011DocumentReader  {
     public DocumentIterator(String filename, Options options) throws IOException {
       this.options = options;
       this.filename = filename;
-      this.br = IOUtils.getBufferedFileReader(filename);
+      this.br = IOUtils.readerFromString(filename);
       nextDoc = readNextDocument();
     }
 

@@ -93,7 +93,9 @@ public class PTBTokenizerTest {
       "the 9-to-11:45 a.m. weekday shift",
       "Brighton Rd. Pacifica",
       "Walls keeping water out of the bowl-shaped city have been breached, and emergency teams are using helicopters to drop 1,350kg (3,000lb) sandbags and concrete barriers into the gaps.",
-          "i got (89.2%) in my exams",
+      "i got (89.2%) in my exams",
+      "Dial 908-333-4444 to unban mox opal",
+      "The jerk who banned mox opal has social security number 555-55-5555.",
   };
 
   private final String[][] ptbGold = {
@@ -183,7 +185,9 @@ public class PTBTokenizerTest {
       { "Walls", "keeping", "water", "out", "of", "the", "bowl-shaped", "city", "have", "been", "breached", ",", "and",
               "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "-LRB-", "3,000", "lb",
               "-RRB-", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
-          { "i", "got", "-LRB-", "89.2", "%", "-RRB-", "in", "my", "exams" },
+      { "i", "got", "-LRB-", "89.2", "%", "-RRB-", "in", "my", "exams" },
+      { "Dial", "908-333-4444", "to", "unban", "mox", "opal" },
+      { "The", "jerk", "who", "banned", "mox", "opal", "has", "social", "security", "number", "555-55-5555", "." },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -282,7 +286,9 @@ public class PTBTokenizerTest {
       { "Walls", "keeping", "water", "out", "of", "the", "bowl", "-", "shaped", "city", "have", "been", "breached", ",", "and",
               "emergency", "teams", "are", "using", "helicopters", "to", "drop", "1,350", "kg", "(", "3,000", "lb",
               ")", "sandbags", "and", "concrete", "barriers", "into", "the", "gaps", "." },
-          { "i", "got", "(", "89.2", "%", ")", "in", "my", "exams" },
+      { "i", "got", "(", "89.2", "%", ")", "in", "my", "exams" },
+      { "Dial", "908-333-4444", "to", "unban", "mox", "opal" },
+      { "The", "jerk", "who", "banned", "mox", "opal", "has", "social", "security", "number", "555-55-5555", "." },
 
   };
 

@@ -12,6 +12,7 @@ import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.trees.treebank.EnglishPTBTreebankCorrector;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -40,6 +41,7 @@ public class Treebanks  {
     log.info("\t-pennPrint\t-encoding enc\t-tlp class\t-sentenceLengths");
     log.info("\t-summary\t-decimate\t-yield\t-correct\t-punct");
     log.info("\t-oneLine\t-words\t-taggedWords\t-annotate options");
+    log.info("\t-filter <class>: class implements Predicate<Tree>, this filters trees which return false");
   }
 
   /**
@@ -48,7 +50,7 @@ public class Treebanks  {
    * number range if any are loaded.<p>
    * By default, this class works over raw trees.
    * You can normalize the trees as we usually do in an English-specific way by using either of the flags:
-   * {@code -normalize} or {@code -trf edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory}.
+   * {@code -normalized} or {@code -trf edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory}.
    * You can normalize for different treebanks by loading an appropriate TreeReaderFactory.
    * You can print trees one per line up to a certain length (for EVALB) and many other things.
    * <p>

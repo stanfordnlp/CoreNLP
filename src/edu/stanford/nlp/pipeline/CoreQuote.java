@@ -14,9 +14,9 @@ import java.util.*;
 
 public class CoreQuote {
 
-  private CoreMap quoteCoreMap;
-  private CoreDocument document;
-  private List<CoreSentence> sentences;
+  private final CoreMap quoteCoreMap;
+  private final CoreDocument document;
+  private final List<CoreSentence> sentences;
   // optional speaker info...note there may not be an entity mention corresponding to the speaker
   public boolean hasSpeaker;
   public boolean hasCanonicalSpeaker;
@@ -49,7 +49,7 @@ public class CoreQuote {
     this.speakerCharOffsets = Optional.empty();
     this.speakerEntityMention = Optional.empty();
     if (firstSpeakerTokenIndex != null && lastSpeakerTokenIndex != null) {
-      this.speakerTokens = Optional.of(new ArrayList<CoreLabel>());
+      this.speakerTokens = Optional.of(new ArrayList<>());
       for (int speakerTokenIndex = firstSpeakerTokenIndex ;
            speakerTokenIndex <= lastSpeakerTokenIndex ; speakerTokenIndex++) {
         this.speakerTokens.get().add(this.document.tokens().get(speakerTokenIndex));

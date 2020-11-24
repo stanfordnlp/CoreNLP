@@ -14,17 +14,18 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
-/**
- * @author Michael Fang
- * @author Grace Muzny
+/** Return as a guess the most frequent speaker (of the right gender) in the region of text close to the quote.
+ *
+ *  @author Michael Fang
+ *  @author Grace Muzny
  */
 public class BaselineTopSpeakerSieve extends MSSieve {
 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(BaselineTopSpeakerSieve.class);
 
-  private Map<String, Person.Gender> genderList;
-  private Set<String> familyRelations;
+  private final Map<String, Person.Gender> genderList;
+  private final Set<String> familyRelations;
 
   public static final int BACKWARD_WINDOW = 2000;
   public static final int BACKWARD_WINDOW_BIG = 4000;
@@ -34,7 +35,7 @@ public class BaselineTopSpeakerSieve extends MSSieve {
   public static final double BACKWARD_WEIGHT = 1.0;
 
   public BaselineTopSpeakerSieve(Annotation doc, Map<String, List<Person>> characterMap,
-                                 Map<Integer, String> pronounCorefMap, Set<String> animacySet,
+                                 Map<Integer,String> pronounCorefMap, Set<String> animacySet,
                                  Map<String, Person.Gender> genderList, Set<String> familyRelations) {
     super(doc, characterMap, pronounCorefMap, animacySet);
     this.genderList = genderList;
@@ -59,33 +60,47 @@ public class BaselineTopSpeakerSieve extends MSSieve {
   public void topSpeakerInRange(Annotation doc) {
     List<CoreLabel> toks = doc.get(CoreAnnotations.TokensAnnotation.class);
     List<CoreMap> quotes = doc.get(CoreAnnotations.QuotationsAnnotation.class);
-    for (int quote_idx = 0; quote_idx < quotes.size(); quote_idx++) {
+    for (int quote_idx = 0, qsize = quotes.size(); quote_idx < qsize; quote_idx++) {
       CoreMap quote = quotes.get(quote_idx);
-      if(quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) == null) {
+      // log.info("BaselineTopSpeakerSieve processing quote: " + quote.toShorterString());
+      if (quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) == null) {
         Pair<Integer, Integer> quoteRun = new Pair<>(quote.get(CoreAnnotations.TokenBeginAnnotation.class),
                 quote.get(CoreAnnotations.TokenEndAnnotation.class));
+        int backSpanStart = Math.max(0, quoteRun.first - BACKWARD_WINDOW);
         List<MentionData> closestMentionsBackward = findClosestMentionsInSpanBackward(
-                new Pair<>(Math.max(0, quoteRun.first - BACKWARD_WINDOW), quoteRun.first - 1));
-        List<MentionData> closestMentions = findClosestMentionsInSpanForward(new Pair<>(quoteRun.second + 1,
-                Math.min(quoteRun.second + FORWARD_WINDOW, toks.size() - 1)));
+                new Pair<>(backSpanStart, quoteRun.first - 1));
+        // log.info("  Found backward mentions in [" + backSpanStart + "," + (quoteRun.first - 1) + "]: " +
+        //         closestMentionsBackward);
+        int forwardSpanEnd = Math.min(quoteRun.second + FORWARD_WINDOW, toks.size() - 1);
+        List<MentionData> closestMentions = findClosestMentionsInSpanForward(new Pair<>(quoteRun.second + 1, forwardSpanEnd));
+        // log.info("  Found forward mentions in [" + (quoteRun.second + 1) + "," + forwardSpanEnd + "]: " +
+        //         closestMentions);
         closestMentions.addAll(closestMentionsBackward);
 
         Person.Gender gender = getGender(makeMentionData(quote));
 
-
         List<String> topSpeakers = Counters.toSortedList(getTopSpeakers(closestMentions, closestMentionsBackward, gender,
                 quote, false));
-        //if none found, try again with bigger window
+        // if none found, try again with bigger window
         if (topSpeakers.isEmpty()) {
-          closestMentionsBackward = findClosestMentionsInSpanBackward(new Pair<>(Math.max(0,
-                  quoteRun.first - BACKWARD_WINDOW_BIG), quoteRun.first - 1));
-          closestMentions = findClosestMentionsInSpanForward(new Pair<>(quoteRun.second + 1,
-                  Math.min(quoteRun.second + FORWARD_WINDOW_BIG, toks.size() - 1)));
+          if (backSpanStart > 0) {
+            backSpanStart = Math.max(0, quoteRun.first - BACKWARD_WINDOW_BIG);
+            closestMentionsBackward = findClosestMentionsInSpanBackward(new Pair<>(backSpanStart, quoteRun.first - 1));
+            // log.info("  Found big backward mentions in [" + backSpanStart + "," + (quoteRun.first - 1) + "]: " +
+            //         closestMentionsBackward);
+          }
+          if (forwardSpanEnd < toks.size() - 1) {
+            forwardSpanEnd = Math.min(quoteRun.second + FORWARD_WINDOW_BIG, toks.size() - 1);
+            closestMentions = findClosestMentionsInSpanForward(new Pair<>(quoteRun.second + 1, forwardSpanEnd));
+            // log.info("  Found big forward mentions in [" + (quoteRun.second + 1) + "," + forwardSpanEnd + "]: " +
+            //         closestMentions);
+          }
           topSpeakers = Counters.toSortedList(getTopSpeakers(closestMentions, closestMentionsBackward, gender,
                   quote, true));
         }
         if (topSpeakers.isEmpty()) {
-          log.warn("Watch out, there's an empty top speakers list!");
+          log.warn("  Empty top speakers list for: " + quote.toShorterString() +
+                  " [no candidate top speakers found – just ignore!");
           continue;
         }
         topSpeakers = removeQuoteNames(topSpeakers, quote);
@@ -93,19 +108,19 @@ public class BaselineTopSpeakerSieve extends MSSieve {
 
         Pair<String, String> nextPrediction = getConversationalNextPrediction(quotes, quote_idx, gender);
         boolean set = updatePredictions(quote, nextPrediction);
-        if(set) {
+        if (set) {
           continue;
         }
 
-        Pair<String, String> prevPrediction = getConversationalPreviousPrediction(quotes,quote_idx, gender);
+        Pair<String, String> prevPrediction = getConversationalPreviousPrediction(quotes, quote_idx, gender);
         set = updatePredictions(quote, prevPrediction);
-        if(set) {
+        if (set) {
           continue;
         }
 
         Pair<String, String> famPrediction = getFamilyAnimateVocative(quotes, quote_idx, gender, topSpeakers);
         set = updatePredictions(quote, famPrediction);
-        if(set) {
+        if (set) {
           continue;
         }
 
@@ -115,8 +130,7 @@ public class BaselineTopSpeakerSieve extends MSSieve {
   }
 
   public List<String> removeQuoteNames(List<String> topSpeakers, CoreMap quote) {
-    // if the top speakers name is in the quote,
-    // move to the next option and remove it
+    // if the top speakers name is in the quote, move to the next option and remove it
     String topSpeaker = topSpeakers.get(0);
     Set<Person> namesInParagraphQuotes = getNamesInParagraph(quote);
     if(namesInParagraphQuotes.contains(characterMap.get(topSpeaker).get(0)) && topSpeakers.size() > 1) {
@@ -144,17 +158,21 @@ public class BaselineTopSpeakerSieve extends MSSieve {
     return gender;
   }
 
-  public Counter<String> getTopSpeakers(List<MentionData> closestMentions, List<MentionData> closestMentionsBackward,
+  public Counter<String> getTopSpeakers(List<MentionData> closestMentionsForward, List<MentionData> closestMentionsBackward,
                                         Person.Gender gender, CoreMap quote, boolean overrideGender) {
+    // put all mentions in closestMentions, and then use closestMentionsBackwards to differentiate forward/backward
+    List<MentionData> closestMentions = new ArrayList<>(closestMentionsForward.size() + closestMentionsBackward.size());
+    closestMentions.addAll(closestMentionsForward);
+    closestMentions.addAll(closestMentionsBackward);
     Counter<String> topSpeakerInRange = new ClassicCounter<>();
     Counter<String> topSpeakerInRangeIgnoreGender = new ClassicCounter<>();
 
     Set<MentionData> backwardsMentions = new HashSet<>(closestMentionsBackward);
 
-    for(MentionData mention : closestMentions) {
+    for (MentionData mention : closestMentions) {
       double weight = backwardsMentions.contains(mention) ? BACKWARD_WEIGHT : FORWARD_WEIGHT;
-      if(mention.type.equals(NAME)) {
-        if (!characterMap.keySet().contains(mention.text)) {
+      if (mention.type.equals(NAME)) {
+        if (!characterMap.containsKey(mention.text)) {
           continue;
         }
         Person p = characterMap.get(mention.text).get(0);
@@ -164,8 +182,8 @@ public class BaselineTopSpeakerSieve extends MSSieve {
           topSpeakerInRange.incrementCount(p.name, weight);
         }
         topSpeakerInRangeIgnoreGender.incrementCount(p.name, weight);
-        if(closestMentions.size() == 128 && closestMentionsBackward.size() == 94)
-          System.out.println(p.name + " " + weight + " name");
+        // if (closestMentions.size() == 128 && closestMentionsBackward.size() == 94)
+        //   System.out.println(p.name + " " + weight + " name");
       } else if (mention.type.equals(PRONOUN)) {
         int charBeginKey = doc.get(CoreAnnotations.TokensAnnotation.class).get(mention.begin).beginPosition();
         Person p = doCoreference(charBeginKey, quote);
@@ -176,21 +194,21 @@ public class BaselineTopSpeakerSieve extends MSSieve {
             topSpeakerInRange.incrementCount(p.name, weight);
           }
           topSpeakerInRangeIgnoreGender.incrementCount(p.name, weight);
-          if(closestMentions.size() == 128 && closestMentionsBackward.size() == 94)
-            System.out.println(p.name + " " + weight + " pronoun");
+          // if (closestMentions.size() == 128 && closestMentionsBackward.size() == 94)
+          //   System.out.println(p.name + " " + weight + " pronoun");
         }
       }
     }
     if (topSpeakerInRange.size() > 0) {
       return topSpeakerInRange;
-    } else if (gender != Person.Gender.UNK && !overrideGender) {
+    } else if (gender != Person.Gender.UNK && ! overrideGender) {
       return topSpeakerInRange;
     }
     return topSpeakerInRangeIgnoreGender;
   }
 
   public boolean updatePredictions(CoreMap quote, Pair<String, String> speakerAndMethod) {
-    if(speakerAndMethod.first != null && speakerAndMethod.second != null) {
+    if (speakerAndMethod.first != null && speakerAndMethod.second != null) {
       quote.set(QuoteAttributionAnnotator.SpeakerAnnotation.class, characterMap.get(speakerAndMethod.first).get(0).name);
       quote.set(QuoteAttributionAnnotator.SpeakerSieveAnnotation.class, "Baseline Top" + speakerAndMethod.second);
       return true;
@@ -202,14 +220,14 @@ public class BaselineTopSpeakerSieve extends MSSieve {
   public Pair<String, String> getFamilyAnimateVocative(List<CoreMap> quotes, int quote_index, Person.Gender gender,
                                                        List<String> topSpeakers) {
     MentionData mention = makeMentionData(quotes.get(quote_index));
-    if(mention.text != null) {
-      if(mention.type.equals("animate noun") && familyRelations.contains(mention.text.toLowerCase())
+    if (mention.text != null) {
+      if (mention.type.equals("animate noun") && familyRelations.contains(mention.text.toLowerCase())
               && gender != Person.Gender.UNK) {
         int quoteContainingMention = getQuoteContainingRange(quotes, new Pair<>(mention.begin, mention.end));
 
-        if(quoteContainingMention >= 0) {
+        if (quoteContainingMention >= 0) {
           String relatedName = quotes.get(quoteContainingMention).get(QuoteAttributionAnnotator.SpeakerAnnotation.class);
-          if(relatedName != null) {
+          if (relatedName != null) {
             for (String speaker : topSpeakers) {
               String[] speakerNames = speaker.split("_");
               if (relatedName.endsWith(speakerNames[speakerNames.length - 1])) {
@@ -242,7 +260,7 @@ public class BaselineTopSpeakerSieve extends MSSieve {
       CoreMap prevprevQuote = quotes.get(prevPrev);
       String speakerName = prevprevQuote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class);
 
-      if(speakerName != null && (gender == Person.Gender.UNK) || getGender(makeMentionData(prevprevQuote)) == gender) {
+      if (speakerName != null && (gender == Person.Gender.UNK) || getGender(makeMentionData(prevprevQuote)) == gender) {
         topSpeaker = speakerName;
         modifier = " conversation - prev";
       }
@@ -259,8 +277,8 @@ public class BaselineTopSpeakerSieve extends MSSieve {
     List<Integer> quotesInNextNext = new ArrayList<>();
     CoreMap quote = quotes.get(quoteIndex);
     int quoteParagraph = getQuoteParagraph(quote);
-    for(int j = quoteIndex + 1; j < quotes.size(); j++) {
-      if(getQuoteParagraph(quotes.get(j)) == quoteParagraph + 2) {
+    for (int j = quoteIndex + 1; j < quotes.size(); j++) {
+      if (getQuoteParagraph(quotes.get(j)) == quoteParagraph + 2) {
         quotesInNextNext.add(j);
       }
     }
@@ -269,7 +287,7 @@ public class BaselineTopSpeakerSieve extends MSSieve {
       CoreMap nextNextQuote = quotes.get(nextNext);
       String speakerName = nextNextQuote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class);
       MentionData md = makeMentionData(quotes.get(nextNext));
-      if(speakerName != null && (gender == Person.Gender.UNK) || getGender(md) == gender) {
+      if (speakerName != null && (gender == Person.Gender.UNK) || getGender(md) == gender) {
         topSpeaker = speakerName;
         modifier = " conversation - next";
       }
@@ -278,8 +296,8 @@ public class BaselineTopSpeakerSieve extends MSSieve {
   }
 
   public static int getQuoteContainingRange(List<CoreMap> quotes, Pair<Integer, Integer> range) {
-    for (int i = 0; i < quotes.size(); i++) {
-      if(quotes.get(i).get(CoreAnnotations.TokenBeginAnnotation.class) <= range.first &&
+    for (int i = 0, qSize = quotes.size(); i < qSize; i++) {
+      if (quotes.get(i).get(CoreAnnotations.TokenBeginAnnotation.class) <= range.first &&
               quotes.get(i).get(CoreAnnotations.TokenEndAnnotation.class) >= range.second) {
         return i;
       }

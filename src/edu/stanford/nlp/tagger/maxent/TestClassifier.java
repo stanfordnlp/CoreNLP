@@ -185,7 +185,7 @@ public class TestClassifier  {
     return numRight + numWrong;
   }
 
-  void setDebug(boolean status) {
+  private void setDebug(boolean status) {
     writeUnknDict = status;
     writeWords = status;
     writeTopWords = status;

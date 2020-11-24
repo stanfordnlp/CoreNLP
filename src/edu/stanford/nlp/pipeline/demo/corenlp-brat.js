@@ -66,8 +66,7 @@ var tokensMap = {
 };
 
 /**
- * A mapping from part of speech tag to the associated
- * visualization color
+ * A mapping from part of speech tag to the associated visualization color
  */
 function posColor(posTag) {
   if (posTag.startsWith('N')) {
@@ -98,8 +97,7 @@ function posColor(posTag) {
 }
 
 /**
- * A mapping from named entity tag to the associated
- * visualization color
+ * A mapping from named entity tag to the associated visualization color
  */
 function nerColor(nerTag) {
   if (nerTag === 'PERSON') {
@@ -108,9 +106,9 @@ function nerColor(nerTag) {
     return '#8FB2FF';
   } else if (nerTag === 'MISC') {
     return '#F1F447';
-  } else if (nerTag === 'LOCATION') {
+  } else if (nerTag === 'LOCATION' || nerTag === 'COUNTRY' || nerTag === 'STATE_OR_PROVINCE' || nerTag === 'CITY') {
     return '#95DFFF';
-  } else if (nerTag === 'DATE' || nerTag === 'TIME' || nerTag === 'SET') {
+  } else if (nerTag === 'DATE' || nerTag === 'TIME' || nerTag === 'DURATION' || nerTag === 'SET') {
     return '#9AFFE6';
   } else if (nerTag === 'MONEY') {
     return '#FFFFFF';
@@ -119,6 +117,72 @@ function nerColor(nerTag) {
   } else {
     return '#E3E3E3';
   }
+}
+
+var d3_category18 = {
+  // Just like d3_category20 but no grays!
+  name: 'd3_category_18',
+  colors: [
+   '#aec7e8',
+   '#ffbb78',
+   '#98df8a',
+   '#ff9896',
+   '#c5b0d5',
+   '#c49c94',
+   '#f7b6d2',
+   '#dbdb8d',
+   '#9edae5',
+   '#1f77b4',
+   '#ff7f0e',
+   '#2ca02c',
+   '#d62728',
+   '#9467bd',
+   '#8c564b',
+   '#e377c2',
+   '#bcbd22',
+   '#17becf',
+  ]
+};
+
+function generateRandomColor() {
+  return "#" + Math.random().toString(16).slice(2, 8);
+}
+
+function generateNextColor(i, palette) {
+  if (palette && i < palette.colors.length) {
+    return palette.colors[i];
+  } else {
+    return generateRandomColor();
+  }
+}
+
+function getTagColor(tag, colorIndex, colors) {
+  var ci = colorIndex[tag];
+  if (ci == null) {
+    ci = colors.length;
+    colorIndex[tag] = ci;
+    colors.push(generateNextColor(ci, d3_category18));
+  }
+  return colors[ci];
+}
+
+/**
+ * A mapping from coref values to the associated visualization color
+ */
+var corefColorIndex = {};
+var corefColors = [];
+function corefColor(corefTag) {
+  if (corefTag === "MENTION") {
+    return '#FFE000';
+  } else {
+    return getTagColor(corefTag, corefColorIndex, corefColors);
+  }
+}
+
+var speakerColorIndex = {};
+var speakerColors = [];
+function speakerColor(tag) {
+  return getTagColor(tag, speakerColorIndex, speakerColors);
 }
 
 
@@ -148,6 +212,9 @@ function sentimentColor(sentiment) {
  */
 function annotators() {
   var annotators = "tokenize,ssplit";
+  if ($('#language').val() === 'de' | $('#language').val() === 'fr' | $('#language').val() === 'es') {
+    annotators += ",mwt";
+  }
   $('#annotators').find('option:selected').each(function () {
     annotators += "," + $(this).val();
   });
@@ -307,8 +374,10 @@ function render(data, reverse) {
       color = nerColor(coarseType);
     } else if (name === 'NNER') {
       color = nerColor(coarseType);
+    } else if (name === 'SPEAKER') {
+      color = speakerColor(coarseType);
     } else if (name === 'COREF') {
-      color = '#FFE000';
+      color = corefColor(coarseType);
     } else if (name === 'ENTITY') {
       color = posColor('NN');
     } else if (name === 'RELATION') {
@@ -406,6 +475,7 @@ function render(data, reverse) {
   var cparseEntities = [];
   var cparseRelations = [];
 
+  var speakerEntities = [];
   //
   // Loop over sentences.
   // This fills in the variables above.
@@ -417,6 +487,16 @@ function render(data, reverse) {
     var deps = sentence['basicDependencies'];
     var deps2 = sentence['enhancedPlusPlusDependencies'];
     var parseTree = sentence['parseTree'];
+
+    // Speakers
+    if (tokens.length > 0 && typeof tokens[0].speaker !== 'undefined') {
+      var speaker = tokens[0].speaker;
+      var speakerId = 'S(' + speaker + ')';
+      addEntityType('SPEAKER', speakerId);
+      var begin = parseInt(tokens[0].characterOffsetBegin);
+      var end = parseInt(tokens[tokens.length-1].characterOffsetEnd);
+      speakerEntities.push(['sent' + sentI, speakerId, [[begin, end]]]);
+    }
 
     // POS tags
     /**
@@ -672,6 +752,10 @@ function render(data, reverse) {
   //
   var corefEntities = [];
   var corefRelations = [];
+  corefColors = [];
+  corefColorIndex = {};
+  speakerColors = [];
+  speakerColorIndex = {};
   if (typeof data.corefs !== 'undefined') {
     addRelationType('coref', true);
     addEntityType('COREF', 'Mention');
@@ -679,20 +763,22 @@ function render(data, reverse) {
     clusters.forEach( function (clusterId) {
       var chain = data.corefs[clusterId];
       if (chain.length > 1) {
+        var entityChainId = 'CorefEntity' + clusterId;
+        addEntityType('COREF', entityChainId);
         for (var i = 0; i < chain.length; ++i) {
           var mention = chain[i];
           var id = 'COREF' + mention.id;
           var tokens = data.sentences[mention.sentNum - 1].tokens;
-          corefEntities.push([id, 'Mention',
+          corefEntities.push([id, entityChainId,
             [[tokens[mention.startIndex - 1].characterOffsetBegin,
               tokens[mention.endIndex - 2].characterOffsetEnd      ]] ]);
-          if (i > 0) {
-            var lastId = 'COREF' + chain[i - 1].id;
-            corefRelations.push(['COREF' + chain[i-1].id + '_' + chain[i].id,
-                                 'coref',
-                                 [['governor', lastId],
-                                  ['dependent', id]    ] ]);
-          }
+          // if (i > 0) {
+          //   var lastId = 'COREF' + chain[i - 1].id;
+          //   corefRelations.push(['COREF' + chain[i-1].id + '_' + chain[i].id,
+          //                        'coref',
+          //                        [['governor', lastId],
+          //                         ['dependent', id]    ] ]);
+          // }
         }
       }
     });
@@ -737,6 +823,9 @@ function render(data, reverse) {
     }
     embed('deps', posEntities, depsRelations);
     embed('deps2', posEntities, deps2Relations);
+    if (speakerEntities.length) {
+      embed('speakers', speakerEntities);
+    }
     embed('coref', corefEntities, corefRelations);
     embed('openie', openieEntities, openieRelations);
     embed('kbp',    kbpEntities, kbpRelations);
@@ -758,7 +847,7 @@ function render(data, reverse) {
  * Render a TokensRegex response
  */
 function renderTokensregex(data) {
-  /**
+  /**COREF'
    * Register an entity type (a tag) for Brat
    */
   var entityTypesSet = {};
@@ -1038,6 +1127,7 @@ $(document).ready(function() {
           createAnnotationDiv('deps',     'depparse',   'basicDependencies',                   'Basic Dependencies'      );
           createAnnotationDiv('deps2',    'depparse',   'enhancedPlusPlusDependencies',        'Enhanced++ Dependencies' );
           createAnnotationDiv('openie',   'openie',     'openie',                              'Open IE'                 );
+          createAnnotationDiv('speakers', 'coref',      'corefs',                              'Speakers'                );
           createAnnotationDiv('coref',    'coref',      'corefs',                              'Coreference'             );
           createAnnotationDiv('entities', 'entitylink', 'entitylink',                          'Wikidict Entities'       );
           createAnnotationDiv('kbp',      'kbp',        'kbp',                                 'KBP Relations'           );

@@ -25,17 +25,19 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 class Oracle {
-  List<Tree> binarizedTrees;
+  final List<Tree> binarizedTrees;
 
-  List<IdentityHashMap<Tree, Tree>> parentMaps;
+  final List<IdentityHashMap<Tree, Tree>> parentMaps;
 
-  List<List<Tree>> leafLists;
+  final List<List<Tree>> leafLists;
 
-  boolean compoundUnaries;
+  final boolean compoundUnaries;
 
-  Set<String> rootStates;
+  final Set<String> rootStates;
 
-  Oracle(List<Tree> binarizedTrees, boolean compoundUnaries, Set<String> rootStates) {
+  final Set<String> rootOnlyStates;
+
+  Oracle(List<Tree> binarizedTrees, boolean compoundUnaries, Set<String> rootStates, Set<String> rootOnlyStates) {
     this.binarizedTrees = binarizedTrees;
 
     parentMaps = Generics.newArrayList(binarizedTrees.size());
@@ -46,6 +48,8 @@ class Oracle {
     }
 
     this.compoundUnaries = compoundUnaries;
+    this.rootStates = rootStates;
+    this.rootOnlyStates = rootOnlyStates;
   }
 
   static IdentityHashMap<Tree, Tree> buildParentMap(Tree tree) {
@@ -157,7 +161,7 @@ class Oracle {
       Tree enclosingS1 = getEnclosingTree(S1, parents, leaves);
       if (spansEqual(S1, enclosingS1)) {
         // the two subtrees should be combined
-        return new OracleTransition(new BinaryTransition(parent.value(), ShiftReduceUtils.getBinarySide(parent)), false, false, false);
+        return new OracleTransition(new BinaryTransition(parent.value(), ShiftReduceUtils.getBinarySide(parent), rootOnlyStates.contains(parent.value())), false, false, false);
       }
       return new OracleTransition(null, false, true, false);
     }
@@ -169,7 +173,7 @@ class Oracle {
       Tree enclosingS1 = getEnclosingTree(S1, parents, leaves);
       if (enclosingS0 == enclosingS1) {
         // BinaryTransition with enclosingS0's label, either side, but preferring LEFT
-        return new OracleTransition(new BinaryTransition(enclosingS0.value(), BinaryTransition.Side.LEFT), false, false, true);
+        return new OracleTransition(new BinaryTransition(enclosingS0.value(), BinaryTransition.Side.LEFT, rootOnlyStates.contains(enclosingS0.value())), false, false, true);
       }
       // S1 is smaller than the next tree S0 is supposed to be part of,
       // so we must have a BinaryTransition

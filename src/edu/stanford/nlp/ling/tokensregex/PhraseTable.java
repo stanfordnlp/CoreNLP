@@ -141,7 +141,7 @@ public class PhraseTable implements Serializable
   {
     Timing timer = new Timing();
     timer.doing("Reading phrases: " + filename);
-    BufferedReader br = IOUtils.getBufferedFileReader(filename);
+    BufferedReader br = IOUtils.readerFromString(filename);
     String line;
     while ((line = br.readLine()) != null) {
       if (checkTag) {
@@ -182,7 +182,7 @@ public class PhraseTable implements Serializable
   {
     Timing timer = new Timing();
     timer.doing("Reading phrases: " + filename);
-    BufferedReader br = IOUtils.getBufferedFileReader(filename);
+    BufferedReader br = IOUtils.readerFromString(filename);
     String line;
     int lineno = 0;
     while ((line = br.readLine()) != null) {
@@ -220,7 +220,7 @@ public class PhraseTable implements Serializable
     }
     Timing timer = new Timing();
     timer.doing("Reading phrases: " + filename);
-    BufferedReader br = IOUtils.getBufferedFileReader(filename);
+    BufferedReader br = IOUtils.readerFromString(filename);
     String line;
     while ((line = br.readLine()) != null) {
       String[] columns = tabPattern.split(line);
@@ -343,7 +343,7 @@ public class PhraseTable implements Serializable
       tree.put(word, phrase);
     } else if (node instanceof Phrase) {
       // create list with this phrase and other and put it here
-      List list = new ArrayList(2);
+      List<Object> list = new ArrayList<>(2);
       list.add(phrase);
       list.add(node);
       tree.put(word, list);
@@ -383,7 +383,7 @@ public class PhraseTable implements Serializable
         } else {
           // create list with this phrase and other and put it here
           Phrase newphrase = new Phrase(wordList, phraseText, tag, phraseData);
-          List list = new ArrayList(2);
+          List<Phrase> list = new ArrayList<>(2);
           list.add(oldphrase);
           list.add(newphrase);
           tree.put(word, list);
@@ -460,7 +460,7 @@ public class PhraseTable implements Serializable
           } else {
             // create list with this phrase and other and put it here
             Phrase newphrase = new Phrase(wordList, phraseText, tag, phraseData);
-            List list = new ArrayList(2);
+            List<Phrase> list = new ArrayList<>(2);
             list.add(oldphrase);
             list.add(newphrase);
             tree.put(PHRASE_END, list);
@@ -963,7 +963,7 @@ public class PhraseTable implements Serializable
 
     public Collection<String> getAlternateForms() {
       if (alternateForms == null) {
-        List<String> forms = new ArrayList(1);
+        List<String> forms = new ArrayList<>(1);
         forms.add(text);
         return forms;
       }

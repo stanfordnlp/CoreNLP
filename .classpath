@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="itest/src"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test/src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="lib/ant-contrib-1.0b3.jar" sourcepath="libsrc/ant-contrib-1.0b3-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat/el-api.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat/jasper.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat/tomcat-juli.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat/jasper-el.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat/jsp-api.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat/tomcat-api.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar" sourcepath="libsrc/commons-logging-1.1.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/junit-4.13.1.jar" sourcepath="libsrc/junit-4.13.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/javax.servlet.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/AppleJavaExtensions.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jflex-1.8.2.jar" sourcepath="libsrc/jflex-1.8.2-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/xom-1.3.2.jar" sourcepath="libsrc/xom-1.3.2-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/joda-time.jar" sourcepath="libsrc/joda-time-2.10.5-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jollyday-0.4.9.jar" sourcepath="libsrc/jollyday-0.4.9-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.16.jar" sourcepath="libsrc/log4j-1.2.16-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-lang3-3.1.jar" sourcepath="libsrc/commons-lang3-3.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/protobuf.jar" sourcepath="libsrc/protobuf-java-3.9.2-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/javax.json.jar" sourcepath="libsrc/javax.json-api-1.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-core-7.5.0.jar" sourcepath="libsrc/lucene-core-7.5.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-demo-7.5.0.jar" sourcepath="libsrc/lucene-demo-7.5.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-analyzers-common-7.5.0.jar" sourcepath="lucene-analyzers-common-7.5.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-queryparser-7.5.0.jar" sourcepath="lucene-queryparser-7.5.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-api.jar" sourcepath="libsrc/slf4j-api-1.7.12-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-simple.jar" sourcepath="libsrc/slf4j-simple-1.7.12-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/javax.activation-api-1.2.0.jar" sourcepath="libsrc/javax.activation-api-1.2.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jaxb-api-2.4.0-b180830.0359.jar" sourcepath="libsrc/jaxb-api-2.4.0-b180830.0359-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jaxb-core-2.3.0.1.jar" sourcepath="libsrc/jaxb-core-2.3.0.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jaxb-impl-2.4.0-b180830.0438.jar" sourcepath="libsrc/jaxb-impl-2.4.0-b180830.0438-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ejml-core-0.39.jar" sourcepath="libsrc/projects/core/libsrc/ejml-core-0.39-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ejml-ddense-0.39.jar" sourcepath="libsrc/projects/core/libsrc/ejml-ddense-0.39-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ejml-simple-0.39.jar" sourcepath="libsrc/projects/core/libsrc/ejml-simple-0.39-sources.jar"/>
+	<classpathentry kind="lib" path="liblocal/antlr-runtime.jar"/>
+	<classpathentry kind="lib" path="liblocal/hamcrest-2.2.jar " sourcepath="libsrc/hamcrest-2.2-sources.jar"/>
+	<classpathentry kind="lib" path="liblocal/javaruntype.jar"/>
+-       <classpathentry kind="lib" path="liblocal/junit-quickcheck-core-0.4.jar" sourcepath="libsrc/junit-quickcheck-core-0.4-sources.jar"/>
+-       <classpathentry kind="lib" path="liblocal/junit-quickcheck-generators-0.4.jar" sourcepath="libsrc/junit-quickcheck-generators-0.4-sources.jar"/>
+	<classpathentry kind="lib" path="liblocal/junit-theories.jar"/>
+	<classpathentry kind="lib" path="liblocal/ognl.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>

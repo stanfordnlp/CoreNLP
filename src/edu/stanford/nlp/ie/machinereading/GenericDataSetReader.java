@@ -101,6 +101,9 @@ public class GenericDataSetReader  {
     this.useNewHeadFinder = useNewHeadFinder;
   }
 
+  // TODO(luffa): this should get the parser passed in somehow when
+  // creating the Reader, or maybe we need to cache the parser the
+  // same way the dependency parser is now cached
   public Annotator getParser() {
     if(parserProcessor == null){
       parserProcessor = StanfordCoreNLP.getExistingAnnotator("parse");

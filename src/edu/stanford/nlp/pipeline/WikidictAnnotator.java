@@ -9,6 +9,7 @@ import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Interner;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.SystemUtils;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -19,6 +20,10 @@ import java.util.regex.Pattern;
 
 /**
  * An annotator for entity linking to Wikipedia pages via the Wikidict.
+ * <br>
+ * The wikidict dictionary in particular is based on this paper: <br>
+ * "A Cross-Lingual Dictionary for English Wikipedia Concepts" <br>
+ * https://nlp.stanford.edu/pubs/crosswikis.pdf
  *
  * @author Gabor Angeli
  */
@@ -45,8 +50,11 @@ public class WikidictAnnotator extends SentenceAnnotator {
 
   /**
    * The actual Wikidict dictionary.
+   * <br>
+   * Initialized with a huge size to limit the resizing needed when loading.
+   * Load factor of 0.75 and 21M entries
    */
-  private final Map<String, String> dictionary = new HashMap<>(21000000);  // it's gonna be large no matter what
+  private final Map<String, String> dictionary = new HashMap<>(30000000);
 
   /**
    * Create a new WikiDict annotator, with the given name and properties.
@@ -58,14 +66,23 @@ public class WikidictAnnotator extends SentenceAnnotator {
     try {
       int i = 0;
       String[] fields = new String[3];
+      // Keeping track of the previous link will let us reuse String
+      // objects, assuming the file is sorted by the second column.
+      // TODO: we actually didn't know where the dictionary creation
+      // code is.  If it gets updated later and the dictionary is
+      // rebuilt, please remember to change the code to update it by
+      // the second column.
+      String previousLink = "";
+      int reuse = 0;
       for (String line : IOUtils.readLines(wikidictPath, "UTF-8")) {
         if (line.charAt(0) == '\t') {
           continue;
         }
-        StringUtils.splitOnChar(fields, line, '\t');
         if (i % 1000000 == 0) {
           log.info("Loaded " + i + " entries from Wikidict [" + SystemUtils.getMemoryInUse() + "MB memory used; " + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + " elapsed]");
         }
+        i += 1;
+        StringUtils.splitOnChar(fields, line, '\t');
         // Check that the read entry is above the score threshold
         if (threshold > 0.0) {
           double score = Double.parseDouble(fields[2]);
@@ -76,12 +93,21 @@ public class WikidictAnnotator extends SentenceAnnotator {
         String surfaceForm = fields[0];
         if (wikidictCaseless)
           surfaceForm = surfaceForm.toLowerCase();
-        String link = fields[1].intern();  // intern, as most entities have multiple surface forms
+        // save memory by reusing the string without using an interner
+        // requires that the dictionary be sorted by link
+        String link = fields[1];
+        if (link.equals(previousLink)) {
+          link = previousLink;
+          reuse++;
+        }
         // Add the entry
         dictionary.put(surfaceForm, link);
-        i += 1;
+        previousLink = link;
       }
-      log.info("Done reading Wikidict (" + dictionary.size() + " links read; " + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + " elapsed)");
+      log.info("Done reading Wikidict (" + dictionary.size() + " links read; " + (dictionary.size() - reuse) + " unique entities; " + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + " elapsed)");
+      if ((dictionary.size() - reuse) / (float) dictionary.size() > 0.35) {
+        log.error("We expected a much higher fraction of key reuse in the dictionary.  It is possible the dictionary was recreated and then not sorted.  Please sort the dictionary by the second column and update the dictionary creation code to sort this way before writing.  This will save quite a bit of time loading without sacrificing memory performance.");
+      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

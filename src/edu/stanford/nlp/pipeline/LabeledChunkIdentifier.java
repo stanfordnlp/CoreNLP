@@ -105,7 +105,7 @@ public class LabeledChunkIdentifier {
                                           Class textKey, Class labelKey,
                                           Class tokenChunkKey, Class tokenLabelKey,
                                           Predicate<Pair<CoreLabel, CoreLabel>> checkTokensCompatible) {
-    List<CoreMap> chunks = new ArrayList();
+    List<CoreMap> chunks = new ArrayList<>();
     LabelTagType prevTagType = null;
     int tokenBegin = -1;
     for (int i = 0; i < tokens.size(); i++) {

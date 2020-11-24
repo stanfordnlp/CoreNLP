@@ -79,10 +79,11 @@ public class CreateTransitionSequence {
       if (head == null || leftHead == null || rightHead == null) {
         throw new IllegalArgumentException("Expected tree labels to have their heads assigned.  Failed at: " + tree);
       }
+      boolean isRoot = rootOnlyStates.contains(tree.label().value());
       if (head == leftHead) {
-        transitions.add(new BinaryTransition(tree.label().value(), BinaryTransition.Side.LEFT));
+        transitions.add(new BinaryTransition(tree.label().value(), BinaryTransition.Side.LEFT, isRoot));
       } else if (head == rightHead) {
-        transitions.add(new BinaryTransition(tree.label().value(), BinaryTransition.Side.RIGHT));
+        transitions.add(new BinaryTransition(tree.label().value(), BinaryTransition.Side.RIGHT, isRoot));
       } else {
         throw new IllegalArgumentException("Heads were incorrectly assigned: tree's head is not matched to either the right or left head");
       }

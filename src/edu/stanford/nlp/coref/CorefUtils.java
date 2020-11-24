@@ -1,19 +1,14 @@
 package edu.stanford.nlp.coref;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import edu.stanford.nlp.coref.data.CorefCluster;
-import edu.stanford.nlp.coref.data.Document;
-import edu.stanford.nlp.coref.data.Mention;
+import edu.stanford.nlp.coref.data.*;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -83,6 +78,43 @@ public class CorefUtils {
     }
   }
 
+  public static void mergePronounsBasedOnSpeaker(Document document, List<Mention> mentions) {
+    if (document.numberOfSpeakers() == 2) {
+      // Let's hack something together for 'I' and 'you'
+      Map<String, Set<Mention>> groupedMentions = new HashMap<>();
+      Set<String> speakers = document.speakerInfoMap.keySet();
+      for (String s : speakers) {
+        groupedMentions.put(s, new HashSet<>());
+      }
+      for (Mention m : mentions) {
+        String speaker = m.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
+        Dictionaries.Person p = m.person;
+        if (Dictionaries.Person.I == p) {
+          groupedMentions.get(speaker).add(m);
+        } else if (Dictionaries.Person.YOU == p) {
+          String otherSpeaker = null;
+          for (String s : speakers) {
+            if (!s.equals(speaker)) {
+              otherSpeaker = s;
+              break;
+            }
+          }
+          if (otherSpeaker != null) {
+            groupedMentions.get(otherSpeaker).add(m);
+          }
+        }
+      }
+      for (Set<Mention> group : groupedMentions.values()) {
+        if (group.size() > 1) {
+          List<Mention> ms = CollectionUtils.toList(group);
+          for (Mention m : ms) {
+            CorefUtils.mergeCoreferenceClusters(Pair.makePair(m.mentionID, ms.get(0).mentionID), document);
+          }
+        }
+      }
+    }
+  }
+
   public static void checkForInterrupt() {
     if (Thread.interrupted()) {
       throw new RuntimeInterruptedException();
@@ -147,4 +179,82 @@ public class CorefUtils {
       }
     }
   }
+
+  static Set<String> abstractPronouns = CollectionUtils.asSet("that", "this", "it", "here", "there", "these", "those", "its");
+    public static Set<Triple<Integer, Integer, Integer>> getMatchingSpans(Annotation annotation) {
+        List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+        Set<Triple<Integer, Integer, Integer>> set = new HashSet<>();
+        for (CoreMap sentence : sentences) {
+            List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+            int iToken = 0;
+            for (CoreLabel token : tokens) {
+                if (abstractPronouns.contains(token.word().toLowerCase()) && "customer".equals(token.get(CoreAnnotations.SpeakerAnnotation.class))) {
+                    set.add(Triple.makeTriple(sentence.get(CoreAnnotations.SentenceIndexAnnotation.class), iToken, iToken+1));
+                }
+                iToken++;
+            }
+        }
+        return set;
+    }
+
+
+  public static Set<Triple<Integer, Integer, Integer>> getMatchingMentionsSpans(
+          Annotation annotation, Collection<CorefChain> chains,
+          Predicate<Pair<CorefChain.CorefMention, List<CoreLabel>>> matcher, boolean includeAllMentionsInChain) {
+      List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+      Set<Triple<Integer, Integer, Integer>> set = new HashSet<>();
+      for (CorefChain chain : chains) {
+          List<CorefChain.CorefMention> mentions = chain.getMentionsInTextualOrder();
+          boolean chainMatched = false;
+          for (CorefChain.CorefMention mention : mentions) {
+              List<CoreLabel> tokens = sentences.get(mention.sentNum-1).get(CoreAnnotations.TokensAnnotation.class).subList(mention.startIndex-1, mention.endIndex-1);
+              if (matcher.test(Pair.makePair(mention, tokens))) {
+                  chainMatched = true;
+                  if (includeAllMentionsInChain) {
+                      break;
+                  } else {
+                      set.add(Triple.makeTriple(mention.sentNum - 1, mention.startIndex - 1, mention.endIndex - 1));
+                  }
+              }
+          }
+          if (chainMatched && includeAllMentionsInChain) {
+              for (CorefChain.CorefMention mention : mentions) {
+                  set.add(Triple.makeTriple(mention.sentNum - 1, mention.startIndex - 1, mention.endIndex - 1));
+              }
+          }
+      }
+      return set;
+  }
+  public static Predicate<Pair<CorefChain.CorefMention, List<CoreLabel>>> filterCustomerAbstractPronouns = pair -> {
+      CoreLabel token = pair.second.get(0);
+      CorefChain.CorefMention mention = pair.first;
+      return abstractPronouns.contains(mention.mentionSpan.toLowerCase()) && "customer".equals(token.get(CoreAnnotations.SpeakerAnnotation.class));
+  };
+
+    public static boolean filterCorefChainWithMentionSpans(CorefChain chain, Set<Triple<Integer, Integer,Integer>> spans) {
+        List<CorefChain.CorefMention> mentions = chain.getMentionsInTextualOrder();
+        return mentions.stream().anyMatch(mention -> {
+            return spans.contains(Triple.makeTriple(mention.sentNum-1, mention.startIndex-1, mention.endIndex-1));
+        });
+    }
+
+    public static boolean filterClustersWithMentionSpans(CorefCluster cluster, Set<Triple<Integer, Integer,Integer>> spans) {
+        Set<Mention> mentions = cluster.getCorefMentions();
+        return mentions.stream().anyMatch(mention -> {
+            return spans.contains(Triple.makeTriple(mention.sentNum, mention.startIndex, mention.endIndex));
+        });
+    }
+
+    public static List<List<Mention>> filterXmlTagsFromMentions(List<List<Mention>> mentions) {
+        List<List<Mention>> filtered = mentions.stream().map(
+                smentions -> smentions.stream().filter( x -> {
+                    String text = x.spanToString();
+                    boolean isTag = (text.startsWith("<") && text.endsWith(">") &&
+                            text.indexOf('<', 1) < 0 &&
+                            text.lastIndexOf('>', text.length()-2) < 0);
+                    return !isTag;
+                }).collect(Collectors.toList())
+        ).collect(Collectors.toList());
+        return filtered;
+    }
 }

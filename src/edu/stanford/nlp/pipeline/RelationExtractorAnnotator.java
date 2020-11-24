@@ -72,7 +72,7 @@ public class RelationExtractorAnnotator implements Annotator  {
   }
   @Override
   public void annotate(Annotation annotation) {
- // extract entities and relations
+    // extract entities and relations
     Annotation output = mr.annotate(annotation);
     
     // transfer entities/relations back to the original annotation

@@ -10,7 +10,7 @@ import java.lang.reflect.Field;
  */
 public class DefaultPaths {
 
-  public static final String DEFAULT_POS_MODEL = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
+  public static final String DEFAULT_POS_MODEL = "edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger";
 
   public static final String DEFAULT_PARSER_MODEL = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
 
@@ -60,7 +60,7 @@ public class DefaultPaths {
   public static final String DEFAULT_KBP_TOKENSREGEX_DIR = "edu/stanford/nlp/models/kbp/english/tokensregex";
 
   public static final String DEFAULT_KBP_TOKENSREGEX_NER_SETTINGS =
-          "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab;" +
+          "ignorecase=true,validpospattern=(NN|JJ|ADD).*,edu/stanford/nlp/models/kbp/english/gazetteers/regexner_caseless.tab;" +
                   "edu/stanford/nlp/models/kbp/english/gazetteers/regexner_cased.tab";
 
   public static final String DEFAULT_WIKIDICT_TSV = "edu/stanford/nlp/models/kbp/english/wikidict.tab.gz";

@@ -10,6 +10,7 @@ import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.Debinarizer;
 import edu.stanford.nlp.parser.lexparser.Options;
+import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.Generics;
@@ -24,20 +25,20 @@ public class ReorderingOracleTest extends TestCase {
   FinalizeTransition finalize = new FinalizeTransition(Collections.singleton("ROOT"));
   ShiftTransition shift = new ShiftTransition();
 
-  BinaryTransition rightNP = new BinaryTransition("NP", BinaryTransition.Side.RIGHT);
-  BinaryTransition tempRightNP = new BinaryTransition("@NP", BinaryTransition.Side.RIGHT);
-  BinaryTransition leftNP = new BinaryTransition("NP", BinaryTransition.Side.LEFT);
-  BinaryTransition tempLeftNP = new BinaryTransition("@NP", BinaryTransition.Side.LEFT);
+  BinaryTransition rightNP = new BinaryTransition("NP", BinaryTransition.Side.RIGHT, false);
+  BinaryTransition tempRightNP = new BinaryTransition("@NP", BinaryTransition.Side.RIGHT, false);
+  BinaryTransition leftNP = new BinaryTransition("NP", BinaryTransition.Side.LEFT, false);
+  BinaryTransition tempLeftNP = new BinaryTransition("@NP", BinaryTransition.Side.LEFT, false);
 
-  BinaryTransition rightVP = new BinaryTransition("VP", BinaryTransition.Side.RIGHT);
-  BinaryTransition tempRightVP = new BinaryTransition("@VP", BinaryTransition.Side.RIGHT);
-  BinaryTransition leftVP = new BinaryTransition("VP", BinaryTransition.Side.LEFT);
-  BinaryTransition tempLeftVP = new BinaryTransition("@VP", BinaryTransition.Side.LEFT);
+  BinaryTransition rightVP = new BinaryTransition("VP", BinaryTransition.Side.RIGHT, false);
+  BinaryTransition tempRightVP = new BinaryTransition("@VP", BinaryTransition.Side.RIGHT, false);
+  BinaryTransition leftVP = new BinaryTransition("VP", BinaryTransition.Side.LEFT, false);
+  BinaryTransition tempLeftVP = new BinaryTransition("@VP", BinaryTransition.Side.LEFT, false);
 
-  BinaryTransition rightS = new BinaryTransition("S", BinaryTransition.Side.RIGHT);
-  BinaryTransition tempRightS = new BinaryTransition("@S", BinaryTransition.Side.RIGHT);
-  BinaryTransition leftS = new BinaryTransition("S", BinaryTransition.Side.LEFT);
-  BinaryTransition tempLeftS = new BinaryTransition("@S", BinaryTransition.Side.LEFT);
+  BinaryTransition rightS = new BinaryTransition("S", BinaryTransition.Side.RIGHT, false);
+  BinaryTransition tempRightS = new BinaryTransition("@S", BinaryTransition.Side.RIGHT, false);
+  BinaryTransition leftS = new BinaryTransition("S", BinaryTransition.Side.LEFT, false);
+  BinaryTransition tempLeftS = new BinaryTransition("@S", BinaryTransition.Side.LEFT, false);
 
   UnaryTransition unaryADVP = new UnaryTransition("ADVP", false);
 
@@ -52,6 +53,8 @@ public class ReorderingOracleTest extends TestCase {
   };
   List<Tree> binarizedTrees; // initialized in setUp
 
+  ReorderingOracle oracle = new ReorderingOracle(new ShiftReduceOptions(), Collections.singleton("ROOT"));
+  
   Tree[] incorrectShiftTrees = { 
     Tree.valueOf("(ROOT (S (PRP$ My) (NN dog) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))"),
     Tree.valueOf("(NP (NN A) (NN B) (NN C))") , // doesn't have to make sense
@@ -74,15 +77,15 @@ public class ReorderingOracleTest extends TestCase {
 
   public void testReorderIncorrectBinaryTransition() {
     List<Transition> transitions = buildTransitionList(shift, rightNP, rightVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectBinaryTransition(transitions));
+    assertTrue(oracle.reorderIncorrectBinaryTransition(transitions));
     assertEquals(buildTransitionList(shift, rightVP, finalize), transitions);
 
     transitions = buildTransitionList(shift, unaryADVP, rightNP, rightVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectBinaryTransition(transitions));
+    assertTrue(oracle.reorderIncorrectBinaryTransition(transitions));
     assertEquals(buildTransitionList(shift, unaryADVP, rightVP, finalize), transitions);    
 
     transitions = buildTransitionList(shift, rightNP, unaryADVP, rightVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectBinaryTransition(transitions));
+    assertTrue(oracle.reorderIncorrectBinaryTransition(transitions));
     assertEquals(buildTransitionList(shift, rightVP, finalize), transitions);    
   }
 
@@ -102,7 +105,7 @@ public class ReorderingOracleTest extends TestCase {
       }
       state = shift.apply(state);
       List<Transition> reordered = Generics.newLinkedList(gold.subList(tnum, gold.size()));
-      assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(reordered));
+      assertTrue(oracle.reorderIncorrectShiftTransition(reordered));
       // System.err.println(reordered);
       for (Transition transition : reordered) {
         state = transition.apply(state);
@@ -115,43 +118,43 @@ public class ReorderingOracleTest extends TestCase {
 
   public void testReorderIncorrectShift() {
     List<Transition> transitions = buildTransitionList(rightNP, shift, rightVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(transitions));
+    assertTrue(oracle.reorderIncorrectShiftTransition(transitions));
     assertEquals(buildTransitionList(tempRightVP, rightVP, finalize), transitions);
 
     transitions = buildTransitionList(rightNP, shift, shift, leftNP, rightVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(transitions));
+    assertTrue(oracle.reorderIncorrectShiftTransition(transitions));
     assertEquals(buildTransitionList(shift, leftNP, tempRightVP, rightVP, finalize), transitions);
 
     transitions = buildTransitionList(rightNP, shift, unaryADVP, shift, leftNP, rightVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(transitions));
+    assertTrue(oracle.reorderIncorrectShiftTransition(transitions));
     assertEquals(buildTransitionList(unaryADVP, shift, leftNP, tempRightVP, rightVP, finalize), transitions);
 
     transitions = buildTransitionList(rightNP, shift, shift, unaryADVP, leftNP, rightVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(transitions));
+    assertTrue(oracle.reorderIncorrectShiftTransition(transitions));
     assertEquals(buildTransitionList(shift, unaryADVP, leftNP, tempRightVP, rightVP, finalize), transitions);
 
     transitions = buildTransitionList(leftNP, shift, shift, unaryADVP, leftNP, rightVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(transitions));
+    assertTrue(oracle.reorderIncorrectShiftTransition(transitions));
     assertEquals(buildTransitionList(shift, unaryADVP, leftNP, tempRightVP, rightVP, finalize), transitions);
 
     transitions = buildTransitionList(leftNP, shift, shift, unaryADVP, leftNP, leftVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(transitions));
+    assertTrue(oracle.reorderIncorrectShiftTransition(transitions));
     assertEquals(buildTransitionList(shift, unaryADVP, leftNP, tempLeftVP, leftVP, finalize), transitions);
 
     transitions = buildTransitionList(rightNP, shift, shift, unaryADVP, leftNP, leftVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(transitions));
+    assertTrue(oracle.reorderIncorrectShiftTransition(transitions));
     assertEquals(buildTransitionList(shift, unaryADVP, leftNP, tempLeftVP, rightVP, finalize), transitions);
 
     transitions = buildTransitionList(leftNP, leftNP, shift, shift, unaryADVP, leftNP, rightVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(transitions));
+    assertTrue(oracle.reorderIncorrectShiftTransition(transitions));
     assertEquals(buildTransitionList(shift, unaryADVP, leftNP, tempRightVP, tempRightVP, rightVP, finalize), transitions);
 
     transitions = buildTransitionList(leftNP, rightNP, shift, shift, unaryADVP, leftNP, leftVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(transitions));
+    assertTrue(oracle.reorderIncorrectShiftTransition(transitions));
     assertEquals(buildTransitionList(shift, unaryADVP, leftNP, tempLeftVP, tempLeftVP, rightVP, finalize), transitions);
 
     transitions = buildTransitionList(leftNP, leftNP, shift, shift, unaryADVP, leftNP, leftVP, finalize);
-    assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(transitions));
+    assertTrue(oracle.reorderIncorrectShiftTransition(transitions));
     assertEquals(buildTransitionList(shift, unaryADVP, leftNP, tempLeftVP, tempLeftVP, leftVP, finalize), transitions);
   }
 }

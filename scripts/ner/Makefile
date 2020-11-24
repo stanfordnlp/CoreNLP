@@ -15,27 +15,14 @@ genia-nlpba-2004.crf.gz:
 	java -mx10g edu.stanford.nlp.ie.crf.CRFClassifier -prop genia-nlpba-2004.prop > genia-nlpba-2004.out 2>&1
 
 # We are No longer building/distributing deWAC model. The data for distributional similarity classes wasn't clean and can't be recovered.
-german: german.conll.crf.ser.gz german.hgc_175m_600.crf.ser.gz german.conll.germeval2014.hgc_175m_600.crf.ser.gz german.conll.germeval2014.europeana.hgc_175m_600.crf.ser.gz
+german: german.distsim.crf.ser.gz
 
-german.conll.crf.ser.gz:
-	java -mx5g edu.stanford.nlp.ie.crf.CRFClassifier -prop german-2018.hgc_175m_600.prop -useDistSim false -serializeTo $@ \
-		> $(addsuffix .out, $(basename $(basename $(basename $@)))) 2>&1
-
-german.conll.hgc_175m_600.crf.ser.gz:
-	java -mx10g edu.stanford.nlp.ie.crf.CRFClassifier -prop german-2018.hgc_175m_600.prop -serializeTo $@ \
-		> $(addsuffix .out, $(basename $(basename $(basename $@)))) 2>&1
-
-german.conll.germeval2014.hgc_175m_600.crf.ser.gz:
-	java -mx15g edu.stanford.nlp.ie.crf.CRFClassifier -prop german-2018.hgc_175m_600.prop -serializeTo $@ \
-		-trainFileList /u/nlp/data/german/ner/2016/deu.io.f15.utf8.train,/u/nlp/data/german/ner/2016/GermEval2014_complete_data/NER-de-train-io.tsv \
+german.distsim.crf.ser.gz:
+	java -mx10g edu.stanford.nlp.ie.crf.CRFClassifier -prop german.distsim.prop -serializeTo $@ \
 		> $(addsuffix .out, $(basename $(basename $(basename $@)))) 2>&1
 
 # currently we exclude enp_DE.sbb.io, as the data has too many issues, but we could work to include it....
 # ,/u/nlp/data/german/ner/2016/Europeana-Newspapers-data/ner-corpora/enp_DE.sbb.bio/enp_DE.sbb.io
-german.conll.germeval2014.europeana.hgc_175m_600.crf.ser.gz:
-	java -mx20g edu.stanford.nlp.ie.crf.CRFClassifier -prop german-2018.hgc_175m_600.prop -serializeTo $@ \
-		-trainFileList /u/nlp/data/german/ner/2016/deu.io.f15.utf8.train,/u/nlp/data/german/ner/2016/GermEval2014_complete_data/NER-de-train-io.tsv,/u/nlp/data/german/ner/2016/Europeana-Newspapers-data/ner-corpora/enp_DE.lft.bio/enp_DE.lft.io,/u/nlp/data/german/ner/2016/Europeana-Newspapers-data/ner-corpora/enp_DE.onb.bio/enp_DE.onb.io \
-		> $(addsuffix .out, $(basename $(basename $(basename $@)))) 2>&1
 
 # We are No longer building/distributing deWAC model. The data for distributional similarity classes wasn't clean and can't be recovered.
 # german.dewac_175m_600.crf.ser.gz:
