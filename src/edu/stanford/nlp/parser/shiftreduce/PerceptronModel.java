@@ -647,6 +647,7 @@ public class PerceptronModel extends BaseModel  {
           }
         }
         averageScoredModels(models.subList(0, bestSize));
+        log.info("Label F1 for " + bestSize + " models: " + bestF1);
       } else {
         averageScoredModels(bestModels);
       }
