@@ -354,7 +354,8 @@ public class PerceptronModel extends BaseModel  {
         // can't have a FinalizeTransition applied.  This doesn't
         // happen for the BEAM method because in that case the correct
         // state (eg one with ROOT) isn't on the agenda so it stops.
-        if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM && highestScoringTransitionFromGoldState == null) {
+        if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM &&
+            highestScoringTransitionFromGoldState == null) {
           break;
         }
 
