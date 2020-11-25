@@ -71,7 +71,12 @@ public class ShiftReduceParserQuery implements ParserQuery  {
     Tsurgeon.parseOperation("[move punc >-1 top] [if exists single prune single]");
 
   private boolean parseInternal() {
-    final int maxBeamSize = Math.max(parser.op.testOptions().beamSize, 1);
+    final int maxBeamSize;
+    if (parser.op.testOptions().beamSize == 0) {
+      maxBeamSize = Math.max(parser.op.trainOptions().beamSize, 1);
+    } else {
+      maxBeamSize = parser.op.testOptions().beamSize;
+    }
 
     success = true;
     unparsable = false;
