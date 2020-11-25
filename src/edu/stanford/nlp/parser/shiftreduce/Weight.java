@@ -80,14 +80,18 @@ public class Weight implements Serializable {
     }
   }
 
-  public void condense() {
+  static private final float THRESHOLD = 0.00001f;
+
+  void condense() {
+    // threshold is in case floating point math makes a feature we
+    // don't care about exist
     if (packed == null) {
       return;
     }
 
     int nonzero = 0;
     for (int i = 0; i < packed.length; ++i) {
-      if (unpackScore(i) != 0.0f) {
+      if (Math.abs(unpackScore(i)) > THRESHOLD) {
         ++nonzero;
       }
     }
@@ -104,7 +108,7 @@ public class Weight implements Serializable {
     long[] newPacked = new long[nonzero];
     int j = 0;
     for (int i = 0; i < packed.length; ++i) {
-      if (unpackScore(i) == 0.0f) {
+      if (Math.abs(unpackScore(i)) <= THRESHOLD) {
         continue;
       }
       int index = unpackIndex(i);
@@ -140,6 +144,40 @@ public class Weight implements Serializable {
     }
     newPacked[packed.length] = pack(index, increment);
     packed = newPacked;
+  }
+
+  float maxAbs() {
+    if (packed == null) {
+      return 0.0f;
+    }
+
+    float maxScore = 0.0f;
+    for (int i = 0; i < packed.length; ++i) {
+      float score = Math.abs(unpackScore(i));
+      maxScore = Math.max(score, maxScore);
+    }
+
+    return maxScore;
+  }
+
+  /**
+   * Moves the weights closer to 0 as a form of l1 regularization
+   */
+  void l1Reg(float reg) {
+    if (packed == null) {
+      return;
+    }
+
+    for (int i = 0; i < packed.length; ++i) {
+      int index = unpackIndex(i);
+      float score = unpackScore(i);
+      if (score > 0.0f) {
+        score = Math.max(0.0f, score - reg);
+      } else {
+        score = Math.min(0.0f, score + reg);
+      }
+      packed[i] = pack(index, score);
+    }
   }
 
   private long[] packed;

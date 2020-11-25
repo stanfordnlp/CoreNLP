@@ -43,6 +43,9 @@ public class ShiftReduceTrainOptions extends TrainOptions {
   /** If positive, every 10 iterations, multiply the learning rate by this amount. */
   public double decayLearningRate = 0.0;
 
+  /** If positive, after every iteration, weights are moved by this much back towards 0. */
+  public float l1Reg = 0.0f;
+
   // version id randomly chosen by forgetting to set the version id when serializing models
   private static final long serialVersionUID = -8158249539308373819L;
 }

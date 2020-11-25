@@ -538,7 +538,11 @@ public class PerceptronModel extends BaseModel  {
     }
 
     IntCounter<String> featureFrequencies = null;
-    if (op.trainOptions().featureFrequencyCutoff > 1) {
+    if (op.trainOptions().featureFrequencyCutoff > 1 && allowedFeatures == null) {
+      // allowedFeatures != null means we already filtered rare
+      // features once.  Sometimes the exact features found are
+      // different depending on how the learning proceeds..  The
+      // second time around, we will allow rare features to exist
       featureFrequencies = new IntCounter<>();
     }
 
@@ -573,10 +577,17 @@ public class PerceptronModel extends BaseModel  {
           }
         }
       }
+
+      float l1Reg = op.trainOptions().l1Reg;
+      if (l1Reg > 0.0f) {
+        for (Map.Entry<String, Weight> weight : featureWeights.entrySet()) {
+          weight.getValue().l1Reg(l1Reg);
+        }
+      }
+
       trainingTimer.done("Iteration " + iteration);
       log.info("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
       outputStats();
-
 
       double labelF1 = 0.0;
       if (devTreebank != null) {
