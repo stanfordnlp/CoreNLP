@@ -46,6 +46,17 @@ public class ShiftReduceTrainOptions extends TrainOptions {
   /** If positive, after every iteration, weights are moved by this much back towards 0. */
   public float l1Reg = 0.0f;
 
+  /** If more than one, retrains this many "shards" after the initial
+   *  training and then averages them together */
+  public int retrainShards = 1;
+
+  /**
+   * Shards 2..n will have this many features dropped.  Shard 1 will
+   * be the full model, which guarantees that every feature appears
+   * at least once.
+   */
+  public double retrainShardFeatureDrop = 0.25;
+
   // version id randomly chosen by forgetting to set the version id when serializing models
   private static final long serialVersionUID = -8158249539308373819L;
 }
