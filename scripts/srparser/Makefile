@@ -118,7 +118,7 @@ wsjSR.beam.ser.gz:
 englishSR.ser.gz:
 	@echo Training $@
 	@echo Will test on $(ENGLISH_TEST)
-	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(ENGLISH_TRAIN) -devTreebank $(ENGLISH_DEV) -serializedPath $@ -trainingThreads 4 -batchSize 24 -preTag -taggerSerializedFile $(ENGLISH_TAGGER) -trainingIterations 200 -stalledIterationLimit 25 -tlpp $(ENGLISH_TLPP) > $@.out 2>&1
+	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(ENGLISH_TRAIN) -devTreebank $(ENGLISH_DEV) -serializedPath $@ -trainingThreads 4 -batchSize 24 -preTag -taggerSerializedFile $(ENGLISH_TAGGER) -trainingIterations 200 -stalledIterationLimit 40 -l1Reg 0.25 -featureFrequencyCutoff 25 -trainingMethod REORDER_ORACLE -tlpp $(ENGLISH_TLPP) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(ENGLISH_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(ENGLISH_TAGGER) >> $@.out 2>&1
 
 englishSR.beam.ser.gz:
