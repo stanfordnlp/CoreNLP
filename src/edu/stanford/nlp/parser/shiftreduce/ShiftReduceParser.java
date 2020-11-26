@@ -651,7 +651,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
         ShiftReduceOptions op = buildTrainingOptions(tlppClass, newArgs);
         parser = new ShiftReduceParser(op);
       }
+      Timing trainingTimer = new Timing();
       parser.train(trainTreebankPath, devTreebankPath, serializedPath);
+      trainingTimer.done("Overall training process");
       parser.saveModel(serializedPath);
     }
 
