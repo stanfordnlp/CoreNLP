@@ -1,8 +1,16 @@
 
-WSJ_TRAIN  = /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 200-2199
-WSJ_DEV    = /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2200-2219
-WSJ_TEST   = /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2300-2399
-WSJ_TAGGER = /u/nlp/data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger
+ifndef CONSTITUENCY_HOME
+  WSJ_TRAIN  = /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 200-2199
+  WSJ_DEV    = /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2200-2219
+  WSJ_TEST   = /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2300-2399
+else
+  WSJ_TRAIN  = $(CONSTITUENCY_HOME)/english/train/wsj-train.mrg
+  WSJ_DEV    = $(CONSTITUENCY_HOME)/english/dev/wsj-dev.mrg
+  WSJ_TEST   = $(CONSTITUENCY_HOME)/english/test/wsj-test.mrg
+endif
+#WSJ_TAGGER = /u/nlp/data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger
+# TODO: technically we want a wsj-only tagger here
+WSJ_TAGGER = edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger
 WSJ_TLPP   = edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams
 
 
@@ -45,7 +53,6 @@ else
   CHINESE_DEV    = $(CONSTITUENCY_HOME)/chinese/ctb7/dev_small.mrg
   CHINESE_TEST   = $(CONSTITUENCY_HOME)/chinese/ctb7/test.mrg
 endif
-
 #CHINESE_TAGGER = /u/nlp/data/pos-tagger/distrib/chinese-nodistsim.tagger
 CHINESE_TAGGER = edu/stanford/nlp/models/pos-tagger/chinese-distsim.tagger
 CHINESE_TLPP   = edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams
@@ -106,7 +113,7 @@ all: wsjSR.ser.gz wsjSR.beam.ser.gz englishSR.ser.gz englishSR.beam.ser.gz frenc
 wsjSR.ser.gz:
 	@echo Training $@
 	@echo Will test on $(WSJ_TEST)
-	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(WSJ_TRAIN) -devTreebank $(WSJ_DEV) -serializedPath $@ -trainingThreads 4 -batchSize 24 -preTag -taggerSerializedFile $(WSJ_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 -tlpp $(WSJ_TLPP) > $@.out 2>&1
+	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(WSJ_TRAIN) -devTreebank $(WSJ_DEV) -serializedPath $@ -trainingThreads 4 -batchSize 24 -preTag -taggerSerializedFile $(WSJ_TAGGER) -trainingIterations 200 -stalledIterationLimit 40 -l1Reg 0.25 -featureFrequencyCutoff 25 -trainingMethod REORDER_ORACLE -tlpp $(WSJ_TLPP) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(WSJ_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(WSJ_TAGGER) >> $@.out 2>&1
 
 wsjSR.beam.ser.gz:
