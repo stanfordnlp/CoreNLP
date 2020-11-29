@@ -115,7 +115,9 @@ TRAIN_ORACLE_25    = -l1Reg 0.25 -featureFrequencyCutoff 25 -trainingMethod REOR
 
 SHARDS_5           = -retrainShards 5
 
-all: wsjSR.ser.gz wsjSR.beam.ser.gz englishSR.ser.gz englishSR.beam.ser.gz frenchSR.ser.gz frenchSR.beam.ser.gz chineseSR.ser.gz chineseSR.beam.ser.gz germanSR.ser.gz germanSR.beam.ser.gz arabicSR.ser.gz arabicSR.beam.ser.gz spanishSR.ser.gz spanishSR.beam.ser.gz
+all-beam:   wsjSR.beam.ser.gz englishSR.beam.ser.gz frenchSR.beam.ser.gz chineseSR.beam.ser.gz germanSR.beam.ser.gz arabicSR.beam.ser.gz spanishSR.beam.ser.gz
+all-nobeam: wsjSR.ser.gz      englishSR.ser.gz      frenchSR.ser.gz      chineseSR.ser.gz      germanSR.ser.gz      arabicSR.ser.gz      spanishSR.ser.gz
+all: all-beam all-nobeam
 .PHONY: all
 
 wsjSR.ser.gz:
