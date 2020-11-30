@@ -229,23 +229,23 @@ public class AceDocument extends AceElement  {
   }
 
   public String toXml(int offset) {
-    StringBuffer buffer = new StringBuffer();
-    appendOffset(buffer, offset);
-    buffer.append("<?xml version=\"1.0\"?>\n");
-    appendOffset(buffer, offset);
-    buffer.append("<!DOCTYPE source_file SYSTEM \"apf.v5.1.2.dtd\">\n");
-    appendOffset(buffer, offset);
-    buffer.append("<source_file URI=\"" + mId + ".sgm\" SOURCE=\"" + mSource
+    StringBuilder builder = new StringBuilder();
+    appendOffset(builder, offset);
+    builder.append("<?xml version=\"1.0\"?>\n");
+    appendOffset(builder, offset);
+    builder.append("<!DOCTYPE source_file SYSTEM \"apf.v5.1.2.dtd\">\n");
+    appendOffset(builder, offset);
+    builder.append("<source_file URI=\"" + mId + ".sgm\" SOURCE=\"" + mSource
         + "\" TYPE=\"text\" AUTHOR=\"LDC\" ENCODING=\"UTF-8\">\n");
-    appendOffset(buffer, offset);
-    buffer.append("<document DOCID=\"" + getId() + "\">\n");
+    appendOffset(builder, offset);
+    builder.append("<document DOCID=\"" + getId() + "\">\n");
 
     // display all entities
     Set<String> entKeys = mEntities.keySet();
     for (String key : entKeys) {
       AceEntity e = mEntities.get(key);
-      buffer.append(e.toXml(offset));
-      buffer.append("\n");
+      builder.append(e.toXml(offset));
+      builder.append("\n");
     }
 
     // display all relations
@@ -253,24 +253,24 @@ public class AceDocument extends AceElement  {
     for (String key : relKeys) {
       AceRelation r = mRelations.get(key);
       if (!r.getType().equals(AceRelation.NIL_LABEL)) {
-        buffer.append(r.toXml(offset));
-        buffer.append("\n");
+        builder.append(r.toXml(offset));
+        builder.append("\n");
       }
     }
     
     // TODO: display all events
 
-    appendOffset(buffer, offset);
-    buffer.append("</document>\n");
-    appendOffset(buffer, offset);
-    buffer.append("</source_file>\n");
-    return buffer.toString();
+    appendOffset(builder, offset);
+    builder.append("</document>\n");
+    appendOffset(builder, offset);
+    builder.append("</source_file>\n");
+    return builder.toString();
   }
 
   private String tokensWithByteSpan(int start, int end) {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder builder = new StringBuilder();
     boolean doPrint = false;
-    buf.append("...");
+    builder.append("...");
     for (AceToken mToken : mTokens) {
       // start printing
       if (doPrint == false && mToken.getByteOffset().start() > start - 20
@@ -284,11 +284,11 @@ public class AceDocument extends AceElement  {
       }
 
       if (doPrint) {
-        buf.append(" " + mToken.display());
+        builder.append(" " + mToken.display());
       }
     }
-    buf.append("...");
-    return buf.toString();
+    builder.append("...");
+    return builder.toString();
   }
 
   /**
@@ -751,11 +751,11 @@ public class AceDocument extends AceElement  {
 
   private void readRawBytes(String fileName) throws IOException {
     BufferedReader in = new BufferedReader(new FileReader(fileName));
-    StringBuffer buf = new StringBuffer();
+    StringBuilder builder = new StringBuilder();
     int c;
     while ((c = in.read()) >= 0)
-      buf.append((char) c);
-    mRawBuffer = buf.toString();
+      builder.append((char) c);
+    mRawBuffer = builder.toString();
     // System.out.println(mRawBuffer);
     in.close();
   }
@@ -826,7 +826,7 @@ public class AceDocument extends AceElement  {
 
   public AceCharSeq makeCharSeq(int startToken, int endToken) {
     /*
-     * StringBuffer buf = new StringBuffer(); for(int i = startToken; i <
+     * StringBuilder buf = new StringBuilder(); for(int i = startToken; i <
      * endToken; i ++){ if(i > startToken) buf.append(" ");
      * buf.append(mTokens.get(i).getLiteral()); }
      */

@@ -133,9 +133,9 @@ public class ParentAnnotationStats implements TreeVisitor  {
     // System.out.println(gPRules);
 
     // Store java code for selSplit
-    StringBuffer[] javaSB = new StringBuffer[CUTOFFS.length];
+    StringBuilder[] javaSB = new StringBuilder[CUTOFFS.length];
     for (int i = 0; i < CUTOFFS.length; i++) {
-      javaSB[i] = new StringBuffer("  private static String[] splitters" + (i + 1) + " = new String[] {");
+      javaSB[i] = new StringBuilder("  private static String[] splitters" + (i + 1) + " = new String[] {");
     }
 
     ClassicCounter<List<String>> allScores = new ClassicCounter<>();

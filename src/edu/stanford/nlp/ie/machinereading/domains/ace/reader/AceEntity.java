@@ -44,7 +44,7 @@ public class AceEntity extends AceElement {
   public String getClasss() { return mClass; }
 
   public String toXml(int offset) {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     appendOffset(buffer, offset);
     buffer.append("<entity ID=\"" + getId() + "\" TYPE =\"" +
 		  AceToken.OTHERS.get(mType) +

@@ -150,7 +150,7 @@ public class TextAnnotationPatterns {
     allExtractions.put(label, new ClassicCounter<>());
 
     for(Map.Entry<String, DataInstance> sent: Data.sents.entrySet()){
-      StringBuffer str = new StringBuffer();
+      StringBuilder str = new StringBuilder();
       for(CoreLabel l : sent.getValue().getTokens()){
         if(l.get(PatternsAnnotations.MatchedPatterns.class) != null && !l.get(PatternsAnnotations.MatchedPatterns.class).isEmpty()){
           str.append(" " + l.word());

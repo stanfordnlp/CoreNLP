@@ -95,7 +95,7 @@ public class FTBDataset extends AbstractDataset  {
 
       if(makeFlatFile) {
         outputFileList.add(flatFileName);
-        toStringBuffer.append(" Made flat files\n");
+        toStringBuilder.append(" Made flat files\n");
       }
 
       preprocessMWEs();
