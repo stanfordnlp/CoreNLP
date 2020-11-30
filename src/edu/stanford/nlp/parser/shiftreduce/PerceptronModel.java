@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -354,7 +355,8 @@ public class PerceptronModel extends BaseModel  {
         // can't have a FinalizeTransition applied.  This doesn't
         // happen for the BEAM method because in that case the correct
         // state (eg one with ROOT) isn't on the agenda so it stops.
-        if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM && highestScoringTransitionFromGoldState == null) {
+        if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM &&
+            highestScoringTransitionFromGoldState == null) {
           break;
         }
 
@@ -514,6 +516,16 @@ public class PerceptronModel extends BaseModel  {
   }
 
 
+  private double evaluate(Tagger tagger, Treebank devTreebank, String message) {
+    ShiftReduceParser temp = new ShiftReduceParser(op, this);
+    EvaluateTreebank evaluator = new EvaluateTreebank(temp.getOp(), null, temp, tagger);
+    evaluator.testOnTreebank(devTreebank);
+    double labelF1 = evaluator.getLBScore();
+    log.info(message + ": " + labelF1);
+    return labelF1;
+  }
+
+
   private void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads, Set<String> allowedFeatures) {
     double bestScore = 0.0;
     int bestIteration = 0;
@@ -538,7 +550,11 @@ public class PerceptronModel extends BaseModel  {
     }
 
     IntCounter<String> featureFrequencies = null;
-    if (op.trainOptions().featureFrequencyCutoff > 1) {
+    if (op.trainOptions().featureFrequencyCutoff > 1 && allowedFeatures == null) {
+      // allowedFeatures != null means we already filtered rare
+      // features once.  Sometimes the exact features found are
+      // different depending on how the learning proceeds..  The
+      // second time around, we will allow rare features to exist
       featureFrequencies = new IntCounter<>();
     }
 
@@ -573,17 +589,21 @@ public class PerceptronModel extends BaseModel  {
           }
         }
       }
+
+      float l1Reg = op.trainOptions().l1Reg;
+      if (l1Reg > 0.0f) {
+        for (Map.Entry<String, Weight> weight : featureWeights.entrySet()) {
+          weight.getValue().l1Reg(l1Reg);
+        }
+      }
+
       trainingTimer.done("Iteration " + iteration);
       log.info("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
       outputStats();
 
-
       double labelF1 = 0.0;
       if (devTreebank != null) {
-        EvaluateTreebank evaluator = new EvaluateTreebank(op, null, new ShiftReduceParser(op, this), tagger);
-        evaluator.testOnTreebank(devTreebank);
-        labelF1 = evaluator.getLBScore();
-        log.info("Label F1 after " + iteration + " iterations: " + labelF1);
+        labelF1 = evaluate(tagger, devTreebank, "Label F1 for iteration " + iteration);
 
         if (labelF1 > bestScore) {
           log.info("New best dev score (previous best " + bestScore + ")");
@@ -636,11 +656,7 @@ public class PerceptronModel extends BaseModel  {
           log.info("Testing with " + i + " models averaged together");
           // TODO: this is kind of ugly, would prefer a separate object
           averageScoredModels(models.subList(0, i));
-          ShiftReduceParser temp = new ShiftReduceParser(op, this);
-          EvaluateTreebank evaluator = new EvaluateTreebank(temp.getOp(), null, temp, tagger);
-          evaluator.testOnTreebank(devTreebank);
-          double labelF1 = evaluator.getLBScore();
-          log.info("Label F1 for " + i + " models: " + labelF1);
+          double labelF1 = evaluate(tagger, devTreebank, "Label F1 for " + i + " models");
           if (labelF1 > bestF1) {
             bestF1 = labelF1;
             bestSize = i;
@@ -663,6 +679,21 @@ public class PerceptronModel extends BaseModel  {
     condenseFeatures();
   }
 
+  Set<String> pruneFeatures(Set<String> features, Random random, double drop) {
+    Set<String> prunedFeatures = new HashSet<>();
+    for (String feature : features) {
+      if (random.nextDouble() > drop) {
+        prunedFeatures.add(feature);
+      }
+    }
+    if (prunedFeatures.size() == 0) {
+      for (String feature : features) {
+        prunedFeatures.add(feature);
+        break;
+      }
+    }
+    return prunedFeatures;
+  }
 
   /**
    * Will train the model on the given treebank, using devTreebank as
@@ -671,14 +702,36 @@ public class PerceptronModel extends BaseModel  {
    */
   @Override
   public void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads) {
-    if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0) {
+    if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0 ||
+        op.trainOptions().retrainShards > 1) {
       String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
       trainModel(tempName, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, null);
       ShiftReduceParser temp = new ShiftReduceParser(op, this);
       temp.saveModel(tempName);
+      log.info("Beginning retraining");
       Set<String> features = featureWeights.keySet();
       featureWeights = Generics.newHashMap();
       trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, features);
+
+      // If we only had one train shard, we are now done.  Otherwise,
+      // we retrain N-1 more times, each time dropping a fraction of
+      // the features.
+      if (op.trainOptions().retrainShards > 1) {
+        List<PerceptronModel> shards = Generics.newArrayList();
+        shards.add(new PerceptronModel(this));
+
+        for (int i = 1; i < op.trainOptions().retrainShards; ++i) {
+          log.info("Beginning retraining of shard " + (i+1));
+          Set<String> prunedFeatures = pruneFeatures(features, random, op.trainOptions().retrainShardFeatureDrop);
+          featureWeights = Generics.newHashMap();
+          trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, prunedFeatures);
+          shards.add(new PerceptronModel(this));
+        }
+        log.info("Averaging " + op.trainOptions().retrainShards + " shards");
+        averageModels(shards);
+        condenseFeatures();
+        evaluate(tagger, devTreebank, "Label F1 for " + op.trainOptions().retrainShards + " averaged shards");
+      }
     } else {
       trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, null);
     }
