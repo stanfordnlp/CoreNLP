@@ -33,9 +33,15 @@ CTB7_TRAIN=/u/nlp/data/chinese/ctb7/seg/ctb7-seg.train.txt
 ifndef CHINESE_SEGMENTER_HOME
   CTB9_TRAIN=/u/nlp/data/chinese/ctb9/seg/ctb9-seg-with-extra.txt
   CTB9_TEST=/u/nlp/data/chinese/ctb9/seg/ctb9.test.txt
+
+  GSD_TRAIN=/u/nlp/data/chinese/ctb9/seg/zh_gsdsimp.train.seg.txt
+  GSD_TEST=/u/nlp/data/chinese/ctb9/seg/zh_gsdsimp.test.seg.txt
 else
   CTB9_TRAIN=$(CHINESE_SEGMENTER_HOME)/ctb9-seg-with-extra.txt
   CTB9_TEST=$(CHINESE_SEGMENTER_HOME)/ctb9.test.txt
+
+  GSD_TRAIN=$(CHINESE_SEGMENTER_HOME)/zh_gsdsimp.train.seg.txt
+  GSD_TEST=$(CHINESE_SEGMENTER_HOME)/zh_gsdsimp.test.seg.txt
 endif
 
 # Special prerelease segmentation data from Bolt.  Do not release publicly!
@@ -80,6 +86,11 @@ ctb9.train.chris6.ser.gz: dict-chris6.ser.gz
 ctb9.train-small.chris6.ser.gz: dict-chris6.ser.gz
 	time java -mx60g edu.stanford.nlp.ie.crf.CRFClassifier -prop ctb9-chris6.prop -serDictionary $+ -sighanCorporaDict $(SIGHAN2007_CORPORA_DICT) -featureDiffThresh 0.005 -trainFile $(CTB9_TRAIN) -serializeTo $@ > $@.log 2> $@.err
 	time java -mx5g  edu.stanford.nlp.ie.crf.CRFClassifier  -sighanCorporaDict $(SIGHAN2007_CORPORA_DICT) -loadClassifier $@ -testFile $(CTB9_TEST) -inputEncoding UTF-8 -sighanPostProcessing true -serDictionary $+ -keepAllWhitespaces false >> $@.log 2>> $@.err
+
+# train on train GSD, with all external lexicons, without training lexicon
+gsd.ser.gz: dict-chris6.ser.gz
+	time java -mx60g edu.stanford.nlp.ie.crf.CRFClassifier -prop ctb9-chris6.prop -serDictionary $+ -sighanCorporaDict $(SIGHAN2007_CORPORA_DICT) -trainFile $(GSD_TRAIN) -serializeTo $@ > $@.log 2> $@.err
+	time java -mx5g  edu.stanford.nlp.ie.crf.CRFClassifier  -sighanCorporaDict $(SIGHAN2007_CORPORA_DICT) -loadClassifier $@ -testFile $(GSD_TEST) -inputEncoding UTF-8 -sighanPostProcessing true -serDictionary $+ -keepAllWhitespaces false >> $@.log 2>> $@.err
 
 # train on all CTB7, with all external lexicons, without training lexicon
 bolt.chris6.ser.gz: dict-chris6.ser.gz
