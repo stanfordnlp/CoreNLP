@@ -15,17 +15,21 @@ import java.util.stream.Collectors;
 /**
  * This implements a confusion table over arbitrary types of class labels. Main
  * routines of interest:
- * 	    add(guess, gold), increments the guess/gold entry in this cell by 1
- *      get(guess, gold), returns the number of entries in this cell
- *      toString(), returns printed form of the table, with marginals and
+ * <ul>
+ * <li> add(guess, gold), increments the guess/gold entry in this cell by 1
+ * <li> get(guess, gold), returns the number of entries in this cell
+ * <li> toString(), returns printed form of the table, with marginals and
  *                     contingencies for each class label
+ * </ul>
  *
  * Example usage:
+ * <pre>{@code
  * Confusion<String> myConf = new Confusion<String>();
  * myConf.add("l1", "l1");
  * myConf.add("l1", "l2");
  * myConf.add("l2", "l2");
  * System.out.println(myConf.toString());
+ * }</pre>
  *
  * NOTES: - This sorts by the toString() of the guess and gold labels. Thus the
  * label.toString() values should be distinct!
