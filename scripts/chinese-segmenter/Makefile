@@ -37,9 +37,9 @@ dict-chris6.ser.gz:
 # train and test on Sighan 2006 data. No serialized model will be produced
 # Revision: 20267..
 ctb6.chris6.lex.result: dict-chris6.ser.gz
-	# train & test
+	echo "Train and test"
 	time java6 -mx7g edu.stanford.nlp.ie.crf.CRFClassifier -prop $(DIR)/sighan2006-chris6.prop -sighanCorporaDict $(SIGHAN2006_CORPORADICT) -serDictionary $+ -serializeTo sighan2006-chris6.lex.gz -serializeToText sighan2006-chris6.lex.text.gz > sighan2006-chris6.lex.log 2> sighan2006-chris6.lex.err
-	# eval
+	echo "Running eval"
 	tail -5117 $(DIR)/05202008-sighan2006-chris6.lex.log > $(DIR)/05202008-sighan2006-chris6.lex.out
 	$(SCORE) /u/nlp/data/gale/segtool/stanford-seg/props/sighan2006-train.dict /u/nlp/data/gale/segtool/stanford-seg/data/Sighan2006/CTB_gold/CTB.utf8.simp.gold $(DIR)/05202008-sighan2006-chris6.lex.out > $(DIR)/$@
 
