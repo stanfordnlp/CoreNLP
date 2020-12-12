@@ -47,27 +47,9 @@ The `tokenize.options` option accepts a wide variety of settings for the `PTBTok
 | normalizeFractions | Whether to map certain common composed fraction characters to spelled out letter forms, e.g., "½" becomes "1/2"). |
 | normalizeParentheses | Whether to map round parentheses to -LRB-, -RRB-, as in the Penn Treebank |
 | normalizeOtherBrackets | Whether to map other common bracket characters to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank | 
-
-| Option name | Description |
-| --- | --- |
-| quotes | Select a style of mapping quotes. An enum with possible values (case insensitive):
-latex, unicode, ascii, not\_cp1252, original. "ascii" maps all quote characters to the traditional ' and ".
-"latex" maps quotes to ``, `, ', '', as in Latex and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
-"unicode" maps quotes to the range U+2018 to U+201D, the preferred unicode encoding of single and double quotes.
-"original" leaves all quotes as they were. "not\_cp1252" only remaps invalid cp1252 quotes to Unicode.
-The default is "not\_cp1252". |
-| ellipses | Select a style for mapping ellipses (3 dots).  An enum with possible values
-(case insensitive): unicode, ptb3, not\_cp1252, original. "ptb3" maps ellipses to three dots (...), the
-old PTB3 WSJ coding of an ellipsis. "unicode" maps three dot and space three dot sequences to
-U+2026 (…), the Unicode ellipsis character. "not\_cp1252" only remaps invalid cp1252 ellipses to unicode.
-"original" leaves all ellipses as they were. The default is "not\_cp1252". |
-| dashes | Select a style for mapping dashes. An enum with possible values (case insensitive): unicode, ptb3, not\_cp1252, original.
-"ptb3" maps dashes to "--", the most prevalent old PTB3 WSJ coding of a dash (though some are just "-" HYPHEN-MINUS).
-"unicode" maps "-", "--", and "---" HYPHEN-MINUS sequences and CP1252 dashes to Unicode en and em dashes.
-"not\_cp1252" only remaps invalid cp1252 dashes to unicode. "original" leaves all dashes as they were. The default is "not\_cp1252". |
-
-| Option name | Description |
-| --- | --- |
+| quotes | Select a style of mapping quotes. An enum with possible values (case insensitive): latex, unicode, ascii, not\_cp1252, original. "ascii" maps all quote characters to the traditional ' and ". "latex" maps quotes to ``, `, ', '', as in Latex and the PTB3 WSJ (though this is now heavily frowned on in Unicode). "unicode" maps quotes to the range U+2018 to U+201D, the preferred unicode encoding of single and double quotes. "original" leaves all quotes as they were. "not\_cp1252" only remaps invalid cp1252 quotes to Unicode. The default is "not\_cp1252". |
+| ellipses | Select a style for mapping ellipses (3 dots).  An enum with possible values (case insensitive): unicode, ptb3, not\_cp1252, original. "ptb3" maps ellipses to three dots (...), the old PTB3 WSJ coding of an ellipsis. "unicode" maps three dot and space three dot sequences to U+2026 (…), the Unicode ellipsis character. "not\_cp1252" only remaps invalid cp1252 ellipses to unicode. "original" leaves all ellipses as they were. The default is "not\_cp1252". |
+| dashes | Select a style for mapping dashes. An enum with possible values (case insensitive): unicode, ptb3, not\_cp1252, original. "ptb3" maps dashes to "--", the most prevalent old PTB3 WSJ coding of a dash (though some are just "-" HYPHEN-MINUS). "unicode" maps "-", "--", and "---" HYPHEN-MINUS sequences and CP1252 dashes to Unicode en and em dashes. "not\_cp1252" only remaps invalid cp1252 dashes to unicode. "original" leaves all dashes as they were. The default is "not\_cp1252". |
 | splitAssimilations | If true tokenize words like "gonna" as multiple tokens "gon", "na". If false, keep as one token. Default is true. |
 | splitHyphenated | Whether or not to tokenize hyphenated words as several tokens ("school" "-" "aged", "frog" "-" "lipped"), keeping together the exceptions in Supplementary Guidelines for ETTB 2.0 by Justin Mott, Colin Warner, Ann Bies, Ann Taylor and CLEAR guidelines (Bracketing Biomedical Text) by Colin Warner et al. (2012), e.g., keeping together prefixes like "co-indexation". Default is currently true. |
 | splitForwardSlash | Whether to tokenize segments of slashed tokens separately ("Asian" "/" "Indian", "and" "/" "or"). Default is true. |
