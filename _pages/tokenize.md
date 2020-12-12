@@ -35,6 +35,11 @@ The `tokenize.options` option accepts a wide variety of settings for the `PTBTok
 
 | Option name | Description |
 | --- | --- |
+| small test | foo |
+
+
+| Option name | Description |
+| --- | --- |
 | invertible | Store enough information about the original form of the token and the whitespace around it that a list of tokens can be faithfully converted back to the original String. Valid only if the LexedTokenFactory is an instance of CoreLabelTokenFactory. The keys used are: `TextAnnotation` for the tokenized form, `OriginalTextAnnotation` for the original string, `BeforeAnnotation` and `AfterAnnotation` for the whitespace before and after a token, and perhaps `BeginPositionAnnotation` and `EndPositionAnnotation` to record token begin/after end character offsets, if they were specified to be recorded in TokenFactory construction. (Like the Java String class, begin and end are done so end - begin gives the token length.) |
 | tokenizeNLs | Whether end-of-lines should become tokens (or just be treated as part of whitespace). |
 | tokenizePerLine | Run the tokenizer separately on each line of a file. This has the following consequences: (i) A token (currently only SGML tokens) cannot span multiple lines of the original input, and (ii) The tokenizer will not examine/wait for input from the next line before deciding tokenization decisions on this line. The latter property stops the tokenizer getting extra information from the next line to help decide whether a period after an acronym should be treated as an end-of-sentence period or not. **Use this option for strictly line-oriented processing: Having this true is necessary to stop the tokenizer blocking and waiting for input after a newline is seen when the previous line ends with an abbreviation.** |
