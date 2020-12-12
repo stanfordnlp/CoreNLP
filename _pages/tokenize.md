@@ -35,17 +35,11 @@ The `tokenize.options` option accepts a wide variety of settings for the `PTBTok
 
 | Option name | Description |
 | --- | --- |
-| small test | foo |
-
-
-| Option name | Description |
-| --- | --- |
 | invertible | Store enough information about the original form of the token and the whitespace around it that a list of tokens can be faithfully converted back to the original String. Valid only if the LexedTokenFactory is an instance of CoreLabelTokenFactory. The keys used are: `TextAnnotation` for the tokenized form, `OriginalTextAnnotation` for the original string, `BeforeAnnotation` and `AfterAnnotation` for the whitespace before and after a token, and perhaps `BeginPositionAnnotation` and `EndPositionAnnotation` to record token begin/after end character offsets, if they were specified to be recorded in TokenFactory construction. (Like the Java String class, begin and end are done so end - begin gives the token length.) |
 | tokenizeNLs | Whether end-of-lines should become tokens (or just be treated as part of whitespace). |
 | tokenizePerLine | Run the tokenizer separately on each line of a file. This has the following consequences: (i) A token (currently only SGML tokens) cannot span multiple lines of the original input, and (ii) The tokenizer will not examine/wait for input from the next line before deciding tokenization decisions on this line. The latter property stops the tokenizer getting extra information from the next line to help decide whether a period after an acronym should be treated as an end-of-sentence period or not. **Use this option for strictly line-oriented processing: Having this true is necessary to stop the tokenizer blocking and waiting for input after a newline is seen when the previous line ends with an abbreviation.** |
 | ptb3Escaping | Enable all traditional PTB3 token transforms (like parentheses becoming -LRB-, -RRB-). This is a macro flag that sets or clears all the options below. (This escaping used to be the default in CoreNLP versions 3 and below. It is not what is used by CoreNLP version 4 models.) |
-| ud | Tokenize in the way expected by Universal Dependencies (ud) corpora. This does less normalization. In particular parentheses tokens tokenize
-just as themselves ("(" and ")") rather than being weirdly escaped. This is the default, used by all CoreNLP version 4 models.
+| ud | Tokenize in the way expected by Universal Dependencies (ud) corpora. This does less normalization. In particular parentheses tokens tokenize just as themselves ("(" and ")") rather than being weirdly escaped. This is the default, used by all CoreNLP version 4 models. |
 | americanize | Whether to rewrite common British English spellings as American English spellings, e.g. "colour" becomes "color". |
 | normalizeSpace | Whether any spaces in tokens (for example, in phone numbers or mixed fractions) get turned into U+00A0 (non-breaking space). The default is `true` and it's dangerous to turn this option off for most of our Stanford NLP software, which assumes no spaces in tokens. |
 | normalizeAmpersandEntity | Whether to map the XML &amp; to an ampersand. |
@@ -53,6 +47,9 @@ just as themselves ("(" and ")") rather than being weirdly escaped. This is the 
 | normalizeFractions | Whether to map certain common composed fraction characters to spelled out letter forms, e.g., "½" becomes "1/2"). |
 | normalizeParentheses | Whether to map round parentheses to -LRB-, -RRB-, as in the Penn Treebank |
 | normalizeOtherBrackets | Whether to map other common bracket characters to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank | 
+
+| Option name | Description |
+| --- | --- |
 | quotes | Select a style of mapping quotes. An enum with possible values (case insensitive):
 latex, unicode, ascii, not\_cp1252, original. "ascii" maps all quote characters to the traditional ' and ".
 "latex" maps quotes to ``, `, ', '', as in Latex and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
