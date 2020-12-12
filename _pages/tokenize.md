@@ -64,15 +64,18 @@ U+2026 (…), the Unicode ellipsis character. "not\_cp1252" only remaps invalid 
 | dashes | Select a style for mapping dashes. An enum with possible values (case insensitive): unicode, ptb3, not\_cp1252, original.
 "ptb3" maps dashes to "--", the most prevalent old PTB3 WSJ coding of a dash (though some are just "-" HYPHEN-MINUS).
 "unicode" maps "-", "--", and "---" HYPHEN-MINUS sequences and CP1252 dashes to Unicode en and em dashes.
-"not\_cp1252" only remaps invalid cp1252 dashes to unicode. "original" leaves all dashes as they were. The default is "not\_cp1252".
+"not\_cp1252" only remaps invalid cp1252 dashes to unicode. "original" leaves all dashes as they were. The default is "not\_cp1252". |
+
+| Option name | Description |
+| --- | --- |
 | splitAssimilations | If true tokenize words like "gonna" as multiple tokens "gon", "na". If false, keep as one token. Default is true. |
 | splitHyphenated | Whether or not to tokenize hyphenated words as several tokens ("school" "-" "aged", "frog" "-" "lipped"), keeping together the exceptions in Supplementary Guidelines for ETTB 2.0 by Justin Mott, Colin Warner, Ann Bies, Ann Taylor and CLEAR guidelines (Bracketing Biomedical Text) by Colin Warner et al. (2012), e.g., keeping together prefixes like "co-indexation". Default is currently true. |
-| splitForwardSlash: Whether to tokenize segments of slashed tokens separately ("Asian" "/" "Indian", "and" "/" "or"). Default is true.
+| splitForwardSlash | Whether to tokenize segments of slashed tokens separately ("Asian" "/" "Indian", "and" "/" "or"). Default is true. |
 | escapeForwardSlashAsterisk | Whether to put a backslash escape in front of / and * as the old PTB3 WSJ does for some reason (something to do with Lisp readers??). |
 | untokenizable | What to do with untokenizable characters (ones not known to the tokenizer). Six options combining whether to log a warning for none, the first, or all, and whether to delete them or to include them as single character tokens in the output: noneDelete, firstDelete, allDelete, noneKeep, firstKeep, allKeep. The default is "firstDelete". |
 | strictTreebank3 | PTBTokenizer deliberately deviates from strict PTB3 WSJ tokenization in two cases. Setting this improves compatibility for those cases. They are: (i) When an acronym is followed by a sentence end, such as "U.K." at the end of a sentence, the PTB3 has tokens of "Corp" and ".", while by default PTBTokenizer duplicates the period returning tokens of "Corp." and ".", and (ii) PTBTokenizer will return numbers with a whole number and a fractional part like "5 7/8" as a single token, with a non-breaking space in the middle, while the PTB3 separates them into two tokens "5" and "7/8". (Exception: for only "U.S." the PTB3 treebank does have the two tokens "U.S." and "." like our default; strictTreebank3 now mimics that too.) The default is false. |
 | strictFraction | Only split mixed fractions into two tokens (see under `strictTreebank3`). |
-| strictAcronym |Only adopt the PTB3 tokenization of sentence final acronyms (see under `strictTreebank3`). |
+| strictAcronym | Only adopt the PTB3 tokenization of sentence final acronyms (see under `strictTreebank3`). |
 
 ## Tokenizing From The Command Line
 
