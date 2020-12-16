@@ -150,10 +150,12 @@ frenchSR.ser.gz:
 	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank  $(FRENCH_TRAIN) -devTreebank  $(FRENCH_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile  $(FRENCH_TAGGER) -tlpp  $(FRENCH_TLPP) $(TRAIN_ORACLE_10) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank  $(FRENCH_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(FRENCH_TAGGER) >> $@.out 2>&1
 
+# French performance was falling with some of the changes, but the
+# number of shards increases it back a bit
 frenchSR.beam.ser.gz:
 	@echo Training $@
 	@echo Will test on $(FRENCH_TEST)
-	java -mx40g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank  $(FRENCH_TRAIN) -devTreebank  $(FRENCH_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile  $(FRENCH_TAGGER) -tlpp  $(FRENCH_TLPP) $(TRAIN_BEAM) > $@.out 2>&1
+	java -mx40g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank  $(FRENCH_TRAIN) -devTreebank  $(FRENCH_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile  $(FRENCH_TAGGER) -tlpp  $(FRENCH_TLPP) $(TRAIN_BEAM) $(SHARDS_5) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank  $(FRENCH_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(FRENCH_TAGGER) >> $@.out 2>&1
 
 chineseSR.ser.gz:
