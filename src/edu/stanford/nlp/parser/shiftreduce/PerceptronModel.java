@@ -590,6 +590,13 @@ public class PerceptronModel extends BaseModel  {
         }
       }
 
+      float l2Reg = op.trainOptions().l2Reg;
+      if (l2Reg > 0.0f) {
+        for (Map.Entry<String, Weight> weight : featureWeights.entrySet()) {
+          weight.getValue().l2Reg(l2Reg);
+        }
+      }
+
       float l1Reg = op.trainOptions().l1Reg;
       if (l1Reg > 0.0f) {
         for (Map.Entry<String, Weight> weight : featureWeights.entrySet()) {

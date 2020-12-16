@@ -103,6 +103,9 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-l1Reg")) {
       trainOptions().l1Reg = Float.parseFloat(args[i + 1]);
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-l2Reg")) {
+      trainOptions().l2Reg = Float.parseFloat(args[i + 1]);
+      i += 2;
     } else if (args[i].equalsIgnoreCase("-retrainShards")) {
       trainOptions().retrainShards = Integer.parseInt(args[i + 1]);
       i += 2;

@@ -180,6 +180,22 @@ public class Weight implements Serializable {
     }
   }
 
+  /**
+   * Moves the weights closer to 0 as a form of l2 regularization
+   */
+  void l2Reg(float reg) {
+    if (packed == null) {
+      return;
+    }
+
+    for (int i = 0; i < packed.length; ++i) {
+      int index = unpackIndex(i);
+      float score = unpackScore(i);
+      score = score - score * reg;
+      packed[i] = pack(index, score);
+    }
+  }
+
   private long[] packed;
 
   private static final long serialVersionUID = 1;

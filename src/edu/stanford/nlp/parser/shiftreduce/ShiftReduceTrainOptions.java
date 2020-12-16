@@ -46,6 +46,9 @@ public class ShiftReduceTrainOptions extends TrainOptions {
   /** If positive, after every iteration, weights are moved by this much back towards 0. */
   public float l1Reg = 0.0f;
 
+  /** If positive, after every iteration, weights are scaled by this ratio back towards 0. */
+  public float l2Reg = 0.0f;
+
   /** If more than one, retrains this many "shards" after the initial
    *  training and then averages them together */
   public int retrainShards = 1;
