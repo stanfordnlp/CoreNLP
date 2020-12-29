@@ -88,6 +88,8 @@ ctb9.train-small.chris6.ser.gz: dict-chris6.ser.gz
 	time java -mx5g  edu.stanford.nlp.ie.crf.CRFClassifier  -sighanCorporaDict $(SIGHAN2007_CORPORA_DICT) -loadClassifier $@ -testFile $(CTB9_TEST) -inputEncoding UTF-8 -sighanPostProcessing true -serDictionary $+ -keepAllWhitespaces false >> $@.log 2>> $@.err
 
 # train on train GSD, with all external lexicons, without training lexicon
+# there is a script in Stanza which converts the UD GSD treebank to a segmenter training file:
+#   stanza/utils/datasets/corenlp_segmenter_dataset.py
 gsd.ser.gz: dict-chris6.ser.gz
 	time java -mx60g edu.stanford.nlp.ie.crf.CRFClassifier -prop ctb9-chris6.prop -serDictionary $+ -sighanCorporaDict $(SIGHAN2007_CORPORA_DICT) -trainFile $(GSD_TRAIN) -serializeTo $@ > $@.log 2> $@.err
 	time java -mx5g  edu.stanford.nlp.ie.crf.CRFClassifier  -sighanCorporaDict $(SIGHAN2007_CORPORA_DICT) -loadClassifier $@ -testFile $(GSD_TEST) -inputEncoding UTF-8 -sighanPostProcessing true -serDictionary $+ -keepAllWhitespaces false >> $@.log 2>> $@.err
