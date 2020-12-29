@@ -12,6 +12,8 @@ Below are interfaces and packages for running Stanford CoreNLP from other langua
 ### C#/F#/.NET
 * [Stanford CoreNLP for .NET](http://sergey-tihon.github.io/Stanford.NLP.NET/StanfordCoreNLP.html) by Sergey Tihon.  See also: [NuGet page](https://www.nuget.org/packages/Stanford.NLP.CoreNLP/).
 
+* [CoreNLPClient.Net](https://github.com/AMArostegui/CoreNLPClient.Net)  .NET reimplementation of the Stanza client by [Antonio Miras](https://github.com/AMArostegui)
+
 ### Clojure
 
 * [Clojure wrapper for CoreNLP](https://github.com/damienstanton/stanford-corenlp) by Cory Giles, Hans Engel, and Damien Stanton. Incomplete. Currently only a tagger and parser.
