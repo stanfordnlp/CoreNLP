@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -113,7 +114,7 @@ public class GenerateTrees {
         }
 
         try {
-          Section newSection = Section.valueOf(line.toUpperCase());
+          Section newSection = Section.valueOf(line.toUpperCase(Locale.ROOT));
           section = newSection;
           if (section == Section.TSURGEON) {
             // this will tregex pattern until it has eaten a blank

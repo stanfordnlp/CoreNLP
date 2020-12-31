@@ -1,5 +1,7 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
+import java.util.Locale;
+
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.TestOptions;
 import edu.stanford.nlp.parser.lexparser.TrainOptions;
@@ -65,7 +67,7 @@ public class ShiftReduceOptions extends Options {
       trainOptions().retrainAfterCutoff = false;
       i++;
     } else if (args[i].equalsIgnoreCase("-trainingMethod")) {
-      trainOptions().trainingMethod = ShiftReduceTrainOptions.TrainingMethod.valueOf(args[i + 1].toUpperCase());
+      trainOptions().trainingMethod = ShiftReduceTrainOptions.TrainingMethod.valueOf(args[i + 1].toUpperCase(Locale.ROOT));
       if (trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM ||
           trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
         if (trainOptions().beamSize <= 0) {

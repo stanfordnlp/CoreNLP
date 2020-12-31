@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -238,7 +239,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     if (mode == null) {
       return DEFAULT_COMBINATION_MODE;
     } else {
-      return CombinationMode.valueOf(mode.toUpperCase());
+      return CombinationMode.valueOf(mode.toUpperCase(Locale.ROOT));
     }
   }
 

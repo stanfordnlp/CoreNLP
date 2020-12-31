@@ -1019,7 +1019,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
                                        Properties properties,
                                        AnnotationOutputter.Options outputOptions) throws IOException {
     final OutputFormat outputFormat =
-            OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
+            OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase(Locale.ROOT));
 
     switch (outputFormat) {
       case XML:
@@ -1091,7 +1091,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    */
   public void processFiles(String base, final Collection<File> files, int numThreads, boolean clearPool, Optional<Timing> tim) throws IOException {
     AnnotationOutputter.Options options = AnnotationOutputter.getOptions(properties);
-    StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
+    StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase(Locale.ROOT));
     processFiles(base, files, numThreads, properties, this::annotate, createOutputter(properties, options), outputFormat, clearPool, Optional.of(this), tim);
   }
 

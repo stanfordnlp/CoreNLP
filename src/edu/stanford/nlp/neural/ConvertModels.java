@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
@@ -373,14 +374,14 @@ public class ConvertModels {
 
     final Stage stage;
     try {
-      stage = Stage.valueOf(props.getProperty("stage").toUpperCase());
+      stage = Stage.valueOf(props.getProperty("stage").toUpperCase(Locale.ROOT));
     } catch (IllegalArgumentException | NullPointerException e) {
       throw new IllegalArgumentException("Please specify -stage, either OLD or NEW");
     }
 
     final Model modelType;
     try {
-      modelType = Model.valueOf(props.getProperty("model").toUpperCase());
+      modelType = Model.valueOf(props.getProperty("model").toUpperCase(Locale.ROOT));
     } catch (IllegalArgumentException | NullPointerException e) {
       throw new IllegalArgumentException("Please specify -model, either SENTIMENT, DVPARSER, EMBEDDING, COREF, FASTCOREF");
     }
