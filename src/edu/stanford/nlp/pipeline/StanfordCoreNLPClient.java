@@ -590,7 +590,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    */
   private static void shell(StanfordCoreNLPClient pipeline) throws IOException {
     log.info("Entering interactive shell. Type q RETURN or EOF to quit.");
-    final StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
+    final StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase(Locale.ROOT));
     IOUtils.console("NLP> ", line -> {
       if ( ! line.isEmpty()) {
         Annotation anno = pipeline.process(line);
@@ -631,7 +631,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    */
   public void run() throws IOException {
     StanfordRedwoodConfiguration.minimalSetup();
-    StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", "text").toUpperCase());
+    StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", "text").toUpperCase(Locale.ROOT));
 
     //
     // Process one file or a directory of files

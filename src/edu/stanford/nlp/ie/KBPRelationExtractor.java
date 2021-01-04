@@ -373,10 +373,10 @@ public interface KBPRelationExtractor {
         tokens.add(fields[0]);
         if ("SUBJECT".equals(fields[1])) {
           subject = new Span(Math.min(subject.start(), i), Math.max(subject.end(), i + 1));
-          subjectNER = valueOf(fields[2].toUpperCase());
+          subjectNER = valueOf(fields[2].toUpperCase(Locale.ROOT));
         } else if ("OBJECT".equals(fields[3])) {
           object = new Span(Math.min(object.start(), i), Math.max(object.end(), i + 1));
-          objectNER = valueOf(fields[4].toUpperCase());
+          objectNER = valueOf(fields[4].toUpperCase(Locale.ROOT));
         } else if ("-".equals(fields[1]) && "-".equals(fields[3])) {
           // do nothing
         } else {

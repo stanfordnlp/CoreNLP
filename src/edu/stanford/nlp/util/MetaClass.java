@@ -626,10 +626,10 @@ public class MetaClass {
         return (E) Enum.valueOf(c, value);
       } catch (Exception e){
         try {
-          return (E) Enum.valueOf(c, value.toLowerCase());
+          return (E) Enum.valueOf(c, value.toLowerCase(Locale.ROOT));
         } catch (Exception e2){
           try {
-            return (E) Enum.valueOf(c, value.toUpperCase());
+            return (E) Enum.valueOf(c, value.toUpperCase(Locale.ROOT));
           } catch (Exception e3){
             return (E) Enum.valueOf(c,
                 (Character.isUpperCase(value.charAt(0)) ? Character.toLowerCase(value.charAt(0)) : Character.toUpperCase(value.charAt(0))) +

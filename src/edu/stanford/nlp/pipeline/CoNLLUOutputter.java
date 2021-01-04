@@ -106,7 +106,7 @@ public class CoNLLUOutputter extends AnnotationOutputter {
   }
 
   public CoNLLUOutputter(Properties props) {
-    dependenciesType = SemanticGraphCoreAnnotations.DependenciesType.valueOf(props.getProperty("output.dependenciesType", "basic").toUpperCase());
+    dependenciesType = SemanticGraphCoreAnnotations.DependenciesType.valueOf(props.getProperty("output.dependenciesType", "basic").toUpperCase(Locale.ROOT));
   }
 
   @Override

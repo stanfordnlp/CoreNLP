@@ -37,7 +37,7 @@ public class CorefProperties {
   public static CorefAlgorithmType algorithm(Properties props) {
     String type = PropertiesUtils.getString(props, "coref.algorithm",
         getLanguage(props) == Locale.ENGLISH ? "statistical" : "neural");
-    return CorefAlgorithmType.valueOf(type.toUpperCase());
+    return CorefAlgorithmType.valueOf(type.toUpperCase(Locale.ROOT));
   }
 
   //---------- General Coreference Options ----------
@@ -92,7 +92,7 @@ public class CorefProperties {
     if (type.equalsIgnoreCase("dep")) {
       type = "DEPENDENCY";
     }
-    return MentionDetectionType.valueOf(type.toUpperCase());
+    return MentionDetectionType.valueOf(type.toUpperCase(Locale.ROOT));
   }
 
   public static String getMentionDetectionModel(Properties props) {

@@ -1483,7 +1483,7 @@ public class SeqClassifierFlags implements Serializable  {
         useUndirectedDisjunctive = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("splitSlashHyphenWords")) {
         try {
-          slashHyphenTreatment = SlashHyphenEnum.valueOf(val.trim().toUpperCase());
+          slashHyphenTreatment = SlashHyphenEnum.valueOf(val.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException | NullPointerException iae) {
           slashHyphenTreatment = SlashHyphenEnum.NONE;
         }

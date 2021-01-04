@@ -122,7 +122,7 @@ import edu.stanford.nlp.util.logging.Redwood;
         ptb3Dashes = val;
         quoteStyle = val ? LexerUtils.QuotesEnum.ASCII : LexerUtils.QuotesEnum.ORIGINAL;
       } else if ("quotes".equals(key)) {
-        quoteStyle = LexerUtils.QuotesEnum.valueOf(value.toUpperCase());
+        quoteStyle = LexerUtils.QuotesEnum.valueOf(value.toUpperCase(Locale.ROOT));
       } else if ("normalizeAmpersandEntity".equals(key)) {
         normalizeAmpersandEntity = val;
       } else if ("normalizeFractions".equals(key)) {
