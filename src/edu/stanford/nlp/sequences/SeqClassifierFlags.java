@@ -1081,6 +1081,8 @@ public class SeqClassifierFlags implements Serializable  {
    */
   public boolean useMoreNeighborNGrams = false;
 
+  /** if using dict2 in a segmenter, load it with this filename */
+  public String dict2name = "";
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2634,6 +2636,8 @@ public class SeqClassifierFlags implements Serializable  {
       } else if (key.equalsIgnoreCase("ner.model")) {
         nerModel = val;
       } else if (key.equalsIgnoreCase("sutime.language")) {
+      } else if (key.equalsIgnoreCase("dict2name")) {
+        dict2name = val;
         // ADD VALUE ABOVE HERE
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         log.info("Unknown property: |" + key + '|');
