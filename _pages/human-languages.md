@@ -33,11 +33,11 @@ The jars for each language can be found here:
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-arabic.jar) | 4.0.0 |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-chinese.jar) | 4.0.0 |
-| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-french.jar) | 4.0.0 |
-| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-german.jar) | 4.0.0 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.0.0-models-spanish.jar) | 4.0.0 |
+| Arabic  | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-arabic.jar) | 4.2.0 |
+| Chinese | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-chinese.jar) | 4.2.0 |
+| French | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-french.jar) | 4.2.0 |
+| German | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-german.jar) | 4.2.0 |
+| Spanish | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-spanish.jar) | 4.2.0 |
 
 #### Running pipelines
 

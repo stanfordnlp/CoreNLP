@@ -13,7 +13,7 @@ homepage: true
    <img src="assets/images/corenlp-title.png">
 </p>
 
-[<i class="fab fa-java"></i> Download CoreNLP 4.2.0](http://nlp.stanford.edu/software/stanford-corenlp-latest.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
+[<i class="fab fa-java"></i> Download CoreNLP 4.2.0](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 [<i class="fab fa-github"></i> CoreNLP on GitHub](https://github.com/stanfordnlp/CoreNLP){: .btn .fs-5 .mr-2 .mb-md-0 }
 [<i class="fab fa-sonatype"></i> CoreNLP on Maven](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.0.0/jar){: .btn .fs-5 .mr-2 .mb-md-0 }
 
@@ -73,19 +73,19 @@ CoreNLP generates a variety of linguistic annotations, including:
 
 ## Quickstart
 
-* Download and unzip [CoreNLP 4.2.0](http://nlp.stanford.edu/software/stanford-corenlp-latest.zip)
+* Download and unzip [CoreNLP 4.2.0](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip)
 
 * Download model jars for the language you want to work on and move the jars to the distribution directory.
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-arabic.jar) | 4.2.0 |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-chinese.jar) | 4.2.0 |
-| English | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-english.jar) | 4.2.0 |
-| English (KBP) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-english-kbp.jar) | 4.2.0 |
-| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-french.jar) | 4.2.0 |
-| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-german.jar) | 4.2.0 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-spanish.jar) | 4.2.0 |
+| Arabic  | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-arabic.jar) | 4.2.0 |
+| Chinese | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-chinese.jar) | 4.2.0 |
+| English | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-english.jar) | 4.2.0 |
+| English (KBP) | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-english-kbp.jar) | 4.2.0 |
+| French | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-french.jar) | 4.2.0 |
+| German | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-german.jar) | 4.2.0 |
+| Spanish | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-spanish.jar) | 4.2.0 |
 
 ```bash
 mv /path/to/stanford-corenlp-4.2.0-models-french.jar /path/to/stanford-corenlp-4.2.0
