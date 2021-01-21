@@ -167,7 +167,7 @@ chineseSR.ser.gz:
 chineseSR.beam.ser.gz:
 	@echo Training $@
 	@echo Will test on $(CHINESE_TEST)
-	java -mx50g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(CHINESE_TRAIN) -devTreebank $(CHINESE_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(CHINESE_TAGGER) -tlpp $(CHINESE_TLPP) $(TRAIN_BEAM) > $@.out 2>&1
+	java -mx50g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(CHINESE_TRAIN) -devTreebank $(CHINESE_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(CHINESE_TAGGER) -tlpp $(CHINESE_TLPP) $(TRAIN_BEAM) $(SHARDS_5) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(CHINESE_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(CHINESE_TAGGER) >> $@.out 2>&1
 
 germanSR.ser.gz:
