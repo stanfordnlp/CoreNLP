@@ -252,14 +252,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * edu.stanford.nlp.wordseg.Sighan2005DocumentReaderAndWriter for
    * the Chinese Segmenter.
    */
-  public DocumentReaderAndWriter<IN> makePlainTextReaderAndWriter() {
+  public static <INN extends CoreMap> DocumentReaderAndWriter<INN> makePlainTextReaderAndWriter(SeqClassifierFlags flags) {
     String readerClassName = flags.plainTextDocumentReaderAndWriter;
     // We set this default here if needed because there may be models
     // which don't have the reader flag set
     if (readerClassName == null) {
       readerClassName = SeqClassifierFlags.DEFAULT_PLAIN_TEXT_READER;
     }
-    DocumentReaderAndWriter<IN> readerAndWriter;
+    DocumentReaderAndWriter<INN> readerAndWriter;
     try {
       readerAndWriter = ReflectionLoading.loadByReflection(readerClassName);
     } catch (Exception e) {
@@ -267,6 +267,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
     readerAndWriter.init(flags);
     return readerAndWriter;
+  }
+
+  public DocumentReaderAndWriter<IN> makePlainTextReaderAndWriter() {
+    return makePlainTextReaderAndWriter(flags);
   }
 
   /**

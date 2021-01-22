@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -39,9 +40,13 @@ import edu.stanford.nlp.util.StringUtils;
 /**
  * DocumentReader for Chinese segmentation task. (Sighan bakeoff 2005)
  * Reads in characters and labels them as 1 or 0 (word START or NONSTART).
- *
+ * <br>
  * Note: maybe this can do less interning, since some is done in
  * ObjectBankWrapper, but this also calls trim() as it works....
+ * <br>
+ * Data can be output in two formats: plaintext, meaning whitespace
+ * separated words, or a fake conllu document usable with the conllu
+ * scoring script.
  *
  * @author Pi-Chuan Chang
  * @author Michel Galley (Viterbi search graph printing)
@@ -81,6 +86,12 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
   private SeqClassifierFlags flags;
   private IteratorFromReaderFactory<List<CoreLabel>> factory;
 
+  private enum OutputFormat {
+    PLAINTEXT, CONLLU
+  }
+
+  private OutputFormat outputFormat;
+
   @Override
   public Iterator<List<CoreLabel>> getIterator(Reader r) {
     return factory.getIterator(r);
@@ -107,6 +118,13 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     if (flags.dictionary2 != null) {
       String[] dicts2 = flags.dictionary2.split(",");
       cdict2 = new ChineseDictionary(dicts2, cdtos, flags.expandMidDot);
+    }
+
+    if (flags.outputFormat != null) {
+      outputFormat = OutputFormat.valueOf(flags.outputFormat.toUpperCase(Locale.ROOT));
+      logger.info("Output format: " + outputFormat);
+    } else {
+      outputFormat = OutputFormat.PLAINTEXT;
     }
   }
 
@@ -309,11 +327,53 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     }
   }
 
-  @Override
-  public void printAnswers(List<CoreLabel> doc, PrintWriter pw) {
+  private void printPlainTextAnswer(List<CoreLabel> doc, PrintWriter pw) {
     String ansStr = ChineseStringUtils.combineSegmentedSentence(doc, flags);
     pw.print(ansStr);
     pw.println();
+  }
+
+  /**
+   * Prints a fake Conllu document for use in the conllu tokenization scoring scripts
+   */
+  private void printConlluAnswer(List<CoreLabel> doc, PrintWriter pw) {
+    String ansStr = ChineseStringUtils.combineSegmentedSentence(doc, flags);
+    pw.print("# text = " + ansStr);
+    pw.println();
+
+    List<String> words = StringUtils.split(ansStr);
+    int idx = 0;
+    for (String word : words) {
+      idx = idx + 1;
+      pw.print(idx + "\t" + word);
+      // 4 _ - print blanks for lemma & tags
+      pw.print("\t_\t_\t_\t_\t");
+      pw.print(idx - 1);
+      pw.print("\t");
+      if (idx == 1) {
+        pw.print("root");
+      } else {
+        pw.print("dep");
+      }
+      pw.print("\t_\t_");
+      pw.println();
+    }
+
+    pw.println();
+  }
+
+  @Override
+  public void printAnswers(List<CoreLabel> doc, PrintWriter pw) {
+    switch (outputFormat) {
+    case PLAINTEXT:
+      printPlainTextAnswer(doc, pw);
+      break;
+    case CONLLU:
+      printConlluAnswer(doc, pw);
+      break;
+    default:
+      throw new IllegalArgumentException("Unknown outputFormat: " + outputFormat);
+    }
   }
 
 
