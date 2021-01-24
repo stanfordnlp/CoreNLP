@@ -254,11 +254,10 @@ public class PerceptronModel extends BaseModel  {
    * transitionLists: a list of pre-assembled transitions for the trees
    * oracle: if training method ORACLE is used, the oracle to use for predicting transitions
    */
-  private Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> trainTree(int index, List<TrainingExample> trainingData, Oracle oracle) {
+  private Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> trainTree(TrainingExample example, Oracle oracle) {
     int numCorrect = 0;
     int numWrong = 0;
 
-    TrainingExample example = trainingData.get(index);
     Tree tree = example.binarizedTree;
 
     List<Update> updates = Generics.newArrayList();
@@ -277,7 +276,7 @@ public class PerceptronModel extends BaseModel  {
     // significantly help with that.  Otherwise, not sure how to keep
     // it under control.
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.ORACLE) {
-      State state = ShiftReduceParser.initialStateFromGoldTagTree(example);
+      State state = example.initialStateFromGoldTagTree();
       while (!state.isFinished()) {
         List<String> features = featureFactory.featurize(state);
         ScoredObject<Integer> prediction = findHighestScoringTransition(state, features, true);
@@ -286,7 +285,7 @@ public class PerceptronModel extends BaseModel  {
         }
         int predictedNum = prediction.object();
         Transition predicted = transitionIndex.get(predictedNum);
-        OracleTransition gold = oracle.goldTransition(index, state);
+        OracleTransition gold = oracle.goldTransition(example, state);
         if (gold.isCorrect(predicted)) {
           numCorrect++;
           if (gold.transition != null && !gold.transition.equals(predicted)) {
@@ -317,9 +316,9 @@ public class PerceptronModel extends BaseModel  {
       if (op.trainOptions().beamSize <= 0) {
         throw new IllegalArgumentException("Illegal beam size " + op.trainOptions().beamSize);
       }
-      List<Transition> transitions = Generics.newLinkedList(example.transitions);
       PriorityQueue<State> agenda = new PriorityQueue<>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
-      State goldState = ShiftReduceParser.initialStateFromGoldTagTree(example);
+      State goldState = example.initialStateFromGoldTagTree();
+      List<Transition> transitions = example.trainTransitions();
       agenda.add(goldState);
       // int transitionCount = 0;
       while (transitions.size() > 0) {
@@ -416,8 +415,9 @@ public class PerceptronModel extends BaseModel  {
     } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
                op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION ||
                op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.GOLD) {
-      State state = ShiftReduceParser.initialStateFromGoldTagTree(example);
-      List<Transition> transitions = Generics.newLinkedList(example.transitions);
+      State state = example.initialStateFromGoldTagTree();
+      List<Transition> transitions = example.trainTransitions();
+
       boolean keepGoing = true;
       while (transitions.size() > 0 && keepGoing) {
         Transition transition = transitions.get(0);
@@ -460,18 +460,16 @@ public class PerceptronModel extends BaseModel  {
     return new Quadruple<>(updates, numCorrect, numWrong, firstError);
   }
 
-  private class TrainTreeProcessor implements ThreadsafeProcessor<Integer, Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>>> {
-    List<TrainingExample> trainingData;
+  private class TrainTreeProcessor implements ThreadsafeProcessor<TrainingExample, Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>>> {
     Oracle oracle;
 
-    public TrainTreeProcessor(List<TrainingExample> trainingData, Oracle oracle) {
-      this.trainingData = trainingData;
+    public TrainTreeProcessor(Oracle oracle) {
       this.oracle = oracle;
     }
 
     @Override
-    public Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> process(Integer index) {
-      return trainTree(index, trainingData, oracle);
+    public Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> process(TrainingExample example) {
+      return trainTree(example, oracle);
     }
 
     @Override
@@ -492,14 +490,14 @@ public class PerceptronModel extends BaseModel  {
    * trees without updating any weights, which allows the results for
    * multithreaded training to be reproduced.
    */
-  private Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> trainBatch(List<Integer> indices, List<TrainingExample> trainingData, Oracle oracle, MulticoreWrapper<Integer, Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>>> wrapper) {
+  private Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> trainBatch(List<TrainingExample> trainingData, Oracle oracle, MulticoreWrapper<TrainingExample, Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>>> wrapper) {
     int numCorrect = 0;
     int numWrong = 0;
     final List<Update> updates = Generics.newArrayList();
     final List<Pair<Integer, Integer>> firstErrors = Generics.newArrayList();
     if (op.trainOptions.trainingThreads == 1) {
-      for (Integer index : indices) {
-        Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> update = trainTree(index, trainingData, oracle);
+      for (TrainingExample example : trainingData) {
+        Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> update = trainTree(example, oracle);
         updates.addAll(update.first);
         numCorrect += update.second;
         numWrong += update.third;
@@ -508,8 +506,8 @@ public class PerceptronModel extends BaseModel  {
         }
       }
     } else {
-      for (Integer index : indices) {
-        wrapper.put(index);
+      for (TrainingExample example : trainingData) {
+        wrapper.put(example);
       }
       wrapper.join(false);
       while (wrapper.peek()) {
@@ -554,9 +552,9 @@ public class PerceptronModel extends BaseModel  {
       oracle = new Oracle(trainingData, op.compoundUnaries, rootStates, rootOnlyStates);
     }
 
-    MulticoreWrapper<Integer, Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>>> wrapper = null;
+    MulticoreWrapper<TrainingExample, Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>>> wrapper = null;
     if (nThreads != 1) {
-      wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new TrainTreeProcessor(trainingData, oracle));
+      wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new TrainTreeProcessor(oracle));
     }
 
     IntCounter<String> featureFrequencies = null;
@@ -574,10 +572,10 @@ public class PerceptronModel extends BaseModel  {
       int numWrong = 0;
       IntCounter<Pair<Integer, Integer>> firstErrors = new IntCounter<>();
 
-      Collections.shuffle(indices, random);
+      Collections.shuffle(trainingData, random);
       for (int start = 0; start < indices.size(); start += op.trainOptions.batchSize) {
         int end = Math.min(start + op.trainOptions.batchSize, indices.size());
-        Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> result = trainBatch(indices.subList(start, end), trainingData, oracle, wrapper);
+        Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> result = trainBatch(trainingData.subList(start, end), oracle, wrapper);
 
         numCorrect += result.second;
         numWrong += result.third;

@@ -217,10 +217,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     return evals;
   }
 
-  public static State initialStateFromGoldTagTree(TrainingExample example) {
-    return initialStateFromTaggedSentence(example.binarizedTree.taggedYield());
-  }
-
   public static State initialStateFromGoldTagTree(Tree tree) {
     return initialStateFromTaggedSentence(tree.taggedYield());
   }

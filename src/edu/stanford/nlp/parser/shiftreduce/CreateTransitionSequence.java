@@ -18,7 +18,7 @@ public class CreateTransitionSequence {
     List<TrainingExample> transitionLists = Generics.newArrayList();
     for (Tree tree : binarizedTrees) {
       List<Transition> transitions = createTransitionSequence(tree, compoundUnary, rootStates, rootOnlyStates);
-      transitionLists.add(new TrainingExample(tree, transitions));
+      transitionLists.add(new TrainingExample(tree, transitions, 0));
     }
     return transitionLists;
   }

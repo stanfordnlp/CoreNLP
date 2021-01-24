@@ -62,14 +62,14 @@ public class OracleTest extends TestCase {
   }
 
   public static void runEndToEndTest(List<TrainingExample> trainingData, Oracle oracle) {
-    for (int index = 0; index < trainingData.size(); ++index) {
-      State state = ShiftReduceParser.initialStateFromGoldTagTree(trainingData.get(index).binarizedTree);
+    for (TrainingExample example : trainingData) {
+      State state = example.initialStateFromGoldTagTree();
       while (!state.isFinished()) {
-        OracleTransition gold = oracle.goldTransition(index, state);
+        OracleTransition gold = oracle.goldTransition(example, state);
         assertTrue(gold.transition != null);
         state = gold.transition.apply(state);
       }
-      assertEquals(trainingData.get(index).binarizedTree, state.stack.peek());
+      assertEquals(example.binarizedTree, state.stack.peek());
     }
   }
 }

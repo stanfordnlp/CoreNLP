@@ -27,9 +27,9 @@ import edu.stanford.nlp.util.Generics;
 class Oracle {
   final List<TrainingExample> trainingData;
 
-  final List<IdentityHashMap<Tree, Tree>> parentMaps;
+  final IdentityHashMap<Tree, List<Tree>> leafMap;
 
-  final List<List<Tree>> leafLists;
+  final IdentityHashMap<Tree, IdentityHashMap<Tree, Tree>> parentMaps;
 
   final boolean compoundUnaries;
 
@@ -40,11 +40,11 @@ class Oracle {
   Oracle(List<TrainingExample> trainingData, boolean compoundUnaries, Set<String> rootStates, Set<String> rootOnlyStates) {
     this.trainingData = trainingData;
 
-    parentMaps = Generics.newArrayList(trainingData.size());
-    leafLists = Generics.newArrayList();
+    parentMaps = new IdentityHashMap<>(trainingData.size());
+    leafMap = new IdentityHashMap<>(trainingData.size());
     for (TrainingExample example : trainingData) {
-      parentMaps.add(buildParentMap(example.binarizedTree));
-      leafLists.add(Trees.leaves(example.binarizedTree));
+      parentMaps.put(example.binarizedTree, buildParentMap(example.binarizedTree));
+      leafMap.put(example.binarizedTree, Trees.leaves(example.binarizedTree));
     }
 
     this.compoundUnaries = compoundUnaries;
@@ -73,8 +73,8 @@ class Oracle {
    * Returns an attempt at a "gold" transition given the current state
    * while parsing a known gold tree.
    *
-   * Tree is passed in by index so the oracle can precompute various
-   * statistics about the tree.
+   * Tree is searched for in IdentityHashMaps so the oracle can
+   * precompute various statistics about the tree.
    *
    * If we already finalized, then the correct transition is to idle.
    *
@@ -118,7 +118,7 @@ class Oracle {
    * binary reduce are acceptable, with no gold transition.  TODO: can
    * this be improved?
    */
-  OracleTransition goldTransition(int index, State state) {
+  OracleTransition goldTransition(TrainingExample example, State state) {
     if (state.finished) {
       return new OracleTransition(new IdleTransition(), false, false, false);
     }
@@ -127,9 +127,9 @@ class Oracle {
       return new OracleTransition(new ShiftTransition(), false, false, false);
     }
 
-    Map<Tree, Tree> parents = parentMaps.get(index);
-    Tree gold = trainingData.get(index).binarizedTree;
-    List<Tree> leaves = leafLists.get(index);
+    Tree gold = example.binarizedTree;
+    Map<Tree, Tree> parents = parentMaps.get(gold);
+    List<Tree> leaves = leafMap.get(gold);
 
     Tree S0 = state.stack.peek();
     Tree enclosingS0 = getEnclosingTree(S0, parents, leaves);
