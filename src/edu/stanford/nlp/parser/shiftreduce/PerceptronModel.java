@@ -277,7 +277,7 @@ public class PerceptronModel extends BaseModel  {
     // significantly help with that.  Otherwise, not sure how to keep
     // it under control.
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.ORACLE) {
-      State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
+      State state = ShiftReduceParser.initialStateFromGoldTagTree(example);
       while (!state.isFinished()) {
         List<String> features = featureFactory.featurize(state);
         ScoredObject<Integer> prediction = findHighestScoringTransition(state, features, true);
@@ -319,7 +319,7 @@ public class PerceptronModel extends BaseModel  {
       }
       List<Transition> transitions = Generics.newLinkedList(example.transitions);
       PriorityQueue<State> agenda = new PriorityQueue<>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
-      State goldState = ShiftReduceParser.initialStateFromGoldTagTree(tree);
+      State goldState = ShiftReduceParser.initialStateFromGoldTagTree(example);
       agenda.add(goldState);
       // int transitionCount = 0;
       while (transitions.size() > 0) {
@@ -416,7 +416,7 @@ public class PerceptronModel extends BaseModel  {
     } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
                op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION ||
                op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.GOLD) {
-      State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
+      State state = ShiftReduceParser.initialStateFromGoldTagTree(example);
       List<Transition> transitions = Generics.newLinkedList(example.transitions);
       boolean keepGoing = true;
       while (transitions.size() > 0 && keepGoing) {
