@@ -32,7 +32,7 @@ public class OracleTest extends TestCase {
                           "(ROOT (S (NP (NP (RB Not) (PDT all) (DT those)) (SBAR (WHNP (WP who)) (S (VP (VBD wrote))))) (VP (VBP oppose) (NP (DT the) (NNS changes))) (. .)))",
                           "(ROOT (S (NP (NP (DT The) (NNS anthers)) (PP (IN in) (NP (DT these) (NNS plants)))) (VP (VBP are) (ADJP (JJ difficult) (SBAR (S (VP (TO to) (VP (VB clip) (PRT (RP off)))))))) (. .)))" };
 
-  public List<Tree> buildTestTreebank() {
+  public List<TrainingExample> buildTestTreebank() {
     MemoryTreebank treebank = new MemoryTreebank();
 
     for (String text : TEST_TREES) {
@@ -41,7 +41,7 @@ public class OracleTest extends TestCase {
     }
 
     List<Tree> binarizedTrees = ShiftReduceParser.binarizeTreebank(treebank, new Options());
-    return binarizedTrees;
+    return CreateTransitionSequence.createTransitionSequences(binarizedTrees);
   }
 
   /**
@@ -50,26 +50,26 @@ public class OracleTest extends TestCase {
    * it produces the original tree again.
    */
   public void testEndToEndCompoundUnaries() {
-    List<Tree> binarizedTrees = buildTestTreebank();
-    Oracle oracle = new Oracle(binarizedTrees, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
-    runEndToEndTest(binarizedTrees, oracle);
+    List<TrainingExample> trainingData = buildTestTreebank();
+    Oracle oracle = new Oracle(trainingData, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
+    runEndToEndTest(trainingData, oracle);
   }
 
   public void testEndToEndSingleUnaries() {
-    List<Tree> binarizedTrees = buildTestTreebank();
-    Oracle oracle = new Oracle(binarizedTrees, false, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
-    runEndToEndTest(binarizedTrees, oracle);
+    List<TrainingExample> trainingData = buildTestTreebank();
+    Oracle oracle = new Oracle(trainingData, false, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
+    runEndToEndTest(trainingData, oracle);
   }
 
-  public static void runEndToEndTest(List<Tree> binarizedTrees, Oracle oracle) {
-    for (int index = 0; index < binarizedTrees.size(); ++index) {
-      State state = ShiftReduceParser.initialStateFromGoldTagTree(binarizedTrees.get(index));
+  public static void runEndToEndTest(List<TrainingExample> trainingData, Oracle oracle) {
+    for (int index = 0; index < trainingData.size(); ++index) {
+      State state = ShiftReduceParser.initialStateFromGoldTagTree(trainingData.get(index).binarizedTree);
       while (!state.isFinished()) {
         OracleTransition gold = oracle.goldTransition(index, state);
         assertTrue(gold.transition != null);
         state = gold.transition.apply(state);
       }
-      assertEquals(binarizedTrees.get(index), state.stack.peek());
+      assertEquals(trainingData.get(index).binarizedTree, state.stack.peek());
     }
   }
 }

@@ -177,7 +177,7 @@ public abstract class BaseModel implements Serializable {
    * @param devTreebank a set of trees which can be used for dev testing (assuming the user provided a dev treebank)
    * @param nThreads how many threads the model can use for training
    */
-  public abstract void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrainTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads);
+  public abstract void trainModel(String serializedPath, Tagger tagger, Random random, List<TrainingExample> trainingData, Treebank devTreebank, int nThreads);
 
   abstract Set<String> tagSet();
 

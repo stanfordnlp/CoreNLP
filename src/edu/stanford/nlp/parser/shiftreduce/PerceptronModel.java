@@ -254,11 +254,12 @@ public class PerceptronModel extends BaseModel  {
    * transitionLists: a list of pre-assembled transitions for the trees
    * oracle: if training method ORACLE is used, the oracle to use for predicting transitions
    */
-  private Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> trainTree(int index, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Oracle oracle) {
+  private Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> trainTree(int index, List<TrainingExample> trainingData, Oracle oracle) {
     int numCorrect = 0;
     int numWrong = 0;
 
-    Tree tree = binarizedTrees.get(index);
+    TrainingExample example = trainingData.get(index);
+    Tree tree = example.binarizedTree;
 
     List<Update> updates = Generics.newArrayList();
     Pair<Integer, Integer> firstError = null;
@@ -316,7 +317,7 @@ public class PerceptronModel extends BaseModel  {
       if (op.trainOptions().beamSize <= 0) {
         throw new IllegalArgumentException("Illegal beam size " + op.trainOptions().beamSize);
       }
-      List<Transition> transitions = Generics.newLinkedList(transitionLists.get(index));
+      List<Transition> transitions = Generics.newLinkedList(example.transitions);
       PriorityQueue<State> agenda = new PriorityQueue<>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State goldState = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       agenda.add(goldState);
@@ -369,7 +370,7 @@ public class PerceptronModel extends BaseModel  {
             System.err.println(state);
           }
           System.err.println("Gold transitions:");
-          System.err.println(transitionLists.get(index));
+          System.err.println(example.transitions);
           break;
         }
 
@@ -416,8 +417,7 @@ public class PerceptronModel extends BaseModel  {
                op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION ||
                op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.GOLD) {
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
-      List<Transition> transitions = transitionLists.get(index);
-      transitions = Generics.newLinkedList(transitions);
+      List<Transition> transitions = Generics.newLinkedList(example.transitions);
       boolean keepGoing = true;
       while (transitions.size() > 0 && keepGoing) {
         Transition transition = transitions.get(0);
@@ -461,19 +461,17 @@ public class PerceptronModel extends BaseModel  {
   }
 
   private class TrainTreeProcessor implements ThreadsafeProcessor<Integer, Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>>> {
-    List<Tree> binarizedTrees;
-    List<List<Transition>> transitionLists;
+    List<TrainingExample> trainingData;
     Oracle oracle;
 
-    public TrainTreeProcessor(List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Oracle oracle) {
-      this.binarizedTrees = binarizedTrees;
-      this.transitionLists = transitionLists;
+    public TrainTreeProcessor(List<TrainingExample> trainingData, Oracle oracle) {
+      this.trainingData = trainingData;
       this.oracle = oracle;
     }
 
     @Override
     public Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> process(Integer index) {
-      return trainTree(index, binarizedTrees, transitionLists, oracle);
+      return trainTree(index, trainingData, oracle);
     }
 
     @Override
@@ -494,14 +492,14 @@ public class PerceptronModel extends BaseModel  {
    * trees without updating any weights, which allows the results for
    * multithreaded training to be reproduced.
    */
-  private Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> trainBatch(List<Integer> indices, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Oracle oracle, MulticoreWrapper<Integer, Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>>> wrapper) {
+  private Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> trainBatch(List<Integer> indices, List<TrainingExample> trainingData, Oracle oracle, MulticoreWrapper<Integer, Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>>> wrapper) {
     int numCorrect = 0;
     int numWrong = 0;
     final List<Update> updates = Generics.newArrayList();
     final List<Pair<Integer, Integer>> firstErrors = Generics.newArrayList();
     if (op.trainOptions.trainingThreads == 1) {
       for (Integer index : indices) {
-        Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> update = trainTree(index, binarizedTrees, transitionLists, oracle);
+        Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>> update = trainTree(index, trainingData, oracle);
         updates.addAll(update.first);
         numCorrect += update.second;
         numWrong += update.third;
@@ -538,7 +536,7 @@ public class PerceptronModel extends BaseModel  {
   }
 
 
-  private void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads, Set<String> allowedFeatures) {
+  private void trainModel(String serializedPath, Tagger tagger, Random random, List<TrainingExample> trainingData, Treebank devTreebank, int nThreads, Set<String> allowedFeatures) {
     double bestScore = 0.0;
     int bestIteration = 0;
     PriorityQueue<ScoredObject<PerceptronModel>> bestModels = null;
@@ -547,18 +545,18 @@ public class PerceptronModel extends BaseModel  {
     }
 
     List<Integer> indices = Generics.newArrayList();
-    for (int i = 0; i < binarizedTrees.size(); ++i) {
+    for (int i = 0; i < trainingData.size(); ++i) {
       indices.add(i);
     }
 
     Oracle oracle = null;
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.ORACLE) {
-      oracle = new Oracle(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
+      oracle = new Oracle(trainingData, op.compoundUnaries, rootStates, rootOnlyStates);
     }
 
     MulticoreWrapper<Integer, Quadruple<List<Update>, Integer, Integer, Pair<Integer, Integer>>> wrapper = null;
     if (nThreads != 1) {
-      wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new TrainTreeProcessor(binarizedTrees, transitionLists, oracle));
+      wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new TrainTreeProcessor(trainingData, oracle));
     }
 
     IntCounter<String> featureFrequencies = null;
@@ -579,7 +577,7 @@ public class PerceptronModel extends BaseModel  {
       Collections.shuffle(indices, random);
       for (int start = 0; start < indices.size(); start += op.trainOptions.batchSize) {
         int end = Math.min(start + op.trainOptions.batchSize, indices.size());
-        Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> result = trainBatch(indices.subList(start, end), binarizedTrees, transitionLists, oracle, wrapper);
+        Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> result = trainBatch(indices.subList(start, end), trainingData, oracle, wrapper);
 
         numCorrect += result.second;
         numWrong += result.third;
@@ -739,17 +737,17 @@ public class PerceptronModel extends BaseModel  {
    * after the first time through on a limited set of features.
    */
   @Override
-  public void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads) {
+  public void trainModel(String serializedPath, Tagger tagger, Random random, List<TrainingExample> trainingData, Treebank devTreebank, int nThreads) {
     if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0 ||
         op.trainOptions().retrainShards > 1) {
       String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
-      trainModel(tempName, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, null);
+      trainModel(tempName, tagger, random, trainingData, devTreebank, nThreads, null);
       ShiftReduceParser temp = new ShiftReduceParser(op, this);
       temp.saveModel(tempName);
       log.info("Beginning retraining");
       Set<String> features = featureWeights.keySet();
       featureWeights = Generics.newHashMap();
-      trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, features);
+      trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, features);
 
       // If we only had one train shard, we are now done.  Otherwise,
       // we retrain N-1 more times, each time dropping a fraction of
@@ -762,7 +760,7 @@ public class PerceptronModel extends BaseModel  {
           log.info("Beginning retraining of shard " + (i+1));
           Set<String> prunedFeatures = pruneFeatures(features, random, op.trainOptions().retrainShardFeatureDrop);
           featureWeights = Generics.newHashMap();
-          trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, prunedFeatures);
+          trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, prunedFeatures);
           shards.add(new PerceptronModel(this));
         }
         log.info("Averaging " + op.trainOptions().retrainShards + " shards");
@@ -771,7 +769,7 @@ public class PerceptronModel extends BaseModel  {
         evaluate(tagger, devTreebank, "Label F1 for " + op.trainOptions().retrainShards + " averaged shards");
       }
     } else {
-      trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, null);
+      trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, null);
     }
   }
 

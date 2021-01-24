@@ -491,18 +491,14 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     }
   }
 
-  private void verifyTransitions(List<Tree> binarizedTrees, List<List<Transition>> transitionLists) {
-    if (binarizedTrees.size() != transitionLists.size()) {
-      throw new AssertionError("Expected the trees and transition lists to be the same size");
-    }
-
-    for (int i = 0; i < binarizedTrees.size(); ++i) {
-      State state = initialStateFromGoldTagTree(binarizedTrees.get(i));
-      List<Transition> transitions = transitionLists.get(i);
+  private void verifyTransitions(List<TrainingExample> trainingData) {
+    for (TrainingExample train : trainingData) {
+      State state = initialStateFromGoldTagTree(train.binarizedTree);
+      List<Transition> transitions = train.transitions;
       for (int j = 0; j < transitions.size(); ++j) {
         if (!transitions.get(j).isLegal(state, null)) {
           System.err.println("Transition list for a gold tree is illegal!");
-          System.err.println("  " + binarizedTrees.get(i));
+          System.err.println("  " + train.binarizedTree);
           System.err.println("  " + transitions);
           System.err.println("  First illegal transition: " + j + ": " + transitions.get(j));
           System.err.println("  State at this time: " + state);
@@ -544,13 +540,13 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     log.info("States which only occur at the root: " + rootOnlyStates);
 
     Timing transitionTimer = new Timing();
-    List<List<Transition>> transitionLists = CreateTransitionSequence.createTransitionSequences(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
+    List<TrainingExample> trainingData = CreateTransitionSequence.createTransitionSequences(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
     Index<Transition> transitionIndex = new HashIndex<>();
-    for (List<Transition> transitions : transitionLists) {
-      transitionIndex.addAll(transitions);
+    for (TrainingExample example : trainingData) {
+      transitionIndex.addAll(example.transitions);
     }
 
-    verifyTransitions(binarizedTrees, transitionLists);
+    verifyTransitions(trainingData);
 
     transitionTimer.done("Converting trees into transition lists");
     log.info("Number of transitions: " + transitionIndex.size());
@@ -563,7 +559,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     }
 
     PerceptronModel newModel = new PerceptronModel(this.op, transitionIndex, knownStates, rootStates, rootOnlyStates);
-    newModel.trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads);
+    newModel.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads);
     this.model = newModel;
   }
 

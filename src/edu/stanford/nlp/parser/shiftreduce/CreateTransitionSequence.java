@@ -14,13 +14,17 @@ public class CreateTransitionSequence {
   // we could change this if we wanted to include options.
   private CreateTransitionSequence() {}
 
-  public static List<List<Transition>> createTransitionSequences(List<Tree> binarizedTrees, boolean compoundUnary, Set<String> rootStates, Set<String> rootOnlyStates) {
-    List<List<Transition>> transitionLists = Generics.newArrayList();
+  public static List<TrainingExample> createTransitionSequences(List<Tree> binarizedTrees, boolean compoundUnary, Set<String> rootStates, Set<String> rootOnlyStates) {
+    List<TrainingExample> transitionLists = Generics.newArrayList();
     for (Tree tree : binarizedTrees) {
       List<Transition> transitions = createTransitionSequence(tree, compoundUnary, rootStates, rootOnlyStates);
-      transitionLists.add(transitions);
+      transitionLists.add(new TrainingExample(tree, transitions));
     }
     return transitionLists;
+  }
+
+  public static List<TrainingExample> createTransitionSequences(List<Tree> binarizedTrees) {
+    return createTransitionSequences(binarizedTrees, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
   }
 
   public static List<Transition> createTransitionSequence(Tree tree) {

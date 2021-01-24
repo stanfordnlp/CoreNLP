@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 class Oracle {
-  final List<Tree> binarizedTrees;
+  final List<TrainingExample> trainingData;
 
   final List<IdentityHashMap<Tree, Tree>> parentMaps;
 
@@ -37,14 +37,14 @@ class Oracle {
 
   final Set<String> rootOnlyStates;
 
-  Oracle(List<Tree> binarizedTrees, boolean compoundUnaries, Set<String> rootStates, Set<String> rootOnlyStates) {
-    this.binarizedTrees = binarizedTrees;
+  Oracle(List<TrainingExample> trainingData, boolean compoundUnaries, Set<String> rootStates, Set<String> rootOnlyStates) {
+    this.trainingData = trainingData;
 
-    parentMaps = Generics.newArrayList(binarizedTrees.size());
+    parentMaps = Generics.newArrayList(trainingData.size());
     leafLists = Generics.newArrayList();
-    for (Tree tree : binarizedTrees) {
-      parentMaps.add(buildParentMap(tree));
-      leafLists.add(Trees.leaves(tree));
+    for (TrainingExample example : trainingData) {
+      parentMaps.add(buildParentMap(example.binarizedTree));
+      leafLists.add(Trees.leaves(example.binarizedTree));
     }
 
     this.compoundUnaries = compoundUnaries;
@@ -128,7 +128,7 @@ class Oracle {
     }
 
     Map<Tree, Tree> parents = parentMaps.get(index);
-    Tree gold = binarizedTrees.get(index);
+    Tree gold = trainingData.get(index).binarizedTree;
     List<Tree> leaves = leafLists.get(index);
 
     Tree S0 = state.stack.peek();
