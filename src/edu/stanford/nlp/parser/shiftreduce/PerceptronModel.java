@@ -542,11 +542,6 @@ public class PerceptronModel extends BaseModel  {
       bestModels = new PriorityQueue<>(op.trainOptions().averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
     }
 
-    List<Integer> indices = Generics.newArrayList();
-    for (int i = 0; i < trainingData.size(); ++i) {
-      indices.add(i);
-    }
-
     Oracle oracle = null;
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.ORACLE) {
       oracle = new Oracle(trainingData, op.compoundUnaries, rootStates, rootOnlyStates);
@@ -573,8 +568,8 @@ public class PerceptronModel extends BaseModel  {
       IntCounter<Pair<Integer, Integer>> firstErrors = new IntCounter<>();
 
       Collections.shuffle(trainingData, random);
-      for (int start = 0; start < indices.size(); start += op.trainOptions.batchSize) {
-        int end = Math.min(start + op.trainOptions.batchSize, indices.size());
+      for (int start = 0; start < trainingData.size(); start += op.trainOptions.batchSize) {
+        int end = Math.min(start + op.trainOptions.batchSize, trainingData.size());
         Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> result = trainBatch(trainingData.subList(start, end), oracle, wrapper);
 
         numCorrect += result.second;
