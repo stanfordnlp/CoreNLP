@@ -268,9 +268,12 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     return new State(preterminals);
   }
 
+  private static final String[] BASIC_TRAINING_OPTIONS = { "-forceTags", "-debugOutputFrequency", "1", "-quietEvaluation" };
+  private static final String[] FORCE_TAGS = { "-forceTags" };
+
   public static ShiftReduceOptions buildTrainingOptions(String tlppClass, String[] args) {
     ShiftReduceOptions op = new ShiftReduceOptions();
-    op.setOptions("-forceTags", "-debugOutputFrequency", "1", "-quietEvaluation");
+    op.setOptions(BASIC_TRAINING_OPTIONS);
     if (tlppClass != null) {
       op.tlpParams = ReflectionLoading.loadByReflection(tlppClass);
     }
@@ -585,8 +588,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     }
   }
 
-  private static final String[] FORCE_TAGS = { "-forceTags" };
-
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
 
@@ -642,7 +643,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
       log.info("Initial arguments:");
       log.info("   " + StringUtils.join(args));
       if (continueTraining != null) {
-        parser = ShiftReduceParser.loadModel(continueTraining, ArrayUtils.concatenate(FORCE_TAGS, newArgs));
+        parser = ShiftReduceParser.loadModel(continueTraining, ArrayUtils.concatenate(BASIC_TRAINING_OPTIONS, newArgs));
       } else {
         ShiftReduceOptions op = buildTrainingOptions(tlppClass, newArgs);
         parser = new ShiftReduceParser(op);
