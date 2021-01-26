@@ -29,7 +29,6 @@ import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
-import edu.stanford.nlp.util.Quadruple;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -241,7 +240,7 @@ public class PerceptronModel extends BaseModel  {
    * transitionLists: a list of pre-assembled transitions for the trees
    * oracle: if training method ORACLE is used, the oracle to use for predicting transitions
    */
-  private Quadruple<List<TrainingUpdate>, Integer, Integer, Pair<Integer, Integer>> trainTree(TrainingExample example, Oracle oracle) {
+  private TrainingResult trainTree(TrainingExample example, Oracle oracle) {
     int numCorrect = 0;
     int numWrong = 0;
 
@@ -444,10 +443,14 @@ public class PerceptronModel extends BaseModel  {
       }
     }
 
-    return new Quadruple<>(updates, numCorrect, numWrong, firstError);
+    if (firstError == null) {
+      return new TrainingResult(updates, numCorrect, numWrong);
+    } else {
+      return new TrainingResult(updates, numCorrect, numWrong, firstError);
+    }
   }
 
-  private class TrainTreeProcessor implements ThreadsafeProcessor<TrainingExample, Quadruple<List<TrainingUpdate>, Integer, Integer, Pair<Integer, Integer>>> {
+  private class TrainTreeProcessor implements ThreadsafeProcessor<TrainingExample, TrainingResult> {
     Oracle oracle;
 
     public TrainTreeProcessor(Oracle oracle) {
@@ -455,7 +458,7 @@ public class PerceptronModel extends BaseModel  {
     }
 
     @Override
-    public Quadruple<List<TrainingUpdate>, Integer, Integer, Pair<Integer, Integer>> process(TrainingExample example) {
+    public TrainingResult process(TrainingExample example) {
       return trainTree(example, oracle);
     }
 
@@ -477,20 +480,18 @@ public class PerceptronModel extends BaseModel  {
    * trees without updating any weights, which allows the results for
    * multithreaded training to be reproduced.
    */
-  private Quadruple<List<TrainingUpdate>, Integer, Integer, List<Pair<Integer, Integer>>> trainBatch(List<TrainingExample> trainingData, Oracle oracle, MulticoreWrapper<TrainingExample, Quadruple<List<TrainingUpdate>, Integer, Integer, Pair<Integer, Integer>>> wrapper) {
+  private TrainingResult trainBatch(List<TrainingExample> trainingData, Oracle oracle, MulticoreWrapper<TrainingExample, TrainingResult> wrapper) {
     int numCorrect = 0;
     int numWrong = 0;
     final List<TrainingUpdate> updates = Generics.newArrayList();
     final List<Pair<Integer, Integer>> firstErrors = Generics.newArrayList();
     if (op.trainOptions.trainingThreads == 1) {
       for (TrainingExample example : trainingData) {
-        Quadruple<List<TrainingUpdate>, Integer, Integer, Pair<Integer, Integer>> update = trainTree(example, oracle);
-        updates.addAll(update.first);
-        numCorrect += update.second;
-        numWrong += update.third;
-        if (update.fourth != null) {
-          firstErrors.add(update.fourth);
-        }
+        TrainingResult result = trainTree(example, oracle);
+        updates.addAll(result.updates);
+        numCorrect += result.numCorrect;
+        numWrong += result.numWrong;
+        firstErrors.addAll(result.firstErrors);
       }
     } else {
       for (TrainingExample example : trainingData) {
@@ -498,16 +499,14 @@ public class PerceptronModel extends BaseModel  {
       }
       wrapper.join(false);
       while (wrapper.peek()) {
-        Quadruple<List<TrainingUpdate>, Integer, Integer, Pair<Integer, Integer>> result = wrapper.poll();
-        updates.addAll(result.first);
-        numCorrect += result.second;
-        numWrong += result.third;
-        if (result.fourth != null) {
-          firstErrors.add(result.fourth);
-        }
+        TrainingResult result = wrapper.poll();
+        updates.addAll(result.updates);
+        numCorrect += result.numCorrect;
+        numWrong += result.numWrong;
+        firstErrors.addAll(result.firstErrors);
       }
     }
-    return new Quadruple<>(updates, numCorrect, numWrong, firstErrors);
+    return new TrainingResult(updates, numCorrect, numWrong, firstErrors);
   }
 
 
@@ -549,7 +548,7 @@ public class PerceptronModel extends BaseModel  {
       oracle = new Oracle(trainingData, op.compoundUnaries, rootStates, rootOnlyStates);
     }
 
-    MulticoreWrapper<TrainingExample, Quadruple<List<TrainingUpdate>, Integer, Integer, Pair<Integer, Integer>>> wrapper = null;
+    MulticoreWrapper<TrainingExample, TrainingResult> wrapper = null;
     if (nThreads != 1) {
       wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new TrainTreeProcessor(oracle));
     }
@@ -575,18 +574,18 @@ public class PerceptronModel extends BaseModel  {
       log.info("Original list " + trainingData.size() + "; augmented " + augmentedData.size());
       for (int start = 0; start < augmentedData.size(); start += op.trainOptions.batchSize) {
         int end = Math.min(start + op.trainOptions.batchSize, augmentedData.size());
-        Quadruple<List<TrainingUpdate>, Integer, Integer, List<Pair<Integer, Integer>>> result = trainBatch(augmentedData.subList(start, end), oracle, wrapper);
+        TrainingResult result = trainBatch(augmentedData.subList(start, end), oracle, wrapper);
 
-        numCorrect += result.second;
-        numWrong += result.third;
-        for (Pair<Integer, Integer> firstError : result.fourth) {
+        numCorrect += result.numCorrect;
+        numWrong += result.numWrong;
+        for (Pair<Integer, Integer> firstError : result.firstErrors) {
           firstErrors.incrementCount(firstError);
         }
-        if (numWrong < result.fourth.size()) {
-          log.error("WTF " + numWrong + " " + result.fourth);
+        if (numWrong < result.firstErrors.size()) {
+          log.error("WTF " + numWrong + " " + result.firstErrors.size());
         }
 
-        for (TrainingUpdate update : result.first) {
+        for (TrainingUpdate update : result.updates) {
           for (String feature : update.features) {
             if (allowedFeatures != null && !allowedFeatures.contains(feature)) {
               continue;
