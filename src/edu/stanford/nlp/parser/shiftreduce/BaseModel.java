@@ -172,8 +172,7 @@ public abstract class BaseModel implements Serializable {
    * @param serializedPath Where serialized models go.  If the appropriate options are set, the method can use this to save intermediate models.
    * @param tagger The tagger to use when evaluating devTreebank.  TODO: it would make more sense for ShiftReduceParser to retag the trees first
    * @param random A random number generator to use for any random numbers.  Useful to make sure results can be reproduced.
-   * @param binarizedTrainTrees The treebank to train from.
-   * @param transitionLists binarizedTrainTrees converted into lists of transitions that will reproduce the same tree.
+   * @param trainingData The treebank to train from, along with lists of transitions that will reproduce the same trees.
    * @param devTreebank a set of trees which can be used for dev testing (assuming the user provided a dev treebank)
    * @param nThreads how many threads the model can use for training
    */
