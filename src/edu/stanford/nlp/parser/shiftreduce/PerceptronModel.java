@@ -526,7 +526,7 @@ public class PerceptronModel extends BaseModel  {
    * <br>
    * TODO: make constants out of 10, 0.5, etc
    */
-  void augmentData(List<TrainingExample> augmentedData, List<TrainingExample> trainingData, Random random) {
+  static void augmentData(List<TrainingExample> augmentedData, List<TrainingExample> trainingData, Random random) {
     for (TrainingExample example : trainingData) {
       if (example.transitions.size() > 10 && random.nextDouble() < 0.5) {
         int pivot = random.nextInt(example.transitions.size() - 10) + 7;
@@ -725,7 +725,7 @@ public class PerceptronModel extends BaseModel  {
     condenseFeatures();
   }
 
-  Set<String> pruneFeatures(Set<String> features, Random random, double drop) {
+  static Set<String> pruneFeatures(Set<String> features, Random random, double drop) {
     Set<String> prunedFeatures = new HashSet<>();
     for (String feature : features) {
       if (random.nextDouble() > drop) {
