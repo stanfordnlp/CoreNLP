@@ -2,6 +2,7 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -534,6 +535,21 @@ public class PerceptronModel extends BaseModel  {
   }
 
 
+  /**
+   * This increases f1 slightly, probably by letting the parser know
+   * what to do in situations it doesn't get to during the training.
+   * <br>
+   * TODO: make constants out of 10, 0.5, etc
+   */
+  void augmentData(List<TrainingExample> augmentedData, List<TrainingExample> trainingData, Random random) {
+    for (TrainingExample example : trainingData) {
+      if (example.transitions.size() > 10 && random.nextDouble() < 0.5) {
+        int pivot = random.nextInt(example.transitions.size() - 10) + 7;
+        augmentedData.add(new TrainingExample(example.binarizedTree, example.transitions, pivot));
+      }
+    }
+  }
+
   private void trainModel(String serializedPath, Tagger tagger, Random random, List<TrainingExample> trainingData, Treebank devTreebank, int nThreads, Set<String> allowedFeatures) {
     double bestScore = 0.0;
     int bestIteration = 0;
@@ -567,10 +583,13 @@ public class PerceptronModel extends BaseModel  {
       int numWrong = 0;
       IntCounter<Pair<Integer, Integer>> firstErrors = new IntCounter<>();
 
-      Collections.shuffle(trainingData, random);
-      for (int start = 0; start < trainingData.size(); start += op.trainOptions.batchSize) {
-        int end = Math.min(start + op.trainOptions.batchSize, trainingData.size());
-        Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> result = trainBatch(trainingData.subList(start, end), oracle, wrapper);
+      List<TrainingExample> augmentedData = new ArrayList<TrainingExample>(trainingData);
+      augmentData(augmentedData, trainingData, random);
+      Collections.shuffle(augmentedData, random);
+      log.info("Original list " + trainingData.size() + "; augmented " + augmentedData.size());
+      for (int start = 0; start < augmentedData.size(); start += op.trainOptions.batchSize) {
+        int end = Math.min(start + op.trainOptions.batchSize, augmentedData.size());
+        Quadruple<List<Update>, Integer, Integer, List<Pair<Integer, Integer>>> result = trainBatch(augmentedData.subList(start, end), oracle, wrapper);
 
         numCorrect += result.second;
         numWrong += result.third;
