@@ -535,6 +535,28 @@ public class PerceptronModel extends BaseModel  {
     }
   }
 
+  /**
+   * Output the top 9 transition errors made by the model during training.
+   * <br>
+   * Creates a copy so that the original counter is unchanged
+   */
+  private void outputFirstErrors(IntCounter<Pair<Integer, Integer>> firstErrors) {
+    if (firstErrors == null || firstErrors.size() == 0)
+      return;
+
+    IntCounter<Pair<Integer, Integer>> firstErrorCopy = new IntCounter<>(firstErrors);
+
+    log.info("Most common transition errors: gold -> predicted");
+    for (int i = 0; i < 9 && firstErrorCopy.size() > 0; ++i) {
+      Pair<Integer, Integer> mostCommon = firstErrorCopy.argmax();
+      int count = firstErrorCopy.max();
+      firstErrorCopy.decrementCount(mostCommon, count);
+      Transition predicted = transitionIndex.get(mostCommon.first());
+      Transition gold = transitionIndex.get(mostCommon.second());
+      log.info("  # " + (i+1) + ": " + gold + " -> " + predicted + " happened " + firstErrorCopy.max() + " times");
+    }
+  }
+
   private void trainModel(String serializedPath, Tagger tagger, Random random, List<TrainingExample> trainingData, Treebank devTreebank, int nThreads, Set<String> allowedFeatures) {
     double bestScore = 0.0;
     int bestIteration = 0;
@@ -557,8 +579,9 @@ public class PerceptronModel extends BaseModel  {
     if (op.trainOptions().featureFrequencyCutoff > 1 && allowedFeatures == null) {
       // allowedFeatures != null means we already filtered rare
       // features once.  Sometimes the exact features found are
-      // different depending on how the learning proceeds..  The
-      // second time around, we will allow rare features to exist
+      // different depending on how the learning proceeds.  The second
+      // time training, we only allow rare features to exist if they
+      // met the threshold established the first time around
       featureFrequencies = new IntCounter<>();
     }
 
@@ -622,17 +645,7 @@ public class PerceptronModel extends BaseModel  {
       trainingTimer.done("Iteration " + iteration);
       log.info("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
       outputStats();
-      if (firstErrors.size() > 0) {
-        log.info("Most common transition errors:");
-        for (int i = 0; i < 9 && firstErrors.size() > 0; ++i) {
-          Pair<Integer, Integer> mostCommon = firstErrors.argmax();
-          int count = firstErrors.max();
-          firstErrors.decrementCount(mostCommon, count);
-          Transition predicted = transitionIndex.get(mostCommon.first());
-          Transition gold = transitionIndex.get(mostCommon.second());
-          log.info("  # " + (i+1) + ": " + gold + " -> " + predicted + " happened " + firstErrors.max() + " times");
-        }
-      }
+      outputFirstErrors(firstErrors);
 
       double labelF1 = 0.0;
       if (devTreebank != null) {
