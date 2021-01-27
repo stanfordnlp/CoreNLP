@@ -725,6 +725,11 @@ public class PerceptronModel extends BaseModel  {
     condenseFeatures();
   }
 
+  /**
+   * Randomly drop a fraction of the features.  Return a set of the features being kept.
+   * <br>
+   * Useful for training shards of the perceptron, for example
+   */
   static Set<String> pruneFeatures(Set<String> features, Random random, double drop) {
     Set<String> prunedFeatures = new HashSet<>();
     for (String feature : features) {
@@ -745,6 +750,15 @@ public class PerceptronModel extends BaseModel  {
    * Will train the model on the given treebank, using devTreebank as
    * a dev set.  If op.retrainAfterCutoff is set, will rerun training
    * after the first time through on a limited set of features.
+   *<br>
+   * TODO: why not go from the trainingData to the derived Sets here
+   *
+   * @param op The options used to initialize the parser
+   * @param transitionIndex precalculated transitions from the training data
+   * @param knownStates the states in the training data
+   * @param rootStates states which occur at the top of the trees
+   * @param rootOnlyStates states which ONLY occur at the top of the trees
+   * @param initialModel if training a continuation, use this model as the starting point
    *
    * @param serializedPath Where serialized models go.  If the appropriate options are set, the method can use this to save intermediate models.
    * @param tagger The tagger to use when evaluating devTreebank.  TODO: it would make more sense for ShiftReduceParser to retag the trees first
