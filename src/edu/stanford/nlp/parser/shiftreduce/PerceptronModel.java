@@ -476,12 +476,10 @@ public class PerceptronModel extends BaseModel  {
   /**
    * This increases f1 slightly, probably by letting the parser know
    * what to do in situations it doesn't get to during the training.
-   * <br>
-   * TODO: make constants out of 10, 0.5, etc
    */
-  static void augmentData(List<TrainingExample> augmentedData, List<TrainingExample> trainingData, Random random) {
+  static void augmentSubsentences(List<TrainingExample> augmentedData, List<TrainingExample> trainingData, Random random, float augmentFraction) {
     for (TrainingExample example : trainingData) {
-      if (example.transitions.size() > 10 && random.nextDouble() < 0.5) {
+      if (example.transitions.size() > 10 && random.nextDouble() < augmentFraction) {
         int pivot = random.nextInt(example.transitions.size() - 10) + 7;
         augmentedData.add(new TrainingExample(example.binarizedTree, example.transitions, pivot));
       }
@@ -540,9 +538,10 @@ public class PerceptronModel extends BaseModel  {
       IntCounter<Pair<Integer, Integer>> firstErrors = new IntCounter<>();
 
       List<TrainingExample> augmentedData = new ArrayList<TrainingExample>(trainingData);
-      augmentData(augmentedData, trainingData, random);
+      augmentSubsentences(augmentedData, trainingData, random, op.trainOptions().augmentSubsentences);
       Collections.shuffle(augmentedData, random);
       log.info("Original list " + trainingData.size() + "; augmented " + augmentedData.size());
+
       for (int start = 0; start < augmentedData.size(); start += op.trainOptions.batchSize) {
         int end = Math.min(start + op.trainOptions.batchSize, augmentedData.size());
         TrainingResult result = trainBatch(augmentedData.subList(start, end), wrapper);

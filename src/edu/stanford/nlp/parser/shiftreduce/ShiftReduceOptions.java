@@ -114,6 +114,9 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-retrainShardFeatureDrop")) {
       trainOptions().retrainShardFeatureDrop = Double.parseDouble(args[i + 1]);
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-augmentSubsentences")) {
+      trainOptions().augmentSubsentences = Float.parseFloat(args[i + 1]);
+      i += 2;
     }
     return i;
   }
