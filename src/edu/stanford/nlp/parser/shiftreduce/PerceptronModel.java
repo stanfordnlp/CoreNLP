@@ -238,9 +238,8 @@ public class PerceptronModel extends BaseModel  {
    * index: the tree to train
    * binarizedTrees: a list of all the training trees we know about, binarized
    * transitionLists: a list of pre-assembled transitions for the trees
-   * oracle: if training method ORACLE is used, the oracle to use for predicting transitions
    */
-  private TrainingResult trainTree(TrainingExample example, Oracle oracle) {
+  private TrainingResult trainTree(TrainingExample example) {
     int numCorrect = 0;
     int numWrong = 0;
 
@@ -255,50 +254,8 @@ public class PerceptronModel extends BaseModel  {
       reorderer = new ReorderingOracle(op, rootOnlyStates);
     }
 
-    // TODO.  This training method seems to be working in that it
-    // trains models just like the gold and early termination methods do.
-    // However, it causes the feature space to go crazy.  Presumably
-    // leaving out features with low weights or low frequencies would
-    // significantly help with that.  Otherwise, not sure how to keep
-    // it under control.
-    if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.ORACLE) {
-      State state = example.initialStateFromGoldTagTree();
-      while (!state.isFinished()) {
-        List<String> features = featureFactory.featurize(state);
-        ScoredObject<Integer> prediction = findHighestScoringTransition(state, features, true);
-        if (prediction == null) {
-          throw new AssertionError("Did not find a legal transition");
-        }
-        int predictedNum = prediction.object();
-        Transition predicted = transitionIndex.get(predictedNum);
-        OracleTransition gold = oracle.goldTransition(example, state);
-        if (gold.isCorrect(predicted)) {
-          numCorrect++;
-          if (gold.transition != null && !gold.transition.equals(predicted)) {
-            int transitionNum = transitionIndex.indexOf(gold.transition);
-            if (transitionNum < 0) {
-              // TODO: do we want to add unary transitions which are
-              // only possible when the parser has gone off the rails?
-              continue;
-            }
-            updates.add(new TrainingUpdate(features, transitionNum, -1, learningRate));
-          }
-        } else {
-          numWrong++;
-          int transitionNum = -1;
-          if (gold.transition != null) {
-            transitionNum = transitionIndex.indexOf(gold.transition);
-            // TODO: this can theoretically result in a -1 gold
-            // transition if the transition exists, but is a
-            // CompoundUnaryTransition which only exists because the
-            // parser is wrong.  Do we want to add those transitions?
-          }
-          updates.add(new TrainingUpdate(features, transitionNum, predictedNum, learningRate));
-        }
-        state = predicted.apply(state);
-      }
-    } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM ||
-               op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
+    if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM ||
+        op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
       if (op.trainOptions().beamSize <= 0) {
         throw new IllegalArgumentException("Illegal beam size " + op.trainOptions().beamSize);
       }
@@ -451,15 +408,11 @@ public class PerceptronModel extends BaseModel  {
   }
 
   private class TrainTreeProcessor implements ThreadsafeProcessor<TrainingExample, TrainingResult> {
-    Oracle oracle;
-
-    public TrainTreeProcessor(Oracle oracle) {
-      this.oracle = oracle;
-    }
+    public TrainTreeProcessor() { }
 
     @Override
     public TrainingResult process(TrainingExample example) {
-      return trainTree(example, oracle);
+      return trainTree(example);
     }
 
     @Override
@@ -480,14 +433,14 @@ public class PerceptronModel extends BaseModel  {
    * trees without updating any weights, which allows the results for
    * multithreaded training to be reproduced.
    */
-  private TrainingResult trainBatch(List<TrainingExample> trainingData, Oracle oracle, MulticoreWrapper<TrainingExample, TrainingResult> wrapper) {
+  private TrainingResult trainBatch(List<TrainingExample> trainingData, MulticoreWrapper<TrainingExample, TrainingResult> wrapper) {
     int numCorrect = 0;
     int numWrong = 0;
     final List<TrainingUpdate> updates = Generics.newArrayList();
     final List<Pair<Integer, Integer>> firstErrors = Generics.newArrayList();
     if (op.trainOptions.trainingThreads == 1) {
       for (TrainingExample example : trainingData) {
-        TrainingResult result = trainTree(example, oracle);
+        TrainingResult result = trainTree(example);
         updates.addAll(result.updates);
         numCorrect += result.numCorrect;
         numWrong += result.numWrong;
@@ -565,14 +518,9 @@ public class PerceptronModel extends BaseModel  {
       bestModels = new PriorityQueue<>(op.trainOptions().averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
     }
 
-    Oracle oracle = null;
-    if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.ORACLE) {
-      oracle = new Oracle(trainingData, op.compoundUnaries, rootStates, rootOnlyStates);
-    }
-
     MulticoreWrapper<TrainingExample, TrainingResult> wrapper = null;
     if (nThreads != 1) {
-      wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new TrainTreeProcessor(oracle));
+      wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new TrainTreeProcessor());
     }
 
     IntCounter<String> featureFrequencies = null;
@@ -597,7 +545,7 @@ public class PerceptronModel extends BaseModel  {
       log.info("Original list " + trainingData.size() + "; augmented " + augmentedData.size());
       for (int start = 0; start < augmentedData.size(); start += op.trainOptions.batchSize) {
         int end = Math.min(start + op.trainOptions.batchSize, augmentedData.size());
-        TrainingResult result = trainBatch(augmentedData.subList(start, end), oracle, wrapper);
+        TrainingResult result = trainBatch(augmentedData.subList(start, end), wrapper);
 
         numCorrect += result.numCorrect;
         numWrong += result.numWrong;
