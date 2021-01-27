@@ -90,13 +90,13 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
   final ShiftReduceOptions op;
 
-  BaseModel model;
+  PerceptronModel model;
 
   public ShiftReduceParser(ShiftReduceOptions op) {
     this(op, null);
   }
 
-  public ShiftReduceParser(ShiftReduceOptions op, BaseModel model) {
+  public ShiftReduceParser(ShiftReduceOptions op, PerceptronModel model) {
     this.op = op;
     this.model = model;
   }
@@ -561,10 +561,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
       devTreebank = readTreebank(devTreebankPath.first(), devTreebankPath.second());
     }
 
-    if (this.model == null) {
-      this.model = new PerceptronModel(this.op, transitionIndex, knownStates, rootStates, rootOnlyStates);
-    }
-    this.model.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads);
+    this.model = PerceptronModel.trainModel(this.op, transitionIndex, knownStates, rootStates, rootOnlyStates, this.model,
+                                            serializedPath, tagger, random, trainingData, devTreebank, nThreads);
   }
 
   @Override

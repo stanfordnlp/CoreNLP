@@ -753,40 +753,67 @@ public class PerceptronModel extends BaseModel  {
    * @param devTreebank a set of trees which can be used for dev testing (assuming the user provided a dev treebank)
    * @param nThreads how many threads the model can use for training
    */
-  @Override
-  public void trainModel(String serializedPath, Tagger tagger, Random random, List<TrainingExample> trainingData, Treebank devTreebank, int nThreads) {
+  public static PerceptronModel trainModel(ShiftReduceOptions op,
+                                           Index<Transition> transitionIndex,
+                                           Set<String> knownStates,
+                                           Set<String> rootStates,
+                                           Set<String> rootOnlyStates,
+                                           PerceptronModel initialModel,
+                                           String serializedPath,
+                                           Tagger tagger,
+                                           Random random,
+                                           List<TrainingExample> trainingData,
+                                           Treebank devTreebank,
+                                           int nThreads) {
+    if (initialModel == null) {
+      initialModel = new PerceptronModel(op, transitionIndex, knownStates, rootStates, rootOnlyStates);
+    }
+
     if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0 ||
         op.trainOptions().retrainShards > 1) {
       String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
-      trainModel(tempName, tagger, random, trainingData, devTreebank, nThreads, null);
-      ShiftReduceParser temp = new ShiftReduceParser(op, this);
-      temp.saveModel(tempName);
+      PerceptronModel currentModel = new PerceptronModel(initialModel);
+      currentModel.trainModel(tempName, tagger, random, trainingData, devTreebank, nThreads, null);
+
+      if (op.trainOptions().saveIntermediateModels) {
+        ShiftReduceParser temp = new ShiftReduceParser(op, currentModel);
+        temp.saveModel(tempName);
+      }
+
       log.info("Beginning retraining");
-      Set<String> features = featureWeights.keySet();
-      featureWeights = Generics.newHashMap();
-      trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, features);
+      Set<String> allowedFeatures = currentModel.featureWeights.keySet();
+
+      currentModel = new PerceptronModel(initialModel);
+      currentModel.filterFeatures(allowedFeatures);
+      currentModel.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, allowedFeatures);
 
       // If we only had one train shard, we are now done.  Otherwise,
       // we retrain N-1 more times, each time dropping a fraction of
       // the features.
       if (op.trainOptions().retrainShards > 1) {
         List<PerceptronModel> shards = Generics.newArrayList();
-        shards.add(new PerceptronModel(this));
+        shards.add(currentModel);
 
         for (int i = 1; i < op.trainOptions().retrainShards; ++i) {
           log.info("Beginning retraining of shard " + (i+1));
-          Set<String> prunedFeatures = pruneFeatures(features, random, op.trainOptions().retrainShardFeatureDrop);
-          featureWeights = Generics.newHashMap();
-          trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, prunedFeatures);
-          shards.add(new PerceptronModel(this));
+          Set<String> prunedFeatures = pruneFeatures(allowedFeatures, random, op.trainOptions().retrainShardFeatureDrop);
+          currentModel = new PerceptronModel(initialModel);
+          currentModel.filterFeatures(prunedFeatures);
+          currentModel.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, prunedFeatures);
+          shards.add(currentModel);
         }
         log.info("Averaging " + op.trainOptions().retrainShards + " shards");
-        averageModels(shards);
-        condenseFeatures();
-        evaluate(tagger, devTreebank, "Label F1 for " + op.trainOptions().retrainShards + " averaged shards");
+        currentModel = new PerceptronModel(initialModel);
+        currentModel.averageModels(shards);
+        currentModel.condenseFeatures();
+        currentModel.evaluate(tagger, devTreebank, "Label F1 for " + op.trainOptions().retrainShards + " averaged shards");
       }
+
+      return currentModel;
     } else {
-      trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, null);
+      PerceptronModel currentModel = new PerceptronModel(initialModel);
+      currentModel.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, null);
+      return currentModel;
     }
   }
 
