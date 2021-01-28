@@ -273,6 +273,9 @@ public class PerceptronModel extends BaseModel  {
         double highestScoreFromGoldState = 0.0;
         PriorityQueue<State> newAgenda = new PriorityQueue<>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
         State highestScoringState = null;
+        // keep track of the state in the current agenda which leads
+        // to the highest score on the next agenda.  this will be
+        // trained down assuming it is not the correct state
         State highestCurrentState = null;
         for (State currentState : agenda) {
           // TODO: can maybe speed this part up, although it doesn't seem like a critical part of the runtime
