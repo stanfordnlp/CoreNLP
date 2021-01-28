@@ -254,6 +254,9 @@ public class PerceptronModel extends BaseModel  {
       reorderer = new ReorderingOracle(op, rootOnlyStates);
     }
 
+    int reorderSuccess = 0;
+    int reorderFail = 0;
+
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM ||
         op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
       if (op.trainOptions().beamSize <= 0) {
@@ -263,7 +266,7 @@ public class PerceptronModel extends BaseModel  {
       State goldState = example.initialStateFromGoldTagTree();
       List<Transition> transitions = example.trainTransitions();
       agenda.add(goldState);
-      // int transitionCount = 0;
+
       while (transitions.size() > 0) {
         Transition goldTransition = transitions.get(0);
         Transition highestScoringTransitionFromGoldState = null;
@@ -272,8 +275,8 @@ public class PerceptronModel extends BaseModel  {
         State highestScoringState = null;
         State highestCurrentState = null;
         for (State currentState : agenda) {
-          boolean isGoldState = (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM &&
-                                 goldState.areTransitionsEqual(currentState));
+          // TODO: can maybe speed this part up, although it doesn't seem like a critical part of the runtime
+          boolean isGoldState = goldState.areTransitionsEqual(currentState);
 
           List<String> features = featureFactory.featurize(currentState);
           Collection<ScoredObject<Integer>> stateTransitions = findHighestScoringTransitions(currentState, features, true, op.trainOptions().beamSize, null);
@@ -318,6 +321,18 @@ public class PerceptronModel extends BaseModel  {
 
         State newGoldState = goldTransition.apply(goldState, 0.0);
 
+        if (firstError == null && !highestScoringTransitionFromGoldState.equals(goldTransition)) {
+          int predictedIndex = transitionIndex.indexOf(highestScoringTransitionFromGoldState);
+          int goldIndex = transitionIndex.indexOf(goldTransition);
+          if (predictedIndex < 0) {
+            throw new AssertionError("Predicted transition not in the index: " + highestScoringTransitionFromGoldState);
+          }
+          if (goldIndex < 0) {
+            throw new AssertionError("Gold transition not in the index: " + goldTransition);
+          }
+          firstError = new Pair<>(predictedIndex, goldIndex);
+        }
+
         // if highest scoring state used the correct transition, no training
         // otherwise, down the last transition, up the correct
         if (!newGoldState.areTransitionsEqual(highestScoringState)) {
@@ -337,12 +352,15 @@ public class PerceptronModel extends BaseModel  {
           } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
             if (!ShiftReduceUtils.findStateOnAgenda(newAgenda, newGoldState)) {
               if (!reorderer.reorder(goldState, highestScoringTransitionFromGoldState, transitions)) {
+                if (reorderSuccess == 0) reorderFail = 1;
                 break;
               }
               newGoldState = highestScoringTransitionFromGoldState.apply(goldState);
               if (!ShiftReduceUtils.findStateOnAgenda(newAgenda, newGoldState)) {
+                if (reorderSuccess == 0) reorderFail = 1;
                 break;
               }
+              reorderSuccess = 1;
             } else {
               transitions.remove(0);
             }
@@ -391,6 +409,9 @@ public class PerceptronModel extends BaseModel  {
             keepGoing = reorderer.reorder(state, predicted, transitions);
             if (keepGoing) {
               state = predicted.apply(state);
+              reorderSuccess = 1;
+            } else if (reorderSuccess == 0) {
+              reorderFail = 1;
             }
             break;
           default:
@@ -403,7 +424,7 @@ public class PerceptronModel extends BaseModel  {
     if (firstError == null) {
       return new TrainingResult(updates, numCorrect, numWrong);
     } else {
-      return new TrainingResult(updates, numCorrect, numWrong, firstError);
+      return new TrainingResult(updates, numCorrect, numWrong, firstError, reorderSuccess, reorderFail);
     }
   }
 
@@ -438,6 +459,7 @@ public class PerceptronModel extends BaseModel  {
     int numWrong = 0;
     final List<TrainingUpdate> updates = Generics.newArrayList();
     final List<Pair<Integer, Integer>> firstErrors = Generics.newArrayList();
+    int reorderSuccess = 0, reorderFail = 0;
     if (op.trainOptions.trainingThreads == 1) {
       for (TrainingExample example : trainingData) {
         TrainingResult result = trainTree(example);
@@ -445,6 +467,8 @@ public class PerceptronModel extends BaseModel  {
         numCorrect += result.numCorrect;
         numWrong += result.numWrong;
         firstErrors.addAll(result.firstErrors);
+        reorderSuccess += result.reorderSuccess;
+        reorderFail += result.reorderFail;
       }
     } else {
       for (TrainingExample example : trainingData) {
@@ -457,9 +481,11 @@ public class PerceptronModel extends BaseModel  {
         numCorrect += result.numCorrect;
         numWrong += result.numWrong;
         firstErrors.addAll(result.firstErrors);
+        reorderSuccess += result.reorderSuccess;
+        reorderFail += result.reorderFail;
       }
     }
-    return new TrainingResult(updates, numCorrect, numWrong, firstErrors);
+    return new TrainingResult(updates, numCorrect, numWrong, firstErrors, reorderSuccess, reorderFail);
   }
 
 
@@ -508,6 +534,14 @@ public class PerceptronModel extends BaseModel  {
     }
   }
 
+  private void outputReordererStats(int numReorderSuccess, int numReorderFail) {
+    if (numReorderSuccess == 0 && numReorderFail == 0)
+      return;
+
+    log.info("Reorderer successfully operated at least once on " + numReorderSuccess +
+             " training trees and failed to do anything useful on " + numReorderFail + " trees");
+  }
+
   private void trainModel(String serializedPath, Tagger tagger, Random random, List<TrainingExample> trainingData, Treebank devTreebank, int nThreads, Set<String> allowedFeatures) {
     double bestScore = 0.0;
     int bestIteration = 0;
@@ -537,6 +571,10 @@ public class PerceptronModel extends BaseModel  {
       int numWrong = 0;
       IntCounter<Pair<Integer, Integer>> firstErrors = new IntCounter<>();
 
+      // Stats on the Reordering Oracle might be nice, when available
+      int numReorderSuccess = 0;
+      int numReorderFail = 0;
+
       List<TrainingExample> augmentedData = new ArrayList<TrainingExample>(trainingData);
       augmentSubsentences(augmentedData, trainingData, random, op.trainOptions().augmentSubsentences);
       Collections.shuffle(augmentedData, random);
@@ -548,6 +586,8 @@ public class PerceptronModel extends BaseModel  {
 
         numCorrect += result.numCorrect;
         numWrong += result.numWrong;
+        numReorderSuccess += result.reorderSuccess;
+        numReorderFail += result.reorderFail;
         for (Pair<Integer, Integer> firstError : result.firstErrors) {
           firstErrors.incrementCount(firstError);
         }
@@ -593,6 +633,7 @@ public class PerceptronModel extends BaseModel  {
       log.info("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
       outputStats();
       outputFirstErrors(firstErrors);
+      outputReordererStats(numReorderSuccess, numReorderFail);
 
       double labelF1 = 0.0;
       if (devTreebank != null) {
