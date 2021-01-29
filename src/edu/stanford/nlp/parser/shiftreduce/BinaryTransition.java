@@ -155,6 +155,9 @@ public class BinaryTransition implements Transition {
         continue;
       }
       // can't transition to a binarized node when there's a constraint that matches.
+      // the problem here is there is no way to transition to a tree that matches the
+      // constraint - unary transitions are not allowed from temporary, and binary
+      // transitions will make the subtree larger than the constraint
       if (rightTop == constraint.end - 1 && isBinarized()) {
         return false;
       }
