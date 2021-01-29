@@ -83,6 +83,14 @@ public class ShiftTransition implements Transition {
     return new State(state.stack.push(tagNode), state.transitions.push(this), state.separators, state.sentence, state.tokenPosition + 1, state.score + scoreDelta, false);
   }
 
+  /**
+   * Increases the stack size
+   */
+  @Override
+  public int stackSizeChange() {
+    return +1;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == this) {

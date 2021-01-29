@@ -14,6 +14,8 @@ import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.HashIndex;
+import edu.stanford.nlp.util.Index;
 
 /**
  * Test the results that come back when you run the ReorderingOracle
@@ -53,7 +55,7 @@ public class ReorderingOracleTest extends TestCase {
   };
   List<Tree> binarizedTrees; // initialized in setUp
 
-  ReorderingOracle oracle = new ReorderingOracle(new ShiftReduceOptions(), Collections.singleton("ROOT"));
+  ReorderingOracle oracle;
   
   Tree[] incorrectShiftTrees = { 
     Tree.valueOf("(ROOT (S (PRP$ My) (NN dog) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))"),
@@ -69,6 +71,29 @@ public class ReorderingOracleTest extends TestCase {
     
     treebank.addAll(Arrays.asList(correctTrees));
     binarizedTrees = ShiftReduceParser.binarizeTreebank(treebank, op);
+
+    Index<Transition> transitionIndex = new HashIndex<>();
+    transitionIndex.add(finalize);
+    transitionIndex.add(shift);
+
+    transitionIndex.add(rightNP);
+    transitionIndex.add(tempRightNP);
+    transitionIndex.add(leftNP);
+    transitionIndex.add(tempLeftNP);
+
+    transitionIndex.add(rightVP);
+    transitionIndex.add(tempRightVP);
+    transitionIndex.add(leftVP);
+    transitionIndex.add(tempLeftVP);
+
+    transitionIndex.add(rightS);
+    transitionIndex.add(tempRightS);
+    transitionIndex.add(leftS);
+    transitionIndex.add(tempLeftS);
+
+    transitionIndex.add(unaryADVP);
+
+    oracle = new ReorderingOracle(new ShiftReduceOptions(), Collections.singleton("ROOT"), transitionIndex);
   }
   
   public List<Transition> buildTransitionList(Transition ... transitions) {

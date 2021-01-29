@@ -28,6 +28,14 @@ public class IdleTransition implements Transition {
     return new State(state.stack, state.transitions.push(this), state.separators, state.sentence, state.tokenPosition, state.score + scoreDelta, state.finished);
   }
 
+  /**
+   * Does not change the stack size
+   */
+  @Override
+  public int stackSizeChange() {
+    return 0;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == this) {

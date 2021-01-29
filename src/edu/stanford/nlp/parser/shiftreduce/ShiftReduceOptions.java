@@ -120,6 +120,9 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-augmentSubsentences")) {
       trainOptions().augmentSubsentences = Float.parseFloat(args[i + 1]);
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-learnExtraTransitions")) {
+      trainOptions().learnExtraTransitions = true;
+      i++;
     }
     return i;
   }

@@ -120,6 +120,14 @@ public class CompoundUnaryTransition implements Transition {
     return new State(stack, state.transitions.push(this), state.separators, state.sentence, state.tokenPosition, state.score + scoreDelta, false);
   }
 
+  /**
+   * Does not change the stack size
+   */
+  @Override
+  public int stackSizeChange() {
+    return 0;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == this) {

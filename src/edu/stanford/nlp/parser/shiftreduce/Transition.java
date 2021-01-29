@@ -29,4 +29,11 @@ public interface Transition extends Serializable {
    * Applies this transition to get a new state.
    */
   public State apply(State state, double scoreDelta);
+
+  /**
+   * How much the stack size changes because of this transition.
+   * Multiple processes in these models tries to estimate when the
+   * stack will be empty, for example
+   */
+  public int stackSizeChange();
 }

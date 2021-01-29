@@ -369,6 +369,12 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
     }
   }
 
+  public void addAll(List<E> items) {
+    for (E item : items) {
+      incrementCount(item);
+    }
+  }
+
   /**
    * Subtracts the counts in the given Counter from the counts in this Counter.
    * <p>

@@ -217,6 +217,14 @@ public class BinaryTransition implements Transition {
     return new State(stack, state.transitions.push(this), state.separators, state.sentence, state.tokenPosition, state.score + scoreDelta, false);
   }
 
+  /**
+   * Replaces two items on the stack with one item total
+   */
+  @Override
+  public int stackSizeChange() {
+    return -1;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == this) {

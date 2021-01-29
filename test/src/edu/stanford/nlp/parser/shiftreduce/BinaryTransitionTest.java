@@ -64,7 +64,7 @@ public class BinaryTransitionTest extends TestCase {
     checkHeads(state.stack.peek(), state.stack.peek().children()[1]);
   }
 
-  public void checkHeads(Tree t1, Tree t2) {
+  public static void checkHeads(Tree t1, Tree t2) {
     assertTrue(t1.label() instanceof CoreLabel);
     assertTrue(t2.label() instanceof CoreLabel);
 

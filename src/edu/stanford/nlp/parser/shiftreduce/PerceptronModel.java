@@ -5,6 +5,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +27,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
@@ -187,9 +190,7 @@ public class PerceptronModel extends BaseModel  {
     log.info("Number of transitions: " + transitionIndex.size());
 
     IntCounter<Pair<Integer, Integer>> firstErrors = new IntCounter<>();
-    for (Pair<Integer, Integer> firstError : result.firstErrors) {
-      firstErrors.incrementCount(firstError);
-    }
+    firstErrors.addAll(result.firstErrors);
 
     outputFirstErrors(firstErrors);
     outputReordererStats(result.reorderSuccess, result.reorderFail);
@@ -281,7 +282,7 @@ public class PerceptronModel extends BaseModel  {
     ReorderingOracle reorderer = null;
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
         op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
-      reorderer = new ReorderingOracle(op, rootOnlyStates);
+      reorderer = new ReorderingOracle(op, rootOnlyStates, transitionIndex);
     }
 
     int reorderSuccess = 0;
@@ -523,13 +524,16 @@ public class PerceptronModel extends BaseModel  {
    * This increases f1 slightly, probably by letting the parser know
    * what to do in situations it doesn't get to during the training.
    */
-  static void augmentSubsentences(List<TrainingExample> augmentedData, List<TrainingExample> trainingData, Random random, float augmentFraction) {
+  static List<TrainingExample> augmentSubsentences(List<TrainingExample> trainingData, Random random, float augmentFraction) {
+    List<TrainingExample> augmentedData = new ArrayList<TrainingExample>(trainingData);
     for (TrainingExample example : trainingData) {
-      if (example.transitions.size() > 10 && random.nextDouble() < augmentFraction) {
-        int pivot = random.nextInt(example.transitions.size() - 10) + 7;
-        augmentedData.add(new TrainingExample(example.binarizedTree, example.transitions, pivot));
+      int window = 7 + example.numSkips;
+      if (example.transitions.size() > window + 3 && random.nextDouble() < augmentFraction) {
+        int numSkips = random.nextInt(example.transitions.size() - (window + 3)) + window;
+        augmentedData.add(new TrainingExample(example.binarizedTree, example.transitions, numSkips));
       }
     }
+    return augmentedData;
   }
 
   /**
@@ -586,13 +590,23 @@ public class PerceptronModel extends BaseModel  {
     log.info(StringUtils.join(wrong, "\n  "));
   }
 
-  private void trainModel(String serializedPath, Tagger tagger, Random random, List<TrainingExample> trainingData, Treebank devTreebank, int nThreads, Set<String> allowedFeatures) {
+  /**
+   * Currently, the only thing returned is a counter with the first
+   * errors at the best training iteration.  The idea is that this
+   * information can be used after partially training a model to
+   * figure out some new transitions to add to make the next version
+   * of the model better.
+   */
+  private IntCounter<Pair<Integer, Integer>> trainModel(String serializedPath, Tagger tagger, Random random, List<TrainingExample> trainingData, Treebank devTreebank, int nThreads, Set<String> allowedFeatures, int numIterations) {
     double bestScore = 0.0;
     int bestIteration = 0;
+
     PriorityQueue<ScoredObject<PerceptronModel>> bestModels = null;
     if (op.trainOptions().averagedModels > 0) {
       bestModels = new PriorityQueue<>(op.trainOptions().averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
     }
+
+    IntCounter<Pair<Integer, Integer>> bestFirstErrors = null;
 
     MulticoreWrapper<TrainingExample, TrainingResult> wrapper = null;
     if (nThreads != 1) {
@@ -609,12 +623,11 @@ public class PerceptronModel extends BaseModel  {
       featureFrequencies = new IntCounter<>();
     }
 
-    for (int iteration = 1; iteration <= op.trainOptions.trainingIterations; ++iteration) {
+    for (int iteration = 1; iteration <= numIterations; ++iteration) {
       Timing trainingTimer = new Timing();
       List<TrainingResult> results = new ArrayList<>();
 
-      List<TrainingExample> augmentedData = new ArrayList<TrainingExample>(trainingData);
-      augmentSubsentences(augmentedData, trainingData, random, op.trainOptions().augmentSubsentences);
+      List<TrainingExample> augmentedData = augmentSubsentences(trainingData, random, op.trainOptions().augmentSubsentences);
       Collections.shuffle(augmentedData, random);
       log.info("Original list " + trainingData.size() + "; augmented " + augmentedData.size());
 
@@ -658,7 +671,8 @@ public class PerceptronModel extends BaseModel  {
       }
 
       trainingTimer.done("Iteration " + iteration);
-      outputStats(new TrainingResult(results));
+      TrainingResult result = new TrainingResult(results);
+      outputStats(result);
 
       double labelF1 = 0.0;
       if (devTreebank != null) {
@@ -668,6 +682,8 @@ public class PerceptronModel extends BaseModel  {
           log.info("New best dev score (previous best " + bestScore + ")");
           bestScore = labelF1;
           bestIteration = iteration;
+          bestFirstErrors = new IntCounter<>();
+          bestFirstErrors.addAll(result.firstErrors);
         } else {
           log.info("Failed to improve for " + (iteration - bestIteration) + " iteration(s) on previous best score of " + bestScore);
           if (op.trainOptions.stalledIterationLimit > 0 && (iteration - bestIteration >= op.trainOptions.stalledIterationLimit)) {
@@ -738,6 +754,8 @@ public class PerceptronModel extends BaseModel  {
     }
 
     condenseFeatures();
+
+    return bestFirstErrors;
   }
 
   /**
@@ -759,6 +777,212 @@ public class PerceptronModel extends BaseModel  {
       }
     }
     return prunedFeatures;
+  }
+
+  static int findTransitionInList(List<Transition> transitions,
+                                  int start,
+                                  Predicate<Transition> pred) {
+    int index = start;
+    while (index < transitions.size()) {
+      if (pred.test(transitions.get(index))) {
+        return index;
+      }
+      index++;
+    }
+    return -1;
+  }
+
+  static int findClosingBinary(List<Transition> transitions, int start) {
+    int index = start;
+    int position = 0;
+    while (index < transitions.size()) {
+      int delta = transitions.get(index).stackSizeChange();
+      position = position + delta;
+      if (delta < 0 && position <= 0) {
+        break;
+      }
+      ++index;
+    }
+    if (position < 0) {
+      // this happens when the first BinaryTransition occurs before any ShiftTransitions.
+      return -1;
+    }
+    if (position > 0) {
+      throw new AssertionError("There should always be BinaryTransitions matching all of the ShiftTransitions found");
+    }
+    if (!(transitions.get(index) instanceof BinaryTransition)) {
+      throw new AssertionError("The above loop should have ended on a BinaryTransition");
+    }
+    return index;
+  }
+
+  static int chooseRandomTransition(List<Transition> transitions, Random random, Predicate<Transition> pred) {
+    int count = 0;
+    for (Transition t : transitions) {
+      if (pred.test(t)) {
+        ++count;
+      }
+    }
+    if (count == 0) {
+      return -1;
+    }
+    int chosen = random.nextInt(count) + 1;
+    int index = 0;
+    for (int i = 0; i < chosen; ++i) {
+      index = findTransitionInList(transitions, index, pred);
+    }
+    return index;
+  }
+
+  static TrainingExample newExtraShiftUnaryExample(TrainingExample example,
+                                                   List<Transition> shiftUnaryErrors,
+                                                   Map<Transition, RemoveUnaryTransition> removeUnaries,
+                                                   Random random,
+                                                   double ratio) {
+    // TODO: a worthwhile experiment would be to see if using the
+    // partially trained parser to predict the best places to put
+    // these new transitions improves the results
+    List<Transition> transitions = example.transitions;
+    // TODO: perhaps try to use some logic for where the UnaryTransition errors occur most commonly
+    int index = chooseRandomTransition(transitions, random, (x) -> (x instanceof BinaryTransition));
+    if (index < 0) {
+      return null;
+    }
+
+    int unaryIndex = index;
+    int position = 0;
+    while (unaryIndex > 0) {
+      --unaryIndex;
+      position = position + transitions.get(unaryIndex).stackSizeChange();
+      // When we have seen one more Shift than Binary, that means
+      // we have built the right side of the BinaryTransition we
+      // want to modify
+      if (position > 0) {
+        break;
+      }
+    }
+
+    if (unaryIndex <= 0) {
+      throw new AssertionError("Shouldn't fail to find the left side of the BinaryTransition.  Starting index: " + index + " Transition sequence: " + transitions.subList(0, index));
+    }
+    // At this point we have scrolled to before the right side of the Binary Transition
+    // If the previous transition is already (Compound?)UnaryTransition,
+    // we can't use this particular example
+    if ((transitions.get(unaryIndex - 1) instanceof UnaryTransition) ||
+        (transitions.get(unaryIndex - 1) instanceof CompoundUnaryTransition)) {
+      return null;
+    }
+
+    // Now we know that this is a suitable Example for making a new fake example out of
+    if (random.nextDouble() > ratio) {
+      // nah
+      return null;
+    }
+
+    List<Transition> fakeTransitions = new ArrayList<>();
+    fakeTransitions.addAll(transitions.subList(0, unaryIndex));
+    // randomly pick an error to pretend we made
+    Transition errorUnary = shiftUnaryErrors.get(random.nextInt(shiftUnaryErrors.size()));
+    RemoveUnaryTransition removeUnary = removeUnaries.get(errorUnary);
+    if (removeUnary == null) {
+      throw new AssertionError("All common shift->unary errors should be covered by a RemoveUnaryTransition");
+    }
+    fakeTransitions.add(errorUnary);
+    // add the remaining transitions until the BinaryTransition we wanted to learn how to fix
+    fakeTransitions.addAll(transitions.subList(unaryIndex, index));
+    fakeTransitions.add(removeUnary);
+    fakeTransitions.addAll(transitions.subList(index, transitions.size()));
+    return new TrainingExample(example.binarizedTree,
+                               fakeTransitions,
+                               unaryIndex+1);
+  }
+
+  static List<TrainingExample> extraShiftUnaryExamples(List<Transition> shiftUnaryErrors,
+                                                       Index<Transition> newTransitions,
+                                                       Map<Transition, RemoveUnaryTransition> removeUnaries,
+                                                       List<TrainingExample> trainingData,
+                                                       Random random,
+                                                       double ratio) {
+    List<TrainingExample> newExamples = new ArrayList<>();
+
+    for (TrainingExample example : trainingData) {
+      TrainingExample newExample = newExtraShiftUnaryExample(example, shiftUnaryErrors, removeUnaries, random, ratio);
+      if (newExample == null) {
+        continue;
+      }
+      //System.out.println("----- creating new transitions -----");
+      //System.out.println(example.transitions);
+      //System.out.println(newExample.transitions);
+      newExamples.add(newExample);
+    }
+    return newExamples;
+  }
+
+  static Map<Transition, RemoveUnaryTransition> buildRemoveUnaryMap(List<Transition> shiftUnaryErrors) {
+    Map<Transition, RemoveUnaryTransition> removeUnaries = new HashMap<>();
+    for (Transition t : shiftUnaryErrors) {
+      if (t instanceof UnaryTransition) {
+        removeUnaries.put(t, new RemoveUnaryTransition((UnaryTransition) t));
+      } else if (t instanceof CompoundUnaryTransition) {
+        removeUnaries.put(t, new RemoveUnaryTransition((CompoundUnaryTransition) t));
+      } else {
+        throw new AssertionError("Unexpected transition: " + t);
+      }
+      log.info("Added new transition: " + t + " -> " + removeUnaries.get(t));
+    }
+    return removeUnaries;
+  }
+
+  static Pair<Index<Transition>, List<TrainingExample>> chooseExtraTransitions(Index<Transition> transitionIndex,
+                                                                               PerceptronModel initialModel,
+                                                                               Tagger tagger,
+                                                                               Random random,
+                                                                               List<TrainingExample> trainingData,
+                                                                               Treebank devTreebank,
+                                                                               int nThreads) {
+    PerceptronModel tempModel = new PerceptronModel(initialModel);
+    // TODO: make this a parameter
+    // TODO: model averaging and augmenting are both kinda silly in this context
+    IntCounter<Pair<Integer, Integer>> firstErrors = tempModel.trainModel(null, tagger, random, trainingData, devTreebank, nThreads, null, 5);
+    log.info("Done training temporary model");
+
+    // Errors where the parser guessed ShiftTransition instead of (Compound?)UnaryTransition
+    // This stores the Unary transtion that should have been guessed, since there is only one Shift
+    List<Transition> unaryShiftErrors = new ArrayList<>();
+    // Errors where the parser guessed (Compound?)UnaryTransition instead of ShiftTransition
+    // This stores the Unary transtion that was incorrectly guessed, since there is only one Shift
+    List<Transition> shiftUnaryErrors = new ArrayList<>();
+
+    // TODO: make this a parameter
+    Counters.retainTop(firstErrors, 20);
+    List<Pair<Integer, Integer>> commonFirstErrors = Counters.toSortedList(firstErrors);
+    for (Pair<Integer, Integer> mostCommon : commonFirstErrors) {
+      Transition predicted = transitionIndex.get(mostCommon.first());
+      Transition gold = transitionIndex.get(mostCommon.second());
+
+      if ((predicted instanceof ShiftTransition) &&
+          (gold instanceof UnaryTransition || gold instanceof CompoundUnaryTransition)) {
+        // Found a situation where the parser was frequently predicting Shift instead of Unary / CompoundUnary
+        unaryShiftErrors.add(gold);
+      } else if ((gold instanceof ShiftTransition) &&
+                 (predicted instanceof UnaryTransition || predicted instanceof CompoundUnaryTransition)) {
+        // Found a situation where the parser was frequently predicting Unary / CompoundUnary instead of Shift
+        shiftUnaryErrors.add(predicted);
+      }
+    }
+
+    log.info("Most common gold shift, predicted unary errors: " + shiftUnaryErrors);
+    log.info("Most common gold unary, predicted shift errors: " + unaryShiftErrors);
+
+    Index<Transition> newTransitions = new HashIndex<>(transitionIndex);
+    // TODO: make 0.5 an option
+    Map<Transition, RemoveUnaryTransition> removeUnaries = buildRemoveUnaryMap(shiftUnaryErrors);
+    newTransitions.addAll(removeUnaries.values());
+    List<TrainingExample> newExamples = extraShiftUnaryExamples(shiftUnaryErrors, newTransitions, removeUnaries, trainingData, random, 0.5);
+
+    List<TrainingExample> newTraining = new ArrayList<>(trainingData);
+    newTraining.addAll(newExamples);
+    return new Pair<>(newTransitions, newTraining);
   }
 
   /**
@@ -796,13 +1020,24 @@ public class PerceptronModel extends BaseModel  {
                                            int nThreads) {
     if (initialModel == null) {
       initialModel = new PerceptronModel(op, transitionIndex, knownStates, rootStates, rootOnlyStates);
+    } else if (op.trainOptions().learnExtraTransitions) {
+      throw new IllegalArgumentException("Have not yet implemented learning extra transitions starting from an already trained model");
+    } else if (!op.trainOptions().learnExtraTransitions && initialModel.op.trainOptions().learnExtraTransitions) {
+      throw new IllegalArgumentException("Already trained model had extra transitions");
+    }
+
+    if (op.trainOptions().learnExtraTransitions) {
+      Pair<Index<Transition>, List<TrainingExample>> extra = chooseExtraTransitions(transitionIndex, initialModel, tagger, random, trainingData, devTreebank, nThreads);
+      transitionIndex = extra.first;
+      trainingData = extra.second;
+      initialModel = new PerceptronModel(op, transitionIndex, knownStates, rootStates, rootOnlyStates);
     }
 
     if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0 ||
         op.trainOptions().retrainShards > 1) {
       String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
       PerceptronModel currentModel = new PerceptronModel(initialModel);
-      currentModel.trainModel(tempName, tagger, random, trainingData, devTreebank, nThreads, null);
+      currentModel.trainModel(tempName, tagger, random, trainingData, devTreebank, nThreads, null, op.trainOptions().trainingIterations);
 
       if (op.trainOptions().saveIntermediateModels) {
         ShiftReduceParser temp = new ShiftReduceParser(op, currentModel);
@@ -814,7 +1049,7 @@ public class PerceptronModel extends BaseModel  {
 
       currentModel = new PerceptronModel(initialModel);
       currentModel.filterFeatures(allowedFeatures);
-      currentModel.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, allowedFeatures);
+      currentModel.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, allowedFeatures, op.trainOptions().trainingIterations);
 
       // If we only had one train shard, we are now done.  Otherwise,
       // we retrain N-1 more times, each time dropping a fraction of
@@ -828,7 +1063,7 @@ public class PerceptronModel extends BaseModel  {
           Set<String> prunedFeatures = pruneFeatures(allowedFeatures, random, op.trainOptions().retrainShardFeatureDrop);
           currentModel = new PerceptronModel(initialModel);
           currentModel.filterFeatures(prunedFeatures);
-          currentModel.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, prunedFeatures);
+          currentModel.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, prunedFeatures, op.trainOptions().trainingIterations);
           shards.add(currentModel);
         }
         log.info("Averaging " + op.trainOptions().retrainShards + " shards");
@@ -841,7 +1076,7 @@ public class PerceptronModel extends BaseModel  {
       return currentModel;
     } else {
       PerceptronModel currentModel = new PerceptronModel(initialModel);
-      currentModel.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, null);
+      currentModel.trainModel(serializedPath, tagger, random, trainingData, devTreebank, nThreads, null, op.trainOptions().trainingIterations);
       return currentModel;
     }
   }

@@ -68,6 +68,9 @@ public class ShiftReduceTrainOptions extends TrainOptions {
    */
   public float augmentSubsentences = 0.5f;
 
+  /** After a short training session, add extra transitions designed to compensate for common errors */
+  public boolean learnExtraTransitions = false;
+
   // version id randomly chosen by forgetting to set the version id when serializing models
   private static final long serialVersionUID = -8158249539308373819L;
 }

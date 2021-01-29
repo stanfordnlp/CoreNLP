@@ -33,6 +33,14 @@ public class FinalizeTransition implements Transition {
     return true;
   }
 
+  /**
+   * Does not change the stack size
+   */
+  @Override
+  public int stackSizeChange() {
+    return 0;
+  }
+
   @Override
   public State apply(State state) {
     return apply(state, 0.0);
