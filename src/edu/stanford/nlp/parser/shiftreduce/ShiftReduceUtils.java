@@ -63,6 +63,9 @@ class ShiftReduceUtils {
     return rightIndex(tree.children()[tree.children().length - 1]);
   }
 
+  /**
+   * Note that this checks not just the top, but all unary descendants of the top
+   */
   static boolean constraintMatchesTreeTop(Tree top, ParserConstraint constraint) {
     while (true) {
       if (constraint.state.matcher(top.value()).matches()) {
