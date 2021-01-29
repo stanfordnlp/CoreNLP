@@ -114,6 +114,7 @@ TRAIN_ORACLE_10    = -l1Reg 0.10 -featureFrequencyCutoff 10 -trainingMethod REOR
 TRAIN_ORACLE_25    = -l1Reg 0.25 -featureFrequencyCutoff 25 -trainingMethod REORDER_ORACLE
 
 SHARDS_5           = -retrainShards 5
+AUGMENT_LESS       = -augmentSubsentences 0.1
 
 all-beam:   wsjSR.beam.ser.gz englishSR.beam.ser.gz frenchSR.beam.ser.gz chineseSR.beam.ser.gz germanSR.beam.ser.gz arabicSR.beam.ser.gz spanishSR.beam.ser.gz
 all-nobeam: wsjSR.ser.gz      englishSR.ser.gz      frenchSR.ser.gz      chineseSR.ser.gz      germanSR.ser.gz      arabicSR.ser.gz      spanishSR.ser.gz
@@ -135,13 +136,13 @@ wsjSR.beam.ser.gz:
 englishSR.ser.gz:
 	@echo Training $@
 	@echo Will test on $(ENGLISH_TEST)
-	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(ENGLISH_TRAIN) -devTreebank $(ENGLISH_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(ENGLISH_TAGGER) -tlpp $(ENGLISH_TLPP) $(TRAIN_ORACLE_25) > $@.out 2>&1
+	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(ENGLISH_TRAIN) -devTreebank $(ENGLISH_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(ENGLISH_TAGGER) -tlpp $(ENGLISH_TLPP) $(TRAIN_ORACLE_25) $(AUGMENT_LESS) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(ENGLISH_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(ENGLISH_TAGGER) >> $@.out 2>&1
 
 englishSR.beam.ser.gz:
 	@echo Training $@
 	@echo Will test on $(ENGLISH_TEST)
-	java -mx50g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(ENGLISH_TRAIN) -devTreebank $(ENGLISH_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(ENGLISH_TAGGER) -tlpp $(ENGLISH_TLPP) $(TRAIN_BEAM) > $@.out 2>&1
+	java -mx50g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(ENGLISH_TRAIN) -devTreebank $(ENGLISH_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(ENGLISH_TAGGER) -tlpp $(ENGLISH_TLPP) $(TRAIN_BEAM) $(AUGMENT_LESS) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(ENGLISH_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(ENGLISH_TAGGER) >> $@.out 2>&1
 
 frenchSR.ser.gz:
@@ -167,7 +168,7 @@ chineseSR.ser.gz:
 chineseSR.beam.ser.gz:
 	@echo Training $@
 	@echo Will test on $(CHINESE_TEST)
-	java -mx50g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(CHINESE_TRAIN) -devTreebank $(CHINESE_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(CHINESE_TAGGER) -tlpp $(CHINESE_TLPP) $(TRAIN_BEAM) > $@.out 2>&1
+	java -mx50g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(CHINESE_TRAIN) -devTreebank $(CHINESE_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(CHINESE_TAGGER) -tlpp $(CHINESE_TLPP) $(TRAIN_BEAM) $(SHARDS_5) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(CHINESE_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(CHINESE_TAGGER) >> $@.out 2>&1
 
 germanSR.ser.gz:

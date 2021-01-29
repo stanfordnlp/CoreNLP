@@ -161,24 +161,6 @@ public abstract class BaseModel implements Serializable {
 
   public abstract Collection<ScoredObject<Integer>> findHighestScoringTransitions(State state, boolean requireLegal, int numTransitions, List<ParserConstraint> constraints);
 
-  /**
-   * Train a new model.  This is the method to override for new models
-   * such that the ShiftReduceParser will fill in the model.  Given a
-   * collection of training trees and some other various information,
-   * this should train a new model.  The model is expected to already
-   * know about the possible transitions and which states are eligible
-   * to be root states via the BaseModel constructor.
-   *
-   * @param serializedPath Where serialized models go.  If the appropriate options are set, the method can use this to save intermediate models.
-   * @param tagger The tagger to use when evaluating devTreebank.  TODO: it would make more sense for ShiftReduceParser to retag the trees first
-   * @param random A random number generator to use for any random numbers.  Useful to make sure results can be reproduced.
-   * @param binarizedTrainTrees The treebank to train from.
-   * @param transitionLists binarizedTrainTrees converted into lists of transitions that will reproduce the same tree.
-   * @param devTreebank a set of trees which can be used for dev testing (assuming the user provided a dev treebank)
-   * @param nThreads how many threads the model can use for training
-   */
-  public abstract void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrainTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads);
-
   abstract Set<String> tagSet();
 
   private static final long serialVersionUID = -175375535849840611L;

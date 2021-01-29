@@ -18,7 +18,7 @@ public class ShiftReduceTrainOptions extends TrainOptions {
   public boolean cvAveragedModels = true;
 
   public enum TrainingMethod {
-    EARLY_TERMINATION, GOLD, ORACLE, REORDER_ORACLE, BEAM, REORDER_BEAM;
+    EARLY_TERMINATION, GOLD, REORDER_ORACLE, BEAM, REORDER_BEAM;
   };
   public TrainingMethod trainingMethod = TrainingMethod.EARLY_TERMINATION;
 
@@ -59,6 +59,14 @@ public class ShiftReduceTrainOptions extends TrainOptions {
    * at least once.
    */
   public double retrainShardFeatureDrop = 0.25;
+
+  /**
+   * Some training trees will be repeated, with gold transitions given
+   * for the first several steps to ensure the parser starts from a
+   * good place.  For some datasets, such as the English training set,
+   * 0.5 is excessively large.
+   */
+  public float augmentSubsentences = 0.5f;
 
   // version id randomly chosen by forgetting to set the version id when serializing models
   private static final long serialVersionUID = -8158249539308373819L;
