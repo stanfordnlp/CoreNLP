@@ -16,6 +16,11 @@ public class TrainingExample {
   List<Transition> transitions;
   int numSkips;
 
+  /**
+   * Returns a list of transitions after already skipping the first numSkip transitions.
+   * <br>
+   * To get the corresponding State, call initialState...
+   */
   public List<Transition> trainTransitions() {
     List<Transition> t = new LinkedList<>(this.transitions);
     for (int i = 0; i < this.numSkips; ++i) {
