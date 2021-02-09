@@ -24,6 +24,11 @@ public class MemoryMonitor  {
   protected int usedSwap;
   protected int swaps;
   protected Runtime r;
+  
+  public MemoryMonitor(long millis, Runtime r) {
+    this(60000);
+    this.r = r;
+  }
 
   public MemoryMonitor() {
     this(60000); // 1 min default
@@ -81,6 +86,16 @@ public class MemoryMonitor  {
 
   public static String getUsedMemoryString() {
     int usedK = getUsedMemoryStatic();
+    if (usedK < 1024) {
+      return String.valueOf(usedK) + "k";
+    } else {
+      int usedM = usedK / 1024;
+      return String.valueOf(usedM) + "m";
+    }
+  }
+
+  public static String getUsedMemoryString(Runtime r) {
+    int usedK = getUsedMemoryStatic(r);
     if (usedK < 1024) {
       return String.valueOf(usedK) + "k";
     } else {
