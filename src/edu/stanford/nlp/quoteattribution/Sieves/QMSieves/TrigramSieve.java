@@ -68,8 +68,8 @@ public class TrigramSieve extends QMSieve {
           }
           //VCQ
           if (lastNameIndex.second.equals(quoteBeginTokenIndex - 1 - offset)) {
-            CoreLabel secondPrevToken = docTokens.get(lastNameIndex.first - 1);
-            if (secondPrevToken.tag().startsWith("V")) {
+            CoreLabel secondPrevToken = lastNameIndex.first >= 1 ? docTokens.get(lastNameIndex.first - 1) : null;
+            if (secondPrevToken != null && secondPrevToken.tag().startsWith("V")) {
               fillInMention(quote, names.get(names.size() - 1), lastNameIndex.first, lastNameIndex.second, "trigram VCQ", NAME);
               continue;
             }
