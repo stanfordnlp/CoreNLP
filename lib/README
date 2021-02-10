@@ -132,7 +132,7 @@ LAST UPDATE BY: Sonal Gupta
 commons-logging.jar
 
 ORIGINAL JAR NAME: commons-logging.jar
-VERSION: 1.0.4
+VERSION: 1.1.1
 RELEASE DATE: ?
 SOURCE AVAILABLE: yes
 DESCRIPTION: "The Logging package is an ultri-thin bridge between different
@@ -143,8 +143,8 @@ URL: http://jakarta.apache.org/commons/logging
 USED BY: el-api.jar, jwnl, hadoop, etc. (Only by various external libraries.)
 Not needed by CoreNLP distributions.
 
-LAST UPDATE: 2006/02/06
-LAST UPDATE BY: Jeff Michels
+LAST UPDATE: ?
+LAST UPDATE BY: ?
 
 
 -----------------------------------------------------------------------
@@ -196,13 +196,13 @@ LAST UPDATE: 9/18/2007
 LAST UPDATE BY: Anna Rafferty.
 
 -----------------------------------------------------------------------
-xom-1.2.10.jar
+xom-1.3.2.jar
 
-ORIGINAL JAR NAME: xom-1.2.10.jar
+ORIGINAL JAR NAME: xom-1.3.2.jar
 
-VERSION: 1.2.10
+VERSION: 1.3.2
 
-RELEASE DATE: 2013-05-25
+RELEASE DATE: 2019-03-31
 
 SOURCE AVAILABLE: yes
 
@@ -213,9 +213,9 @@ URL: http://www.xom.nu/
 USED BY: StanfordCoreNLP.java
 Needed by CoreNLP distributions
 
-LAST UPDATE: 2013-11-12
+LAST UPDATE: 2019-10-24
 
-LAST UPDATE BY: John Bauer
+LAST UPDATE BY: Jason Bolton
 
 -----------------------------------------------------------------------
 jflex-full-1.8.2.jar
@@ -257,9 +257,9 @@ LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 joda-time.jar
-ORIGINAL JAR NAME: joda-time-2.9.4.jar
-VERSION: 2.9.4
-RELEASE DATE: 2016-05-27
+ORIGINAL JAR NAME: joda-time-2.10.5.jar
+VERSION: 2.10.5
+RELEASE DATE: 2019-10-24
 SOURCE AVAILABLE: yes
 DESCRIPTION: Extended date/time API that handles partial dates/times
 URL: http://joda-time.sourceforge.net/index.html
@@ -267,8 +267,8 @@ URL: http://joda-time.sourceforge.net/index.html
 USED BY: edu.stanford.nlp.time
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2016-07-08
-LAST UPDATE BY: Angel Chang
+LAST UPDATE: 2019-10-24
+LAST UPDATE BY: Jason Bolton
 
 -----------------------------------------------------------------------
 jollyday-0.4.9.jar
@@ -286,10 +286,10 @@ LAST UPDATE: 2016-07-24
 LAST UPDATE BY: Christopher Manning
 
 -----------------------------------------------------------------------
-ejml-core-0.38.jar
-ORIGINAL JAR NAME: ejml-core-0.38.jar
-VERSION: 0.38
-RELEASE DATE: 2019-03-14
+ejml-core-0.39.jar
+ORIGINAL JAR NAME: ejml-core-0.39.jar
+VERSION: 0.39
+RELEASE DATE: 2020-04-07
 SOURCE AVAILABLE: yes
 DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
     size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
@@ -298,14 +298,14 @@ URL: http://ejml.org/
 USED BY: Used in deep learning, especially RNN parser and sentiment
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2019-07-29
+LAST UPDATE: 2020-10-21
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-ejml-ddense-0.38.jar
-ORIGINAL JAR NAME: ejml-ddense-0.38.jar
-VERSION: 0.38
-RELEASE DATE: 2019-03-14
+ejml-ddense-0.39.jar
+ORIGINAL JAR NAME: ejml-ddense-0.39.jar
+VERSION: 0.39
+RELEASE DATE: 2020-04-07
 SOURCE AVAILABLE: yes
 DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
     size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
@@ -314,14 +314,14 @@ URL: http://ejml.org/
 USED BY: Used in deep learning, especially RNN parser and sentiment
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2019-07-29
+LAST UPDATE: 2020-10-21
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-ejml-simple-0.38.jar
-ORIGINAL JAR NAME: ejml-simple-0.38.jar
-VERSION: 0.38
-RELEASE DATE: 2019-03-14
+ejml-simple-0.39.jar
+ORIGINAL JAR NAME: ejml-simple-0.39.jar
+VERSION: 0.39
+RELEASE DATE: 2020-04-07
 SOURCE AVAILABLE: yes
 DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
     size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
@@ -330,7 +330,7 @@ URL: http://ejml.org/
 USED BY: Used in deep learning, especially RNN parser and sentiment
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2019-07-29
+LAST UPDATE: 2020-10-21
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
@@ -388,14 +388,13 @@ LAST UPDATE:2014-04-07
 LAST UPDATE BY:Sonal Gupta
 
 -----------------------------------------------------------------------
-lucene-analyzers-common-4.10.3.jar
-lucene-core-4.10.3.jar
-lucene-demo-4.10.3.jar
-lucene-queryparser-4.10.3.jar
-ORIGINAL JAR NAME: lucene-core-4.2.1.jar
-                   lucene-demos-4.2.1.jar
-VERSION: 4.10.3
-RELEASE DATE: 29 Dec 2014
+lucene-analyzers-common-7.5.0.jar
+lucene-core-7.5.0.jar
+lucene-demo-7.5.0.jar
+lucene-queryparser-7.5.0.jar
+ORIGINAL JAR NAME: n/a
+VERSION: 7.5.0
+RELEASE DATE: 24 Sep 2018
 SOURCE AVAILABLE: yes
 DESCRIPTION: "Apache Lucene is a high-performance, full-featured text
 search engine library written entirely in Java. It is a technology
@@ -405,7 +404,7 @@ in has version number, as before. Broken into several Jars in this version."
 URL: http://lucene.apache.org/
 USED BY: patterns.surface
 
-LAST UPDATE: 2015-01-15
+LAST UPDATE: 2018-11-11
 LAST UPDATE BY: Melvin Johnson Premkumar
 
 -----------------------------------------------------------------
