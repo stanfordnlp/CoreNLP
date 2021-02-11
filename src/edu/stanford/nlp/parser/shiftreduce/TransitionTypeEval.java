@@ -36,7 +36,10 @@ public class TransitionTypeEval implements ParserQueryEval {
     pw.println("Shift-Reduce transition type frequency");
     List<Class<? extends Transition>> sorted = Counters.toSortedList(transitionCounts);
     for (Class<? extends Transition> t : sorted) {
-      pw.println(t + ": " + transitionCounts.getCount(t));
+      String className = t.toString();
+      String[] pieces = className.split("[.]");
+      className = pieces[pieces.length - 1];
+      pw.println("  " + className + ": " + transitionCounts.getCount(t));
     }
   }
 
