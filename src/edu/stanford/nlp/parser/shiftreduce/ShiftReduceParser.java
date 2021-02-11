@@ -204,7 +204,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
   @Override
   public List<ParserQueryEval> getParserQueryEvals() {
-    if (op.testOptions().recordBinarized == null && op.testOptions().recordDebinarized == null) {
+    if (op.testOptions().recordBinarized == null &&
+        op.testOptions().recordDebinarized == null &&
+        !op.testOptions().recordTransitionTypes) {
       return Collections.emptyList();
     }
     List<ParserQueryEval> evals = Generics.newArrayList();
@@ -213,6 +215,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     }
     if (op.testOptions().recordDebinarized != null) {
       evals.add(new TreeRecorder(TreeRecorder.Mode.DEBINARIZED, op.testOptions().recordDebinarized));
+    }
+    if (op.testOptions().recordTransitionTypes) {
+      evals.add(new TransitionTypeEval());
     }
     return evals;
   }
