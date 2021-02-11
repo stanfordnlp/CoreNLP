@@ -9,15 +9,20 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.trees.Tree;
 
+/**
+ * Tally and output the number of each type of transition used.
+ * Useful for cases where you are adding a new transition type and
+ * want to make sure it is actually firing
+ */
 public class TransitionTypeEval implements ParserQueryEval {
   private IntCounter<Class<? extends Transition>> transitionCounts = new IntCounter<>();
-  
+
   @Override
   public void evaluate(ParserQuery query, Tree gold, PrintWriter pw) {
     if (!(query instanceof ShiftReduceParserQuery)) {
       throw new IllegalArgumentException("This evaluator only works for the ShiftReduceParser");
     }
-    
+
     ShiftReduceParserQuery srquery = (ShiftReduceParserQuery) query;
     List<Transition> transitions = srquery.getBestTransitionSequence();
 
