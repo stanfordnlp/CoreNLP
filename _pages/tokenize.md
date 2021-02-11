@@ -30,6 +30,8 @@ It is important to note that the full tokenization process for French, German, a
 | tokenize.keepeol | boolean | false | If true, end-of-line tokens are kept and used as sentence boundaries with the WhitespaceTokenizer. |
 | tokenize.options | String | null | Accepts the options of `PTBTokenizer` for example, things like "americanize=false" or "strictTreebank3=true,untokenizable=allKeep". |
 | tokenize.verbose | boolean | false | Make the TokenizerAnnotator verbose - that is, it prints out all tokenizations it performs. |
+| tokenize.codepoint | boolean | false | When using CoreNLP results in Python or other languages, there is a limitation with characters such as 😺, which Java treats as two characters in different codepoints.  Turning this feature on adds CodepointOffsetBeginAnnotation and CodepointOffsetEndAnnotation, which languages which treat the cat as a single character can use as indices into the text. |
+
 
 The `tokenize.options` option accepts a wide variety of settings for the `PTBTokenizer`.
 
