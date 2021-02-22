@@ -17,7 +17,9 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
+import edu.stanford.nlp.stats.TwoDimensionalIntCounter;
 import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
@@ -28,6 +30,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
@@ -151,9 +154,10 @@ public class PerceptronModel extends BaseModel  {
 
 
   /**
-   * Output some random facts about the model
+   * Output some random facts about the model and the training iteration
    */
-  public void outputStats() {
+  public void outputStats(TrainingResult result) {
+    log.info("While training, got " + result.numCorrect + " transitions correct and " + result.numWrong + " transitions wrong");
     log.info("Number of known features: " + featureWeights.size());
     int numWeights = 0;
     for (Map.Entry<String, Weight> stringWeightEntry : featureWeights.entrySet()) {
@@ -168,6 +172,16 @@ public class PerceptronModel extends BaseModel  {
     log.info("Total word length: " + wordLength);
 
     log.info("Number of transitions: " + transitionIndex.size());
+
+    IntCounter<Pair<Integer, Integer>> firstErrors = new IntCounter<>();
+    for (Pair<Integer, Integer> firstError : result.firstErrors) {
+      firstErrors.incrementCount(firstError);
+    }
+
+    outputFirstErrors(firstErrors);
+    outputReordererStats(result.reorderSuccess, result.reorderFail);
+
+    outputTransitionStats(result);
   }
 
   /** Reconstruct the tag set that was used to train the model by decoding some of the features.
@@ -247,6 +261,9 @@ public class PerceptronModel extends BaseModel  {
 
     List<TrainingUpdate> updates = Generics.newArrayList();
     Pair<Integer, Integer> firstError = null;
+
+    IntCounter<Class<? extends Transition>> correctTransitions = new IntCounter<>();
+    TwoDimensionalIntCounter<Class<? extends Transition>, Class<? extends Transition>> wrongTransitions = new TwoDimensionalIntCounter<>();
 
     ReorderingOracle reorderer = null;
     if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
@@ -340,6 +357,7 @@ public class PerceptronModel extends BaseModel  {
         // otherwise, down the last transition, up the correct
         if (!newGoldState.areTransitionsEqual(highestScoringState)) {
           ++numWrong;
+          wrongTransitions.incrementCount(goldTransition.getClass(), highestScoringTransitionFromGoldState.getClass());
           List<String> goldFeatures = featureFactory.featurize(goldState);
           int lastTransition = transitionIndex.indexOf(highestScoringState.transitions.peek());
           updates.add(new TrainingUpdate(featureFactory.featurize(highestCurrentState), -1, lastTransition, learningRate));
@@ -370,6 +388,7 @@ public class PerceptronModel extends BaseModel  {
           }
         } else {
           ++numCorrect;
+          correctTransitions.incrementCount(goldTransition.getClass());
           transitions.remove(0);
         }
 
@@ -393,8 +412,10 @@ public class PerceptronModel extends BaseModel  {
           transitions.remove(0);
           state = transition.apply(state);
           numCorrect++;
+          correctTransitions.incrementCount(transition.getClass());
         } else {
           numWrong++;
+          wrongTransitions.incrementCount(transition.getClass(), predicted.getClass());
           if (firstError == null) {
             firstError = new Pair<>(predictedNum, transitionNum);
           }
@@ -424,11 +445,7 @@ public class PerceptronModel extends BaseModel  {
       }
     }
 
-    if (firstError == null) {
-      return new TrainingResult(updates, numCorrect, numWrong);
-    } else {
-      return new TrainingResult(updates, numCorrect, numWrong, firstError, reorderSuccess, reorderFail);
-    }
+    return new TrainingResult(updates, numCorrect, numWrong, firstError, correctTransitions, wrongTransitions, reorderSuccess, reorderFail);
   }
 
   private class TrainTreeProcessor implements ThreadsafeProcessor<TrainingExample, TrainingResult> {
@@ -532,6 +549,30 @@ public class PerceptronModel extends BaseModel  {
              " training trees and failed to do anything useful on " + numReorderFail + " trees");
   }
 
+  private void outputTransitionStats(TrainingResult result) {
+    // Output a list of all the correct guesses
+    List<Class<? extends Transition>> sorted = Counters.toSortedList(result.correctTransitions);
+    List<String> correct = new ArrayList<>();
+    correct.add("Got the following transition types correct:");
+    for (Class<? extends Transition> t : sorted) {
+      correct.add(ShiftReduceUtils.transitionShortName(t) + ": " + result.correctTransitions.getCount(t));
+    }
+    log.info(StringUtils.join(correct, "\n  "));
+
+    IntCounter<Class<? extends Transition>> totalGuesses = result.wrongTransitions.totalCounts();
+    sorted = Counters.toSortedList(totalGuesses);
+    List<String> wrong = new ArrayList<>();
+    wrong.add("Got the following transition types incorrect:");
+    for (Class<? extends Transition> t : sorted) {
+      IntCounter<Class<? extends Transition>> inner = result.wrongTransitions.getCounter(t);
+      List<Class<? extends Transition>> sortedInner = Counters.toSortedList(inner);
+      for (Class<? extends Transition> u : sortedInner) {
+        wrong.add(ShiftReduceUtils.transitionShortName(t) + " -> " + ShiftReduceUtils.transitionShortName(u) + ": " + inner.getCount(u));
+      }
+    }
+    log.info(StringUtils.join(wrong, "\n  "));
+  }
+
   private void trainModel(String serializedPath, Tagger tagger, Random random, List<TrainingExample> trainingData, Treebank devTreebank, int nThreads, Set<String> allowedFeatures) {
     double bestScore = 0.0;
     int bestIteration = 0;
@@ -557,13 +598,7 @@ public class PerceptronModel extends BaseModel  {
 
     for (int iteration = 1; iteration <= op.trainOptions.trainingIterations; ++iteration) {
       Timing trainingTimer = new Timing();
-      int numCorrect = 0;
-      int numWrong = 0;
-      IntCounter<Pair<Integer, Integer>> firstErrors = new IntCounter<>();
-
-      // Stats on the Reordering Oracle might be nice, when available
-      int numReorderSuccess = 0;
-      int numReorderFail = 0;
+      List<TrainingResult> results = new ArrayList<>();
 
       List<TrainingExample> augmentedData = new ArrayList<TrainingExample>(trainingData);
       augmentSubsentences(augmentedData, trainingData, random, op.trainOptions().augmentSubsentences);
@@ -573,17 +608,7 @@ public class PerceptronModel extends BaseModel  {
       for (int start = 0; start < augmentedData.size(); start += op.trainOptions.batchSize) {
         int end = Math.min(start + op.trainOptions.batchSize, augmentedData.size());
         TrainingResult result = trainBatch(augmentedData.subList(start, end), wrapper);
-
-        numCorrect += result.numCorrect;
-        numWrong += result.numWrong;
-        numReorderSuccess += result.reorderSuccess;
-        numReorderFail += result.reorderFail;
-        for (Pair<Integer, Integer> firstError : result.firstErrors) {
-          firstErrors.incrementCount(firstError);
-        }
-        if (numWrong < result.firstErrors.size()) {
-          log.error("WTF " + numWrong + " " + result.firstErrors.size());
-        }
+        results.add(result);
 
         for (TrainingUpdate update : result.updates) {
           for (String feature : update.features) {
@@ -620,10 +645,7 @@ public class PerceptronModel extends BaseModel  {
       }
 
       trainingTimer.done("Iteration " + iteration);
-      log.info("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
-      outputStats();
-      outputFirstErrors(firstErrors);
-      outputReordererStats(numReorderSuccess, numReorderFail);
+      outputStats(new TrainingResult(results));
 
       double labelF1 = 0.0;
       if (devTreebank != null) {

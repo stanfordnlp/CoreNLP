@@ -90,4 +90,14 @@ class ShiftReduceUtils {
     return false;
   }
 
+  static final String TRANSITION = "Transition";
+  static String transitionShortName(Class<? extends Transition> t) {
+    String className = t.toString();
+    String[] pieces = className.split("[.]");
+    className = pieces[pieces.length - 1];
+    if (className.endsWith(TRANSITION) && className.length() > TRANSITION.length()) {
+      return className.substring(0, className.length() - TRANSITION.length());
+    }
+    return className;
+  }
 }

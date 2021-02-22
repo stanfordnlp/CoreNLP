@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import edu.stanford.nlp.stats.IntCounter;
+import edu.stanford.nlp.stats.TwoDimensionalIntCounter;
 import edu.stanford.nlp.util.Pair;
 
 public class TrainingResult {
   public TrainingResult(List<TrainingUpdate> updates, int numCorrect, int numWrong,
                         List<Pair<Integer, Integer>> firstErrors,
+                        IntCounter<Class<? extends Transition>> correctTransitions,
+                        TwoDimensionalIntCounter<Class<? extends Transition>, Class<? extends Transition>> wrongTransitions,
                         int reorderSuccess, int reorderFail) {
     this.updates = updates;
 
@@ -16,18 +20,22 @@ public class TrainingResult {
     this.numWrong = numWrong;
 
     this.firstErrors = firstErrors;
+    this.correctTransitions = correctTransitions;
+    this.wrongTransitions = wrongTransitions;
 
     this.reorderSuccess = reorderSuccess;
     this.reorderFail = reorderFail;
   }
 
   public TrainingResult(List<TrainingUpdate> updates, int numCorrect, int numWrong,
-                        Pair<Integer, Integer> firstError, int reorderSuccess, int reorderFail) {
-    this(updates, numCorrect, numWrong, Collections.singletonList(firstError), reorderSuccess, reorderFail);
-  }
-
-  public TrainingResult(List<TrainingUpdate> updates, int numCorrect, int numWrong) {
-    this(updates, numCorrect, numWrong, Collections.emptyList(), 0, 0);
+                        Pair<Integer, Integer> firstError,
+                        IntCounter<Class<? extends Transition>> correctTransitions,
+                        TwoDimensionalIntCounter<Class<? extends Transition>, Class<? extends Transition>> wrongTransitions,
+                        int reorderSuccess, int reorderFail) {
+    this(updates, numCorrect, numWrong,
+         (firstError == null ? Collections.emptyList() : Collections.singletonList(firstError)),
+         correctTransitions, wrongTransitions,
+         reorderSuccess, reorderFail);
   }
 
   public TrainingResult(List<TrainingResult> results) {
@@ -37,12 +45,16 @@ public class TrainingResult {
     int numWrong = 0;
     int reorderSuccess = 0;
     int reorderFail = 0;
+    IntCounter<Class<? extends Transition>> correctTransitions = new IntCounter<>();
+    TwoDimensionalIntCounter<Class<? extends Transition>, Class<? extends Transition>> wrongTransitions = new TwoDimensionalIntCounter<>();
 
     for (TrainingResult result : results) {
       updates.addAll(result.updates);
       numCorrect += result.numCorrect;
       numWrong += result.numWrong;
       firstErrors.addAll(result.firstErrors);
+      correctTransitions.addAll(result.correctTransitions);
+      wrongTransitions.addAll(result.wrongTransitions);
       reorderSuccess += result.reorderSuccess;
       reorderFail += result.reorderFail;
     }
@@ -51,6 +63,8 @@ public class TrainingResult {
     this.numCorrect = numCorrect;
     this.numWrong = numWrong;
     this.firstErrors = Collections.unmodifiableList(firstErrors);
+    this.correctTransitions = correctTransitions;
+    this.wrongTransitions = wrongTransitions;
     this.reorderSuccess = reorderSuccess;
     this.reorderFail = reorderFail;
   }
@@ -61,6 +75,9 @@ public class TrainingResult {
   final int numWrong;
 
   List<Pair<Integer, Integer>> firstErrors;
+
+  IntCounter<Class<? extends Transition>> correctTransitions;
+  TwoDimensionalIntCounter<Class<? extends Transition>, Class<? extends Transition>> wrongTransitions;
 
   final int reorderSuccess;
   final int reorderFail;
