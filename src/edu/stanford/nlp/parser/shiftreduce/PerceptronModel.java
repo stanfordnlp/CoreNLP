@@ -458,20 +458,12 @@ public class PerceptronModel extends BaseModel  {
    * multithreaded training to be reproduced.
    */
   private TrainingResult trainBatch(List<TrainingExample> trainingData, MulticoreWrapper<TrainingExample, TrainingResult> wrapper) {
-    int numCorrect = 0;
-    int numWrong = 0;
-    final List<TrainingUpdate> updates = Generics.newArrayList();
-    final List<Pair<Integer, Integer>> firstErrors = Generics.newArrayList();
-    int reorderSuccess = 0, reorderFail = 0;
+    List<TrainingResult> results = new ArrayList<>();
+
     if (op.trainOptions.trainingThreads == 1) {
       for (TrainingExample example : trainingData) {
         TrainingResult result = trainTree(example);
-        updates.addAll(result.updates);
-        numCorrect += result.numCorrect;
-        numWrong += result.numWrong;
-        firstErrors.addAll(result.firstErrors);
-        reorderSuccess += result.reorderSuccess;
-        reorderFail += result.reorderFail;
+        results.add(result);
       }
     } else {
       for (TrainingExample example : trainingData) {
@@ -480,15 +472,10 @@ public class PerceptronModel extends BaseModel  {
       wrapper.join(false);
       while (wrapper.peek()) {
         TrainingResult result = wrapper.poll();
-        updates.addAll(result.updates);
-        numCorrect += result.numCorrect;
-        numWrong += result.numWrong;
-        firstErrors.addAll(result.firstErrors);
-        reorderSuccess += result.reorderSuccess;
-        reorderFail += result.reorderFail;
+        results.add(result);
       }
     }
-    return new TrainingResult(updates, numCorrect, numWrong, firstErrors, reorderSuccess, reorderFail);
+    return new TrainingResult(results);
   }
 
 
