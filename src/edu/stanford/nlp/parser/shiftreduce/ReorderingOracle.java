@@ -34,6 +34,10 @@ public class ReorderingOracle {
       throw new AssertionError();
     }
 
+    if (!chosenTransition.isLegal(state, null)) {
+      return false;
+    }
+
     Transition goldTransition = transitions.get(0);
 
     // If the transition is gold, we are already satisfied.
