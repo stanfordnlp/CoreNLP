@@ -403,31 +403,31 @@ public class PerceptronModel extends BaseModel  {
 
       boolean keepGoing = true;
       while (transitions.size() > 0 && keepGoing) {
-        Transition transition = transitions.get(0);
-        int transitionNum = transitionIndex.indexOf(transition);
+        Transition gold = transitions.get(0);
+        int goldNum = transitionIndex.indexOf(gold);
         List<String> features = featureFactory.featurize(state);
         int predictedNum = findHighestScoringTransition(state, features, false).object();
         Transition predicted = transitionIndex.get(predictedNum);
-        if (transitionNum == predictedNum) {
+        if (goldNum == predictedNum) {
           transitions.remove(0);
-          state = transition.apply(state);
+          state = gold.apply(state);
           numCorrect++;
-          correctTransitions.incrementCount(transition.getClass());
+          correctTransitions.incrementCount(gold.getClass());
         } else {
           numWrong++;
-          wrongTransitions.incrementCount(transition.getClass(), predicted.getClass());
+          wrongTransitions.incrementCount(gold.getClass(), predicted.getClass());
           if (firstError == null) {
-            firstError = new Pair<>(predictedNum, transitionNum);
+            firstError = new Pair<>(predictedNum, goldNum);
           }
           // TODO: allow weighted features, weighted training, etc
-          updates.add(new TrainingUpdate(features, transitionNum, predictedNum, learningRate));
+          updates.add(new TrainingUpdate(features, goldNum, predictedNum, learningRate));
           switch (op.trainOptions().trainingMethod) {
           case EARLY_TERMINATION:
             keepGoing = false;
             break;
           case GOLD:
             transitions.remove(0);
-            state = transition.apply(state);
+            state = gold.apply(state);
             break;
           case REORDER_ORACLE:
             keepGoing = reorderer.reorder(state, predicted, transitions);
