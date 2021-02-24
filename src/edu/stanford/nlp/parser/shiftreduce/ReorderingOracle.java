@@ -34,6 +34,10 @@ public class ReorderingOracle {
       throw new AssertionError();
     }
 
+    if (chosenTransition == null) {
+      return false;
+    }
+
     if (!chosenTransition.isLegal(state, null)) {
       return false;
     }
