@@ -779,6 +779,9 @@ public class PerceptronModel extends BaseModel  {
     return prunedFeatures;
   }
 
+  /**
+   * Starting from the given index, find the next transition that matches the predicate
+   */
   static int findTransitionInList(List<Transition> transitions,
                                   int start,
                                   Predicate<Transition> pred) {
@@ -816,6 +819,9 @@ public class PerceptronModel extends BaseModel  {
     return index;
   }
 
+  /**
+   * Choose a random transition from the given list, using the given predicate to determine eligible position
+   */
   static int chooseRandomTransition(List<Transition> transitions, Random random, Predicate<Transition> pred) {
     int count = 0;
     for (Transition t : transitions) {
@@ -834,6 +840,9 @@ public class PerceptronModel extends BaseModel  {
     return index;
   }
 
+  /**
+   * Create a new training example with an extra Unary transition and a RemoveUnaryTransition to fix it
+   */
   static TrainingExample newExtraShiftUnaryExample(TrainingExample example,
                                                    List<Transition> shiftUnaryErrors,
                                                    Map<Transition, RemoveUnaryTransition> removeUnaries,
