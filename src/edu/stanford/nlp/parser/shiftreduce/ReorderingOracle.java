@@ -65,7 +65,7 @@ public class ReorderingOracle {
     }
 
     if (goldTransition instanceof RemoveUnaryTransition) {
-      // There are four basic possibilities here.
+      // There are five basic possibilities here.
       // - If a different RemoveUnaryTransition was chosen, we can
       //   keep going despite this
       // - If a Unary was chosen, we can put the RemoveUnary next.
@@ -77,6 +77,8 @@ public class ReorderingOracle {
       // - If a Shift was chosen, and there was supposed to be a Shift
       //   after the RemoveUnary, we keep going until an equal number
       //   of Binary transitions, then put the RemoveUnary
+      // - If a LookbehindBinary was chosen, this also covers up
+      //   the unary which could have been removed, so we skip
       if (chosenTransition instanceof RemoveUnaryTransition) {
         transitions.remove(0);
         return true;
@@ -107,7 +109,7 @@ public class ReorderingOracle {
           }
         }
       }
-      if (chosenTransition instanceof BinaryTransition) {
+      if (chosenTransition instanceof BinaryTransition || chosenTransition instanceof LookbehindBinaryTransition) {
         // this covered up the potential RemoveUnary.  We skip it and
         // assess the situation where the BinaryUnary was chosen
         // instead of some other potential transition.
@@ -190,6 +192,7 @@ public class ReorderingOracle {
         return op.trainOptions().oracleBinaryToShift && reorderIncorrectBinaryTransition(transitions);
       }
 
+      // TODO: is there some way to continue after a gold LookbehindBinaryTransition?
       if (!(goldTransition instanceof BinaryTransition)) {
         return false;
       }
@@ -214,22 +217,109 @@ public class ReorderingOracle {
       return true;
     }
 
-    // TODO: fix this for the BinaryRemoveUnaryTransition...
-    // for that matter, fix it in general
     if ((chosenTransition instanceof ShiftTransition) && (goldTransition instanceof BinaryTransition)) {
       // can't shift at the end of the queue
       if (state.endOfQueue()) {
         return false;
       }
 
-      // doesn't help, sadly
       BinaryTransition goldBinary = (BinaryTransition) goldTransition;
+      if (addLookbehind(transitions, goldBinary)) {
+        return true;
+      }
+
+      // doesn't help, sadly
       if (!goldBinary.isBinarized()) {
         return op.trainOptions().oracleShiftToBinary && reorderIncorrectShiftTransition(transitions);
       }
     }
 
+    if ((chosenTransition instanceof ShiftTransition) && (goldTransition instanceof LookbehindBinaryTransition)) {
+      // this is when the pattern is something like
+      // should have combined A+B, built C instead
+      // when C is built, stack is A,B,C
+      // can now use a Lookbehind to combine A,B
+      // instead the model chose to start building D
+      // eventually the model will need to combine C,D
+      // when the stack is A,B,C+D we should be able to combine A,B
+      addLookbehind(transitions, goldTransition);
+    }
+
     return false;
+  }
+
+  boolean addLookbehind(List<Transition> transitions, Transition gold) {
+    final LookbehindBinaryTransition fix;
+    boolean fixBinary;
+    if (gold instanceof LookbehindBinaryTransition) {
+      fix = (LookbehindBinaryTransition) gold;
+      fixBinary = false;
+    } else if (gold instanceof BinaryTransition) {
+      fix = new LookbehindBinaryTransition((BinaryTransition) gold);
+      fixBinary = true;
+    } else {
+      throw new AssertionError("Expected a BinaryTransition or a LookbehindBinaryTransition");
+    }
+    if (!(transitionIndex.contains(fix))) {
+      return false;
+    }
+    ListIterator<Transition> cursor = transitions.listIterator();
+    Transition next = cursor.next();
+    if (!gold.equals(next)) {
+      throw new AssertionError("Should have been called with " + gold + " as the first element of the transitions list");
+    }
+    if (!cursor.hasNext()) {
+      return false;
+    }
+    next = cursor.next();
+    if (!(next instanceof ShiftTransition)) {
+      // TODO: could perhaps skip past Unary.  See if this is better or worse
+      return false;
+    }
+
+    int shiftCount = 1;
+    while (cursor.hasNext()) {
+      next = cursor.next();
+      if (next instanceof ShiftTransition) {
+        ++shiftCount;
+      } else if (next instanceof BinaryTransition) {
+        --shiftCount;
+        if ((fixBinary && shiftCount <= 1) ||
+            (!fixBinary && shiftCount == 0)) {
+          break;
+        }
+      } else if (next instanceof LookbehindBinaryTransition) {
+        if (shiftCount > 2) {
+          --shiftCount;
+        } else {
+          return false;
+        }
+      }
+    }
+    if (shiftCount == 0 && fixBinary) {
+      // the pattern went Shift, Binary after the Binary we missed
+      // conceivably the model might have learned enough from this one
+      // shift to figure out to reduce now, but that seems unlikely
+      return false;
+    }
+    // at this point we have built constituent C after forgetting
+    // to merge A+B
+    // in the case of fixBinary, this is a new constituent C
+    // in the case of fixing a lookbehind, this is C merged with D
+    // the idea is that this constituent will have enough
+    // information to learn how to merge
+    // TODO: could intersperse unary transforms of C here as well
+
+    //String old = transitions.toString();
+
+    // add the fixed transition
+    cursor.add(fix);
+    // remove the binary transition we missed
+    transitions.remove(0);
+    // System.out.println("Updated:\n       " + old + "\n  -->  " + transitions);
+    // ALSO, remove the shift transition we actually applied
+    transitions.remove(0);
+    return true;
   }
 
   boolean addRemoveUnary(List<Transition> transitions, Transition chosenTransition) {
@@ -260,6 +350,15 @@ public class ReorderingOracle {
         --shiftCount;
         if (shiftCount <= 1) {
           break;
+        }
+      } else if (next instanceof LookbehindBinaryTransition) {
+        if (shiftCount > 2) {
+          // this Lookbehind is far enough ahead that we won't cover
+          // the Unary we want removed
+          --shiftCount;
+        } else {
+          // this would cover the Unary we might potentially remove anyway
+          return true;
         }
       }
     }
@@ -335,6 +434,12 @@ public class ReorderingOracle {
         if (shiftCount <= 0) {
           cursor.remove();
         }
+      } else if (next instanceof LookbehindBinaryTransition) {
+        if (shiftCount > 2) {
+          --shiftCount;
+        } else {
+          return false;
+        }
       }
     } while (shiftCount > 0);
 
@@ -391,11 +496,16 @@ public class ReorderingOracle {
     BinaryTransition lastBinary = null;
     while (cursor.hasNext() && shiftCount >= 0) {
       Transition next = cursor.next();
-      shiftCount = shiftCount + next.stackSizeChange();
-      if (shiftCount < 0) {
-        // TODO: look for potential alternative Binary types
-        lastBinary = (BinaryTransition) next;
-        cursor.remove();
+      if (next instanceof ShiftTransition) {
+        shiftCount++;
+      } else if (next instanceof BinaryTransition) {
+        shiftCount--;
+        if (shiftCount < 0) {
+          lastBinary = (BinaryTransition) next;
+          cursor.remove();
+        }
+      } else if (next instanceof LookbehindBinaryTransition) {
+        return false;
       }
     }
     if (!cursor.hasNext() || lastBinary == null) {

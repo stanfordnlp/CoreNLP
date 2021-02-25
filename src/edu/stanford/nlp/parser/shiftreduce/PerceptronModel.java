@@ -907,7 +907,6 @@ public class PerceptronModel extends BaseModel  {
   }
 
   static List<TrainingExample> extraShiftUnaryExamples(List<Transition> shiftUnaryErrors,
-                                                       Index<Transition> newTransitions,
                                                        Map<Transition, RemoveUnaryTransition> removeUnaries,
                                                        List<TrainingExample> trainingData,
                                                        Random random,
@@ -922,6 +921,99 @@ public class PerceptronModel extends BaseModel  {
       //System.out.println("----- creating new transitions -----");
       //System.out.println(example.transitions);
       //System.out.println(newExample.transitions);
+      newExamples.add(newExample);
+    }
+    return newExamples;
+  }
+
+
+  /**
+   * Create a new training example with an extra Unary transition and a RemoveUnaryTransition to fix it
+   */
+  static TrainingExample newExtraBinaryShiftExample(TrainingExample example,
+                                                    List<BinaryTransition> binaryShiftErrors,
+                                                    List<LookbehindBinaryTransition> lookbehind,
+                                                    Random random,
+                                                    double ratio) {
+    List<Transition> transitions = example.transitions;
+    // TODO: perhaps try to use some logic for where the BinaryTransition errors occur most commonly.
+    // for example, could run the partially trained model
+    int index = chooseRandomTransition(transitions, random, (x) -> (binaryShiftErrors.contains(x)));
+    if (index < 0) {
+      return null;
+    }
+
+    if (!(transitions.get(index + 1) instanceof ShiftTransition)) {
+      // TODO: perhaps multiple BinaryTransitions can be fixed as well
+      return null;
+    }
+
+    Transition fakeError = transitions.get(index);
+    if (!(fakeError instanceof BinaryTransition)) {
+      throw new AssertionError("Should have found a BinaryTransition");
+    }
+
+    int close = index + 1;
+    int shift = 0;
+    for (; close < transitions.size(); ++close) {
+      if (transitions.get(close) instanceof ShiftTransition) {
+        shift++;
+      } else if (transitions.get(close) instanceof BinaryTransition) {
+        shift--;
+        if (shift == 0) {
+          // 0 means it went shift..binary (with some number of
+          // unaries, maybe) and we never built a new constituent to
+          // merge, just a single node.  this will probably not be
+          // enough information to learn how to do the new transition
+          return null;
+        } else if (shift == 1) {
+          // 1 means it went shift..shift..binary and built a new
+          // tree, which is exactly what we are looking for
+          break;
+        }
+      }
+    }
+
+    // now close should point to the BinaryTransition that closes the constituent started by the next Shift
+    if (close >= transitions.size() || !(transitions.get(close) instanceof BinaryTransition)) {
+      throw new AssertionError("Shouldn't fail to find the close of the next constituent.  Starting index: " + index + " Transition sequence: " + transitions.subList(index, transitions.size()));
+    }
+
+    // the new TrainingExample will be
+    // 0..index-1
+    // index+1..close
+    // LookbehindBinaryTransition to fix the missing BinaryTransition
+    // close+1..end
+
+    List<Transition> fakeTransitions = new ArrayList<>();
+    fakeTransitions.addAll(transitions.subList(0, index));
+    fakeTransitions.addAll(transitions.subList(index+1, close+1));
+    fakeTransitions.add(new LookbehindBinaryTransition((BinaryTransition) fakeError));
+    fakeTransitions.addAll(transitions.subList(close+1, transitions.size()));
+    return new TrainingExample(example.binarizedTree,
+                               fakeTransitions,
+                               index+1);
+  }
+
+
+
+  // TODO: technically could refactor this using a lambda
+  static List<TrainingExample> extraBinaryShiftExamples(List<BinaryTransition> binaryShiftErrors,
+                                                        List<LookbehindBinaryTransition> lookbehind,
+                                                        List<TrainingExample> trainingData,
+                                                        Random random,
+                                                        double ratio) {
+    List<TrainingExample> newExamples = new ArrayList<>();
+
+    for (TrainingExample example : trainingData) {
+      TrainingExample newExample = newExtraBinaryShiftExample(example, binaryShiftErrors, lookbehind, random, ratio);
+      if (newExample == null) {
+        continue;
+      }
+      // System.out.println("----- creating new transitions -----");
+      // System.out.println(example.binarizedTree);
+      // System.out.println(example.transitions);
+      // System.out.println(newExample.transitions);
       newExamples.add(newExample);
     }
     return newExamples;
@@ -942,6 +1034,20 @@ public class PerceptronModel extends BaseModel  {
     return removeUnaries;
   }
 
+  /**
+   * Bulid and report a list of new LookbehindBinaryTransitions
+   */
+  static List<LookbehindBinaryTransition> buildLookbehind(List<BinaryTransition> binaryShiftErrors) {
+    List<LookbehindBinaryTransition> lookbehind = new ArrayList<>();
+    for (BinaryTransition bt : binaryShiftErrors) {
+      LookbehindBinaryTransition lbt = new LookbehindBinaryTransition(bt);
+      log.info("Added new transition: " + bt + " -> " + lbt);
+      lookbehind.add(lbt);
+    }
+    return lookbehind;
+  }
+
+
   static Pair<Index<Transition>, List<TrainingExample>> chooseExtraTransitions(Index<Transition> transitionIndex,
                                                                                PerceptronModel initialModel,
                                                                                Tagger tagger,
@@ -961,6 +1067,8 @@ public class PerceptronModel extends BaseModel  {
     // Errors where the parser guessed (Compound?)UnaryTransition instead of ShiftTransition
     // This stores the Unary transtion that was incorrectly guessed, since there is only one Shift
     List<Transition> shiftUnaryErrors = new ArrayList<>();
+    // Errors where the parser guessed ShiftTransition instead of BinaryTransition
+    List<BinaryTransition> binaryShiftErrors = new ArrayList<>();
 
     // TODO: make this a parameter
     Counters.retainTop(firstErrors, 20);
@@ -977,20 +1085,33 @@ public class PerceptronModel extends BaseModel  {
                  (predicted instanceof UnaryTransition || predicted instanceof CompoundUnaryTransition)) {
         // Found a situation where the parser was frequently predicting Unary / CompoundUnary instead of Shift
         shiftUnaryErrors.add(predicted);
+      } else if ((gold instanceof BinaryTransition) &&
+                 (predicted instanceof ShiftTransition)) {
+        // Found a situation where the parser was frequently predicting Shift instead of Binary
+        binaryShiftErrors.add((BinaryTransition) gold);
       }
     }
 
     log.info("Most common gold shift, predicted unary errors: " + shiftUnaryErrors);
     log.info("Most common gold unary, predicted shift errors: " + unaryShiftErrors);
+    log.info("Most common gold binary, predicted shift errors: " + binaryShiftErrors);
 
+    List<TrainingExample> newTraining = new ArrayList<>(trainingData);
+
+    // RemoveUnaryTransitions
     Index<Transition> newTransitions = new HashIndex<>(transitionIndex);
     // TODO: make 0.5 an option
     Map<Transition, RemoveUnaryTransition> removeUnaries = buildRemoveUnaryMap(shiftUnaryErrors);
     newTransitions.addAll(removeUnaries.values());
-    List<TrainingExample> newExamples = extraShiftUnaryExamples(shiftUnaryErrors, newTransitions, removeUnaries, trainingData, random, 0.5);
-
-    List<TrainingExample> newTraining = new ArrayList<>(trainingData);
+    List<TrainingExample> newExamples = extraShiftUnaryExamples(shiftUnaryErrors, removeUnaries, trainingData, random, 0.5);
     newTraining.addAll(newExamples);
+
+    // add LookbehindBinaryTransitions
+    List<LookbehindBinaryTransition> lookbehind = buildLookbehind(binaryShiftErrors);
+    newTransitions.addAll(lookbehind);
+    newExamples = extraBinaryShiftExamples(binaryShiftErrors, lookbehind, trainingData, random, 0.5);
+    newTraining.addAll(newExamples);
+
     return new Pair<>(newTransitions, newTraining);
   }
 
