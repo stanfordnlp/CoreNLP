@@ -75,6 +75,10 @@ public class State implements Scored {
    */
   final TreeMap<Integer, String> separators;
 
+  State popStack() {
+    return new State(stack.pop(), transitions, separators, sentence, tokenPosition, score, finished);
+  }
+
   Tree getStackNode(int depth) {
     if (depth >= stack.size()) {
       return null;
