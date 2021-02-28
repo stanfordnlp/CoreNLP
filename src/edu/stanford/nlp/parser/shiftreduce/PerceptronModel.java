@@ -371,6 +371,12 @@ public class PerceptronModel extends BaseModel  {
         // otherwise, down the last transition, up the correct
         if (!newGoldState.areTransitionsEqual(highestScoringState)) {
           ++numWrong;
+          if (goldTransition == null) {
+            throw new AssertionError("This should not be possible");
+          }
+          if (highestScoringTransitionFromGoldState == null) {
+            throw new AssertionError("Failed to find a valid transition from the gold state.  This occurred in:\n" + goldState + "\n" + example.transitions);
+          }
           wrongTransitions.incrementCount(goldTransition.getClass(), highestScoringTransitionFromGoldState.getClass());
           List<String> goldFeatures = featureFactory.featurize(goldState);
           int lastTransition = transitionIndex.indexOf(highestScoringState.transitions.peek());
@@ -1098,19 +1104,23 @@ public class PerceptronModel extends BaseModel  {
 
     List<TrainingExample> newTraining = new ArrayList<>(trainingData);
 
-    // RemoveUnaryTransitions
     Index<Transition> newTransitions = new HashIndex<>(transitionIndex);
-    // TODO: make 0.5 an option
-    Map<Transition, RemoveUnaryTransition> removeUnaries = buildRemoveUnaryMap(shiftUnaryErrors);
-    newTransitions.addAll(removeUnaries.values());
-    List<TrainingExample> newExamples = extraShiftUnaryExamples(shiftUnaryErrors, removeUnaries, trainingData, random, 0.5);
-    newTraining.addAll(newExamples);
+    if (shiftUnaryErrors.size() > 0) {
+      // add RemoveUnaryTransitions
+      // TODO: make 0.5 an option
+      Map<Transition, RemoveUnaryTransition> removeUnaries = buildRemoveUnaryMap(shiftUnaryErrors);
+      newTransitions.addAll(removeUnaries.values());
+      List<TrainingExample> newExamples = extraShiftUnaryExamples(shiftUnaryErrors, removeUnaries, trainingData, random, 0.5);
+      newTraining.addAll(newExamples);
+    }
 
-    // add LookbehindBinaryTransitions
-    List<LookbehindBinaryTransition> lookbehind = buildLookbehind(binaryShiftErrors);
-    newTransitions.addAll(lookbehind);
-    newExamples = extraBinaryShiftExamples(binaryShiftErrors, lookbehind, trainingData, random, 0.5);
-    newTraining.addAll(newExamples);
+    if (binaryShiftErrors.size() > 0) {
+      // add LookbehindBinaryTransitions
+      List<LookbehindBinaryTransition> lookbehind = buildLookbehind(binaryShiftErrors);
+      newTransitions.addAll(lookbehind);
+      List<TrainingExample> newExamples = extraBinaryShiftExamples(binaryShiftErrors, lookbehind, trainingData, random, 0.5);
+      newTraining.addAll(newExamples);
+    }
 
     return new Pair<>(newTransitions, newTraining);
   }
