@@ -53,14 +53,26 @@ public class Weight implements Serializable {
     return Float.intBitsToFloat((int) (pack & 0xFFFFFFFF));
   }
 
-  private static long pack(int index, float score) {
+  private static long packedValue(int index, float score) {
     long pack = ((long) (Float.floatToIntBits(score))) & 0x00000000FFFFFFFFL;
     pack = pack | (((long) index) << 32);
     return pack;
   }
 
+  private static void pack(long[] packed, int i, int index, float score) {
+    packed[i] = packedValue(index, score);
+  }
+
+  private void pack(int i, int index, float score) {
+    packed[i] = packedValue(index, score);
+  }
+
   public void score(float[] scores) {
-    for (int i = 0; i < size(); ++i) {
+    final int length = size();
+    if (length > scores.length) {
+      throw new AssertionError("Called with an array of scores too small to fit");
+    }
+    for (int i = 0; i < length; ++i) {
       // Since this is the critical method, we optimize it even further.
       // We could do this:
       // int index = unpackIndex; float score = unpackScore;
@@ -73,9 +85,10 @@ public class Weight implements Serializable {
   }
 
   public void addScaled(Weight other, float scale) {
-    for (int i = 0; i < other.size(); ++i) {
-      int index = other.unpackIndex(i);
-      float score = other.unpackScore(i);
+    final int otherLength = other.size();
+    for (int i = 0; i < otherLength; ++i) {
+      final int index = other.unpackIndex(i);
+      final float score = other.unpackScore(i);
       updateWeight(index, score * scale);
     }
   }
@@ -90,7 +103,8 @@ public class Weight implements Serializable {
     }
 
     int nonzero = 0;
-    for (int i = 0; i < packed.length; ++i) {
+    final int length = this.size();
+    for (int i = 0; i < length; ++i) {
       if (Math.abs(unpackScore(i)) > THRESHOLD) {
         ++nonzero;
       }
@@ -101,22 +115,36 @@ public class Weight implements Serializable {
       return;
     }
 
-    if (nonzero == packed.length) {
+    if (nonzero == length) {
       return;
     }
 
     long[] newPacked = new long[nonzero];
     int j = 0;
-    for (int i = 0; i < packed.length; ++i) {
+    for (int i = 0; i < length; ++i) {
       if (Math.abs(unpackScore(i)) <= THRESHOLD) {
         continue;
       }
       int index = unpackIndex(i);
       float score = unpackScore(i);
-      newPacked[j] = pack(index, score);
+      pack(newPacked, j, index, score);
       ++j;
     }
     packed = newPacked;
+  }
+
+  public float getScore(int index) {
+    if (packed == null) {
+      return 0.0f;
+    }
+
+    final int length = size();
+    for (int i = 0; i < length; ++i) {
+      if (unpackIndex(i) == index) {
+        return unpackScore(i);
+      }
+    }
+    return 0.0f;
   }
 
   public void updateWeight(int index, float increment) {
@@ -126,23 +154,24 @@ public class Weight implements Serializable {
 
     if (packed == null) {
       packed = new long[1];
-      packed[0] = pack(index, increment);
+      pack(0, index, increment);
       return;
     }
 
-    for (int i = 0; i < packed.length; ++i) {
+    final int length = size();
+    for (int i = 0; i < length; ++i) {
       if (unpackIndex(i) == index) {
         float score = unpackScore(i);
-        packed[i] = pack(index, score + increment);
+        pack(i, index, score + increment);
         return;
       }
     }
 
-    long[] newPacked = new long[packed.length + 1];
-    for (int i = 0; i < packed.length; ++i) {
+    long[] newPacked = new long[length + 1];
+    for (int i = 0; i < length; ++i) {
       newPacked[i] = packed[i];
     }
-    newPacked[packed.length] = pack(index, increment);
+    pack(newPacked, length, index, increment);
     packed = newPacked;
   }
 
@@ -152,7 +181,8 @@ public class Weight implements Serializable {
     }
 
     float maxScore = 0.0f;
-    for (int i = 0; i < packed.length; ++i) {
+    final int length = size();
+    for (int i = 0; i < length; ++i) {
       float score = Math.abs(unpackScore(i));
       maxScore = Math.max(score, maxScore);
     }
@@ -168,7 +198,8 @@ public class Weight implements Serializable {
       return;
     }
 
-    for (int i = 0; i < packed.length; ++i) {
+    final int length = size();
+    for (int i = 0; i < length; ++i) {
       int index = unpackIndex(i);
       float score = unpackScore(i);
       if (score > 0.0f) {
@@ -176,7 +207,7 @@ public class Weight implements Serializable {
       } else {
         score = Math.min(0.0f, score + reg);
       }
-      packed[i] = pack(index, score);
+      pack(i, index, score);
     }
   }
 
@@ -188,12 +219,23 @@ public class Weight implements Serializable {
       return;
     }
 
-    for (int i = 0; i < packed.length; ++i) {
+    final int length = size();
+    for (int i = 0; i < length; ++i) {
       int index = unpackIndex(i);
       float score = unpackScore(i);
       score = score - score * reg;
-      packed[i] = pack(index, score);
+      pack(i, index, score);
     }
+  }
+
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    final int length = size();
+    for (int i = 0; i < length; ++i) {
+      if (i > 0) builder.append("   ");
+      builder.append(unpackIndex(i) + "=" + unpackScore(i));
+    }
+    return builder.toString();
   }
 
   private long[] packed;
