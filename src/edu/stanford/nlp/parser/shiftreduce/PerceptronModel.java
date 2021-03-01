@@ -152,6 +152,21 @@ public class PerceptronModel extends BaseModel  {
     }
   }
 
+  public int numWeights() {
+    int numWeights = 0;
+    for (Map.Entry<String, Weight> stringWeightEntry : featureWeights.entrySet()) {
+      numWeights += stringWeightEntry.getValue().size();
+    }
+    return numWeights;
+  }
+
+  public float maxAbs() {
+    float maxAbs = 0.0f;
+    for (Map.Entry<String, Weight> weight : featureWeights.entrySet()) {
+      maxAbs = Math.max(maxAbs, weight.getValue().maxAbs());
+    }
+    return maxAbs;
+  }
 
   /**
    * Output some random facts about the model and the training iteration
@@ -159,11 +174,9 @@ public class PerceptronModel extends BaseModel  {
   public void outputStats(TrainingResult result) {
     log.info("While training, got " + result.numCorrect + " transitions correct and " + result.numWrong + " transitions wrong");
     log.info("Number of known features: " + featureWeights.size());
-    int numWeights = 0;
-    for (Map.Entry<String, Weight> stringWeightEntry : featureWeights.entrySet()) {
-      numWeights += stringWeightEntry.getValue().size();
-    }
-    log.info("Number of non-zero weights: " + numWeights);
+
+    log.info("Number of non-zero weights: " + numWeights());
+    log.info("Weight values maxAbs: " + maxAbs());
 
     int wordLength = 0;
     for (String feature : featureWeights.keySet()) {
