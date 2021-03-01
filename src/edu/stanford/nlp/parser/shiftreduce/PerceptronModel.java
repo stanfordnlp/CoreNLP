@@ -628,13 +628,13 @@ public class PerceptronModel extends BaseModel  {
             if (allowedFeatures != null && !allowedFeatures.contains(feature)) {
               continue;
             }
-            Weight weights = featureWeights.get(feature);
-            if (weights == null) {
-              weights = new Weight();
-              featureWeights.put(feature, weights);
+            Weight weight = featureWeights.get(feature);
+            if (weight == null) {
+              weight = new Weight();
+              featureWeights.put(feature, weight);
             }
-            weights.updateWeight(update.goldTransition, update.delta);
-            weights.updateWeight(update.predictedTransition, -update.delta);
+            weight.updateWeight(update.goldTransition, update.delta);
+            weight.updateWeight(update.predictedTransition, -update.delta);
 
             if (featureFrequencies != null) {
               featureFrequencies.incrementCount(feature, (update.goldTransition >= 0 && update.predictedTransition >= 0) ? 2 : 1);
