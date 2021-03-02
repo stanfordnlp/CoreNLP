@@ -1,8 +1,12 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
+import edu.stanford.nlp.io.ByteArrayUtils;
 import edu.stanford.nlp.util.ArrayUtils;
+
 
 /**
  * Stores one row of the sparse matrix which makes up the multiclass perceptron.
@@ -240,6 +244,22 @@ public class Weight implements Serializable {
 
   private long[] packed;
 
-  private static final long serialVersionUID = 1;
+  void writeBytes(ByteArrayOutputStream bout) {
+    ByteArrayUtils.writeInt(bout, packed.length);
+    for (int i = 0; i < packed.length; ++i) {
+      ByteArrayUtils.writeLong(bout, packed[i]);
+    }
+  }
 
+  static Weight readBytes(ByteArrayInputStream bin) {
+    int len = ByteArrayUtils.readInt(bin);
+    Weight weight = new Weight();
+    weight.packed = new long[len];
+    for (int i = 0; i < len; ++i) {
+      weight.packed[i] = ByteArrayUtils.readLong(bin);
+    }
+    return weight;
+  }
+
+  private static final long serialVersionUID = 2;
 }

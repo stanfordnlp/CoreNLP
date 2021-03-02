@@ -5,6 +5,9 @@ import org.junit.Test;
 
 import java.util.Random;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 public class WeightTest {
   @Test
   public void testSize() {
@@ -130,5 +133,23 @@ public class WeightTest {
     w.score(scores);
     w2.score(scores);
     assertEquals(-952.0, scores[232], 0.0001f);
+  }
+
+  @Test
+  public void testReadWrite() {
+    Weight w = new Weight();
+    w.updateWeight(232, -431.0f);
+    w.updateWeight(200, -521.0f);
+    w.updateWeight(3, 50.0f);
+
+    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+    w.writeBytes(bout);
+
+    ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+    Weight w2 = Weight.readBytes(bin);
+    assertEquals(3, w2.size());
+    assertEquals(-431.0f, w2.getScore(232), 0.0001f);
+    assertEquals(-521.0f, w2.getScore(200), 0.0001f);
+    assertEquals(50.0f, w2.getScore(3), 0.0001f);
   }
 }
