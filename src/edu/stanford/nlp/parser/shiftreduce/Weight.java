@@ -27,13 +27,15 @@ import edu.stanford.nlp.util.ArrayUtils;
  */
 
 public class Weight implements Serializable {
+  static final short[] EMPTY = {};
+
   public Weight() {
-    packed = null;
+    packed = EMPTY;
   }
 
   public Weight(Weight other) {
     if (other.size() == 0) {
-      packed = null;
+      packed = EMPTY;
       return;
     }
     packed = ArrayUtils.copy(other.packed);
@@ -41,34 +43,41 @@ public class Weight implements Serializable {
   }
 
   public int size() {
-    if (packed == null) {
-      return 0;
-    }
-    return packed.length;
+    // TODO: find a fast way of doing this... we know it's a multiple of 3 after all
+    return packed.length / 3;
   }
 
-  private int unpackIndex(int i) {
-    long pack = packed[i];
-    return (int) (pack >>> 32);
+  private short unpackIndex(int i) {
+    return packed[i * 3];
   }
 
   private float unpackScore(int i) {
-    long pack = packed[i];
-    return Float.intBitsToFloat((int) (pack & 0xFFFFFFFF));
+    i = i * 3 + 1;
+    final int high = ((int) packed[i++]) << 16;
+    final int low = packed[i] & 0x0000FFFF;
+    return Float.intBitsToFloat(high | low);
   }
 
-  private static long packedValue(int index, float score) {
-    long pack = ((long) (Float.floatToIntBits(score))) & 0x00000000FFFFFFFFL;
-    pack = pack | (((long) index) << 32);
-    return pack;
-  }
-
-  private static void pack(long[] packed, int i, int index, float score) {
-    packed[i] = packedValue(index, score);
+  private static void pack(short[] packed, int i, int index, float score) {
+    if (i > Short.MAX_VALUE) {
+      throw new ArithmeticException("How did you make an index with 30,000 weights??");
+    }
+    int pos = i * 3;
+    packed[pos++] = (short) index;
+    final int bits = Float.floatToIntBits(score);
+    packed[pos++] = (short) ((bits & 0xFFFF0000) >> 16);
+    packed[pos] = (short) (bits & 0x0000FFFF);
   }
 
   private void pack(int i, int index, float score) {
-    packed[i] = packedValue(index, score);
+    if (i > Short.MAX_VALUE) {
+      throw new ArithmeticException("How did you make an index with 30,000 weights??");
+    }
+    int pos = i * 3;
+    packed[pos++] = (short) index;
+    final int bits = Float.floatToIntBits(score);
+    packed[pos++] = (short) ((bits & 0xFFFF0000) >> 16);
+    packed[pos] = (short) (bits & 0x0000FFFF);
   }
 
   public void score(float[] scores) {
@@ -76,14 +85,17 @@ public class Weight implements Serializable {
     if (length > scores.length) {
       throw new AssertionError("Called with an array of scores too small to fit");
     }
-    for (int i = 0; i < length; ++i) {
+    for (int i = 0; i < packed.length; ) {
       // Since this is the critical method, we optimize it even further.
       // We could do this:
       // int index = unpackIndex; float score = unpackScore;
-      // That results in an extra array lookup
-      final long pack = packed[i];
-      final int index = (int) (pack >>> 32);
-      final float score = Float.intBitsToFloat((int) (pack & 0xFFFFFFFF));
+      // That results in extra operations
+      final short index = packed[i++];
+      final int high = ((int) packed[i++]) << 16;
+      final int low = packed[i++] & 0x0000FFFF;
+      final int bits = high | low;
+      // final int bits = (((int) packed[i++]) << 16) | (packed[i++] & 0x0000FFFF);
+      final float score = Float.intBitsToFloat(bits);
       scores[index] += score;
     }
   }
@@ -102,7 +114,7 @@ public class Weight implements Serializable {
   void condense() {
     // threshold is in case floating point math makes a feature we
     // don't care about exist
-    if (packed == null) {
+    if (packed == null || packed.length == 0) {
       return;
     }
 
@@ -115,7 +127,7 @@ public class Weight implements Serializable {
     }
 
     if (nonzero == 0) {
-      packed = null;
+      packed = EMPTY;
       return;
     }
 
@@ -123,7 +135,7 @@ public class Weight implements Serializable {
       return;
     }
 
-    long[] newPacked = new long[nonzero];
+    short[] newPacked = new short[nonzero * 3];
     int j = 0;
     for (int i = 0; i < length; ++i) {
       if (Math.abs(unpackScore(i)) <= THRESHOLD) {
@@ -156,8 +168,8 @@ public class Weight implements Serializable {
       return;
     }
 
-    if (packed == null) {
-      packed = new long[1];
+    if (packed == null || packed.length == 0) {
+      packed = new short[3];
       pack(0, index, increment);
       return;
     }
@@ -165,14 +177,14 @@ public class Weight implements Serializable {
     final int length = size();
     for (int i = 0; i < length; ++i) {
       if (unpackIndex(i) == index) {
-        float score = unpackScore(i);
+        final float score = unpackScore(i);
         pack(i, index, score + increment);
         return;
       }
     }
 
-    long[] newPacked = new long[length + 1];
-    for (int i = 0; i < length; ++i) {
+    short[] newPacked = new short[packed.length + 3];
+    for (int i = 0; i < packed.length; ++i) {
       newPacked[i] = packed[i];
     }
     pack(newPacked, length, index, increment);
@@ -235,31 +247,33 @@ public class Weight implements Serializable {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     final int length = size();
+    builder.append("Weight(");
     for (int i = 0; i < length; ++i) {
-      if (i > 0) builder.append("   ");
+      if (i > 0) builder.append("  ");
       builder.append(unpackIndex(i) + "=" + unpackScore(i));
     }
+    builder.append(")");
     return builder.toString();
   }
 
-  private long[] packed;
+  private short[] packed;
 
   void writeBytes(ByteArrayOutputStream bout) {
     ByteArrayUtils.writeInt(bout, packed.length);
     for (int i = 0; i < packed.length; ++i) {
-      ByteArrayUtils.writeLong(bout, packed[i]);
+      ByteArrayUtils.writeShort(bout, packed[i]);
     }
   }
 
   static Weight readBytes(ByteArrayInputStream bin) {
     int len = ByteArrayUtils.readInt(bin);
     Weight weight = new Weight();
-    weight.packed = new long[len];
+    weight.packed = new short[len];
     for (int i = 0; i < len; ++i) {
-      weight.packed[i] = ByteArrayUtils.readLong(bin);
+      weight.packed[i] = ByteArrayUtils.readShort(bin);
     }
     return weight;
   }
 
-  private static final long serialVersionUID = 2;
+  private static final long serialVersionUID = 3;
 }
