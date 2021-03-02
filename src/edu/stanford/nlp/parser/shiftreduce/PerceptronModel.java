@@ -678,7 +678,9 @@ public class PerceptronModel extends BaseModel  {
         log.info("\n\n");
 
         if (bestModels != null) {
-          bestModels.add(new ScoredObject<>(new PerceptronModel(this), labelF1));
+          PerceptronModel copy = new PerceptronModel(this);
+          copy.condenseFeatures();
+          bestModels.add(new ScoredObject<>(copy, labelF1));
           if (bestModels.size() > op.trainOptions().averagedModels) {
             bestModels.poll();
           }
