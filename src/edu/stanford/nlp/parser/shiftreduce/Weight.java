@@ -81,8 +81,7 @@ public class Weight implements Serializable {
   }
 
   public void score(float[] scores) {
-    final int length = size();
-    if (length > scores.length) {
+    if (packed.length > scores.length * 3) {
       throw new AssertionError("Called with an array of scores too small to fit");
     }
     for (int i = 0; i < packed.length; ) {
