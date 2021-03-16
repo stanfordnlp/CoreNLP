@@ -232,12 +232,11 @@ public class BinaryTransition implements Transition {
 
   @Override
   public int hashCode() {
-    // TODO: fix the hashcode for the side?  would require rebuilding all models
     switch(side) {
     case LEFT:
       return 97197711 ^ label.hashCode();
     case RIGHT:
-      return 97197711 ^ label.hashCode();
+      return 85635467 ^ label.hashCode();
     default:
       throw new IllegalArgumentException("Unknown side " + side);
     }

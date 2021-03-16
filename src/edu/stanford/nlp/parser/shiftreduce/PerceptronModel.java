@@ -44,13 +44,13 @@ public class PerceptronModel extends BaseModel  {
 
   private float learningRate = 1.0f;
 
-  Map<String, Weight> featureWeights;
+  WeightMap featureWeights;
   final FeatureFactory featureFactory;
 
   public PerceptronModel(ShiftReduceOptions op, Index<Transition> transitionIndex,
                          Set<String> knownStates, Set<String> rootStates, Set<String> rootOnlyStates) {
     super(op, transitionIndex, knownStates, rootStates, rootOnlyStates);
-    this.featureWeights = Generics.newHashMap();
+    this.featureWeights = new WeightMap();
 
     String[] classes = op.featureFactoryClass.split(";");
     if (classes.length == 1) {
@@ -74,7 +74,7 @@ public class PerceptronModel extends BaseModel  {
     super(other);
     this.featureFactory = other.featureFactory;
 
-    this.featureWeights = Generics.newHashMap();
+    this.featureWeights = new WeightMap();
     for (String feature : other.featureWeights.keySet()) {
       featureWeights.put(feature, new Weight(other.featureWeights.get(feature)));
     }
@@ -110,7 +110,7 @@ public class PerceptronModel extends BaseModel  {
       }
     }
 
-    featureWeights = Generics.newHashMap();
+    featureWeights = new WeightMap();
     for (String feature : features) {
       featureWeights.put(feature, new Weight());
     }
