@@ -44,13 +44,6 @@ import edu.stanford.nlp.util.StringUtils;
 //TODO: "Fix two men wearing shirts." in plural resolver.
 public class SemanticGraphEnhancer {
 
-  /* Special relation for quantificational modifiers. */
-  public static final GrammaticalRelation QMOD_RELATION = new GrammaticalRelation(Language.UniversalEnglish, "det:qmod", "quantificational modifier", UniversalEnglishGrammaticalRelations.MODIFIER);
-
-  static {
-    UniversalEnglishGrammaticalRelations.threadSafeAddRelation(QMOD_RELATION);
-  }
-
   /* A lot of, an assortment of, ... */
   public static final SemgrexPattern QUANT_MOD_PATTERN = SemgrexPattern.compile("{word:/(?i:lot|assortment|number|couple|bunch|handful|litany|sheaf|slew|dozen|series|variety|multitude|wad|clutch|wave|mountain|array|spate|string|ton|range|plethora|heap|sort|form|kind|type|version|bit|pair|triple|total)/}=w2 >det {word:/(?i:an?)/}=w1 >/nmod.*/ ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w3) . {}=w3");
 
@@ -115,7 +108,7 @@ public class SemanticGraphEnhancer {
       }
 
       Collections.sort(otherDeps);
-      createMultiWordExpression(sg, gov, QMOD_RELATION, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
+      createMultiWordExpression(sg, gov, UniversalEnglishGrammaticalRelations.QMOD, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
     }
 
     //TODO: make this a function and don't duplicate for each pattern
@@ -157,7 +150,7 @@ public class SemanticGraphEnhancer {
       }
 
       Collections.sort(otherDeps);
-      createMultiWordExpression(sg, gov, QMOD_RELATION, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
+      createMultiWordExpression(sg, gov, UniversalEnglishGrammaticalRelations.QMOD, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
 
     }
 
@@ -203,7 +196,7 @@ public class SemanticGraphEnhancer {
 
 
       Collections.sort(otherDeps);
-      createMultiWordExpression(sg, gov, QMOD_RELATION, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
+      createMultiWordExpression(sg, gov, UniversalEnglishGrammaticalRelations.QMOD, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
 
     }
   }
@@ -268,8 +261,8 @@ public class SemanticGraphEnhancer {
             && nummod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() < 20) {
           numCopies = nummod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() - 1;
         }
-      } else if (sg.hasChildWithReln(subj, QMOD_RELATION)) {
-        IndexedWord qmod = sg.getChildWithReln(subj, QMOD_RELATION);
+      } else if (sg.hasChildWithReln(subj, UniversalEnglishGrammaticalRelations.QMOD)) {
+        IndexedWord qmod = sg.getChildWithReln(subj, UniversalEnglishGrammaticalRelations.QMOD);
         if (qmod.get(CoreAnnotations.NumericValueAnnotation.class) != null &&
             qmod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() < 20) {
           numCopies = qmod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() - 1;
@@ -342,8 +335,8 @@ public class SemanticGraphEnhancer {
             && nummod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() < 20) {
           numCopies = nummod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() - 1;
         }
-      } else if (sg.hasChildWithReln(subj, QMOD_RELATION)) {
-        IndexedWord qmod = sg.getChildWithReln(subj, QMOD_RELATION);
+      } else if (sg.hasChildWithReln(subj, UniversalEnglishGrammaticalRelations.QMOD)) {
+        IndexedWord qmod = sg.getChildWithReln(subj, UniversalEnglishGrammaticalRelations.QMOD);
         if (qmod.get(CoreAnnotations.NumericValueAnnotation.class) != null &&
             qmod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() < 20) {
           numCopies = qmod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() - 1;
@@ -368,8 +361,8 @@ public class SemanticGraphEnhancer {
             && nummod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() < 20) {
           numCopies = nummod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() - 1;
         }
-      } else if (sg.hasChildWithReln(word, QMOD_RELATION)) {
-        IndexedWord qmod = sg.getChildWithReln(word, QMOD_RELATION);
+      } else if (sg.hasChildWithReln(word, UniversalEnglishGrammaticalRelations.QMOD)) {
+        IndexedWord qmod = sg.getChildWithReln(word, UniversalEnglishGrammaticalRelations.QMOD);
         if (qmod.get(CoreAnnotations.NumericValueAnnotation.class) != null &&
             qmod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() < 20) {
           numCopies = qmod.get(CoreAnnotations.NumericValueAnnotation.class).intValue() - 1;
