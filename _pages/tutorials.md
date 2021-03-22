@@ -15,12 +15,7 @@ However, here are some tutorials by third parties. Note that some of this tutori
 ### Getting started with CoreNLP
 
 * [linguisticsweb.org tutorial](http://www.linguisticsweb.org/doku.php?id=linguisticsweb:tutorials:linguistics_tutorials:automaticannotation:stanford_core_nlp)
-* [Stanford CoreNLP Tutorial](https://interviewbubble.com/stanford-corenlp-tutorial/)
 * [Natural Language Processing with Stanford CoreNLP](https://cloudacademy.com/blog/natural-language-processing-stanford-corenlp-2/) from the CloudAcademy Blog. Has comparisons with Google Cloud NL API.
-
-### NER
-
-* [Recognizing Named Entities - An Introduction](http://blog.thehumangeo.com/ner-intro.html) by Denny DeCastro and Kyle von Bredow at HumanGeo.  Also another blog post on [Named Entity Recognition for Twitter](http://blog.thehumangeo.com/twitter-ner.html) by George Cooper.
 
 ### Sentiment analysis
 
@@ -33,7 +28,3 @@ However, here are some tutorials by third parties. Note that some of this tutori
 ### Japanese
 
 * [CoreNLP を使ってみる(1)/Try using CoreNLP (1)](http://lab.astamuse.co.jp/entry/corenlp1): A tutorial introduction to CoreNLP in Japanese by astamuse Lab.
-
-### Slides
-
-* [Stanford CoreNLP Introduction](http://www.sfs.uni-tuebingen.de/~keberle/NLPTools/presentations/CoreNLP/CoreNLP_introduction.pdf) by Svea Klaus.
