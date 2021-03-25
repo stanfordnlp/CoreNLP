@@ -445,29 +445,28 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     int nerTokenizedIdx = 0;
     int mergeCount = 0;
     int originalIdx = 0;
-    while (originalIdx < originalTokens.size()) {
-      // get current tokens to align
-      CoreLabel origToken = originalTokens.get(originalIdx);
-      CoreLabel nerTokenizedToken = nerTokenizedTokens.get(nerTokenizedIdx);
-      // copy data
-      for (Class c : nerKeys) {
-        if (nerTokenizedToken.get(c) != null)
-          origToken.set(c, nerTokenizedToken.get(c));
-      }
-      // increment index into original
-      originalIdx++;
-      // increment index into ner tokenization list, if on a merged token, stay on this till exhausted
-      // check if first time on merged token
-      if (mergeCount == 0 && nerTokenizedToken.get(TokenMergeCountAnnotation.class) != null) {
-        mergeCount = nerTokenizedToken.get(TokenMergeCountAnnotation.class);
-      } else if (mergeCount > 1) {
-        // check if in middle of processing merged token
-        // drop the mergeIdx, but dont leave this token in the ner tokenized list
-        mergeCount--;
-      } else {
-        // move on if mergeIdx exhausted or this isn't a merge token
-        mergeCount = 0;
-        nerTokenizedIdx++;
+    for (CoreMap sentence : originalAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+      for (CoreLabel origToken : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+        // get current tokens to align
+        CoreLabel nerTokenizedToken = nerTokenizedTokens.get(nerTokenizedIdx);
+        // copy data
+        for (Class c : nerKeys) {
+          if (nerTokenizedToken.get(c) != null)
+            origToken.set(c, nerTokenizedToken.get(c));
+        }
+        // increment index into ner tokenization list, if on a merged token, stay on this till exhausted
+        // check if first time on merged token
+        if (mergeCount == 0 && nerTokenizedToken.get(TokenMergeCountAnnotation.class) != null) {
+          mergeCount = nerTokenizedToken.get(TokenMergeCountAnnotation.class);
+        } else if (mergeCount > 1) {
+          // check if in middle of processing merged token
+          // drop the mergeIdx, but dont leave this token in the ner tokenized list
+          mergeCount--;
+        } else {
+          // move on if mergeIdx exhausted or this isn't a merge token
+          mergeCount = 0;
+          nerTokenizedIdx++;
+        }
       }
     }
   }
