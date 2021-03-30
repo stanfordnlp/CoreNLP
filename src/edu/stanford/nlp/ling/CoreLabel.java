@@ -34,12 +34,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   private static final long serialVersionUID = 2L;
 
 
-  // /**
-  //  * Should warnings be printed when converting from MapLabel family.
-  //  */
-  // private static final boolean VERBOSE = false;
-
-
   /** Default constructor, calls super() */
   public CoreLabel() {
     super();
@@ -170,11 +164,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    * This allows you to read in arbitrary values from a file as features, for example.
    */
   public interface GenericAnnotation<T> extends CoreAnnotation<T> {  }
-  //Unchecked is below because eclipse can't handle the level of type inference if we correctly parametrize GenericAnnotation with String
-  @SuppressWarnings("unchecked")
-  public static final Map<String, Class<? extends GenericAnnotation>> genericKeys = Generics.newHashMap();
-  @SuppressWarnings("unchecked")
-  public static final Map<Class<? extends GenericAnnotation>, String> genericValues = Generics.newHashMap();
+
+  public static final Map<String, Class<? extends GenericAnnotation<String>>> genericKeys = Generics.newHashMap();
+
+  public static final Map<Class<? extends GenericAnnotation<String>>, String> genericValues = Generics.newHashMap();
 
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -193,29 +186,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
         if (key != null) {
           throw new UnsupportedOperationException("Unknown key " + key);
         }
-
-        // It used to be that the following code let you put unknown keys
-        // in the CoreLabel.  However, you can't create classes dynamically
-        // at run time, which meant only one of these classes could ever
-        // exist, which meant multiple unknown keys would clobber each
-        // other and be very annoying.  It's easier just to not allow
-        // it at all.
-        // If it becomes possible to create classes dynamically,
-        // we could add this code back.
-        //if(genericKeys.containsKey(key)) {
-        //  this.set(genericKeys.get(key), value);
-        //} else {
-        //  GenericAnnotation<String> newKey = new GenericAnnotation<String>() {
-        //    public Class<String> getType() { return String.class;} };
-        //  this.set(newKey.getClass(), values[i]);
-        //  genericKeys.put(keys[i], newKey.getClass());
-        //  genericValues.put(newKey.getClass(), keys[i]);
-        //}
-        // unknown key; ignore
-        //if (VERBOSE) {
-        //  log.info("CORE: CoreLabel.fromAbstractMapLabel: " +
-        //      "Unknown key "+key);
-        //}
       } else {
         try {
           Class<?> valueClass = AnnotationLookup.getValueType(coreKeyClass);
@@ -410,6 +380,8 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     // todo [cdm 2015]: probably no one now knows why this was even needed, but maybe it should just be removed. It's kind of weird.
     if (word != null && !word.equals(originalWord) && containsKey(CoreAnnotations.LemmaAnnotation.class)) {
       remove(CoreAnnotations.LemmaAnnotation.class);
+      // [cdm 2021] The only unit test that depends on this code is the one that tests for this exact behavior! Remove?
+      // throw new IllegalStateException("Looks like your code is relying on a dirty branch in setWord() that we want to remove!");
     }
   }
 
@@ -566,8 +538,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
 
   /**
    * Set value of IsNewlineAnnotation
-   *
-   * @return value of IsNewlineAnnotation
    */
   public void setIsNewline(boolean isNewline) {
     set(CoreAnnotations.IsNewlineAnnotation.class, isNewline);
@@ -593,8 +563,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
 
   /**
    * Set value of IsMultiWordToken
-   *
-   * @return
    */
   public void setIsMWT(boolean isMWT) {
     set(CoreAnnotations.IsMultiWordTokenAnnotation.class, isMWT);
@@ -602,8 +570,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
 
   /**
    * Set value of IsFirstWordOfMWT
-   *
-   * @return
    */
   public void setIsMWTFirst(boolean isFirstMWT) {
     set(CoreAnnotations.IsFirstWordOfMWTAnnotation.class,
@@ -730,7 +696,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       break;
     case MAP: {
       Map map2 = new TreeMap();
-      for(Class key : this.keySet()) {
+      for (Class key : this.keySet()) {
         map2.put(key.getName(), get(key));
       }
       buf.append(map2);
@@ -739,7 +705,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     case VALUE_MAP: {
       buf.append(value());
       Map map2 = new TreeMap(asClassComparator);
-      for(Class key : this.keySet()) {
+      for (Class key : this.keySet()) {
         map2.put(key, get(key));
       }
       map2.remove(CoreAnnotations.ValueAnnotation.class);
@@ -781,7 +747,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
         buf.append('-').append((index).intValue());
       }
       Map<String,Object> map2 = new TreeMap<>();
-      for(Class key : this.keySet()) {
+      for (Class key : this.keySet()) {
         String cls = key.getName();
         // special shortening of all the Annotation classes
         int idx = cls.indexOf('$');
