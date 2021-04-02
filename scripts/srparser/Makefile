@@ -129,7 +129,7 @@ ITALIAN_TAGGER = edu/stanford/nlp/models/pos-tagger/italian.tagger
 ITALIAN_TLPP   = edu.stanford.nlp.parser.lexparser.ItalianTreebankParserParams
 
 
-DEFAULT_OPTIONS    = -trainingThreads 8 -batchSize 24 -trainingIterations 200 -stalledIterationLimit 40 -featureFrequencyCutoff 5
+DEFAULT_OPTIONS    = -trainingThreads 8 -batchSize 24 -trainingIterations 200 -stalledIterationLimit 40 -featureFrequencyCutoff 5 -learnExtraTransitions -recordTransitionTypes
 
 TRAIN_BEAM         = -featureFrequencyCutoff 10 -trainingMethod BEAM -trainBeamSize 8
 TRAIN_ORACLE_BEAM  = -l1Reg 0.10 -featureFrequencyCutoff 10 -trainingMethod REORDER_BEAM -trainBeamSize 8
