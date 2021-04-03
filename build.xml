@@ -437,6 +437,14 @@
     </jar>
   </target>
 
+  <target name="scenegraph.jar" depends="compile"
+          description="build the semantic graph jar file">
+    <jar destfile="scenegraph.jar">
+      <fileset dir="${build.path}/edu/stanford/nlp/scenegraph" />
+    </jar>
+  </target>
+
+
   <!-- I wrote this for a side project, so if you one day see it in a
        build file of mine, you can't sue me for taking it from
        Stanford. -jab -->
