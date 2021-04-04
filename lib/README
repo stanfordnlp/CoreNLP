@@ -434,6 +434,13 @@ URL: https://www.slf4j.org/
 LAST UPDATE: 2017-01-17
 LAST UPDATE BY: Jason Bolton
 
+------------------------------------------------------------------------
+json-simple.jar
+ORIGINAL JAR NAME:json-simple-1.1.1.jar
+VERSION: 1.1.1
+SOURCE AVAILABLE: yes (https://code.google.com/p/json-simple/)
+DESCRIPTION: Simple JSON library
+LAST UPDATE BY: Angel Chang
 -----------------------------------------------------------------
 foo.jar
 

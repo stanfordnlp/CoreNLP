@@ -37,6 +37,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/ejml-core-0.39.jar" sourcepath="libsrc/projects/core/libsrc/ejml-core-0.39-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ejml-ddense-0.39.jar" sourcepath="libsrc/projects/core/libsrc/ejml-ddense-0.39-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ejml-simple-0.39.jar" sourcepath="libsrc/projects/core/libsrc/ejml-simple-0.39-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/json-simple.jar" />
 	<classpathentry kind="lib" path="liblocal/antlr-runtime.jar"/>
 	<classpathentry kind="lib" path="liblocal/hamcrest-2.2.jar" sourcepath="libsrc/hamcrest-2.2-sources.jar"/>
 	<classpathentry kind="lib" path="liblocal/javaruntype.jar"/>
