@@ -7,6 +7,11 @@
 
 package edu.stanford.nlp.semgraph.semgrex;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -69,14 +74,65 @@ public class ProcessSemgrexRequest {
     return responseBuilder.build();
   }
 
+  /**
+   * Reads a single request from the InputStream, then writes back a single response.
+   */
   public static void processInputStream(InputStream in, OutputStream out) throws IOException {
-    // TODO: it would be nice to allow multiple reads from the same stream
     CoreNLPProtos.SemgrexRequest request = CoreNLPProtos.SemgrexRequest.parseFrom(in);
     CoreNLPProtos.SemgrexResponse response = processRequest(request);
     response.writeTo(out);
   }
 
+  /**
+   * Processes multiple requests from the same stream.
+   *<br>
+   * As per the google suggestion for streaming multiple messages,
+   * this reads the length of the buffer, then reads exactly that many
+   * bytes and decodes it.  It repeats until either 0 is read for the
+   * length or until EOF.
+   *<br>
+   * https://developers.google.com/protocol-buffers/docs/techniques#streamimg
+   */
+  public static void processMultipleInputs(InputStream in, OutputStream out) throws IOException {
+    DataInputStream din = new DataInputStream(in);
+    DataOutputStream dout = new DataOutputStream(out);
+    int size = 0;
+    do {
+      try {
+        size = din.readInt();
+      } catch (EOFException e) {
+        // If the stream ends without a closing 0, we consider that okay too
+        size = 0;
+      }
+
+      // stream is done if there's a closing 0 or if the stream ends
+      if (size == 0) {
+        dout.writeInt(0);
+        break;
+      }
+
+      byte[] inputArray = new byte[size];
+      din.read(inputArray, 0, size);
+      ByteArrayInputStream bin = new ByteArrayInputStream(inputArray);
+      ByteArrayOutputStream result = new ByteArrayOutputStream();
+      processInputStream(bin, result);
+      byte[] outputArray = result.toByteArray();
+      dout.writeInt(outputArray.length);
+      dout.write(outputArray);
+    } while (size > 0);
+  }
+
+  /**
+   * Command line tool for processing a semgrex request.
+   * <br>
+   * If -multiple is specified, will process multiple requests.
+   */
   public static void main(String[] args) throws IOException {
-    processInputStream(System.in, System.out);
+    if (args.length > 0 &&
+        (args[0].equalsIgnoreCase("-multiple") || args[0].equalsIgnoreCase("--multiple"))) {
+      processMultipleInputs(System.in, System.out);
+    } else {
+      processInputStream(System.in, System.out);
+    }
   }
 }
