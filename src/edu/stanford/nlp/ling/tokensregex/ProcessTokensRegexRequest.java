@@ -16,11 +16,12 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.ProcessProtobufRequest;
 
 /**
  * This class contains static methods for processing tokensregex requests on a Document.
  */
-public class ProcessTokensRegexRequest {
+public class ProcessTokensRegexRequest extends ProcessProtobufRequest {
   public static CoreNLPProtos.TokensRegexResponse.PatternMatch matchPattern(TokenSequencePattern pattern, List<CoreMap> sentences) {
     CoreNLPProtos.TokensRegexResponse.PatternMatch.Builder resultBuilder = CoreNLPProtos.TokensRegexResponse.PatternMatch.newBuilder();
     for (int sentenceIdx = 0; sentenceIdx < sentences.size(); ++sentenceIdx) {
@@ -70,15 +71,15 @@ public class ProcessTokensRegexRequest {
     
     return responseBuilder.build();    
   }
-  
-  public static void processInputStream(InputStream in, OutputStream out) throws IOException {
-    // TODO: it would be nice to allow multiple reads from the same stream
+
+  @Override
+  public void processInputStream(InputStream in, OutputStream out) throws IOException {
     CoreNLPProtos.TokensRegexRequest request = CoreNLPProtos.TokensRegexRequest.parseFrom(in);
     CoreNLPProtos.TokensRegexResponse response = processRequest(request);
     response.writeTo(out);
   }
 
   public static void main(String[] args) throws IOException {
-    processInputStream(System.in, System.out);
+    ProcessProtobufRequest.process(new ProcessTokensRegexRequest(), args);
   }
 }
