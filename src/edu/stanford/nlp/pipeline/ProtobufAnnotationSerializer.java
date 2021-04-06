@@ -61,7 +61,7 @@ import edu.stanford.nlp.coref.data.SpeakerInfo;
  *
  * <p>
  *   To allow lossy serialization, use {@link ProtobufAnnotationSerializer#ProtobufAnnotationSerializer(boolean)}.
- *   Otherwise, an exception is thrown if an unknown key appears in the annotation which would not be saved to th
+ *   Otherwise, an exception is thrown if an unknown key appears in the annotation which would not be saved to the
  *   protocol buffer.
  *   If such keys exist, and are a part of the standard CoreNLP pipeline, please let us know!
  *   If you would like to serialize keys in addition to those serialized by default (e.g., you are attaching
