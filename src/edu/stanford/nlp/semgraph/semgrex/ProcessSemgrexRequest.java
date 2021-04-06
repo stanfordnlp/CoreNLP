@@ -53,6 +53,11 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
     return semgrexResultBuilder.build();
   }
 
+  /**
+   * For a single request, iterate through the SemanticGraphs it
+   * includes, and add the results of each Semgrex operation included
+   * in the request.
+   */
   public static CoreNLPProtos.SemgrexResponse processRequest(CoreNLPProtos.SemgrexRequest request) {
     ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
     CoreNLPProtos.SemgrexResponse.Builder responseBuilder = CoreNLPProtos.SemgrexResponse.newBuilder();
