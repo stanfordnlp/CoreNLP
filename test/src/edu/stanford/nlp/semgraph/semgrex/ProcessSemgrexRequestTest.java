@@ -181,7 +181,8 @@ result {
     ByteArrayInputStream bin = new ByteArrayInputStream(request);
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
 
-    ProcessSemgrexRequest.processMultipleInputs(bin, bout);
+    ProcessSemgrexRequest processor = new ProcessSemgrexRequest();
+    processor.processMultipleInputs(bin, bout);
     checkRepeatedResults(bout.toByteArray(), 1);
   }
 
@@ -194,7 +195,8 @@ result {
     ByteArrayInputStream bin = new ByteArrayInputStream(request);
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
 
-    ProcessSemgrexRequest.processMultipleInputs(bin, bout);
+    ProcessSemgrexRequest processor = new ProcessSemgrexRequest();
+    processor.processMultipleInputs(bin, bout);
     checkRepeatedResults(bout.toByteArray(), 2);
   }
 
@@ -208,7 +210,8 @@ result {
     ByteArrayInputStream bin = new ByteArrayInputStream(request);
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
 
-    ProcessSemgrexRequest.processMultipleInputs(bin, bout);
+    ProcessSemgrexRequest processor = new ProcessSemgrexRequest();
+    processor.processMultipleInputs(bin, bout);
     checkRepeatedResults(bout.toByteArray(), 1);
   }
 }
