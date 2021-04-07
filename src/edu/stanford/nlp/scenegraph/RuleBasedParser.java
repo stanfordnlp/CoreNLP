@@ -21,10 +21,10 @@ import edu.stanford.nlp.util.Triple;
 public class RuleBasedParser extends AbstractSceneGraphParser {
 
   /* A man is riding a horse. */
-  public static SemgrexPattern SUBJ_PRED_OBJ_TRIPLET_PATTERN = SemgrexPattern.compile("{}=pred >nsubj {tag:/NNP?S?/}=subj >/(iobj|dobj|nmod:.*)/=objreln {tag:/NNP?S?/}=obj !> cop {}");
+  public static SemgrexPattern SUBJ_PRED_OBJ_TRIPLET_PATTERN = SemgrexPattern.compile("{}=pred >nsubj {tag:/NNP?S?/}=subj >/(iobj|obj|nmod:.*|obl:.*)/=objreln {tag:/NNP?S?/}=obj !> cop {}");
 
   /* A woman is smiling. */
-  public static SemgrexPattern SUBJ_PRED_PAIR_PATTERN = SemgrexPattern.compile("{}=pred >nsubj {tag:/NNP?S?/}=subj !>/(iobj|dobj|nmod:.*)/ {tag:/NNP?S?/} !>cop {}");
+  public static SemgrexPattern SUBJ_PRED_PAIR_PATTERN = SemgrexPattern.compile("{}=pred >nsubj {tag:/NNP?S?/}=subj !>/(iobj|obj|nmod:.*|obl:.*)/ {tag:/NNP?S?/} !>cop {}");
 
   /* The man is a rider. */
   public static SemgrexPattern COPULAR_PATTERN = SemgrexPattern.compile("{}=pred >nsubj {tag:/NNP?S?/}=subj >cop {}");
@@ -36,16 +36,16 @@ public class RuleBasedParser extends AbstractSceneGraphParser {
   public static SemgrexPattern ADJ_PRED_PATTERN = SemgrexPattern.compile("{tag:/J.*/}=adj >nsubj {}=obj");
 
   /* A woman is in the house. */
-  public static SemgrexPattern PP_MOD_PATTERN = SemgrexPattern.compile("{tag:/NNP?S?/}=gov >/nmod:.*/=reln {}=mod");
+  public static SemgrexPattern PP_MOD_PATTERN = SemgrexPattern.compile("{tag:/NNP?S?/}=gov >/(nmod:.*|obl:.*)/=reln {}=mod");
 
   /* His watch. */
   public static SemgrexPattern POSS_PATTERN = SemgrexPattern.compile("{tag:/NNP?S?/}=gov >/nmod:poss/=reln {tag:/NNP?S?/}=mod");
 
   /*   */
-  public static SemgrexPattern AGENT_PATTERN = SemgrexPattern.compile("{tag:/V.*/}=pred >/nmod:agent/=reln {tag:/NNP?S?/}=subj >nsubjpass {tag:/NNP?S?/}=obj ");
+  public static SemgrexPattern AGENT_PATTERN = SemgrexPattern.compile("{tag:/V.*/}=pred >/obl:agent/=reln {tag:/NNP?S?/}=subj >/nsubj:pass/ {tag:/NNP?S?/}=obj ");
 
   /* A cat sitting in a chair. */
-  public static SemgrexPattern ACL_PATTERN = SemgrexPattern.compile("{}=subj >acl ({tag:/V.*/}=pred >/(iobj|dobj|nmod:.*)/=objreln {tag:/NNP?S?/}=obj)");
+  public static SemgrexPattern ACL_PATTERN = SemgrexPattern.compile("{}=subj >acl ({tag:/V.*/}=pred >/(iobj|obj|nmod:.*|obl:.*)/=objreln {tag:/NNP?S?/}=obj)");
 
   //TODO: do something special with nmod:by
 

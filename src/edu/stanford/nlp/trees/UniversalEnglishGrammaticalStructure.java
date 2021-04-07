@@ -1755,6 +1755,17 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
         sg.addEdge(mweHead, word, MULTI_WORD_EXPRESSION, Double.NEGATIVE_INFINITY, false);
       }
     }
+    
+    // attach any dependents (e.g., case makers) to the governor of the MWE
+    for (IndexedWord word : words) {
+      for (SemanticGraphEdge edge : new ArrayList<>(sg.getOutEdgesSorted(word))) {
+        if (edge.getRelation() != MULTI_WORD_EXPRESSION) {
+          sg.removeEdge(edge);
+          sg.addEdge(gov, edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
+        }
+      }
+    }
+    
   }
 
 
