@@ -30,7 +30,7 @@ public class LexicalizedParserServerITest {
 
   static final String testString = "John Bauer works at Stanford.";
   static final String resultString = "(ROOT (S (NP (NNP John) (NNP Bauer)) (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .)))";
-  static final String binarizedResultString = "(ROOT (S (NP (NNP John) (NNP Bauer)) (@S (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .))))";
+  static final String binarizedResultString = "(ROOT (S (@S (NP (NNP John) (NNP Bauer)) (VP (VBZ works) (PP (IN at) (NP (NNP Stanford))))) (. .)))";
   static final String collapsedTreeStanfordDependenciesString =
     ("nn(Bauer-2, John-1)\n" +
      "nsubj(works-3, Bauer-2)\n" +
