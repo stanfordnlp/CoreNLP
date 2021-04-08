@@ -17,4 +17,4 @@ Therefore, we can accept contributions on any of the following terms:
    a [Contributor License Agreement for Corporations](http://nlp.stanford.edu/software/CLA/corporate.html).
    You can send them to us or contact us at: java-nlp-support@lists.stanford.edu .
 
-You should do development against our master branch. The project's source code is in utf-8 character encoding. You should make sure that all unit tests still pass. (In general, you will not be able to run our integration tests, since they rely on resources in our filesystem.)
+You should do development against our dev branch. The project's source code is in utf-8 character encoding. You should make sure that all unit tests still pass. (In general, you will not be able to run our integration tests, since they rely on resources in our filesystem.)
