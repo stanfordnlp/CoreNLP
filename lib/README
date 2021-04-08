@@ -366,14 +366,14 @@ LAST UPDATE BY: Spence Green
 -----------------------------------------------------------------
 protobuf.jar
 ORIGINAL JAR NAME: <compiled from source>
-VERSION: 2.6.1
-RELEASE DATE: Oct 2014
+VERSION: 3.11.4
+RELEASE DATE: Oct 2020
 SOURCE AVAILABLE: yes
 DESCRIPTION: Google's protocol buffer library
 URL: https://developers.google.com/protocol-buffers/
 USED BY: CoreMapProtos (and associated serializers)
-LAST UPDATE: 2015-09-07
-LAST UPDATE BY: Sebastian Schuster
+LAST UPDATE: 2021-04-06
+LAST UPDATE BY: John Bauer
 
 ----------------------------------------------------------------
 javax.json.jar
