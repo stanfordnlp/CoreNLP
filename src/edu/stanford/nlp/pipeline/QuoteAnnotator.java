@@ -599,14 +599,15 @@ public class QuoteAnnotator implements Annotator  {
       Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> embedded = recursiveQuotes(toPass, offset, null);
       // these are the good quotes
       for (Pair<Integer, Integer> e : embedded.first()) {
+        // offset by the amount of text we trimmed: start+quote.length()
         quotes.add(new Pair<>(e.first() + start + quote.length(),
-                              e.second() + start + 1));
+                              e.second() + start + quote.length()));
       }
       if (EXTRACT_UNCLOSED) {
         // these are the unclosed quotes
         for (Pair<Integer, Integer> e : embedded.second()) {
           unclosedQuotes.add(new Pair<>(e.first() + start + quote.length(),
-                                        e.second() + start + 1));
+                                        e.second() + start + quote.length()));
         }
       }
     }
