@@ -277,27 +277,39 @@ public class TextOutputter extends AnnotationOutputter {
 
     // display quotes if available
     if (annotation.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
-      pw.println();
-      pw.println("Extracted quotes:");
-      List<CoreMap> allQuotes = QuoteAnnotator.gatherQuotes(annotation);
-      for (CoreMap quote : allQuotes) {
-        String speakerString;
-        if (quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) != null) {
-          speakerString = quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class);
-        } else if (quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null) {
-          speakerString = quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class);
-        } else {
-          speakerString = "Unknown";
-        }
-        pw.printf("%s:\t%s\t[index=%d, charOffsetBegin=%d]%n",
+      outputQuotes(annotation, pw);
+    }
+
+    pw.flush();
+  }
+
+  /**
+   * Prints the quote section from an annotation.
+   *<br>
+   * Factored out so it can be used elsewhere
+   */
+  public static void outputQuotes(Annotation annotation, PrintWriter pw) {
+    List<CoreMap> allQuotes = QuoteAnnotator.gatherQuotes(annotation);
+    if (allQuotes == null || allQuotes.size() == 0) {
+      return;
+    }
+    pw.println();
+    pw.println("Extracted quotes:");
+    for (CoreMap quote : allQuotes) {
+      String speakerString;
+      if (quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) != null) {
+        speakerString = quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class);
+      } else if (quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null) {
+        speakerString = quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class);
+      } else {
+        speakerString = "Unknown";
+      }
+      pw.printf("%s:\t%s\t[index=%d, charOffsetBegin=%d]%n",
                 speakerString,
                 quote.get(CoreAnnotations.TextAnnotation.class),
                 quote.get(CoreAnnotations.QuotationIndexAnnotation.class),
-                quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class)
-        );
-      }
+                quote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
     }
-
     pw.flush();
   }
 
