@@ -227,7 +227,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * Unique identifier within a document for a given quotation.
+   * Unique identifier within a document for a given quotation. Counts up from zero.
    */
   public static class QuotationIndexAnnotation implements CoreAnnotation<Integer> {
     @Override
@@ -237,7 +237,8 @@ public class CoreAnnotations {
   }
 
   /**
-   * The index of the sentence that this annotation begins in.
+   * The index of the sentence that this annotation begins in. Currently only used by quote attribution.
+   * Set to the SentenceIndexAnnotation of the first sentence of a quote.
    */
   public static class SentenceBeginAnnotation implements CoreAnnotation<Integer> {
     @Override
@@ -397,7 +398,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * Unique identifier within a document for a given sentence.
+   * Unique identifier within a document for a given sentence. Counts up starting from zero.
    */
   public static class SentenceIndexAnnotation implements CoreAnnotation<Integer> {
     @Override
