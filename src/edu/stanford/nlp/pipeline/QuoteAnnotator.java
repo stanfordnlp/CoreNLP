@@ -582,7 +582,7 @@ public class QuoteAnnotator implements Annotator  {
         warning = text.substring(0, 150) + "...";
       }
       log.info("WARNING: unmatched quote of type " +
-          quote + " found at index " + start + " in text segment: " + warning);
+               quote + " found at index " + start + " in text segment: " + warning);
     }
 
     // recursively look for embedded quotes in these ones
@@ -600,13 +600,13 @@ public class QuoteAnnotator implements Annotator  {
       // these are the good quotes
       for (Pair<Integer, Integer> e : embedded.first()) {
         quotes.add(new Pair<>(e.first() + start + quote.length(),
-            e.second() + start + 1));
+                              e.second() + start + 1));
       }
       if (EXTRACT_UNCLOSED) {
         // these are the unclosed quotes
         for (Pair<Integer, Integer> e : embedded.second()) {
           unclosedQuotes.add(new Pair<>(e.first() + start + quote.length(),
-              e.second() + start + 1));
+                                        e.second() + start + 1));
         }
       }
     }
