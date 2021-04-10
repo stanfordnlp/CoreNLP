@@ -6,15 +6,16 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
-import junit.framework.TestCase;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
 /**
  * Created by sonalg on 7/15/14.
  */
-public class SemgrexPatternITest extends TestCase {
+public class SemgrexPatternITest {
 
   @Test
   public void testNERStanfordDependencies() throws Exception{
