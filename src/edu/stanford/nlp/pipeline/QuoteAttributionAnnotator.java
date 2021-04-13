@@ -206,8 +206,11 @@ public class QuoteAttributionAnnotator implements Annotator {
   public void entityMentionsToCharacterMap(Annotation annotation) {
     characterMap = new HashMap<>();
     for (CoreMap entityMention : annotation.get(CoreAnnotations.MentionsAnnotation.class)) {
-      String entityMentionString = entityMention.toString();
       if (entityMention.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals("PERSON")) {
+        // always store the replaceAll version of the string so that
+        // whitespace does not have to match exactly to find the
+        // mention later
+        String entityMentionString = entityMention.toString().replaceAll("\\s+", " ");
         Person newPerson = new Person(entityMentionString, "UNK", new ArrayList<>());
         List<Person> newPersonList = Collections.singletonList(newPerson);
         characterMap.put(entityMentionString, newPersonList);

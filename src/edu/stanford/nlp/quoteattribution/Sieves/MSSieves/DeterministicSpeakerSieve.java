@@ -27,7 +27,8 @@ public class DeterministicSpeakerSieve extends MSSieve {
   public void doMentionToSpeaker(Annotation doc) {
     List<CoreMap> quotes = doc.get(CoreAnnotations.QuotationsAnnotation.class);
     for (CoreMap quote : quotes) {
-      String mention = quote.get(QuoteAttributionAnnotator.MentionAnnotation.class);
+      // replaceAll is to avoid newlines etc ruining our search
+      String mention = quote.get(QuoteAttributionAnnotator.MentionAnnotation.class).replaceAll("\\s+", " ");
       if (mention == null) {
         continue;
       }
