@@ -57,14 +57,16 @@ public class UniversalEnhancer {
 
     SemanticGraph enhanced = new SemanticGraph(basic.typedDependencies());
 
-    if (keepEmptyNodes) {
+    if (keepEmptyNodes && originalEnhanced != null) {
       copyEmptyNodes(originalEnhanced, enhanced);
     }
 
     if (embeddings != null) {
       UniversalGappingEnhancer.addEnhancements(enhanced, embeddings);
     }
-    UniversalGrammaticalStructure.addRef(enhanced, relativePronounsPattern);
+    if (relativePronounsPattern != null) {
+      UniversalGrammaticalStructure.addRef(enhanced, relativePronounsPattern);
+    }
     UniversalGrammaticalStructure.collapseReferent(enhanced);
     UniversalGrammaticalStructure.propagateConjuncts(enhanced);
     UniversalGrammaticalStructure.addExtraNSubj(enhanced);
