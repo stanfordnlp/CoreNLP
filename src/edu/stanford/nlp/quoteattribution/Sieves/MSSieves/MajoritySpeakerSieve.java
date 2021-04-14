@@ -28,6 +28,7 @@ public class MajoritySpeakerSieve extends MSSieve {
     ArrayList<String> names = scanForNames(new Pair<>(0, doc.get(CoreAnnotations.TokensAnnotation.class).size() - 1)).first;
 
     for(String name : names) {
+      name = name.replaceAll("\\s+", " ");
       characters.incrementCount(characterMap.get(name).get(0).name);
     }
     return characters;
