@@ -440,7 +440,7 @@
   <target name="scenegraph.jar" depends="compile"
           description="build the semantic graph jar file">
     <jar destfile="scenegraph.jar">
-      <fileset dir="${build.path}/edu/stanford/nlp/scenegraph" />
+      <fileset dir="${build.path}" includes="edu/stanford/nlp/scenegraph/**" />
     </jar>
   </target>
 
