@@ -129,7 +129,7 @@ public class CoNLLUOutputter extends AnnotationOutputter {
           throw new IllegalArgumentException("CoNLLUOutputter: unknown dependencies type " + dependenciesType);
         }
       } else {
-        writer.print(conllUWriter.printPOSAnnotations(sentence));
+        writer.print(conllUWriter.printPOSAnnotations(sentence, options.printFakeDeps));
       }
     }
     writer.flush();
