@@ -896,11 +896,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     }
   }
 
-  @Override
-  protected void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
-
-    SemanticGraph sg = new SemanticGraph(list);
-
+  /**
+   * Manipulates the given SemanticGraph to add enhancements.  Note that this modifies the input graph.
+   */
+  public static void addEnhancements(SemanticGraph sg, EnhancementOptions options) {
     if (DEBUG) {
       printListSorted("addEnhancements: before correctDependencies()", sg.typedDependencies());
     }
@@ -977,6 +976,15 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     }
 
     correctSubjPass(sg);
+  }
+  
+  @Override
+  protected void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
+
+    SemanticGraph sg = new SemanticGraph(list);
+
+    addEnhancements(sg, options);
+
     list.clear();
     list.addAll(sg.typedDependencies());
 
