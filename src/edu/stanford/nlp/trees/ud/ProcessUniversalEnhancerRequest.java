@@ -12,6 +12,7 @@ import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.EnglishPatterns;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ProcessProtobufRequest;
 
@@ -30,13 +31,35 @@ public class ProcessUniversalEnhancerRequest extends ProcessProtobufRequest {
   }
 
   /**
+   * Enhance the dependencies on a single sentence, using the English-specific rules for enhancement
+   */
+  public static void enhanceEnglishDependencies(Annotation annotation) {
+    for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+      SemanticGraph basic = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+
+      SemanticGraph enhanced = new SemanticGraph(basic);
+      UniversalEnglishGrammaticalStructure.addEnhancements(enhanced, UniversalEnglishGrammaticalStructure.ENHANCED_OPTIONS);
+      sentence.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, enhanced);
+
+      SemanticGraph plusplus = new SemanticGraph(basic);
+      UniversalEnglishGrammaticalStructure.addEnhancements(plusplus, UniversalEnglishGrammaticalStructure.ENHANCED_PLUS_PLUS_OPTIONS);
+      sentence.set(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class, plusplus);
+    }
+  }
+
+  /**
    * Process all sentences in the document, enhancing the basic dependencies on each sentence
    */
   public static CoreNLPProtos.Document processRequest(Pattern relativePronounsPattern, CoreNLPProtos.DependencyEnhancerRequest request) {
     ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
     Annotation annotation = serializer.fromProto(request.getDocument());
 
-    enhanceDependencies(relativePronounsPattern, annotation);
+    if (request.hasLanguage() &&
+        (request.getLanguage() == CoreNLPProtos.Language.English || request.getLanguage() == CoreNLPProtos.Language.UniversalEnglish)) {
+      enhanceEnglishDependencies(annotation);
+    } else {
+      enhanceDependencies(relativePronounsPattern, annotation);
+    }
 
     return serializer.toProto(annotation);
   }
