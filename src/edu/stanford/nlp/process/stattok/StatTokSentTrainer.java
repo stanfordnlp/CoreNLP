@@ -361,6 +361,17 @@ public class StatTokSentTrainer{
     return multiWordRules;
   }
 
+  public static void help() {
+    logger.info("Command line arguments for training the StatTokSent model:\n" +
+                "  -trainFile <filename>              conllu file to train from\n" +
+                "  -testFile <filename>               filename for testing the trained model\n" +
+                "  -serializeTo <filename>            where to write the finished model\n" +
+                "  -loadClassifier <filename>         load an existing model\n" +
+                "  -crossValidationFolds N            use N fold cross-validation\n" +
+                "  -multiWordRulesFile <filename>     MWT rules\n" +
+                "  -inferMultiWordRules 1             infer MWT rules from training file");
+  }
+
   /**
    * Main method to train the tokenizer.
    * The training set and optionally the multi-word rules are obtained via properties.
@@ -377,6 +388,11 @@ public class StatTokSentTrainer{
     String multiWordRulesFile 	= properties.getProperty("multiWordRulesFile", null);
     int windowSize 		= Integer.parseInt(properties.getProperty("windowSize", "4")); //must reflect actual n. of features
     boolean inferMultiWordRules = Integer.parseInt(properties.getProperty("inferMultiWordRules", "0")) != 0;
+
+    if (properties.getProperty("help", null) != null) {
+      help();
+      return;
+    }
 
     if (trainFile == null){
       logger.err("Error: No training file provided in properties or via command line.");
@@ -434,7 +450,7 @@ public class StatTokSentTrainer{
 
     if ((testFile == null && serializeTo == null && crossValidationFolds < 2) ||
         (trainFileIOB == null && loadClassifier == null)) { 
-      logger.err("Not enough information provided via command line properties or properties file.");
+      logger.err("Not enough information provided via command line properties or properties file.  If you want to save a model, please specify -serializeTo.  Use -help for other options.");
       return;
     }
 
