@@ -95,6 +95,9 @@ public class StatTokSentTrainer{
               String token = tokenized.get(tokIdx);
               //Find position of token in the actual sentence
               int begin = sentence.indexOf(token, charIdx);
+              if (begin < 0) {
+                System.err.println("Could not find text, searching from charIdx " + charIdx + ":\n'" + token + "'\n" + sentence);
+              }
               int end = token.length()+begin-1;
 
               for (int i=begin; i <= end; i++){
@@ -164,6 +167,10 @@ public class StatTokSentTrainer{
          */
         else if (Character.isDigit(line.charAt(0))){				
           String tokIdx = line.split("\t")[0];
+          if (tokIdx.indexOf(".") > 0) {
+            // Some treebanks use token index notations such as 54.1 in it_isdt for enhanced dependencies
+            continue;
+          }
           if (tokIdx.indexOf('-') != -1){
             String[] tokIdxSplit = tokIdx.split("-");
             if (multiWordRules.get(line.split("\t")[1].toLowerCase()) != null){
