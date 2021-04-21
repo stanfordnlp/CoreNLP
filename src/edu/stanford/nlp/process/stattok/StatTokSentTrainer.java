@@ -379,6 +379,8 @@ public class StatTokSentTrainer{
                 "  -inferMultiWordRules 1             infer MWT rules from training file");
   }
 
+  public static final Set<String> ARGS_TO_DROP = new HashSet<>(Arrays.asList("trainFile", "multiWordRulesFile", "windowSize", "inferMultiWordRules", "testFile"));
+
   /**
    * Main method to train the tokenizer.
    * The training set and optionally the multi-word rules are obtained via properties.
@@ -439,12 +441,31 @@ public class StatTokSentTrainer{
     }
     fileWriter.close();
 
-    properties.setProperty("trainFile", trainFileIOB);
+    // To build the properties used when training the classifier, we
+    // first throw out properties specific to the featurization code,
+    // then add properties for each column of features we are adding
+    Properties classifierProps = new Properties();
+    for (Object key : properties.keySet()) {
+      if (ARGS_TO_DROP.contains(key)) {
+        continue;
+      }
+      System.out.println("Copying property: " + key + " " + properties.get(key));
+      classifierProps.put(key, properties.get(key));
+    }
+    classifierProps.setProperty("trainFile", trainFileIOB);
+    classifierProps.setProperty("goldAnswerColumn", "0");
+    // column 0 is the tokenizer class
+    // columns 1-2N are the window features
+    // column 2N+1 is the current character feature
+    // column 2N+2 is an uppercase feature for the current character
+    for (int i = 1; i <= 2 * windowSize + 2; ++i) {
+      classifierProps.setProperty(Integer.toString(i) + ".useString", "true");
+    }
 
     logger.info("Creating classifier...");
 
     // Build the ColumnDataClassifier and train it on the temporary training file (or test it).
-    ColumnDataClassifier cdc = new ColumnDataClassifier(properties);
+    ColumnDataClassifier cdc = new ColumnDataClassifier(classifierProps);
 
     String testFile 			= properties.getProperty("testFile", null);
     String serializeTo 			= properties.getProperty("serializeTo", null);
