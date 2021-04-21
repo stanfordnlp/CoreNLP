@@ -732,7 +732,7 @@ public class DependencyParser  {
         log.info("UAS: " + uas);
 
         if (config.saveIntermediate && uas > bestUAS) {
-          log.info("Exceeds best previous UAS of %f. Saving model file.%n", bestUAS);
+          log.info("Exceeds best previous UAS of " + bestUAS + ". Saving model file.");
 
           bestUAS = uas;
           writeModelFile(modelFile);
