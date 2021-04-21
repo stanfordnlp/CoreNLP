@@ -17,6 +17,7 @@ import edu.stanford.nlp.io.IOUtils;
 
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.lang.Math;
 import java.util.*;
 
@@ -63,7 +64,7 @@ public class StatTokSentTrainer{
 
     ArrayList<Pair<String, String>> classChars = new ArrayList<Pair<String, String>>();
 		
-    try(BufferedReader br = new BufferedReader (new InputStreamReader(new FileInputStream(trainFile),"UTF8"))){
+    try (BufferedReader br = IOUtils.readerFromString(trainFile)) {
       String sentence="";
       List<String> tokenized = new ArrayList<String>();
       List<Integer> cliticIndex = new ArrayList<>();
@@ -316,9 +317,8 @@ public class StatTokSentTrainer{
   private Map<String, String[]> readMultiWordRules(String multiWordRulesFile){
     Map<String, String[]> multiWordRules = new HashMap<String, String[]>();
     try{
-      InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(multiWordRulesFile);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-      //BufferedReader reader = new BufferedReader(new FileReader(multiWordRulesFile));
+      // buffered and decoded from utf-8
+      BufferedReader reader = IOUtils.readerFromString(multiWordRulesFile);
       String line;
       while ((line = reader.readLine()) != null){
         String[] parts = line.split("\t");
@@ -338,7 +338,7 @@ public class StatTokSentTrainer{
   private Map<String, String[]> inferMultiWordRules (String trainFile){
     Map<String, String[]> multiWordRules = new HashMap<String, String[]>();
     try{
-      BufferedReader reader = new BufferedReader(new FileReader(trainFile));
+      BufferedReader reader = IOUtils.readerFromString(trainFile);
       String line;
       while ((line = reader.readLine()) != null){
         if ((line.length() > 0) && (Character.isDigit(line.charAt(0)))){
@@ -435,7 +435,7 @@ public class StatTokSentTrainer{
 		
     // Write temporary training data on file
     String trainFileIOB = trainFile+".IOB.features.tmp";
-    FileWriter fileWriter = new FileWriter(trainFileIOB);
+    OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(trainFileIOB), StandardCharsets.UTF_8);
     for (String line : trainingInput){
       fileWriter.write(line+System.lineSeparator());
     }
