@@ -34,7 +34,7 @@ public class StatTokSentAnnotator implements Annotator{
   StatTokSent statTokSent;
 
   /** The main method to intialize a tokenizer object.*/
-  public StatTokSentAnnotator(String name, Properties props) throws Exception,IOException,ClassNotFoundException{
+  public StatTokSentAnnotator(String name, Properties props) throws IOException, ClassNotFoundException {
     // Get model and rule based tokens file paths from props
     String modelFile            = props.getProperty(name + ".model", null);
     String multiWordRulesFile   = props.getProperty(name + ".multiWordRules", null);
@@ -42,14 +42,14 @@ public class StatTokSentAnnotator implements Annotator{
 
     // If the model is not found, throws an exception.
     // If the multi-word tokens file is not found, initialize tokenizer with empty map
-    if (modelFile != null){
-      if (multiWordRulesFile != null){
-        statTokSent = new StatTokSent(modelFile, multiWordRulesFile, windowSize);
-      } else {
-        statTokSent = new StatTokSent(modelFile, windowSize);
-      }
+    if (modelFile == null) {
+      throw new IllegalArgumentException("Tokenization model was not specified in "+ props);
+    }
+
+    if (multiWordRulesFile != null){
+      statTokSent = new StatTokSent(modelFile, multiWordRulesFile, windowSize);
     } else {
-      throw new Exception("Tokenization model was not specified in "+ props);
+      statTokSent = new StatTokSent(modelFile, windowSize);
     }
   }
 
