@@ -1,5 +1,5 @@
 
-all: chinese genia german all.3class nowiki.3class conll.4class muc.7class spanish
+all: chinese hindi genia german all.3class nowiki.3class conll.4class muc.7class spanish
 
 chinese: chinese.misc.nodistsim.ser.gz chinese.misc.distsim.ser.gz
 
@@ -8,6 +8,11 @@ chinese.misc.nodistsim.ser.gz:
 
 chinese.misc.distsim.ser.gz:
 	java -mx15g edu.stanford.nlp.ie.crf.CRFClassifier -prop chinese.misc.distsim.prop > chinese.misc.distsim.out 2>&1
+
+hindi: hindi.ijc.nodistsim.ser.gz
+
+hindi.ijc.nodistsim.ser.gz:
+	java -mx15g edu.stanford.nlp.ie.crf.CRFClassifier -prop hindi.4class.nodistsim.prop > hindi.ijc.nodistsim.out 2>&1
 
 genia: genia-nlpba-2004.crf.gz
 
