@@ -55,20 +55,14 @@ public class StatTokSent{
    * 	multiWordRulesFile: a string containing the path to the file with multi-word tokens.
    */
   public StatTokSent(String modelFile, String multiWordRulesFile, int windowSize) throws IOException, ClassNotFoundException{
-		
     logger.info("Loading StatTokSent model from " + modelFile);
     logger.info("Using multi word rules from " + multiWordRulesFile);
 
     this.windowSize = windowSize;
     ObjectInputStream ois;
 		
-    try{
-      ois = IOUtils.readStreamFromString(modelFile);
-      cdc = ColumnDataClassifier.getClassifier(ois);
-    }
-    catch(FileNotFoundException e){
-      logger.err("Model file Not Found in "+modelFile);
-    }
+    ois = IOUtils.readStreamFromString(modelFile);
+    cdc = ColumnDataClassifier.getClassifier(ois);
 	
     multiWordRules = this.readMultiWordRules(multiWordRulesFile);
   }
@@ -79,13 +73,8 @@ public class StatTokSent{
     this.windowSize = windowSize;
     ObjectInputStream ois;
 		
-    try {
-      ois = IOUtils.readStreamFromString(modelFile);
-      cdc = ColumnDataClassifier.getClassifier(ois);
-    }
-    catch(FileNotFoundException e){
-      logger.err("Model file Not Found in " + modelFile);
-    }
+    ois = IOUtils.readStreamFromString(modelFile);
+    cdc = ColumnDataClassifier.getClassifier(ois);
   }
 
 
@@ -94,22 +83,20 @@ public class StatTokSent{
    * The reader accept the following formatting:
    * <token>\t<part>,...,<part>
    */
-  private Map<String, String[]> readMultiWordRules(String multiWordRulesFile){
+  private Map<String, String[]> readMultiWordRules(String multiWordRulesFile) throws IOException {
     Map<String, String[]> multiWordRules = new HashMap<String, String[]>();
-    try{
-      InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(multiWordRulesFile);
-      BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-      //BufferedReader reader = new BufferedReader(new FileReader(multiWordRulesFile));
-      String line;
-      while ((line = reader.readLine()) != null){
-        String[] parts = line.split("\t");
-        String token = parts[0];
-        String[] tokenComponents = parts[1].split(",");
-        multiWordRules.put(token, tokenComponents);
-      }
-    }catch (Exception e){
-      e.printStackTrace();
+
+    InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(multiWordRulesFile);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    //BufferedReader reader = new BufferedReader(new FileReader(multiWordRulesFile));
+    String line;
+    while ((line = reader.readLine()) != null){
+      String[] parts = line.split("\t");
+      String token = parts[0];
+      String[] tokenComponents = parts[1].split(",");
+      multiWordRules.put(token, tokenComponents);
     }
+
     return multiWordRules;
   }
 
