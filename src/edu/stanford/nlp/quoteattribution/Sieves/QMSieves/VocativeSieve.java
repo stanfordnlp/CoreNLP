@@ -104,6 +104,8 @@ public class VocativeSieve extends QMSieve {
         List<Integer> animates = scanForAnimates(quoteRun);
         List<Pair<String, Integer>> animateVocatives = new ArrayList<>();
         for (int animateIndex : animates) {
+          if (animateIndex < 2 || animateIndex >= toks.size() + 1)
+            continue;
           String prevToken = toks.get(animateIndex - 1).word();
           String prevPrevToken = toks.get(animateIndex - 2).word();
           String nextToken = toks.get(animateIndex + 1).word();
