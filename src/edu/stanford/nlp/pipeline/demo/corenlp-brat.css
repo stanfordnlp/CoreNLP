@@ -8,6 +8,21 @@
   height: auto;
   margin: 0 auto -6ex;
   padding: 0 0 6ex;
+  text-align: center;
+}
+
+#logo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#logo-image {
+    height:20%
+}
+
+#version-num {
+  font-size: 20px;
 }
 
 .pattern_tab {
