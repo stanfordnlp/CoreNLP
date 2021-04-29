@@ -41,6 +41,8 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2021-04-28    4.2.1     Fix Turkish locale, quote annotator crashes
+
 2020-11-16    4.2.0     Bug fixes, Retrained English parser models 
                         with improved trees, Updated dependencies 
                         (ejml, junit, jflex), Speed up loading 
