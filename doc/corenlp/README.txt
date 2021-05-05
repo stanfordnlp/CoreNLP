@@ -41,7 +41,11 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2021-04-28    4.2.1     Fix Turkish locale, quote annotator crashes
+2021-05-05    4.2.1     Fix Turkish locale bug, QuoteAnnotator crash
+                        fixes, smaller srparser models, improvements
+                        to enhanced UD converter, Updated dependencies
+                        (istack, protobuf), batch processing of
+                        semgrex & enhancer requests when using stanza
 
 2020-11-16    4.2.0     Bug fixes, Retrained English parser models 
                         with improved trees, Updated dependencies 
