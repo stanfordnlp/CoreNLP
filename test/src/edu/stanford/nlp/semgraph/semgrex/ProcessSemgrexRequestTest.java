@@ -5,6 +5,12 @@ import org.junit.Test;
 
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ProcessSemgrexRequestTest {
   /**
    * Build a fake request.  The same query will be repeated N times
@@ -85,7 +91,7 @@ result {
   }
 
   @Test
-  public void testMultiSemgrex() {
+  public void testTwoSemgrex() {
     CoreNLPProtos.SemgrexRequest request = buildFakeRequest(1, 2);
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
@@ -123,12 +129,89 @@ result {
   }
 
   @Test
-  public void testMultiRequest() {
+  public void testTwoGraphs() {
     CoreNLPProtos.SemgrexRequest request = buildFakeRequest(2, 1);
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
     Assert.assertEquals("Expected exactly 2 replies", 2, response.getResultList().size());
     checkResult(response.getResultList().get(0), 1);
     checkResult(response.getResultList().get(1), 1);
+  }
+
+  public byte[] buildRepeatedRequest(int count, boolean closingLength) throws IOException {
+    ByteArrayOutputStream singleBout = new ByteArrayOutputStream();
+    CoreNLPProtos.SemgrexRequest singleRequest = buildFakeRequest(1, 1);
+    singleRequest.writeTo(singleBout);
+    byte[] singleBytes = singleBout.toByteArray();
+
+    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+    DataOutputStream dout = new DataOutputStream(bout);
+    for (int i = 0; i < count; ++i) {
+      dout.writeInt(singleBytes.length);
+      dout.write(singleBytes, 0, singleBytes.length);
+    }
+    if (closingLength) {
+      dout.writeInt(0);
+    }
+    dout.close();
+
+    return bout.toByteArray();
+  }
+
+  public void checkRepeatedResults(byte[] arr, int count) throws IOException {
+    ByteArrayInputStream bin = new ByteArrayInputStream(arr);
+    DataInputStream din = new DataInputStream(bin);
+    for (int i = 0; i < count; ++i) {
+      int len = din.readInt();
+      byte[] responseBytes = new byte[len];
+      din.read(responseBytes, 0, len);
+      CoreNLPProtos.SemgrexResponse response = CoreNLPProtos.SemgrexResponse.parseFrom(responseBytes);
+      checkResult(response.getResultList().get(0), 1);
+    }
+    int len = din.readInt();
+    Assert.assertEquals("Repeated results should be over", 0, len);
+  }
+
+  /**
+   * Test that the multiple request pathway works with 1 request
+   */
+  @Test
+  public void testSingleMultiRequest() throws IOException {
+    byte[] request = buildRepeatedRequest(1, true);
+    ByteArrayInputStream bin = new ByteArrayInputStream(request);
+    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+
+    ProcessSemgrexRequest processor = new ProcessSemgrexRequest();
+    processor.processMultipleInputs(bin, bout);
+    checkRepeatedResults(bout.toByteArray(), 1);
+  }
+
+  /**
+   * Test that the multiple request pathway works with 2 requests
+   */
+  @Test
+  public void testDoubleMultiRequest() throws IOException {
+    byte[] request = buildRepeatedRequest(2, true);
+    ByteArrayInputStream bin = new ByteArrayInputStream(request);
+    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+
+    ProcessSemgrexRequest processor = new ProcessSemgrexRequest();
+    processor.processMultipleInputs(bin, bout);
+    checkRepeatedResults(bout.toByteArray(), 2);
+  }
+
+  /**
+   * Test that the multiple request pathway works even when the
+   * input stream hits EOF
+   */
+  @Test
+  public void testUnclosedMultiRequest() throws IOException {
+    byte[] request = buildRepeatedRequest(1, false);
+    ByteArrayInputStream bin = new ByteArrayInputStream(request);
+    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+
+    ProcessSemgrexRequest processor = new ProcessSemgrexRequest();
+    processor.processMultipleInputs(bin, bout);
+    checkRepeatedResults(bout.toByteArray(), 1);
   }
 }

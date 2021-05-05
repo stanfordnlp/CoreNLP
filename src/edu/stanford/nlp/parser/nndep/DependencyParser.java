@@ -648,7 +648,7 @@ public class DependencyParser  {
         log.info("Embedding File " + embedFile + ": #Words = " + nWords + ", dim = " + dim);
 
         if (dim != config.embeddingSize)
-            throw new IllegalArgumentException("The dimension of embedding file does not match config.embeddingSize");
+            throw new IllegalArgumentException("The dimension of embedding file does not match config.embeddingSize (" + dim + " vs " + config.embeddingSize + ").  Perhaps set the -embeddingSize flag");
 
         for (int i = 0; i < lines.size(); ++i) {
           splits = lines.get(i).split("\\s+");
@@ -732,7 +732,7 @@ public class DependencyParser  {
         log.info("UAS: " + uas);
 
         if (config.saveIntermediate && uas > bestUAS) {
-          log.info("Exceeds best previous UAS of %f. Saving model file.%n", bestUAS);
+          log.info("Exceeds best previous UAS of " + bestUAS + ". Saving model file.");
 
           bestUAS = uas;
           writeModelFile(modelFile);

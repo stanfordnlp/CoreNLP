@@ -8,6 +8,7 @@
   <property name="data.path"       value="${basedir}/data" />
   <property name="tests.path"      value="${basedir}/test/src" />
   <property name="itests.path"     value="${basedir}/itest/src" />
+  <property name="javadoc.path"      value="${basedir}/javadoc"/>
 
   <!-- included tasks may use project.core as a property name -->
   <property name="project.core"    value="${basedir}" />
@@ -44,6 +45,45 @@
   <target name="clean" description="Delete old classes">
     <echo message="${ant.project.name}" />
     <delete dir="${build.path}"/>
+  </target>
+
+<!-- ==================== Javadoc Target ================================ -->
+
+  <target name="javadoc" depends="compile"
+   description="Create Javadoc API documentation">
+
+    <mkdir dir="${javadoc.path}"/>
+    <javadoc destdir="${javadoc.path}"
+             maxmemory="1200m"
+             author="true"
+             source="1.8"
+             Overview="${basedir}/src/edu/stanford/nlp/overview.html"
+             Doctitle="Stanford JavaNLP API Documentation"
+             Windowtitle="Stanford JavaNLP API"
+             Encoding="UTF-8"
+             packagenames="*">
+      <!-- Allow @generated, @modifiable and @ordered tags -->
+      <tag name="generated" description="Generated" />
+      <tag name="modifiable" description="Modifiable" />
+      <tag name="ordered" description="Ordered" />
+
+      <!-- Point Javadoc to source directory -->
+      <sourcepath>
+        <pathelement path="${source.path}" />
+      </sourcepath>
+
+      <!-- Depends on all libs and classes folder -->
+      <classpath>
+        <pathelement path="${build.path}" />
+        <pathelement path="${basedir}/lib/*" />
+        <pathelement path="${basedir}/liblocal/*" />
+        <pathelement path="${java.class.path}"/>
+      </classpath>
+
+      <bottom><![CDATA[<font size="2"><a href="https://nlp.stanford.edu" target="_top">Stanford NLP Group</a></font>]]></bottom>
+      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
+    </javadoc>
+
   </target>
 
   <target name="javacceverything" depends="classpath"
@@ -396,6 +436,14 @@
       <fileset dir="${project.core}/classes" />
     </jar>
   </target>
+
+  <target name="scenegraph.jar" depends="compile"
+          description="build the semantic graph jar file">
+    <jar destfile="scenegraph.jar">
+      <fileset dir="${build.path}" includes="edu/stanford/nlp/scenegraph/**" />
+    </jar>
+  </target>
+
 
   <!-- I wrote this for a side project, so if you one day see it in a
        build file of mine, you can't sue me for taking it from

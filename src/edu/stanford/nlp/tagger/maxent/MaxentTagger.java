@@ -168,7 +168,7 @@ import java.text.DecimalFormat;
        The second format is a file of Penn Treebank formatted (i.e., s-expression) tree files.  Trees are loaded one at a time and the tagged words in a tree are used as a training sentence.
        To specify this format, preface the filename with "{@code format=TREES,}".  <br>
        The final possible format is TSV files (tab-separated columns).  To specify a TSV file, set {@code trainFile} to "{@code format=TSV,wordColumn=x,tagColumn=y,filename}".
-       Column numbers are indexed from 0, and sentences are separated with blank lines. The default wordColumn is 0 and default tagColumn is 1.
+       Column numbers are indexed from 0, and sentences are separated with blank lines. The default wordColumn is 0 and default tagColumn is 1.  If comments=true, then comment lines will be skipped (a common thing to appear in conllu files)
        <br>
        A file can be in a different character set encoding than the tagger's default encoding by prefacing the filename with {@code "encoding=ENC,"}.
        You can specify the tagSeparator character in a TEXT file by prefacing the filename with "tagSeparator=c,". <br>

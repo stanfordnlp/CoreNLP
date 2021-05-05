@@ -18,11 +18,11 @@ public class ShiftReduceTrainOptions extends TrainOptions {
   public boolean cvAveragedModels = true;
 
   public enum TrainingMethod {
-    EARLY_TERMINATION, GOLD, ORACLE, REORDER_ORACLE, BEAM, REORDER_BEAM;
+    EARLY_TERMINATION, GOLD, REORDER_ORACLE, BEAM, REORDER_BEAM;
   };
   public TrainingMethod trainingMethod = TrainingMethod.EARLY_TERMINATION;
 
-  public static final int DEFAULT_BEAM_SIZE = 4;
+  public static final int DEFAULT_BEAM_SIZE = 8;
   public int beamSize = 0;
   
   /** How many times a feature must be seen when training.  Less than this and it is filtered. */
@@ -42,6 +42,31 @@ public class ShiftReduceTrainOptions extends TrainOptions {
 
   /** If positive, every 10 iterations, multiply the learning rate by this amount. */
   public double decayLearningRate = 0.0;
+
+  /** If positive, after every iteration, weights are moved by this much back towards 0. */
+  public float l1Reg = 0.0f;
+
+  /** If positive, after every iteration, weights are scaled by this ratio back towards 0. */
+  public float l2Reg = 0.0f;
+
+  /** If more than one, retrains this many "shards" after the initial
+   *  training and then averages them together */
+  public int retrainShards = 1;
+
+  /**
+   * Shards 2..n will have this many features dropped.  Shard 1 will
+   * be the full model, which guarantees that every feature appears
+   * at least once.
+   */
+  public double retrainShardFeatureDrop = 0.25;
+
+  /**
+   * Some training trees will be repeated, with gold transitions given
+   * for the first several steps to ensure the parser starts from a
+   * good place.  For some datasets, such as the English training set,
+   * 0.5 is excessively large.
+   */
+  public float augmentSubsentences = 0.5f;
 
   // version id randomly chosen by forgetting to set the version id when serializing models
   private static final long serialVersionUID = -8158249539308373819L;

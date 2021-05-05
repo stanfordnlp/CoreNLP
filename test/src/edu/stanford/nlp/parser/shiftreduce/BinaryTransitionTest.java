@@ -17,9 +17,7 @@ import java.util.List;
  * @author John Bauer
  */
 public class BinaryTransitionTest extends TestCase {
-  // TODO: add tests for isLegal
-  // test states where BinaryTransition could not apply (eg stack too small)
-  // test compound transitions
+  // TODO: add more tests for isLegal
 
   public static State buildState(int shifts) {
     String[] words = { "This", "is", "a", "short", "test", "." };
@@ -39,7 +37,11 @@ public class BinaryTransitionTest extends TestCase {
   public void testLeftTransition() {
     State state = buildState(2);
     BinaryTransition transition = new BinaryTransition("NP", BinaryTransition.Side.LEFT, false);
+    assertTrue(transition.isLegal(state, null));
     state = transition.apply(state);
+    // should be illegal now that the stack has 1 thing on it
+    assertFalse(transition.isLegal(state, null));
+
     assertEquals(2, state.tokenPosition);
     assertEquals(1, state.stack.size());
     assertEquals(2, state.stack.peek().children().length);
@@ -50,7 +52,11 @@ public class BinaryTransitionTest extends TestCase {
   public void testRightTransition() {
     State state = buildState(2);
     BinaryTransition transition = new BinaryTransition("NP", BinaryTransition.Side.RIGHT, false);
+    assertTrue(transition.isLegal(state, null));
     state = transition.apply(state);
+    // should be illegal now that the stack has 1 thing on it
+    assertFalse(transition.isLegal(state, null));
+
     assertEquals(2, state.tokenPosition);
     assertEquals(1, state.stack.size());
     assertEquals(2, state.stack.peek().children().length);

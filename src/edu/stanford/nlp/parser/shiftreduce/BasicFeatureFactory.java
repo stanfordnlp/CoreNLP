@@ -83,6 +83,11 @@ public class BasicFeatureFactory extends FeatureFactory {
     if (state.tokenPosition >= state.sentence.size() && state.stack.size() == 1) {
       features.add("QUEUE_FINISHED_STACK_SINGLETON");
     }
+    // turns out it's quite hard to distinguish between IdleTransition
+    // and FinalizeTransition without this
+    if (state.isFinished()) {
+      features.add("FINALIZED");
+    }
   }
 
   public static void addSeparatorFeature(List<String> features, String featureType, State.HeadPosition separator) {

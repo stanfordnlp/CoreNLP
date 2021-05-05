@@ -3,12 +3,16 @@
 
 package edu.stanford.nlp.loglinear.model.proto;
 
-import com.google.protobuf.CodedOutputStream;
-
 public final class ConcatVectorProto {
   private ConcatVectorProto() {}
   public static void registerAllExtensions(
+      com.google.protobuf.ExtensionRegistryLite registry) {
+  }
+
+  public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
+    registerAllExtensions(
+        (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   public interface ConcatVectorOrBuilder extends
       // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.loglinear.model.proto.ConcatVector)
@@ -41,37 +45,39 @@ public final class ConcatVectorProto {
   /**
    * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.ConcatVector}
    */
-  public static final class ConcatVector extends
-      com.google.protobuf.GeneratedMessage implements
+  public  static final class ConcatVector extends
+      com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.loglinear.model.proto.ConcatVector)
       ConcatVectorOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use ConcatVector.newBuilder() to construct.
-    private ConcatVector(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private ConcatVector(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private ConcatVector(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final ConcatVector defaultInstance;
-    public static ConcatVector getDefaultInstance() {
-      return defaultInstance;
+    private ConcatVector() {
+      component_ = java.util.Collections.emptyList();
     }
 
-    public ConcatVector getDefaultInstanceForType() {
-      return defaultInstance;
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ConcatVector();
     }
 
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    getUnknownFields() {
       return this.unknownFields;
     }
     private ConcatVector(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -83,19 +89,20 @@ public final class ConcatVectorProto {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                component_ = new java.util.ArrayList<>();
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                component_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component>();
                 mutable_bitField0_ |= 0x00000001;
               }
-              component_.add(input.readMessage(edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.PARSER, extensionRegistry));
+              component_.add(
+                  input.readMessage(edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.PARSER, extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
               break;
             }
           }
@@ -104,9 +111,9 @@ public final class ConcatVectorProto {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+            e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           component_ = java.util.Collections.unmodifiableList(component_);
         }
         this.unknownFields = unknownFields.build();
@@ -118,26 +125,12 @@ public final class ConcatVectorProto {
       return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.class, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<ConcatVector> PARSER =
-        new com.google.protobuf.AbstractParser<ConcatVector>() {
-      public ConcatVector parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ConcatVector(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ConcatVector> getParserForType() {
-      return PARSER;
     }
 
     public interface ComponentOrBuilder extends
@@ -146,60 +139,68 @@ public final class ConcatVectorProto {
 
       /**
        * <code>required bool sparse = 1;</code>
+       * @return Whether the sparse field is set.
        */
       boolean hasSparse();
       /**
        * <code>required bool sparse = 1;</code>
+       * @return The sparse.
        */
       boolean getSparse();
 
       /**
        * <code>repeated double data = 2;</code>
+       * @return A list containing the data.
        */
       java.util.List<java.lang.Double> getDataList();
       /**
        * <code>repeated double data = 2;</code>
+       * @return The count of data.
        */
       int getDataCount();
       /**
        * <code>repeated double data = 2;</code>
+       * @param index The index of the element to return.
+       * @return The data at the given index.
        */
       double getData(int index);
     }
     /**
      * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.ConcatVector.Component}
      */
-    public static final class Component extends
-        com.google.protobuf.GeneratedMessage implements
+    public  static final class Component extends
+        com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.loglinear.model.proto.ConcatVector.Component)
         ComponentOrBuilder {
+    private static final long serialVersionUID = 0L;
       // Use Component.newBuilder() to construct.
-      private Component(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      private Component(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
         super(builder);
-        this.unknownFields = builder.getUnknownFields();
       }
-      private Component(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-      private static final Component defaultInstance;
-      public static Component getDefaultInstance() {
-        return defaultInstance;
+      private Component() {
+        data_ = emptyDoubleList();
       }
 
-      public Component getDefaultInstanceForType() {
-        return defaultInstance;
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new Component();
       }
 
-      private final com.google.protobuf.UnknownFieldSet unknownFields;
       @java.lang.Override
       public final com.google.protobuf.UnknownFieldSet
-          getUnknownFields() {
+      getUnknownFields() {
         return this.unknownFields;
       }
       private Component(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        initFields();
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         int mutable_bitField0_ = 0;
         com.google.protobuf.UnknownFieldSet.Builder unknownFields =
             com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -211,37 +212,37 @@ public final class ConcatVectorProto {
               case 0:
                 done = true;
                 break;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
               case 8: {
                 bitField0_ |= 0x00000001;
                 sparse_ = input.readBool();
                 break;
               }
               case 17: {
-                if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                  data_ = new java.util.ArrayList<>();
+                if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                  data_ = newDoubleList();
                   mutable_bitField0_ |= 0x00000002;
                 }
-                data_.add(input.readDouble());
+                data_.addDouble(input.readDouble());
                 break;
               }
               case 18: {
                 int length = input.readRawVarint32();
                 int limit = input.pushLimit(length);
-                if (!((mutable_bitField0_ & 0x00000002) == 0x00000002) && input.getBytesUntilLimit() > 0) {
-                  data_ = new java.util.ArrayList<>();
+                if (!((mutable_bitField0_ & 0x00000002) != 0) && input.getBytesUntilLimit() > 0) {
+                  data_ = newDoubleList();
                   mutable_bitField0_ |= 0x00000002;
                 }
                 while (input.getBytesUntilLimit() > 0) {
-                  data_.add(input.readDouble());
+                  data_.addDouble(input.readDouble());
                 }
                 input.popLimit(limit);
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
                 break;
               }
             }
@@ -250,10 +251,10 @@ public final class ConcatVectorProto {
           throw e.setUnfinishedMessage(this);
         } catch (java.io.IOException e) {
           throw new com.google.protobuf.InvalidProtocolBufferException(
-              e.getMessage()).setUnfinishedMessage(this);
+              e).setUnfinishedMessage(this);
         } finally {
-          if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-            data_ = java.util.Collections.unmodifiableList(data_);
+          if (((mutable_bitField0_ & 0x00000002) != 0)) {
+            data_.makeImmutable(); // C
           }
           this.unknownFields = unknownFields.build();
           makeExtensionsImmutable();
@@ -264,26 +265,12 @@ public final class ConcatVectorProto {
         return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_Component_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_Component_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.class, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.Builder.class);
-      }
-
-      public static com.google.protobuf.Parser<Component> PARSER =
-          new com.google.protobuf.AbstractParser<Component>() {
-        public Component parsePartialFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Component(input, extensionRegistry);
-        }
-      };
-
-      @java.lang.Override
-      public com.google.protobuf.Parser<Component> getParserForType() {
-        return PARSER;
       }
 
       private int bitField0_;
@@ -291,21 +278,24 @@ public final class ConcatVectorProto {
       private boolean sparse_;
       /**
        * <code>required bool sparse = 1;</code>
+       * @return Whether the sparse field is set.
        */
       public boolean hasSparse() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
+        return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required bool sparse = 1;</code>
+       * @return The sparse.
        */
       public boolean getSparse() {
         return sparse_;
       }
 
       public static final int DATA_FIELD_NUMBER = 2;
-      private java.util.List<java.lang.Double> data_;
+      private com.google.protobuf.Internal.DoubleList data_;
       /**
        * <code>repeated double data = 2;</code>
+       * @return A list containing the data.
        */
       public java.util.List<java.lang.Double>
           getDataList() {
@@ -313,22 +303,22 @@ public final class ConcatVectorProto {
       }
       /**
        * <code>repeated double data = 2;</code>
+       * @return The count of data.
        */
       public int getDataCount() {
         return data_.size();
       }
       /**
        * <code>repeated double data = 2;</code>
+       * @param index The index of the element to return.
+       * @return The data at the given index.
        */
       public double getData(int index) {
-        return data_.get(index);
+        return data_.getDouble(index);
       }
 
-      private void initFields() {
-        sparse_ = false;
-        data_ = java.util.Collections.emptyList();
-      }
       private byte memoizedIsInitialized = -1;
+      @java.lang.Override
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
         if (isInitialized == 1) return true;
@@ -342,25 +332,25 @@ public final class ConcatVectorProto {
         return true;
       }
 
+      @java.lang.Override
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
-        getSerializedSize();
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           output.writeBool(1, sparse_);
         }
-        for (Double aData_ : data_) {
-          output.writeDouble(2, aData_);
+        for (int i = 0; i < data_.size(); i++) {
+          output.writeDouble(2, data_.getDouble(i));
         }
-        getUnknownFields().writeTo(output);
+        unknownFields.writeTo(output);
       }
 
-      private int memoizedSerializedSize = -1;
+      @java.lang.Override
       public int getSerializedSize() {
-        int size = memoizedSerializedSize;
+        int size = memoizedSize;
         if (size != -1) return size;
 
         size = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           size += com.google.protobuf.CodedOutputStream
             .computeBoolSize(1, sparse_);
         }
@@ -370,18 +360,64 @@ public final class ConcatVectorProto {
           size += dataSize;
           size += 1 * getDataList().size();
         }
-        size += getUnknownFields().getSerializedSize();
-        memoizedSerializedSize = size;
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
         return size;
       }
 
-      private static final long serialVersionUID = 0L;
       @java.lang.Override
-      protected java.lang.Object writeReplace()
-          throws java.io.ObjectStreamException {
-        return super.writeReplace();
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component other = (edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component) obj;
+
+        if (hasSparse() != other.hasSparse()) return false;
+        if (hasSparse()) {
+          if (getSparse()
+              != other.getSparse()) return false;
+        }
+        if (!getDataList()
+            .equals(other.getDataList())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasSparse()) {
+          hash = (37 * hash) + SPARSE_FIELD_NUMBER;
+          hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+              getSparse());
+        }
+        if (getDataCount() > 0) {
+          hash = (37 * hash) + DATA_FIELD_NUMBER;
+          hash = (53 * hash) + getDataList().hashCode();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
       public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -405,46 +441,59 @@ public final class ConcatVectorProto {
       }
       public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return PARSER.parseFrom(input);
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
       }
       public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return PARSER.parseFrom(input, extensionRegistry);
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
       }
       public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return PARSER.parseDelimitedFrom(input);
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
       }
       public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
       }
       public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
-        return PARSER.parseFrom(input);
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
       }
       public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return PARSER.parseFrom(input, extensionRegistry);
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
       }
 
-      public static Builder newBuilder() { return Builder.create(); }
+      @java.lang.Override
       public Builder newBuilderForType() { return newBuilder(); }
-      public static Builder newBuilder(edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component prototype) {
-        return newBuilder().mergeFrom(prototype);
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
       }
-      public Builder toBuilder() { return newBuilder(this); }
+      public static Builder newBuilder(edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
 
       @java.lang.Override
       protected Builder newBuilderForType(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         Builder builder = new Builder(parent);
         return builder;
       }
@@ -452,7 +501,7 @@ public final class ConcatVectorProto {
        * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.ConcatVector.Component}
        */
       public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
           // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.loglinear.model.proto.ConcatVector.Component)
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.ComponentOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
@@ -460,7 +509,8 @@ public final class ConcatVectorProto {
           return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_Component_descriptor;
         }
 
-        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internalGetFieldAccessorTable() {
           return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_Component_fieldAccessorTable
               .ensureFieldAccessorsInitialized(
@@ -473,40 +523,37 @@ public final class ConcatVectorProto {
         }
 
         private Builder(
-            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
           maybeForceBuilderInitialization();
         }
         private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
           }
         }
-        private static Builder create() {
-          return new Builder();
-        }
-
+        @java.lang.Override
         public Builder clear() {
           super.clear();
           sparse_ = false;
           bitField0_ = (bitField0_ & ~0x00000001);
-          data_ = java.util.Collections.emptyList();
+          data_ = emptyDoubleList();
           bitField0_ = (bitField0_ & ~0x00000002);
           return this;
         }
 
-        public Builder clone() {
-          return create().mergeFrom(buildPartial());
-        }
-
+        @java.lang.Override
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
           return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_Component_descriptor;
         }
 
+        @java.lang.Override
         public edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component getDefaultInstanceForType() {
           return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.getDefaultInstance();
         }
 
+        @java.lang.Override
         public edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component build() {
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component result = buildPartial();
           if (!result.isInitialized()) {
@@ -515,16 +562,17 @@ public final class ConcatVectorProto {
           return result;
         }
 
+        @java.lang.Override
         public edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component buildPartial() {
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component result = new edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component(this);
           int from_bitField0_ = bitField0_;
           int to_bitField0_ = 0;
-          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            result.sparse_ = sparse_;
             to_bitField0_ |= 0x00000001;
           }
-          result.sparse_ = sparse_;
-          if (((bitField0_ & 0x00000002) == 0x00000002)) {
-            data_ = java.util.Collections.unmodifiableList(data_);
+          if (((bitField0_ & 0x00000002) != 0)) {
+            data_.makeImmutable();
             bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.data_ = data_;
@@ -533,6 +581,39 @@ public final class ConcatVectorProto {
           return result;
         }
 
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component) {
             return mergeFrom((edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component)other);
@@ -557,18 +638,20 @@ public final class ConcatVectorProto {
             }
             onChanged();
           }
-          this.mergeUnknownFields(other.getUnknownFields());
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
           return this;
         }
 
+        @java.lang.Override
         public final boolean isInitialized() {
           if (!hasSparse()) {
-            
             return false;
           }
           return true;
         }
 
+        @java.lang.Override
         public Builder mergeFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -578,7 +661,7 @@ public final class ConcatVectorProto {
             parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
             parsedMessage = (edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component) e.getUnfinishedMessage();
-            throw e;
+            throw e.unwrapIOException();
           } finally {
             if (parsedMessage != null) {
               mergeFrom(parsedMessage);
@@ -591,18 +674,22 @@ public final class ConcatVectorProto {
         private boolean sparse_ ;
         /**
          * <code>required bool sparse = 1;</code>
+         * @return Whether the sparse field is set.
          */
         public boolean hasSparse() {
-          return ((bitField0_ & 0x00000001) == 0x00000001);
+          return ((bitField0_ & 0x00000001) != 0);
         }
         /**
          * <code>required bool sparse = 1;</code>
+         * @return The sparse.
          */
         public boolean getSparse() {
           return sparse_;
         }
         /**
          * <code>required bool sparse = 1;</code>
+         * @param value The sparse to set.
+         * @return This builder for chaining.
          */
         public Builder setSparse(boolean value) {
           bitField0_ |= 0x00000001;
@@ -612,6 +699,7 @@ public final class ConcatVectorProto {
         }
         /**
          * <code>required bool sparse = 1;</code>
+         * @return This builder for chaining.
          */
         public Builder clearSparse() {
           bitField0_ = (bitField0_ & ~0x00000001);
@@ -620,53 +708,65 @@ public final class ConcatVectorProto {
           return this;
         }
 
-        private java.util.List<java.lang.Double> data_ = java.util.Collections.emptyList();
+        private com.google.protobuf.Internal.DoubleList data_ = emptyDoubleList();
         private void ensureDataIsMutable() {
-          if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-            data_ = new java.util.ArrayList<>(data_);
+          if (!((bitField0_ & 0x00000002) != 0)) {
+            data_ = mutableCopy(data_);
             bitField0_ |= 0x00000002;
            }
         }
         /**
          * <code>repeated double data = 2;</code>
+         * @return A list containing the data.
          */
         public java.util.List<java.lang.Double>
             getDataList() {
-          return java.util.Collections.unmodifiableList(data_);
+          return ((bitField0_ & 0x00000002) != 0) ?
+                   java.util.Collections.unmodifiableList(data_) : data_;
         }
         /**
          * <code>repeated double data = 2;</code>
+         * @return The count of data.
          */
         public int getDataCount() {
           return data_.size();
         }
         /**
          * <code>repeated double data = 2;</code>
+         * @param index The index of the element to return.
+         * @return The data at the given index.
          */
         public double getData(int index) {
-          return data_.get(index);
+          return data_.getDouble(index);
         }
         /**
          * <code>repeated double data = 2;</code>
+         * @param index The index to set the value at.
+         * @param value The data to set.
+         * @return This builder for chaining.
          */
         public Builder setData(
             int index, double value) {
           ensureDataIsMutable();
-          data_.set(index, value);
+          data_.setDouble(index, value);
           onChanged();
           return this;
         }
         /**
          * <code>repeated double data = 2;</code>
+         * @param value The data to add.
+         * @return This builder for chaining.
          */
         public Builder addData(double value) {
           ensureDataIsMutable();
-          data_.add(value);
+          data_.addDouble(value);
           onChanged();
           return this;
         }
         /**
          * <code>repeated double data = 2;</code>
+         * @param values The data to add.
+         * @return This builder for chaining.
          */
         public Builder addAllData(
             java.lang.Iterable<? extends java.lang.Double> values) {
@@ -678,23 +778,65 @@ public final class ConcatVectorProto {
         }
         /**
          * <code>repeated double data = 2;</code>
+         * @return This builder for chaining.
          */
         public Builder clearData() {
-          data_ = java.util.Collections.emptyList();
+          data_ = emptyDoubleList();
           bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
           return this;
         }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
 
         // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.loglinear.model.proto.ConcatVector.Component)
       }
 
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.loglinear.model.proto.ConcatVector.Component)
+      private static final edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component DEFAULT_INSTANCE;
       static {
-        defaultInstance = new Component(true);
-        defaultInstance.initFields();
+        DEFAULT_INSTANCE = new edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component();
       }
 
-      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.loglinear.model.proto.ConcatVector.Component)
+      public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<Component>
+          PARSER = new com.google.protobuf.AbstractParser<Component>() {
+        @java.lang.Override
+        public Component parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Component(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<Component> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Component> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
     }
 
     public static final int COMPONENT_FIELD_NUMBER = 1;
@@ -732,10 +874,8 @@ public final class ConcatVectorProto {
       return component_.get(index);
     }
 
-    private void initFields() {
-      component_ = java.util.Collections.emptyList();
-    }
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
@@ -751,37 +891,73 @@ public final class ConcatVectorProto {
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
-      for (Component aComponent_ : component_) {
-        output.writeMessage(1, aComponent_);
+      for (int i = 0; i < component_.size(); i++) {
+        output.writeMessage(1, component_.get(i));
       }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
-    private int memoizedSerializedSize = -1;
+    @java.lang.Override
     public int getSerializedSize() {
-      int size = memoizedSerializedSize;
+      int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      for (Component aComponent_ : component_) {
-        size += CodedOutputStream
-                .computeMessageSize(1, aComponent_);
+      for (int i = 0; i < component_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, component_.get(i));
       }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector other = (edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector) obj;
+
+      if (!getComponentList()
+          .equals(other.getComponentList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getComponentCount() > 0) {
+        hash = (37 * hash) + COMPONENT_FIELD_NUMBER;
+        hash = (53 * hash) + getComponentList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -805,46 +981,59 @@ public final class ConcatVectorProto {
     }
     public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector prototype) {
-      return newBuilder().mergeFrom(prototype);
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
     }
-    public Builder toBuilder() { return newBuilder(this); }
+    public static Builder newBuilder(edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -852,7 +1041,7 @@ public final class ConcatVectorProto {
      * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.ConcatVector}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.loglinear.model.proto.ConcatVector)
         edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVectorOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
@@ -860,7 +1049,8 @@ public final class ConcatVectorProto {
         return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -873,19 +1063,17 @@ public final class ConcatVectorProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
           getComponentFieldBuilder();
         }
       }
-      private static Builder create() {
-        return new Builder();
-      }
-
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         if (componentBuilder_ == null) {
@@ -897,19 +1085,18 @@ public final class ConcatVectorProto {
         return this;
       }
 
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_descriptor;
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector getDefaultInstanceForType() {
         return edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.getDefaultInstance();
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector build() {
         edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector result = buildPartial();
         if (!result.isInitialized()) {
@@ -918,11 +1105,12 @@ public final class ConcatVectorProto {
         return result;
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector buildPartial() {
         edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector result = new edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector(this);
         int from_bitField0_ = bitField0_;
         if (componentBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             component_ = java.util.Collections.unmodifiableList(component_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -934,6 +1122,39 @@ public final class ConcatVectorProto {
         return result;
       }
 
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector) {
           return mergeFrom((edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector)other);
@@ -964,27 +1185,29 @@ public final class ConcatVectorProto {
               component_ = other.component_;
               bitField0_ = (bitField0_ & ~0x00000001);
               componentBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getComponentFieldBuilder() : null;
             } else {
               componentBuilder_.addAllMessages(other.component_);
             }
           }
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
         for (int i = 0; i < getComponentCount(); i++) {
           if (!getComponent(i).isInitialized()) {
-            
             return false;
           }
         }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -994,7 +1217,7 @@ public final class ConcatVectorProto {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -1007,13 +1230,13 @@ public final class ConcatVectorProto {
       private java.util.List<edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component> component_ =
         java.util.Collections.emptyList();
       private void ensureComponentIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          component_ = new java.util.ArrayList<>(component_);
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          component_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component>(component_);
           bitField0_ |= 0x00000001;
          }
       }
 
-      private com.google.protobuf.RepeatedFieldBuilder<
+      private com.google.protobuf.RepeatedFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.ComponentOrBuilder> componentBuilder_;
 
       /**
@@ -1229,47 +1452,89 @@ public final class ConcatVectorProto {
            getComponentBuilderList() {
         return getComponentFieldBuilder().getBuilderList();
       }
-      private com.google.protobuf.RepeatedFieldBuilder<
+      private com.google.protobuf.RepeatedFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.ComponentOrBuilder> 
           getComponentFieldBuilder() {
         if (componentBuilder_ == null) {
-          componentBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
+          componentBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.ComponentOrBuilder>(
                   component_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           component_ = null;
         }
         return componentBuilder_;
       }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
 
       // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.loglinear.model.proto.ConcatVector)
     }
 
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.loglinear.model.proto.ConcatVector)
+    private static final edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector DEFAULT_INSTANCE;
     static {
-      defaultInstance = new ConcatVector(true);
-      defaultInstance.initFields();
+      DEFAULT_INSTANCE = new edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector();
     }
 
-    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.loglinear.model.proto.ConcatVector)
+    public static edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<ConcatVector>
+        PARSER = new com.google.protobuf.AbstractParser<ConcatVector>() {
+      @java.lang.Override
+      public ConcatVector parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ConcatVector(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ConcatVector> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ConcatVector> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_Component_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_Component_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
   }
-  private static com.google.protobuf.Descriptors.FileDescriptor
+  private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
     java.lang.String[] descriptorData = {
@@ -1281,28 +1546,20 @@ public final class ConcatVectorProto {
       "\003(\001B;\n&edu.stanford.nlp.loglinear.model." +
       "protoB\021ConcatVectorProto"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        });
     internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_descriptor,
         new java.lang.String[] { "Component", });
     internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_Component_descriptor =
       internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_descriptor.getNestedTypes().get(0);
     internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_Component_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_loglinear_model_proto_ConcatVector_Component_descriptor,
         new java.lang.String[] { "Sparse", "Data", });
   }

@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.util.regex.Pattern;
 import edu.stanford.nlp.io.NumberRangeFileFilter;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
+import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 
@@ -55,7 +56,16 @@ public class ArgUtils {
         numSubArgs--;
       }
       if (numSubArgs == 2) {
-        filter = new NumberRangesFileFilter(args[argIndex++], true);
+        if (args[argIndex].equals("train")) {
+          filter = new RegExFileFilter(".*train.*");
+        } else if (args[argIndex].equals("dev")) {
+          filter = new RegExFileFilter(".*dev.*");
+        } else if (args[argIndex].equals("test")) {
+          filter = new RegExFileFilter(".*test.*");
+        } else {
+          filter = new NumberRangesFileFilter(args[argIndex], true);
+        }
+        argIndex++;
       } else if (numSubArgs == 3) {
         try {
           int low = Integer.parseInt(args[argIndex]);

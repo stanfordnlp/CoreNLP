@@ -63,6 +63,9 @@ public abstract class AnnotationOutputter {
     public final double relationsBeam;
     /** Columns to print in CoNLL output. */
     public final List<Class<? extends CoreAnnotation<?>>> keysToPrint;
+    /** Print some fake dependency info in the CoNLL output.
+        Useful for the original conll eval script, for example */
+    public final boolean printFakeDeps;
 
 
     public Options() {
@@ -80,6 +83,7 @@ public abstract class AnnotationOutputter {
       printSingletons = false;
       relationsBeam = 0.0;
       keysToPrint = getKeysToPrint(DEFAULT_KEYS);
+      printFakeDeps = false;
     }
 
     public Options(Properties properties) {
@@ -94,6 +98,7 @@ public abstract class AnnotationOutputter {
       printSingletons = PropertiesUtils.getBool(properties, "output.printSingletonEntities", false);
       relationsBeam = PropertiesUtils.getDouble(properties, "output.relation.beam", 0.0);
       keysToPrint = getKeysToPrint(properties.getProperty("output.columns", DEFAULT_KEYS));
+      printFakeDeps = PropertiesUtils.getBool(properties, "output.printFakeDeps", false);
     }
 
     private static List<Class<? extends CoreAnnotation<?>>> getKeysToPrint(String columns) {

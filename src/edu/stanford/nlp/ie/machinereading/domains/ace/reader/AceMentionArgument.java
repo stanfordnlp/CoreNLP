@@ -18,24 +18,24 @@ public class AceMentionArgument {
   public String getRole() { return mRole; }
 
   public String toXml(int offset) {
-    StringBuffer buffer = new StringBuffer();
-    AceElement.appendOffset(buffer, offset);
-    buffer.append("<" + mentionType + "_mention_argument REFID=\"" + mContent.getId() + 
+    StringBuilder builder = new StringBuilder();
+    AceElement.appendOffset(builder, offset);
+    builder.append("<" + mentionType + "_mention_argument REFID=\"" + mContent.getId() + 
   	  "\" ROLE=\"" + mRole + "\">\n");
   
     
     //buffer.append(getContent().toXml(offset + 2));
     AceCharSeq ext = getContent().getExtent();
-    buffer.append(ext.toXml("extent", offset + 2));
-    buffer.append("\n");
+    builder.append(ext.toXml("extent", offset + 2));
+    builder.append("\n");
   
-    AceElement.appendOffset(buffer, offset);
-    buffer.append("</" + mentionType + "_mention_argument>");
-    return buffer.toString();
+    AceElement.appendOffset(builder, offset);
+    builder.append("</" + mentionType + "_mention_argument>");
+    return builder.toString();
   }
 
   public String toXmlShort(int offset) {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     AceElement.appendOffset(buffer, offset);
     buffer.append("<" + mentionType + "_argument REFID=\"" + 
   	  mContent.getParent().getId() + 

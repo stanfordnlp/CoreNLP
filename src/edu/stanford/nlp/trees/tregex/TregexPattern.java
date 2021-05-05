@@ -58,7 +58,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * TregexPattern instances can be matched against instances of the {@link Tree} class.
  * The {@link #main} method can be used to find matching nodes of a treebank from the command line.
  *
- * <h3>Getting Started</h3>
+ * <h2>Getting Started</h2>
  *
  * Suppose we want to find all examples of subtrees where the label of
  * the root of the subtree starts with MW and it has a child node with the label IN.
@@ -71,22 +71,20 @@ import edu.stanford.nlp.util.logging.Redwood;
  * We then create a pattern, find matches in a given tree, and process
  * those matches as follows:
  *
- * <blockquote>
- * <code>
- *   // Create a reusable pattern object <br>
- *   TregexPattern patternMW = TregexPattern.compile("/^MW/ < IN"); <br>
- *   // Run the pattern on one particular tree <br>
- *   TregexMatcher matcher = patternMW.matcher(tree); <br>
- *   // Iterate over all of the subtrees that matched <br>
- *   while (matcher.findNextMatchingNode()) { <br>
- *   &nbsp;&nbsp;Tree match = matcher.getMatch(); <br>
- *   &nbsp;&nbsp;// do what we want to do with the subtree <br>
- *   &nbsp;&nbsp;match.pennPrint();
+ * <pre>{@code
+ *   // Create a reusable pattern object
+ *   TregexPattern patternMW = TregexPattern.compile("/^MW/ < IN");
+ *   // Run the pattern on one particular tree
+ *   TregexMatcher matcher = patternMW.matcher(tree);
+ *   // Iterate over all of the subtrees that matched
+ *   while (matcher.findNextMatchingNode()) {
+ *     Tree match = matcher.getMatch();
+ *     // do what we want to do with the subtree
+ *     match.pennPrint();
  *   }
- * </code>
- * </blockquote>
+ * }</pre>
  *
- *  <h3>Tregex pattern language</h3>
+ *  <h2>Tregex pattern language</h2>
  *
  * The currently supported node-node relations and their symbols are:
  *
@@ -157,9 +155,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * node.  (WARNING!!  Use of the '__' node description may seriously
  * slow down search.)  If a label description is preceded by '@', the
  * label will match any node whose <em>basicCategory</em> matches the
- * description.  <emph>NB: A single '@' thus scopes over a disjunction
+ * description.  <b>NB: A single '@' thus scopes over a disjunction
  * specified by '|': @NP|VP means things with basic category NP or VP.
- * </emph> The basicCategory is defined according to a Function
+ * </b> The basicCategory is defined according to a Function
  * mapping Strings to Strings, as provided by
  * {@link edu.stanford.nlp.trees.AbstractTreebankLanguagePack#getBasicCategoryFunction()}.
  * Note that Label description regular expressions are matched as {@code find()},
@@ -178,7 +176,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * So, if instead what you want is an S above a VP above an NP, you must write
  * "{@code S < (VP < NP)}".
  *
- * <h3>Notes on relations</h3>
+ * <h2>Notes on relations</h2>
  *
  * Node {@code B} "follows" node {@code A} if {@code B}
  * or one of its ancestors is a right sibling of {@code A} or one
@@ -204,10 +202,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code ((A << B) == (A << C))}.  (Both expressions are
  * equivalent, of course, but this is just an example.)
  *
- * <h3>Boolean relational operators</h3>
+ * <h2>Boolean relational operators</h2>
  *
- * Relations can be combined using the '&' and '|' operators,
- * negated with the '!' operator, and made optional with the '?' operator.
+ * Relations can be combined using the {@code '&' } and {@code '|' } operators,
+ * negated with the {@code '!' } operator, and made optional with the {@code '?' } operator.
  * Thus {@code (NP < NN | < NNS) } will match an NP node dominating either
  * an NN or an NNS.  {@code (NP > S & $++ VP) } matches an NP that
  * is both under an S and has a VP as a right sister.
@@ -248,7 +246,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * expression will match even if the optional relation is not satisfied.
  * This is useful when used together with node naming (see below).
  *
- * <h3>Basic Categories</h3>
+ * <h2>Basic Categories</h2>
  *
  * In order to consider only the "basic category" of a tree label,
  * i.e. to ignore functional tags or other annotations on the label,
@@ -258,7 +256,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * to use a {@link edu.stanford.nlp.trees.TreeNormalizer} to remove functional
  * tags before passing the tree to the TregexPattern.
  *
- * <h3>Segmenting patterns</h3>
+ * <h2>Segmenting patterns</h2>
  *
  * The ":" operator allows you to segment a pattern into two pieces.  This can simplify your pattern writing.  For example,
  * the pattern
@@ -269,7 +267,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * matches only those S nodes in trees that also have an NP node.
  *
- * <h3>Naming nodes</h3>
+ * <h2>Naming nodes</h2>
  *
  * Nodes can be given names (a.k.a. handles) using '='.  A named node will be stored in a
  * map that maps names to nodes so that if a match is found, the node
@@ -277,11 +275,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  * example {@code (NP < NNP=name) } will match an NP dominating an NNP
  * and after a match is found, the map can be queried with the
  * name to retreived the matched node using {@link TregexMatcher#getNode(String o)}
- * with (String) argument "name" (<it>not</it> "=name").
+ * with (String) argument "name" (<b>not</b> "=name").
  * Note that you are not allowed to name a node that is under the scope of a negation operator (the semantics would
  * be unclear, since you can't store a node that never gets matched to).
  * Trying to do so will cause a {@link TregexParseException} to be thrown. Named nodes
- * <it>can be put within the scope of an optionality operator</it>.
+ * <b>can be put within the scope of an optionality operator</b>.
  *
  * Named nodes that refer back to previous named nodes need not have a node
  * description -- this is known as "backreferencing".  In this case, the expression
@@ -304,14 +302,14 @@ import edu.stanford.nlp.util.logging.Redwood;
  * A link cannot have a node description, i.e. the '~' symbol must immediately follow a
  * relation symbol.
  *
- * <h3>Customizing headship and basic categories</h3>
+ * <h2>Customizing headship and basic categories</h2>
  *
  * The HeadFinder used to determine heads for the head relations {@code <#}, {@code >#}, {@code <<#},
  * and {@code >>#}, and also
  * the Function mapping from labels to Basic Category tags can be
  * chosen by using a {@link TregexPatternCompiler}.
  *
- * <h3>Variable Groups</h3>
+ * <h2>Variable Groups</h2>
  *
  * If you write a node description using a regular expression, you can assign its matching groups to variable names.
  * If more than one node has a group assigned to the same variable name, then matching will only occur when all such groups
@@ -329,7 +327,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * will match only such that the WH- node under the SBAR is coindexed with the trace node that gets the name {@code empty}.
  *
- * <h3>Current known bugs/shortcomings:</h3>
+ * <h2>Current known bugs/shortcomings:</h2>
  *
  * <ul>
  *

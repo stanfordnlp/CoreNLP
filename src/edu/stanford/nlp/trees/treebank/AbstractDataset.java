@@ -55,7 +55,7 @@ public abstract class AbstractDataset implements Dataset  {
   protected Treebank treebank;
   protected final Set<String> configuredOptions;
   protected final Set<String> requiredOptions;
-  protected final StringBuilder toStringBuffer;
+  protected final StringBuilder toStringBuilder;
 
   protected String treeFileExtension = "tree";    //Current LDC releases use this extension
 
@@ -68,7 +68,7 @@ public abstract class AbstractDataset implements Dataset  {
     outputFileList = new ArrayList<>();
     pathsToData = new ArrayList<>();
     pathsToMappings = new ArrayList<>();
-    toStringBuffer = new StringBuilder();
+    toStringBuilder = new StringBuilder();
 
     //Read the raw file as UTF-8 irrespective of output encoding
 //    treebank = new DiskTreebank(new ArabicTreeReaderFactory.ArabicRawTreeReaderFactory(true), "UTF-8");
@@ -125,7 +125,7 @@ public abstract class AbstractDataset implements Dataset  {
       else if(param.equals(ConfigParser.paramName)) {
         Matcher inThisFilename = fileNameNormalizer.matcher(value.trim());
         outFileName = inThisFilename.replaceAll("-");
-        toStringBuffer.append(String.format("Dataset Name: %s\n",value.trim()));
+        toStringBuilder.append(String.format("Dataset Name: %s\n",value.trim()));
       }
       else if(param.equals(ConfigParser.paramDT))
         addDeterminer = Boolean.parseBoolean(value);
@@ -220,7 +220,7 @@ public abstract class AbstractDataset implements Dataset  {
 
   @Override
   public String toString() {
-    return toStringBuffer.toString();
+    return toStringBuilder.toString();
   }
 
   /*

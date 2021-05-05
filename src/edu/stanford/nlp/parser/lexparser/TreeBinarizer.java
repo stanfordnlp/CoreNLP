@@ -451,7 +451,22 @@ public class TreeBinarizer implements TreeTransformer  {
       }
       return tf.newTreeNode(label, newChildren);
     }
-    if (headNum > leftProcessed) {
+
+    boolean eatLeft = headNum > leftProcessed;
+    if (eatLeft && rightProcessed == 0) {
+      // try to put punctuation at the top of binarized trees whenever
+      // possible
+      // note that in a language like Arabic, the last child is still
+      // considered the "right" child even though the words are the
+      // other way around now
+      Tree rightChild = t.getChild(t.numChildren() - rightProcessed - 1);
+      String rightCategory = tlp.basicCategory(rightChild.label().value());
+      if (tlp.isPunctuationTag(rightCategory)) {
+        eatLeft = false;
+      }
+    }
+
+    if (eatLeft) {
       // eat a left word
       Tree leftChild = t.getChild(leftProcessed);
       String childLeftStr = leftStr + ' ' + leftChild.label().value();

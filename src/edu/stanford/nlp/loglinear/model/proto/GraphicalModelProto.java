@@ -3,12 +3,16 @@
 
 package edu.stanford.nlp.loglinear.model.proto;
 
-import com.google.protobuf.CodedOutputStream;
-
 public final class GraphicalModelProto {
   private GraphicalModelProto() {}
   public static void registerAllExtensions(
+      com.google.protobuf.ExtensionRegistryLite registry) {
+  }
+
+  public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
+    registerAllExtensions(
+        (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   public interface GraphicalModelOrBuilder extends
       // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.loglinear.model.proto.GraphicalModel)
@@ -64,10 +68,12 @@ public final class GraphicalModelProto {
 
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+     * @return Whether the metaData field is set.
      */
     boolean hasMetaData();
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+     * @return The metaData.
      */
     edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getMetaData();
     /**
@@ -78,37 +84,40 @@ public final class GraphicalModelProto {
   /**
    * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.GraphicalModel}
    */
-  public static final class GraphicalModel extends
-      com.google.protobuf.GeneratedMessage implements
+  public  static final class GraphicalModel extends
+      com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.loglinear.model.proto.GraphicalModel)
       GraphicalModelOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use GraphicalModel.newBuilder() to construct.
-    private GraphicalModel(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private GraphicalModel(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private GraphicalModel(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final GraphicalModel defaultInstance;
-    public static GraphicalModel getDefaultInstance() {
-      return defaultInstance;
+    private GraphicalModel() {
+      factor_ = java.util.Collections.emptyList();
+      variableMetaData_ = java.util.Collections.emptyList();
     }
 
-    public GraphicalModel getDefaultInstanceForType() {
-      return defaultInstance;
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GraphicalModel();
     }
 
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    getUnknownFields() {
       return this.unknownFields;
     }
     private GraphicalModel(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -120,32 +129,27 @@ public final class GraphicalModelProto {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                factor_ = new java.util.ArrayList<>();
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                factor_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor>();
                 mutable_bitField0_ |= 0x00000001;
               }
-              factor_.add(input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.PARSER, extensionRegistry));
+              factor_.add(
+                  input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.PARSER, extensionRegistry));
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                variableMetaData_ = new java.util.ArrayList<>();
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                variableMetaData_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData>();
                 mutable_bitField0_ |= 0x00000002;
               }
-              variableMetaData_.add(input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.PARSER, extensionRegistry));
+              variableMetaData_.add(
+                  input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.PARSER, extensionRegistry));
               break;
             }
             case 26: {
               edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+              if (((bitField0_ & 0x00000001) != 0)) {
                 subBuilder = metaData_.toBuilder();
               }
               metaData_ = input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.PARSER, extensionRegistry);
@@ -156,18 +160,25 @@ public final class GraphicalModelProto {
               bitField0_ |= 0x00000001;
               break;
             }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+            e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           factor_ = java.util.Collections.unmodifiableList(factor_);
         }
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
           variableMetaData_ = java.util.Collections.unmodifiableList(variableMetaData_);
         }
         this.unknownFields = unknownFields.build();
@@ -179,26 +190,12 @@ public final class GraphicalModelProto {
       return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel.class, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<GraphicalModel> PARSER =
-        new com.google.protobuf.AbstractParser<GraphicalModel>() {
-      public GraphicalModel parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GraphicalModel(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<GraphicalModel> getParserForType() {
-      return PARSER;
     }
 
     private int bitField0_;
@@ -276,29 +273,27 @@ public final class GraphicalModelProto {
     private edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData metaData_;
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+     * @return Whether the metaData field is set.
      */
     public boolean hasMetaData() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
+      return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+     * @return The metaData.
      */
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getMetaData() {
-      return metaData_;
+      return metaData_ == null ? edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
     }
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
      */
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder getMetaDataOrBuilder() {
-      return metaData_;
+      return metaData_ == null ? edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
     }
 
-    private void initFields() {
-      factor_ = java.util.Collections.emptyList();
-      variableMetaData_ = java.util.Collections.emptyList();
-      metaData_ = edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance();
-    }
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
@@ -314,51 +309,102 @@ public final class GraphicalModelProto {
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
-      for (Factor aFactor_ : factor_) {
-        output.writeMessage(1, aFactor_);
+      for (int i = 0; i < factor_.size(); i++) {
+        output.writeMessage(1, factor_.get(i));
       }
-      for (MetaData aVariableMetaData_ : variableMetaData_) {
-        output.writeMessage(2, aVariableMetaData_);
+      for (int i = 0; i < variableMetaData_.size(); i++) {
+        output.writeMessage(2, variableMetaData_.get(i));
       }
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeMessage(3, metaData_);
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(3, getMetaData());
       }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
-    private int memoizedSerializedSize = -1;
+    @java.lang.Override
     public int getSerializedSize() {
-      int size = memoizedSerializedSize;
+      int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      for (Factor aFactor_ : factor_) {
-        size += CodedOutputStream
-                .computeMessageSize(1, aFactor_);
-      }
-      for (MetaData aVariableMetaData_ : variableMetaData_) {
-        size += CodedOutputStream
-                .computeMessageSize(2, aVariableMetaData_);
-      }
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      for (int i = 0; i < factor_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, metaData_);
+          .computeMessageSize(1, factor_.get(i));
       }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
+      for (int i = 0; i < variableMetaData_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, variableMetaData_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getMetaData());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel other = (edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel) obj;
+
+      if (!getFactorList()
+          .equals(other.getFactorList())) return false;
+      if (!getVariableMetaDataList()
+          .equals(other.getVariableMetaDataList())) return false;
+      if (hasMetaData() != other.hasMetaData()) return false;
+      if (hasMetaData()) {
+        if (!getMetaData()
+            .equals(other.getMetaData())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getFactorCount() > 0) {
+        hash = (37 * hash) + FACTOR_FIELD_NUMBER;
+        hash = (53 * hash) + getFactorList().hashCode();
+      }
+      if (getVariableMetaDataCount() > 0) {
+        hash = (37 * hash) + VARIABLEMETADATA_FIELD_NUMBER;
+        hash = (53 * hash) + getVariableMetaDataList().hashCode();
+      }
+      if (hasMetaData()) {
+        hash = (37 * hash) + METADATA_FIELD_NUMBER;
+        hash = (53 * hash) + getMetaData().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -382,46 +428,59 @@ public final class GraphicalModelProto {
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel prototype) {
-      return newBuilder().mergeFrom(prototype);
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
     }
-    public Builder toBuilder() { return newBuilder(this); }
+    public static Builder newBuilder(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -429,7 +488,7 @@ public final class GraphicalModelProto {
      * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.GraphicalModel}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.loglinear.model.proto.GraphicalModel)
         edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModelOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
@@ -437,7 +496,8 @@ public final class GraphicalModelProto {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -450,21 +510,19 @@ public final class GraphicalModelProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
           getFactorFieldBuilder();
           getVariableMetaDataFieldBuilder();
           getMetaDataFieldBuilder();
         }
       }
-      private static Builder create() {
-        return new Builder();
-      }
-
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         if (factorBuilder_ == null) {
@@ -480,7 +538,7 @@ public final class GraphicalModelProto {
           variableMetaDataBuilder_.clear();
         }
         if (metaDataBuilder_ == null) {
-          metaData_ = edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance();
+          metaData_ = null;
         } else {
           metaDataBuilder_.clear();
         }
@@ -488,19 +546,18 @@ public final class GraphicalModelProto {
         return this;
       }
 
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_descriptor;
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel getDefaultInstanceForType() {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel.getDefaultInstance();
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel build() {
         edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel result = buildPartial();
         if (!result.isInitialized()) {
@@ -509,12 +566,13 @@ public final class GraphicalModelProto {
         return result;
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel buildPartial() {
         edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel result = new edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (factorBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             factor_ = java.util.Collections.unmodifiableList(factor_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -523,7 +581,7 @@ public final class GraphicalModelProto {
           result.factor_ = factorBuilder_.build();
         }
         if (variableMetaDataBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          if (((bitField0_ & 0x00000002) != 0)) {
             variableMetaData_ = java.util.Collections.unmodifiableList(variableMetaData_);
             bitField0_ = (bitField0_ & ~0x00000002);
           }
@@ -531,19 +589,52 @@ public final class GraphicalModelProto {
         } else {
           result.variableMetaData_ = variableMetaDataBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          if (metaDataBuilder_ == null) {
+            result.metaData_ = metaData_;
+          } else {
+            result.metaData_ = metaDataBuilder_.build();
+          }
           to_bitField0_ |= 0x00000001;
-        }
-        if (metaDataBuilder_ == null) {
-          result.metaData_ = metaData_;
-        } else {
-          result.metaData_ = metaDataBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel) {
           return mergeFrom((edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel)other);
@@ -574,7 +665,7 @@ public final class GraphicalModelProto {
               factor_ = other.factor_;
               bitField0_ = (bitField0_ & ~0x00000001);
               factorBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getFactorFieldBuilder() : null;
             } else {
               factorBuilder_.addAllMessages(other.factor_);
@@ -600,7 +691,7 @@ public final class GraphicalModelProto {
               variableMetaData_ = other.variableMetaData_;
               bitField0_ = (bitField0_ & ~0x00000002);
               variableMetaDataBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getVariableMetaDataFieldBuilder() : null;
             } else {
               variableMetaDataBuilder_.addAllMessages(other.variableMetaData_);
@@ -610,20 +701,22 @@ public final class GraphicalModelProto {
         if (other.hasMetaData()) {
           mergeMetaData(other.getMetaData());
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
         for (int i = 0; i < getFactorCount(); i++) {
           if (!getFactor(i).isInitialized()) {
-            
             return false;
           }
         }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -633,7 +726,7 @@ public final class GraphicalModelProto {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -646,13 +739,13 @@ public final class GraphicalModelProto {
       private java.util.List<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor> factor_ =
         java.util.Collections.emptyList();
       private void ensureFactorIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          factor_ = new java.util.ArrayList<>(factor_);
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          factor_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor>(factor_);
           bitField0_ |= 0x00000001;
          }
       }
 
-      private com.google.protobuf.RepeatedFieldBuilder<
+      private com.google.protobuf.RepeatedFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.FactorOrBuilder> factorBuilder_;
 
       /**
@@ -868,13 +961,14 @@ public final class GraphicalModelProto {
            getFactorBuilderList() {
         return getFactorFieldBuilder().getBuilderList();
       }
-      private com.google.protobuf.RepeatedFieldBuilder<
+      private com.google.protobuf.RepeatedFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.FactorOrBuilder> 
           getFactorFieldBuilder() {
         if (factorBuilder_ == null) {
-          factorBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
+          factorBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.FactorOrBuilder>(
                   factor_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           factor_ = null;
@@ -885,13 +979,13 @@ public final class GraphicalModelProto {
       private java.util.List<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData> variableMetaData_ =
         java.util.Collections.emptyList();
       private void ensureVariableMetaDataIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          variableMetaData_ = new java.util.ArrayList<>(variableMetaData_);
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          variableMetaData_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData>(variableMetaData_);
           bitField0_ |= 0x00000002;
          }
       }
 
-      private com.google.protobuf.RepeatedFieldBuilder<
+      private com.google.protobuf.RepeatedFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder> variableMetaDataBuilder_;
 
       /**
@@ -1107,13 +1201,14 @@ public final class GraphicalModelProto {
            getVariableMetaDataBuilderList() {
         return getVariableMetaDataFieldBuilder().getBuilderList();
       }
-      private com.google.protobuf.RepeatedFieldBuilder<
+      private com.google.protobuf.RepeatedFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder> 
           getVariableMetaDataFieldBuilder() {
         if (variableMetaDataBuilder_ == null) {
-          variableMetaDataBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
+          variableMetaDataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder>(
                   variableMetaData_,
-                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  ((bitField0_ & 0x00000002) != 0),
                   getParentForChildren(),
                   isClean());
           variableMetaData_ = null;
@@ -1121,21 +1216,23 @@ public final class GraphicalModelProto {
         return variableMetaDataBuilder_;
       }
 
-      private edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData metaData_ = edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
+      private edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData metaData_;
+      private com.google.protobuf.SingleFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder> metaDataBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+       * @return Whether the metaData field is set.
        */
       public boolean hasMetaData() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+       * @return The metaData.
        */
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getMetaData() {
         if (metaDataBuilder_ == null) {
-          return metaData_;
+          return metaData_ == null ? edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
         } else {
           return metaDataBuilder_.getMessage();
         }
@@ -1175,7 +1272,8 @@ public final class GraphicalModelProto {
        */
       public Builder mergeMetaData(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData value) {
         if (metaDataBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004) &&
+          if (((bitField0_ & 0x00000004) != 0) &&
+              metaData_ != null &&
               metaData_ != edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance()) {
             metaData_ =
               edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.newBuilder(metaData_).mergeFrom(value).buildPartial();
@@ -1194,7 +1292,7 @@ public final class GraphicalModelProto {
        */
       public Builder clearMetaData() {
         if (metaDataBuilder_ == null) {
-          metaData_ = edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance();
+          metaData_ = null;
           onChanged();
         } else {
           metaDataBuilder_.clear();
@@ -1217,17 +1315,19 @@ public final class GraphicalModelProto {
         if (metaDataBuilder_ != null) {
           return metaDataBuilder_.getMessageOrBuilder();
         } else {
-          return metaData_;
+          return metaData_ == null ?
+              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
         }
       }
       /**
        * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
        */
-      private com.google.protobuf.SingleFieldBuilder<
+      private com.google.protobuf.SingleFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder> 
           getMetaDataFieldBuilder() {
         if (metaDataBuilder_ == null) {
-          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
+          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder>(
                   getMetaData(),
                   getParentForChildren(),
                   isClean());
@@ -1235,16 +1335,57 @@ public final class GraphicalModelProto {
         }
         return metaDataBuilder_;
       }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
 
       // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.loglinear.model.proto.GraphicalModel)
     }
 
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.loglinear.model.proto.GraphicalModel)
+    private static final edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel DEFAULT_INSTANCE;
     static {
-      defaultInstance = new GraphicalModel(true);
-      defaultInstance.initFields();
+      DEFAULT_INSTANCE = new edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel();
     }
 
-    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.loglinear.model.proto.GraphicalModel)
+    public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<GraphicalModel>
+        PARSER = new com.google.protobuf.AbstractParser<GraphicalModel>() {
+      @java.lang.Override
+      public GraphicalModel parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new GraphicalModel(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<GraphicalModel> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GraphicalModel> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
   public interface FactorOrBuilder extends
@@ -1253,10 +1394,12 @@ public final class GraphicalModelProto {
 
     /**
      * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
+     * @return Whether the featuresTable field is set.
      */
     boolean hasFeaturesTable();
     /**
      * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
+     * @return The featuresTable.
      */
     edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable getFeaturesTable();
     /**
@@ -1266,23 +1409,29 @@ public final class GraphicalModelProto {
 
     /**
      * <code>repeated int32 neighbor = 2;</code>
+     * @return A list containing the neighbor.
      */
     java.util.List<java.lang.Integer> getNeighborList();
     /**
      * <code>repeated int32 neighbor = 2;</code>
+     * @return The count of neighbor.
      */
     int getNeighborCount();
     /**
      * <code>repeated int32 neighbor = 2;</code>
+     * @param index The index of the element to return.
+     * @return The neighbor at the given index.
      */
     int getNeighbor(int index);
 
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+     * @return Whether the metaData field is set.
      */
     boolean hasMetaData();
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+     * @return The metaData.
      */
     edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getMetaData();
     /**
@@ -1293,37 +1442,39 @@ public final class GraphicalModelProto {
   /**
    * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.Factor}
    */
-  public static final class Factor extends
-      com.google.protobuf.GeneratedMessage implements
+  public  static final class Factor extends
+      com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.loglinear.model.proto.Factor)
       FactorOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use Factor.newBuilder() to construct.
-    private Factor(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private Factor(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private Factor(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final Factor defaultInstance;
-    public static Factor getDefaultInstance() {
-      return defaultInstance;
+    private Factor() {
+      neighbor_ = emptyIntList();
     }
 
-    public Factor getDefaultInstanceForType() {
-      return defaultInstance;
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Factor();
     }
 
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    getUnknownFields() {
       return this.unknownFields;
     }
     private Factor(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -1335,16 +1486,9 @@ public final class GraphicalModelProto {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
             case 10: {
               edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+              if (((bitField0_ & 0x00000001) != 0)) {
                 subBuilder = featuresTable_.toBuilder();
               }
               featuresTable_ = input.readMessage(edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.PARSER, extensionRegistry);
@@ -1356,29 +1500,29 @@ public final class GraphicalModelProto {
               break;
             }
             case 16: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                neighbor_ = new java.util.ArrayList<>();
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                neighbor_ = newIntList();
                 mutable_bitField0_ |= 0x00000002;
               }
-              neighbor_.add(input.readInt32());
+              neighbor_.addInt(input.readInt32());
               break;
             }
             case 18: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002) && input.getBytesUntilLimit() > 0) {
-                neighbor_ = new java.util.ArrayList<>();
+              if (!((mutable_bitField0_ & 0x00000002) != 0) && input.getBytesUntilLimit() > 0) {
+                neighbor_ = newIntList();
                 mutable_bitField0_ |= 0x00000002;
               }
               while (input.getBytesUntilLimit() > 0) {
-                neighbor_.add(input.readInt32());
+                neighbor_.addInt(input.readInt32());
               }
               input.popLimit(limit);
               break;
             }
             case 26: {
               edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000002) == 0x00000002)) {
+              if (((bitField0_ & 0x00000002) != 0)) {
                 subBuilder = metaData_.toBuilder();
               }
               metaData_ = input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.PARSER, extensionRegistry);
@@ -1389,16 +1533,23 @@ public final class GraphicalModelProto {
               bitField0_ |= 0x00000002;
               break;
             }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+            e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-          neighbor_ = java.util.Collections.unmodifiableList(neighbor_);
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
+          neighbor_.makeImmutable(); // C
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -1409,26 +1560,12 @@ public final class GraphicalModelProto {
       return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.class, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<Factor> PARSER =
-        new com.google.protobuf.AbstractParser<Factor>() {
-      public Factor parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Factor(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Factor> getParserForType() {
-      return PARSER;
     }
 
     private int bitField0_;
@@ -1436,27 +1573,30 @@ public final class GraphicalModelProto {
     private edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable featuresTable_;
     /**
      * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
+     * @return Whether the featuresTable field is set.
      */
     public boolean hasFeaturesTable() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
+      return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
+     * @return The featuresTable.
      */
     public edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable getFeaturesTable() {
-      return featuresTable_;
+      return featuresTable_ == null ? edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance() : featuresTable_;
     }
     /**
      * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
      */
     public edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTableOrBuilder getFeaturesTableOrBuilder() {
-      return featuresTable_;
+      return featuresTable_ == null ? edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance() : featuresTable_;
     }
 
     public static final int NEIGHBOR_FIELD_NUMBER = 2;
-    private java.util.List<java.lang.Integer> neighbor_;
+    private com.google.protobuf.Internal.IntList neighbor_;
     /**
      * <code>repeated int32 neighbor = 2;</code>
+     * @return A list containing the neighbor.
      */
     public java.util.List<java.lang.Integer>
         getNeighborList() {
@@ -1464,44 +1604,45 @@ public final class GraphicalModelProto {
     }
     /**
      * <code>repeated int32 neighbor = 2;</code>
+     * @return The count of neighbor.
      */
     public int getNeighborCount() {
       return neighbor_.size();
     }
     /**
      * <code>repeated int32 neighbor = 2;</code>
+     * @param index The index of the element to return.
+     * @return The neighbor at the given index.
      */
     public int getNeighbor(int index) {
-      return neighbor_.get(index);
+      return neighbor_.getInt(index);
     }
 
     public static final int METADATA_FIELD_NUMBER = 3;
     private edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData metaData_;
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+     * @return Whether the metaData field is set.
      */
     public boolean hasMetaData() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+      return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+     * @return The metaData.
      */
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getMetaData() {
-      return metaData_;
+      return metaData_ == null ? edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
     }
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
      */
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder getMetaDataOrBuilder() {
-      return metaData_;
+      return metaData_ == null ? edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
     }
 
-    private void initFields() {
-      featuresTable_ = edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance();
-      neighbor_ = java.util.Collections.emptyList();
-      metaData_ = edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance();
-    }
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
@@ -1519,56 +1660,110 @@ public final class GraphicalModelProto {
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeMessage(1, featuresTable_);
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getFeaturesTable());
       }
-      for (Integer aNeighbor_ : neighbor_) {
-        output.writeInt32(2, aNeighbor_);
+      for (int i = 0; i < neighbor_.size(); i++) {
+        output.writeInt32(2, neighbor_.getInt(i));
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeMessage(3, metaData_);
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeMessage(3, getMetaData());
       }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
-    private int memoizedSerializedSize = -1;
+    @java.lang.Override
     public int getSerializedSize() {
-      int size = memoizedSerializedSize;
+      int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, featuresTable_);
+          .computeMessageSize(1, getFeaturesTable());
       }
       {
         int dataSize = 0;
-        for (Integer aNeighbor_ : neighbor_) {
-          dataSize += CodedOutputStream
-                  .computeInt32SizeNoTag(aNeighbor_);
+        for (int i = 0; i < neighbor_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(neighbor_.getInt(i));
         }
         size += dataSize;
         size += 1 * getNeighborList().size();
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, metaData_);
+          .computeMessageSize(3, getMetaData());
       }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor other = (edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor) obj;
+
+      if (hasFeaturesTable() != other.hasFeaturesTable()) return false;
+      if (hasFeaturesTable()) {
+        if (!getFeaturesTable()
+            .equals(other.getFeaturesTable())) return false;
+      }
+      if (!getNeighborList()
+          .equals(other.getNeighborList())) return false;
+      if (hasMetaData() != other.hasMetaData()) return false;
+      if (hasMetaData()) {
+        if (!getMetaData()
+            .equals(other.getMetaData())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasFeaturesTable()) {
+        hash = (37 * hash) + FEATURESTABLE_FIELD_NUMBER;
+        hash = (53 * hash) + getFeaturesTable().hashCode();
+      }
+      if (getNeighborCount() > 0) {
+        hash = (37 * hash) + NEIGHBOR_FIELD_NUMBER;
+        hash = (53 * hash) + getNeighborList().hashCode();
+      }
+      if (hasMetaData()) {
+        hash = (37 * hash) + METADATA_FIELD_NUMBER;
+        hash = (53 * hash) + getMetaData().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1592,46 +1787,59 @@ public final class GraphicalModelProto {
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor prototype) {
-      return newBuilder().mergeFrom(prototype);
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
     }
-    public Builder toBuilder() { return newBuilder(this); }
+    public static Builder newBuilder(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -1639,7 +1847,7 @@ public final class GraphicalModelProto {
      * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.Factor}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.loglinear.model.proto.Factor)
         edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.FactorOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
@@ -1647,7 +1855,8 @@ public final class GraphicalModelProto {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1660,32 +1869,30 @@ public final class GraphicalModelProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
           getFeaturesTableFieldBuilder();
           getMetaDataFieldBuilder();
         }
       }
-      private static Builder create() {
-        return new Builder();
-      }
-
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         if (featuresTableBuilder_ == null) {
-          featuresTable_ = edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance();
+          featuresTable_ = null;
         } else {
           featuresTableBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000001);
-        neighbor_ = java.util.Collections.emptyList();
+        neighbor_ = emptyIntList();
         bitField0_ = (bitField0_ & ~0x00000002);
         if (metaDataBuilder_ == null) {
-          metaData_ = edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance();
+          metaData_ = null;
         } else {
           metaDataBuilder_.clear();
         }
@@ -1693,19 +1900,18 @@ public final class GraphicalModelProto {
         return this;
       }
 
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_descriptor;
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor getDefaultInstanceForType() {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.getDefaultInstance();
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor build() {
         edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor result = buildPartial();
         if (!result.isInitialized()) {
@@ -1714,36 +1920,70 @@ public final class GraphicalModelProto {
         return result;
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor buildPartial() {
         edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor result = new edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          if (featuresTableBuilder_ == null) {
+            result.featuresTable_ = featuresTable_;
+          } else {
+            result.featuresTable_ = featuresTableBuilder_.build();
+          }
           to_bitField0_ |= 0x00000001;
         }
-        if (featuresTableBuilder_ == null) {
-          result.featuresTable_ = featuresTable_;
-        } else {
-          result.featuresTable_ = featuresTableBuilder_.build();
-        }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          neighbor_ = java.util.Collections.unmodifiableList(neighbor_);
+        if (((bitField0_ & 0x00000002) != 0)) {
+          neighbor_.makeImmutable();
           bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.neighbor_ = neighbor_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          if (metaDataBuilder_ == null) {
+            result.metaData_ = metaData_;
+          } else {
+            result.metaData_ = metaDataBuilder_.build();
+          }
           to_bitField0_ |= 0x00000002;
-        }
-        if (metaDataBuilder_ == null) {
-          result.metaData_ = metaData_;
-        } else {
-          result.metaData_ = metaDataBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor) {
           return mergeFrom((edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor)other);
@@ -1771,22 +2011,23 @@ public final class GraphicalModelProto {
         if (other.hasMetaData()) {
           mergeMetaData(other.getMetaData());
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
         if (!hasFeaturesTable()) {
-          
           return false;
         }
         if (!getFeaturesTable().isInitialized()) {
-          
           return false;
         }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1796,7 +2037,7 @@ public final class GraphicalModelProto {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -1806,21 +2047,23 @@ public final class GraphicalModelProto {
       }
       private int bitField0_;
 
-      private edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable featuresTable_ = edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
+      private edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable featuresTable_;
+      private com.google.protobuf.SingleFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable, edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTableOrBuilder> featuresTableBuilder_;
       /**
        * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
+       * @return Whether the featuresTable field is set.
        */
       public boolean hasFeaturesTable() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
+        return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
+       * @return The featuresTable.
        */
       public edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable getFeaturesTable() {
         if (featuresTableBuilder_ == null) {
-          return featuresTable_;
+          return featuresTable_ == null ? edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance() : featuresTable_;
         } else {
           return featuresTableBuilder_.getMessage();
         }
@@ -1860,7 +2103,8 @@ public final class GraphicalModelProto {
        */
       public Builder mergeFeaturesTable(edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable value) {
         if (featuresTableBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001) &&
+          if (((bitField0_ & 0x00000001) != 0) &&
+              featuresTable_ != null &&
               featuresTable_ != edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance()) {
             featuresTable_ =
               edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.newBuilder(featuresTable_).mergeFrom(value).buildPartial();
@@ -1879,7 +2123,7 @@ public final class GraphicalModelProto {
        */
       public Builder clearFeaturesTable() {
         if (featuresTableBuilder_ == null) {
-          featuresTable_ = edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance();
+          featuresTable_ = null;
           onChanged();
         } else {
           featuresTableBuilder_.clear();
@@ -1902,17 +2146,19 @@ public final class GraphicalModelProto {
         if (featuresTableBuilder_ != null) {
           return featuresTableBuilder_.getMessageOrBuilder();
         } else {
-          return featuresTable_;
+          return featuresTable_ == null ?
+              edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance() : featuresTable_;
         }
       }
       /**
        * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
        */
-      private com.google.protobuf.SingleFieldBuilder<
+      private com.google.protobuf.SingleFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable, edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTableOrBuilder> 
           getFeaturesTableFieldBuilder() {
         if (featuresTableBuilder_ == null) {
-          featuresTableBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
+          featuresTableBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable, edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTableOrBuilder>(
                   getFeaturesTable(),
                   getParentForChildren(),
                   isClean());
@@ -1921,53 +2167,65 @@ public final class GraphicalModelProto {
         return featuresTableBuilder_;
       }
 
-      private java.util.List<java.lang.Integer> neighbor_ = java.util.Collections.emptyList();
+      private com.google.protobuf.Internal.IntList neighbor_ = emptyIntList();
       private void ensureNeighborIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          neighbor_ = new java.util.ArrayList<>(neighbor_);
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          neighbor_ = mutableCopy(neighbor_);
           bitField0_ |= 0x00000002;
          }
       }
       /**
        * <code>repeated int32 neighbor = 2;</code>
+       * @return A list containing the neighbor.
        */
       public java.util.List<java.lang.Integer>
           getNeighborList() {
-        return java.util.Collections.unmodifiableList(neighbor_);
+        return ((bitField0_ & 0x00000002) != 0) ?
+                 java.util.Collections.unmodifiableList(neighbor_) : neighbor_;
       }
       /**
        * <code>repeated int32 neighbor = 2;</code>
+       * @return The count of neighbor.
        */
       public int getNeighborCount() {
         return neighbor_.size();
       }
       /**
        * <code>repeated int32 neighbor = 2;</code>
+       * @param index The index of the element to return.
+       * @return The neighbor at the given index.
        */
       public int getNeighbor(int index) {
-        return neighbor_.get(index);
+        return neighbor_.getInt(index);
       }
       /**
        * <code>repeated int32 neighbor = 2;</code>
+       * @param index The index to set the value at.
+       * @param value The neighbor to set.
+       * @return This builder for chaining.
        */
       public Builder setNeighbor(
           int index, int value) {
         ensureNeighborIsMutable();
-        neighbor_.set(index, value);
+        neighbor_.setInt(index, value);
         onChanged();
         return this;
       }
       /**
        * <code>repeated int32 neighbor = 2;</code>
+       * @param value The neighbor to add.
+       * @return This builder for chaining.
        */
       public Builder addNeighbor(int value) {
         ensureNeighborIsMutable();
-        neighbor_.add(value);
+        neighbor_.addInt(value);
         onChanged();
         return this;
       }
       /**
        * <code>repeated int32 neighbor = 2;</code>
+       * @param values The neighbor to add.
+       * @return This builder for chaining.
        */
       public Builder addAllNeighbor(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -1979,29 +2237,32 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated int32 neighbor = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNeighbor() {
-        neighbor_ = java.util.Collections.emptyList();
+        neighbor_ = emptyIntList();
         bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
 
-      private edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData metaData_ = edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
+      private edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData metaData_;
+      private com.google.protobuf.SingleFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder> metaDataBuilder_;
       /**
        * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+       * @return Whether the metaData field is set.
        */
       public boolean hasMetaData() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
+       * @return The metaData.
        */
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getMetaData() {
         if (metaDataBuilder_ == null) {
-          return metaData_;
+          return metaData_ == null ? edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
         } else {
           return metaDataBuilder_.getMessage();
         }
@@ -2041,7 +2302,8 @@ public final class GraphicalModelProto {
        */
       public Builder mergeMetaData(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData value) {
         if (metaDataBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004) &&
+          if (((bitField0_ & 0x00000004) != 0) &&
+              metaData_ != null &&
               metaData_ != edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance()) {
             metaData_ =
               edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.newBuilder(metaData_).mergeFrom(value).buildPartial();
@@ -2060,7 +2322,7 @@ public final class GraphicalModelProto {
        */
       public Builder clearMetaData() {
         if (metaDataBuilder_ == null) {
-          metaData_ = edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance();
+          metaData_ = null;
           onChanged();
         } else {
           metaDataBuilder_.clear();
@@ -2083,17 +2345,19 @@ public final class GraphicalModelProto {
         if (metaDataBuilder_ != null) {
           return metaDataBuilder_.getMessageOrBuilder();
         } else {
-          return metaData_;
+          return metaData_ == null ?
+              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
         }
       }
       /**
        * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
        */
-      private com.google.protobuf.SingleFieldBuilder<
+      private com.google.protobuf.SingleFieldBuilderV3<
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder> 
           getMetaDataFieldBuilder() {
         if (metaDataBuilder_ == null) {
-          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
+          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder>(
                   getMetaData(),
                   getParentForChildren(),
                   isClean());
@@ -2101,16 +2365,57 @@ public final class GraphicalModelProto {
         }
         return metaDataBuilder_;
       }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
 
       // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.loglinear.model.proto.Factor)
     }
 
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.loglinear.model.proto.Factor)
+    private static final edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor DEFAULT_INSTANCE;
     static {
-      defaultInstance = new Factor(true);
-      defaultInstance.initFields();
+      DEFAULT_INSTANCE = new edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor();
     }
 
-    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.loglinear.model.proto.Factor)
+    public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<Factor>
+        PARSER = new com.google.protobuf.AbstractParser<Factor>() {
+      @java.lang.Override
+      public Factor parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Factor(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<Factor> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Factor> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
   public interface MetaDataOrBuilder extends
@@ -2119,38 +2424,50 @@ public final class GraphicalModelProto {
 
     /**
      * <code>repeated string key = 1;</code>
+     * @return A list containing the key.
      */
-    com.google.protobuf.ProtocolStringList
+    java.util.List<java.lang.String>
         getKeyList();
     /**
      * <code>repeated string key = 1;</code>
+     * @return The count of key.
      */
     int getKeyCount();
     /**
      * <code>repeated string key = 1;</code>
+     * @param index The index of the element to return.
+     * @return The key at the given index.
      */
     java.lang.String getKey(int index);
     /**
      * <code>repeated string key = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the key at the given index.
      */
     com.google.protobuf.ByteString
         getKeyBytes(int index);
 
     /**
      * <code>repeated string value = 2;</code>
+     * @return A list containing the value.
      */
-    com.google.protobuf.ProtocolStringList
+    java.util.List<java.lang.String>
         getValueList();
     /**
      * <code>repeated string value = 2;</code>
+     * @return The count of value.
      */
     int getValueCount();
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the element to return.
+     * @return The value at the given index.
      */
     java.lang.String getValue(int index);
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the value at the given index.
      */
     com.google.protobuf.ByteString
         getValueBytes(int index);
@@ -2158,37 +2475,40 @@ public final class GraphicalModelProto {
   /**
    * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.MetaData}
    */
-  public static final class MetaData extends
-      com.google.protobuf.GeneratedMessage implements
+  public  static final class MetaData extends
+      com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.loglinear.model.proto.MetaData)
       MetaDataOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use MetaData.newBuilder() to construct.
-    private MetaData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private MetaData(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private MetaData(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final MetaData defaultInstance;
-    public static MetaData getDefaultInstance() {
-      return defaultInstance;
+    private MetaData() {
+      key_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      value_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     }
 
-    public MetaData getDefaultInstanceForType() {
-      return defaultInstance;
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new MetaData();
     }
 
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
+    getUnknownFields() {
       return this.unknownFields;
     }
     private MetaData(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -2200,16 +2520,9 @@ public final class GraphicalModelProto {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
             case 10: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 key_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -2218,11 +2531,18 @@ public final class GraphicalModelProto {
             }
             case 18: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 value_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000002;
               }
               value_.add(bs);
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
               break;
             }
           }
@@ -2231,12 +2551,12 @@ public final class GraphicalModelProto {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
+            e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           key_ = key_.getUnmodifiableView();
         }
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
           value_ = value_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -2248,32 +2568,19 @@ public final class GraphicalModelProto {
       return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_MetaData_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_MetaData_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.class, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<MetaData> PARSER =
-        new com.google.protobuf.AbstractParser<MetaData>() {
-      public MetaData parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new MetaData(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<MetaData> getParserForType() {
-      return PARSER;
-    }
-
     public static final int KEY_FIELD_NUMBER = 1;
     private com.google.protobuf.LazyStringList key_;
     /**
      * <code>repeated string key = 1;</code>
+     * @return A list containing the key.
      */
     public com.google.protobuf.ProtocolStringList
         getKeyList() {
@@ -2281,18 +2588,23 @@ public final class GraphicalModelProto {
     }
     /**
      * <code>repeated string key = 1;</code>
+     * @return The count of key.
      */
     public int getKeyCount() {
       return key_.size();
     }
     /**
      * <code>repeated string key = 1;</code>
+     * @param index The index of the element to return.
+     * @return The key at the given index.
      */
     public java.lang.String getKey(int index) {
       return key_.get(index);
     }
     /**
      * <code>repeated string key = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the key at the given index.
      */
     public com.google.protobuf.ByteString
         getKeyBytes(int index) {
@@ -2303,6 +2615,7 @@ public final class GraphicalModelProto {
     private com.google.protobuf.LazyStringList value_;
     /**
      * <code>repeated string value = 2;</code>
+     * @return A list containing the value.
      */
     public com.google.protobuf.ProtocolStringList
         getValueList() {
@@ -2310,29 +2623,31 @@ public final class GraphicalModelProto {
     }
     /**
      * <code>repeated string value = 2;</code>
+     * @return The count of value.
      */
     public int getValueCount() {
       return value_.size();
     }
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the element to return.
+     * @return The value at the given index.
      */
     public java.lang.String getValue(int index) {
       return value_.get(index);
     }
     /**
      * <code>repeated string value = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the value at the given index.
      */
     public com.google.protobuf.ByteString
         getValueBytes(int index) {
       return value_.getByteString(index);
     }
 
-    private void initFields() {
-      key_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      value_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-    }
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
@@ -2342,29 +2657,28 @@ public final class GraphicalModelProto {
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      getSerializedSize();
       for (int i = 0; i < key_.size(); i++) {
-        output.writeBytes(1, key_.getByteString(i));
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_.getRaw(i));
       }
       for (int i = 0; i < value_.size(); i++) {
-        output.writeBytes(2, value_.getByteString(i));
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_.getRaw(i));
       }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
-    private int memoizedSerializedSize = -1;
+    @java.lang.Override
     public int getSerializedSize() {
-      int size = memoizedSerializedSize;
+      int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
       {
         int dataSize = 0;
         for (int i = 0; i < key_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeBytesSizeNoTag(key_.getByteString(i));
+          dataSize += computeStringSizeNoTag(key_.getRaw(i));
         }
         size += dataSize;
         size += 1 * getKeyList().size();
@@ -2372,24 +2686,65 @@ public final class GraphicalModelProto {
       {
         int dataSize = 0;
         for (int i = 0; i < value_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeBytesSizeNoTag(value_.getByteString(i));
+          dataSize += computeStringSizeNoTag(value_.getRaw(i));
         }
         size += dataSize;
         size += 1 * getValueList().size();
       }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData other = (edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData) obj;
+
+      if (!getKeyList()
+          .equals(other.getKeyList())) return false;
+      if (!getValueList()
+          .equals(other.getValueList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getKeyCount() > 0) {
+        hash = (37 * hash) + KEY_FIELD_NUMBER;
+        hash = (53 * hash) + getKeyList().hashCode();
+      }
+      if (getValueCount() > 0) {
+        hash = (37 * hash) + VALUE_FIELD_NUMBER;
+        hash = (53 * hash) + getValueList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2413,46 +2768,59 @@ public final class GraphicalModelProto {
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
     }
     public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static Builder newBuilder() { return Builder.create(); }
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData prototype) {
-      return newBuilder().mergeFrom(prototype);
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
     }
-    public Builder toBuilder() { return newBuilder(this); }
+    public static Builder newBuilder(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -2460,7 +2828,7 @@ public final class GraphicalModelProto {
      * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.MetaData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.loglinear.model.proto.MetaData)
         edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
@@ -2468,7 +2836,8 @@ public final class GraphicalModelProto {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_MetaData_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_MetaData_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -2481,18 +2850,16 @@ public final class GraphicalModelProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
         }
       }
-      private static Builder create() {
-        return new Builder();
-      }
-
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         key_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -2502,19 +2869,18 @@ public final class GraphicalModelProto {
         return this;
       }
 
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_MetaData_descriptor;
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getDefaultInstanceForType() {
         return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance();
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData build() {
         edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData result = buildPartial();
         if (!result.isInitialized()) {
@@ -2523,15 +2889,16 @@ public final class GraphicalModelProto {
         return result;
       }
 
+      @java.lang.Override
       public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData buildPartial() {
         edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData result = new edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData(this);
         int from_bitField0_ = bitField0_;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           key_ = key_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.key_ = key_;
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((bitField0_ & 0x00000002) != 0)) {
           value_ = value_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000002);
         }
@@ -2540,6 +2907,39 @@ public final class GraphicalModelProto {
         return result;
       }
 
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData) {
           return mergeFrom((edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData)other);
@@ -2571,14 +2971,17 @@ public final class GraphicalModelProto {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2588,7 +2991,7 @@ public final class GraphicalModelProto {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           parsedMessage = (edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData) e.getUnfinishedMessage();
-          throw e;
+          throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
             mergeFrom(parsedMessage);
@@ -2600,13 +3003,14 @@ public final class GraphicalModelProto {
 
       private com.google.protobuf.LazyStringList key_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureKeyIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           key_ = new com.google.protobuf.LazyStringArrayList(key_);
           bitField0_ |= 0x00000001;
          }
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @return A list containing the key.
        */
       public com.google.protobuf.ProtocolStringList
           getKeyList() {
@@ -2614,18 +3018,23 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @return The count of key.
        */
       public int getKeyCount() {
         return key_.size();
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param index The index of the element to return.
+       * @return The key at the given index.
        */
       public java.lang.String getKey(int index) {
         return key_.get(index);
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the key at the given index.
        */
       public com.google.protobuf.ByteString
           getKeyBytes(int index) {
@@ -2633,6 +3042,9 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The key to set.
+       * @return This builder for chaining.
        */
       public Builder setKey(
           int index, java.lang.String value) {
@@ -2646,6 +3058,8 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param value The key to add.
+       * @return This builder for chaining.
        */
       public Builder addKey(
           java.lang.String value) {
@@ -2659,6 +3073,8 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param values The key to add.
+       * @return This builder for chaining.
        */
       public Builder addAllKey(
           java.lang.Iterable<java.lang.String> values) {
@@ -2670,6 +3086,7 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearKey() {
         key_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -2679,6 +3096,8 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string key = 1;</code>
+       * @param value The bytes of the key to add.
+       * @return This builder for chaining.
        */
       public Builder addKeyBytes(
           com.google.protobuf.ByteString value) {
@@ -2693,13 +3112,14 @@ public final class GraphicalModelProto {
 
       private com.google.protobuf.LazyStringList value_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureValueIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           value_ = new com.google.protobuf.LazyStringArrayList(value_);
           bitField0_ |= 0x00000002;
          }
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @return A list containing the value.
        */
       public com.google.protobuf.ProtocolStringList
           getValueList() {
@@ -2707,18 +3127,23 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @return The count of value.
        */
       public int getValueCount() {
         return value_.size();
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param index The index of the element to return.
+       * @return The value at the given index.
        */
       public java.lang.String getValue(int index) {
         return value_.get(index);
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the value at the given index.
        */
       public com.google.protobuf.ByteString
           getValueBytes(int index) {
@@ -2726,6 +3151,9 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param index The index to set the value at.
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(
           int index, java.lang.String value) {
@@ -2739,6 +3167,8 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param value The value to add.
+       * @return This builder for chaining.
        */
       public Builder addValue(
           java.lang.String value) {
@@ -2752,6 +3182,8 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param values The value to add.
+       * @return This builder for chaining.
        */
       public Builder addAllValue(
           java.lang.Iterable<java.lang.String> values) {
@@ -2763,6 +3195,7 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         value_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -2772,6 +3205,8 @@ public final class GraphicalModelProto {
       }
       /**
        * <code>repeated string value = 2;</code>
+       * @param value The bytes of the value to add.
+       * @return This builder for chaining.
        */
       public Builder addValueBytes(
           com.google.protobuf.ByteString value) {
@@ -2783,39 +3218,80 @@ public final class GraphicalModelProto {
         onChanged();
         return this;
       }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
 
       // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.loglinear.model.proto.MetaData)
     }
 
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.loglinear.model.proto.MetaData)
+    private static final edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData DEFAULT_INSTANCE;
     static {
-      defaultInstance = new MetaData(true);
-      defaultInstance.initFields();
+      DEFAULT_INSTANCE = new edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData();
     }
 
-    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.loglinear.model.proto.MetaData)
+    public static edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<MetaData>
+        PARSER = new com.google.protobuf.AbstractParser<MetaData>() {
+      @java.lang.Override
+      public MetaData parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new MetaData(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<MetaData> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<MetaData> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_loglinear_model_proto_MetaData_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_loglinear_model_proto_MetaData_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
   }
-  private static com.google.protobuf.Descriptors.FileDescriptor
+  private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
     java.lang.String[] descriptorData = {
@@ -2828,42 +3304,34 @@ public final class GraphicalModelProto {
       "taData\022B\n\010metaData\030\003 \001(\01320.edu.stanford." +
       "nlp.loglinear.model.proto.MetaData\"\260\001\n\006F" +
       "actor\022P\n\rfeaturesTable\030\001 \002(\01329.edu.stanf" +
-      "ord.nlp.loglinear.model.proto.ConcatVect",
+      "ord.nlp.loglinear.model.proto.ConcatVect" +
       "orTable\022\020\n\010neighbor\030\002 \003(\005\022B\n\010metaData\030\003 " +
       "\001(\01320.edu.stanford.nlp.loglinear.model.p" +
       "roto.MetaData\"&\n\010MetaData\022\013\n\003key\030\001 \003(\t\022\r" +
       "\n\005value\030\002 \003(\tB=\n&edu.stanford.nlp.loglin" +
       "ear.model.protoB\023GraphicalModelProto"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.getDescriptor(),
-        }, assigner);
+        });
     internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_descriptor,
         new java.lang.String[] { "Factor", "VariableMetaData", "MetaData", });
     internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_descriptor,
         new java.lang.String[] { "FeaturesTable", "Neighbor", "MetaData", });
     internal_static_edu_stanford_nlp_loglinear_model_proto_MetaData_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_edu_stanford_nlp_loglinear_model_proto_MetaData_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_loglinear_model_proto_MetaData_descriptor,
         new java.lang.String[] { "Key", "Value", });
     edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.getDescriptor();

@@ -16,3 +16,6 @@ classes/**
 
 # emacs
 *~
+
+# generated javadoc
+javadoc/**

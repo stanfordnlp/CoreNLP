@@ -666,7 +666,7 @@ message TokensRegexRequest {
 // The result will be a nested structure:
 // repeated PatternMatch, one for each pattern
 // each PatternMatch has a repeated Match,
-//   which tells you which sentence matched and where
+// which tells you which sentence matched and where
 message TokensRegexResponse {
   message MatchLocation {
     optional string          text        = 1;
@@ -685,4 +685,16 @@ message TokensRegexResponse {
   }
 
   repeated PatternMatch      match       = 1;
+}
+
+// A protobuf which allows to pass in a document with basic
+// dependencies to be converted to enhanced
+message DependencyEnhancerRequest {
+  required Document          document           = 1;
+
+  oneof ref {
+    Language          language           = 2;
+    // The expected value of this is a regex which matches relative pronouns
+    string            relativePronouns   = 3;
+  }
 }

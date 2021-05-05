@@ -8,4 +8,6 @@ public class ShiftReduceTestOptions extends TestOptions {
   public String recordDebinarized = null;
 
   public int beamSize = 0;
+
+  public boolean recordTransitionTypes;
 }

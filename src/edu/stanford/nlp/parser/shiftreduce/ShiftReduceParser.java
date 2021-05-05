@@ -90,13 +90,13 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
   final ShiftReduceOptions op;
 
-  BaseModel model;
+  PerceptronModel model;
 
   public ShiftReduceParser(ShiftReduceOptions op) {
     this(op, null);
   }
 
-  public ShiftReduceParser(ShiftReduceOptions op, BaseModel model) {
+  public ShiftReduceParser(ShiftReduceOptions op, PerceptronModel model) {
     this.op = op;
     this.model = model;
   }
@@ -204,7 +204,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
   @Override
   public List<ParserQueryEval> getParserQueryEvals() {
-    if (op.testOptions().recordBinarized == null && op.testOptions().recordDebinarized == null) {
+    if (op.testOptions().recordBinarized == null &&
+        op.testOptions().recordDebinarized == null &&
+        !op.testOptions().recordTransitionTypes) {
       return Collections.emptyList();
     }
     List<ParserQueryEval> evals = Generics.newArrayList();
@@ -213,6 +215,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     }
     if (op.testOptions().recordDebinarized != null) {
       evals.add(new TreeRecorder(TreeRecorder.Mode.DEBINARIZED, op.testOptions().recordDebinarized));
+    }
+    if (op.testOptions().recordTransitionTypes) {
+      evals.add(new TransitionTypeEval());
     }
     return evals;
   }
@@ -268,9 +273,12 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     return new State(preterminals);
   }
 
+  private static final String[] BASIC_TRAINING_OPTIONS = { "-forceTags", "-debugOutputFrequency", "1", "-quietEvaluation" };
+  private static final String[] FORCE_TAGS = { "-forceTags" };
+
   public static ShiftReduceOptions buildTrainingOptions(String tlppClass, String[] args) {
     ShiftReduceOptions op = new ShiftReduceOptions();
-    op.setOptions("-forceTags", "-debugOutputFrequency", "1", "-quietEvaluation");
+    op.setOptions(BASIC_TRAINING_OPTIONS);
     if (tlppClass != null) {
       op.tlpParams = ReflectionLoading.loadByReflection(tlppClass);
     }
@@ -491,6 +499,23 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     }
   }
 
+  private void verifyTransitions(List<TrainingExample> trainingData) {
+    for (TrainingExample train : trainingData) {
+      State state = initialStateFromGoldTagTree(train.binarizedTree);
+      List<Transition> transitions = train.transitions;
+      for (int j = 0; j < transitions.size(); ++j) {
+        if (!transitions.get(j).isLegal(state, null)) {
+          System.err.println("Transition list for a gold tree is illegal!");
+          System.err.println("  " + train.binarizedTree);
+          System.err.println("  " + transitions);
+          System.err.println("  First illegal transition: " + j + ": " + transitions.get(j));
+          System.err.println("  State at this time: " + state);
+          break;
+        }
+        state = transitions.get(j).apply(state);
+      }
+    }
+  }
 
   private void train(List<Pair<String, FileFilter>> trainTreebankPath,
                      Pair<String, FileFilter> devTreebankPath,
@@ -523,11 +548,14 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     log.info("States which only occur at the root: " + rootOnlyStates);
 
     Timing transitionTimer = new Timing();
-    List<List<Transition>> transitionLists = CreateTransitionSequence.createTransitionSequences(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
+    List<TrainingExample> trainingData = CreateTransitionSequence.createTransitionSequences(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
     Index<Transition> transitionIndex = new HashIndex<>();
-    for (List<Transition> transitions : transitionLists) {
-      transitionIndex.addAll(transitions);
+    for (TrainingExample example : trainingData) {
+      transitionIndex.addAll(example.transitions);
     }
+
+    verifyTransitions(trainingData);
+
     transitionTimer.done("Converting trees into transition lists");
     log.info("Number of transitions: " + transitionIndex.size());
 
@@ -538,9 +566,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
       devTreebank = readTreebank(devTreebankPath.first(), devTreebankPath.second());
     }
 
-    PerceptronModel newModel = new PerceptronModel(this.op, transitionIndex, knownStates, rootStates, rootOnlyStates);
-    newModel.trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads);
-    this.model = newModel;
+    this.model = PerceptronModel.trainModel(this.op, transitionIndex, knownStates, rootStates, rootOnlyStates, this.model,
+                                            serializedPath, tagger, random, trainingData, devTreebank, nThreads);
   }
 
   @Override
@@ -564,8 +591,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
       throw new RuntimeIOException(e);
     }
   }
-
-  private static final String[] FORCE_TAGS = { "-forceTags" };
 
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
@@ -622,12 +647,14 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
       log.info("Initial arguments:");
       log.info("   " + StringUtils.join(args));
       if (continueTraining != null) {
-        parser = ShiftReduceParser.loadModel(continueTraining, ArrayUtils.concatenate(FORCE_TAGS, newArgs));
+        parser = ShiftReduceParser.loadModel(continueTraining, ArrayUtils.concatenate(BASIC_TRAINING_OPTIONS, newArgs));
       } else {
         ShiftReduceOptions op = buildTrainingOptions(tlppClass, newArgs);
         parser = new ShiftReduceParser(op);
       }
+      Timing trainingTimer = new Timing();
       parser.train(trainTreebankPath, devTreebankPath, serializedPath);
+      trainingTimer.done("Overall training process");
       parser.saveModel(serializedPath);
     }
 

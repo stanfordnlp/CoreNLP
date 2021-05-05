@@ -582,7 +582,7 @@ public class QuoteAnnotator implements Annotator  {
         warning = text.substring(0, 150) + "...";
       }
       log.info("WARNING: unmatched quote of type " +
-          quote + " found at index " + start + " in text segment: " + warning);
+               quote + " found at index " + start + " in text segment: " + warning);
     }
 
     // recursively look for embedded quotes in these ones
@@ -599,14 +599,15 @@ public class QuoteAnnotator implements Annotator  {
       Pair<List<Pair<Integer, Integer>>, List<Pair<Integer, Integer>>> embedded = recursiveQuotes(toPass, offset, null);
       // these are the good quotes
       for (Pair<Integer, Integer> e : embedded.first()) {
+        // offset by the amount of text we trimmed: start+quote.length()
         quotes.add(new Pair<>(e.first() + start + quote.length(),
-            e.second() + start + 1));
+                              e.second() + start + quote.length()));
       }
       if (EXTRACT_UNCLOSED) {
         // these are the unclosed quotes
         for (Pair<Integer, Integer> e : embedded.second()) {
           unclosedQuotes.add(new Pair<>(e.first() + start + quote.length(),
-              e.second() + start + 1));
+                                        e.second() + start + quote.length()));
         }
       }
     }
@@ -681,12 +682,16 @@ public class QuoteAnnotator implements Annotator  {
   private static boolean isDoubleQuoteEnd(String text, int i) {
     if (i == text.length() - 1) return true;
     String next = text.substring(i + 1, i + 2);
-    if (i == text.length() - 2 && isWhitespaceOrPunct(next)) {
-      return true;
+    if (i == text.length() - 2) {
+      if (isWhitespaceOrPunct(next)) {
+        return true;
+      } else {
+        return false;
+      }
     }
     String nextNext = text.substring(i + 2, i + 3);
-    return ((isWhitespaceOrPunct(next) &&
-           !isSingleQuote(next)) || (isSingleQuote(next) && isWhitespaceOrPunct(nextNext)));
+    return ((isWhitespaceOrPunct(next) && !isSingleQuote(next)) ||
+            (isSingleQuote(next) && isWhitespaceOrPunct(nextNext)));
   }
 
   public static boolean isWhitespaceOrPunct(String c) {

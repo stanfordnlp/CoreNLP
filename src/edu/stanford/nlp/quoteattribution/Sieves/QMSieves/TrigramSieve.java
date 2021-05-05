@@ -68,8 +68,8 @@ public class TrigramSieve extends QMSieve {
           }
           //VCQ
           if (lastNameIndex.second.equals(quoteBeginTokenIndex - 1 - offset)) {
-            CoreLabel secondPrevToken = docTokens.get(lastNameIndex.first - 1);
-            if (secondPrevToken.tag().startsWith("V")) {
+            CoreLabel secondPrevToken = lastNameIndex.first >= 1 ? docTokens.get(lastNameIndex.first - 1) : null;
+            if (secondPrevToken != null && secondPrevToken.tag().startsWith("V")) {
               fillInMention(quote, names.get(names.size() - 1), lastNameIndex.first, lastNameIndex.second, "trigram VCQ", NAME);
               continue;
             }
@@ -91,8 +91,8 @@ public class TrigramSieve extends QMSieve {
             continue;
           }
           //VPQ
-          if (lastPronounIndex == quoteBeginTokenIndex - 1 - offset
-                  && docTokens.get(quoteBeginTokenIndex - 2 - offset).tag().startsWith("V")) {
+          if (lastPronounIndex == quoteBeginTokenIndex - 1 - offset &&
+              docTokens.get(quoteBeginTokenIndex - 2 - offset).tag().startsWith("V")) {
             fillInMention(quote, tokenRangeToString(lastPronounIndex), lastPronounIndex, lastPronounIndex, "trigram VPQ", PRONOUN);
             continue;
           }
@@ -106,17 +106,19 @@ public class TrigramSieve extends QMSieve {
         ArrayList<String> names = namesAndNameIndices.first;
         ArrayList<Pair<Integer, Integer>> nameIndices = namesAndNameIndices.second;
 
-        if (names.size() > 0) {
+        if (names.size() > 0 &&
+            docTokens.size() > quoteEndTokenIndex + 1) {
           Pair<Integer, Integer> firstNameIndex = nameIndices.get(0);
           CoreLabel nextToken = docTokens.get(quoteEndTokenIndex + 1);
           //QVC
-          if (nextToken.tag().startsWith("V")  // verb!
-                  && firstNameIndex.first.equals(quoteEndTokenIndex + 2)) {
+          if (nextToken.tag().startsWith("V") && // verb!
+              firstNameIndex.first.equals(quoteEndTokenIndex + 2)) {
             fillInMention(quote, names.get(0), firstNameIndex.first, firstNameIndex.second, "trigram QVC", NAME);
             continue;
           }
           //QCV
-          if (firstNameIndex.first.equals(quoteEndTokenIndex + 1)) {
+          if (firstNameIndex.first.equals(quoteEndTokenIndex + 1) &&
+              docTokens.size() > firstNameIndex.second + 1) {
             CoreLabel secondNextToken = docTokens.get(firstNameIndex.second + 1);
             if(secondNextToken.tag().startsWith("V")) {
               fillInMention(quote, names.get(0), firstNameIndex.first, firstNameIndex.second, "trigram QCV", NAME);
@@ -126,7 +128,8 @@ public class TrigramSieve extends QMSieve {
         }
 
         ArrayList<Integer> pronounsIndices = scanForPronouns(followingTokenRange);
-        if (pronounsIndices.size() > 0) {
+        if (pronounsIndices.size() > 0 &&
+            docTokens.size() > quoteEndTokenIndex + 1) {
           CoreLabel nextToken = docTokens.get(quoteEndTokenIndex + 1);
           int firstPronounIndex = pronounsIndices.get(0);
           //QVP
@@ -135,15 +138,15 @@ public class TrigramSieve extends QMSieve {
             continue;
           }
           //QPV
-          if (firstPronounIndex == quoteEndTokenIndex + 1
-                  && docTokens.get(quoteEndTokenIndex + 2).tag().startsWith("V")) {
+          if (firstPronounIndex == quoteEndTokenIndex + 1 &&
+              docTokens.size() > quoteEndTokenIndex + 2 &&
+              docTokens.get(quoteEndTokenIndex + 2).tag().startsWith("V")) {
             fillInMention(quote, tokenRangeToString(pronounsIndices.get(pronounsIndices.size() - 1)), firstPronounIndex,
-                    firstPronounIndex, "trigram QPV", PRONOUN);
+                          firstPronounIndex, "trigram QPV", PRONOUN);
             continue;
           }
         }
       }
     }
   }
-
 }

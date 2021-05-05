@@ -25,7 +25,7 @@ public class Alignment {
   public void serialize(PrintWriter writer) {
     writer.println(new String(longForm));
     writer.println(new String(shortForm));
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     for (int pointer : pointers) {
       sb.append(pointer + " ");
     }
@@ -70,25 +70,25 @@ public class Alignment {
   private static final char[] spaces = "                      ".toCharArray();
 
   public String toString(String prefix) {
-    StringBuffer buf = new StringBuffer();
-    buf.append(prefix);
-    buf.append(longForm);
-    buf.append("\n");
-    buf.append(spaces, 0, prefix.length());
+    StringBuilder builder = new StringBuilder();
+    builder.append(prefix);
+    builder.append(longForm);
+    builder.append("\n");
+    builder.append(spaces, 0, prefix.length());
     int l = 0;
     for (int s = 0; s < shortForm.length; ++s) {
       if (pointers[s] == -1) {
         continue;
       }
       for (; l < longForm.length && pointers[s] != l; ++l) {
-        buf.append(" ");
+        builder.append(" ");
       }
       if (l < longForm.length) {
-        buf.append(shortForm[s]);
+        builder.append(shortForm[s]);
         ++l;
       }
     }
-    return buf.toString();
+    return builder.toString();
   }
 
   @Override

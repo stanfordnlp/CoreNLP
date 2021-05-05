@@ -1,5 +1,7 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
+import java.util.Locale;
+
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.TestOptions;
 import edu.stanford.nlp.parser.lexparser.TrainOptions;
@@ -65,7 +67,7 @@ public class ShiftReduceOptions extends Options {
       trainOptions().retrainAfterCutoff = false;
       i++;
     } else if (args[i].equalsIgnoreCase("-trainingMethod")) {
-      trainOptions().trainingMethod = ShiftReduceTrainOptions.TrainingMethod.valueOf(args[i + 1].toUpperCase());
+      trainOptions().trainingMethod = ShiftReduceTrainOptions.TrainingMethod.valueOf(args[i + 1].toUpperCase(Locale.ROOT));
       if (trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM ||
           trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
         if (trainOptions().beamSize <= 0) {
@@ -97,8 +99,26 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-recordDebinarized")) {
       testOptions().recordDebinarized = args[i + 1];
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-recordTransitionTypes")) {
+      testOptions().recordTransitionTypes = true;
+      i++;
     } else if (args[i].equalsIgnoreCase("-decayLearningRate")) {
       trainOptions().decayLearningRate = Double.parseDouble(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-l1Reg")) {
+      trainOptions().l1Reg = Float.parseFloat(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-l2Reg")) {
+      trainOptions().l2Reg = Float.parseFloat(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-retrainShards")) {
+      trainOptions().retrainShards = Integer.parseInt(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-retrainShardFeatureDrop")) {
+      trainOptions().retrainShardFeatureDrop = Double.parseDouble(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-augmentSubsentences")) {
+      trainOptions().augmentSubsentences = Float.parseFloat(args[i + 1]);
       i += 2;
     }
     return i;

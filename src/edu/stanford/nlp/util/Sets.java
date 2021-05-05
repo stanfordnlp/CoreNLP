@@ -1,9 +1,11 @@
 package edu.stanford.nlp.util;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.function.Supplier; 
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**
@@ -16,6 +18,13 @@ public class Sets {
   // private to prevent instantiation
   private Sets() {}
 
+  public static <E, F> Set<F> map(Set<E> oldSet, Function<E, F> lambda) {
+    Set<F> newSet = new HashSet<>();
+    for (E e : oldSet) {
+      newSet.add(lambda.apply(e));
+    }
+    return newSet;
+  }
 
   /**
    * Returns the set cross product of s1 and s2, as <code>Pair</code>s

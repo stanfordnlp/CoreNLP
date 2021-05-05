@@ -44,7 +44,8 @@ public class OneNameSentenceSieve extends QMSieve {
 
       ArrayList<Integer> pronounsIndices = scanForPronouns(range);
       if (names.size() == 1) {
-        List<Person> p = characterMap.get(names.get(0));
+        String name = names.get(0).replaceAll("\\s+", " ");
+        List<Person> p = characterMap.get(name);
 
         //guess if exactly one name
         if (p.size() == 1 && pronounsIndices.size() == 0) {

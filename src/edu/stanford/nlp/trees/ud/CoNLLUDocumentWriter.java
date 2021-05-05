@@ -1,6 +1,7 @@
 package edu.stanford.nlp.trees.ud;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.AbstractCoreLabel;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -46,11 +47,7 @@ public class CoNLLUDocumentWriter {
         for (IndexedWord token : tokenSg.vertexListSorted()) {
             /* Check for multiword tokens. */
             if (token.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class)) {
-                IntPair tokenSpan = token.get(CoreAnnotations.CoNLLUTokenSpanAnnotation.class);
-                if (tokenSpan.getSource() == token.index()) {
-                    String range = String.format("%d-%d", tokenSpan.getSource(), tokenSpan.getTarget());
-                    sb.append(String.format("%s\t%s\t_\t_\t_\t_\t_\t_\t_\t_%n", range, token.originalText()));
-                }
+                printSpan(sb, token);
             }
 
             /* Try to find main governor and additional dependencies. */
@@ -133,6 +130,17 @@ public class CoNLLUDocumentWriter {
     }
 
   /**
+   * Outputs just one token span (MWT)
+   */
+  public static void printSpan(StringBuilder sb, AbstractCoreLabel token) {
+      IntPair tokenSpan = token.get(CoreAnnotations.CoNLLUTokenSpanAnnotation.class);
+      if (tokenSpan.getSource() == token.index()) {
+          String range = String.format("%d-%d", tokenSpan.getSource(), tokenSpan.getTarget());
+          sb.append(String.format("%s\t%s\t_\t_\t_\t_\t_\t_\t_\t_%n", range, token.originalText()));
+      }
+  }
+
+  /**
    * Outputs a partial CONLL-U file with token information (form, lemma, POS)
    * but without any dependency information.
    *
@@ -140,18 +148,38 @@ public class CoNLLUDocumentWriter {
    * @return
    */
 
-  public String printPOSAnnotations(CoreMap sentence) {
+  public String printPOSAnnotations(CoreMap sentence, boolean fakeDeps) {
       StringBuilder sb = new StringBuilder();
 
+      int index = 0;
       for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+          /* Check for multiword tokens. */
+          if (token.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class)) {
+              printSpan(sb, token);
+          }
 
           String upos = token.getString(CoreAnnotations.CoarseTagAnnotation.class, "_");
           String lemma = token.getString(CoreAnnotations.LemmaAnnotation.class, "_");
           String pos = token.getString(CoreAnnotations.PartOfSpeechAnnotation.class, "_");
           String featuresString = CoNLLUUtils.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
           String misc = token.getString(CoreAnnotations.CoNLLUMisc.class, "_");
+          final String head;
+          final String rel;
+          final String headrel;
+          if (fakeDeps) {
+            // deps count from 1, with 0 as the root.
+            // we will have the first word go to fake root
+            head = Integer.toString(index);
+            rel = (index == 0) ? "root" : "dep";
+            headrel = head + ":" + rel;
+          } else {
+            head = "_";
+            rel = "_";
+            headrel = "_";
+          }
+          index++;
           sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.index(), token.word(),
-              lemma, upos , pos, featuresString, "_", "_", "_", misc));
+                                  lemma, upos , pos, featuresString, head, rel, headrel, misc));
       }
       sb.append(System.lineSeparator());
 

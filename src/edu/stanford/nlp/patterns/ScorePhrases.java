@@ -631,7 +631,7 @@ public class ScorePhrases<E extends Pattern>  {
       if(constVars.goldEntities != null){
         Map<String, Boolean> goldEntities4Label = constVars.goldEntities.get(label);
         if(goldEntities4Label != null) {
-          StringBuffer s = new StringBuffer();
+          StringBuilder s = new StringBuilder();
           finalwords.keySet().stream().forEach(x ->
             s.append(x.getPhrase() + (goldEntities4Label.containsKey(x.getPhrase()) ? ":"+goldEntities4Label.get(x.getPhrase()) : ":UKNOWN")+"\n"));
 

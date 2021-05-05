@@ -153,7 +153,8 @@ public class BaselineTopSpeakerSieve extends MSSieve {
         gender = genderList.get(mentionText);
       }
     } else if(mention.type != null && mention.type.equals("name")) {
-      gender = characterMap.get(mention.text).get(0).gender;
+      String mentionText = mention.text.replaceAll("\\s+", " ");
+      gender = characterMap.get(mentionText).get(0).gender;
     }
     return gender;
   }

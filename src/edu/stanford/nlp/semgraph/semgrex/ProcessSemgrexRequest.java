@@ -7,6 +7,8 @@
 
 package edu.stanford.nlp.semgraph.semgrex;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,8 +21,9 @@ import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.util.ProcessProtobufRequest;
 
-public class ProcessSemgrexRequest {
+public class ProcessSemgrexRequest extends ProcessProtobufRequest {
   /**
    * Builds a single inner SemgrexResult structure from the pair of a SemgrexPattern and a SemanticGraph
    */
@@ -50,6 +53,11 @@ public class ProcessSemgrexRequest {
     return semgrexResultBuilder.build();
   }
 
+  /**
+   * For a single request, iterate through the SemanticGraphs it
+   * includes, and add the results of each Semgrex operation included
+   * in the request.
+   */
   public static CoreNLPProtos.SemgrexResponse processRequest(CoreNLPProtos.SemgrexRequest request) {
     ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
     CoreNLPProtos.SemgrexResponse.Builder responseBuilder = CoreNLPProtos.SemgrexResponse.newBuilder();
@@ -69,14 +77,22 @@ public class ProcessSemgrexRequest {
     return responseBuilder.build();
   }
 
-  public static void processInputStream(InputStream in, OutputStream out) throws IOException {
-    // TODO: it would be nice to allow multiple reads from the same stream
+  /**
+   * Reads a single request from the InputStream, then writes back a single response.
+   */
+  @Override
+  public void processInputStream(InputStream in, OutputStream out) throws IOException {
     CoreNLPProtos.SemgrexRequest request = CoreNLPProtos.SemgrexRequest.parseFrom(in);
     CoreNLPProtos.SemgrexResponse response = processRequest(request);
     response.writeTo(out);
   }
 
+  /**
+   * Command line tool for processing a semgrex request.
+   * <br>
+   * If -multiple is specified, will process multiple requests.
+   */
   public static void main(String[] args) throws IOException {
-    processInputStream(System.in, System.out);
+    ProcessProtobufRequest.process(new ProcessSemgrexRequest(), args);
   }
 }

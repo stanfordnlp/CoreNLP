@@ -720,6 +720,13 @@ public class ArrayUtils  {
   }
 
 
+  public static short[] copy(short[] arr) {
+    if (arr == null) { return null; }
+    short[] newArr = new short[arr.length];
+    System.arraycopy(arr, 0, newArr, 0, arr.length);
+    return newArr;
+  }
+
   public static double[] copy(double[] d) {
     if (d == null) { return null; }
     double[] newD = new double[d.length];

@@ -34,6 +34,14 @@ public class ReorderingOracle {
       throw new AssertionError();
     }
 
+    if (chosenTransition == null) {
+      return false;
+    }
+
+    if (!chosenTransition.isLegal(state, null)) {
+      return false;
+    }
+
     Transition goldTransition = transitions.get(0);
 
     // If the transition is gold, we are already satisfied.
@@ -119,6 +127,23 @@ public class ReorderingOracle {
     return false;
   }
 
+  /**
+   * We wanted to shift and build up a new subtree, call it C, but
+   * instead we combined subtrees A and B into A+B.  The eventual goal
+   * would have been to combine B+C and have the stack be A / B+C
+   * <br>
+   * What we do is we keep all of the transitions that build up C, so
+   * that the stack is A+B / C, and the next transition was the one
+   * that should have combined B+C
+   * <br>
+   * We then drop the transition that would have combined B+C
+   * <br>
+   * At that point, either A+B and C will be combined, which means A+B / C
+   * was the only error, or we started building D and will continue to
+   * produce more errors after that.  However, there's no better
+   * solution for that situation anyway, unless we could decide that
+   * A+B+C / D is better than A+B / C+D as a replacement for A / B+C+D
+   */
   boolean reorderIncorrectBinaryTransition(List<Transition> transitions) {
     int shiftCount = 0;
     ListIterator<Transition> cursor = transitions.listIterator();

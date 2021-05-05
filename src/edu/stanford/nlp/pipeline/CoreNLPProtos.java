@@ -76258,7 +76258,7 @@ public final class CoreNLPProtos {
    * The result will be a nested structure:
    * repeated PatternMatch, one for each pattern
    * each PatternMatch has a repeated Match,
-   *   which tells you which sentence matched and where
+   * which tells you which sentence matched and where
    * </pre>
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.TokensRegexResponse}
@@ -79251,7 +79251,7 @@ public final class CoreNLPProtos {
      * The result will be a nested structure:
      * repeated PatternMatch, one for each pattern
      * each PatternMatch has a repeated Match,
-     *   which tells you which sentence matched and where
+     * which tells you which sentence matched and where
      * </pre>
      *
      * Protobuf type {@code edu.stanford.nlp.pipeline.TokensRegexResponse}
@@ -79735,6 +79735,1089 @@ public final class CoreNLPProtos {
 
   }
 
+  public interface DependencyEnhancerRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.DependencyEnhancerRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+     * @return Whether the document field is set.
+     */
+    boolean hasDocument();
+    /**
+     * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+     * @return The document.
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.Document getDocument();
+    /**
+     * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.DocumentOrBuilder getDocumentOrBuilder();
+
+    /**
+     * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+     * @return Whether the language field is set.
+     */
+    boolean hasLanguage();
+    /**
+     * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+     * @return The language.
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage();
+
+    /**
+     * <pre>
+     * The expected value of this is a regex which matches relative pronouns
+     * </pre>
+     *
+     * <code>optional string relativePronouns = 3;</code>
+     * @return Whether the relativePronouns field is set.
+     */
+    boolean hasRelativePronouns();
+    /**
+     * <pre>
+     * The expected value of this is a regex which matches relative pronouns
+     * </pre>
+     *
+     * <code>optional string relativePronouns = 3;</code>
+     * @return The relativePronouns.
+     */
+    java.lang.String getRelativePronouns();
+    /**
+     * <pre>
+     * The expected value of this is a regex which matches relative pronouns
+     * </pre>
+     *
+     * <code>optional string relativePronouns = 3;</code>
+     * @return The bytes for relativePronouns.
+     */
+    com.google.protobuf.ByteString
+        getRelativePronounsBytes();
+
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest.RefCase getRefCase();
+  }
+  /**
+   * <pre>
+   * A protobuf which allows to pass in a document with basic
+   * dependencies to be converted to enhanced
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyEnhancerRequest}
+   */
+  public  static final class DependencyEnhancerRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.DependencyEnhancerRequest)
+      DependencyEnhancerRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DependencyEnhancerRequest.newBuilder() to construct.
+    private DependencyEnhancerRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DependencyEnhancerRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DependencyEnhancerRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DependencyEnhancerRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              edu.stanford.nlp.pipeline.CoreNLPProtos.Document.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) != 0)) {
+                subBuilder = document_.toBuilder();
+              }
+              document_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Document.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(document_);
+                document_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+              @SuppressWarnings("deprecation")
+              edu.stanford.nlp.pipeline.CoreNLPProtos.Language value = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(2, rawValue);
+              } else {
+                refCase_ = 2;
+                ref_ = rawValue;
+              }
+              break;
+            }
+            case 26: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              refCase_ = 3;
+              ref_ = bs;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest.Builder.class);
+    }
+
+    private int bitField0_;
+    private int refCase_ = 0;
+    private java.lang.Object ref_;
+    public enum RefCase
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+      LANGUAGE(2),
+      RELATIVEPRONOUNS(3),
+      REF_NOT_SET(0);
+      private final int value;
+      private RefCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static RefCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static RefCase forNumber(int value) {
+        switch (value) {
+          case 2: return LANGUAGE;
+          case 3: return RELATIVEPRONOUNS;
+          case 0: return REF_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public RefCase
+    getRefCase() {
+      return RefCase.forNumber(
+          refCase_);
+    }
+
+    public static final int DOCUMENT_FIELD_NUMBER = 1;
+    private edu.stanford.nlp.pipeline.CoreNLPProtos.Document document_;
+    /**
+     * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+     * @return Whether the document field is set.
+     */
+    public boolean hasDocument() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+     * @return The document.
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.Document getDocument() {
+      return document_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Document.getDefaultInstance() : document_;
+    }
+    /**
+     * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.DocumentOrBuilder getDocumentOrBuilder() {
+      return document_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Document.getDefaultInstance() : document_;
+    }
+
+    public static final int LANGUAGE_FIELD_NUMBER = 2;
+    /**
+     * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+     * @return Whether the language field is set.
+     */
+    public boolean hasLanguage() {
+      return refCase_ == 2;
+    }
+    /**
+     * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+     * @return The language.
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
+      if (refCase_ == 2) {
+        @SuppressWarnings("deprecation")
+        edu.stanford.nlp.pipeline.CoreNLPProtos.Language result = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.valueOf(
+            (java.lang.Integer) ref_);
+        return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Language.Unknown : result;
+      }
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.Language.Unknown;
+    }
+
+    public static final int RELATIVEPRONOUNS_FIELD_NUMBER = 3;
+    /**
+     * <pre>
+     * The expected value of this is a regex which matches relative pronouns
+     * </pre>
+     *
+     * <code>optional string relativePronouns = 3;</code>
+     * @return Whether the relativePronouns field is set.
+     */
+    public boolean hasRelativePronouns() {
+      return refCase_ == 3;
+    }
+    /**
+     * <pre>
+     * The expected value of this is a regex which matches relative pronouns
+     * </pre>
+     *
+     * <code>optional string relativePronouns = 3;</code>
+     * @return The relativePronouns.
+     */
+    public java.lang.String getRelativePronouns() {
+      java.lang.Object ref = "";
+      if (refCase_ == 3) {
+        ref = ref_;
+      }
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8() && (refCase_ == 3)) {
+          ref_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The expected value of this is a regex which matches relative pronouns
+     * </pre>
+     *
+     * <code>optional string relativePronouns = 3;</code>
+     * @return The bytes for relativePronouns.
+     */
+    public com.google.protobuf.ByteString
+        getRelativePronounsBytes() {
+      java.lang.Object ref = "";
+      if (refCase_ == 3) {
+        ref = ref_;
+      }
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        if (refCase_ == 3) {
+          ref_ = b;
+        }
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (!hasDocument()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!getDocument().isInitialized()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(1, getDocument());
+      }
+      if (refCase_ == 2) {
+        output.writeEnum(2, ((java.lang.Integer) ref_));
+      }
+      if (refCase_ == 3) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, ref_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getDocument());
+      }
+      if (refCase_ == 2) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, ((java.lang.Integer) ref_));
+      }
+      if (refCase_ == 3) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, ref_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest other = (edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest) obj;
+
+      if (hasDocument() != other.hasDocument()) return false;
+      if (hasDocument()) {
+        if (!getDocument()
+            .equals(other.getDocument())) return false;
+      }
+      if (!getRefCase().equals(other.getRefCase())) return false;
+      switch (refCase_) {
+        case 2:
+          if (!getLanguage()
+              .equals(other.getLanguage())) return false;
+          break;
+        case 3:
+          if (!getRelativePronouns()
+              .equals(other.getRelativePronouns())) return false;
+          break;
+        case 0:
+        default:
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasDocument()) {
+        hash = (37 * hash) + DOCUMENT_FIELD_NUMBER;
+        hash = (53 * hash) + getDocument().hashCode();
+      }
+      switch (refCase_) {
+        case 2:
+          hash = (37 * hash) + LANGUAGE_FIELD_NUMBER;
+          hash = (53 * hash) + getLanguage().getNumber();
+          break;
+        case 3:
+          hash = (37 * hash) + RELATIVEPRONOUNS_FIELD_NUMBER;
+          hash = (53 * hash) + getRelativePronouns().hashCode();
+          break;
+        case 0:
+        default:
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * A protobuf which allows to pass in a document with basic
+     * dependencies to be converted to enhanced
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyEnhancerRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.DependencyEnhancerRequest)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getDocumentFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (documentBuilder_ == null) {
+          document_ = null;
+        } else {
+          documentBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        refCase_ = 0;
+        ref_ = null;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest result = new edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          if (documentBuilder_ == null) {
+            result.document_ = document_;
+          } else {
+            result.document_ = documentBuilder_.build();
+          }
+          to_bitField0_ |= 0x00000001;
+        }
+        if (refCase_ == 2) {
+          result.ref_ = ref_;
+        }
+        if (refCase_ == 3) {
+          result.ref_ = ref_;
+        }
+        result.bitField0_ = to_bitField0_;
+        result.refCase_ = refCase_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest.getDefaultInstance()) return this;
+        if (other.hasDocument()) {
+          mergeDocument(other.getDocument());
+        }
+        switch (other.getRefCase()) {
+          case LANGUAGE: {
+            setLanguage(other.getLanguage());
+            break;
+          }
+          case RELATIVEPRONOUNS: {
+            refCase_ = 3;
+            ref_ = other.ref_;
+            onChanged();
+            break;
+          }
+          case REF_NOT_SET: {
+            break;
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        if (!hasDocument()) {
+          return false;
+        }
+        if (!getDocument().isInitialized()) {
+          return false;
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int refCase_ = 0;
+      private java.lang.Object ref_;
+      public RefCase
+          getRefCase() {
+        return RefCase.forNumber(
+            refCase_);
+      }
+
+      public Builder clearRef() {
+        refCase_ = 0;
+        ref_ = null;
+        onChanged();
+        return this;
+      }
+
+      private int bitField0_;
+
+      private edu.stanford.nlp.pipeline.CoreNLPProtos.Document document_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.Document, edu.stanford.nlp.pipeline.CoreNLPProtos.Document.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DocumentOrBuilder> documentBuilder_;
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+       * @return Whether the document field is set.
+       */
+      public boolean hasDocument() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+       * @return The document.
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.Document getDocument() {
+        if (documentBuilder_ == null) {
+          return document_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Document.getDefaultInstance() : document_;
+        } else {
+          return documentBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+       */
+      public Builder setDocument(edu.stanford.nlp.pipeline.CoreNLPProtos.Document value) {
+        if (documentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          document_ = value;
+          onChanged();
+        } else {
+          documentBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+       */
+      public Builder setDocument(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.Document.Builder builderForValue) {
+        if (documentBuilder_ == null) {
+          document_ = builderForValue.build();
+          onChanged();
+        } else {
+          documentBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+       */
+      public Builder mergeDocument(edu.stanford.nlp.pipeline.CoreNLPProtos.Document value) {
+        if (documentBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0) &&
+              document_ != null &&
+              document_ != edu.stanford.nlp.pipeline.CoreNLPProtos.Document.getDefaultInstance()) {
+            document_ =
+              edu.stanford.nlp.pipeline.CoreNLPProtos.Document.newBuilder(document_).mergeFrom(value).buildPartial();
+          } else {
+            document_ = value;
+          }
+          onChanged();
+        } else {
+          documentBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000001;
+        return this;
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+       */
+      public Builder clearDocument() {
+        if (documentBuilder_ == null) {
+          document_ = null;
+          onChanged();
+        } else {
+          documentBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.Document.Builder getDocumentBuilder() {
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return getDocumentFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DocumentOrBuilder getDocumentOrBuilder() {
+        if (documentBuilder_ != null) {
+          return documentBuilder_.getMessageOrBuilder();
+        } else {
+          return document_ == null ?
+              edu.stanford.nlp.pipeline.CoreNLPProtos.Document.getDefaultInstance() : document_;
+        }
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.Document, edu.stanford.nlp.pipeline.CoreNLPProtos.Document.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DocumentOrBuilder> 
+          getDocumentFieldBuilder() {
+        if (documentBuilder_ == null) {
+          documentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.Document, edu.stanford.nlp.pipeline.CoreNLPProtos.Document.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DocumentOrBuilder>(
+                  getDocument(),
+                  getParentForChildren(),
+                  isClean());
+          document_ = null;
+        }
+        return documentBuilder_;
+      }
+
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+       * @return Whether the language field is set.
+       */
+      public boolean hasLanguage() {
+        return refCase_ == 2;
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+       * @return The language.
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
+        if (refCase_ == 2) {
+          @SuppressWarnings("deprecation")
+          edu.stanford.nlp.pipeline.CoreNLPProtos.Language result = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.valueOf(
+              (java.lang.Integer) ref_);
+          return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Language.Unknown : result;
+        }
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.Language.Unknown;
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+       * @param value The language to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLanguage(edu.stanford.nlp.pipeline.CoreNLPProtos.Language value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        refCase_ = 2;
+        ref_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLanguage() {
+        if (refCase_ == 2) {
+          refCase_ = 0;
+          ref_ = null;
+          onChanged();
+        }
+        return this;
+      }
+
+      /**
+       * <pre>
+       * The expected value of this is a regex which matches relative pronouns
+       * </pre>
+       *
+       * <code>optional string relativePronouns = 3;</code>
+       * @return Whether the relativePronouns field is set.
+       */
+      public boolean hasRelativePronouns() {
+        return refCase_ == 3;
+      }
+      /**
+       * <pre>
+       * The expected value of this is a regex which matches relative pronouns
+       * </pre>
+       *
+       * <code>optional string relativePronouns = 3;</code>
+       * @return The relativePronouns.
+       */
+      public java.lang.String getRelativePronouns() {
+        java.lang.Object ref = "";
+        if (refCase_ == 3) {
+          ref = ref_;
+        }
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (refCase_ == 3) {
+            if (bs.isValidUtf8()) {
+              ref_ = s;
+            }
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The expected value of this is a regex which matches relative pronouns
+       * </pre>
+       *
+       * <code>optional string relativePronouns = 3;</code>
+       * @return The bytes for relativePronouns.
+       */
+      public com.google.protobuf.ByteString
+          getRelativePronounsBytes() {
+        java.lang.Object ref = "";
+        if (refCase_ == 3) {
+          ref = ref_;
+        }
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          if (refCase_ == 3) {
+            ref_ = b;
+          }
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The expected value of this is a regex which matches relative pronouns
+       * </pre>
+       *
+       * <code>optional string relativePronouns = 3;</code>
+       * @param value The relativePronouns to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRelativePronouns(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  refCase_ = 3;
+        ref_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The expected value of this is a regex which matches relative pronouns
+       * </pre>
+       *
+       * <code>optional string relativePronouns = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRelativePronouns() {
+        if (refCase_ == 3) {
+          refCase_ = 0;
+          ref_ = null;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The expected value of this is a regex which matches relative pronouns
+       * </pre>
+       *
+       * <code>optional string relativePronouns = 3;</code>
+       * @param value The bytes for relativePronouns to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRelativePronounsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  refCase_ = 3;
+        ref_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.DependencyEnhancerRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.DependencyEnhancerRequest)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<DependencyEnhancerRequest>
+        PARSER = new com.google.protobuf.AbstractParser<DependencyEnhancerRequest>() {
+      @java.lang.Override
+      public DependencyEnhancerRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DependencyEnhancerRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<DependencyEnhancerRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DependencyEnhancerRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_Document_descriptor;
   private static final 
@@ -79930,6 +81013,11 @@ public final class CoreNLPProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_TokensRegexResponse_PatternMatch_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -80213,18 +81301,23 @@ public final class CoreNLPProtos {
       "p.pipeline.TokensRegexResponse.MatchLoca" +
       "tion\032S\n\014PatternMatch\022C\n\005match\030\001 \003(\01324.ed" +
       "u.stanford.nlp.pipeline.TokensRegexRespo" +
-      "nse.Match*\243\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003A" +
-      "ny\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English" +
-      "\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013" +
-      "\n\007Spanish\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n\020Uni" +
-      "versalChinese\020\n*h\n\tSentiment\022\023\n\017STRONG_N" +
-      "EGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020" +
-      "\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020" +
-      "\004*\223\001\n\024NaturalLogicRelation\022\017\n\013EQUIVALENC" +
-      "E\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REVERSE_E" +
-      "NTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION" +
-      "\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.s" +
-      "tanford.nlp.pipelineB\rCoreNLPProtos"
+      "nse.Match\"\256\001\n\031DependencyEnhancerRequest\022" +
+      "5\n\010document\030\001 \002(\0132#.edu.stanford.nlp.pip" +
+      "eline.Document\0227\n\010language\030\002 \001(\0162#.edu.s" +
+      "tanford.nlp.pipeline.LanguageH\000\022\032\n\020relat" +
+      "ivePronouns\030\003 \001(\tH\000B\005\n\003ref*\243\001\n\010Language\022" +
+      "\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chi" +
+      "nese\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006Frenc" +
+      "h\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020Universa" +
+      "lEnglish\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSent" +
+      "iment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGAT" +
+      "IVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n" +
+      "\017STRONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelat" +
+      "ion\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILME" +
+      "NT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION" +
+      "\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPE" +
+      "NDENCE\020\006B*\n\031edu.stanford.nlp.pipelineB\rC" +
+      "oreNLPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -80464,6 +81557,12 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_TokensRegexResponse_PatternMatch_descriptor,
         new java.lang.String[] { "Match", });
+    internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_descriptor =
+      getDescriptor().getMessageTypes().get(27);
+    internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_descriptor,
+        new java.lang.String[] { "Document", "Language", "RelativePronouns", "Ref", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

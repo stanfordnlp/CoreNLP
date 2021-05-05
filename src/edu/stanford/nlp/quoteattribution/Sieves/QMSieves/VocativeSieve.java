@@ -74,9 +74,9 @@ public class VocativeSieve extends QMSieve {
         for (int i = 0; i < nameAndIndices.first.size(); i++) {
           String name = nameAndIndices.first.get(i);
           Pair<Integer, Integer> nameIndex = nameAndIndices.second.get(i);
-          String prevToken = toks.get(nameIndex.first - 1).word();
-          String prevPrevToken = toks.get(nameIndex.first - 2).word();
-          String nextToken = toks.get(nameIndex.second + 1).word();
+          String prevToken = nameIndex.first >= 1 ? toks.get(nameIndex.first - 1).word() : "";
+          String prevPrevToken = nameIndex.first >= 2 ? toks.get(nameIndex.first - 2).word() : "";
+          String nextToken = nameIndex.second + 1 < toks.size() ? toks.get(nameIndex.second + 1).word() : "";
           if ((prevToken.equals(",") && nextToken.equals("!")) ||
                   (prevToken.equals(",") && nextToken.equals("?")) ||
                   (prevToken.equals(",") && nextToken.equals(".")) ||
@@ -104,6 +104,8 @@ public class VocativeSieve extends QMSieve {
         List<Integer> animates = scanForAnimates(quoteRun);
         List<Pair<String, Integer>> animateVocatives = new ArrayList<>();
         for (int animateIndex : animates) {
+          if (animateIndex < 2 || animateIndex >= toks.size() + 1)
+            continue;
           String prevToken = toks.get(animateIndex - 1).word();
           String prevPrevToken = toks.get(animateIndex - 2).word();
           String nextToken = toks.get(animateIndex + 1).word();

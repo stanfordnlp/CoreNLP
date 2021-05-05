@@ -52,6 +52,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
 
   private transient TagAffixDetector taDetector; // = null;
   private transient CorpusDictionary outDict; // = null;
+  private transient NonDict2 nonDict; // = null;
 
   @Override
   public void init(SeqClassifierFlags flags) {
@@ -71,6 +72,11 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
     }
   }
 
+  private synchronized void createNonDict() {
+    if (nonDict == null) {
+      nonDict = new NonDict2(flags);
+    }
+  }
 
   /**
    * Extracts all the features from the input data at a certain index.
@@ -479,8 +485,10 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
      * This is frickin' useful.  I hadn't realized.  CDM Oct 2007.
      */
     if (flags.useDict2) {
-      NonDict2 nd = new NonDict2(flags);
-      features.add(nd.checkDic(charp+charc, flags)+"nondict");
+      if (nonDict == null) {
+        createNonDict();
+      }
+      features.add(nonDict.checkDic(charp+charc, flags)+"nondict");
     }
 
     if (flags.useOutDict2) {

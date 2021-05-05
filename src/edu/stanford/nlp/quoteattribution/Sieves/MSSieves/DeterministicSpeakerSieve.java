@@ -31,6 +31,8 @@ public class DeterministicSpeakerSieve extends MSSieve {
       if (mention == null) {
         continue;
       }
+      // replaceAll is to avoid newlines etc ruining our search
+      mention = mention.replaceAll("\\s+", " ");
       int mentionBegin = quote.get(QuoteAttributionAnnotator.MentionBeginAnnotation.class);
       int mentionEnd = quote.get(QuoteAttributionAnnotator.MentionEndAnnotation.class);
       List<CoreLabel> mentionTokens = new ArrayList<>();

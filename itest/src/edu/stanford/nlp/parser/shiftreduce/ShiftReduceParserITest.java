@@ -63,13 +63,18 @@ public class ShiftReduceParserITest {
     result = pq.getBestParse();
     assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina) (NNPS Reapers))) (. .)))", result.toString());
 
+    // Note that since the constraints are introducing brackets which
+    // don't exist, we may get some weird parse results as models
+    // change in the future.  The important thing is that the ADJP
+    // bracket appears for this test and the VP bracket appears for
+    // the next test
     constraint = new ParserConstraint(2, 4, "ADJP");
     constraints = Collections.singletonList(constraint);
     pq = englishParser.parserQuery();
     pq.setConstraints(constraints);
     assertTrue(pq.parse(sentence));
     result = pq.getBestParse();
-    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (ADJP (NML (NP (NNP Carolina) (NNPS Reapers))))) (. .)))", result.toString());
+    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (ADJP (NP (NNP Carolina) (NNPS Reapers)))) (. .)))", result.toString());
 
     constraint = new ParserConstraint(1, 3, "VP");
     constraints = Collections.singletonList(constraint);
@@ -77,6 +82,6 @@ public class ShiftReduceParserITest {
     pq.setConstraints(constraints);
     assertTrue(pq.parse(sentence));
     result = pq.getBestParse();
-    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (NP (NNP Carolina))) (NP (NNPS Reapers)) (. .)))", result.toString());
+    assertEquals("(ROOT (S (NP (PRP It)) (VP (VBD was) (ADJP (NNP Carolina))) (NP (NNPS Reapers)) (. .)))", result.toString());
   }
 }

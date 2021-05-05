@@ -9,6 +9,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 import org.ejml.simple.SimpleMatrix;
@@ -273,13 +274,13 @@ public class SentimentPipeline  {
         stdin = true;
         argIndex++;
       } else if (args[argIndex].equalsIgnoreCase("-input")) {
-        inputFormat = Input.valueOf(args[argIndex + 1].toUpperCase());
+        inputFormat = Input.valueOf(args[argIndex + 1].toUpperCase(Locale.ROOT));
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-output")) {
         String[] formats = args[argIndex + 1].split(",");
         outputFormats = new ArrayList<>();
         for (String format : formats) {
-          outputFormats.add(Output.valueOf(format.toUpperCase()));
+          outputFormats.add(Output.valueOf(format.toUpperCase(Locale.ROOT)));
         }
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-filterUnknown")) {

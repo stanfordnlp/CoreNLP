@@ -106,7 +106,7 @@ public class CoNLLUOutputter extends AnnotationOutputter {
   }
 
   public CoNLLUOutputter(Properties props) {
-    dependenciesType = SemanticGraphCoreAnnotations.DependenciesType.valueOf(props.getProperty("output.dependenciesType", "basic").toUpperCase());
+    dependenciesType = SemanticGraphCoreAnnotations.DependenciesType.valueOf(props.getProperty("output.dependenciesType", "basic").toUpperCase(Locale.ROOT));
   }
 
   @Override
@@ -129,7 +129,7 @@ public class CoNLLUOutputter extends AnnotationOutputter {
           throw new IllegalArgumentException("CoNLLUOutputter: unknown dependencies type " + dependenciesType);
         }
       } else {
-        writer.print(conllUWriter.printPOSAnnotations(sentence));
+        writer.print(conllUWriter.printPOSAnnotations(sentence, options.printFakeDeps));
       }
     }
     writer.flush();

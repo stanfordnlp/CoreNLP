@@ -1,8 +1,12 @@
+syntax = "proto2";
+
 package edu.stanford.nlp.loglinear.model.proto;
 
 option java_package = "edu.stanford.nlp.loglinear.model.proto";
-
 option java_outer_classname = "ConcatVectorTableProto";
+
+// To compile:
+// protoc -I=src/edu/stanford/nlp/loglinear/model/proto --java_out=src src/edu/stanford/nlp/loglinear/model/proto/ConcatVectorTable.proto
 
 import "ConcatVector.proto";
 

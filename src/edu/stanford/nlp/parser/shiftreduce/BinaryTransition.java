@@ -71,23 +71,28 @@ public class BinaryTransition implements Transition {
     if (state.stack.size() == 2 && isBinarized() && state.endOfQueue()) {
       return false;
     }
-    // when the stack contains only two nodes, temporary resulting
-    // nodes from binary reduce must be left-headed
-    if (state.stack.size() == 2 && isBinarized() && side == Side.RIGHT) {
-      return false;
-    }
+
     // when the queue is empty and the stack contains more than two
     // nodes, with the third node from the top being temporary, binary
     // reduce can be applied only if the resulting node is non-temporary
     if (state.endOfQueue() && state.stack.size() > 2 && ShiftReduceUtils.isTemporary(state.stack.pop().pop().peek()) && isBinarized()) {
       return false;
     }
+
+    // when the stack contains only two nodes, temporary resulting
+    // nodes from binary reduce must be left-headed
+    // TODO: why is this true?  see what happens if removed
+    // if (state.stack.size() == 2 && isBinarized() && side == Side.RIGHT) {
+    //   return false;
+    // }
+
     // when the stack contains more than two nodes, with the third
     // node from the top being temporary, temporary resulting nodes
     // from binary reduce must be left-headed
-    if (state.stack.size() > 2 && ShiftReduceUtils.isTemporary(state.stack.pop().pop().peek()) && isBinarized() && side == Side.RIGHT) {
-      return false;
-    }
+    // TODO: this is equivalent to the above rule, and it is unclear why it is true
+    // if (state.stack.size() > 2 && ShiftReduceUtils.isTemporary(state.stack.pop().pop().peek()) && isBinarized() && side == Side.RIGHT) {
+    //   return false;
+    // }
 
     // if this transition is only allowed at the root node, and the
     // model tries to apply it elsewhere, that must be rejected unless
@@ -150,6 +155,9 @@ public class BinaryTransition implements Transition {
         continue;
       }
       // can't transition to a binarized node when there's a constraint that matches.
+      // the problem here is there is no way to transition to a tree that matches the
+      // constraint - unary transitions are not allowed from temporary, and binary
+      // transitions will make the subtree larger than the constraint
       if (rightTop == constraint.end - 1 && isBinarized()) {
         return false;
       }
@@ -206,7 +214,7 @@ public class BinaryTransition implements Transition {
 
     stack = stack.push(newTop);
 
-    return new State(stack, state.transitions.push(this), state.separators, state.sentence, state.tokenPosition, state.score + scoreDelta, false);    
+    return new State(stack, state.transitions.push(this), state.separators, state.sentence, state.tokenPosition, state.score + scoreDelta, false);
   }
 
   @Override
@@ -224,12 +232,11 @@ public class BinaryTransition implements Transition {
 
   @Override
   public int hashCode() {
-    // TODO: fix the hashcode for the side?  would require rebuilding all models
     switch(side) {
     case LEFT:
       return 97197711 ^ label.hashCode();
     case RIGHT:
-      return 97197711 ^ label.hashCode();
+      return 85635467 ^ label.hashCode();
     default:
       throw new IllegalArgumentException("Unknown side " + side);
     }

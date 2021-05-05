@@ -17,9 +17,9 @@ import java.io.FileFilter;
  */
 public class NumberRangeFileFilter implements FileFilter {
 
-  private int minimum;
-  private int maximum;
-  private boolean recursively;
+  private final int minimum;
+  private final int maximum;
+  private final boolean recursively;
 
   /**
    * Sets up a NumberRangeFileFilter by specifying the range of numbers

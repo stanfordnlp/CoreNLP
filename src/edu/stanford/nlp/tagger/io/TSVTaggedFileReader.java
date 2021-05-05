@@ -15,6 +15,7 @@ public class TSVTaggedFileReader implements TaggedFileReader {
   private final BufferedReader reader;
   private final String filename;
   private final int wordColumn, tagColumn;
+  private final boolean usesComments;
   private List<TaggedWord> next; // = null;
   private int linesRead; // = 0;
 
@@ -34,6 +35,7 @@ public class TSVTaggedFileReader implements TaggedFileReader {
                   DEFAULT_WORD_COLUMN : record.wordColumn);
     tagColumn = ((record.tagColumn == null) ?
                  DEFAULT_TAG_COLUMN : record.tagColumn);
+    usesComments = record.usesComments;
     primeNext();
   }
 
@@ -58,9 +60,9 @@ public class TSVTaggedFileReader implements TaggedFileReader {
 
 
   private void primeNext() {
-    // eat all blank lines until we hit the next block of text
+    // eat all blank lines (and maybe comments) until we hit the next block of text
     String line = "";
-    while (line.trim().isEmpty()) {
+    while (line.trim().isEmpty() || (usesComments && line.startsWith("#"))) {
       try {
         line = reader.readLine();
         ++linesRead;
@@ -77,14 +79,16 @@ public class TSVTaggedFileReader implements TaggedFileReader {
     // ends the sentence.
     next = new ArrayList<>();
     while (line != null && ! line.trim().isEmpty()) {
-      String[] pieces = line.split("\t");
-      if (pieces.length <= wordColumn || pieces.length <= tagColumn) {
-        throw new IllegalArgumentException("File " + filename + " line #" +
-                                           linesRead + " too short");
+      if (!(usesComments && line.startsWith("#"))) {
+        String[] pieces = line.split("\t");
+        if (pieces.length <= wordColumn || pieces.length <= tagColumn) {
+          throw new IllegalArgumentException("File " + filename + " line #" +
+                                             linesRead + " too short");
+        }
+        String word = pieces[wordColumn];
+        String tag = pieces[tagColumn];
+        next.add(new TaggedWord(word, tag));
       }
-      String word = pieces[wordColumn];
-      String tag = pieces[tagColumn];
-      next.add(new TaggedWord(word, tag));
       try {
         line = reader.readLine();
         ++linesRead;
