@@ -350,7 +350,7 @@ public class ColumnDataClassifier  {
    */
   public Pair<GeneralDataset<String,String>, List<String[]>> readAndReturnTrainingExamples(String fileName) {
     if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "train", Flags.encoding);
+      newFeaturePrinter(globalFlags.printFeatures, "train", globalFlags.encoding);
     }
     Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readDataset(fileName, true);
     GeneralDataset<String,String> train = dataInfo.first();
@@ -410,7 +410,7 @@ public class ColumnDataClassifier  {
     Timing tim = new Timing();
     GeneralDataset<String,String> dataset;
     List<String[]> lineInfos = null;
-    if ((inTestPhase && Flags.testFromSVMLight) || (!inTestPhase && Flags.trainFromSVMLight)) {
+    if ((inTestPhase && globalFlags.testFromSVMLight) || (!inTestPhase && globalFlags.trainFromSVMLight)) {
       List<String> lines = null;
       if (inTestPhase) {
         lines = new ArrayList<>();
@@ -436,16 +436,16 @@ public class ColumnDataClassifier  {
         int lineNo = 0;
         int minColumns = Integer.MAX_VALUE;
         int maxColumns = 0;
-        for (String line : ObjectBank.getLineIterator(new File(filename), Flags.encoding)) {
+        for (String line : ObjectBank.getLineIterator(new File(filename), globalFlags.encoding)) {
           lineNo++;
-          if (Flags.inputFormat == InputFormat.HEADER) {
+          if (globalFlags.inputFormat == InputFormat.HEADER) {
             if (lineNo == 1) {
               if (storedHeader == null) {
                 storedHeader = line; // store it because need elements of it to print header in output
               }
               continue;
             }
-          } else if (Flags.inputFormat == InputFormat.COMMENTS) {
+          } else if (globalFlags.inputFormat == InputFormat.COMMENTS) {
             if (line.matches("\\s#.*")) {
               continue;
             }
@@ -1814,23 +1814,23 @@ public class ColumnDataClassifier  {
       } else if (key.equals("loadClassifier")) {
         myFlags[col].loadClassifier = val;
       } else if (key.equals("serializeTo")) {
-        Flags.serializeTo = val;
+        myFlags[col].serializeTo = val;
       } else if (key.equals("printTo")) {
-        Flags.printTo = val;
+        myFlags[col].printTo = val;
       } else if (key.equals("trainFile")) {
-        Flags.trainFile = val;
+        myFlags[col].trainFile = val;
       } else if (key.equals("displayAllAnswers")) {
-        Flags.displayAllAnswers = Boolean.parseBoolean(val);
+        myFlags[col].displayAllAnswers = Boolean.parseBoolean(val);
       } else if (key.equals("testFile")) {
         myFlags[col].testFile = val;
       } else if (key.equals("trainFromSVMLight")) {
-        Flags.trainFromSVMLight = Boolean.parseBoolean(val);
+        myFlags[col].trainFromSVMLight = Boolean.parseBoolean(val);
       } else if (key.equals("testFromSVMLight")) {
-        Flags.testFromSVMLight = Boolean.parseBoolean(val);
+        myFlags[col].testFromSVMLight = Boolean.parseBoolean(val);
       } else if (key.equals("encoding")) {
-        Flags.encoding = val;
+        myFlags[col].encoding = val;
       } else if (key.equals("printSVMLightFormatTo")) {
-        Flags.printSVMLightFormatTo = val;
+        myFlags[col].printSVMLightFormatTo = val;
       } else if (key.equals("displayedColumn")) {
         myFlags[col].displayedColumn = Integer.parseInt(val);
       } else if (key.equals("groupingColumn")) {
@@ -2015,8 +2015,8 @@ public class ColumnDataClassifier  {
     String testFile = cdc.globalFlags.testFile;
 
     // check that we have roughly sensible options or else warn and exit
-    if ((testFile == null && Flags.serializeTo == null && cdc.globalFlags.crossValidationFolds < 2) ||
-            (Flags.trainFile == null && cdc.globalFlags.loadClassifier == null)) {
+    if ((testFile == null && cdc.globalFlags.serializeTo == null && cdc.globalFlags.crossValidationFolds < 2) ||
+            (cdc.globalFlags.trainFile == null && cdc.globalFlags.loadClassifier == null)) {
       logger.info("usage: java edu.stanford.nlp.classify.ColumnDataClassifier -prop propFile");
       logger.info("  and/or: -trainFile trainFile -testFile testFile|-serializeTo modelFile [-useNGrams|-sigma sigma|...]");
       return; // ENDS PROCESSING
@@ -2024,7 +2024,7 @@ public class ColumnDataClassifier  {
 
     if (cdc.globalFlags.loadClassifier == null) {
       // Otherwise we attempt to train one and exit if we don't succeed
-      if ( ! cdc.trainClassifier(Flags.trainFile)) {
+      if (!cdc.trainClassifier(cdc.globalFlags.trainFile)) {
         return;
       }
     }
@@ -2067,12 +2067,12 @@ public class ColumnDataClassifier  {
       }
     }
     // print the training data in SVMlight format if desired
-    if (Flags.printSVMLightFormatTo != null) {
-      PrintWriter pw = IOUtils.getPrintWriter(Flags.printSVMLightFormatTo, Flags.encoding);
+    if (globalFlags.printSVMLightFormatTo != null) {
+      PrintWriter pw = IOUtils.getPrintWriter(globalFlags.printSVMLightFormatTo, globalFlags.encoding);
       train.printSVMLightFormat(pw);
       IOUtils.closeIgnoringExceptions(pw);
-      train.featureIndex().saveToFilename(Flags.printSVMLightFormatTo + ".featureIndex");
-      train.labelIndex().saveToFilename(Flags.printSVMLightFormatTo + ".labelIndex");
+      train.featureIndex().saveToFilename(globalFlags.printSVMLightFormatTo + ".featureIndex");
+      train.labelIndex().saveToFilename(globalFlags.printSVMLightFormatTo + ".labelIndex");
     }
 
     if (globalFlags.crossValidationFolds > 1) {
@@ -2088,7 +2088,7 @@ public class ColumnDataClassifier  {
     printClassifier(classifier);
 
     // serialize the classifier
-    String serializeTo = Flags.serializeTo;
+    String serializeTo = globalFlags.serializeTo;
     if (serializeTo != null) {
       serializeClassifier(serializeTo);
     }
@@ -2119,11 +2119,7 @@ public class ColumnDataClassifier  {
    */
   public void serializeClassifier(ObjectOutputStream oos) throws IOException {
     oos.writeObject(classifier);
-    // Fiddle: Don't write a testFile to the serialized classifier.  It makes no sense and confuses people
-    String testFile = globalFlags.testFile;
-    globalFlags.testFile = null;
     oos.writeObject(flags);
-    globalFlags.testFile = testFile;
   }
 
   private void printClassifier(Classifier classifier) {
@@ -2133,10 +2129,10 @@ public class ColumnDataClassifier  {
     } else {
       classString = classifier.toString();
     }
-    if (Flags.printTo != null) {
+    if (globalFlags.printTo != null) {
       PrintWriter fw = null;
       try {
-        fw = IOUtils.getPrintWriter(Flags.printTo, Flags.encoding);
+        fw = IOUtils.getPrintWriter(globalFlags.printTo, globalFlags.encoding);
         fw.write(classString);
         fw.println();
       } catch (IOException ioe) {
@@ -2144,7 +2140,7 @@ public class ColumnDataClassifier  {
       } finally {
         IOUtils.closeIgnoringExceptions(fw);
       }
-      logger.info("Built classifier described in file " + Flags.printTo);
+      logger.info("Built classifier described in file " + globalFlags.printTo);
     } else {
       logger.info("Built this classifier: " + classString);
     }
@@ -2157,7 +2153,7 @@ public class ColumnDataClassifier  {
    */
   public Pair<Double, Double> testClassifier(String testFile) {
     if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "test", Flags.encoding);
+      newFeaturePrinter(globalFlags.printFeatures, "test", globalFlags.encoding);
     }
 
     Pair<GeneralDataset<String,String>,List<String[]>> testInfo = readTestExamples(testFile);
@@ -2343,19 +2339,18 @@ public class ColumnDataClassifier  {
     double l1regmax = 500.0;
     double featureWeightThreshold = 0;
 
-    String testFile = null;  // this one would be better off static (we avoid serializing it)
-    String loadClassifier = null;   // this one could also be static
+    // these are transient because we don't want them serialized
+    transient String testFile = null;
+    transient String loadClassifier = null;
+    transient String trainFile = null;
+    transient String serializeTo = null;
+    transient String printTo = null;
+    transient boolean trainFromSVMLight = false; //train file is in SVMLight format
+    transient boolean testFromSVMLight = false; //test file is in SVMLight format
+    transient String encoding = null;
+    transient String printSVMLightFormatTo;
 
-    // these are static because we don't want them serialized
-    static String trainFile = null;
-    static String serializeTo = null;
-    static String printTo = null;
-    static boolean trainFromSVMLight = false; //train file is in SVMLight format
-    static boolean testFromSVMLight = false; //test file is in SVMLight format
-    static String encoding = null;
-    static String printSVMLightFormatTo;
-
-    static boolean displayAllAnswers = false;
+    transient boolean displayAllAnswers = false;
 
     // Distinguishes whether this file has real valued features or if the more efficient non-RVF representation can be used.
     // This is set as a summary flag in globalFeatures based on whether anything uses real values.
@@ -2371,8 +2366,8 @@ public class ColumnDataClassifier  {
     boolean shuffleTrainingData = false;
     long shuffleSeed = 0;
 
-    static boolean csvInput = false; //train and test files are in csv format
-    static InputFormat inputFormat = InputFormat.PLAIN;
+    transient boolean csvInput = false; //train and test files are in csv format
+    transient InputFormat inputFormat = InputFormat.PLAIN;
     boolean splitWordsWithPTBTokenizer = false;
 
     boolean splitWordCount;
@@ -2380,7 +2375,7 @@ public class ColumnDataClassifier  {
     int[] binnedSplitWordCounts;
     Map<String, float[]> wordVectors;
 
-    static String csvOutput = null;
+    transient String csvOutput = null;
     boolean printCrossValidationDecisions = false;
 
     boolean verboseOptimization = false;
