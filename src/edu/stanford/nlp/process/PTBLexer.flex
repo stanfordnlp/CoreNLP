@@ -1,7 +1,7 @@
 package edu.stanford.nlp.process;
 
 // Stanford English Tokenizer -- a deterministic, fast, high-quality tokenizer.
-// Copyright (c) 2002-2019 The Board of Trustees of
+// Copyright (c) 2002-2021 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -742,11 +742,11 @@ ACRONYM = ({ACRO})\.
  * Otherwise, they aren't recognized as abbreviations (unless they also
  * appear in ABBREV1 or ABBREV2).
  * est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa.
- * "Art(s)." is for "article(s)" -- common in legal context, Sec(t). for section(s)
+ * "Art(s)." is for "article(s)" -- common in legal context, Sec(t). for section(s). ch for chapters.
  */
 /* Maybe also "op." for "op. cit." but also get a photo op. Rs. for Rupees */
 /* Pt for part needs to be case sensitive (vs. country code for Portugal). */
-ABBREV3 = (ca|figs?|prop|nos?|vols?|sect?s?|arts?|paras?|bldg|prop|pp|op|approx|[P][t]|rs|Apt|Rt)\.
+ABBREV3 = (ca|chs?|figs?|prop|nos?|vols?|sect?s?|arts?|paras?|bldg|prop|pp|op|approx|[P][t]|rs|Apt|Rt)\.
 /* Case for south/north before a few places. */
 ABBREVSN = So\.|No\.
 
@@ -790,8 +790,10 @@ EMOJI_GENDERED = [\u26F9\u{01F3C3}-\u{01F3C4}\u{01F3CA}-\u{01F3CC}\u{01F466}-\u{
 EMOJI_FOLLOW = [\uFE0E\uFE0F\u{01F3FB}-\u{01F3FF}]
 /* Just things followed by the keycap surrounding char - note that if not separated by space beforehand, may be mistokenized */
 EMOJI_KEYCAPS = [\u0023\u002A\u0030-\u0039]\uFE0F?\u20E3
-/* Two geographic characters as a flag or GB regions as flags */
-EMOJI_FLAG = [\u{01F1E6}-\u{01F1FF}]{2,2}|\u{01F3F4}\u{0E0067}\u{0E0062}[\u{0E0061}-\u{0E007A}]+\u{0E007F}
+/* Two geographic characters as a flag or GB regions as flags
+ * (changed to use \U to avoid bug in IntelliJ JFlex plugin).
+ */
+EMOJI_FLAG = [\U01F1E6-\U01F1FF]{2,2}|\U01F3F4\U0E0067\U0E0062[\U0E0061-\U0E007A]+\U0E007F
 /* Rainbow flag etc. */
 EMOJI_MISC = [\u{01F3F3}\u{01F441}][\uFE0E\uFE0F]?\u200D[\u{01F308}\u{01F5E8}][\uFE0E\uFE0F]?|{EMOJI_KEYCAPS}
 /* Things that have an emoji presentation form */
