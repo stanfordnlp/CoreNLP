@@ -40,7 +40,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * which can follow a sentenceBoundaryToken while still belonging to
  * the previous sentence.  They cannot begin a sentence (except at the
  * beginning of a document).  A canonical example is a close parenthesis
- * ')'.
+ * ')'. The default (English) set is in DEFAULT_BOUNDARY_FOLLOWERS_REGEX.
  * <li>sentenceBoundaryToDiscard are tokens which separate sentences and
  * which should be thrown away.  In web documents, a typical example would
  * be a '{@code <p>}' tag.  If two of these follow each other, they are
@@ -224,7 +224,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     }
   }
 
-  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0084\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
 
   /** At present this only tries to avoid adding a straight single/double quote to a sentence when it doesn't plausibly
    *  go there and should go with the next sentence.  It does this by checking for odd number of that quote type.
@@ -233,24 +232,25 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
    *  @return Whether it's plausible to add because there was an open quote
    */
   private boolean plausibleToAdd(List<IN> lastSentence, String word) {
-    if (!word.equals("\"") && !word.equals("\'")) {
+    if ( ! word.equals("\"") && !word.equals("'")) {
       return true;
     }
     int singleQuoteCount = 0;
     int doubleQuoteCount = 0;
     for (IN lastWord : lastSentence) {
       String lastStr = ((Label) lastWord).value();
-      if (lastStr.equals("\'"))
+      if (lastStr.equals("'"))
         singleQuoteCount += 1;
       if (lastStr.equals("\""))
         doubleQuoteCount += 1;
     }
-    if (word.equals("\"") && (doubleQuoteCount % 2 != 0))
+    if (word.equals("\"") && (doubleQuoteCount % 2 != 0)) {
       return true;
-    else if (word.equals("\'") && (singleQuoteCount % 2 != 0))
+    } else if (word.equals("'") && (singleQuoteCount % 2 != 0)) {
       return true;
-    else
+    } else {
       return false;
+    }
   }
 
   /**

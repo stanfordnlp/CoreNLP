@@ -209,7 +209,7 @@ public class WordToSentenceProcessorTest extends TestCase {
   public void testExclamationPoint() {
     Annotation annotation = new Annotation("Foo!!");
     ud.annotate(annotation);
-    List list = annotation.get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreLabel> list = annotation.get(CoreAnnotations.TokensAnnotation.class);
     assertEquals("Wrong double bang", "[Foo, !!]", list.toString());
   }
 
