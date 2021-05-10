@@ -38,9 +38,9 @@ At present, [the current released version of the code](https://stanfordnlp.githu
 #### Build with Maven
 
 1. Make sure you have Maven installed, details here: [https://maven.apache.org/](https://maven.apache.org/)
-2. If you run this command in the CoreNLP directory: `mvn package` , it should run the tests and build this jar file: `CoreNLP/target/stanford-corenlp-4.0.0.jar`
+2. If you run this command in the CoreNLP directory: `mvn package` , it should run the tests and build this jar file: `CoreNLP/target/stanford-corenlp-4.2.1.jar`
 3. When using the latest version of the code make sure to download the latest versions of the [corenlp-models](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar), [english-models](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar), and [english-models-kbp](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) and include them in your CLASSPATH.  If you are processing languages other than English, make sure to download the latest version of the models jar for the language you are interested in.  
-4. If you want to use Stanford CoreNLP as part of a Maven project you need to install the models jars into your Maven repository.  Below is a sample command for installing the Spanish models jar.  For other languages just change the language name in the command.  To install `stanford-corenlp-models-current.jar` you will need to set `-Dclassifier=models`.  Here is the sample command for Spanish: `mvn install:install-file -Dfile=/location/of/stanford-spanish-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=4.0.0 -Dclassifier=models-spanish -Dpackaging=jar` 
+4. If you want to use Stanford CoreNLP as part of a Maven project you need to install the models jars into your Maven repository.  Below is a sample command for installing the Spanish models jar.  For other languages just change the language name in the command.  To install `stanford-corenlp-models-current.jar` you will need to set `-Dclassifier=models`.  Here is the sample command for Spanish: `mvn install:install-file -Dfile=/location/of/stanford-spanish-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=4.2.1 -Dclassifier=models-spanish -Dpackaging=jar`
 
 #### Models
 
@@ -52,14 +52,14 @@ models jar.
 
 | Language | Model Jar | Last Updated |
 | --- | --- | --- |
-| Arabic | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-arabic.jar) | 4.2.0 |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-chinese.jar) | 4.2.0 |
-| English (default) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models.jar) | 4.2.0 |
-| English (extra) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-english.jar) | 4.2.0 |
-| English (kbp) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-english-kbp.jar) | 4.2.0 |
-| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-french.jar) | 4.2.0 |
-| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-german.jar) | 4.2.0 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0-models-spanish.jar) | 4.2.0 |
+| Arabic | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-arabic.jar) | 4.2.1 |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-chinese.jar) | 4.2.1 |
+| English (default) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models.jar) | 4.2.1 |
+| English (extra) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-english.jar) | 4.2.1 |
+| English (kbp) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-english-kbp.jar) | 4.2.1 |
+| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-french.jar) | 4.2.1 |
+| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-german.jar) | 4.2.1 |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-spanish.jar) | 4.2.1 |
 
 ### Useful resources
 
