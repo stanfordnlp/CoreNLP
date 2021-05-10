@@ -23,6 +23,8 @@ However, here are some tutorials by third parties. Note that some of this tutori
 
 ### Python
 
+Note: be sure to install stanza instead of stanfordnlp in the following example
+
 * [How to setup and use Stanford CoreNLP Server with Python](https://www.khalidalnajjar.com/setup-use-stanford-corenlp-server-python/)
 
 ### Japanese
