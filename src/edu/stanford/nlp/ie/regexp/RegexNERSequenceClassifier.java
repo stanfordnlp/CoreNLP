@@ -168,6 +168,19 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     // log.info("RegexNER using labels: " + myLabels);
   }
 
+  /**
+   * Most AbstractSequenceClassifiers have classIndex set.
+   * ClassifierCombiner calls labels() to get the values from the
+   * index.
+   * <br>
+   * TODO: chceck that classIndex isn't used anywhere other than the
+   * call to labels()
+   */
+  @Override
+  public Set<String> labels() {
+    return myLabels;
+  }
+
   private static class Entry implements Comparable<Entry> {
     public List<Pattern> regex; // the regex, tokenized by splitting on white space
     public List<String> exact = new ArrayList<>();
