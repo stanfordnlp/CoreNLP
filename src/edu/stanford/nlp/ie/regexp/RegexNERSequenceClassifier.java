@@ -275,6 +275,10 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     int lineCount = 0;
     for (String line; (line = mapping.readLine()) != null; ) {
       lineCount ++;
+      // skip blank lines
+      if (line.trim().equals(""))
+        continue;
+
       String[] split = line.split("\t");
       if (split.length < 2 || split.length > 4)
         throw new IllegalArgumentException("Provided mapping file is in wrong format: " + line);
