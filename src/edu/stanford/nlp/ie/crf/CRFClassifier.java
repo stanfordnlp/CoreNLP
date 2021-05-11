@@ -2921,6 +2921,20 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return crf;
   }
 
+  public String toString() {
+    String name = flags.loadClassifier;
+    if (name == null) {
+      name = flags.serializeTo;
+    }
+    if (name == null) {
+      name = flags.trainFile;
+    }
+    if (name == null) {
+      name = super.toString();
+    }
+    return name + classIndex.toString();
+  }
+
   /** The main method. See the class documentation. */
   public static void main(String[] args) throws Exception {
     StringUtils.logInvocationString(log, args);

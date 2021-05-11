@@ -1499,6 +1499,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public void loadClassifier(String loadPath) throws ClassCastException, IOException, ClassNotFoundException {
     loadClassifier(loadPath, null);
+    flags.loadClassifier = loadPath;
   }
 
   /**
@@ -1509,6 +1510,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     try (InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(loadPath)) {
       Timing t = new Timing();
       loadClassifier(is, props);
+      flags.loadClassifier = loadPath;
       t.done(log, "Loading classifier from " + loadPath);
     }
   }
@@ -1529,6 +1531,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   public void loadClassifier(File file) throws ClassCastException, IOException, ClassNotFoundException {
     loadClassifier(file, null);
+    flags.loadClassifier = file.toString();
   }
 
   /**
@@ -1555,6 +1558,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
     try {
       loadClassifier(bis, props);
+      flags.loadClassifier = file.toString();
       t.done(log, "Loading classifier from " + file.getAbsolutePath());
     } finally {
       bis.close();
