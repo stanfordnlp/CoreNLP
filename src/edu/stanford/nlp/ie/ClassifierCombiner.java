@@ -60,7 +60,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(ClassifierCombiner.class);
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = System.getProperty("ClassifierCombiner", null) != null;;
 
   private List<AbstractSequenceClassifier<IN>> baseClassifiers;
 
