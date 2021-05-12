@@ -292,6 +292,8 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
       if (split.length >= 3) {
         overwritableTypes.addAll(Arrays.asList(split[2].trim().split(",")));
       }
+      // by default, always consider overwriting the background symbol
+      overwritableTypes.add("O");
 
       if (split.length == 4) {
         try {
@@ -343,7 +345,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
         String currentType = token.get(CoreAnnotations.AnswerAnnotation.class);
 
         if (
-            currentType != null ||
+            (currentType != null && ! (entry.overwritableTypes.contains(currentType) || myLabels.contains(currentType))) ||
             (exact != null && ! (ignoreCase ? exact.equalsIgnoreCase(token.word()) : exact.equals(token.word()))) ||
             ! (entry.overwritableTypes.contains(NERType) || myLabels.contains(NERType))  ||
             ! pattern.matcher(token.word()).matches()  // last, as this is likely the expensive operation
