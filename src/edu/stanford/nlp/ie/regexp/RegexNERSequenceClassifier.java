@@ -344,8 +344,13 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
         String NERType = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
         String currentType = token.get(CoreAnnotations.AnswerAnnotation.class);
 
+        // Note that we allow currentType to be overwritable, but not in our set of provided labels
+        // The logic here is that if a higher priority regex matches a section, we don't want
+        // a lower priority regex to overwrite it
+        // see edu.stanford.nlp.pipeline.RegexNERAnnotatorITest::testPriority for an example
+        // TODO: perhaps we could let the current type be the same as the entry's type?
         if (
-            (currentType != null && ! (entry.overwritableTypes.contains(currentType) || myLabels.contains(currentType))) ||
+            (currentType != null && !entry.overwritableTypes.contains(currentType)) ||
             (exact != null && ! (ignoreCase ? exact.equalsIgnoreCase(token.word()) : exact.equals(token.word()))) ||
             ! (entry.overwritableTypes.contains(NERType) || myLabels.contains(NERType))  ||
             ! pattern.matcher(token.word()).matches()  // last, as this is likely the expensive operation
