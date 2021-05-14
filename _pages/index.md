@@ -13,7 +13,7 @@ homepage: true
    <img src="assets/images/corenlp-title.png">
 </p>
 
-[<i class="fab fa-java"></i> Download CoreNLP 4.2.1](https://nlp.stanford.edu/software/stanford-corenlp-4.2.1.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
+[<i class="fab fa-java"></i> Download CoreNLP 4.2.2](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 [<i class="fab fa-github"></i> CoreNLP on GitHub](https://github.com/stanfordnlp/CoreNLP){: .btn .fs-5 .mr-2 .mb-md-0 }
 [<i class="fab fa-sonatype"></i> CoreNLP on Maven](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.0.0/jar){: .btn .fs-5 .mr-2 .mb-md-0 }
 
