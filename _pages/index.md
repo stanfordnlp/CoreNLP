@@ -73,28 +73,28 @@ CoreNLP generates a variety of linguistic annotations, including:
 
 ## Quickstart
 
-* Download and unzip [CoreNLP 4.2.1](https://nlp.stanford.edu/software/stanford-corenlp-4.2.1.zip)
+* Download and unzip [CoreNLP 4.2.2](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2.zip)
 
 * Download model jars for the language you want to work on and move the jars to the distribution directory.
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-arabic.jar) | 4.2.1 |
-| Chinese | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-chinese.jar) | 4.2.1 |
-| English | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-english.jar) | 4.2.1 |
-| English (KBP) | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-english-kbp.jar) | 4.2.1 |
-| French | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-french.jar) | 4.2.1 |
-| German | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-german.jar) | 4.2.1 |
-| Spanish | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-spanish.jar) | 4.2.1 |
+| Arabic  | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-arabic.jar) | 4.2.2 |
+| Chinese | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-chinese.jar) | 4.2.2 |
+| English | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-english.jar) | 4.2.2 |
+| English (KBP) | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-english-kbp.jar) | 4.2.2 |
+| French | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-french.jar) | 4.2.2 |
+| German | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-german.jar) | 4.2.2 |
+| Spanish | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-spanish.jar) | 4.2.2 |
 
 ```bash
-mv /path/to/stanford-corenlp-4.2.1-models-french.jar /path/to/stanford-corenlp-4.2.1
+mv /path/to/stanford-corenlp-4.2.2-models-french.jar /path/to/stanford-corenlp-4.2.2
 ```
 
 * Include the distribution directory in your CLASSPATH.
 
 ```bash
-export CLASSPATH=$CLASSPATH:/path/to/stanford-corenlp-4.2.1/*:
+export CLASSPATH=$CLASSPATH:/path/to/stanford-corenlp-4.2.2/*:
 ```
 
 * You're ready to go! There are many ways to run a CoreNLP pipeline. For instance here's how to run a pipeline on a text file.
