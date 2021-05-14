@@ -41,6 +41,8 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2021-05-14    4.2.2     Fix issue with demo. 
+
 2021-05-05    4.2.1     Fix Turkish locale bug, QuoteAnnotator crash
                         fixes, smaller srparser models, improvements
                         to enhanced UD converter, Updated dependencies
