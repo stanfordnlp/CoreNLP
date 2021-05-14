@@ -52,18 +52,18 @@ models jar.
 
 | Language | Model Jar | Last Updated |
 | --- | --- | --- |
-| Arabic | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-arabic.jar) | 4.2.1 |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-chinese.jar) | 4.2.1 |
-| English (default) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models.jar) | 4.2.1 |
-| English (extra) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-english.jar) | 4.2.1 |
-| English (kbp) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-english-kbp.jar) | 4.2.1 |
-| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-french.jar) | 4.2.1 |
-| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-german.jar) | 4.2.1 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.1-models-spanish.jar) | 4.2.1 |
+| Arabic | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-arabic.jar) | 4.2.2 |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-chinese.jar) | 4.2.2 |
+| English (default) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models.jar) | 4.2.2 |
+| English (extra) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-english.jar) | 4.2.2 |
+| English (kbp) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-english-kbp.jar) | 4.2.2 |
+| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-french.jar) | 4.2.2 |
+| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-german.jar) | 4.2.2 |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-spanish.jar) | 4.2.2 |
 
 ### Useful resources
 
-You can find releases of Stanford CoreNLP on [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.0.0/jar).
+You can find releases of Stanford CoreNLP on [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.2.2/jar).
 
 You can find more explanation and documentation on [the Stanford CoreNLP homepage](http://stanfordnlp.github.io/CoreNLP/).
 
