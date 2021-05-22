@@ -1,6 +1,7 @@
 package edu.stanford.nlp.util;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 import junit.framework.TestCase;
@@ -33,11 +34,13 @@ public class TimingTest extends TestCase {
     long val = t.report();
     // System.err.println(val);
     assertEquals("Wrong sleep", 20, val, 20);
-    for (int i = 0; i < 8; i++) {
+    // On Linux, 6 loops is ~80ms which gets rounded up to 100 by the DecimalFormat.
+    // On Windows, 6 loops is ~130ms which gets rounded down to 100
+    for (int i = 0; i < 6; i++) {
       sleepTen();
     }
     long val3 = t.report();
-    assertEquals("Wrong formatted time", new DecimalFormat("0.0").format(0.1), Timing.toSecondsString(val3));
+    assertEquals("Wrong formatted time", new DecimalFormat("0.0", DecimalFormatSymbols.getInstance(Locale.ROOT)).format(0.1), Timing.toSecondsString(val3));
   }
 
   private static void sleepTen() {
