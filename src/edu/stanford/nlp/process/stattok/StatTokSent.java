@@ -363,10 +363,19 @@ public class StatTokSent{
         lastBeginChar = currentClass;
         //In case of S as first character, do not add any sentence
         if (i == 0){
-          currentWord+=currentChar;		
+          currentWord+=currentChar;
           i++;
           continue;
         } else {
+          //If there hasn't been O class between tokens, create token for last word
+          if (currentWord != ""){
+            endToken = i-1;
+            CoreLabel newToken = factory.makeToken(currentWord, currentWord, beginToken, endToken-beginToken);
+            Pair<CoreLabel, String> tokenAndClass = new Pair<CoreLabel, String>(newToken,lastBeginChar);
+            sentenceTokensBase.add(tokenAndClass);
+            tokensCounter++;
+          }
+
           //generate sentence tokens with clitics, spans etc.
           sentenceTokens = this.makeSentenceTokens(sentenceTokensBase);
           ret.add(sentenceTokens);
