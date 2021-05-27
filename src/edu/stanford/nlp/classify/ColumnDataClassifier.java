@@ -2237,7 +2237,7 @@ public class ColumnDataClassifier  {
 
     // PLEASE ADD NEW FLAGS AT THE END OF THIS CLASS (SO AS TO NOT UNNECESSARILY BREAK SERIALIZED CLASSIFIERS)
 
-    private static final long serialVersionUID = -7076671761070232566L;
+    private static final long serialVersionUID = -7176671761070236565L;
 
     boolean useNGrams = false;
     boolean usePrefixSuffixNGrams = false;
