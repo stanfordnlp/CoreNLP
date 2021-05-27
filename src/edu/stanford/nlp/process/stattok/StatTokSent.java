@@ -54,20 +54,22 @@ public class StatTokSent{
    * 	modelFile: a string containing the path to the model;
    * 	multiWordRulesFile: a string containing the path to the file with multi-word tokens.
    */
-  public StatTokSent(String modelFile, String multiWordRulesFile, int windowSize) throws IOException, ClassNotFoundException{
+  public StatTokSent(String modelFile, String multiWordRulesFile) throws IOException, ClassNotFoundException{
     logger.info("Loading StatTokSent model from " + modelFile);
     logger.info("Using multi word rules from " + multiWordRulesFile);
 
-    this.windowSize = windowSize;
     ObjectInputStream ois;
 		
     ois = IOUtils.readStreamFromString(modelFile);
     cdc = ColumnDataClassifier.getClassifier(ois);
-	
+    this.windowSize = ois.readInt();
+
+    logger.info("Found window size of " + this.windowSize);
+
     multiWordRules = this.readMultiWordRules(multiWordRulesFile);
   }
 
-  public StatTokSent(String modelFile, int windowSize) throws IOException, ClassNotFoundException{
+  public StatTokSent(String modelFile) throws IOException, ClassNotFoundException{
     logger.info("Loading StatTokSent model from " + modelFile);
     logger.info("Using default multi word rules");
     this.windowSize = windowSize;
@@ -75,6 +77,9 @@ public class StatTokSent{
 		
     ois = IOUtils.readStreamFromString(modelFile);
     cdc = ColumnDataClassifier.getClassifier(ois);
+    this.windowSize = ois.readInt();
+
+    logger.info("Found window size of " + this.windowSize);
   }
 
 
@@ -443,7 +448,6 @@ public class StatTokSent{
   public static void main(String[] args) throws Exception{
     Map<String, String[]> arguments = StringUtils.argsToMap(args);
     String textFile = null;
-    String model = null;
     int windowSize = 0;
     String multiWordRulesFile = null;
     try{
@@ -452,11 +456,12 @@ public class StatTokSent{
       System.out.println("You have not specified a text file.\nUse -textFile option.");
       ex.printStackTrace();
     }
-    try{
-      model = arguments.get("-model")[0];
-    }catch (NullPointerException ex){
+    final String modelFile;
+    try {
+      modelFile = arguments.get("-model")[0];
+    } catch (NullPointerException ex) {
       System.out.println("You have not specified a model.\nUse -model option.");
-      ex.printStackTrace();
+      throw ex;
     }
     try{
       windowSize = Integer.parseInt(arguments.get("-windowSize")[0]);
@@ -483,9 +488,9 @@ public class StatTokSent{
 
     StatTokSent tokenizer = null;
     if (multiWordRulesFile != null){
-      tokenizer = new StatTokSent(model, multiWordRulesFile, windowSize);
+      tokenizer = new StatTokSent(modelFile, multiWordRulesFile);
     }else{
-      tokenizer = new StatTokSent(model, windowSize);
+      tokenizer = new StatTokSent(modelFile);
     }
 
     List<List<CoreLabel>> sentences = tokenizer.tokenize(text);

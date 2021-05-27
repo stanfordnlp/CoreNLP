@@ -38,7 +38,6 @@ public class StatTokSentAnnotator implements Annotator{
     // Get model and rule based tokens file paths from props
     String modelFile            = props.getProperty(name + ".model", null);
     String multiWordRulesFile   = props.getProperty(name + ".multiWordRules", null);
-    int windowSize              = Integer.parseInt(props.getProperty(name + ".windowSize", "4")); //must reflect trained model.
 
     // If the model is not found, throws an exception.
     // If the multi-word tokens file is not found, initialize tokenizer with empty map
@@ -47,9 +46,9 @@ public class StatTokSentAnnotator implements Annotator{
     }
 
     if (multiWordRulesFile != null){
-      statTokSent = new StatTokSent(modelFile, multiWordRulesFile, windowSize);
+      statTokSent = new StatTokSent(modelFile, multiWordRulesFile);
     } else {
-      statTokSent = new StatTokSent(modelFile, windowSize);
+      statTokSent = new StatTokSent(modelFile);
     }
   }
 
