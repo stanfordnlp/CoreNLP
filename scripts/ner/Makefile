@@ -21,6 +21,12 @@ german.distsim.crf.ser.gz:
 	java -mx10g edu.stanford.nlp.ie.crf.CRFClassifier -prop german.distsim.prop -serializeTo $@ \
 		> $(addsuffix .out, $(basename $(basename $(basename $@)))) 2>&1
 
+hungarian: hungarian.crf.ser.gz
+
+hungarian.crf.ser.gz:
+	java -mx20g edu.stanford.nlp.ie.crf.CRFClassifier -prop hungarian.prop -serializeTo $@ > hungarian.out 2>&1
+
+
 # currently we exclude enp_DE.sbb.io, as the data has too many issues, but we could work to include it....
 # ,/u/nlp/data/german/ner/2016/Europeana-Newspapers-data/ner-corpora/enp_DE.sbb.bio/enp_DE.sbb.io
 
