@@ -145,8 +145,7 @@ public class StatTokSent{
       }
       int index = 0;
       for (String character : window){
-        // TODO: is this the windowSize, hardcoded?
-        if (index == 4){
+        if (index == windowSize){
           index++;
           continue;
         }
