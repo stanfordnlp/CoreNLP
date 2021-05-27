@@ -379,7 +379,15 @@ public class StatTokSentTrainer{
                 "  -inferMultiWordRules 1             infer MWT rules from training file");
   }
 
-  public static final Set<String> ARGS_TO_DROP = new HashSet<>(Arrays.asList("trainFile", "multiWordRulesFile", "windowSize", "inferMultiWordRules", "testFile"));
+  public static void serialize(String serializeTo, ColumnDataClassifier cdc, int windowSize) throws IOException {
+    ObjectOutputStream oos = IOUtils.writeStreamFromString(serializeTo);
+    cdc.serializeClassifier(oos);
+    oos.writeInt(windowSize);
+    oos.close();
+  }
+
+  // we drop serializeTo so we can serialize the CDC ourselves and include the window size
+  public static final Set<String> ARGS_TO_DROP = new HashSet<>(Arrays.asList("serializeTo", "trainFile", "multiWordRulesFile", "windowSize", "inferMultiWordRules", "testFile"));
 
   /**
    * Main method to train the tokenizer.
@@ -483,9 +491,11 @@ public class StatTokSentTrainer{
     }
 
     if (loadClassifier == null) {
-      if ( ! cdc.trainClassifier(trainFileIOB)) {
+      if (!cdc.trainClassifier(trainFileIOB)) {
+        logger.err("Training of the CDC failed!  Unable to build StatTokSent model");
         return;
       }
+      serialize(serializeTo, cdc, windowSize);
     }
 
     if (testFile != null) {
