@@ -1403,10 +1403,10 @@ RM/{NUM}        { String txt = yytext();
 <<EOF>> { if (invertible) {
             // prevWordAfter.append(yytext());
             String str = prevWordAfter.toString();
-            // System.err.println("At end of text making after: |" + str + "|");
+            if (DEBUG) { logger.info("At end of text making after: |" + str + "|"); }
             prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
-            // System.err.println("prevWord is |" + prevWord.get(CoreAnnotations.TextAnnotation.class) + "|, its after is |" +
-            //         prevWord.get(CoreAnnotations.AfterAnnotation.class) + "|");
+            if (DEBUG) { logger.info("prevWord is |" + prevWord.get(CoreAnnotations.TextAnnotation.class) + "|, its after is " +
+                                     "|" + prevWord.get(CoreAnnotations.AfterAnnotation.class) + "|"); }
             prevWordAfter.setLength(0);
           }
           return null;
