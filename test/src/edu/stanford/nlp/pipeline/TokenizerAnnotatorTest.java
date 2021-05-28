@@ -163,6 +163,49 @@ public class TokenizerAnnotatorTest extends TestCase {
 
   }
 
+  /** Test a few key values which should be set on the tokens */
+  public void testBeforeAfterOffsets() {
+    String test = "   Unban mox  opal!";
+    List<String> words = Arrays.asList("Unban", "mox", "opal", "!");
+    List<String> before = Arrays.asList("   ", " ", "  ", "");
+    List<String> after = Arrays.asList(" ", "  ", "", "");
+    int[] beginOffsets = { 3, 9, 14, 18 };
+    int[] endOffsets = { 8, 12, 18, 19 };
+
+    Properties props = PropertiesUtils.asProperties("annotators", "tokenize", "tokenize.options", "ptb3Escaping=true");
+    Annotation ann = new Annotation(test);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(ann);
+    
+    List<CoreLabel> toks = ann.get(CoreAnnotations.TokensAnnotation.class);
+    assertEquals(4, toks.size());
+    for (int i = 0; i < toks.size(); ++i) {
+      CoreLabel tok = toks.get(i);
+      assertEquals(words.get(i),    tok.get(CoreAnnotations.TextAnnotation.class));
+      assertEquals(before.get(i),   tok.get(CoreAnnotations.BeforeAnnotation.class));
+      assertEquals(after.get(i),    tok.get(CoreAnnotations.AfterAnnotation.class));
+      assertEquals(beginOffsets[i], tok.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class).intValue());
+      assertEquals(endOffsets[i],   tok.get(CoreAnnotations.CharacterOffsetEndAnnotation.class).intValue());
+    }
+  }
+
+  /** The word "gonna" at the end of the text should be tokenized.  See TokenizerAnnotator for details on this issue */
+  public void testFinalGonna() {
+    String test = "gonna";
+    List<String> words = Arrays.asList("gon", "na");
+
+    Properties props = PropertiesUtils.asProperties("annotators", "tokenize", "tokenize.options", "ptb3Escaping=true");
+    Annotation ann = new Annotation(test);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(ann);
+    
+    List<CoreLabel> toks = ann.get(CoreAnnotations.TokensAnnotation.class);
+    assertEquals(2, toks.size()); 
+    for (int i = 0; i < toks.size(); ++i) {
+      CoreLabel tok = toks.get(i);
+      assertEquals(words.get(i), tok.get(CoreAnnotations.TextAnnotation.class));
+    }
+  }
 
   /*
   // [cdm] Need to work this out. It would be good to test that things work well with NLs in whitespace, but haven't yet....
