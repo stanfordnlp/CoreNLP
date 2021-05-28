@@ -348,6 +348,13 @@ public class TokenizerAnnotator implements Annotator  {
     }
   }
 
+  public static void adjustFinalToken(List<CoreLabel> tokens) {
+    CoreLabel finalToken = tokens.get(tokens.size() - 1);
+    String finalTokenAfter = finalToken.get(CoreAnnotations.AfterAnnotation.class);
+    finalTokenAfter = finalTokenAfter.substring(0, finalTokenAfter.length() - 1);
+    finalToken.set(CoreAnnotations.AfterAnnotation.class, finalTokenAfter);
+  }
+
   /**
    * Does the actual work of splitting TextAnnotation into CoreLabels,
    * which are then attached to the TokensAnnotation.
@@ -368,11 +375,20 @@ public class TokenizerAnnotator implements Annotator  {
     }
 
     if (annotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
-      String text = annotation.get(CoreAnnotations.TextAnnotation.class);
+      // TODO: This is a huge hack.  jflex does not have a lookahead operation which can match EOF
+      // Because of this, the PTBTokenizer has a few productions which can't operate at EOF.
+      // For example,
+      //   {ASSIMILATIONS2}/[^\p{Alpha}]
+      // We compensate by adding a space, then undoing the space later on
+      // We can change it back to this if that feature is ever added to jflex:
+      //   String text = annotation.get(CoreAnnotations.TextAnnotation.class);
+      String text = annotation.get(CoreAnnotations.TextAnnotation.class) + " ";
       Reader r = new StringReader(text);
       // don't wrap in BufferedReader.  It gives you nothing for in-memory String unless you need the readLine() method!
 
       List<CoreLabel> tokens = getTokenizer(r).tokenize();
+      adjustFinalToken(tokens);
+
       // cdm 2010-05-15: This is now unnecessary, as it is done in CoreLabelTokenFactory
       // for (CoreLabel token: tokens) {
       // token.set(CoreAnnotations.TextAnnotation.class, token.get(CoreAnnotations.TextAnnotation.class));
