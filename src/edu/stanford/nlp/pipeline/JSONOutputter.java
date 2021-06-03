@@ -259,15 +259,38 @@ public class JSONOutputter extends AnnotationOutputter {
           l2.set("endToken", quote.get(CoreAnnotations.TokenEndAnnotation.class));
           l2.set("beginSentence", quote.get(CoreAnnotations.SentenceBeginAnnotation.class));
           l2.set("endSentence", quote.get(CoreAnnotations.SentenceEndAnnotation.class));
+          if (quote.get(QuoteAttributionAnnotator.MentionAnnotation.class) != null) {
+              l2.set("mention", quote.get(QuoteAttributionAnnotator.MentionAnnotation.class));
+          }
+          if (quote.get(QuoteAttributionAnnotator.MentionBeginAnnotation.class) != null) {
+              l2.set("mentionBegin", quote.get(QuoteAttributionAnnotator.MentionBeginAnnotation.class));
+          }
+          if (quote.get(QuoteAttributionAnnotator.MentionEndAnnotation.class) != null) {
+              l2.set("mentionEnd", quote.get(QuoteAttributionAnnotator.MentionEndAnnotation.class));
+          }
+          if (quote.get(QuoteAttributionAnnotator.MentionTypeAnnotation.class) != null) {
+              l2.set("mentionType", quote.get(QuoteAttributionAnnotator.MentionTypeAnnotation.class));
+          }
+          if (quote.get(QuoteAttributionAnnotator.MentionSieveAnnotation.class) != null) {
+              l2.set("mentionSieve", quote.get(QuoteAttributionAnnotator.MentionSieveAnnotation.class));
+          }
           l2.set("speaker",
               quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) != null ?
                   quote.get(QuoteAttributionAnnotator.SpeakerAnnotation.class) :
                   "Unknown");
+          if (quote.get(QuoteAttributionAnnotator.SpeakerSieveAnnotation.class) != null) {
+              l2.set("speakerSieve", quote.get(QuoteAttributionAnnotator.SpeakerSieveAnnotation.class));
+          }
           l2.set("canonicalSpeaker",
               quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) != null ?
                   quote.get(QuoteAttributionAnnotator.CanonicalMentionAnnotation.class) :
                   "Unknown");
-
+          if (quote.get(QuoteAttributionAnnotator.CanonicalMentionBeginAnnotation.class) != null) {
+              l2.set("canonicalMentionBegin", quote.get(QuoteAttributionAnnotator.CanonicalMentionBeginAnnotation.class));
+          }
+          if (quote.get(QuoteAttributionAnnotator.CanonicalMentionEndAnnotation.class) != null) {
+              l2.set("canonicalMentionEnd", quote.get(QuoteAttributionAnnotator.CanonicalMentionEndAnnotation.class));
+          }
         }));
       }
 
