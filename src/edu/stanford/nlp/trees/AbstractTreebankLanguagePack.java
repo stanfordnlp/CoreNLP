@@ -96,6 +96,15 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   public abstract String[] sentenceFinalPunctuationTags();
 
   /**
+   * Returns a String array of sentence final punctuation words for
+   * this treebank/language.
+   *
+   * @return The punctuation words
+   */
+  @Override
+  public abstract String[] sentenceFinalPunctuationWords();
+
+  /**
    * Returns a String array of punctuation tags that EVALB-style evaluation
    * should ignore for this treebank/language.
    * Traditionally, EVALB has ignored a subset of the total set of
