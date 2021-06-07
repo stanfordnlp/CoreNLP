@@ -204,6 +204,9 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
     return inputEncoding;
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public abstract TreeReaderFactory treeReaderFactory();
 
   /**
    * Returns a language specific object for evaluating PP attachment
