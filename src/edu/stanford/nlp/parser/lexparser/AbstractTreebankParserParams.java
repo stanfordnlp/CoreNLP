@@ -3,6 +3,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.ling.HasTag;
+import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
@@ -615,6 +616,10 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   public int setOptionFlag(String[] args, int i) {
     return i;
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public abstract List<? extends HasWord> defaultTestSentence();
 
   private static final long serialVersionUID = 4299501909017975915L;
 
