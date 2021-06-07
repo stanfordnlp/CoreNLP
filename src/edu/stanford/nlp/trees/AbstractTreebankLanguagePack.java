@@ -566,6 +566,10 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
     return ssyms[0];
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public abstract String treebankFileExtension();
+
 
   private final Predicate<String> punctTagStringAcceptFilter = Filters.collectionAcceptFilter(punctuationTags());
 
@@ -650,6 +654,15 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   public TokenizerFactory<Tree> treeTokenizerFactory() {
     return new TreeTokenizerFactory(treeReaderFactory());
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public abstract HeadFinder headFinder();
+
+
+  /** {@inheritDoc} */
+  @Override
+  public abstract HeadFinder typedDependencyHeadFinder();
 
   /**
    * Returns a morphological feature specification for words in this language.
