@@ -532,6 +532,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   private static Map<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> getNamedAnnotators() {
     Map<String, BiFunction<Properties, AnnotatorImplementations, Annotator>> pool = new HashMap<>();
     pool.put(STANFORD_TOKENIZE, (props, impl) -> impl.tokenizer(props));
+    pool.put(STANFORD_CDC_TOKENIZE, (props, impl) -> impl.cdcTokenizer(props));
     pool.put(STANFORD_CLEAN_XML, (props, impl) -> impl.cleanXML(props));
     pool.put(STANFORD_SSPLIT, (props, impl) -> impl.wordToSentences(props));
     pool.put(STANFORD_MWT, (props, impl) -> impl.multiWordToken(props));
