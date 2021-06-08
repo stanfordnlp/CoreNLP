@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -543,7 +544,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     Set<String> rootStates = findRootStates(binarizedTrees);
     Set<String> rootOnlyStates = findRootOnlyStates(binarizedTrees, rootStates);
 
-    log.info("Known states: " + knownStates);
+    log.info("Known states: " + new TreeSet<String>(knownStates));
     log.info("States which occur at the root: " + rootStates);
     log.info("States which only occur at the root: " + rootOnlyStates);
 
