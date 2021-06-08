@@ -342,28 +342,26 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
     return (tree.numChildren() == 1);
   }
 
-  public List<Tree> filterTreebank(Treebank treebank) {
-    List<Tree> filteredTrees = new ArrayList<>();
-    for (Tree tree : treebank) {
-      if (isLegalTree(tree)) {
-        filteredTrees.add(tree);
-      } else {
-        log.error("Found an illegal tree, skipping: " + tree);
-      }
-    }
-    return filteredTrees;
-  }
-
   /**
-   * Returns false if the tree is obviously unacceptable for the sr parser training.
+   * Filters any trees which are obviously unacceptable for the sr parser training.
    * <br>
    * Disallowed: <ul>
    * <li> trees where internal nodes go directly to leaves instead of preterminals.
    * <li> trees which don't start with a unary transition
    * </ul>
    */
-  public static boolean isLegalTree(Tree tree) {
-    return checkLeafBranching(tree) && checkRootTransition(tree);
+  public List<Tree> filterTreebank(Treebank treebank) {
+    List<Tree> filteredTrees = new ArrayList<>();
+    for (Tree tree : treebank) {
+      if (!checkLeafBranching(tree)) {
+        log.error("Found an illegal tree, skipping (leaf in internal node): " + tree);
+      } else if (!checkRootTransition(tree)) {
+        log.error("Found an illegal tree, skipping (non-unary root production): " + tree);
+      } else {
+        filteredTrees.add(tree);
+      }
+    }
+    return filteredTrees;
   }
 
   public static List<Tree> binarizeTreebank(Iterable<Tree> treebank, Options op) {
