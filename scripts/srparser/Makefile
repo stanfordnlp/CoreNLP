@@ -103,6 +103,18 @@ endif
 SPANISH_TAGGER= edu/stanford/nlp/models/pos-tagger/spanish-ud.tagger
 SPANISH_TLPP  = edu.stanford.nlp.parser.lexparser.SpanishTreebankParserParams
 
+ifndef CONSTITUENCY_HOME
+  HUNGARIAN_TRAIN = /u/nlp/data/constituency-parser/spmrl/SPMRL_SHARED_2014/HUNGARIAN_SPMRL/gold/ptb/train/train.Hungarian.gold.ptb
+  HUNGARIAN_DEV   = /u/nlp/data/constituency-parser/spmrl/SPMRL_SHARED_2014/HUNGARIAN_SPMRL/gold/ptb/dev/dev.Hungarian.gold.ptb
+  HUNGARIAN_TEST  = /u/nlp/data/constituency-parser/spmrl/SPMRL_SHARED_2014/HUNGARIAN_SPMRL/gold/ptb/test/test.Hungarian.gold.ptb
+else
+  HUNGARIAN_TRAIN = $(CONSTITUENCY_HOME)/spmrl/SPMRL_SHARED_2014/HUNGARIAN_SPMRL/gold/ptb/train/train.Hungarian.gold.ptb
+  HUNGARIAN_DEV   = $(CONSTITUENCY_HOME)/spmrl/SPMRL_SHARED_2014/HUNGARIAN_SPMRL/gold/ptb/dev/dev.Hungarian.gold.ptb
+  HUNGARIAN_TEST  = $(CONSTITUENCY_HOME)/spmrl/SPMRL_SHARED_2014/HUNGARIAN_SPMRL/gold/ptb/test/test.Hungarian.gold.ptb
+endif
+#HUNGARIAN_TAGGER = edu/stanford/nlp/models/pos-tagger/hungarian-ud.tagger
+HUNGARIAN_TAGGER = edu/stanford/nlp/models/pos-tagger/hungarian.tagger
+HUNGARIAN_TLPP   = edu.stanford.nlp.parser.lexparser.HungarianTreebankParserParams
 
 DEFAULT_OPTIONS    = -trainingThreads 8 -batchSize 24 -trainingIterations 200 -stalledIterationLimit 40 -featureFrequencyCutoff 5
 
@@ -118,8 +130,8 @@ AUGMENT_LESS       = -augmentSubsentences 0.1
 
 TEST_ARGS          =  -quietEvaluation -recordTransitionTypes
 
-all-beam:   wsjSR.beam.ser.gz englishSR.beam.ser.gz frenchSR.beam.ser.gz chineseSR.beam.ser.gz germanSR.beam.ser.gz arabicSR.beam.ser.gz spanishSR.beam.ser.gz
-all-nobeam: wsjSR.ser.gz      englishSR.ser.gz      frenchSR.ser.gz      chineseSR.ser.gz      germanSR.ser.gz      arabicSR.ser.gz      spanishSR.ser.gz
+all-beam:   wsjSR.beam.ser.gz englishSR.beam.ser.gz frenchSR.beam.ser.gz chineseSR.beam.ser.gz germanSR.beam.ser.gz arabicSR.beam.ser.gz spanishSR.beam.ser.gz  hungarianSR.beam.ser.gz
+all-nobeam: wsjSR.ser.gz      englishSR.ser.gz      frenchSR.ser.gz      chineseSR.ser.gz      germanSR.ser.gz      arabicSR.ser.gz      spanishSR.ser.gz       hungarianSR.ser.gz
 all: all-beam all-nobeam
 .PHONY: all
 
@@ -208,3 +220,16 @@ spanishSR.beam.ser.gz:
 	@echo Will test on $(SPANISH_TEST)
 	java -mx50g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(SPANISH_TRAIN) -devTreebank $(SPANISH_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(SPANISH_TAGGER) -tlpp $(SPANISH_TLPP) $(TRAIN_BEAM) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser $(TEST_ARGS) -testTreebank $(SPANISH_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(SPANISH_TAGGER) >> $@.out 2>&1
+
+hungarianSR.ser.gz:
+	@echo Training $@
+	@echo Will test on $(HUNGARIAN_TEST)
+	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(HUNGARIAN_TRAIN) -devTreebank $(HUNGARIAN_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(HUNGARIAN_TAGGER) -tlpp $(HUNGARIAN_TLPP) $(TRAIN_ORACLE_10) > $@.out 2>&1
+	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser $(TEST_ARGS) -testTreebank $(HUNGARIAN_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(HUNGARIAN_TAGGER) >> $@.out 2>&1
+
+hungarianSR.beam.ser.gz:
+	@echo Training $@
+	@echo Will test on $(HUNGARIAN_TEST)
+	java -mx50g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(HUNGARIAN_TRAIN) -devTreebank $(HUNGARIAN_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(HUNGARIAN_TAGGER) -tlpp $(HUNGARIAN_TLPP) $(TRAIN_BEAM) > $@.out 2>&1
+	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser $(TEST_ARGS) -testTreebank $(HUNGARIAN_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(HUNGARIAN_TAGGER) >> $@.out 2>&1
+
