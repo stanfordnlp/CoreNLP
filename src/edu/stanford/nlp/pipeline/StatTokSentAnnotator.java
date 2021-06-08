@@ -33,8 +33,12 @@ public class StatTokSentAnnotator implements Annotator{
 
   StatTokSent statTokSent;
 
+  public StatTokSentAnnotator(Properties props) {
+    this(Annotator.STANFORD_CDC_TOKENIZE, props);
+  }
+
   /** The main method to intialize a tokenizer object.*/
-  public StatTokSentAnnotator(String name, Properties props) throws IOException, ClassNotFoundException {
+  public StatTokSentAnnotator(String name, Properties props) {
     // Get model and rule based tokens file paths from props
     String modelFile            = props.getProperty(name + ".model", null);
     String multiWordRulesFile   = props.getProperty(name + ".multiWordRules", null);

@@ -32,6 +32,13 @@ public class AnnotatorImplementations  {
   }
 
   /**
+   * Tokenize, ssplit, and mwt all at once, using ColumnDataClassifier
+   */
+  public Annotator cdcTokenizer(Properties properties) {
+    return new StatTokSentAnnotator(properties);
+  }
+
+  /**
    * Clean XML input
    */
   public CleanXmlAnnotator cleanXML(Properties properties) {

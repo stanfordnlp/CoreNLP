@@ -12,9 +12,11 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.IntPair;
+import edu.stanford.nlp.util.RuntimeClassNotFoundException;
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 
 
 import java.io.*;
@@ -54,32 +56,36 @@ public class StatTokSent{
    * 	modelFile: a string containing the path to the model;
    * 	multiWordRulesFile: a string containing the path to the file with multi-word tokens.
    */
-  public StatTokSent(String modelFile, String multiWordRulesFile) throws IOException, ClassNotFoundException{
+  public StatTokSent(String modelFile, String multiWordRulesFile) {
     logger.info("Loading StatTokSent model from " + modelFile);
-    logger.info("Using multi word rules from " + multiWordRulesFile);
+    if (multiWordRulesFile == null) {
+      logger.info("Using default multi word rules");
+    } else {
+      logger.info("Using multi word rules from " + multiWordRulesFile);
+      try {
+        multiWordRules = this.readMultiWordRules(multiWordRulesFile);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    }
 
     ObjectInputStream ois;
-		
-    ois = IOUtils.readStreamFromString(modelFile);
-    cdc = ColumnDataClassifier.getClassifier(ois);
-    this.windowSize = ois.readInt();
+
+    try {
+      ois = IOUtils.readStreamFromString(modelFile);
+      cdc = ColumnDataClassifier.getClassifier(ois);
+      this.windowSize = ois.readInt();
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeClassNotFoundException(e);
+    }
 
     logger.info("Found window size of " + this.windowSize);
-
-    multiWordRules = this.readMultiWordRules(multiWordRulesFile);
   }
 
-  public StatTokSent(String modelFile) throws IOException, ClassNotFoundException{
-    logger.info("Loading StatTokSent model from " + modelFile);
-    logger.info("Using default multi word rules");
-    this.windowSize = windowSize;
-    ObjectInputStream ois;
-		
-    ois = IOUtils.readStreamFromString(modelFile);
-    cdc = ColumnDataClassifier.getClassifier(ois);
-    this.windowSize = ois.readInt();
-
-    logger.info("Found window size of " + this.windowSize);
+  public StatTokSent(String modelFile) {
+    this(modelFile, null);
   }
 
 
