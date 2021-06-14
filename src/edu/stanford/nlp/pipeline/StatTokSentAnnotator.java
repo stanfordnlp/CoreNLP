@@ -7,6 +7,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
+import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ArraySet;
@@ -53,6 +54,20 @@ public class StatTokSentAnnotator implements Annotator{
       statTokSent = new StatTokSent(modelFile, multiWordRulesFile);
     } else {
       statTokSent = new StatTokSent(modelFile);
+    }
+  }
+
+  /**
+   * set isNewline()
+   */
+  private static void setNewlineStatus(List<CoreLabel> tokensList) {
+    // label newlines
+    // TODO: refactor with TokenizeAnnotator
+    for (CoreLabel token : tokensList) {
+      if (token.word().equals(AbstractTokenizer.NEWLINE_TOKEN) && (token.endPosition() - token.beginPosition() == 1))
+        token.set(CoreAnnotations.IsNewlineAnnotation.class, true);
+      else
+        token.set(CoreAnnotations.IsNewlineAnnotation.class, false);
     }
   }
 
@@ -115,6 +130,8 @@ public class StatTokSentAnnotator implements Annotator{
     }
     annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
     annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+
+    setNewlineStatus(tokens);
   }
 
   @Override
@@ -138,7 +155,8 @@ public class StatTokSentAnnotator implements Annotator{
                                        CoreAnnotations.ValueAnnotation.class,
                                        CoreAnnotations.SentenceIndexAnnotation.class,
                                        CoreAnnotations.SentencesAnnotation.class,
-                                       CoreAnnotations.DocIDAnnotation.class
+                                       CoreAnnotations.DocIDAnnotation.class,
+                                       CoreAnnotations.IsNewlineAnnotation.class
                                        ));
   }
 }
