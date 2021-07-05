@@ -349,10 +349,19 @@ public class TokenizerAnnotator implements Annotator  {
   }
 
   public static void adjustFinalToken(List<CoreLabel> tokens) {
+    if (tokens == null || tokens.size() == 0) {
+      return;
+    }
     CoreLabel finalToken = tokens.get(tokens.size() - 1);
     String finalTokenAfter = finalToken.get(CoreAnnotations.AfterAnnotation.class);
-    finalTokenAfter = finalTokenAfter.substring(0, finalTokenAfter.length() - 1);
-    finalToken.set(CoreAnnotations.AfterAnnotation.class, finalTokenAfter);
+    if (finalTokenAfter != null && finalTokenAfter.length() > 0) {
+      char last = finalTokenAfter.charAt(finalTokenAfter.length() - 1);
+      if (last != ' ') {
+        throw new IllegalArgumentException("adjustFinalToken: Unexpected final char: |" + last + "| (" + (int) last + ')');
+      }
+      finalTokenAfter = finalTokenAfter.substring(0, finalTokenAfter.length() - 1);
+      finalToken.set(CoreAnnotations.AfterAnnotation.class, finalTokenAfter);
+    }
   }
 
   /**
