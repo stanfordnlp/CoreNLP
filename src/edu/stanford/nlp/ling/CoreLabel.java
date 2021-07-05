@@ -131,7 +131,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   }
 
   /**
-   * This constructor attempts uses preparsed Class keys.
+   * This constructor attempts to use preparsed Class keys.
    * It's mainly useful for reading from a file.
    *
    * @param keys Array of key classes
