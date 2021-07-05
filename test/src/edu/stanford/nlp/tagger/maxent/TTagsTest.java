@@ -1,68 +1,79 @@
 package edu.stanford.nlp.tagger.maxent;
 
-import junit.framework.TestCase;
-//import edu.stanford.nlp.tagger.maxent.TTags;
 
 import edu.stanford.nlp.util.Generics;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TTagsTest extends TestCase {
+import java.io.File;
+
+public class TTagsTest {
 
   private TTags tt;
 
-  @Override
-  protected void setUp() {
+  @Before
+  public void setUp() {
     tt = new TTags();
   }
 
+  @Test
   public void testUniqueness() {
     int a = tt.add("one");
     int b = tt.add("two");
-    assertTrue(a != b);
+    Assert.assertTrue(a != b);
   }
 
+  @Test
   public void testSameness() {
     int a = tt.add("goat");
     int b = tt.add("goat");
-    assertEquals(a, b);
+    Assert.assertEquals(a, b);
   }
 
+  @Test
   public void testPreservesString() {
     int a = tt.add("monkey");
     String s = tt.getTag(a);
-    assertEquals(s, "monkey");
+    Assert.assertEquals(s, "monkey");
   }
 
+  @Test
   public void testPreservesIndex() {
     int a = tt.add("spunky");
     int b = tt.getIndex("spunky");
-    assertEquals(a, b);
+    Assert.assertEquals(a, b);
   }
 
+  @Test
   public void testCanCount() {
     int s = tt.getSize();
     tt.add("asdfdsaefasfdsaf");
     int s2 = tt.getSize();
-    assertEquals(s + 1, s2);
+    Assert.assertEquals(s + 1, s2);
   }
 
+  @Test
   public void testHoldsLotsOfStuff() {
     try {
       for(int i = 0; i < 1000; i++) {
         tt.add("fake" + i);
       }
     } catch(Exception e) {
-      fail("couldn't put lots of stuff in:" + e.getMessage());
+      Assert.fail("couldn't put lots of stuff in:" + e.getMessage());
     }
   }
 
+  @Test
   public void testClosed() {
     tt.add("java");
 
-    assertFalse(tt.isClosed("java"));
+    Assert.assertFalse(tt.isClosed("java"));
     tt.markClosed("java");
-    assertTrue(tt.isClosed("java"));
+    Assert.assertTrue(tt.isClosed("java"));
   }
 
+  @Test
   public void testSerialization() {
     for(int i = 0; i < 100; i++) {
       tt.add("fake" + i);
@@ -72,14 +83,14 @@ public class TTagsTest extends TestCase {
     tt.save("testoutputfile", Generics.newHashMap());
     TTags t2 = new TTags();
     t2.read("testoutputfile");
-    assertEquals(tt.getSize(), t2.getSize());
-    assertEquals(tt.getIndex("boat"), t2.getIndex("boat"));
-    assertEquals(t2.getTag(tt.getIndex("boat")), "boat");
+    Assert.assertEquals(tt.getSize(), t2.getSize());
+    Assert.assertEquals(tt.getIndex("boat"), t2.getIndex("boat"));
+    Assert.assertEquals(t2.getTag(tt.getIndex("boat")), "boat");
 
-    assertFalse(t2.isClosed("fake43"));
-    assertTrue(t2.isClosed("fake44"));
+    Assert.assertFalse(t2.isClosed("fake43"));
+    Assert.assertTrue(t2.isClosed("fake44"));
 
-    assertTrue((new java.io.File("testoutputfile")).delete());
+    Assert.assertTrue((new File("testoutputfile")).delete());
   }
 
 }

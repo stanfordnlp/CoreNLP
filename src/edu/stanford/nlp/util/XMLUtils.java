@@ -435,8 +435,9 @@ public class XMLUtils  {
       case "&apos;":
         return '\'';
       case "&ast;":
+        return '*';
       case "&sharp;":
-        return '-';
+        return '\u266F';
       case "&equals;":
         return '=';
       case "&nbsp;":
@@ -1050,7 +1051,7 @@ public class XMLUtils  {
     /** Stores the complete string passed in as the tag on construction. */
     public String text;
 
-    /** Stores the elememnt name, such as "doc". */
+    /** Stores the element name, such as "doc". */
     public String name;
 
     /** Stores attributes as a Map from keys to values. */
