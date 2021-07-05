@@ -30,7 +30,7 @@ public class WordToSentenceProcessorTest extends TestCase {
 
 
   private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
-                                 String testSentence, String ... gold) {
+                                 String testSentence, String... gold) {
     checkResult(wts, ud, testSentence, gold);
   }
 
