@@ -39,6 +39,7 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.parser.metrics.UnlabeledAttachmentEval;
 import edu.stanford.nlp.parser.metrics.Evalb;
+import edu.stanford.nlp.parser.metrics.EvalbFormatWriter;
 import edu.stanford.nlp.parser.metrics.TaggingEval;
 import edu.stanford.nlp.trees.LeftHeadFinder;
 import edu.stanford.nlp.trees.MemoryTreebank;

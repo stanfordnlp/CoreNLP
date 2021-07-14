@@ -24,7 +24,6 @@ import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
 import edu.stanford.nlp.parser.lexparser.BoundaryRemover;
 import edu.stanford.nlp.parser.lexparser.Debinarizer;
-import edu.stanford.nlp.parser.lexparser.EvalbFormatWriter; // TODO: move
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.Lexicon;
 import edu.stanford.nlp.parser.lexparser.Options;
