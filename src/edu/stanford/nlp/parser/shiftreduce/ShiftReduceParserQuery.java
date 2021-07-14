@@ -311,10 +311,13 @@ public class ShiftReduceParserQuery implements ParserQuery  {
                                       "\n Orig: " + SentenceUtils.listToString(originalSentence) +
                                       "\n Pars: " + SentenceUtils.listToString(leaves));
     }
-    // TODO: get rid of this cast
-    Iterator<? extends Label> wordsIterator = (Iterator<? extends Label>) originalSentence.iterator();
-    for (Tree leaf : leaves) {
-      leaf.setLabel(wordsIterator.next());
+    Iterator<Tree> leafIterator = leaves.iterator();
+    for (HasWord word : originalSentence) {
+      Tree leaf = leafIterator.next();
+      if (!(word instanceof Label)) {
+        continue;
+      }
+      leaf.setLabel((Label) word);
     }
   }
 
