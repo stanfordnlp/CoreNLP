@@ -583,8 +583,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * is used by default.
    * Output looks like: My/O name/O is/O Bill/PERSON Smith/PERSON ./O
    *
-   * @param sentences
-   *          The String to be classified
+   * @param sentences The String to be classified
    * @return A String annotated with classification information.
    */
   public String classifyToString(String sentences) {
