@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.parser.common.ArgUtils;
-import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.Reranker;
+import edu.stanford.nlp.parser.metrics.EvaluateTreebank;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.Pair;
 
