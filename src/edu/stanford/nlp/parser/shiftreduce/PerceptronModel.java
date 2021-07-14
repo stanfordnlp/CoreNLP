@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
+import edu.stanford.nlp.parser.metrics.EvaluateTreebank;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.stats.TwoDimensionalIntCounter;

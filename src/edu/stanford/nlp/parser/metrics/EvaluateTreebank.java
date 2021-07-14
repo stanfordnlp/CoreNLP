@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
+package edu.stanford.nlp.parser.metrics; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileOutputStream;
@@ -22,17 +22,14 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserQueryFactory;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
-import edu.stanford.nlp.parser.metrics.AbstractEval;
-import edu.stanford.nlp.parser.metrics.BestOfTopKEval;
-import edu.stanford.nlp.parser.metrics.Eval;
-import edu.stanford.nlp.parser.metrics.Evalb;
-import edu.stanford.nlp.parser.metrics.EvalbByCat;
-import edu.stanford.nlp.parser.metrics.FilteredEval;
-import edu.stanford.nlp.parser.metrics.LeafAncestorEval;
-import edu.stanford.nlp.parser.metrics.ParserQueryEval;
-import edu.stanford.nlp.parser.metrics.TaggingEval;
-import edu.stanford.nlp.parser.metrics.TopMatchEval;
-import edu.stanford.nlp.parser.metrics.UnlabeledAttachmentEval;
+import edu.stanford.nlp.parser.lexparser.BoundaryRemover;
+import edu.stanford.nlp.parser.lexparser.Debinarizer;
+import edu.stanford.nlp.parser.lexparser.EvalbFormatWriter; // TODO: move
+import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.parser.lexparser.Lexicon;
+import edu.stanford.nlp.parser.lexparser.Options;
+import edu.stanford.nlp.parser.lexparser.TreeAnnotatorAndBinarizer;
+import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.trees.LeftHeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
