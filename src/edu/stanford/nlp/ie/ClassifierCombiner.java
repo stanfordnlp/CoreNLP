@@ -60,7 +60,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(ClassifierCombiner.class);
 
-  private static final boolean DEBUG = System.getProperty("ClassifierCombiner", null) != null;;
+  private static final boolean DEBUG = System.getProperty("ClassifierCombiner", null) != null;
 
   private List<AbstractSequenceClassifier<IN>> baseClassifiers;
 
@@ -77,7 +77,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   private final CombinationMode combinationMode;
 
   // keep track of properties used to initialize
-  private  Properties initProps;
+  private final Properties initProps;
   // keep track of paths used to load CRFs
   private List<String> initLoadPaths = new ArrayList<>();
 
@@ -208,7 +208,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
     this.combinationMode = newCM;
     // read in the base classifiers
-    Integer numClassifiers = ois.readInt();
+    int numClassifiers = ois.readInt();
     // set up the list of base classifiers
     this.baseClassifiers = new ArrayList<>();
     int i = 0;
@@ -264,13 +264,13 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   private void loadClassifiers(Properties props, List<String> paths) throws IOException {
     baseClassifiers = new ArrayList<>();
     if (PropertiesUtils.getBool(props, "ner.usePresetNERTags", false)) {
-      AbstractSequenceClassifier<IN> presetASC = new PresetSequenceClassifier(props);
+      AbstractSequenceClassifier<IN> presetASC = new PresetSequenceClassifier<>(props);
       baseClassifiers.add(presetASC);
     }
-    for(String path: paths){
+    for (String path: paths){
       AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(props, path);
       baseClassifiers.add(cls);
-      if(DEBUG){
+      if (DEBUG) {
         System.err.printf("Successfully loaded classifier #%d from %s.%n", baseClassifiers.size(), path);
       }
     }
@@ -478,13 +478,11 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       baseOutputs.add(output);
     }
     assert(baseOutputs.size() == baseClassifiers.size());
-    List<IN> finalAnswer = mergeDocuments(baseOutputs);
 
-    return finalAnswer;
+    return mergeDocuments(baseOutputs);
   }
 
 
-  @SuppressWarnings("unchecked")
   @Override
   public void train(Collection<List<IN>> docs,
                     DocumentReaderAndWriter<IN> readerAndWriter) {
@@ -527,7 +525,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       String combinationModeString = combinationMode.name();
       oos.writeObject(combinationModeString);
       // get the number of classifiers to write to disk
-      Integer numClassifiers = baseClassifiers.size();
+      int numClassifiers = baseClassifiers.size();
       oos.writeInt(numClassifiers);
       // go through baseClassifiers and write each one to disk with CRFClassifier's serialize method
       log.info("");
@@ -566,9 +564,9 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     return new ClassifierCombiner(ois, props);
   }
 
-  // run a particular CRF of this ClassifierCombiner on a testFile
-  // user can say -crfToExamine 0 to get 1st element or -crfToExamine /edu/stanford/models/muc7.crf.ser.gz
-  // this does not currently support drill down on CMM's
+  // Run a particular CRF of this ClassifierCombiner on a testFile.
+  // User can say -crfToExamine 0 to get 1st element or -crfToExamine /edu/stanford/models/muc7.crf.ser.gz .
+  // This does not currently support drill down on CMMs.
   public static void examineCRF(ClassifierCombiner cc, String crfNameOrIndex, SeqClassifierFlags flags,
                                 String testFile, String testFiles,
                                 DocumentReaderAndWriter<CoreLabel> readerAndWriter) throws Exception {

@@ -69,9 +69,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   // todo [cdm 2015]: Could avoid constructing this if applyNumericClassifiers is false
   private final AbstractSequenceClassifier<CoreLabel> nsc;
 
-  public NERClassifierCombiner(Properties props)
-    throws IOException
-  {
+  public NERClassifierCombiner(Properties props) throws IOException {
     super(props);
     applyNumericClassifiers = PropertiesUtils.getBool(props, APPLY_NUMERIC_CLASSIFIERS_PROPERTY, APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
     nerLanguage = Language.fromString(PropertiesUtils.getString(props, NER_LANGUAGE_PROPERTY, null), NER_LANGUAGE_DEFAULT);
@@ -79,17 +77,14 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
   }
 
-  public NERClassifierCombiner(String... loadPaths)
-    throws IOException
-  {
+  public NERClassifierCombiner(String... loadPaths) throws IOException {
     this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, loadPaths);
   }
 
   public NERClassifierCombiner(boolean applyNumericClassifiers,
                                boolean useSUTime,
                                String... loadPaths)
-    throws IOException
-  {
+          throws IOException {
     super(loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
     this.nerLanguage = NER_LANGUAGE_DEFAULT;
@@ -102,8 +97,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
                                boolean useSUTime,
                                Properties nscProps,
                                String... loadPaths)
-    throws IOException
-  {
+          throws IOException {
     // NOTE: nscProps may contains sutime props which will not be recognized by the SeqClassifierFlags
     super(nscProps, ClassifierCombiner.extractCombinationModeSafe(nscProps), loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
@@ -118,9 +112,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   }
 
   @SafeVarargs
-  public NERClassifierCombiner(AbstractSequenceClassifier<CoreLabel>... classifiers)
-    throws IOException
-  {
+  public NERClassifierCombiner(AbstractSequenceClassifier<CoreLabel>... classifiers) throws IOException {
     this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, classifiers);
   }
 
@@ -128,8 +120,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   public NERClassifierCombiner(boolean applyNumericClassifiers,
                                boolean useSUTime,
                                AbstractSequenceClassifier<CoreLabel>... classifiers)
-    throws IOException
-  {
+          throws IOException {
     super(classifiers);
     this.applyNumericClassifiers = applyNumericClassifiers;
     this.nerLanguage = NER_LANGUAGE_DEFAULT;
@@ -141,14 +132,14 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   public NERClassifierCombiner(ObjectInputStream ois, Properties props) throws IOException, ClassCastException, ClassNotFoundException {
     super(ois,props);
     // read the useSUTime from disk
-    Boolean diskUseSUTime = ois.readBoolean();
+    boolean diskUseSUTime = ois.readBoolean();
     if (props.getProperty("ner.useSUTime") != null) {
       this.useSUTime = Boolean.parseBoolean(props.getProperty("ner.useSUTime"));
     } else {
       this.useSUTime = diskUseSUTime;
     }
     // read the applyNumericClassifiers from disk
-    Boolean diskApplyNumericClassifiers = ois.readBoolean();
+    boolean diskApplyNumericClassifiers = ois.readBoolean();
     if (props.getProperty("ner.applyNumericClassifiers") != null) {
       this.applyNumericClassifiers = Boolean.parseBoolean(props.getProperty("ner.applyNumericClassifiers"));
     } else {

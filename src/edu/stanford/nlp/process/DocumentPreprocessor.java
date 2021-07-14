@@ -47,8 +47,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  *     function to return the new iterator.
  * </ol>
  * <p>
- * NOTE: This implementation should <em>not</em> use external libraries since it
- * is used in the parser.
+ * NOTES: This document preprocessor is principally used in the Stanford Parser
+ * (and also a bit in the POS tagger). It is not used by CoreNLP. This implementation
+ * should <em>not</em> use external libraries since it is used in the parser.
  *
  * @author Spence Green
  */
@@ -89,7 +90,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
   private static final Pattern wsPattern = Pattern.compile("\\s+");
 
   //From PTB conventions
-  private final String[] sentenceFinalFollowers = {")", "]", "\"", "\'", "''", "-RRB-", "-RSB-", "-RCB-"};
+  private final String[] sentenceFinalFollowers = {")", "]", "}", "\"", "'", "''", "-RRB-", "-RSB-", "-RCB-"};
 
   private boolean keepEmptySentences; // = false;
 
@@ -286,8 +287,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
             if(splits.length == 2)
               return splits;
             else {
-              String[] oldStr = {in};
-              return oldStr;
+              return new String[]{in};
             }
           }
         };
@@ -546,7 +546,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
       List<String> whitespaceDelims =
           new ArrayList<>(Arrays.asList(DocumentPreprocessor.DEFAULT_SENTENCE_DELIMS));
       whitespaceDelims.add(WhitespaceLexer.NEWLINE);
-      sentenceDelims = whitespaceDelims.toArray(new String[whitespaceDelims.size()]);
+      sentenceDelims = whitespaceDelims.toArray(StringUtils.EMPTY_STRING_ARRAY);
     } else {
       tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), "");
     }
