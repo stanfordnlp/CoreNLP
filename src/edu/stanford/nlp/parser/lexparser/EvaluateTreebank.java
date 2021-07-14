@@ -116,17 +116,19 @@ public class EvaluateTreebank  {
   }
 
   public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory) {
-    this(op, lex, pqFactory, pqFactory.loadTagger());
+    this(op, lex, pqFactory, pqFactory.loadTagger(), pqFactory.getExtraEvals(), pqFactory.getParserQueryEvals());
   }
 
-  public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory, Function<List<? extends HasWord>,List<TaggedWord>> tagger) {
+  public EvaluateTreebank(Options op, Lexicon lex, ParserQueryFactory pqFactory, Function<List<? extends HasWord>,List<TaggedWord>> tagger,
+                          List<Eval> extraEvals, List<ParserQueryEval> parserQueryEvals) {
     this.op = op;
     this.debinarizer = new Debinarizer(op.forceCNF);
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
 
-    this.evals = Generics.newArrayList();
-    evals.addAll(pqFactory.getExtraEvals());
-    this.parserQueryEvals = pqFactory.getParserQueryEvals();
+    this.evals = new ArrayList<>();
+    this.evals.addAll(extraEvals);
+    this.parserQueryEvals = new ArrayList<>();
+    this.parserQueryEvals.addAll(parserQueryEvals);
 
     // this.lex = lex;
     this.pqFactory = pqFactory;

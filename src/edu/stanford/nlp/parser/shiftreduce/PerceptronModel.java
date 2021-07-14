@@ -511,7 +511,7 @@ public class PerceptronModel extends BaseModel  {
 
   private double evaluate(Tagger tagger, Treebank devTreebank, String message) {
     ShiftReduceParser temp = new ShiftReduceParser(op, this);
-    EvaluateTreebank evaluator = new EvaluateTreebank(temp.getOp(), null, temp, tagger);
+    EvaluateTreebank evaluator = new EvaluateTreebank(temp.getOp(), null, temp, tagger, temp.getExtraEvals(), temp.getParserQueryEvals());
     evaluator.testOnTreebank(devTreebank);
     double labelF1 = evaluator.getLBScore();
     log.info(message + ": " + labelF1);
