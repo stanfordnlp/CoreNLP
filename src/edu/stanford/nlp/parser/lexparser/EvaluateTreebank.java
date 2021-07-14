@@ -19,6 +19,7 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.parser.common.NoSuchParseException;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.common.ParserQueryFactory;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
@@ -55,7 +56,7 @@ public class EvaluateTreebank  {
   private final TreeTransformer collinizer;
   private final TreeTransformer boundaryRemover;
 
-  private final ParserGrammar pqFactory;
+  private final ParserQueryFactory pqFactory;
 
   // private final Lexicon lex;
 
