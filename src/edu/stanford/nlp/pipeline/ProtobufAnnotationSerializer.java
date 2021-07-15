@@ -790,7 +790,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param parseTree The parse tree to convert.
    * @return A protocol buffer message corresponding to this tree.
    */
-  public CoreNLPProtos.ParseTree toProto(Tree parseTree) {
+  public static CoreNLPProtos.ParseTree toProto(Tree parseTree) {
     CoreNLPProtos.ParseTree.Builder builder = CoreNLPProtos.ParseTree.newBuilder();
     // Required fields
     for (Tree child : parseTree.children()) { builder.addChild(toProto(child)); }
@@ -1595,7 +1595,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasParseTree()) { sentence.set(TreeAnnotation.class, fromProto(proto.getParseTree())); }
     if (proto.hasBinarizedParseTree()) { sentence.set(BinarizedTreeAnnotation.class, fromProto(proto.getBinarizedParseTree())); }
     if (proto.getKBestParseTreesCount() > 0) {
-      List<Tree> trees = proto.getKBestParseTreesList().stream().map(this::fromProto).collect(Collectors.toCollection(LinkedList::new));
+      List<Tree> trees = proto.getKBestParseTreesList().stream().map(ProtobufAnnotationSerializer::fromProto).collect(Collectors.toCollection(LinkedList::new));
       sentence.set(KBestTreesAnnotation.class, trees);
     }
     if (proto.hasAnnotatedParseTree()) { sentence.set(SentimentCoreAnnotations.SentimentAnnotatedTree.class, fromProto(proto.getAnnotatedParseTree())); }
@@ -2091,7 +2091,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized tree.
    * @return A Tree object corresponding to the saved tree. This will always be a {@link LabeledScoredTreeNode}.
    */
-  public Tree fromProto(CoreNLPProtos.ParseTree proto) {
+  public static Tree fromProto(CoreNLPProtos.ParseTree proto) {
     if (Thread.interrupted()) {
       throw new RuntimeInterruptedException();
     }
