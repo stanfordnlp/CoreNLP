@@ -37,6 +37,7 @@ import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
 import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -263,34 +264,6 @@ public class EvaluateTreebank  {
     Tree[] kids = tree.children();
     for (Tree kid : kids) {
       nanScores(kid);
-    }
-  }
-
-  /**
-   * Returns the input sentence for the parser.
-   */
-  private List<CoreLabel> getInputSentence(Tree t) {
-    if (op.testOptions.forceTags) {
-      if (op.testOptions.preTag) {
-        List<TaggedWord> s = tagger.apply(t.yieldWords());
-        if(op.testOptions.verbose) {
-          log.info("Guess tags: "+Arrays.toString(s.toArray()));
-          log.info("Gold tags: "+t.labeledYield().toString());
-        }
-        return SentenceUtils.toCoreLabelList(s);
-      } else if(op.testOptions.noFunctionalForcing) {
-        ArrayList<? extends HasWord> s = t.taggedYield();
-        for (HasWord word : s) {
-          String tag = ((HasTag) word).tag();
-          tag = tag.split("-")[0];
-          ((HasTag) word).setTag(tag);
-        }
-        return SentenceUtils.toCoreLabelList(s);
-      } else {
-        return SentenceUtils.toCoreLabelList(t.taggedYield());
-      }
-    } else {
-      return SentenceUtils.toCoreLabelList(t.yieldWords());
     }
   }
 
@@ -567,6 +540,118 @@ public class EvaluateTreebank  {
       pwErr.println();
   }
 
+  /**
+   * Wrapper for a way to pass in a dataset which may need reprocessing to get parse results
+   */
+  public static interface EvaluationDataset {
+    List<Pair<ParserQuery, Tree>> dataset(PrintWriter pwErr, PrintWriter pwOut, PrintWriter pwFileOut, PrintWriter pwStats, TreePrint treePrint);
+
+    void summarize(PrintWriter pwErr, TreebankLanguagePack tlp);
+  }
+
+  public static class TreebankEvaluationDataset implements EvaluationDataset {
+    final Treebank testTreebank;
+    final ParserQueryFactory pqFactory;
+    final Options op;
+    final Function<List<? extends HasWord>, List<TaggedWord>> tagger;
+
+    public TreebankEvaluationDataset(Treebank testTreebank, ParserQueryFactory pqFactory, Options op, Function<List<? extends HasWord>, List<TaggedWord>> tagger) {
+      this.pqFactory = pqFactory;
+      this.testTreebank = testTreebank;
+      this.op = op;
+      this.tagger = tagger;
+    }
+
+    /**
+     * Returns an input sentence based on this tree for use in the parser.
+     */
+    private List<CoreLabel> getInputSentence(Tree t) {
+      if (op.testOptions.forceTags) {
+        if (op.testOptions.preTag) {
+          List<TaggedWord> s = tagger.apply(t.yieldWords());
+          if(op.testOptions.verbose) {
+            log.info("Guess tags: "+Arrays.toString(s.toArray()));
+            log.info("Gold tags: "+t.labeledYield().toString());
+          }
+          return SentenceUtils.toCoreLabelList(s);
+        } else if(op.testOptions.noFunctionalForcing) {
+          ArrayList<? extends HasWord> s = t.taggedYield();
+          for (HasWord word : s) {
+            String tag = ((HasTag) word).tag();
+            tag = tag.split("-")[0];
+            ((HasTag) word).setTag(tag);
+          }
+          return SentenceUtils.toCoreLabelList(s);
+        } else {
+          return SentenceUtils.toCoreLabelList(t.taggedYield());
+        }
+      } else {
+        return SentenceUtils.toCoreLabelList(t.yieldWords());
+      }
+    }
+
+    public List<Pair<ParserQuery, Tree>> dataset(PrintWriter pwErr, PrintWriter pwOut, PrintWriter pwFileOut, PrintWriter pwStats, TreePrint treePrint) {
+      List<Pair<ParserQuery, Tree>> results = new ArrayList<>();
+
+      if (op.testOptions.testingThreads != 1) {
+        MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
+
+        LinkedList<Tree> goldTrees = new LinkedList<>();
+        for (Tree goldTree : testTreebank) {
+          List<? extends HasWord> sentence = getInputSentence(goldTree);
+          goldTrees.add(goldTree);
+
+          pwErr.println("Parsing [len. " + sentence.size() + "]: " + SentenceUtils.listToString(sentence));
+          wrapper.put(sentence);
+          while (wrapper.peek()) {
+            ParserQuery pq = wrapper.poll();
+            goldTree = goldTrees.poll();
+            results.add(new Pair<>(pq, goldTree));
+          }
+        } // for tree iterator
+        wrapper.join();
+        while (wrapper.peek()) {
+          ParserQuery pq = wrapper.poll();
+          Tree goldTree = goldTrees.poll();
+          results.add(new Pair<>(pq, goldTree));
+        }
+      } else {
+        for (Tree goldTree : testTreebank) {
+          final List<CoreLabel> sentence = getInputSentence(goldTree);
+
+          pwErr.println("Parsing [len. " + sentence.size() + "]: " + SentenceUtils.listToString(sentence));
+
+          ParserQuery pq = pqFactory.parserQuery();
+          pq.parseAndReport(sentence, pwErr);
+          results.add(new Pair<>(pq, goldTree));
+        } // for tree iterator
+      }
+
+      return results;
+    }
+
+    public void summarize(PrintWriter pwErr, TreebankLanguagePack tlp) {
+      pwErr.print("Testing ");
+      pwErr.println(testTreebank.textualSummary(tlp));
+    }
+  }
+
+  public static class PreparsedEvaluationDataset implements EvaluationDataset {
+    List<Pair<ParserQuery, Tree>> testTreebank;
+
+    public PreparsedEvaluationDataset(List<Pair<ParserQuery, Tree>> testTreebank) {
+      this.testTreebank = testTreebank;
+    }
+
+    public List<Pair<ParserQuery, Tree>> dataset(PrintWriter pwErr, PrintWriter pwOut, PrintWriter pwFileOut, PrintWriter pwStats, TreePrint treePrint) {
+      return testTreebank;
+    }
+
+    public void summarize(PrintWriter pwErr, TreebankLanguagePack tlp) {
+      // TODO: could pass in a summary, but we haven't done that yet
+    }
+  }
+
   /** Test the parser on a treebank. Parses will be written to stdout, and
    *  various other information will be written to stderr and stdout,
    *  particularly if <code>op.testOptions.verbose</code> is true.
@@ -576,6 +661,14 @@ public class EvaluateTreebank  {
    *          of the parser on the treebank.
    */
   public double testOnTreebank(Treebank testTreebank) {
+    return testOnTreebank(new TreebankEvaluationDataset(testTreebank, pqFactory, op, tagger));
+  }
+
+  public double testOnTreebank(List<Pair<ParserQuery, Tree>> testTreebank) {
+    return testOnTreebank(new PreparsedEvaluationDataset(testTreebank));
+  }
+
+  public double testOnTreebank(EvaluationDataset testTreebank) {
     log.info("Testing on treebank");
     Timing treebankTotalTimer = new Timing();
     TreePrint treePrint = op.testOptions.treePrint(op.tlpParams);
@@ -591,8 +684,7 @@ public class EvaluateTreebank  {
       pwErr = tlpParams.pw(System.err);
     }
     if (op.testOptions.verbose) {
-      pwErr.print("Testing ");
-      pwErr.println(testTreebank.textualSummary(tlp));
+      testTreebank.summarize(pwErr, tlp);
     }
     if (op.testOptions.evalb) {
       EvalbFormatWriter.initEVALBfiles(tlpParams);
@@ -617,40 +709,11 @@ public class EvaluateTreebank  {
       }
     }
 
-    if (op.testOptions.testingThreads != 1) {
-      MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
-
-      LinkedList<Tree> goldTrees = new LinkedList<>();
-      for (Tree goldTree : testTreebank) {
-        List<? extends HasWord> sentence = getInputSentence(goldTree);
-        goldTrees.add(goldTree);
-
-        pwErr.println("Parsing [len. " + sentence.size() + "]: " + SentenceUtils.listToString(sentence));
-        wrapper.put(sentence);
-        while (wrapper.peek()) {
-          ParserQuery pq = wrapper.poll();
-          goldTree = goldTrees.poll();
-          processResults(pq, goldTree, pwErr, pwOut, pwFileOut, pwStats, treePrint);
-        }
-      } // for tree iterator
-      wrapper.join();
-      while (wrapper.peek()) {
-        ParserQuery pq = wrapper.poll();
-        Tree goldTree = goldTrees.poll();
-        processResults(pq, goldTree, pwErr, pwOut, pwFileOut, pwStats, treePrint);
-      }
-    } else {
-      ParserQuery pq = pqFactory.parserQuery();
-
-      for (Tree goldTree : testTreebank) {
-        final List<CoreLabel> sentence = getInputSentence(goldTree);
-
-        pwErr.println("Parsing [len. " + sentence.size() + "]: " + SentenceUtils.listToString(sentence));
-
-        pq.parseAndReport(sentence, pwErr);
-
-        processResults(pq, goldTree, pwErr, pwOut, pwFileOut, pwStats, treePrint);
-      } // for tree iterator
+    List<Pair<ParserQuery, Tree>> results = testTreebank.dataset(pwErr, pwOut, pwFileOut, pwStats, treePrint);
+    for (Pair<ParserQuery, Tree> result : results) {
+      ParserQuery pq = result.first;
+      Tree goldTree = result.second;
+      processResults(pq, goldTree, pwErr, pwOut, pwFileOut, pwStats, treePrint);
     }
 
     //Done parsing...print the results of the evaluations
@@ -668,7 +731,8 @@ public class EvaluateTreebank  {
       pwErr.printf("Unable to evaluate %d parser hypotheses due to yield mismatch\n",numSkippedEvals);
     }
     // only created here so we know what parser types are supported...
-    ParserQuery pq = pqFactory.parserQuery();
+    // TODO: pass in the various pcfgparser, dependencyparser, etc?
+    ParserQuery pq = pqFactory != null ? pqFactory.parserQuery() : null;
     if (summary) {
       if (pcfgLB != null) pcfgLB.display(false, pwErr);
       if (pcfgChildSpecific != null) pcfgChildSpecific.display(false, pwErr);
@@ -676,17 +740,17 @@ public class EvaluateTreebank  {
       if (pcfgCB != null) pcfgCB.display(false, pwErr);
       if (pcfgDA != null) pcfgDA.display(false, pwErr);
       if (pcfgTA != null) pcfgTA.display(false, pwErr);
-      if (pcfgLL != null && pq.getPCFGParser() != null) pcfgLL.display(false, pwErr);
+      if (pcfgLL != null && pq != null && pq.getPCFGParser() != null) pcfgLL.display(false, pwErr);
       if (depDA != null) depDA.display(false, pwErr);
       if (depTA != null) depTA.display(false, pwErr);
-      if (depLL != null && pq.getDependencyParser() != null) depLL.display(false, pwErr);
+      if (depLL != null && pq != null && pq.getDependencyParser() != null) depLL.display(false, pwErr);
       if (factLB != null) factLB.display(false, pwErr);
       if (factChildSpecific != null) factChildSpecific.display(false, pwErr);
       if (factLA != null) factLA.display(false, pwErr);
       if (factCB != null) factCB.display(false, pwErr);
       if (factDA != null) factDA.display(false, pwErr);
       if (factTA != null) factTA.display(false, pwErr);
-      if (factLL != null && pq.getFactoredParser() != null) factLL.display(false, pwErr);
+      if (factLL != null && pq != null && pq.getFactoredParser() != null) factLL.display(false, pwErr);
       if (pcfgCatE != null) pcfgCatE.display(false, pwErr);
       for (Eval eval : evals) {
         eval.display(false, pwErr);
@@ -703,15 +767,15 @@ public class EvaluateTreebank  {
       pwErr.println("factF1\tfactDA\tfactEx\tpcfgF1\tdepDA\tfactTA\tnum");
       if (factLB != null) pwErr.print(nf.format(factLB.getEvalbF1Percent()));
       pwErr.print("\t");
-      if (pq.getDependencyParser() != null && factDA != null) pwErr.print(nf.format(factDA.getEvalbF1Percent()));
+      if (pq != null && pq.getDependencyParser() != null && factDA != null) pwErr.print(nf.format(factDA.getEvalbF1Percent()));
       pwErr.print("\t");
       if (factLB != null) pwErr.print(nf.format(factLB.getExactPercent()));
       pwErr.print("\t");
       if (pcfgLB != null) pwErr.print(nf.format(pcfgLB.getEvalbF1Percent()));
       pwErr.print("\t");
-      if (pq.getDependencyParser() != null && depDA != null) pwErr.print(nf.format(depDA.getEvalbF1Percent()));
+      if (pq != null && pq.getDependencyParser() != null && depDA != null) pwErr.print(nf.format(depDA.getEvalbF1Percent()));
       pwErr.print("\t");
-      if (pq.getPCFGParser() != null && factTA != null) pwErr.print(nf.format(factTA.getEvalbF1Percent()));
+      if (pq != null && pq.getPCFGParser() != null && factTA != null) pwErr.print(nf.format(factTA.getEvalbF1Percent()));
       pwErr.print("\t");
       if (factLB != null) pwErr.print(factLB.getNum());
       pwErr.println();

@@ -698,3 +698,35 @@ message DependencyEnhancerRequest {
     string            relativePronouns   = 3;
   }
 }
+
+// A version of ParseTree with a flattened structure so that deep trees
+// don't exceed the protobuf stack depth
+message FlattenedParseTree {
+  message Node {
+    oneof contents {
+      bool              openNode           = 1;
+      bool              closeNode          = 2;
+      string            value              = 3;
+    }
+
+    optional double     score              = 4;
+  }
+
+  repeated Node         nodes              = 1;
+}
+
+// A protobuf for calling the java constituency parser evaluator from elsewhere
+message EvaluateParserRequest {
+  message ParseResult {
+    required FlattenedParseTree         gold           = 1;
+    // repeated so you can send in kbest parses, if your parser handles that
+    // note that this already includes a score field
+    repeated FlattenedParseTree         predicted      = 2;
+  }
+
+  repeated ParseResult         treebank       = 1;
+}
+
+message EvaluateParserResponse {
+  required double              f1             = 1;
+}

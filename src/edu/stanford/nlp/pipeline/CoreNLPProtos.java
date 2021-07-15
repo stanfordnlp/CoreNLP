@@ -80818,6 +80818,4275 @@ public final class CoreNLPProtos {
 
   }
 
+  public interface FlattenedParseTreeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.FlattenedParseTree)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node> 
+        getNodesList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node getNodes(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+     */
+    int getNodesCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder> 
+        getNodesOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder getNodesOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * A version of ParseTree with a flattened structure so that deep trees
+   * don't exceed the protobuf stack depth
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.FlattenedParseTree}
+   */
+  public  static final class FlattenedParseTree extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.FlattenedParseTree)
+      FlattenedParseTreeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use FlattenedParseTree.newBuilder() to construct.
+    private FlattenedParseTree(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private FlattenedParseTree() {
+      nodes_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FlattenedParseTree();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FlattenedParseTree(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                nodes_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              nodes_.add(
+                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.PARSER, extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          nodes_ = java.util.Collections.unmodifiableList(nodes_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.class, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder.class);
+    }
+
+    public interface NodeOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.FlattenedParseTree.Node)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>optional bool openNode = 1;</code>
+       * @return Whether the openNode field is set.
+       */
+      boolean hasOpenNode();
+      /**
+       * <code>optional bool openNode = 1;</code>
+       * @return The openNode.
+       */
+      boolean getOpenNode();
+
+      /**
+       * <code>optional bool closeNode = 2;</code>
+       * @return Whether the closeNode field is set.
+       */
+      boolean hasCloseNode();
+      /**
+       * <code>optional bool closeNode = 2;</code>
+       * @return The closeNode.
+       */
+      boolean getCloseNode();
+
+      /**
+       * <code>optional string value = 3;</code>
+       * @return Whether the value field is set.
+       */
+      boolean hasValue();
+      /**
+       * <code>optional string value = 3;</code>
+       * @return The value.
+       */
+      java.lang.String getValue();
+      /**
+       * <code>optional string value = 3;</code>
+       * @return The bytes for value.
+       */
+      com.google.protobuf.ByteString
+          getValueBytes();
+
+      /**
+       * <code>optional double score = 4;</code>
+       * @return Whether the score field is set.
+       */
+      boolean hasScore();
+      /**
+       * <code>optional double score = 4;</code>
+       * @return The score.
+       */
+      double getScore();
+
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.ContentsCase getContentsCase();
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.FlattenedParseTree.Node}
+     */
+    public  static final class Node extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.FlattenedParseTree.Node)
+        NodeOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use Node.newBuilder() to construct.
+      private Node(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private Node() {
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new Node();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Node(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                contentsCase_ = 1;
+                contents_ = input.readBool();
+                break;
+              }
+              case 16: {
+                contentsCase_ = 2;
+                contents_ = input.readBool();
+                break;
+              }
+              case 26: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                contentsCase_ = 3;
+                contents_ = bs;
+                break;
+              }
+              case 33: {
+                bitField0_ |= 0x00000008;
+                score_ = input.readDouble();
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.class, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder.class);
+      }
+
+      private int bitField0_;
+      private int contentsCase_ = 0;
+      private java.lang.Object contents_;
+      public enum ContentsCase
+          implements com.google.protobuf.Internal.EnumLite,
+              com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+        OPENNODE(1),
+        CLOSENODE(2),
+        VALUE(3),
+        CONTENTS_NOT_SET(0);
+        private final int value;
+        private ContentsCase(int value) {
+          this.value = value;
+        }
+        /**
+         * @param value The number of the enum to look for.
+         * @return The enum associated with the given number.
+         * @deprecated Use {@link #forNumber(int)} instead.
+         */
+        @java.lang.Deprecated
+        public static ContentsCase valueOf(int value) {
+          return forNumber(value);
+        }
+
+        public static ContentsCase forNumber(int value) {
+          switch (value) {
+            case 1: return OPENNODE;
+            case 2: return CLOSENODE;
+            case 3: return VALUE;
+            case 0: return CONTENTS_NOT_SET;
+            default: return null;
+          }
+        }
+        public int getNumber() {
+          return this.value;
+        }
+      };
+
+      public ContentsCase
+      getContentsCase() {
+        return ContentsCase.forNumber(
+            contentsCase_);
+      }
+
+      public static final int OPENNODE_FIELD_NUMBER = 1;
+      /**
+       * <code>optional bool openNode = 1;</code>
+       * @return Whether the openNode field is set.
+       */
+      public boolean hasOpenNode() {
+        return contentsCase_ == 1;
+      }
+      /**
+       * <code>optional bool openNode = 1;</code>
+       * @return The openNode.
+       */
+      public boolean getOpenNode() {
+        if (contentsCase_ == 1) {
+          return (java.lang.Boolean) contents_;
+        }
+        return false;
+      }
+
+      public static final int CLOSENODE_FIELD_NUMBER = 2;
+      /**
+       * <code>optional bool closeNode = 2;</code>
+       * @return Whether the closeNode field is set.
+       */
+      public boolean hasCloseNode() {
+        return contentsCase_ == 2;
+      }
+      /**
+       * <code>optional bool closeNode = 2;</code>
+       * @return The closeNode.
+       */
+      public boolean getCloseNode() {
+        if (contentsCase_ == 2) {
+          return (java.lang.Boolean) contents_;
+        }
+        return false;
+      }
+
+      public static final int VALUE_FIELD_NUMBER = 3;
+      /**
+       * <code>optional string value = 3;</code>
+       * @return Whether the value field is set.
+       */
+      public boolean hasValue() {
+        return contentsCase_ == 3;
+      }
+      /**
+       * <code>optional string value = 3;</code>
+       * @return The value.
+       */
+      public java.lang.String getValue() {
+        java.lang.Object ref = "";
+        if (contentsCase_ == 3) {
+          ref = contents_;
+        }
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8() && (contentsCase_ == 3)) {
+            contents_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string value = 3;</code>
+       * @return The bytes for value.
+       */
+      public com.google.protobuf.ByteString
+          getValueBytes() {
+        java.lang.Object ref = "";
+        if (contentsCase_ == 3) {
+          ref = contents_;
+        }
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          if (contentsCase_ == 3) {
+            contents_ = b;
+          }
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int SCORE_FIELD_NUMBER = 4;
+      private double score_;
+      /**
+       * <code>optional double score = 4;</code>
+       * @return Whether the score field is set.
+       */
+      public boolean hasScore() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>optional double score = 4;</code>
+       * @return The score.
+       */
+      public double getScore() {
+        return score_;
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (contentsCase_ == 1) {
+          output.writeBool(
+              1, (boolean)((java.lang.Boolean) contents_));
+        }
+        if (contentsCase_ == 2) {
+          output.writeBool(
+              2, (boolean)((java.lang.Boolean) contents_));
+        }
+        if (contentsCase_ == 3) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 3, contents_);
+        }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          output.writeDouble(4, score_);
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (contentsCase_ == 1) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBoolSize(
+                1, (boolean)((java.lang.Boolean) contents_));
+        }
+        if (contentsCase_ == 2) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBoolSize(
+                2, (boolean)((java.lang.Boolean) contents_));
+        }
+        if (contentsCase_ == 3) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, contents_);
+        }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeDoubleSize(4, score_);
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node other = (edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node) obj;
+
+        if (hasScore() != other.hasScore()) return false;
+        if (hasScore()) {
+          if (java.lang.Double.doubleToLongBits(getScore())
+              != java.lang.Double.doubleToLongBits(
+                  other.getScore())) return false;
+        }
+        if (!getContentsCase().equals(other.getContentsCase())) return false;
+        switch (contentsCase_) {
+          case 1:
+            if (getOpenNode()
+                != other.getOpenNode()) return false;
+            break;
+          case 2:
+            if (getCloseNode()
+                != other.getCloseNode()) return false;
+            break;
+          case 3:
+            if (!getValue()
+                .equals(other.getValue())) return false;
+            break;
+          case 0:
+          default:
+        }
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasScore()) {
+          hash = (37 * hash) + SCORE_FIELD_NUMBER;
+          hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+              java.lang.Double.doubleToLongBits(getScore()));
+        }
+        switch (contentsCase_) {
+          case 1:
+            hash = (37 * hash) + OPENNODE_FIELD_NUMBER;
+            hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+                getOpenNode());
+            break;
+          case 2:
+            hash = (37 * hash) + CLOSENODE_FIELD_NUMBER;
+            hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+                getCloseNode());
+            break;
+          case 3:
+            hash = (37 * hash) + VALUE_FIELD_NUMBER;
+            hash = (53 * hash) + getValue().hashCode();
+            break;
+          case 0:
+          default:
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.FlattenedParseTree.Node}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.FlattenedParseTree.Node)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.class, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          score_ = 0D;
+          bitField0_ = (bitField0_ & ~0x00000008);
+          contentsCase_ = 0;
+          contents_ = null;
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node result = new edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (contentsCase_ == 1) {
+            result.contents_ = contents_;
+          }
+          if (contentsCase_ == 2) {
+            result.contents_ = contents_;
+          }
+          if (contentsCase_ == 3) {
+            result.contents_ = contents_;
+          }
+          if (((from_bitField0_ & 0x00000008) != 0)) {
+            result.score_ = score_;
+            to_bitField0_ |= 0x00000008;
+          }
+          result.bitField0_ = to_bitField0_;
+          result.contentsCase_ = contentsCase_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.getDefaultInstance()) return this;
+          if (other.hasScore()) {
+            setScore(other.getScore());
+          }
+          switch (other.getContentsCase()) {
+            case OPENNODE: {
+              setOpenNode(other.getOpenNode());
+              break;
+            }
+            case CLOSENODE: {
+              setCloseNode(other.getCloseNode());
+              break;
+            }
+            case VALUE: {
+              contentsCase_ = 3;
+              contents_ = other.contents_;
+              onChanged();
+              break;
+            }
+            case CONTENTS_NOT_SET: {
+              break;
+            }
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int contentsCase_ = 0;
+        private java.lang.Object contents_;
+        public ContentsCase
+            getContentsCase() {
+          return ContentsCase.forNumber(
+              contentsCase_);
+        }
+
+        public Builder clearContents() {
+          contentsCase_ = 0;
+          contents_ = null;
+          onChanged();
+          return this;
+        }
+
+        private int bitField0_;
+
+        /**
+         * <code>optional bool openNode = 1;</code>
+         * @return Whether the openNode field is set.
+         */
+        public boolean hasOpenNode() {
+          return contentsCase_ == 1;
+        }
+        /**
+         * <code>optional bool openNode = 1;</code>
+         * @return The openNode.
+         */
+        public boolean getOpenNode() {
+          if (contentsCase_ == 1) {
+            return (java.lang.Boolean) contents_;
+          }
+          return false;
+        }
+        /**
+         * <code>optional bool openNode = 1;</code>
+         * @param value The openNode to set.
+         * @return This builder for chaining.
+         */
+        public Builder setOpenNode(boolean value) {
+          contentsCase_ = 1;
+          contents_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional bool openNode = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearOpenNode() {
+          if (contentsCase_ == 1) {
+            contentsCase_ = 0;
+            contents_ = null;
+            onChanged();
+          }
+          return this;
+        }
+
+        /**
+         * <code>optional bool closeNode = 2;</code>
+         * @return Whether the closeNode field is set.
+         */
+        public boolean hasCloseNode() {
+          return contentsCase_ == 2;
+        }
+        /**
+         * <code>optional bool closeNode = 2;</code>
+         * @return The closeNode.
+         */
+        public boolean getCloseNode() {
+          if (contentsCase_ == 2) {
+            return (java.lang.Boolean) contents_;
+          }
+          return false;
+        }
+        /**
+         * <code>optional bool closeNode = 2;</code>
+         * @param value The closeNode to set.
+         * @return This builder for chaining.
+         */
+        public Builder setCloseNode(boolean value) {
+          contentsCase_ = 2;
+          contents_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional bool closeNode = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearCloseNode() {
+          if (contentsCase_ == 2) {
+            contentsCase_ = 0;
+            contents_ = null;
+            onChanged();
+          }
+          return this;
+        }
+
+        /**
+         * <code>optional string value = 3;</code>
+         * @return Whether the value field is set.
+         */
+        public boolean hasValue() {
+          return contentsCase_ == 3;
+        }
+        /**
+         * <code>optional string value = 3;</code>
+         * @return The value.
+         */
+        public java.lang.String getValue() {
+          java.lang.Object ref = "";
+          if (contentsCase_ == 3) {
+            ref = contents_;
+          }
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (contentsCase_ == 3) {
+              if (bs.isValidUtf8()) {
+                contents_ = s;
+              }
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string value = 3;</code>
+         * @return The bytes for value.
+         */
+        public com.google.protobuf.ByteString
+            getValueBytes() {
+          java.lang.Object ref = "";
+          if (contentsCase_ == 3) {
+            ref = contents_;
+          }
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            if (contentsCase_ == 3) {
+              contents_ = b;
+            }
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string value = 3;</code>
+         * @param value The value to set.
+         * @return This builder for chaining.
+         */
+        public Builder setValue(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  contentsCase_ = 3;
+          contents_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string value = 3;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearValue() {
+          if (contentsCase_ == 3) {
+            contentsCase_ = 0;
+            contents_ = null;
+            onChanged();
+          }
+          return this;
+        }
+        /**
+         * <code>optional string value = 3;</code>
+         * @param value The bytes for value to set.
+         * @return This builder for chaining.
+         */
+        public Builder setValueBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  contentsCase_ = 3;
+          contents_ = value;
+          onChanged();
+          return this;
+        }
+
+        private double score_ ;
+        /**
+         * <code>optional double score = 4;</code>
+         * @return Whether the score field is set.
+         */
+        public boolean hasScore() {
+          return ((bitField0_ & 0x00000008) != 0);
+        }
+        /**
+         * <code>optional double score = 4;</code>
+         * @return The score.
+         */
+        public double getScore() {
+          return score_;
+        }
+        /**
+         * <code>optional double score = 4;</code>
+         * @param value The score to set.
+         * @return This builder for chaining.
+         */
+        public Builder setScore(double value) {
+          bitField0_ |= 0x00000008;
+          score_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional double score = 4;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearScore() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          score_ = 0D;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.FlattenedParseTree.Node)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.FlattenedParseTree.Node)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<Node>
+          PARSER = new com.google.protobuf.AbstractParser<Node>() {
+        @java.lang.Override
+        public Node parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Node(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<Node> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Node> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public static final int NODES_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node> nodes_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+     */
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node> getNodesList() {
+      return nodes_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+     */
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder> 
+        getNodesOrBuilderList() {
+      return nodes_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+     */
+    public int getNodesCount() {
+      return nodes_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node getNodes(int index) {
+      return nodes_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder getNodesOrBuilder(
+        int index) {
+      return nodes_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < nodes_.size(); i++) {
+        output.writeMessage(1, nodes_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < nodes_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, nodes_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree other = (edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree) obj;
+
+      if (!getNodesList()
+          .equals(other.getNodesList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getNodesCount() > 0) {
+        hash = (37 * hash) + NODES_FIELD_NUMBER;
+        hash = (53 * hash) + getNodesList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * A version of ParseTree with a flattened structure so that deep trees
+     * don't exceed the protobuf stack depth
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.FlattenedParseTree}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.FlattenedParseTree)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.class, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getNodesFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (nodesBuilder_ == null) {
+          nodes_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          nodesBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree result = new edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree(this);
+        int from_bitField0_ = bitField0_;
+        if (nodesBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            nodes_ = java.util.Collections.unmodifiableList(nodes_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.nodes_ = nodes_;
+        } else {
+          result.nodes_ = nodesBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance()) return this;
+        if (nodesBuilder_ == null) {
+          if (!other.nodes_.isEmpty()) {
+            if (nodes_.isEmpty()) {
+              nodes_ = other.nodes_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureNodesIsMutable();
+              nodes_.addAll(other.nodes_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.nodes_.isEmpty()) {
+            if (nodesBuilder_.isEmpty()) {
+              nodesBuilder_.dispose();
+              nodesBuilder_ = null;
+              nodes_ = other.nodes_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              nodesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getNodesFieldBuilder() : null;
+            } else {
+              nodesBuilder_.addAllMessages(other.nodes_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node> nodes_ =
+        java.util.Collections.emptyList();
+      private void ensureNodesIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          nodes_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node>(nodes_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder> nodesBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node> getNodesList() {
+        if (nodesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(nodes_);
+        } else {
+          return nodesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public int getNodesCount() {
+        if (nodesBuilder_ == null) {
+          return nodes_.size();
+        } else {
+          return nodesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node getNodes(int index) {
+        if (nodesBuilder_ == null) {
+          return nodes_.get(index);
+        } else {
+          return nodesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public Builder setNodes(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node value) {
+        if (nodesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureNodesIsMutable();
+          nodes_.set(index, value);
+          onChanged();
+        } else {
+          nodesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public Builder setNodes(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder builderForValue) {
+        if (nodesBuilder_ == null) {
+          ensureNodesIsMutable();
+          nodes_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          nodesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public Builder addNodes(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node value) {
+        if (nodesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureNodesIsMutable();
+          nodes_.add(value);
+          onChanged();
+        } else {
+          nodesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public Builder addNodes(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node value) {
+        if (nodesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureNodesIsMutable();
+          nodes_.add(index, value);
+          onChanged();
+        } else {
+          nodesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public Builder addNodes(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder builderForValue) {
+        if (nodesBuilder_ == null) {
+          ensureNodesIsMutable();
+          nodes_.add(builderForValue.build());
+          onChanged();
+        } else {
+          nodesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public Builder addNodes(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder builderForValue) {
+        if (nodesBuilder_ == null) {
+          ensureNodesIsMutable();
+          nodes_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          nodesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public Builder addAllNodes(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node> values) {
+        if (nodesBuilder_ == null) {
+          ensureNodesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, nodes_);
+          onChanged();
+        } else {
+          nodesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public Builder clearNodes() {
+        if (nodesBuilder_ == null) {
+          nodes_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          nodesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public Builder removeNodes(int index) {
+        if (nodesBuilder_ == null) {
+          ensureNodesIsMutable();
+          nodes_.remove(index);
+          onChanged();
+        } else {
+          nodesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder getNodesBuilder(
+          int index) {
+        return getNodesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder getNodesOrBuilder(
+          int index) {
+        if (nodesBuilder_ == null) {
+          return nodes_.get(index);  } else {
+          return nodesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder> 
+           getNodesOrBuilderList() {
+        if (nodesBuilder_ != null) {
+          return nodesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(nodes_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder addNodesBuilder() {
+        return getNodesFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder addNodesBuilder(
+          int index) {
+        return getNodesFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder> 
+           getNodesBuilderList() {
+        return getNodesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder> 
+          getNodesFieldBuilder() {
+        if (nodesBuilder_ == null) {
+          nodesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder>(
+                  nodes_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          nodes_ = null;
+        }
+        return nodesBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.FlattenedParseTree)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.FlattenedParseTree)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<FlattenedParseTree>
+        PARSER = new com.google.protobuf.AbstractParser<FlattenedParseTree>() {
+      @java.lang.Override
+      public FlattenedParseTree parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FlattenedParseTree(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<FlattenedParseTree> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FlattenedParseTree> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface EvaluateParserRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.EvaluateParserRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult> 
+        getTreebankList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult getTreebank(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+     */
+    int getTreebankCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder> 
+        getTreebankOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder getTreebankOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * A protobuf for calling the java constituency parser evaluator from elsewhere
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserRequest}
+   */
+  public  static final class EvaluateParserRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.EvaluateParserRequest)
+      EvaluateParserRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use EvaluateParserRequest.newBuilder() to construct.
+    private EvaluateParserRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private EvaluateParserRequest() {
+      treebank_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new EvaluateParserRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private EvaluateParserRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                treebank_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              treebank_.add(
+                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.PARSER, extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          treebank_ = java.util.Collections.unmodifiableList(treebank_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.Builder.class);
+    }
+
+    public interface ParseResultOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+       * @return Whether the gold field is set.
+       */
+      boolean hasGold();
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+       * @return The gold.
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getGold();
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getGoldOrBuilder();
+
+      /**
+       * <pre>
+       * repeated so you can send in kbest parses, if your parser handles that
+       * note that this already includes a score field
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+       */
+      java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> 
+          getPredictedList();
+      /**
+       * <pre>
+       * repeated so you can send in kbest parses, if your parser handles that
+       * note that this already includes a score field
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getPredicted(int index);
+      /**
+       * <pre>
+       * repeated so you can send in kbest parses, if your parser handles that
+       * note that this already includes a score field
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+       */
+      int getPredictedCount();
+      /**
+       * <pre>
+       * repeated so you can send in kbest parses, if your parser handles that
+       * note that this already includes a score field
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+       */
+      java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+          getPredictedOrBuilderList();
+      /**
+       * <pre>
+       * repeated so you can send in kbest parses, if your parser handles that
+       * note that this already includes a score field
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getPredictedOrBuilder(
+          int index);
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult}
+     */
+    public  static final class ParseResult extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult)
+        ParseResultOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use ParseResult.newBuilder() to construct.
+      private ParseResult(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private ParseResult() {
+        predicted_ = java.util.Collections.emptyList();
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new ParseResult();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private ParseResult(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000001) != 0)) {
+                  subBuilder = gold_.toBuilder();
+                }
+                gold_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER, extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(gold_);
+                  gold_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000001;
+                break;
+              }
+              case 18: {
+                if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                  predicted_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>();
+                  mutable_bitField0_ |= 0x00000002;
+                }
+                predicted_.add(
+                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER, extensionRegistry));
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          if (((mutable_bitField0_ & 0x00000002) != 0)) {
+            predicted_ = java.util.Collections.unmodifiableList(predicted_);
+          }
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int GOLD_FIELD_NUMBER = 1;
+      private edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree gold_;
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+       * @return Whether the gold field is set.
+       */
+      public boolean hasGold() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+       * @return The gold.
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getGold() {
+        return gold_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance() : gold_;
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getGoldOrBuilder() {
+        return gold_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance() : gold_;
+      }
+
+      public static final int PREDICTED_FIELD_NUMBER = 2;
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> predicted_;
+      /**
+       * <pre>
+       * repeated so you can send in kbest parses, if your parser handles that
+       * note that this already includes a score field
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getPredictedList() {
+        return predicted_;
+      }
+      /**
+       * <pre>
+       * repeated so you can send in kbest parses, if your parser handles that
+       * note that this already includes a score field
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+          getPredictedOrBuilderList() {
+        return predicted_;
+      }
+      /**
+       * <pre>
+       * repeated so you can send in kbest parses, if your parser handles that
+       * note that this already includes a score field
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+       */
+      public int getPredictedCount() {
+        return predicted_.size();
+      }
+      /**
+       * <pre>
+       * repeated so you can send in kbest parses, if your parser handles that
+       * note that this already includes a score field
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getPredicted(int index) {
+        return predicted_.get(index);
+      }
+      /**
+       * <pre>
+       * repeated so you can send in kbest parses, if your parser handles that
+       * note that this already includes a score field
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getPredictedOrBuilder(
+          int index) {
+        return predicted_.get(index);
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasGold()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          output.writeMessage(1, getGold());
+        }
+        for (int i = 0; i < predicted_.size(); i++) {
+          output.writeMessage(2, predicted_.get(i));
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, getGold());
+        }
+        for (int i = 0; i < predicted_.size(); i++) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(2, predicted_.get(i));
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult other = (edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult) obj;
+
+        if (hasGold() != other.hasGold()) return false;
+        if (hasGold()) {
+          if (!getGold()
+              .equals(other.getGold())) return false;
+        }
+        if (!getPredictedList()
+            .equals(other.getPredictedList())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasGold()) {
+          hash = (37 * hash) + GOLD_FIELD_NUMBER;
+          hash = (53 * hash) + getGold().hashCode();
+        }
+        if (getPredictedCount() > 0) {
+          hash = (37 * hash) + PREDICTED_FIELD_NUMBER;
+          hash = (53 * hash) + getPredictedList().hashCode();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+            getGoldFieldBuilder();
+            getPredictedFieldBuilder();
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          if (goldBuilder_ == null) {
+            gold_ = null;
+          } else {
+            goldBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000001);
+          if (predictedBuilder_ == null) {
+            predicted_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            predictedBuilder_.clear();
+          }
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult result = new edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            if (goldBuilder_ == null) {
+              result.gold_ = gold_;
+            } else {
+              result.gold_ = goldBuilder_.build();
+            }
+            to_bitField0_ |= 0x00000001;
+          }
+          if (predictedBuilder_ == null) {
+            if (((bitField0_ & 0x00000002) != 0)) {
+              predicted_ = java.util.Collections.unmodifiableList(predicted_);
+              bitField0_ = (bitField0_ & ~0x00000002);
+            }
+            result.predicted_ = predicted_;
+          } else {
+            result.predicted_ = predictedBuilder_.build();
+          }
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.getDefaultInstance()) return this;
+          if (other.hasGold()) {
+            mergeGold(other.getGold());
+          }
+          if (predictedBuilder_ == null) {
+            if (!other.predicted_.isEmpty()) {
+              if (predicted_.isEmpty()) {
+                predicted_ = other.predicted_;
+                bitField0_ = (bitField0_ & ~0x00000002);
+              } else {
+                ensurePredictedIsMutable();
+                predicted_.addAll(other.predicted_);
+              }
+              onChanged();
+            }
+          } else {
+            if (!other.predicted_.isEmpty()) {
+              if (predictedBuilder_.isEmpty()) {
+                predictedBuilder_.dispose();
+                predictedBuilder_ = null;
+                predicted_ = other.predicted_;
+                bitField0_ = (bitField0_ & ~0x00000002);
+                predictedBuilder_ = 
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                     getPredictedFieldBuilder() : null;
+              } else {
+                predictedBuilder_.addAllMessages(other.predicted_);
+              }
+            }
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          if (!hasGold()) {
+            return false;
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree gold_;
+        private com.google.protobuf.SingleFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> goldBuilder_;
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+         * @return Whether the gold field is set.
+         */
+        public boolean hasGold() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+         * @return The gold.
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getGold() {
+          if (goldBuilder_ == null) {
+            return gold_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance() : gold_;
+          } else {
+            return goldBuilder_.getMessage();
+          }
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+         */
+        public Builder setGold(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+          if (goldBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            gold_ = value;
+            onChanged();
+          } else {
+            goldBuilder_.setMessage(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+         */
+        public Builder setGold(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+          if (goldBuilder_ == null) {
+            gold_ = builderForValue.build();
+            onChanged();
+          } else {
+            goldBuilder_.setMessage(builderForValue.build());
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+         */
+        public Builder mergeGold(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+          if (goldBuilder_ == null) {
+            if (((bitField0_ & 0x00000001) != 0) &&
+                gold_ != null &&
+                gold_ != edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance()) {
+              gold_ =
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.newBuilder(gold_).mergeFrom(value).buildPartial();
+            } else {
+              gold_ = value;
+            }
+            onChanged();
+          } else {
+            goldBuilder_.mergeFrom(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+         */
+        public Builder clearGold() {
+          if (goldBuilder_ == null) {
+            gold_ = null;
+            onChanged();
+          } else {
+            goldBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000001);
+          return this;
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder getGoldBuilder() {
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return getGoldFieldBuilder().getBuilder();
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getGoldOrBuilder() {
+          if (goldBuilder_ != null) {
+            return goldBuilder_.getMessageOrBuilder();
+          } else {
+            return gold_ == null ?
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance() : gold_;
+          }
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+            getGoldFieldBuilder() {
+          if (goldBuilder_ == null) {
+            goldBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder>(
+                    getGold(),
+                    getParentForChildren(),
+                    isClean());
+            gold_ = null;
+          }
+          return goldBuilder_;
+        }
+
+        private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> predicted_ =
+          java.util.Collections.emptyList();
+        private void ensurePredictedIsMutable() {
+          if (!((bitField0_ & 0x00000002) != 0)) {
+            predicted_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>(predicted_);
+            bitField0_ |= 0x00000002;
+           }
+        }
+
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> predictedBuilder_;
+
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getPredictedList() {
+          if (predictedBuilder_ == null) {
+            return java.util.Collections.unmodifiableList(predicted_);
+          } else {
+            return predictedBuilder_.getMessageList();
+          }
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public int getPredictedCount() {
+          if (predictedBuilder_ == null) {
+            return predicted_.size();
+          } else {
+            return predictedBuilder_.getCount();
+          }
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getPredicted(int index) {
+          if (predictedBuilder_ == null) {
+            return predicted_.get(index);
+          } else {
+            return predictedBuilder_.getMessage(index);
+          }
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public Builder setPredicted(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+          if (predictedBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensurePredictedIsMutable();
+            predicted_.set(index, value);
+            onChanged();
+          } else {
+            predictedBuilder_.setMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public Builder setPredicted(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+          if (predictedBuilder_ == null) {
+            ensurePredictedIsMutable();
+            predicted_.set(index, builderForValue.build());
+            onChanged();
+          } else {
+            predictedBuilder_.setMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public Builder addPredicted(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+          if (predictedBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensurePredictedIsMutable();
+            predicted_.add(value);
+            onChanged();
+          } else {
+            predictedBuilder_.addMessage(value);
+          }
+          return this;
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public Builder addPredicted(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+          if (predictedBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensurePredictedIsMutable();
+            predicted_.add(index, value);
+            onChanged();
+          } else {
+            predictedBuilder_.addMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public Builder addPredicted(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+          if (predictedBuilder_ == null) {
+            ensurePredictedIsMutable();
+            predicted_.add(builderForValue.build());
+            onChanged();
+          } else {
+            predictedBuilder_.addMessage(builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public Builder addPredicted(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+          if (predictedBuilder_ == null) {
+            ensurePredictedIsMutable();
+            predicted_.add(index, builderForValue.build());
+            onChanged();
+          } else {
+            predictedBuilder_.addMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public Builder addAllPredicted(
+            java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> values) {
+          if (predictedBuilder_ == null) {
+            ensurePredictedIsMutable();
+            com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                values, predicted_);
+            onChanged();
+          } else {
+            predictedBuilder_.addAllMessages(values);
+          }
+          return this;
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public Builder clearPredicted() {
+          if (predictedBuilder_ == null) {
+            predicted_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000002);
+            onChanged();
+          } else {
+            predictedBuilder_.clear();
+          }
+          return this;
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public Builder removePredicted(int index) {
+          if (predictedBuilder_ == null) {
+            ensurePredictedIsMutable();
+            predicted_.remove(index);
+            onChanged();
+          } else {
+            predictedBuilder_.remove(index);
+          }
+          return this;
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder getPredictedBuilder(
+            int index) {
+          return getPredictedFieldBuilder().getBuilder(index);
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getPredictedOrBuilder(
+            int index) {
+          if (predictedBuilder_ == null) {
+            return predicted_.get(index);  } else {
+            return predictedBuilder_.getMessageOrBuilder(index);
+          }
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+             getPredictedOrBuilderList() {
+          if (predictedBuilder_ != null) {
+            return predictedBuilder_.getMessageOrBuilderList();
+          } else {
+            return java.util.Collections.unmodifiableList(predicted_);
+          }
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder addPredictedBuilder() {
+          return getPredictedFieldBuilder().addBuilder(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance());
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder addPredictedBuilder(
+            int index) {
+          return getPredictedFieldBuilder().addBuilder(
+              index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance());
+        }
+        /**
+         * <pre>
+         * repeated so you can send in kbest parses, if your parser handles that
+         * note that this already includes a score field
+         * </pre>
+         *
+         * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder> 
+             getPredictedBuilderList() {
+          return getPredictedFieldBuilder().getBuilderList();
+        }
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+            getPredictedFieldBuilder() {
+          if (predictedBuilder_ == null) {
+            predictedBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder>(
+                    predicted_,
+                    ((bitField0_ & 0x00000002) != 0),
+                    getParentForChildren(),
+                    isClean());
+            predicted_ = null;
+          }
+          return predictedBuilder_;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<ParseResult>
+          PARSER = new com.google.protobuf.AbstractParser<ParseResult>() {
+        @java.lang.Override
+        public ParseResult parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new ParseResult(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<ParseResult> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<ParseResult> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public static final int TREEBANK_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult> treebank_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+     */
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult> getTreebankList() {
+      return treebank_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+     */
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder> 
+        getTreebankOrBuilderList() {
+      return treebank_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+     */
+    public int getTreebankCount() {
+      return treebank_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult getTreebank(int index) {
+      return treebank_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder getTreebankOrBuilder(
+        int index) {
+      return treebank_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      for (int i = 0; i < getTreebankCount(); i++) {
+        if (!getTreebank(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < treebank_.size(); i++) {
+        output.writeMessage(1, treebank_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < treebank_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, treebank_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest other = (edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest) obj;
+
+      if (!getTreebankList()
+          .equals(other.getTreebankList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getTreebankCount() > 0) {
+        hash = (37 * hash) + TREEBANK_FIELD_NUMBER;
+        hash = (53 * hash) + getTreebankList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * A protobuf for calling the java constituency parser evaluator from elsewhere
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.EvaluateParserRequest)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getTreebankFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (treebankBuilder_ == null) {
+          treebank_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          treebankBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest result = new edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest(this);
+        int from_bitField0_ = bitField0_;
+        if (treebankBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            treebank_ = java.util.Collections.unmodifiableList(treebank_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.treebank_ = treebank_;
+        } else {
+          result.treebank_ = treebankBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.getDefaultInstance()) return this;
+        if (treebankBuilder_ == null) {
+          if (!other.treebank_.isEmpty()) {
+            if (treebank_.isEmpty()) {
+              treebank_ = other.treebank_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureTreebankIsMutable();
+              treebank_.addAll(other.treebank_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.treebank_.isEmpty()) {
+            if (treebankBuilder_.isEmpty()) {
+              treebankBuilder_.dispose();
+              treebankBuilder_ = null;
+              treebank_ = other.treebank_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              treebankBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getTreebankFieldBuilder() : null;
+            } else {
+              treebankBuilder_.addAllMessages(other.treebank_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        for (int i = 0; i < getTreebankCount(); i++) {
+          if (!getTreebank(i).isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult> treebank_ =
+        java.util.Collections.emptyList();
+      private void ensureTreebankIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          treebank_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult>(treebank_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder> treebankBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult> getTreebankList() {
+        if (treebankBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(treebank_);
+        } else {
+          return treebankBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public int getTreebankCount() {
+        if (treebankBuilder_ == null) {
+          return treebank_.size();
+        } else {
+          return treebankBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult getTreebank(int index) {
+        if (treebankBuilder_ == null) {
+          return treebank_.get(index);
+        } else {
+          return treebankBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public Builder setTreebank(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult value) {
+        if (treebankBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreebankIsMutable();
+          treebank_.set(index, value);
+          onChanged();
+        } else {
+          treebankBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public Builder setTreebank(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder builderForValue) {
+        if (treebankBuilder_ == null) {
+          ensureTreebankIsMutable();
+          treebank_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          treebankBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public Builder addTreebank(edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult value) {
+        if (treebankBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreebankIsMutable();
+          treebank_.add(value);
+          onChanged();
+        } else {
+          treebankBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public Builder addTreebank(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult value) {
+        if (treebankBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreebankIsMutable();
+          treebank_.add(index, value);
+          onChanged();
+        } else {
+          treebankBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public Builder addTreebank(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder builderForValue) {
+        if (treebankBuilder_ == null) {
+          ensureTreebankIsMutable();
+          treebank_.add(builderForValue.build());
+          onChanged();
+        } else {
+          treebankBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public Builder addTreebank(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder builderForValue) {
+        if (treebankBuilder_ == null) {
+          ensureTreebankIsMutable();
+          treebank_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          treebankBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public Builder addAllTreebank(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult> values) {
+        if (treebankBuilder_ == null) {
+          ensureTreebankIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, treebank_);
+          onChanged();
+        } else {
+          treebankBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public Builder clearTreebank() {
+        if (treebankBuilder_ == null) {
+          treebank_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          treebankBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public Builder removeTreebank(int index) {
+        if (treebankBuilder_ == null) {
+          ensureTreebankIsMutable();
+          treebank_.remove(index);
+          onChanged();
+        } else {
+          treebankBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder getTreebankBuilder(
+          int index) {
+        return getTreebankFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder getTreebankOrBuilder(
+          int index) {
+        if (treebankBuilder_ == null) {
+          return treebank_.get(index);  } else {
+          return treebankBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder> 
+           getTreebankOrBuilderList() {
+        if (treebankBuilder_ != null) {
+          return treebankBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(treebank_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder addTreebankBuilder() {
+        return getTreebankFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder addTreebankBuilder(
+          int index) {
+        return getTreebankFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder> 
+           getTreebankBuilderList() {
+        return getTreebankFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder> 
+          getTreebankFieldBuilder() {
+        if (treebankBuilder_ == null) {
+          treebankBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder>(
+                  treebank_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          treebank_ = null;
+        }
+        return treebankBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.EvaluateParserRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.EvaluateParserRequest)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<EvaluateParserRequest>
+        PARSER = new com.google.protobuf.AbstractParser<EvaluateParserRequest>() {
+      @java.lang.Override
+      public EvaluateParserRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new EvaluateParserRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<EvaluateParserRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<EvaluateParserRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface EvaluateParserResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.EvaluateParserResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>required double f1 = 1;</code>
+     * @return Whether the f1 field is set.
+     */
+    boolean hasF1();
+    /**
+     * <code>required double f1 = 1;</code>
+     * @return The f1.
+     */
+    double getF1();
+  }
+  /**
+   * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserResponse}
+   */
+  public  static final class EvaluateParserResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.EvaluateParserResponse)
+      EvaluateParserResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use EvaluateParserResponse.newBuilder() to construct.
+    private EvaluateParserResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private EvaluateParserResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new EvaluateParserResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private EvaluateParserResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 9: {
+              bitField0_ |= 0x00000001;
+              f1_ = input.readDouble();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int F1_FIELD_NUMBER = 1;
+    private double f1_;
+    /**
+     * <code>required double f1 = 1;</code>
+     * @return Whether the f1 field is set.
+     */
+    public boolean hasF1() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>required double f1 = 1;</code>
+     * @return The f1.
+     */
+    public double getF1() {
+      return f1_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (!hasF1()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeDouble(1, f1_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(1, f1_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse other = (edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse) obj;
+
+      if (hasF1() != other.hasF1()) return false;
+      if (hasF1()) {
+        if (java.lang.Double.doubleToLongBits(getF1())
+            != java.lang.Double.doubleToLongBits(
+                other.getF1())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasF1()) {
+        hash = (37 * hash) + F1_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            java.lang.Double.doubleToLongBits(getF1()));
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.EvaluateParserResponse)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        f1_ = 0D;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse result = new edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.f1_ = f1_;
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse.getDefaultInstance()) return this;
+        if (other.hasF1()) {
+          setF1(other.getF1());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        if (!hasF1()) {
+          return false;
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private double f1_ ;
+      /**
+       * <code>required double f1 = 1;</code>
+       * @return Whether the f1 field is set.
+       */
+      public boolean hasF1() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required double f1 = 1;</code>
+       * @return The f1.
+       */
+      public double getF1() {
+        return f1_;
+      }
+      /**
+       * <code>required double f1 = 1;</code>
+       * @param value The f1 to set.
+       * @return This builder for chaining.
+       */
+      public Builder setF1(double value) {
+        bitField0_ |= 0x00000001;
+        f1_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required double f1 = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearF1() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        f1_ = 0D;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.EvaluateParserResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.EvaluateParserResponse)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<EvaluateParserResponse>
+        PARSER = new com.google.protobuf.AbstractParser<EvaluateParserResponse>() {
+      @java.lang.Override
+      public EvaluateParserResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new EvaluateParserResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<EvaluateParserResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<EvaluateParserResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_Document_descriptor;
   private static final 
@@ -81018,6 +85287,31 @@ public final class CoreNLPProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -81305,19 +85599,31 @@ public final class CoreNLPProtos {
       "5\n\010document\030\001 \002(\0132#.edu.stanford.nlp.pip" +
       "eline.Document\0227\n\010language\030\002 \001(\0162#.edu.s" +
       "tanford.nlp.pipeline.LanguageH\000\022\032\n\020relat" +
-      "ivePronouns\030\003 \001(\tH\000B\005\n\003ref*\243\001\n\010Language\022" +
-      "\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chi" +
-      "nese\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006Frenc" +
-      "h\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020Universa" +
-      "lEnglish\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSent" +
-      "iment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGAT" +
-      "IVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n" +
-      "\017STRONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelat" +
-      "ion\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILME" +
-      "NT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION" +
-      "\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPE" +
-      "NDENCE\020\006B*\n\031edu.stanford.nlp.pipelineB\rC" +
-      "oreNLPProtos"
+      "ivePronouns\030\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022Flattened" +
+      "ParseTree\022A\n\005nodes\030\001 \003(\01322.edu.stanford." +
+      "nlp.pipeline.FlattenedParseTree.Node\032[\n\004" +
+      "Node\022\022\n\010openNode\030\001 \001(\010H\000\022\023\n\tcloseNode\030\002 " +
+      "\001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B\n\n" +
+      "\010contents\"\366\001\n\025EvaluateParserRequest\022N\n\010t" +
+      "reebank\030\001 \003(\0132<.edu.stanford.nlp.pipelin" +
+      "e.EvaluateParserRequest.ParseResult\032\214\001\n\013" +
+      "ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stanford" +
+      ".nlp.pipeline.FlattenedParseTree\022@\n\tpred" +
+      "icted\030\002 \003(\0132-.edu.stanford.nlp.pipeline." +
+      "FlattenedParseTree\"$\n\026EvaluateParserResp" +
+      "onse\022\n\n\002f1\030\001 \002(\001*\243\001\n\010Language\022\013\n\007Unknown" +
+      "\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007" +
+      "English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Heb" +
+      "rew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglish\020\t" +
+      "\022\024\n\020UniversalChinese\020\n*h\n\tSentiment\022\023\n\017S" +
+      "TRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007N" +
+      "EUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_PO" +
+      "SITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013EQU" +
+      "IVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022RE" +
+      "VERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTE" +
+      "RNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*" +
+      "\n\031edu.stanford.nlp.pipelineB\rCoreNLPProt" +
+      "os"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -81563,6 +85869,36 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_descriptor,
         new java.lang.String[] { "Document", "Language", "RelativePronouns", "Ref", });
+    internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_descriptor =
+      getDescriptor().getMessageTypes().get(28);
+    internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_descriptor,
+        new java.lang.String[] { "Nodes", });
+    internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_descriptor.getNestedTypes().get(0);
+    internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_descriptor,
+        new java.lang.String[] { "OpenNode", "CloseNode", "Value", "Score", "Contents", });
+    internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor =
+      getDescriptor().getMessageTypes().get(29);
+    internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor,
+        new java.lang.String[] { "Treebank", });
+    internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor.getNestedTypes().get(0);
+    internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_descriptor,
+        new java.lang.String[] { "Gold", "Predicted", });
+    internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor =
+      getDescriptor().getMessageTypes().get(30);
+    internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor,
+        new java.lang.String[] { "F1", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
