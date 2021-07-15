@@ -56,8 +56,8 @@ public class EvaluateTreebank  {
 
   // private final Lexicon lex;
 
-  List<Eval> evals = null;
-  List<ParserQueryEval> parserQueryEvals = null;
+  final List<Eval> evals;
+  final List<ParserQueryEval> parserQueryEvals;
 
   private final boolean summary;
   private final boolean tsv;
@@ -122,9 +122,13 @@ public class EvaluateTreebank  {
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
 
     this.evals = new ArrayList<>();
-    this.evals.addAll(extraEvals);
+    if (extraEvals != null) {
+      this.evals.addAll(extraEvals);
+    }
     this.parserQueryEvals = new ArrayList<>();
-    this.parserQueryEvals.addAll(parserQueryEvals);
+    if (parserQueryEvals != null) {
+      this.parserQueryEvals.addAll(parserQueryEvals);
+    }
 
     // this.lex = lex;
     this.pqFactory = pqFactory;
@@ -551,10 +555,8 @@ public class EvaluateTreebank  {
         for (Eval eval : evals) {
           eval.evaluate(treeFact, transGoldTree, pwErr);
         }
-        if (parserQueryEvals != null) {
-          for (ParserQueryEval eval : parserQueryEvals) {
-            eval.evaluate(pq, transGoldTree, pwErr);
-          }
+        for (ParserQueryEval eval : parserQueryEvals) {
+          eval.evaluate(pq, transGoldTree, pwErr);
         }
         if (op.testOptions.evalb) {
           // empty out scores just in case
@@ -724,10 +726,8 @@ public class EvaluateTreebank  {
     if(pwFileOut != null) pwFileOut.close();
     if(pwStats != null) pwStats.close();
 
-    if (parserQueryEvals != null) {
-      for (ParserQueryEval parserQueryEval : parserQueryEvals) {
-        parserQueryEval.display(false, pwErr);
-      }
+    for (ParserQueryEval parserQueryEval : parserQueryEvals) {
+      parserQueryEval.display(false, pwErr);
     }
 
     return f1;
