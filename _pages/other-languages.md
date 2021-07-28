@@ -61,29 +61,30 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 ### JavaScript (node.js)
 
+#### Recommended
+
 * [corenlp](https://www.npmjs.com/package/corenlp)
 ([github site](https://github.com/gerardobort/node-corenlp))
 by Gerardo Bort is an actively developed node.js CoreNLP library. Multilingual support.
 You can [run this package in your browser, using RunKit](https://npm.runkit.com/corenlp).
-* [corenlp-sentiment](https://www.npmjs.com/package/corenlp-sentiment) adds support for sentiment analysis to the above corenlp package. By Garrick James McMickell.
-* [stanford-corenlp](https://www.npmjs.org/package/stanford-corenlp) ([github site](https://github.com/hiteshjoshi/node-stanford-corenlp)) is a simple node.js wrapper by hiteshjoshi.
-* [CoreNLP-client](https://npmdaily.com/pkg/corenlp-client) ([GitHub site](https://github.com/rom1504/node-corenlp-client)) is a simple corenlp client to the corenlp http server using request-promise by Romain Beaumont. Extended by Christophe B. for multilingual use as [corenlp-client-multilang](https://www.npmjs.com/package/corenlp-client-multilang)
+* [corenlp-sentiment](https://www.npmjs.com/package/corenlp-sentiment) ([github site](https://github.com/garrickmcmickell/corenlp-sentiment)) adds support for sentiment analysis to the above corenlp package. By Garrick James McMickell.
+* [CoreNLP-client](https://www.npmjs.com/package/corenlp-client) ([GitHub site](https://github.com/rom1504/node-corenlp-client)) is a simple corenlp client to the corenlp http server using request-promise by Romain Beaumont. Extended by Christophe B. for multilingual use as [corenlp-client-multilang](https://www.npmjs.com/package/corenlp-client-multilang)
 ([github site](https://github.com/christophe77/node-corenlp-client)). The latter has multilingual support.
 * [corenlp-request-wrapper ](https://www.npmjs.com/package/corenlp-request-wrapper)
-([github site](https://github.com/nash403/corenlp-request-wrapper))
-is a wrapper for a Stanford CoreNLP server by nash403.
+([github site](https://github.com/nash403/corenlp-request-wrapper)) is a wrapper for a Stanford CoreNLP server by nash403.
 
-Other choices are now probably best avoided:
+#### Caution: Disrecommended
 
-* [corenlp-js-interface](https://www.npmjs.com/package/corenlp-js-interface) is the simplest interface with CoreNLP server in node.js.  The GitHub site is no longer available.
-<!-- ([github site](https://github.com/noahDess/corenlp-js-interface)) -->
-* [corenlp-js-prefab](https://www.npmjs.com/package/corenlp-js-prefab) a simple interface to the CoreNLP server with a prefab function so you only have to send text no extra parameters with each call. By Noah Dessauer. The GitHub site is no longer available.
+* [stanford-corenlp](https://www.npmjs.org/package/stanford-corenlp) ([github site](https://github.com/hiteshjoshi/node-stanford-corenlp)) is a simple node.js wrapper by hiteshjoshi.
 * [stanford-corenlp-node](https://github.com/mhewett/stanford-corenlp-node) ([github site](https://github.com/mhewett/stanford-corenlp-node)) is a webservice interface to CoreNLP in node.js by Mike Hewett. No recent development.
-* [stanford-simple-nlp](https://npmjs.org/package/stanford-simple-nlp) ([github site](https://github.com/xissy/node-stanford-simple-nlp)) is a node.js CoreNLP wrapper by Taeho Kim (xissy). This doesn't seem to have been updated lately. You're better off with something else.
+* [stanford-simple-nlp](https://npmjs.org/package/stanford-simple-nlp) ([github site](https://github.com/xissy/node-stanford-simple-nlp)) is a node.js CoreNLP wrapper by Taeho Kim (xissy). This doesn't seem to have been updated lately. You're better off with something else
+* [corenlp-js-interface](https://www.npmjs.com/package/corenlp-js-interface) was a (too) simple interface to a CoreNLP server in node.js. It is deprecated, suffers from a [command injection vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2020-28439) and the GitHub site is no longer available.
+<!-- ([github site](https://github.com/noahDess/corenlp-js-interface)) -->
+* [corenlp-js-prefab](https://www.npmjs.com/package/corenlp-js-prefab) was a simple interface to the CoreNLP server with a prefab function so you only have to send text and no extra parameters with each call by Noah Dessauer. It is deprecated and the GitHub site is no longer available.
 
 ### Lua
 
-* [CoreNLP.lua](https://github.com/vzhong/CoreNLP.lua). Lua client for StanfordCoreNLPServer by [Victor Zhong](http://www.victorzhong.com/)
+* [CoreNLP.lua](https://github.com/vzhong/CoreNLP.lua). Lua client for StanfordCoreNLPServer by [Victor Zhong](http://www.victorzhong.com/). ([LuaRocks site](https://luarocks.org/modules/vzhong/corenlp))
 
 ### Perl
 
