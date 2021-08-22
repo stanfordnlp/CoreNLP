@@ -291,6 +291,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    *
    * @return the next token in the token stream, or null if none exists.
    */
+  @SuppressWarnings({"unchecked"})
   @Override
   protected T getNext() {
     // if (lexer == null) {

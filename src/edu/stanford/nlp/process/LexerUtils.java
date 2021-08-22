@@ -78,9 +78,11 @@ public class LexerUtils {
     return s1;
   }
 
+  /** This removes both the character U+00AD for a soft hyphen and the no-break word joiner U+2060. */
   public static String removeSoftHyphens(String in) {
     // \u00AD is the soft hyphen character, which we remove, regarding it as inserted only for line-breaking
-    if (in.indexOf('\u00AD') < 0) {
+    // \u2060 is the word joiner character, which we remove, regarding it as inserted only to prevent line-breaking.
+    if (in.indexOf('\u00AD') < 0 && in.indexOf('\u2060') < 0) {
       // shortcut doing work
       return in;
     }
@@ -97,12 +99,12 @@ public class LexerUtils {
     */
     for (int i = 0; i < length; i++) {
       char ch = in.charAt(i);
-      if (ch != '\u00AD') {
+      if (ch != '\u00AD' && ch != '\u2060') {
        out.append(ch);
       }
     }
     if (out.length() == 0) {
-      out.append('-'); // don't create an empty token, put in a regular hyphen
+      out.append('-'); // awkward, but don't create an empty token, put in a regular hyphen
     }
     return out.toString();
   }
