@@ -52,14 +52,15 @@ models jar.
 
 | Language | Model Jar | Last Updated |
 | --- | --- | --- |
-| Arabic | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-arabic.jar) | 4.2.2 |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-chinese.jar) | 4.2.2 |
-| English (default) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models.jar) | 4.2.2 |
-| English (extra) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-english.jar) | 4.2.2 |
-| English (kbp) | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-english-kbp.jar) | 4.2.2 |
-| French | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-french.jar) | 4.2.2 |
-| German | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-german.jar) | 4.2.2 |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-spanish.jar) | 4.2.2 |
+| Arabic  | [download](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-models-arabic.jar) [mirror](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-arabic.jar) | 4.2.2 |
+| Chinese | [download](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-models-chinese.jar) [mirror](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-chinese.jar) | 4.2.2 |
+| English (extra) | [download](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-models-english-extra.jar) [mirror](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-english.jar) | 4.2.2 |
+| English (KBP) | [download](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-models-english-kbp.jar) [mirror](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-english-kbp.jar) | 4.2.2 |
+| French | [download](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-models-french.jar) [mirror](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-french.jar) | 4.2.2 |
+| German | [download](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-models-german.jar) [mirror](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-german.jar) | 4.2.2 |
+| Spanish | [download](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-models-spanish.jar) [mirror](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-spanish.jar) | 4.2.2 |
+
+Thank you to HuggingFace for helping with our hosting!
 
 ### Useful resources
 
