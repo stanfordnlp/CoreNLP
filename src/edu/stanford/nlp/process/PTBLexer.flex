@@ -345,9 +345,9 @@ import edu.stanford.nlp.util.logging.Redwood;
 
   /* This pattern now also include newlines, since we sometimes allow them in SGML tokens.... */
   private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("[ \r\n]");
-  private static final Pattern HYPHENS = Pattern.compile("[-\u2010-\u2011]");
+  private static final Pattern HYPHENS = Pattern.compile("[-\u2010-\u2012]");
   private static final Pattern FORWARD_SLASH = Pattern.compile("/");
-  private static final Pattern HYPHENS_FORWARD_SLASH = Pattern.compile("[-\u2010-\u2011/]");
+  private static final Pattern HYPHENS_FORWARD_SLASH = Pattern.compile("[-\u2010-\u2012/]");
   private static final Pattern HYPHENS_DASHES = Pattern.compile("[-\u2010-\u2015]");
   private static final Pattern NUMBER = Pattern.compile("\\d+");
 
@@ -575,32 +575,34 @@ SPAMP = &amp;
 SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
 SPLET = &[aeiouAEIOU](acute|grave|uml);
 /* \u3000 is ideographic space */
-SPACE = [ \t\u00A0\u2000-\u200A\u3000]
+SPACE = [ \t\u00A0\u2000-\u200A\u202F\u3000]
 SPACES = {SPACE}+
 NEWLINE = \r|\r?\n|\u2028|\u2029|\u000B|\u000C|\u0085
 SPACENL = ({SPACE}|{NEWLINE})
 SPACENLS = {SPACENL}+
 /* These next ones are useful to get a fixed length trailing context. */
-SPACENL_ONE_CHAR = [ \t\u00A0\u2000-\u200A\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
-NOT_SPACENL_ONE_CHAR = [^ \t\u00A0\u2000-\u200A\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
+SPACENL_ONE_CHAR = [ \t\u00A0\u2000-\u200A\u202F\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
+NOT_SPACENL_ONE_CHAR = [^ \t\u00A0\u2000-\u200A\u202F\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
 SENTEND1 = {SPACENL}({SPACENL}|[:uppercase:]|{SGML1})
 SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
 DIGIT = [:digit:]|[\u07C0-\u07C9]
-DATE = {DIGIT}{1,2}[\-\/]{DIGIT}{1,2}[\-\/]{DIGIT}{2,4}|{DIGIT}{4}[\-\/]{DIGIT}{1,2}[\-\/]{DIGIT}{1,2}
+DATE = {DIGIT}{1,2}[\-\u2012\/]{DIGIT}{1,2}[\-\u2012\/]{DIGIT}{2,4}|{DIGIT}{4}[\-\u2012\/]{DIGIT}{1,2}[\-\u2012\/]{DIGIT}{1,2}
 /* Note that NUM also includes times like 12:55. One can start with a . or , but not a : */
 NUM = {DIGIT}*([.,\u066B\u066C]{DIGIT}+)+|{DIGIT}+([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)*
 /* Now don't allow bracketed negative numbers!  They have too many uses (e.g.,
    years or times in parentheses), and having them in tokens messes up
    treebank parsing.
    NUMBER = [\-+]?{NUM}|\({NUM}\) */
-NUMBER = [\-+]?{NUM}
+NUMBER = [\-\u2212+]?{NUM}
 SUBSUPNUM = [\u207A\u207B\u208A\u208B]?([\u2070\u00B9\u00B2\u00B3\u2074-\u2079]+|[\u2080-\u2089]+)
 /* Constrain fraction to only match likely fractions. Full one allows hyphen, space, or non-breaking space between integer and fraction part, but strictFraction allows only hyphen. */
 FRAC = ({DIGIT}{1,4}[- \u00A0])?{DIGIT}{1,4}(\\?\/|\u2044){DIGIT}{1,4}
 FRAC2 = [\u00BC\u00BD\u00BE\u2153-\u215E]
+/* # is here for historical reasons -- old UK ASCII-equivalent used # for pound mark. Bit ugly now. */
 DOLSIGN = ([A-Z]*\$|#)
-/* These are cent and pound; currency, yen; CP1252 euro, ECU, new shekel, euro; rupee ... Lira */
-DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AA\u20AC\u20B9\u060B\u0E3F\u20A4\uFFE0\uFFE1\uFFE5\uFFE6\u20BD\u20A9]
+/* Currency: These are cent, pound, currency, yen; CP1252 euro; ECU and many other currency simples including Euro;
+   armenian dram, afghani, bengali rupee, thai bhat; full-wdith dollar, cent pound, yen, won */
+DOLSIGN2 = [\u00A2-\u00A5\u0080\u20A0-\u20BF\u058F\u060B\u09F2\u09F3\u0AF1\u0BF9\u0E3F\u17DB\uFF04\uFFE0\uFFE1\uFFE5\uFFE6]
 /* not used DOLLAR      {DOLSIGN}[ \t]*{NUMBER}  */
 /* |\( ?{NUMBER} ?\))    # is for pound signs */
 FILENAME_EXT = 3gp|avi|bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|flv|gif|gz|h|hei[cf]|htm|html|jar|java|jpeg|jpg|mov|mp[34g]|mpeg|o|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|wm[va]
@@ -614,9 +616,9 @@ SEP_OTHER = ([ap]m|hrs?|words?|m(on)?ths?|y(ea)?rs?|pts?)
 /* If there is a longer alphabetic match, another longer pattern will match so don't need to filter that. */
 SEP_SUFFIX = ({SEP_CURRENCY}|{SEP_UNITS}|{SEP_OTHER})
 /* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
-LETTER = ([:letter:]|{SPLET}|[\u00AD\u2060\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
+LETTER = ([:letter:]|{SPLET}|[\u00AD\u200C\u200D\u2060\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
 /* Allow in the zero-width (non-)joiner characters. */
-WORD = {LETTER}({LETTER}|{DIGIT})*([.!?\u200c\u200d]{LETTER}({LETTER}|{DIGIT})*)*
+WORD = {LETTER}({LETTER}|{DIGIT})*([.!?]{LETTER}({LETTER}|{DIGIT})*)*
 /* THING: The $ was for things like New$;
    WAS: only keep hyphens with short one side like co-ed. But (old) treebank just allows hyphenated things as words!
    THING allows d'Avignon or NUMBER before HYPHEN and the same things after it. Only first number can be negative. */
@@ -627,7 +629,7 @@ APOS = ['\u0092\u2019´]|&apos;  /* ASCII straight quote, single right curly quo
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
 /* HTHING recognizes hyphenated words, including ones with various kinds of numbers in them. And with underscores. */
-HTHING = [\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD\u2060]*([-_]([\p{Alpha}\p{Digit}\u00AD\u2060]+(\.[:digit:]+)?|{ACRO2}\.))+
+HTHING = [\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD\u200C\u200D\u2060]*([-_]([\p{Alpha}\p{Digit}\u00AD\u200C\u200D\u2060]+(\.[:digit:]+)?|{ACRO2}\.))+
 /* from the CLEAR (biomedical?) treebank documentation */
 /* we're going to split on most hyphens except a few */
 /* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */
@@ -653,7 +655,7 @@ HTHINGEXCEPTIONWHOLE = (mm-hm|mm-mm|o-kay|uh-huh|uh-oh)(s|es|d|ed)?
 REDAUX = {APOSETCETERA}([msdMSD]|re|ve|ll)
 /* For things that will have n't on the end. They can't end in 'n' */
 /* \u00AD is soft hyphen. \u2060 is word joiner */
-SWORD = [\p{Alpha}\u00AD\u2060]*[A-MO-Za-mo-z][\u00AD\u2060]*
+SWORD = [\p{Alpha}\u00AD\u200C\u200D\u2060]*[A-MO-Za-mo-z][\u00AD\u200C\u200D\u2060]*
 SREDAUX = n{APOSETCETERA}t
 /* Tokens you want but already okay: C'mon 'n' '[2-9]0s '[eE]m 'till?
    [Yy]'all 'Cause Shi'ite B'Gosh o'clock.  Here now only need apostrophe
@@ -753,17 +755,17 @@ ABBREVSN = So\.|No\.
 /* See also a couple of special cases for pty. in the code below. */
 
 
-HYPHEN = [-\u058A\u2010\u2011]
+HYPHEN = [-\u058A\u2010\u2011\u2012]
 HYPHENS = {HYPHEN}+
 SSN = [0-9]{3}{HYPHEN}[0-9]{2}{HYPHEN}[0-9]{4}
 /* phone numbers. keep multi dots pattern separate, so not confused with decimal numbers. And for new treebank tokenization 346-8792. 1st digit can't be 0 or 1 in NANP. */
-PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{1,4}[\- \u00A0])?[0-9]{2,4}[\- \u00A0/])[0-9]{3,4}[\- \u00A0]?[0-9]{3,5}|((\+\+?)?[0-9]{1,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}|[2-9][0-9]{2}-[0-9]{4}
+PHONE = (\([0-9]{2,3}\)[ \u00A0\u2007]?|(\+\+?)?([0-9]{1,4}[\- \u00A0\u2007\u2012])?[0-9]{2,4}[\- \u00A0\u2007\u2012/])[0-9]{3,4}[\- \u00A0\u2007\u2012]?[0-9]{3,5}|((\+\+?)?[0-9]{1,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}|[2-9][0-9]{2}[-\u2012][0-9]{4}
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
 FAKEDUCKFEET = <<|>>
 LESSTHAN = <|&lt;
 GREATERTHAN = >|&gt;
 LDOTS = \.\.\.+|[\u0085\u2026]
-SPACEDLDOTS = \.[ \u00A0](\.[ \u00A0])+\.
+SPACEDLDOTS = \.[ \u00A0\u202F](\.[ \u00A0\u202F])+\.
 ATS = @+
 UNDS = _+
 ASTS = \*+|(\\\*){1,3}
@@ -1106,10 +1108,10 @@ RM/{NUM}        { String txt = yytext();
 {SSN}                   { return getNext(); }
 {PHONE}                 { String txt = yytext();
                           String norm = txt;
-			  if (normalizeSpace) {
+                          if (normalizeSpace) {
                             norm = norm.replace(' ', '\u00A0'); // change space to non-breaking space
                           }
-			  norm = LexerUtils.pennNormalizeParens(norm, normalizeParentheses);
+                          norm = LexerUtils.pennNormalizeParens(norm, normalizeParentheses);
                           if (DEBUG) { logger.info("Used {PHONE} to recognize " + txt + " as " + norm); }
                           return getNext(norm, txt);
                         }
@@ -1127,13 +1129,13 @@ RM/{NUM}        { String txt = yytext();
                         }
 {SMILEY}/[^\p{Alpha}\p{Digit}] { String txt = yytext();
                   String origText = txt;
-		  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
+                  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
                   if (DEBUG) { logger.info("Used {SMILEY} to recognize " + origText + " as " + txt); }
                   return getNext(txt, origText);
                 }
 {ASIANSMILEY}   { String txt = yytext();
                   String origText = txt;
-		  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
+                  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
                   return getNext(txt, origText);
                 }
 {EMOJI}         { String txt = yytext();
@@ -1183,7 +1185,7 @@ RM/{NUM}        { String txt = yytext();
                   if (yylength() <= 4) {
                      tok = LexerUtils.handleDashes(origTxt, dashesStyle);
                   }
-                  if (DEBUG) { logger.info("Used {SPMDASH} to recognize " + origTxt + " as " + tok); }
+                  if (DEBUG) { logger.info("Used {HYPHENS} to recognize " + origTxt + " as " + tok); }
                   return getNext(tok, origTxt);
                 }
 
