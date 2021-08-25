@@ -187,7 +187,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(PTBTokenizer.class);
 
-  // the underlying lexer
+  /** The underlying lexer */
   private final PTBLexer lexer;
 
 
@@ -364,8 +364,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * the tokens with space and run it through this method to produce nice
    * looking text. It's not perfect, but it works pretty well.
    */
-  public static int ptb2Text(Reader ptbText, Writer w) throws IOException {
-    int numTokens = 0;
+  public static long ptb2Text(Reader ptbText, Writer w) throws IOException {
+    long numTokens = 0;
     PTB2TextLexer lexer = new PTB2TextLexer(ptbText);
     for (String token; (token = lexer.next()) != null; ) {
       numTokens++;
@@ -376,7 +376,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
   private static void untok(List<String> inputFileList, List<String> outputFileList, String charset) throws IOException {
     final long start = System.nanoTime();
-    int numTokens = 0;
+    long numTokens = 0;
     int sz = inputFileList.size();
     if (sz == 0) {
       Reader r = new InputStreamReader(System.in, charset);
@@ -476,9 +476,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     System.err.printf("PTBTokenizer tokenized %d tokens at %.2f tokens per second.%n", numTokens, wordsPerSec);
   }
 
-  private static int tokReader(Reader r, BufferedWriter writer, Pattern parseInsidePattern, Pattern filterPattern, String options,
+  private static long tokReader(Reader r, BufferedWriter writer, Pattern parseInsidePattern, Pattern filterPattern, String options,
                                boolean preserveLines, boolean oneLinePerElement, boolean dump, boolean lowerCase) throws IOException {
-    int numTokens = 0;
+    long numTokens = 0;
     boolean beginLine = true;
     boolean printing = (parseInsidePattern == null); // start off printing, unless you're looking for a start entity
     Matcher m = null;
