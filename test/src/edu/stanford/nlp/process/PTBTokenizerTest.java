@@ -757,17 +757,21 @@ public class PTBTokenizerTest {
   }
 
   private final String[] emojiInputs = {
-          // The non-BMP Emoji end up being surrogate pair encoded in Java! This list includes a flag.
+          // The non-BMP Emoji end up being surrogate pair encoded in Java! This list includes a flag. "😉😀😂😍🤡🇦🇺🍺"
           "\uD83D\uDE09\uD83D\uDE00\uD83D\uDE02\uD83D\uDE0D\uD83E\uDD21\uD83C\uDDE6\uD83C\uDDFA\uD83C\uDF7A",
           // People with skin tones
           "\uD83D\uDC66\uD83C\uDFFB\uD83D\uDC67\uD83C\uDFFF",
-          // A family with cheese
+          // A family with cheese; \u200D is the zero-width joiner for making complex emoji
           "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67\uD83E\uDDC0",
           // Some BMP emoji
           "\u00AE\u203C\u2198\u231A\u2328\u23F0\u2620\u26BD\u2705\u2757",
           // Choosing emoji vs. text presentation.
           "⚠⚠️⚠︎❤️❤",
-          "\uD83D\uDC69\u200D⚖\uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4"
+          // 👩 ‍ ⚖ , 👨🏿‍🎤  i.e. female judge person with skin color (scales is U+2696) then ??
+          "\uD83D\uDC69\u200D⚖\uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4",
+          "555-0199",
+          "555\u20120199",
+          "DBM submits proposed ₱5.024-trillion 2022 budget",
   };
 
   private final String[][] emojiGold = {
@@ -776,7 +780,10 @@ public class PTBTokenizerTest {
           { "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67", "\uD83E\uDDC0" },
           { "\u00AE", "\u203C", "\u2198", "\u231A", "\u2328", "\u23F0", "\u2620", "\u26BD", "\u2705", "\u2757" },
           { "⚠", "⚠️", "⚠︎", "❤️", "❤"},
-          { "\uD83D\uDC69\u200D⚖", "\uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4" }
+          { "\uD83D\uDC69\u200D⚖", "\uD83D\uDC68\uD83C\uDFFF\u200D\uD83C\uDFA4" },
+          { "555-0199" },
+          { "555‒0199" },
+          {"DBM", "submits", "proposed", "₱", "5.024", "-", "trillion", "2022", "budget" },
   };
 
   @Test

@@ -14,6 +14,7 @@ public class LexerUtils {
 
   private static final Pattern CENTS_PATTERN = Pattern.compile("\u00A2");
   private static final Pattern POUND_PATTERN = Pattern.compile("\u00A3");
+  // "¤₠€₹" CP1252 Euro, Generic currency, disused euro-currency, Euro, Rupee
   private static final Pattern GENERIC_CURRENCY_PATTERN = Pattern.compile("[\u0080\u00A4\u20A0\u20AC\u20B9]");
   private static final Pattern CP1252_EURO_PATTERN = Pattern.compile("\u0080");
 
@@ -22,6 +23,9 @@ public class LexerUtils {
   private static final Pattern THREE_FOURTHS_PATTERN = Pattern.compile("\u00BE");
   private static final Pattern ONE_THIRD_PATTERN = Pattern.compile("\u2153");
   private static final Pattern TWO_THIRDS_PATTERN = Pattern.compile("\u2154");
+
+  private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("[ ]");
+  private static final Pattern NON_WORD_REMOVE_CHARS = Pattern.compile("[\u00AD\u200C\u200D\u2060]");
 
   private static final String ptb3EllipsisStr = "...";
   private static final String unicodeEllipsisStr = "\u2026";
@@ -73,40 +77,26 @@ public class LexerUtils {
 
   /** Still at least turn cp1252 euro symbol to Unicode one. */
   public static String minimallyNormalizeCurrency(String in) {
-    String s1 = in;
-    s1 = CP1252_EURO_PATTERN.matcher(s1).replaceAll("\u20AC");
-    return s1;
+    return CP1252_EURO_PATTERN.matcher(in).replaceAll("\u20AC");
   }
 
-  /** This removes both the character U+00AD for a soft hyphen and the no-break word joiner U+2060. */
+
+  /** This removes from words several Unicode characters that aren't really part of the word form:
+   *  (i) the character U+00AD for a soft hyphen,
+   *  (ii) the character U+2060 for a (zero-width) no-break word joiner,
+   *  (iii) the character U+200C for a zero-width non-joiner.
+   *  (iv) the character U+200D zero width joiner
+   *  This method should probably be renamed to reflect its more general behavior.
+   */
   public static String removeSoftHyphens(String in) {
     // \u00AD is the soft hyphen character, which we remove, regarding it as inserted only for line-breaking
+    // \u200C is the zero-width non joiner; \u200D is the zero-width joiner
     // \u2060 is the word joiner character, which we remove, regarding it as inserted only to prevent line-breaking.
-    if (in.indexOf('\u00AD') < 0 && in.indexOf('\u2060') < 0) {
-      // shortcut doing work
-      return in;
+    String out = NON_WORD_REMOVE_CHARS.matcher(in).replaceAll("");
+    if (out.isEmpty()) {
+      out = "-"; // awkward, but don't create an empty token, put in a regular hyphen
     }
-    int length = in.length();
-    StringBuilder out = new StringBuilder(length - 1);
-    /*
-    // This isn't necessary, as BMP, low, and high surrogate encodings are disjoint!
-    for (int offset = 0, cp; offset < length; offset += Character.charCount(cp)) {
-      cp = in.codePointAt(offset);
-      if (cp != '\u00AD') {
-        out.appendCodePoint(cp);
-      }
-    }
-    */
-    for (int i = 0; i < length; i++) {
-      char ch = in.charAt(i);
-      if (ch != '\u00AD' && ch != '\u2060') {
-       out.append(ch);
-      }
-    }
-    if (out.length() == 0) {
-      out.append('-'); // awkward, but don't create an empty token, put in a regular hyphen
-    }
-    return out.toString();
+    return out;
   }
 
   /* CP1252: dagger, double dagger, per mille, bullet, small tilde, trademark */
@@ -246,7 +236,6 @@ public class LexerUtils {
     }
   }
 
-  private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("[ ]");
 
   public static String handleEllipsis(final String tok, EllipsesEnum ellipsesStyle) {
     switch (ellipsesStyle) {
@@ -268,7 +257,7 @@ public class LexerUtils {
     }
   }
 
-  // Other things to consider handling: [_\u058A\u2010\u2011]
+  // Other things to consider handling: [_\u058A\u2010\u2011\u2012]
   public static String handleDashes(final String tok, DashesEnum dashesStyle) {
     switch (dashesStyle) {
       case UNICODE:
