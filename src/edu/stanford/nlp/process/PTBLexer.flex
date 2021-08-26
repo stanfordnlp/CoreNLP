@@ -482,21 +482,30 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
   /** Make the next token.
+   *  If the begin character offset exceeds what can be stored in 32 bits, it is
+   *  entered as Integer.MAX_VALUE and an error is logged.
+   *
    *  @param txt What the token should be
    *  @param originalText The original String that got transformed into txt
    */
   private Object getNext(String txt, String originalText) {
+    int begin;
+    try {
+      begin = Math.toIntExact(yychar);
+    } catch (ArithmeticException ae) {
+      begin = Integer.MAX_VALUE;
+    }
     if (invertible) {
       String str = prevWordAfter.toString();
       prevWordAfter.setLength(0);
-      CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, Math.toIntExact(yychar), yylength());
+      CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, begin, yylength());
       word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
       word.set(CoreAnnotations.BeforeAnnotation.class, str);
       prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
       prevWord = word;
       return word;
     } else {
-      Object word = tokenFactory.makeToken(txt, Math.toIntExact(yychar), yylength());
+      Object word = tokenFactory.makeToken(txt, begin, yylength());
       if (word instanceof CoreLabel) {
         prevWord = (CoreLabel) word;
       }
