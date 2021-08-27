@@ -131,7 +131,8 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
       "ADVP", "TO", "CD", "JJR", "JJ", "IN", "NP", "NML", "JJS", "NN"}});
 
     // SWBD
-    nonTerminalInfo.put("EDITED", new String[][] {{"left"}});  // crap rule for Switchboard (if don't delete EDITED nodes)
+    // crap rule for Switchboard (if don't delete EDITED nodes)
+    nonTerminalInfo.put("EDITED", new String[][]{{"left", "VP", "SQ", "S", "SINV", "SBAR", "NP", "ADJP", "PP", "ADVP", "INTJ", "WHNP", "NAC", "VBP", "JJ", "NN", "NNP"}});
     // in sw2756, a "VB". (copy "VP" to handle this problem, though should really fix it on reading)
     nonTerminalInfo.put("VB", new String[][]{{"left", "TO", "VBD", "VBN", "MD", "VBZ", "VB", "VBG", "VBP", "VP", "AUX", "AUXG", "ADJP", "JJP", "NN", "NNS", "JJ", "NP", "NNP"}});
 

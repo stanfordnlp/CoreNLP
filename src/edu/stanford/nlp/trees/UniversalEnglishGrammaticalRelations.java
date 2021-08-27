@@ -1385,7 +1385,10 @@ public class UniversalEnglishGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalEnglish, "parataxis", "parataxis",
         DEPENDENT, "S|VP|FRAG|NP", tregexCompiler,
             "VP < (PRN=target < S|SINV|SBAR)", // parenthetical
-            "VP $ (PRN=target [ < S|SINV|SBAR | < VP < @NP ] )", // parenthetical
+            // parenthetical
+            // Testing the head prevents connections between VP and PRN
+            // in situations where VP is not the head of the node containing both
+            "VP ># (__ < (PRN=target [ < S|SINV|SBAR | < VP < @NP ] ))",
             // The next relation handles a colon between sentences
             // and similar punct such as --
             // Sometimes these are lists, especially in the case of ";",
