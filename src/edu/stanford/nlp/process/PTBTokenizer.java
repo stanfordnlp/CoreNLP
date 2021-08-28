@@ -440,7 +440,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
   private static void tok(List<String> inputFileList, List<String> outputFileList, String charset,
                           Pattern parseInsidePattern, Pattern filterPattern, String options,
-                          boolean preserveLines, boolean oneLinePerElement, boolean dump, boolean lowerCase) throws IOException {
+                          boolean preserveLines, boolean oneLinePerElement, boolean dump,
+                          boolean lowerCase, boolean blankLineAfterFiles) throws IOException {
     final long start = System.nanoTime();
     long numTokens = 0;
     int numFiles = inputFileList.size();
@@ -464,6 +465,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
         }
         if (outputFileList != null) {
           IOUtils.closeIgnoringExceptions(out);
+        }
+        if (blankLineAfterFiles) {
+          out.newLine();
         }
       } // end for j going through inputFileList
       if (outputFileList == null) {
@@ -753,6 +757,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * <li> -oneLinePerElement Print the tokens of an element space-separated on one line.
    *       An "element" is either a file or one of the elements matched by the
    *       parseInside regex. </li>
+   * <li> -blankLineAfterFiles Put a blank line after each input file
+   *      (including after just a single input file but not at the end of input from stdin). </li>
    * <li> -filter regex Delete any token that matches() (in its entirety) the given regex. </li>
    * <li> -encoding encoding Specifies a character encoding. If you do not
    *      specify one, the default is utf-8 (not the platform default).
@@ -817,6 +823,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     if (preserveLines) {
       optionsSB.append(",tokenizeNLs");
     }
+    boolean blankLineAfterFiles = PropertiesUtils.getBool(options, "blankLineAfterFiles", false);
     boolean oneLinePerElement = PropertiesUtils.getBool(options, "oneLinePerElement", false);
     boolean inputOutputFileList = PropertiesUtils.getBool(options, "ioFileList", false);
     boolean fileList = PropertiesUtils.getBool(options, "fileList", false);
@@ -879,7 +886,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     if (untok) {
       untok(inputFileList, outputFileList, charset);
     } else {
-      tok(inputFileList, outputFileList, charset, parseInsidePattern, filterPattern, optionsSB.toString(), preserveLines, oneLinePerElement, dump, lowerCase);
+      tok(inputFileList, outputFileList, charset, parseInsidePattern, filterPattern, optionsSB.toString(),
+              preserveLines, oneLinePerElement, dump, lowerCase, blankLineAfterFiles);
     }
   } // end main
 

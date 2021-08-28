@@ -44,30 +44,24 @@ public class WordsToSentencesAnnotator implements Annotator  {
     boolean nlSplitting = Boolean.parseBoolean(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
     if (nlSplitting) {
       boolean whitespaceTokenization = Boolean.parseBoolean(properties.getProperty("tokenize.whitespace", "false"));
+      WordToSentenceProcessor<CoreLabel> wts1;
       if (whitespaceTokenization) {
         if (System.lineSeparator().equals("\n")) {
           // this constructor will keep empty lines as empty sentences
-          WordToSentenceProcessor<CoreLabel> wts1 =
-                  new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{"\n", AbstractTokenizer.NEWLINE_TOKEN}));
-          this.countLineNumbers = true;
-          this.wts = wts1;
+          wts1 = new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{"\n", AbstractTokenizer.NEWLINE_TOKEN}));
         } else {
           // throw "\n" in just in case files use that instead of
           // the system separator
           // this constructor will keep empty lines as empty sentences
-          WordToSentenceProcessor<CoreLabel> wts1 =
-                  new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{System.lineSeparator(), "\n",
-                      AbstractTokenizer.NEWLINE_TOKEN}));
-          this.countLineNumbers = true;
-          this.wts = wts1;
+          wts1 = new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{System.lineSeparator(), "\n",
+                  AbstractTokenizer.NEWLINE_TOKEN}));
         }
       } else {
         // this constructor will keep empty lines as empty sentences
-        WordToSentenceProcessor<CoreLabel> wts1 =
-                new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{PTBTokenizer.getNewlineToken()}));
-        this.countLineNumbers = true;
-        this.wts = wts1;
+        wts1 = new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{PTBTokenizer.getNewlineToken()}));
       }
+      this.countLineNumbers = true;
+      this.wts = wts1;
 
     } else {
       String isOneSentence = properties.getProperty("ssplit.isOneSentence");

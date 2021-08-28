@@ -60,7 +60,7 @@ import java.util.Map;
 public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Serializable */, CopulaHeadFinder  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractCollinsHeadFinder.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(AbstractCollinsHeadFinder.class);
 
   private static final boolean DEBUG = System.getProperty("HeadFinder", null) != null;
   protected final TreebankLanguagePack tlp;
@@ -253,7 +253,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
       }
     }
     if (DEBUG) {
-      log.info("  Chose " + theHead.label());
+      log.info("  Chose " + (theHead == null ? "null node": theHead.label()));
     }
     return theHead;
   }
@@ -353,6 +353,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
       for (int i = 1; i < how.length; i++) {
         if (how[i].equals(childCat)) {
           found = false;
+          break;
         }
       }
       if (found) {
@@ -394,6 +395,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
       for (int i = 1; i < how.length; i++) {
         if (how[i].equals(childCat)) {
           found = false;
+          break;
         }
       }
       if (found) {
