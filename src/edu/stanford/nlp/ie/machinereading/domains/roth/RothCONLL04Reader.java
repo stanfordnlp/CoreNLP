@@ -118,10 +118,12 @@ public class RothCONLL04Reader extends GenericDataSetReader {
         List<ExtractionObject> args = new ArrayList<>();
         EntityMention entity1 = indexToEntityMention.get(pieces.get(0));
         EntityMention entity2 = indexToEntityMention.get(pieces.get(1));
+        if (entity1 == null || entity2 == null) {
+          throw new NullPointerException("Error: a relation was marked between two words where one of the words was not a named entity.  Line causing this error: '" + currentLine + "'");
+        }
         args.add(entity1);
         args.add(entity2);
-        Span span = new Span(entity1.getExtentTokenStart(), entity2
-            .getExtentTokenEnd());
+        Span span = new Span(entity1.getExtentTokenStart(), entity2.getExtentTokenEnd());
         // identifier = "relation" + sentenceID + "-" + sentence.getAllRelations().size();
         identifier = RelationMention.makeUniqueId();
         RelationMention relationMention = new RelationMention(identifier,
