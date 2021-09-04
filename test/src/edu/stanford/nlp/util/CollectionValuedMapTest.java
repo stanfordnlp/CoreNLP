@@ -191,6 +191,11 @@ public class CollectionValuedMapTest {
     }
     fooMap.remove(new Integer(2));
     Assert.assertEquals("{0=[0, 1, 2, 3], 1=[0, 1, 2, 3], 3=[0, 1, 2, 3]}", fooMap.toString());
+    Assert.assertEquals("{0=[0, 1, 2, 3], 3=[0, 1, 2, 3], 1=[0, 1, 2, 3]}", fooMap.toString());
+    Assert.assertEquals("{1=[0, 1, 2, 3], 0=[0, 1, 2, 3], 3=[0, 1, 2, 3]}", fooMap.toString());
+    Assert.assertEquals("{1=[0, 1, 2, 3], 3=[0, 1, 2, 3], 0=[0, 1, 2, 3]}", fooMap.toString());
+    Assert.assertEquals("{3=[0, 1, 2, 3], 1=[0, 1, 2, 3], 0=[0, 1, 2, 3]}", fooMap.toString());
+    Assert.assertEquals("{3=[0, 1, 2, 3], 0=[0, 1, 2, 3], 1=[0, 1, 2, 3]}", fooMap.toString());
   }
 
   /**
