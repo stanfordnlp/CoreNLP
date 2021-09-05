@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -190,7 +193,25 @@ public class CollectionValuedMapTest {
       }
     }
     fooMap.remove(new Integer(2));
-    Assert.assertEquals("{0=[0, 1, 2, 3], 1=[0, 1, 2, 3], 3=[0, 1, 2, 3]}", fooMap.toString());
+
+ 
+    for (Map.Entry<Integer, Collection<Integer>> entry: fooMap.entrySet()){
+      List<Integer> list = new ArrayList(entry.getValue());
+      Collections.sort(list);
+      entry.setValue(list);
+    }
+
+    String exp1 = "{0=[0, 1, 2, 3], 1=[0, 1, 2, 3], 3=[0, 1, 2, 3]}";
+    String exp2 = "{0=[0, 1, 2, 3], 3=[0, 1, 2, 3], 1=[0, 1, 2, 3]}";
+    String exp3 = "{1=[0, 1, 2, 3], 0=[0, 1, 2, 3], 3=[0, 1, 2, 3]}";
+    String exp4 = "{1=[0, 1, 2, 3], 3=[0, 1, 2, 3], 0=[0, 1, 2, 3]}";
+    String exp5 = "{3=[0, 1, 2, 3], 1=[0, 1, 2, 3], 0=[0, 1, 2, 3]}";
+    String exp6 = "{3=[0, 1, 2, 3], 0=[0, 1, 2, 3], 1=[0, 1, 2, 3]}";
+
+    String expected[] = {exp1, exp2, exp3, exp4, exp5, exp6};
+    List<String> expectedList = Arrays.asList(expected);
+    
+    Assert.assertTrue(expectedList.contains(fooMap.toString()));
   }
 
   /**
