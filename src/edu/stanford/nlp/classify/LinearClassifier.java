@@ -132,6 +132,11 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
   /** Construct a counter with keys the labels of the classifier and
    *  values the score (unnormalized log probability) of each class.
+   *  <p>
+   *  That is, the scores are assumed to be unnormalized log scores. To convert them
+   *  into probabilities, you should use a "softmax regression" formulation: If you take
+   *  the exponential e^x of a score and divide it by the sum of the exponentials for each
+   *  class (including itself) then this is the probability of the class.
    */
   @Override
   public Counter<L> scoresOf(Datum<L, F> example) {
