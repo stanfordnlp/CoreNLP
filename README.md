@@ -70,6 +70,5 @@ You can find more explanation and documentation on [the Stanford CoreNLP homepag
 For information about making contributions to Stanford CoreNLP, see the file [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Questions about CoreNLP can either be posted on StackOverflow with the tag [stanford-nlp](http://stackoverflow.com/questions/tagged/stanford-nlp),
-  or on the [mailing lists](https://nlp.stanford.edu/software/#Mail).
-  
-  Sample code test
+  or on the [mailing lists](https://nlp.stanford.edu/software/#Mail)
+  Test commit
