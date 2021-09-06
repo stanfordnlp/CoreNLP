@@ -821,6 +821,8 @@ public class PTBTokenizerTest {
           "In 2009, Wiesel criticized the Vatican for lifting the excommunication of controversial bishop Richard Williamson, a member of the Society of Saint Pius X.",
           "RM460.35 million",
           "I like Amb. McFaul.",
+          "including eight honorary LL.D.s (Doctorate of Laws)",
+          "I is less than Br. The marked reduction is predicted.",
   };
 
   private final String[][] tweetGold = {
@@ -846,7 +848,9 @@ public class PTBTokenizerTest {
                   "of", "controversial", "bishop", "Richard", "Williamson", ",", "a", "member", "of", "the",
                   "Society", "of", "Saint", "Pius", "X." },
           { "RM", "460.35", "million" },
-          { "I", "like", "Amb.", "McFaul", "." } ,
+          { "I", "like", "Amb.", "McFaul", "." },
+          { "including", "eight", "honorary", "LL.D.s", "(", "Doctorate", "of", "Laws", ")" },
+          { "I", "is", "less", "than", "Br.", ".", "The", "marked", "reduction", "is", "predicted", "." },
   };
 
   @Test

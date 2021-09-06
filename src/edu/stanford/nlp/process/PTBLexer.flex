@@ -543,6 +543,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     return getNext();
   }
 
+  /** Assuming we're at an end of sentence (uppercase following), we usually put back a period to become end-of-sentence. */
   private Object processAbbrev1() {
     String s;
     if (strictAcronym && ! "U.S.".equals(yytext())) {
@@ -707,10 +708,10 @@ ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Bhd|Assn|Univ|Intl|Sys
 ABNUM = tel|est|ext|sq
 /* p used to be in ABNUM list, but it can't be any more, since the lexer
    is now caseless.  We don't want to have it recognized for P.  Both
-   p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e].
+   p. and P. are now under ABBREV2. ABLIST also went away as no-op [a-e].
    Dr. Sci. is a degree some places. */
 ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|[BDM]\.Sc|LL\.[BDM]|Esq|Sci
-/* ss?p and aff are for bio taxonomy; also gen and cf but appear elsewhere as ABBREV4 already; fl for flourished. var for variety */
+/* ss?p and aff are for bio taxonomy; also gen and cf but appear elsewhere as ABBREV2 already; fl for flourished. var for variety */
 ABTAXONOMY = (s(ub)?)?spp?|aff|[f][l]|var
 /* Notes: many misspell etc. ect.; kr. is some other currency. eg. for e.g. */
 /*  Tech would be useful for Indian B. Tech. degrees, but "tech" is used too much as a word. Avg = average; pl. for plural */
@@ -731,7 +732,7 @@ ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.
 /* "Rt." occurs both in "Rt. Rev." (capitalized following) and in abbreviation at end of Hungarian company (lower follows). */
 /* Added "Amb" for Ambassador. Don't have "Ambs" as occurs as family name. Fr. for Friar */
 /* Smt. and Ven. before Indian names; Br for brother; Eng. for engineer (but is occasional Chinese name) */
-ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Fr|Rt|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc|Amb|Smt|Ven|Br|Eng
+ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Fr|Rt|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc|Amb|S[m][t]|Ven|Br|Eng
 /* Exhs?. is used for law case exhibits. ass't = assistant, Govt = Government.
    Ph is in there for Ph. D  Sc for B.Sc. syn. for biology synonym; def. for defeated; Mk for Mark (like tank); Soc. for society */
 ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz|Exhs?|ass't|Govt|vs|[v]|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|[S][c]|syn|def|Mk|Soc
@@ -739,9 +740,9 @@ ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz|Exhs?|ass't|Govt|vs|
 /* ABRREV2 abbreviations are normally followed by an upper case word.
  *  We assume they aren't used sentence finally.
  */
-ABBREV4 = {ABTITLE}|{ACRO}|{ABCOMP2}
-ABBREV2 = {ABBREV4}\.
-ACRONYM = ({ACRO})\.
+ABBREV2PRE = {ABTITLE}|{ACRO}|{ABCOMP2}
+ABBREV2 = ({ABBREV2PRE})\.
+/* ACRONYM = ({ACRO})\. */
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
 /* Added Wm. for William and Jos. for Joseph */
 /* In tables: Mkt. for market Div. for division of company, Chg., Yr.: year */
@@ -758,7 +759,7 @@ ABBREV3 = (ca|chs?|figs?|prop|nos?|nrs?|vols?|sect?s?|arts?|paras?|bldg|prop|pp|
 /* Case for south/north before a few places. */
 ABBREVSN = So\.|No\.
 
-/* See also a couple of special cases for pty. in the code below. */
+/* See also a couple of special cases for pty. and op./loc in the code below. */
 
 
 HYPHEN = [-\u058A\u2010\u2011\u2012]
@@ -1055,10 +1056,10 @@ RM/{NUM}        { String txt = yytext();
                           }
                         }
 /* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!). A one letter acronym candidate like "Z." or "I." in this context usually isn't, and so we return the leter and pushback the period for next time. We can't have "To" in list, as often get adjacent in headlines: "U.S. To Ask ...." */
-<YyNotTokenizePerLine>{ACRONYM}/({SPACENLS})([A]|[A]bout|[A]ccording|[A]dditionally|[A]fter|[A]ll|[A]lso|[A]lthough|[A]n|[A]nother|[A]s|[A]t|[B]efore|[B]oth|[B]ut|[B]y|[D]id|[D]uring|[E]ach|[E]arlier|[F]ollowing|[F]or|[F]rom|[H]e|[H]er|[H]ere|[H]is|[H]ow|[H]owever|[I]f|[I]n|[I]t|[I]ts|[L]ast|[L]ater|[M]any|[M]ore|[M]ost|[M]rs?\.|[M]s\.|[N]ow|[O]n|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[T]wo|[U]nder|[U]pon|[W]e|[W]hen|[W]hile|[W]hat|[W]ho|[W]hy|[Y]et|[Y]ou|{SGML1})({SPACENL}|[?!]) {
+<YyNotTokenizePerLine>{ABBREV2}/({SPACENLS})([A]|[A]bout|[A]ccording|[A]dditionally|[A]fter|[A]ll|[A]lso|[A]lthough|[A]n|[A]nother|[A]s|[A]t|[B]efore|[B]oth|[B]ut|[B]y|[D]id|[D]uring|[E]ach|[E]arlier|[F]ollowing|[F]or|[F]rom|[H]e|[H]er|[H]ere|[H]is|[H]ow|[H]owever|[I]f|[I]n|[I]t|[I]ts|[L]ast|[L]ater|[M]any|[M]ore|[M]ost|[M]rs?\.|[M]s\.|[N]ow|[O]n|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[T]wo|[U]nder|[U]pon|[W]e|[W]hen|[W]hile|[W]hat|[W]ho|[W]hy|[Y]et|[Y]ou|{SGML1})({SPACENL}|[?!]) {
                           return processAcronym();
                         }
-<YyTokenizePerLine>{ACRONYM}/({SPACES})([A]|[A]bout|[A]ccording|[A]dditionally|[A]fter|[A]ll|[A]lso|[A]lthough|[A]n|[A]nother|[A]s|[A]t|[B]efore|[B]oth|[B]ut|[B]y|[D]id|[D]uring|[E]ach|[E]arlier|[F]ollowing|[F]or|[F]rom|[H]e|[H]er|[H]ere|[H]is|[H]ow|[H]owever|[I]f|[I]n|[I]t|[I]ts|[L]ast|[L]ater|[M]any|[M]ore|[M]ost|[M]rs?\.|[M]s\.|[N]ow|[O]n|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[T]wo|[U]nder|[U]pon|[W]e|[W]hen|[W]hile|[W]hat|[W]ho|[W]hy|[Y]et|[Y]ou|{SGML1})({SPACE}|[?!]) {
+<YyTokenizePerLine>{ABBREV2}/({SPACES})([A]|[A]bout|[A]ccording|[A]dditionally|[A]fter|[A]ll|[A]lso|[A]lthough|[A]n|[A]nother|[A]s|[A]t|[B]efore|[B]oth|[B]ut|[B]y|[D]id|[D]uring|[E]ach|[E]arlier|[F]ollowing|[F]or|[F]rom|[H]e|[H]er|[H]ere|[H]is|[H]ow|[H]owever|[I]f|[I]n|[I]t|[I]ts|[L]ast|[L]ater|[M]any|[M]ore|[M]ost|[M]rs?\.|[M]s\.|[N]ow|[O]n|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[T]wo|[U]nder|[U]pon|[W]e|[W]hen|[W]hile|[W]hat|[W]ho|[W]hy|[Y]et|[Y]ou|{SGML1})({SPACE}|[?!]) {
                           return processAcronym();
                         }
 
@@ -1081,13 +1082,13 @@ RM/{NUM}        { String txt = yytext();
 <YyTokenizePerLine>{ABBREV1}/{SENTEND2}     {
                           return processAbbrev1();
                         }
-<YyNotTokenizePerLine>{ABBREV1}/[^][^]        { return getNext(); }
-<YyTokenizePerLine>{ABBREV1}/[^\r\n][^\r\n]        { return getNext(); }
-{ABBREV1}               { // this one should only match if we're basically at the end of file
+<YyNotTokenizePerLine>{ABBREV1}s?/[^][^]        { return getNext(); }
+<YyTokenizePerLine>{ABBREV1}s?/[^\r\n][^\r\n]        { return getNext(); }
+{ABBREV1}s?             { // this one should only match if we're basically at the end of file
                           // since the last one matches two things, even newlines (if not tokenize per line)
                           return processAbbrev1();
                         }
-{ABBREV2}               { String tok = yytext();
+{ABBREV2}s?             { String tok = yytext();
                           if (DEBUG) { logger.info("Used {ABBREV2} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
@@ -1101,8 +1102,8 @@ RM/{NUM}        { String txt = yytext();
                                                 if (DEBUG) { logger.info("Used {ALEX} (2) to recognize " + tok); }
                                                 return getNext(tok, tok);
                                               }
-{ABBREV4}/{SPACE}       { String tok = yytext();
-                          if (DEBUG) { logger.info("Used {ABBREV4} to recognize " + tok); }
+{ABBREV2PRE}/{SPACE}       { String tok = yytext();
+                          if (DEBUG) { logger.info("Used {ABBREV2PRE} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
 {ACRO}/{SPACENL}        { return getNext(); }
