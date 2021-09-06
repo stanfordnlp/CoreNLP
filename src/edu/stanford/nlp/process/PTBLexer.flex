@@ -715,8 +715,8 @@ ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|[BDM]\.Sc|LL\.[BDM]|Esq|Sci
 ABTAXONOMY = (s(ub)?)?spp?|aff|[f][l]|var
 /* Notes: many misspell etc. ect.; kr. is some other currency. eg. for e.g. */
 /*  Tech would be useful for Indian B. Tech. degrees, but "tech" is used too much as a word. Avg = average; pl. for plural */
-/* Cir. for circuit court; lb for pounds */
-ABVARIA = etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr|eg|Avg|pl|Cir|min|lb
+/* Cir. for circuit court; lb for pounds. Maybe should have "min." but omit for consistency with "max." */
+ABVARIA = etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr|eg|Avg|pl|Cir|lb
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
  * If they're followed by an uppercase one, we assume there is also a sentence boundary.
@@ -735,7 +735,8 @@ ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.
 ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Fr|Rt|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc|Amb|S[m][t]|Ven|Br|Eng
 /* Exhs?. is used for law case exhibits. ass't = assistant, Govt = Government.
    Ph is in there for Ph. D  Sc for B.Sc. syn. for biology synonym; def. for defeated; Mk for Mark (like tank); Soc. for society */
-ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz|Exhs?|ass't|Govt|vs|[v]|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|[S][c]|syn|def|Mk|Soc
+/* Jos. is kind of dubious as also a name, place and family name. Maybe should delete but alsl common as abbreviated given name. */
+ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz|Exhs?|ass't|Govt|vs|[v]|Wm|Jos|Cie|a\.k\.a|cf|TREAS|P[h]|[S][c]|syn|def|Mk|Soc
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
  *  We assume they aren't used sentence finally.
