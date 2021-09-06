@@ -772,6 +772,13 @@ public class PTBTokenizerTest {
           "555-0199",
           "555\u20120199",
           "DBM submits proposed ₱5.024-trillion 2022 budget",
+          // The tokenizer should handle Indian language etc. non-spacing and combining marks
+          "Kanakadasa's \"Ramadhanya Charite\" (ರಾಮಧಾನ್ಯ ಚರಿತೆ ) is a rare work.",
+          // Be okay with spaced acronyms
+          "Today, U. A. E. is a rich country.",
+          // California flag: 🏴󠁵󠁳󠁣󠁡󠁿
+          "\uD83C\uDFF4\uDB40\uDC75\uDB40\uDC73\uDB40\uDC63\uDB40\uDC61\uDB40\uDC7F",
+          "when one goes 'tisk tisk' at something",
   };
 
   private final String[][] emojiGold = {
@@ -784,6 +791,11 @@ public class PTBTokenizerTest {
           { "555-0199" },
           { "555‒0199" },
           {"DBM", "submits", "proposed", "₱", "5.024", "-", "trillion", "2022", "budget" },
+          { "Kanakadasa", "'s", "\"", "Ramadhanya", "Charite", "\"", "(", "ರಾಮಧಾನ್ಯ", "ಚರಿತೆ", ")", "is", "a", "rare", "work", "." },
+          { "Today", ",", "U.", "A.", "E.", "is", "a", "rich", "country", "." },
+          // California flag: 🏴󠁵󠁳󠁣󠁡󠁿
+          { "\uD83C\uDFF4\uDB40\uDC75\uDB40\uDC73\uDB40\uDC63\uDB40\uDC61\uDB40\uDC7F" },
+          { "when", "one", "goes", "'", "tisk", "tisk", "'", "at", "something" },
   };
 
   @Test

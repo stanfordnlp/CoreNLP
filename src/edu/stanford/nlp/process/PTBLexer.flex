@@ -609,7 +609,7 @@ DOLSIGN2 = [\u00A2-\u00A5\u0080\u20A0-\u20BF\u058F\u060B\u09F2\u09F3\u0AF1\u0BF9
 /* not used DOLLAR      {DOLSIGN}[ \t]*{NUMBER}  */
 /* |\( ?{NUMBER} ?\))    # is for pound signs */
 FILENAME_EXT = 3gp|avi|bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|flv|gif|gz|h|hei[cf]|htm|html|jar|java|jpeg|jpg|mov|mp[34g]|mpeg|o|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|wm[va]
-FILENAME = [\p{Alpha}\p{Digit}]+([-._/#][\p{Alpha}\p{Digit}]+)*\.{FILENAME_EXT}
+FILENAME = [\p{Alpha}\p{Digit}]+([-~.!_/#][\p{Alpha}\p{Digit}]+)*\.{FILENAME_EXT}
 /* Curse of intelligent tokenization, here we come. To model what LDC does, we separate out some \p{Digit}+\p{Alpha}+ tokens as 2 words */
 /* Go with just the top 20 currencies. */
 SEP_CURRENCY = (USD|EUR|JPY|GBP|AUD|CAD|CHF|CNY|SEK|NZD|MXN|SGD|HKD|NOK|KRW|TRY|RUB|INR|BRL|ZAR)
@@ -666,8 +666,8 @@ SREDAUX = n{APOSETCETERA}t
 /* Note that Jflex doesn't support {2,} form.  Only {2,k}. */
 /* [yY]' is for Y'know, y'all and I for I.  So exclude from one letter first */
 /* Rest are for French borrowings.  n allows n'ts in "don'ts" */
-/* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
-APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[1-9]0s|[1-9]0{APOS}s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeioulA-Z][:letter:]*|{APOS}cause|cont'd\.?|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|ass't|O{APOSETCETERA}o
+/* Arguably, c'mon should be split to "c'm" + "on", but not yet. 'Twixt for betwixt */
+APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[1-9]0s|[1-9]0{APOS}s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeioulA-Z][:letter:]*|{APOS}cause|cont'd\.?|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|ass't|'twixt|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
 /* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
 FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?¡¿,·;:&`\"\'\*\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
@@ -709,12 +709,13 @@ ABNUM = tel|est|ext|sq
    is now caseless.  We don't want to have it recognized for P.  Both
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e].
    Dr. Sci. is a degree some places. */
-ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|B\.Sc|LL\.[BM]|Esq|Sci
+ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|[BDM]\.Sc|LL\.[BDM]|Esq|Sci
 /* ss?p and aff are for bio taxonomy; also gen and cf but appear elsewhere as ABBREV4 already; fl for flourished. var for variety */
 ABTAXONOMY = (s(ub)?)?spp?|aff|[f][l]|var
 /* Notes: many misspell etc. ect.; kr. is some other currency. eg. for e.g. */
-/*  Tech would be useful for Indian B. Tech. degrees, but "tech" is used too much as a word. Avg = average*/
-ABVARIA = etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr|eg|Avg
+/*  Tech would be useful for Indian B. Tech. degrees, but "tech" is used too much as a word. Avg = average; pl. for plural */
+/* Cir. for circuit court; lb for pounds */
+ABVARIA = etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr|eg|Avg|pl|Cir|min|lb
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
  * If they're followed by an uppercase one, we assume there is also a sentence boundary.
@@ -729,10 +730,11 @@ ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.
 /* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. St[ae] does Saint, Santa, suite, etc. */
 /* "Rt." occurs both in "Rt. Rev." (capitalized following) and in abbreviation at end of Hungarian company (lower follows). */
 /* Added "Amb" for Ambassador. Don't have "Ambs" as occurs as family name. Fr. for Friar */
-ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Fr|Rt|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc|Amb
+/* Smt. and Ven. before Indian names; Br for brother; Eng. for engineer (but is occasional Chinese name) */
+ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Fr|Rt|Maj|Sgt|Cpl|Pvt|Capt|St[ae]?|Ave|Pres|Lieut|Rt|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc|Amb|Smt|Ven|Br|Eng
 /* Exhs?. is used for law case exhibits. ass't = assistant, Govt = Government.
-   Ph is in there for Ph. D  Sc for B.Sc.*/
-ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz|Exhs?|ass't|Govt|vs|[v]|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|[S][c]
+   Ph is in there for Ph. D  Sc for B.Sc. syn. for biology synonym; def. for defeated; Mk for Mark (like tank); Soc. for society */
+ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz|Exhs?|ass't|Govt|vs|[v]|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|[S][c]|syn|def|Mk|Soc
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
  *  We assume they aren't used sentence finally.
@@ -745,15 +747,14 @@ ACRONYM = ({ACRO})\.
 /* In tables: Mkt. for market Div. for division of company, Chg., Yr.: year */
 
 /* --- ABBREV3 abbreviations are allowed only before numbers. ---
- * Otherwise, they aren't recognized as abbreviations (unless they also
- * appear in ABBREV1 or ABBREV2).
+ * Otherwise, they aren't recognized as abbreviations (unless they also appear in ABBREV1 or ABBREV2).
  * est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa.
  * "Art(s)." is for "article(s)" -- common in legal context, Sec(t). for section(s). ch for chapters.
  * res for resolution (of Congress etc.)
  */
 /* Maybe also "op." for "op. cit." but also get a photo op. Rs. for Rupees */
 /* Pt for part needs to be case sensitive (vs. country code for Portugal). */
-ABBREV3 = (ca|chs?|figs?|prop|nos?|vols?|sect?s?|arts?|paras?|bldg|prop|pp|op|approx|[P][t]|rs|Apt|Rt|Res)\.
+ABBREV3 = (ca|chs?|figs?|prop|nos?|nrs?|vols?|sect?s?|arts?|paras?|bldg|prop|pp|op|approx|p[t]|rs|Apt|Rt|Res)\.
 /* Case for south/north before a few places. */
 ABBREVSN = So\.|No\.
 
@@ -776,7 +777,8 @@ UNDS = _+
 ASTS = \*+|(\\\*){1,3}
 HASHES = #+
 FNMARKS = {ATS}|{HASHES}|{UNDS}
-INSENTP = [,;:\u3001]
+/* U+3001 is Chinese dunhao comma; U+0F0D is Tibetan shad */
+INSENTP = [,;:\u3001\u0F0D]
 QUOTES = {APOS}|[`\u2018-\u201F\u0082\u0084\u0091-\u0094\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;|[`'\u0091\u0092\u2018\u2019]'
 /* Cap'n for captain, c'est for french */
@@ -790,17 +792,18 @@ BANGMAGAZINES = OK\!
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
 ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)|¯\\_\(ツ\)_\/¯
 
-/* Slightly generous but generally reasonable emoji parsing */
+/* Slightly generous but generally reasonably good emoji parsing */
 /* These are human emoji that can have a zwj gender (as well as skin color) */
 EMOJI_GENDERED = [\u26F9\u{01F3C3}-\u{01F3C4}\u{01F3CA}-\u{01F3CC}\u{01F466}-\u{01F469}\u{01F46E}-\u{01F46F}\u{01F471}\u{01F473}\u{01F477}\u{01F481}-\u{01F482}\u{01F486}-\u{01F487}\u{01F575}\u{01F645}-\u{01F647}\u{01F64B}\u{01F64D}-\u{01F64E}\u{01F6A3}\u{01F6B4}-\u{01F6B6}\u{01F926}\u{01F937}-\u{01F939}\u{01F93C}-\u{01F93E}\u{01F9D6}-\u{01F9DF}]
-/* Emoji follower is variation selector (emoji/non-emoji rendering) or Fitzpatrick skin tone */
+/* Emoji follow is variation selector (emoji/non-emoji rendering) or Fitzpatrick skin tone */
 EMOJI_FOLLOW = [\uFE0E\uFE0F\u{01F3FB}-\u{01F3FF}]
 /* Just things followed by the keycap surrounding char - note that if not separated by space beforehand, may be mistokenized */
 EMOJI_KEYCAPS = [\u0023\u002A\u0030-\u0039]\uFE0F?\u20E3
 /* Two geographic characters as a flag or GB regions as flags
  * (changed to use \U to avoid bug in IntelliJ JFlex plugin).
+ * Then second disjunct is emoji tag sequence (ETS) support for certain additional flags
  */
-EMOJI_FLAG = [\U01F1E6-\U01F1FF]{2,2}|\U01F3F4\U0E0067\U0E0062[\U0E0061-\U0E007A]+\U0E007F
+EMOJI_FLAG = [\U01F1E6-\U01F1FF]{2,2}|\U01F3F4\U0E0067\U0E0062[\U0E0061-\U0E007A]+\U0E007F|\U01F3F4[\u{E0030}-\u{E0039}\u{E0061}-\u{E007A}]+\U0E007F
 /* Rainbow flag etc. */
 EMOJI_MISC = [\u{01F3F3}\u{01F441}][\uFE0E\uFE0F]?\u200D[\u{01F308}\u{01F5E8}][\uFE0E\uFE0F]?|{EMOJI_KEYCAPS}
 /* Things that have an emoji presentation form */
@@ -811,11 +814,13 @@ HUMAN_MODIFIER = [\u2640\u2642\u2695-\u2696\u2708\u2764\u{01F33E}\u{01F373}\u{01
 EMOJI = {EMOJI_FLAG}|{EMOJI_PRESENTATION}{EMOJI_FOLLOW}?|{EMOJI_GENDERED}{EMOJI_FOLLOW}?(\u200D([\u{01F466}-\u{01F469}]{EMOJI_FOLLOW}?|{HUMAN_MODIFIER})){1,3}|{EMOJI_MISC}
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
-MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2025\u2030-\u2038\u203B\u203C\u2043\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3001-\u3006\u3008-\u3020\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
 /* \uFF65 is Halfwidth katakana middle dot; \u30FB is Katakana middle dot */
-/* Math and other symbols that stand alone: °²× ∀ */
+/* Math and other symbols that stand alone: °²× ∀; \u33A1 is m^2 in one char! */
+/* Tibetan tsheg or tsek (U+0F0B) goes between syllables; words aren't space separated, so it may be a word or syllable marker; it indicates a possible line-break point. Treat as separate symbol. */
+MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u0F0B\u1FBD\u2016\u2017\u2020-\u2025\u2030-\u2038\u203B\u203C\u2043\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3001-\u3006\u3008-\u3020\u30FB\u33A1\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
 
 PROG_LANGS = c[+][+]|(c|f)#
+/* Assimilations3 leave 3 chars behind after division */
 ASSIMILATIONS3 = cannot|'twas|dunno|['’]d['’]ve
 /* "nno" is a remnant after pushing back from dunno in ASSIMILATIONS3 */
 /* Include splitting some apostrophe-less negations, but not ones like "wont" that are also words. */
@@ -1068,6 +1073,8 @@ RM/{NUM}        { String txt = yytext();
 <YyTokenizePerLine>{ABBREVSN}/{SPACE}+(Africa|Korea|Cal) { return getNext(); }
 /* Special case to get pty. ltd. or pty limited. Also added "Co." since someone complained, but usually a comma after it. */
 (pty|pte|pvt|co)\./{SPACE}(ltd|lim|llc)  { return getNext(); }
+/* Special case to get op. cit.. or loc. cit. */
+(op|loc)\./{SPACE}cit\.  { return getNext(); }
 <YyNotTokenizePerLine>{ABBREV1}/{SENTEND1}     {
                           return processAbbrev1();
                         }
