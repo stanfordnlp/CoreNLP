@@ -823,6 +823,8 @@ public class PTBTokenizerTest {
           "I like Amb. McFaul.",
           "including eight honorary LL.D.s (Doctorate of Laws)",
           "I is less than Br. The marked reduction is predicted.",
+          "I met A. I. Markov to begin.",
+          "states (loc. cit.) that",
   };
 
   private final String[][] tweetGold = {
@@ -851,6 +853,8 @@ public class PTBTokenizerTest {
           { "I", "like", "Amb.", "McFaul", "." },
           { "including", "eight", "honorary", "LL.D.s", "(", "Doctorate", "of", "Laws", ")" },
           { "I", "is", "less", "than", "Br.", ".", "The", "marked", "reduction", "is", "predicted", "." },
+          { "I", "met", "A.", "I.", "Markov", "to", "begin", "." },
+          { "states", "(", "loc.", "cit.", ")", "that" },
   };
 
   @Test
