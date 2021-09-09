@@ -825,6 +825,7 @@ public class PTBTokenizerTest {
           "I is less than Br. The marked reduction is predicted.",
           "I met A. I. Markov to begin.",
           "states (loc. cit.) that",
+          "U.S. vs. The World",
   };
 
   private final String[][] tweetGold = {
@@ -855,6 +856,7 @@ public class PTBTokenizerTest {
           { "I", "is", "less", "than", "Br.", ".", "The", "marked", "reduction", "is", "predicted", "." },
           { "I", "met", "A.", "I.", "Markov", "to", "begin", "." },
           { "states", "(", "loc.", "cit.", ")", "that" },
+          { "U.S.", "vs.", "The", "World" },
   };
 
   @Test

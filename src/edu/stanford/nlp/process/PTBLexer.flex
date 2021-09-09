@@ -736,10 +736,10 @@ ABTITLE = Mr|Mrs|Ms|Mx|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|G
 /* Exhs?. is used for law case exhibits. ass't = assistant, Govt = Government.
    Ph is in there for Ph. D  Sc for B.Sc. syn. for biology synonym; def. for defeated; Mk for Mark (like tank); Soc. for society */
 /* Jos. is kind of dubious as also a name, place and family name. Maybe should delete but alsl common as abbreviated given name. */
-ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz|Exhs?|ass't|Govt|vs|[v]|Wm|Jos|Cie|a\.k\.a|cf|TREAS|P[h]|[S][c]|syn|def|Mk|Soc
+ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept|Blvd|Rd|Ave|[P][l]|viz|Exhs?|ass't|Govt|[v]|Wm|Jos|Cie|cf|TREAS|P[h]|[S][c]|syn|def|Mk|Soc
 
-/* ABRREV2 abbreviations are normally followed by an upper case word.
- *  We assume they aren't used sentence finally.
+/* ABRREV2 abbreviations are normally followed by an upper case word. We mainly hope they aren't used sentence finally.
+ * But we still do recognize them as sentence final when after the period a variety of common function words occur.
  */
 ABBREV2PRE = {ABTITLE}|{ACRO}|{ABCOMP2}
 ABBREV2 = ({ABBREV2PRE})\.
@@ -747,6 +747,9 @@ ABBREV2 = ({ABBREV2PRE})\.
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
 /* Added Wm. for William and Jos. for Joseph */
 /* In tables: Mkt. for market Div. for division of company, Chg., Yr.: year */
+
+/* ABBREV4 abbreviations are always treated as sentence-internal, no matter what follows them. */
+ABBREV4 = vs\.|a\.k\.a\.
 
 /* --- ABBREV3 abbreviations are allowed only before numbers. ---
  * Otherwise, they aren't recognized as abbreviations (unless they also appear in ABBREV1 or ABBREV2).
@@ -1103,11 +1106,14 @@ RM/{NUM}        { String txt = yytext();
                                                 if (DEBUG) { logger.info("Used {ALEX} (2) to recognize " + tok); }
                                                 return getNext(tok, tok);
                                               }
-{ABBREV2PRE}/{SPACE}       { String tok = yytext();
+{ABBREV2PRE}/{SPACENL}    { String tok = yytext();
                           if (DEBUG) { logger.info("Used {ABBREV2PRE} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
-{ACRO}/{SPACENL}        { return getNext(); }
+{ABBREV4}               { String tok = yytext();
+                          if (DEBUG) { logger.info("Used {ABBREV4} to recognize " + tok); }
+                          return getNext(tok, tok);
+                        }
 {TBSPEC2}/{SPACENL}     { return getNext(); }
 {ISO8601DATETIME}       { return getNext(); }
 //{ISO8601DATE}           { return getNext(); }
