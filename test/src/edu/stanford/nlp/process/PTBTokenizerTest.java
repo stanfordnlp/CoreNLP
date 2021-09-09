@@ -826,6 +826,10 @@ public class PTBTokenizerTest {
           "I met A. I. Markov to begin.",
           "states (loc. cit.) that",
           "U.S. vs. The World",
+          "for max. 14 days",
+          "stems reach a max. of 3.5 m",
+          "for min. 14 days",
+          "stems reach a min. of 3.5 m",
   };
 
   private final String[][] tweetGold = {
@@ -857,6 +861,10 @@ public class PTBTokenizerTest {
           { "I", "met", "A.", "I.", "Markov", "to", "begin", "." },
           { "states", "(", "loc.", "cit.", ")", "that" },
           { "U.S.", "vs.", "The", "World" },
+          { "for", "max.", "14", "days" },
+          { "stems", "reach", "a", "max.", "of", "3.5", "m" },
+          { "for", "min.", "14", "days" },
+          { "stems", "reach", "a", "min.", "of", "3.5", "m" },
   };
 
   @Test
