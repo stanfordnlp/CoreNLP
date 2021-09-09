@@ -715,8 +715,8 @@ ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|[BDM]\.Sc|LL\.[BDM]|Esq|Sci
 ABTAXONOMY = (s(ub)?)?spp?|aff|[f][l]|var
 /* Notes: many misspell etc. ect.; kr. is some other currency. eg. for e.g. */
 /*  Tech would be useful for Indian B. Tech. degrees, but "tech" is used too much as a word. Avg = average; pl. for plural */
-/* Cir. for circuit court; lb for pounds. Maybe should have "min." but omit for consistency with "max." cit. for op. cit. */
-ABVARIA = etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr|eg|Avg|pl|Cir|lb|cit
+/* Cir. for circuit court; lb for pounds. I'm adding "min." and "max." even though "max" is a name. cit. for op. cit. */
+ABVARIA = etc|ect|al|seq|Bldg|Pls|wrt|orig|incl|t[b]?[s][p]|kr|eg|Avg|pl|Cir|lb|min|max|cit
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
  * If they're followed by an uppercase one, we assume there is also a sentence boundary.
