@@ -4,8 +4,10 @@ import java.util.function.Function;
 import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -246,4 +248,17 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
     return requirements;
   }
 
+  @Override
+  public Collection<String> exactRequirements() {
+    Set<Class<? extends CoreAnnotation>> requirements = requires();
+    if (requirements.contains(TreeCoreAnnotations.TreeAnnotation.class)) {
+      Set<String> original = DEFAULT_REQUIREMENTS.get(STANFORD_COREF);
+      LinkedHashSet<String> fixed = new LinkedHashSet<>(original);
+      fixed.remove(STANFORD_DEPENDENCIES);
+      fixed.add(STANFORD_PARSE);
+      return fixed;
+    } else {
+      return DEFAULT_REQUIREMENTS.get(STANFORD_COREF);
+    }
+  }
 }

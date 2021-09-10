@@ -79,6 +79,10 @@ public interface Annotator {
    */
   Set<Class<? extends CoreAnnotation>> requires();
 
+  default Collection<String> exactRequirements() {
+    return null;
+  }
+
   /**
    * These are annotators which StanfordCoreNLP knows how to create.
    * Add new annotators and/or annotators from other groups here!
@@ -139,7 +143,7 @@ public interface Annotator {
     put(STANFORD_PARSE,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS)));
     put(STANFORD_DETERMINISTIC_COREF,      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_PARSE)));
     put(STANFORD_COREF,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_DEPENDENCIES)));
-    put(STANFORD_COREF_MENTION,                  new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_DEPENDENCIES)));
+    put(STANFORD_COREF_MENTION,            new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_DEPENDENCIES)));
     put(STANFORD_RELATION,                 new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_PARSE, STANFORD_DEPENDENCIES)));
     put(STANFORD_SENTIMENT,                new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_PARSE)));
     put(STANFORD_COLUMN_DATA_CLASSIFIER,   new LinkedHashSet<>(Arrays.asList()));
