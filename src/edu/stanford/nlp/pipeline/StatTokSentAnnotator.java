@@ -90,7 +90,7 @@ public class StatTokSentAnnotator implements Annotator{
     String oneOrMoreSpace = "[ ]+";
     textPreproc = textPreproc.replaceAll(lineBreak, "\u00A7"); //replace all line breaks with § symbol
     textPreproc = textPreproc.replaceAll(oneOrMoreSpace, " ");
-    if (textPreproc.substring(0,1) == "\u00A7"){
+    if (textPreproc.substring(0,1).equals("\u00A7")) {
       textPreproc = textPreproc.substring(1);
     }
 
