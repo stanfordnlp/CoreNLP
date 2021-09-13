@@ -9,7 +9,7 @@ ENGLISH_TEST = /u/nlp/data/pos-tagger/english/test-wsj-19-21
 
 FRENCH_TEST = format=TREES,/u/nlp/data/lexparser/trees/FrenchCC/FTB-Test.utf8.txt
 
-GERMAN_TEST = format=TREES,trf=edu.stanford.nlp.trees.international.negra.NegraPennTreeReaderFactory,/u/nlp/data/GermanACL08/negra/negra_3.mrg
+GERMAN_TEST = format=TSV,wordColumn=1,tagColumn=3,comments=True,/u/nlp/software/CoreNLP-models/de/pos/german-ud/4.3.0/de_gsd-ud-test.conllu
 
 SPANISH_TEST = format=TREES,/u/nlp/data/spanish/ancora/ancora.test,/u/nlp/data/spanish/ldc/ldc-NW.test,/u/nlp/data/spanish/ldc/ldc-DF.test
 
@@ -52,9 +52,10 @@ french.tagger: $$@.props
 	java -mx6g edu.stanford.nlp.tagger.maxent.MaxentTagger -props $@.props > $@.out 2>&1
 	java -mx6g edu.stanford.nlp.tagger.maxent.MaxentTagger -model $@ -testFile $(FRENCH_TEST)  -verboseResults false >> $@.out 2>&1
 
-german: german-dewac.tagger german-fast.tagger german-fast-caseless.tagger german-hgc.tagger
+# TODO: people might still appreciate a fast tagger?
+german: german-ud.tagger
 
-german-dewac.tagger german-fast.tagger german-fast-caseless.tagger german-hgc.tagger: $$@.props
+german-ud.tagger: $$@.props
 	@echo Training $@
 	@echo Will test on $(GERMAN_TEST)
 	java -mx6g edu.stanford.nlp.tagger.maxent.MaxentTagger -props $@.props > $@.out 2>&1
