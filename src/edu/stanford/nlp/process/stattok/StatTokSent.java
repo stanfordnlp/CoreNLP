@@ -367,6 +367,12 @@ public class StatTokSent{
       //store current values for character and class
       String currentChar  = classificationResults.get(i).first();
       String currentClass = classificationResults.get(i).second();
+      // sometimes the classifier will get this wrong :/
+      // TODO: add a parameter to make double sentinels,
+      // then tokenize that as a new sentence
+      if (currentChar.equals("\u00A7") && currentClass.equals("I")) {
+        currentClass = "O";
+      }
 
       //Beginning of sentence
       if (currentClass.equals("S")){
@@ -405,7 +411,7 @@ public class StatTokSent{
           CoreLabel newToken = factory.makeToken(currentWord, currentWord, beginToken, endToken-beginToken);
           Pair<CoreLabel, String> tokenAndClass = new Pair<CoreLabel, String>(newToken,lastBeginChar);
           sentenceTokensBase.add(tokenAndClass);
-          tokensCounter++;			
+          tokensCounter++;
         }
         //Initialize variables for new token
         beginToken = i;
