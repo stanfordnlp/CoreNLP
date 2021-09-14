@@ -401,8 +401,10 @@ public class StatTokSent{
         //clean list for new sentence and word
         sentenceTokensBase = new ArrayList<>();
         currentWord = "";
-        beginToken = i;		
-        currentWord+=currentChar;			
+        beginToken = i;
+        if (!currentChar.equals(SENTINEL)) {
+          currentWord+=currentChar;
+        }
       }
 
       //Normal token or clitic token
@@ -419,7 +421,9 @@ public class StatTokSent{
         beginToken = i;
         endToken = i;
         currentWord = "";
-        currentWord+=currentChar;
+        if (!currentChar.equals(SENTINEL)) {
+          currentWord+=currentChar;
+        }
         lastBeginChar = currentClass;
       }
 
