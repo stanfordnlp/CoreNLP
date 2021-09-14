@@ -88,9 +88,9 @@ public class StatTokSentAnnotator implements Annotator{
 
     String lineBreak = "[\\r\\n|\\r|\\n]+";
     String oneOrMoreSpace = "[ ]+";
-    textPreproc = textPreproc.replaceAll(lineBreak, "\u00A7"); //replace all line breaks with § symbol
+    textPreproc = textPreproc.replaceAll(lineBreak, StatTokSent.SENTINEL); //replace all line breaks with § symbol
     textPreproc = textPreproc.replaceAll(oneOrMoreSpace, " ");
-    if (textPreproc.substring(0,1).equals("\u00A7")) {
+    if (textPreproc.substring(0,1).equals(StatTokSent.SENTINEL)) {
       textPreproc = textPreproc.substring(1);
     }
 
@@ -101,7 +101,7 @@ public class StatTokSentAnnotator implements Annotator{
     List<CoreMap> sentences = new ArrayList<>();
     ArrayList<CoreLabel> tokens = new ArrayList<>();
     int sIndex = 0;
-        
+
     // Add required annotations for each sentence in sTokens.
     // Add all sentences and tokens information to the Annotation
     for (List<CoreLabel> sentence : sTokens) {
