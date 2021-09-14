@@ -442,7 +442,8 @@ public class StatTokSentTrainer{
     logger.info("Training is ready.");
 		
     // Write temporary training data on file
-    String trainFileIOB = trainFile+".IOB.features.tmp";
+    File trainFileIOB = File.createTempFile("training.", ".iob");
+    trainFileIOB.deleteOnExit();
     OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(trainFileIOB), StandardCharsets.UTF_8);
     for (String line : trainingInput){
       fileWriter.write(line+System.lineSeparator());
@@ -460,7 +461,7 @@ public class StatTokSentTrainer{
       System.out.println("Copying property: " + key + " " + properties.get(key));
       classifierProps.put(key, properties.get(key));
     }
-    classifierProps.setProperty("trainFile", trainFileIOB);
+    classifierProps.setProperty("trainFile", trainFileIOB.getPath());
     classifierProps.setProperty("goldAnswerColumn", "0");
     // column 0 is the tokenizer class
     // columns 1-2N are the window features
@@ -491,7 +492,7 @@ public class StatTokSentTrainer{
     }
 
     if (loadClassifier == null) {
-      if (!cdc.trainClassifier(trainFileIOB)) {
+      if (!cdc.trainClassifier(trainFileIOB.getPath())) {
         logger.err("Training of the CDC failed!  Unable to build StatTokSent model");
         return;
       }
@@ -500,12 +501,6 @@ public class StatTokSentTrainer{
 
     if (testFile != null) {
       cdc.testClassifier(testFile);
-    }
-
-    // Delete the temporary training file.
-    File delTrainFileIOB = new File(trainFileIOB); 
-    if (delTrainFileIOB.delete()){
-      logger.info("IOB training file deleted.");
     }
   }
 }
