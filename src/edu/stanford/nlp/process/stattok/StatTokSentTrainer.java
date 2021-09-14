@@ -129,7 +129,7 @@ public class StatTokSentTrainer{
                   if (randSplit <=0.2){
                     endSentenceAddition = new Pair<String,String>("O", " ");
                   } else {
-                    endSentenceAddition = new Pair<String,String>("O", "\u00A7");
+                    endSentenceAddition = new Pair<String,String>("O", StatTokSent.SENTINEL);
                   }
                   classChars.add(endSentenceAddition);
                 }
@@ -247,7 +247,7 @@ public class StatTokSentTrainer{
               if (randSplit <=0.2){
                 endSentenceAddition = new Pair<String,String>("O", " ");
               } else {
-                endSentenceAddition = new Pair<String,String>("O", "\u00A7");
+                endSentenceAddition = new Pair<String,String>("O", StatTokSent.SENTINEL);
               }
               classChars.add(endSentenceAddition);
             }		
@@ -292,7 +292,7 @@ public class StatTokSentTrainer{
         try{
           window[j+windowSize] = classCharsText.get(i+j).second();
         } catch (IndexOutOfBoundsException e) {
-          window[j+windowSize] = "\u00A7";
+          window[j+windowSize] = StatTokSent.SENTINEL;
         }
       }
       int index = 0;
