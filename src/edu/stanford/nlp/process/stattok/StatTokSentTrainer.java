@@ -454,7 +454,7 @@ public class StatTokSentTrainer{
       if (ARGS_TO_DROP.contains(key)) {
         continue;
       }
-      System.out.println("Copying property: " + key + " " + properties.get(key));
+      logger.info("Copying property: " + key + " " + properties.get(key));
       classifierProps.put(key, properties.get(key));
     }
     classifierProps.setProperty("trainFile", trainFileIOB.getPath());
