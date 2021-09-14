@@ -79,6 +79,7 @@ public class StatTokSentAnnotator implements Annotator{
 
     // Find all line breaks (single and sequences) and multiple spaces in text and replace with a single character
     // Used for simplifying the tokenization process (line breaks are not tokens)
+    // TODO: this may make the start & end offsets useless
 
     // Preprocessing.
     List<String> lines = new ArrayList<String>(Arrays.asList(text.split("\n")));
@@ -86,11 +87,13 @@ public class StatTokSentAnnotator implements Annotator{
     lines.removeAll(Arrays.asList("", null));
     String textPreproc = String.join("\n", lines);
 
-    String lineBreak = "[\\r\\n|\\r|\\n]+";
+    String multipleLineBreaks = "(?:\\r\\n\\r\\n|\\r\\r|\\n\\n)[\\r\\n]*";
+    String lineBreak = "[\\r|\\n]+";
     String oneOrMoreSpace = "[ ]+";
-    textPreproc = textPreproc.replaceAll(lineBreak, "\u00A7"); //replace all line breaks with § symbol
+    textPreproc = textPreproc.replaceAll(multipleLineBreaks, StatTokSent.SENTINEL); //replace all multiple line breaks with § symbol
+    textPreproc = textPreproc.replaceAll(lineBreak, " "); //replace all line breaks with a space
     textPreproc = textPreproc.replaceAll(oneOrMoreSpace, " ");
-    if (textPreproc.substring(0,1).equals("\u00A7")) {
+    if (textPreproc.substring(0,1).equals(StatTokSent.SENTINEL)) {
       textPreproc = textPreproc.substring(1);
     }
 
@@ -101,7 +104,7 @@ public class StatTokSentAnnotator implements Annotator{
     List<CoreMap> sentences = new ArrayList<>();
     ArrayList<CoreLabel> tokens = new ArrayList<>();
     int sIndex = 0;
-        
+
     // Add required annotations for each sentence in sTokens.
     // Add all sentences and tokens information to the Annotation
     for (List<CoreLabel> sentence : sTokens) {

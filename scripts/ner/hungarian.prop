@@ -1,0 +1,61 @@
+trainFileList = /u/nlp/data/ner/hungarian/hu_combined.train.io
+testFile = /u/nlp/data/ner/hungarian/hu_combined.test.io
+serializeTo = hungarian.crf.ser.gz
+
+type=crf
+
+# distSimLexicon = /u/nlp/data/german/ner/hgc_175m_600
+# distSimLexicon = /u/nlp/data/german/ner/2016/hgc-175M-600
+# right options for new hgc_175m_600
+useDistSim = false
+
+# Now using stripped 2 column files so can add extra datasets!
+map = word=0,answer=1
+
+encoding = utf-8
+# saveFeatureIndexToDisk = true # now buggy but unnecessary
+mergeTags = false
+useTitle = false
+
+useClassFeature=true
+useWord=true
+useNGrams=true
+noMidNGrams=true
+# Having no maxNGramLeng seemed to work marginally better, but omitted for efficiency
+maxNGramLeng=6
+usePrev=true
+useNext=true
+useLongSequences=true
+useSequences=true
+usePrevSequences=true
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+# Including useOccurrencePatterns increased scores really marginally (could even disappear now we have weaker regularization)
+useOccurrencePatterns=true
+useLastRealWord=true
+useNextRealWord=true
+normalize=true
+# using chris4 instead hurts in most recent experiment. Earlier, an experiment had seemed to show the opposite.
+wordShape=chris2useLC
+useDisjunctive=true
+# Width 5 works a little better than 4
+disjunctionWidth=5
+
+maxLeft=1
+readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
+useObservedSequencesOnly=true
+useQN = true
+QNsize = 15
+# sigma 20 works better than sigma 5, which is MUCH better than sigma 1; that was the limit of hyperparameter optimization
+# On the basic CoNLL dataset (no distsim, no extra data), sigma=50 is a bit better still (by 0.13 F1)
+sigma = 20
+
+# For making faster (less features); changing this to 0.025 doesn't improve performance
+featureDiffThresh=0.05
+
+# evaluateIOB=true
+
+# other notes
+# even though useTaggySequences will use distsim rather than POS sequences, turning it on didn't help
+# adding useWordPairs doesn't seem to help. (Getting them anyway in an edge feature.)

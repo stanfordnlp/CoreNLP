@@ -50,6 +50,8 @@ public class StatTokSent{
   //private static final Redwood.RedwoodChannels logger = Redwood.channels(StanfordCoreNLP.class);
   private static final Redwood.RedwoodChannels logger = Redwood.channels(StatTokSent.class);
 
+  public static final String SENTINEL = "\u00A7";
+
   /**
    * This is the constructor for the StatTokSent object.
    * Parameters:
@@ -151,7 +153,7 @@ public class StatTokSent{
           window[j+windowSize] = splittedText.get(i+j);
         }
         catch (ArrayIndexOutOfBoundsException e){
-          window[j+windowSize] = "\u00A7";
+          window[j+windowSize] = SENTINEL;
         }
       }
       int index = 0;
@@ -370,7 +372,7 @@ public class StatTokSent{
       // sometimes the classifier will get this wrong :/
       // TODO: add a parameter to make double sentinels,
       // then tokenize that as a new sentence
-      if (currentChar.equals("\u00A7") && currentClass.equals("I")) {
+      if (currentChar.equals(SENTINEL) && currentClass.equals("I")) {
         currentClass = "O";
       }
 
@@ -399,8 +401,10 @@ public class StatTokSent{
         //clean list for new sentence and word
         sentenceTokensBase = new ArrayList<>();
         currentWord = "";
-        beginToken = i;		
-        currentWord+=currentChar;			
+        beginToken = i;
+        if (!currentChar.equals(SENTINEL)) {
+          currentWord+=currentChar;
+        }
       }
 
       //Normal token or clitic token
@@ -417,7 +421,9 @@ public class StatTokSent{
         beginToken = i;
         endToken = i;
         currentWord = "";
-        currentWord+=currentChar;
+        if (!currentChar.equals(SENTINEL)) {
+          currentWord+=currentChar;
+        }
         lastBeginChar = currentClass;
       }
 
