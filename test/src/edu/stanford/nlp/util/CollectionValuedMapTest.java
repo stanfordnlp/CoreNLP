@@ -187,31 +187,17 @@ public class CollectionValuedMapTest {
   @Test
   public void testAddRemove() {
     CollectionValuedMap<Integer, Integer> fooMap = new CollectionValuedMap<>();
+    CollectionValuedMap<Integer, Integer> expectedMap = new CollectionValuedMap<>();
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
         fooMap.add(new Integer(i), new Integer(j));
+        if (i!=2){
+          expectedMap.add(new Integer(i), new Integer(j));
+        }
       }
     }
     fooMap.remove(new Integer(2));
-
- 
-    for (Map.Entry<Integer, Collection<Integer>> entry: fooMap.entrySet()){
-      List<Integer> list = new ArrayList(entry.getValue());
-      Collections.sort(list);
-      entry.setValue(list);
-    }
-
-    String exp1 = "{0=[0, 1, 2, 3], 1=[0, 1, 2, 3], 3=[0, 1, 2, 3]}";
-    String exp2 = "{0=[0, 1, 2, 3], 3=[0, 1, 2, 3], 1=[0, 1, 2, 3]}";
-    String exp3 = "{1=[0, 1, 2, 3], 0=[0, 1, 2, 3], 3=[0, 1, 2, 3]}";
-    String exp4 = "{1=[0, 1, 2, 3], 3=[0, 1, 2, 3], 0=[0, 1, 2, 3]}";
-    String exp5 = "{3=[0, 1, 2, 3], 1=[0, 1, 2, 3], 0=[0, 1, 2, 3]}";
-    String exp6 = "{3=[0, 1, 2, 3], 0=[0, 1, 2, 3], 1=[0, 1, 2, 3]}";
-
-    String expected[] = {exp1, exp2, exp3, exp4, exp5, exp6};
-    List<String> expectedList = Arrays.asList(expected);
-    
-    Assert.assertTrue(expectedList.contains(fooMap.toString()));
+    Assert.assertEquals(expectedMap,fooMap);
   }
 
   /**
