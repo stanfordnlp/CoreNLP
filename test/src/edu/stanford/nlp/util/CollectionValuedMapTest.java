@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -184,13 +187,17 @@ public class CollectionValuedMapTest {
   @Test
   public void testAddRemove() {
     CollectionValuedMap<Integer, Integer> fooMap = new CollectionValuedMap<>();
+    CollectionValuedMap<Integer, Integer> expectedMap = new CollectionValuedMap<>();
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
         fooMap.add(new Integer(i), new Integer(j));
+        if (i!=2){
+          expectedMap.add(new Integer(i), new Integer(j));
+        }
       }
     }
     fooMap.remove(new Integer(2));
-    Assert.assertEquals("{0=[0, 1, 2, 3], 1=[0, 1, 2, 3], 3=[0, 1, 2, 3]}", fooMap.toString());
+    Assert.assertEquals(expectedMap,fooMap);
   }
 
   /**
