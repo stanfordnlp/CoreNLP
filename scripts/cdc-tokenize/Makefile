@@ -1,15 +1,23 @@
 PYTHON = python3
-EVAL_SCRIPT = /home/john/stanza/stanza/utils/conll18_ud_eval.py
+EVAL_SCRIPT = /u/horatio/stanza/stanza/utils/conll18_ud_eval.py
 
-HU_TRAINING = /home/john/extern_data/ud2/ud-treebanks-v2.8/UD_Hungarian-Szeged/hu_szeged-ud-train.conllu
+HU_TRAINING = /u/nlp/software/CoreNLP-models/hu/stattok/4.3.0/hu_szeged-ud-train.conllu
 
-HU_TEST_INPUT = /home/john/extern_data/ud2/ud-treebanks-v2.8/UD_Hungarian-Szeged/hu_szeged-ud-test.txt
-HU_TEST_GOLD = /home/john/extern_data/ud2/ud-treebanks-v2.8/UD_Hungarian-Szeged/hu_szeged-ud-test.conllu
+HU_TEST_INPUT = /u/nlp/software/CoreNLP-models/hu/stattok/4.3.0/hu_szeged-ud-test.txt
+HU_TEST_GOLD = /u/nlp/software/CoreNLP-models/hu/stattok/4.3.0/hu_szeged-ud-test.conllu
+
+
+# ignoring twittiro and postwita because this model gets thrown off
+# quite a lot by the non-standard sentence endings
+IT_TRAINING = /u/nlp/software/CoreNLP-models/it/stattok/4.3.0/it_isdt-ud-train.conllu,/u/nlp/software/CoreNLP-models/it/stattok/4.3.0/it_vit-ud-train.conllu,/u/nlp/software/CoreNLP-models/it/stattok/4.3.0/italian.mwt
+
+IT_TEST_INPUT = /u/nlp/software/CoreNLP-models/it/stattok/4.3.0/it_isdt-ud-test.txt
+IT_TEST_GOLD = /u/nlp/software/CoreNLP-models/it/stattok/4.3.0/it_isdt-ud-test.conllu
 
 .SECONDEXPANSION:
 
-all: hungarian
-.PHONY: all hungarian
+all: hungarian italian
+.PHONY: all hungarian italian
 
 hungarian: hu-tokenizer.ser.gz
 
@@ -18,3 +26,11 @@ hu-tokenizer.ser.gz:
 	java edu.stanford.nlp.process.stattok.StatTokSentTrainer -trainFile $(HU_TRAINING) -serializeTo $@
 	java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators cdc_tokenize -cdc_tokenize.model $@ -file $(HU_TEST_INPUT) -outputFormat conllu -output.printFakeDeps True -outputDirectory /tmp/$@.out
 	$(PYTHON) $(EVAL_SCRIPT) -v $(HU_TEST_GOLD) /tmp/$@.out/$(notdir $(HU_TEST_INPUT)).conllu
+
+italian: it-tokenizer.ser.gz
+
+it-tokenizer.ser.gz:
+	@echo Training $@
+	java edu.stanford.nlp.process.stattok.StatTokSentTrainer -inferMultiWordRules 1 -trainFile $(IT_TRAINING) -serializeTo $@
+	java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators cdc_tokenize -cdc_tokenize.model $@ -file $(IT_TEST_INPUT) -outputFormat conllu -output.printFakeDeps True -outputDirectory /tmp/$@.out
+	$(PYTHON) $(EVAL_SCRIPT) -v $(IT_TEST_GOLD) /tmp/$@.out/$(notdir $(IT_TEST_INPUT)).conllu
