@@ -63,206 +63,202 @@ public class StatTokSentTrainer{
   public ArrayList<Pair<String, String>> fileToTrainSet(String trainFile, Map<String, String[]> multiWordRules)throws IOException, FileNotFoundException{
 
     ArrayList<Pair<String, String>> classChars = new ArrayList<Pair<String, String>>();
-		
-    try (BufferedReader br = IOUtils.readerFromString(trainFile)) {
-      String sentence="";
-      List<String> tokenized = new ArrayList<String>();
-      List<Integer> cliticIndex = new ArrayList<>();
-      List<Integer> mutliWordIndex = new ArrayList<>();
-      Boolean start = true;
 
-      int cliticTokenLenght = -1;
-      int tokenCounter = 0;
+    for (String filename : trainFile.split("[,;]")) {
+      try (BufferedReader br = IOUtils.readerFromString(filename)) {
+        String sentence="";
+        List<String> tokenized = new ArrayList<String>();
+        List<Integer> cliticIndex = new ArrayList<>();
+        List<Integer> mutliWordIndex = new ArrayList<>();
+        Boolean start = true;
 
-      for(String line; (line = br.readLine()) != null; ) {
-				
-        // Skip all lines starting with "#" except those containing the actual text of the sentence.
-        if ((line.startsWith("#")) && (!line.contains("text = ")) || (line.length() == 0)){
-          continue;
-        }
-        // Whenever a line with "text = " is found, elaborate previous sentence and restore utility variables.
-        else if (line.contains("text = ")){
-          if (sentence != ""){
-            int charIdx = 0;
-            List<Character> sentenceChars = new ArrayList<Character>();
-            for(char c : sentence.toCharArray()){
-              sentenceChars.add(c);
-            }
+        int cliticTokenLenght = -1;
+        int tokenCounter = 0;
 
-            //Set class of each character based on its position (and its status as a multi-word token)
-            List<Character> tokensChars = new ArrayList<Character>(sentenceChars);
-            for(int tokIdx=0; tokIdx < tokenized.size(); tokIdx++){
+        for(String line; (line = br.readLine()) != null; ) {
 
-              String token = tokenized.get(tokIdx);
-              //Find position of token in the actual sentence
-              int begin = sentence.indexOf(token, charIdx);
-              if (begin < 0) {
-                System.err.println("Could not find text, searching from charIdx " + charIdx + ":\n'" + token + "'\n" + sentence);
-              }
-              int end = token.length()+begin-1;
-
-              for (int i=begin; i <= end; i++){
-
-                if (i == 0){
-                  tokensChars.set(i, 'S');
-                } else if (i == begin && i != 0){
-                  tokensChars.set(i, 'T');
-                  if (cliticIndex.indexOf(tokIdx) != -1){
-                    tokensChars.set(i, 'C');
-                  }
-                } else {
-                  tokensChars.set(i, 'I');
-                }	    						
-              }
-              charIdx = end+1;
-            }				
-            for (int i = 0; i < sentenceChars.size(); i++){
-              if (tokensChars.get(i) ==' '){
-                tokensChars.set(i, 'O');
-              }
-              // Randomly add a " " or "\u00A7" character to the end of each sentece.
-              // This is done to simulate real world text behaviour for end of sentences (i.e., ". " or new line)
-              if (tokensChars.get(i) == 'S'){
-                if (!start){
-                  Double randSplit = Math.random();
-                  Pair<String,String> endSentenceAddition;
-                  if (randSplit <=0.2){
-                    endSentenceAddition = new Pair<String,String>("O", " ");
-                  } else {
-                    endSentenceAddition = new Pair<String,String>("O", StatTokSent.SENTINEL);
-                  }
-                  classChars.add(endSentenceAddition);
-                }
-
-              }
-              // Add results to the list that will be returned.
-              String classString 	= tokensChars.get(i).toString();
-              String charString 	= sentenceChars.get(i).toString();
-              Pair<String,String> classAndChar = new Pair<String,String>(classString, charString);
-              classChars.add(classAndChar);					
-            }
-
-            // Re-initialize support variables.
-            start = false;
-            tokenized = new ArrayList<>();
-            sentence = "";
-            String[] splitted = line.split("text = ");
-            sentence = splitted[1];
-            cliticIndex = new ArrayList<>();
-            mutliWordIndex = new ArrayList<>();
-            tokenCounter = 0;
-
-          }
-          // Store the sentence text.
-          else{
-            String[] splitted = line.split(" = ");
-            sentence = splitted[1];
-          }					
-        }
-
-        /* Any line starting with a digit is a new token.
-         * If it is a single token, and not a part of a multi-word token, simply add it to the list of tokens.
-         * If it is a multi-word token (identified by "-" in the index), it will be considered in two ways:
-         * 1) If it is in the multi-word token rules, it will be treated as a single token (its parts will be skipped)
-         * 2) If it is not in the multi-word token rules, indexes of its parts will be stored to identify the position in which to assign class "C" to the character.
-         */
-        else if (Character.isDigit(line.charAt(0))){				
-          String tokIdx = line.split("\t")[0];
-          if (tokIdx.indexOf(".") > 0) {
-            // Some treebanks use token index notations such as 54.1 in it_isdt for enhanced dependencies
+          // Skip all lines starting with "#" except those containing the actual text of the sentence.
+          if ((line.startsWith("#")) && (!line.contains("text = ")) || (line.length() == 0)){
             continue;
           }
-          if (tokIdx.indexOf('-') != -1){
-            String[] tokIdxSplit = tokIdx.split("-");
-            if (multiWordRules.get(line.split("\t")[1].toLowerCase()) != null){
-              mutliWordIndex.add(tokenCounter);
-              int skip = Integer.parseInt(tokIdxSplit[1]) - Integer.parseInt(tokIdxSplit[0]);
-              int i = 0;
-              tokenized.add(line.split("\t")[1]);
-              tokenCounter++;
-              while (i <= skip){
-                line = br.readLine();
-                i++;
+          // Whenever a line with "text = " is found, elaborate previous sentence and restore utility variables.
+          else if (line.contains("text = ")){
+            if (sentence != ""){
+              int charIdx = 0;
+              List<Character> sentenceChars = new ArrayList<Character>();
+              for(char c : sentence.toCharArray()){
+                sentenceChars.add(c);
               }
-              continue;
-            } else {
-              cliticTokenLenght = Integer.parseInt(tokIdxSplit[1]) - Integer.parseInt(tokIdxSplit[0]);
-              continue;
+
+              //Set class of each character based on its position (and its status as a multi-word token)
+              List<Character> tokensChars = new ArrayList<Character>(sentenceChars);
+              for(int tokIdx=0; tokIdx < tokenized.size(); tokIdx++){
+
+                String token = tokenized.get(tokIdx);
+                //Find position of token in the actual sentence
+                int begin = sentence.indexOf(token, charIdx);
+                if (begin < 0) {
+                  System.err.println("Could not find text, searching from charIdx " + charIdx + ":\n'" + token + "'\n" + sentence);
+                }
+                int end = token.length()+begin-1;
+
+                for (int i=begin; i <= end; i++){
+
+                  if (i == 0){
+                    tokensChars.set(i, 'S');
+                  } else if (i == begin && i != 0){
+                    tokensChars.set(i, 'T');
+                    if (cliticIndex.indexOf(tokIdx) != -1){
+                      tokensChars.set(i, 'C');
+                    }
+                  } else {
+                    tokensChars.set(i, 'I');
+                  }
+                }
+                charIdx = end+1;
+              }
+              for (int i = 0; i < sentenceChars.size(); i++){
+                if (tokensChars.get(i) ==' '){
+                  tokensChars.set(i, 'O');
+                }
+                // Randomly add a " " or "\u00A7" character to the end of each sentece.
+                // This is done to simulate real world text behaviour for end of sentences (i.e., ". " or new line)
+                if (tokensChars.get(i) == 'S'){
+                  if (!start){
+                    Double randSplit = Math.random();
+                    Pair<String,String> endSentenceAddition;
+                    if (randSplit <=0.2){
+                      endSentenceAddition = new Pair<String,String>("O", " ");
+                    } else {
+                      endSentenceAddition = new Pair<String,String>("O", StatTokSent.SENTINEL);
+                    }
+                    classChars.add(endSentenceAddition);
+                  }
+
+                }
+                // Add results to the list that will be returned.
+                String classString 	= tokensChars.get(i).toString();
+                String charString 	= sentenceChars.get(i).toString();
+                Pair<String,String> classAndChar = new Pair<String,String>(classString, charString);
+                classChars.add(classAndChar);					
+              }
+
+              // Re-initialize support variables.
+              start = false;
+              tokenized = new ArrayList<>();
+              sentence = "";
+              String[] splitted = line.split("text = ");
+              sentence = splitted[1];
+              cliticIndex = new ArrayList<>();
+              mutliWordIndex = new ArrayList<>();
+              tokenCounter = 0;
+            }
+            // Store the sentence text.
+            else{
+              String[] splitted = line.split(" = ");
+              sentence = splitted[1];
             }
           }
 
-          if (cliticTokenLenght > -1){  //ricontrolla che non ne vada aggiunto uno
-            cliticIndex.add(tokenCounter);
-            cliticTokenLenght--;
-          }
-          tokenized.add(line.split("\t")[1]);
-          tokenCounter++;
-
-        }
-
-      }
-      // Elaborate last sentence in the treebank
-      // TODO: Code is repeated from above, the process could be improved and optimized.
-      if (sentence != ""){
-        //do end of sentence stuff						
-        int charIdx = 0;
-        List<Character> sentenceChars = new ArrayList<Character>();
-        for(char c : sentence.toCharArray()){
-          sentenceChars.add(c);
-        }
-        List<Character> tokensChars = new ArrayList<Character>(sentenceChars);
-
-        for(int tokIdx=0; tokIdx < tokenized.size(); tokIdx++){
-
-          String token = tokenized.get(tokIdx);
-          int begin = sentence.indexOf(token, charIdx);
-          int end = token.length()+begin-1;
-
-          for (int i=begin; i <= end; i++){
-
-            if (i == 0){
-              tokensChars.set(i, 'S');
-            } else if (i == begin && i != 0) {
-              tokensChars.set(i, 'T');
-              if (cliticIndex.indexOf(tokIdx) != -1){
-                tokensChars.set(i, 'C');
-              }
-            } else {
-              tokensChars.set(i, 'I');
-            }	    						
-          }
-          charIdx = end+1;
-        }				
-        for (int i = 0; i < sentenceChars.size(); i++){
-
-          if (tokensChars.get(i) ==' '){
-            tokensChars.set(i, 'O');
-          }
-
-          if (tokensChars.get(i) == 'S'){
-            if (!start){
-              //generate random
-              Double randSplit = Math.random();
-              Pair<String,String> endSentenceAddition;
-              if (randSplit <=0.2){
-                endSentenceAddition = new Pair<String,String>("O", " ");
+          /* Any line starting with a digit is a new token.
+           * If it is a single token, and not a part of a multi-word token, simply add it to the list of tokens.
+           * If it is a multi-word token (identified by "-" in the index), it will be considered in two ways:
+           * 1) If it is in the multi-word token rules, it will be treated as a single token (its parts will be skipped)
+           * 2) If it is not in the multi-word token rules, indexes of its parts will be stored to identify the position in which to assign class "C" to the character.
+           */
+          else if (Character.isDigit(line.charAt(0))){				
+            String tokIdx = line.split("\t")[0];
+            if (tokIdx.indexOf(".") > 0) {
+              // Some treebanks use token index notations such as 54.1 in it_isdt for enhanced dependencies
+              continue;
+            }
+            if (tokIdx.indexOf('-') != -1){
+              String[] tokIdxSplit = tokIdx.split("-");
+              if (multiWordRules.get(line.split("\t")[1].toLowerCase()) != null){
+                mutliWordIndex.add(tokenCounter);
+                int skip = Integer.parseInt(tokIdxSplit[1]) - Integer.parseInt(tokIdxSplit[0]);
+                int i = 0;
+                tokenized.add(line.split("\t")[1]);
+                tokenCounter++;
+                while (i <= skip){
+                  line = br.readLine();
+                  i++;
+                }
+                continue;
               } else {
-                endSentenceAddition = new Pair<String,String>("O", StatTokSent.SENTINEL);
+                cliticTokenLenght = Integer.parseInt(tokIdxSplit[1]) - Integer.parseInt(tokIdxSplit[0]);
+                continue;
               }
-              classChars.add(endSentenceAddition);
-            }		
+            }
+
+            if (cliticTokenLenght > -1){  //ricontrolla che non ne vada aggiunto uno
+              cliticIndex.add(tokenCounter);
+              cliticTokenLenght--;
+            }
+            tokenized.add(line.split("\t")[1]);
+            tokenCounter++;
           }
-          String classString 	= tokensChars.get(i).toString();
-          String charString 	= sentenceChars.get(i).toString();
-          Pair<String,String> classAndChar = new Pair<String,String>(classString, charString);
-          classChars.add(classAndChar);					
         }
-        start = false;
-        tokenized = new ArrayList<>();
-        sentence = "";
-        cliticIndex = new ArrayList<>();
-        mutliWordIndex = new ArrayList<>();
-        tokenCounter = 0;
+        // Elaborate last sentence in the treebank
+        // TODO: Code is repeated from above, the process could be improved and optimized.
+        if (sentence != ""){
+          //do end of sentence stuff						
+          int charIdx = 0;
+          List<Character> sentenceChars = new ArrayList<Character>();
+          for(char c : sentence.toCharArray()){
+            sentenceChars.add(c);
+          }
+          List<Character> tokensChars = new ArrayList<Character>(sentenceChars);
+
+          for(int tokIdx=0; tokIdx < tokenized.size(); tokIdx++){
+            String token = tokenized.get(tokIdx);
+            int begin = sentence.indexOf(token, charIdx);
+            int end = token.length()+begin-1;
+
+            for (int i=begin; i <= end; i++){
+              if (i == 0){
+                tokensChars.set(i, 'S');
+              } else if (i == begin && i != 0) {
+                tokensChars.set(i, 'T');
+                if (cliticIndex.indexOf(tokIdx) != -1){
+                  tokensChars.set(i, 'C');
+                }
+              } else {
+                tokensChars.set(i, 'I');
+              }	    						
+            }
+            charIdx = end+1;
+          }				
+          for (int i = 0; i < sentenceChars.size(); i++){
+            if (tokensChars.get(i) ==' '){
+              tokensChars.set(i, 'O');
+            }
+
+            if (tokensChars.get(i) == 'S'){
+              if (!start){
+                //generate random
+                Double randSplit = Math.random();
+                Pair<String,String> endSentenceAddition;
+                if (randSplit <=0.2){
+                  endSentenceAddition = new Pair<String,String>("O", " ");
+                } else {
+                  endSentenceAddition = new Pair<String,String>("O", StatTokSent.SENTINEL);
+                }
+                classChars.add(endSentenceAddition);
+              }
+            }
+            String classString  = tokensChars.get(i).toString();
+            String charString   = sentenceChars.get(i).toString();
+            Pair<String,String> classAndChar = new Pair<String,String>(classString, charString);
+            classChars.add(classAndChar);					
+          }
+          start = false;
+          tokenized = new ArrayList<>();
+          sentence = "";
+          cliticIndex = new ArrayList<>();
+          mutliWordIndex = new ArrayList<>();
+          tokenCounter = 0;
+        }
       }
     }
 
@@ -316,9 +312,8 @@ public class StatTokSentTrainer{
    */
   private Map<String, String[]> readMultiWordRules(String multiWordRulesFile){
     Map<String, String[]> multiWordRules = new HashMap<String, String[]>();
-    try{
-      // buffered and decoded from utf-8
-      BufferedReader reader = IOUtils.readerFromString(multiWordRulesFile);
+    // buffered and decoded from utf-8
+    try (BufferedReader reader = IOUtils.readerFromString(multiWordRulesFile)) {
       String line;
       while ((line = reader.readLine()) != null){
         String[] parts = line.split("\t");
@@ -335,36 +330,37 @@ public class StatTokSentTrainer{
   /**
    * Method to infer multi-word token rules directly from the training set for tokenization.
    */
-  private Map<String, String[]> inferMultiWordRules (String trainFile){
+  private Map<String, String[]> inferMultiWordRules (String trainFile) throws IOException, FileNotFoundException {
     Map<String, String[]> multiWordRules = new HashMap<String, String[]>();
-    try{
-      BufferedReader reader = IOUtils.readerFromString(trainFile);
-      String line;
-      while ((line = reader.readLine()) != null){
-        if ((line.length() > 0) && (Character.isDigit(line.charAt(0)))){
-          String tokIdx = line.split("\t")[0];
-          //if it is a composed token, store token length
-          if (tokIdx.indexOf('-') != -1){
-            if (multiWordRules.get(line.split("\t")[1].toLowerCase()) == null){
-              String token = line.split("\t")[1];
-              String[] tokIdxSplit = tokIdx.split("-");
-              int partsLen =  Integer.parseInt(tokIdxSplit[1]) - Integer.parseInt(tokIdxSplit[0]);
-              int i = 0;
-              String[] parts = new String[partsLen+1];
-              while (i <= partsLen){
-                line = reader.readLine();
-                String part = line.split("\t")[1];
-                parts[i] = part;
-                i++;
+    for (String filename : trainFile.split("[,;]")) {
+      try (BufferedReader reader = IOUtils.readerFromString(filename)) {
+        logger.info("Reading rules from " + filename);
+        String line;
+        while ((line = reader.readLine()) != null){
+          if ((line.length() > 0) && (Character.isDigit(line.charAt(0)))){
+            String tokIdx = line.split("\t")[0];
+            //if it is a composed token, store token length
+            if (tokIdx.indexOf('-') != -1){
+              if (multiWordRules.get(line.split("\t")[1].toLowerCase()) == null){
+                String token = line.split("\t")[1];
+                String[] tokIdxSplit = tokIdx.split("-");
+                int partsLen =  Integer.parseInt(tokIdxSplit[1]) - Integer.parseInt(tokIdxSplit[0]);
+                int i = 0;
+                String[] parts = new String[partsLen+1];
+                while (i <= partsLen){
+                  line = reader.readLine();
+                  String part = line.split("\t")[1];
+                  parts[i] = part;
+                  i++;
+                }
+                multiWordRules.put(token, parts);
               }
-              multiWordRules.put(token, parts);
             }
           }
         }
       }
-    } catch (Exception e){
-      e.printStackTrace();
     }
+    logger.info("Found " + multiWordRules.size() + " rules");
     return multiWordRules;
   }
 
@@ -442,7 +438,8 @@ public class StatTokSentTrainer{
     logger.info("Training is ready.");
 		
     // Write temporary training data on file
-    String trainFileIOB = trainFile+".IOB.features.tmp";
+    File trainFileIOB = File.createTempFile("training.", ".iob");
+    trainFileIOB.deleteOnExit();
     OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(trainFileIOB), StandardCharsets.UTF_8);
     for (String line : trainingInput){
       fileWriter.write(line+System.lineSeparator());
@@ -457,10 +454,10 @@ public class StatTokSentTrainer{
       if (ARGS_TO_DROP.contains(key)) {
         continue;
       }
-      System.out.println("Copying property: " + key + " " + properties.get(key));
+      logger.info("Copying property: " + key + " " + properties.get(key));
       classifierProps.put(key, properties.get(key));
     }
-    classifierProps.setProperty("trainFile", trainFileIOB);
+    classifierProps.setProperty("trainFile", trainFileIOB.getPath());
     classifierProps.setProperty("goldAnswerColumn", "0");
     // column 0 is the tokenizer class
     // columns 1-2N are the window features
@@ -491,7 +488,7 @@ public class StatTokSentTrainer{
     }
 
     if (loadClassifier == null) {
-      if (!cdc.trainClassifier(trainFileIOB)) {
+      if (!cdc.trainClassifier(trainFileIOB.getPath())) {
         logger.err("Training of the CDC failed!  Unable to build StatTokSent model");
         return;
       }
@@ -500,12 +497,6 @@ public class StatTokSentTrainer{
 
     if (testFile != null) {
       cdc.testClassifier(testFile);
-    }
-
-    // Delete the temporary training file.
-    File delTrainFileIOB = new File(trainFileIOB); 
-    if (delTrainFileIOB.delete()){
-      logger.info("IOB training file deleted.");
     }
   }
 }

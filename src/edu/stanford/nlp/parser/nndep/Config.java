@@ -256,6 +256,12 @@ public class Config {
     language = props.containsKey("language")
                ? getLanguage(props.getProperty("language"))
                : language;
+    if (language == null) {
+      throw new IllegalArgumentException("Unknown language " + props.containsKey("language"));
+    }
+    if (language.params == null) {
+      throw new IllegalArgumentException("Language " + language + " does not support parsing!");
+    }
     tlp = language.params.treebankLanguagePack();
     preTokenized = PropertiesUtils.getBool(props, "tokenized", preTokenized);
 

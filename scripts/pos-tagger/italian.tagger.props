@@ -1,0 +1,36 @@
+## tagger training invoked at Tue Sep 14 13:49:09 PDT 2021 with arguments:
+                   model = italian.tagger
+                    arch = left3words,naacl2003unknowns,suffix(10),prefix(4),words(-2,2),unicodeshapes(-2,2),unicodeshapeconjunction(-1,1)
+            wordFunction = 
+               trainFile = format=TSV,comments=true,wordColumn=1,tagColumn=3,/u/nlp/software/CoreNLP-models/it/pos/4.3.0/it_isdt-ud-train.conllu;format=TSV,comments=true,wordColumn=1,tagColumn=3,/u/nlp/software/CoreNLP-models/it/pos/4.3.0/it_vit-ud-train.conllu;format=TSV,comments=true,wordColumn=1,tagColumn=3,/u/nlp/software/CoreNLP-models/it/pos/4.3.0/it_isdt-ud-dev.conllu;format=TSV,comments=true,wordColumn=1,tagColumn=3,/u/nlp/software/CoreNLP-models/it/pos/4.3.0/it_vit-ud-dev.conllu;format=TSV,comments=true,wordColumn=1,tagColumn=3,/u/nlp/software/CoreNLP-models/it/pos/4.3.0/italian.mwt
+         closedClassTags = 
+ closedClassTagThreshold = 40
+ curWordMinFeatureThresh = 2
+                   debug = false
+             debugPrefix = 
+            tagSeparator = _
+                encoding = utf-8
+              iterations = 100
+                    lang = 
+    learnClosedClassTags = false
+        minFeatureThresh = 2
+           openClassTags = 
+rareWordMinFeatureThresh = 10
+          rareWordThresh = 5
+                  search = owlqn2
+                    sgml = false
+            sigmaSquared = 0.0
+                   regL1 = 0.75
+               tagInside = 
+                tokenize = true
+        tokenizerFactory = 
+        tokenizerOptions = 
+                 verbose = false
+          verboseResults = true
+    veryCommonWordThresh = 250
+                xmlInput = null
+              outputFile = 
+            outputFormat = slashTags
+     outputFormatOptions = 
+                nthreads = 1
+        minWordsLockTags = 1

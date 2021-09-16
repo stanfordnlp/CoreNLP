@@ -112,7 +112,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td> useGazettes</td><td>boolean</td><td>false</td><td>If true, use gazette features (defined by other flags)</td></tr>
  * <tr><td> gazette</td><td>String</td><td>null</td><td>The value can be one or more filenames (names separated by a comma, semicolon or space).
  * If provided gazettes are loaded from these files.  Each line should be an entity class name, followed by whitespace followed by an entity (which might be a phrase of several tokens with a single space between words).
- * Giving this property turns on useGazettes, so you normally don't need to specify it (but can use it to turn off gazettes specified in a properties file).</td></tr>
+ * Giving this property turns on useGazettes, so you normally don't need to specify it (but can use it to turn off gazettes specified in a properties file).  Note that you WILL need to specify one or both of cleanGazette or sloppyGazette</td></tr>
  * <tr><td> sloppyGazette</td><td>boolean</td><td>false</td><td>If true, a gazette feature fires when any token of a gazette entry matches</td></tr>
  * <tr><td> cleanGazette</td><td>boolean</td><td>false</td><td>If true, a gazette feature fires when all tokens of a gazette entry match</td></tr>
  *

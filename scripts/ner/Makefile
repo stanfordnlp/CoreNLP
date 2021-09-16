@@ -1,5 +1,5 @@
 
-all: chinese genia german all.3class nowiki.3class conll.4class muc.7class spanish
+all: chinese genia german hungarian italian all.3class nowiki.3class conll.4class muc.7class spanish
 
 chinese: chinese.misc.nodistsim.ser.gz chinese.misc.distsim.ser.gz
 
@@ -25,6 +25,12 @@ hungarian: hungarian.crf.ser.gz
 
 hungarian.crf.ser.gz:
 	java -mx20g edu.stanford.nlp.ie.crf.CRFClassifier -prop hungarian.prop -serializeTo $@ > hungarian.out 2>&1
+
+
+italian: italian.crf.ser.gz
+
+italian.crf.ser.gz:
+	java -mx20g edu.stanford.nlp.ie.crf.CRFClassifier -prop italian.prop -serializeTo $@ > italian.out 2>&1
 
 
 # currently we exclude enp_DE.sbb.io, as the data has too many issues, but we could work to include it....
