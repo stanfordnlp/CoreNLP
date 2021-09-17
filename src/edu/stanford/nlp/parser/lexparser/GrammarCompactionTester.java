@@ -3,6 +3,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.fsm.*;
 import edu.stanford.nlp.io.NumberRangeFileFilter;
+import edu.stanford.nlp.parser.metrics.EvaluateTreebank;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.stats.ClassicCounter;

@@ -1,10 +1,11 @@
-package edu.stanford.nlp.parser.lexparser; 
+package edu.stanford.nlp.parser.metrics;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.trees.Tree;
 
 public class EvalbFormatWriter  {

@@ -16,6 +16,7 @@ import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 public abstract class ProcessProtobufRequest {
   /**
@@ -62,7 +63,17 @@ public abstract class ProcessProtobufRequest {
     } while (size > 0);
   }
 
-  public static void process(ProcessProtobufRequest processor, String[] args) throws IOException {
+  /**
+   * Return args after filtering the args used by the processor
+   *
+   * Currently that is just -multiple
+   */
+  public static String[] leftoverArgs(String[] args) {
+    args = Arrays.stream(args).filter(x -> !x.equals("-multiple") && !x.equals("--multiple")).toArray(String[]::new);
+    return args;
+  }
+
+  public static void process(ProcessProtobufRequest processor, String ... args) throws IOException {
     if (args.length > 0 &&
         (args[0].equalsIgnoreCase("-multiple") || args[0].equalsIgnoreCase("--multiple"))) {
       processor.processMultipleInputs(System.in, System.out);

@@ -790,7 +790,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param parseTree The parse tree to convert.
    * @return A protocol buffer message corresponding to this tree.
    */
-  public CoreNLPProtos.ParseTree toProto(Tree parseTree) {
+  public static CoreNLPProtos.ParseTree toProto(Tree parseTree) {
     CoreNLPProtos.ParseTree.Builder builder = CoreNLPProtos.ParseTree.newBuilder();
     // Required fields
     for (Tree child : parseTree.children()) { builder.addChild(toProto(child)); }
@@ -1595,7 +1595,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasParseTree()) { sentence.set(TreeAnnotation.class, fromProto(proto.getParseTree())); }
     if (proto.hasBinarizedParseTree()) { sentence.set(BinarizedTreeAnnotation.class, fromProto(proto.getBinarizedParseTree())); }
     if (proto.getKBestParseTreesCount() > 0) {
-      List<Tree> trees = proto.getKBestParseTreesList().stream().map(this::fromProto).collect(Collectors.toCollection(LinkedList::new));
+      List<Tree> trees = proto.getKBestParseTreesList().stream().map(ProtobufAnnotationSerializer::fromProto).collect(Collectors.toCollection(LinkedList::new));
       sentence.set(KBestTreesAnnotation.class, trees);
     }
     if (proto.hasAnnotatedParseTree()) { sentence.set(SentimentCoreAnnotations.SentimentAnnotatedTree.class, fromProto(proto.getAnnotatedParseTree())); }
@@ -2082,6 +2082,148 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return ann;
   }
 
+  public static void toFlattenedTree(Tree tree, CoreNLPProtos.FlattenedParseTree.Builder treeBuilder) {
+    CoreNLPProtos.FlattenedParseTree.Node.Builder nodeBuilder = CoreNLPProtos.FlattenedParseTree.Node.newBuilder();
+    nodeBuilder.setOpenNode(true);
+    treeBuilder.addNodes(nodeBuilder.build());
+
+    if (tree.label() == null) {
+      throw new UnsupportedOperationException("Empty label not supported");
+    }
+
+    nodeBuilder = CoreNLPProtos.FlattenedParseTree.Node.newBuilder();
+    nodeBuilder.setValue(tree.label().value());
+    if (!Double.isNaN(tree.score())) {
+      nodeBuilder.setScore(tree.score());
+    }
+    treeBuilder.addNodes(nodeBuilder.build());
+
+    for (Tree child : tree.children()) {
+      if (child.numChildren() == 0) {
+        nodeBuilder = CoreNLPProtos.FlattenedParseTree.Node.newBuilder();
+        nodeBuilder.setValue(child.label().value());
+        if (!Double.isNaN(child.score())) {
+          nodeBuilder.setScore(child.score());
+        }
+        treeBuilder.addNodes(nodeBuilder.build());
+      } else {
+        toFlattenedTree(child, treeBuilder);
+      }
+    }
+
+    nodeBuilder = CoreNLPProtos.FlattenedParseTree.Node.newBuilder();
+    nodeBuilder.setCloseNode(true);
+    treeBuilder.addNodes(nodeBuilder.build());
+  }
+
+  /**
+   * Turn the given tree into a FlattedParseTree object from the proto
+   *<br>
+   * The new structure is useful because the ParseTree object can't
+   * represent trees past a certain depth.  Unfortunately, we can't
+   * just replace ParseTree with this as there are existing
+   * serializations with the old version
+   *<br>
+   * This works by recursively calling the toFlattenedTree helper method.
+   * In fact, that recursion could be eliminated with a stack object,
+   * but presumably it won't be so deep that it kills the Java stack
+   */
+  public static CoreNLPProtos.FlattenedParseTree toFlattenedTree(Tree tree) {
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
+    CoreNLPProtos.FlattenedParseTree.Builder treeBuilder = CoreNLPProtos.FlattenedParseTree.newBuilder();
+    toFlattenedTree(tree, treeBuilder);
+    return treeBuilder.build();
+  }
+
+  /**
+   * Retrieve a Tree object from a flattened tree protobuf.
+   *
+   * @param proto The serialized tree.
+   * @return A Tree object corresponding to the saved tree. This will always be a {@link LabeledScoredTreeNode}.
+   */
+  public static Tree fromProto(CoreNLPProtos.FlattenedParseTree proto) {
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
+    if (proto.getNodesList().size() == 0) {
+      return null;
+    }
+    Stack<LabeledScoredTreeNode> stack = new Stack<>();
+    LabeledScoredTreeNode finished = null;
+
+    // The incoming data structure is basically a PTB formatted tree
+    // with openNode representing ( and closeNode representing )
+    // essentially we only need to keep track of the current node and
+    // all of its ancestors
+    // we do that in a stack.  as we finish a node, we add it to the
+    // appropriate parent and forget about it
+    for (CoreNLPProtos.FlattenedParseTree.Node next : proto.getNodesList()) {
+      if (finished != null) {
+        throw new IllegalArgumentException("Tree continued after it was already closed!  Offending proto: " + proto);
+      }
+      if (next.hasOpenNode()) {
+        if (stack.size() > 0 && stack.peek().label() == null) {
+          throw new IllegalArgumentException("Tree added a child before a label was added to a node!  Offending proto: " + proto);
+        }
+        LabeledScoredTreeNode newNode = new LabeledScoredTreeNode();
+        stack.push(newNode);
+        if (next.hasScore()) {
+          newNode.setScore(next.getScore());
+        }
+      } else if (next.hasCloseNode()) {
+        if (stack.size() == 0) {
+          // demand that the tree always start with an Open
+          throw new IllegalArgumentException("Tree started with a Close, not an Open!  Offending proto: " + proto);
+        }
+        LabeledScoredTreeNode child = stack.pop();
+        if (stack.size() == 0) {
+          // Popped off the last node.  Guess we're done.
+          // We don't return yet so that we check that the
+          // iterator is finished first
+          finished = child;
+        } else {
+          LabeledScoredTreeNode parent = stack.peek();
+          // note: this is actually kind of slow if the tree is really wide,
+          // but hopefully that's not a common occurrence
+          // we could solve that by keeping a stack of list of children as well
+          parent.addChild(child);
+        }
+      } else {
+        if (stack.size() == 0) {
+          // demand that the tree always start with an Open
+          throw new IllegalArgumentException("Tree started with a label, not an Open!  Offending proto: " + proto);
+        }
+        LabeledScoredTreeNode top = stack.peek();
+        if (top.label() == null) {
+          // the first label after an Open is the label
+          CoreLabel value = new CoreLabel();
+          value.setCategory(next.getValue());
+          value.setValue(next.getValue());
+          top.setLabel(value);
+          if (next.hasScore()) {
+            top.setScore(next.getScore());
+          }
+        } else {
+          // subsequence labels will be children
+          LabeledScoredTreeNode child = new LabeledScoredTreeNode();
+          CoreLabel value = new CoreLabel();
+          value.setCategory(next.getValue());
+          value.setValue(next.getValue());
+          child.setLabel(value);
+          top.addChild(child);
+          if (next.hasScore()) {
+            child.setScore(next.getScore());
+          }
+        }
+      }
+    }
+    if (finished == null) {
+      throw new IllegalArgumentException("Tree never finished!  Offending proto: " + proto);
+    }
+    return finished;
+  }
 
   /**
    * Retrieve a Tree object from a saved protobuf.
@@ -2091,7 +2233,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized tree.
    * @return A Tree object corresponding to the saved tree. This will always be a {@link LabeledScoredTreeNode}.
    */
-  public Tree fromProto(CoreNLPProtos.ParseTree proto) {
+  public static Tree fromProto(CoreNLPProtos.ParseTree proto) {
     if (Thread.interrupted()) {
       throw new RuntimeInterruptedException();
     }
