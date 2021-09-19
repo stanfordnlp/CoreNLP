@@ -116,6 +116,19 @@ endif
 HUNGARIAN_TAGGER = edu/stanford/nlp/models/pos-tagger/hungarian.tagger
 HUNGARIAN_TLPP   = edu.stanford.nlp.parser.lexparser.HungarianTreebankParserParams
 
+ifndef CONSTITUENCY_HOME
+  ITALIAN_TRAIN = /u/nlp/data/constituency-parser/italian/it_turin/it_turin_train.mrg
+  ITALIAN_DEV   = /u/nlp/data/constituency-parser/italian/it_turin/it_turin_dev.mrg
+  ITALIAN_TEST  = /u/nlp/data/constituency-parser/italian/it_turin/it_turin_test.mrg
+else
+  ITALIAN_TRAIN = $(CONSTITUENCY_HOME)/italian/it_turin/it_turin_train.mrg
+  ITALIAN_DEV   = $(CONSTITUENCY_HOME)/italian/it_turin/it_turin_dev.mrg
+  ITALIAN_TEST  = $(CONSTITUENCY_HOME)/italian/it_turin/it_turin_test.mrg
+endif
+ITALIAN_TAGGER = edu/stanford/nlp/models/pos-tagger/italian.tagger
+ITALIAN_TLPP   = edu.stanford.nlp.parser.lexparser.ItalianTreebankParserParams
+
+
 DEFAULT_OPTIONS    = -trainingThreads 8 -batchSize 24 -trainingIterations 200 -stalledIterationLimit 40 -featureFrequencyCutoff 5
 
 TRAIN_BEAM         = -featureFrequencyCutoff 10 -trainingMethod BEAM -trainBeamSize 8
@@ -130,8 +143,8 @@ AUGMENT_LESS       = -augmentSubsentences 0.1
 
 TEST_ARGS          =  -quietEvaluation -recordTransitionTypes
 
-all-beam:   wsjSR.beam.ser.gz englishSR.beam.ser.gz frenchSR.beam.ser.gz chineseSR.beam.ser.gz germanSR.beam.ser.gz arabicSR.beam.ser.gz spanishSR.beam.ser.gz  hungarianSR.beam.ser.gz
-all-nobeam: wsjSR.ser.gz      englishSR.ser.gz      frenchSR.ser.gz      chineseSR.ser.gz      germanSR.ser.gz      arabicSR.ser.gz      spanishSR.ser.gz       hungarianSR.ser.gz
+all-beam:   wsjSR.beam.ser.gz englishSR.beam.ser.gz frenchSR.beam.ser.gz chineseSR.beam.ser.gz germanSR.beam.ser.gz arabicSR.beam.ser.gz spanishSR.beam.ser.gz  hungarianSR.beam.ser.gz   italianSR.beam.ser.gz
+all-nobeam: wsjSR.ser.gz      englishSR.ser.gz      frenchSR.ser.gz      chineseSR.ser.gz      germanSR.ser.gz      arabicSR.ser.gz      spanishSR.ser.gz       hungarianSR.ser.gz        italianSR.ser.gz
 all: all-beam all-nobeam
 .PHONY: all
 
@@ -232,4 +245,17 @@ hungarianSR.beam.ser.gz:
 	@echo Will test on $(HUNGARIAN_TEST)
 	java -mx50g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(HUNGARIAN_TRAIN) -devTreebank $(HUNGARIAN_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(HUNGARIAN_TAGGER) -tlpp $(HUNGARIAN_TLPP) $(TRAIN_BEAM) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser $(TEST_ARGS) -testTreebank $(HUNGARIAN_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(HUNGARIAN_TAGGER) >> $@.out 2>&1
+
+
+italianSR.ser.gz:
+	@echo Training $@
+	@echo Will test on $(ITALIAN_TEST)
+	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(ITALIAN_TRAIN) -devTreebank $(ITALIAN_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(ITALIAN_TAGGER) -tlpp $(ITALIAN_TLPP) $(TRAIN_ORACLE_10) > $@.out 2>&1
+	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser $(TEST_ARGS) -testTreebank $(ITALIAN_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(ITALIAN_TAGGER) >> $@.out 2>&1
+
+italianSR.beam.ser.gz:
+	@echo Training $@
+	@echo Will test on $(ITALIAN_TEST)
+	java -mx50g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(ITALIAN_TRAIN) -devTreebank $(ITALIAN_DEV) -serializedPath $@ $(DEFAULT_OPTIONS) -preTag -taggerSerializedFile $(ITALIAN_TAGGER) -tlpp $(ITALIAN_TLPP) $(TRAIN_BEAM) > $@.out 2>&1
+	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser $(TEST_ARGS) -testTreebank $(ITALIAN_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(ITALIAN_TAGGER) >> $@.out 2>&1
 
