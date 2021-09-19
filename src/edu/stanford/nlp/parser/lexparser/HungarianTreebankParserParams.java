@@ -52,29 +52,6 @@ public class HungarianTreebankParserParams extends AbstractTreebankParserParams 
     return headFinder;
   }
 
-  /**
-   * Allows you to read in trees from the source you want.  It's the
-   * responsibility of treeReaderFactory() to deal properly with character-set
-   * encoding of the input.  It also is the responsibility of tr to properly
-   * normalize trees.
-   */
-  @Override
-  public DiskTreebank diskTreebank() {
-    return new DiskTreebank(treeReaderFactory());
-  }
-
-
-  /**
-   * Allows you to read in trees from the source you want.  It's the
-   * responsibility of treeReaderFactory() to deal properly with character-set
-   * encoding of the input.  It also is the responsibility of tr to properly
-   * normalize trees.
-   */
-  @Override
-  public MemoryTreebank memoryTreebank() {
-    return new MemoryTreebank(treeReaderFactory());
-  }
-
   @Override
   public TreeTransformer collinizer() {
     return new TreeCollinizer(tlp, true, false, 0);
