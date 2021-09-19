@@ -2,7 +2,7 @@ package edu.stanford.nlp.trees.international.hungarian;
 
 import edu.stanford.nlp.trees.AbstractTreebankLanguagePack;
 import edu.stanford.nlp.trees.HeadFinder;
-import edu.stanford.nlp.trees.LeftHeadFinder;
+import edu.stanford.nlp.trees.RightHeadFinder;
 
 /**
  * Treebank language pack suitable for the Hungarian section of SPMRL
@@ -55,13 +55,13 @@ public class HungarianTreebankLanguagePack extends AbstractTreebankLanguagePack 
   /** {@inheritDoc} */
   @Override
   public HeadFinder headFinder() {
-    return new LeftHeadFinder();
+    return new RightHeadFinder();
   }
 
   /** {@inheritDoc} */
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    return new LeftHeadFinder();
+    return new RightHeadFinder();
   }
 
 }

@@ -9,31 +9,31 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.HeadFinder;
-import edu.stanford.nlp.trees.RightHeadFinder;
+import edu.stanford.nlp.trees.LeftHeadFinder;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.PennTreeReaderFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
-import edu.stanford.nlp.trees.international.hungarian.HungarianTreebankLanguagePack;
+import edu.stanford.nlp.trees.international.italian.ItalianTreebankLanguagePack;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * Bare-bones implementation of a ParserParams for the Hungarian SPMRL treebank.
+ * Bare-bones implementation of a ParserParams for the Italian Turin treebank.
  * <br>
  * Suitable for use in the SR Parser.  Will need additional work to function in the PCFG.
  * Also, would likely function better with a new headfinder.
  */
-public class HungarianTreebankParserParams extends AbstractTreebankParserParams  {
+public class ItalianTreebankParserParams extends AbstractTreebankParserParams  {
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(HungarianTreebankParserParams.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ItalianTreebankParserParams.class);
 
-  public HungarianTreebankParserParams() {
-    super(new HungarianTreebankLanguagePack());
-    // TODO: make a Hungarian specific HeadFinder or build one that can be learned
-    headFinder = new RightHeadFinder();
+  public ItalianTreebankParserParams() {
+    super(new ItalianTreebankLanguagePack());
+    // TODO: make a Italian specific HeadFinder or build one that can be learned
+    headFinder = new LeftHeadFinder();
   }
 
   private HeadFinder headFinder;
@@ -74,25 +74,19 @@ public class HungarianTreebankParserParams extends AbstractTreebankParserParams 
     return t;
   }
 
-  public static class HungarianSubcategoryStripper extends TreeNormalizer {
+  public static class ItalianSubcategoryStripper extends TreeNormalizer {
     @Override
     public String normalizeNonterminal(String category) {
-      List<String> pieces = StringUtils.split(category, ":");
-      category = pieces.get(0);
-      if (category.equals("PP-locy")) {
-        category = "PP-LOCY";
-      }
-
-      // TODO: maybe some categories should be kept?
-      pieces = StringUtils.split(category, "-");
-      category = pieces.get(0);
+      // The stanza script leaves the fancy endings on the tags
+      // but simplifies the constiituency tags
+      List<String> pieces = StringUtils.split(category, "~");
 
       return pieces.get(0);
     }
   }
 
   TreeNormalizer buildNormalizer() {
-    return new HungarianSubcategoryStripper();
+    return new ItalianSubcategoryStripper();
   }
 
   /** {@inheritDoc} */
@@ -107,20 +101,20 @@ public class HungarianTreebankParserParams extends AbstractTreebankParserParams 
 
   @Override
   public void display() {
-    String hungarianParams = "Using HungarianTreebankParserParams";
-    log.info(hungarianParams);
+    String params = "Using ItalianTreebankParserParams";
+    log.info(params);
   }
 
   /** {@inheritDoc} */
   @Override
   public List<? extends HasWord> defaultTestSentence() {
     List<Word> ret = new ArrayList<>();
-    String[] sent = {"Ez", "egy", "teszt", "."};
+    String[] sent = {"Questo", "è", "un", "test", "."};
     for (String str : sent) {
       ret.add(new Word(str));
     }
     return ret;
   }
 
-  private static final long serialVersionUID = 5652324513L;
+  private static final long serialVersionUID = 9824524678L;
 }

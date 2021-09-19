@@ -42,7 +42,7 @@ public enum Language {
   Hindi(            treebankForLanguage("Hindi")),
   Hungarian(        new HungarianTreebankParserParams()),
   Indonesian(       treebankForLanguage("Indonesian")),
-  Italian(          treebankForLanguage("Italian")),
+  Italian(          new ItalianTreebankParserParams()),
   Irish(            treebankForLanguage("Irish")),
   Kazakh(           treebankForLanguage("Kazakh")),
   Korean(           treebankForLanguage("Korean")),
