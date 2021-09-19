@@ -66,9 +66,8 @@ UD_FRENCH:
 	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(UD_FRENCH_DEV) -language French -model $@.txt.gz -outFile $@.out.dev >> $@.log 2>&1
 	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(UD_FRENCH_TEST) -language French -model $@.txt.gz -outFile $@.out.test >> $@.log 2>&1
 
-# the ONE THING the language setting gets used for is punctuation, so...
 UD_ITALIAN:
-	java edu.stanford.nlp.parser.nndep.DependencyParser -props nndep.properties -trainFile $(UD_ITALIAN_TRAIN) -language French -devFile $(UD_ITALIAN_DEV) -embedFile $(ITALIAN_EMBEDDINGS) -embeddingSize 100  -model $@.txt.gz >> $@.log 2>&1
-	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(UD_ITALIAN_DEV) -language French -model $@.txt.gz -outFile $@.out.dev >> $@.log 2>&1
-	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(UD_ITALIAN_TEST) -language French -model $@.txt.gz -outFile $@.out.test >> $@.log 2>&1
+	java edu.stanford.nlp.parser.nndep.DependencyParser -props nndep.properties -trainFile $(UD_ITALIAN_TRAIN) -language Italian -devFile $(UD_ITALIAN_DEV) -embedFile $(ITALIAN_EMBEDDINGS) -embeddingSize 100  -model $@.txt.gz >> $@.log 2>&1
+	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(UD_ITALIAN_DEV) -language Italian -model $@.txt.gz -outFile $@.out.dev >> $@.log 2>&1
+	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(UD_ITALIAN_TEST) -language Italian -model $@.txt.gz -outFile $@.out.test >> $@.log 2>&1
 
