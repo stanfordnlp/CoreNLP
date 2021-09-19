@@ -463,11 +463,11 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
           }
           numTokens += tokReader(r, out, parseInsidePattern, filterPattern, options, preserveLines, oneLinePerElement, dump, lowerCase);
         }
-        if (outputFileList != null) {
-          IOUtils.closeIgnoringExceptions(out);
-        }
         if (blankLineAfterFiles) {
           out.newLine();
+        }
+        if (outputFileList != null) {
+          IOUtils.closeIgnoringExceptions(out);
         }
       } // end for j going through inputFileList
       if (outputFileList == null) {
@@ -736,6 +736,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     optionArgDefs.put("filter", 1);
     optionArgDefs.put("preserveLines", 0);
     optionArgDefs.put("oneLinePerElement", 0);
+    optionArgDefs.put("blankLineAfterFiles", 0);
     return optionArgDefs;
   }
 
