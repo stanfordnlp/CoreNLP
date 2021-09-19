@@ -1,4 +1,5 @@
 package edu.stanford.nlp.trees.international.pennchinese; 
+
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
@@ -34,7 +35,7 @@ import java.util.List;
 public class CharacterLevelTagExtender extends BobChrisTreeNormalizer implements TreeTransformer  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CharacterLevelTagExtender.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CharacterLevelTagExtender.class);
 
   private static final long serialVersionUID = 7893996593626523700L;
 
@@ -63,7 +64,7 @@ public class CharacterLevelTagExtender extends BobChrisTreeNormalizer implements
 
       List<Tree> newPreterms = new ArrayList<>();
       for (int i = 0, size = word.length(); i < size; i++) {
-        String singleCharLabel = new String(new char[]{word.charAt(i)});
+        String singleCharLabel = String.valueOf(word.charAt(i));
         Tree newLeaf = tf.newLeaf(singleCharLabel);
         String suffix;
         if (useTwoCharTags) {
