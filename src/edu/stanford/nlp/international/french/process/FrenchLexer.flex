@@ -411,23 +411,27 @@ INSENTP = [,;:\u3001]
 QUOTES = {APOSETCETERA}|''|[`\u2018\u2019\u201A\u201B\u201C\u201D\u0091\u0092\u0093\u0094\u201E\u201F\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;
 
-/* Slightly generous but generally reasonable emoji parsing */
-/* These are human emoji that can have a zwj gender (as well as skin color) */
-EMOJI_GENDERED = [\u26F9\u{01F3C3}-\u{01F3C4}\u{01F3CA}-\u{01F3CC}\u{01F466}-\u{01F469}\u{01F46E}-\u{01F46F}\u{01F471}\u{01F473}\u{01F477}\u{01F481}-\u{01F482}\u{01F486}-\u{01F487}\u{01F575}\u{01F645}-\u{01F647}\u{01F64B}\u{01F64D}-\u{01F64E}\u{01F6A3}\u{01F6B4}-\u{01F6B6}\u{01F926}\u{01F937}-\u{01F939}\u{01F93C}-\u{01F93E}\u{01F9D6}-\u{01F9DF}]
-/* Emoji follower is variation selector (emoji/non-emoji rendering) or Fitzpatrick skin tone */
+/* Slightly generous but generally reasonably good emoji parsing */
+/* These are emoji that can be followed by a zwj (U+200D) and then gender or similar things (as well as skin color). Mainly humans but certain others like bears, hearts */
+EMOJI_GENDERED = [\u26F9\u2764\u{01F3C3}-\u{01F3C4}\u{01F3CA}-\u{01F3CC}\u{01F408}\u{01F415}\u{01F43B}\u{01F466}-\u{01F469}\u{01F46E}-\u{01F477}\u{01F481}-\u{01F482}\u{01F486}-\u{01F487}\u{01F575}\u{01F62E}\u{1F635}\u{01F636}\u{01F645}-\u{01F647}\u{01F64B}\u{01F64D}-\u{01F64E}\u{01F6A3}\u{01F6B4}-\u{01F6B6}\u{01F926}\u{01F934}-\u{01F93E}\u{01F9B8}-\u{01F9B9}\u{01F9CD}-\u{01F9DF}\u{01FAF1}-\u{01FAF2}]
+/* Emoji follow is variation selector (emoji/non-emoji rendering) or Fitzpatrick skin tone */
 EMOJI_FOLLOW = [\uFE0E\uFE0F\u{01F3FB}-\u{01F3FF}]
 /* Just things followed by the keycap surrounding char - note that if not separated by space beforehand, may be mistokenized */
 EMOJI_KEYCAPS = [\u0023\u002A\u0030-\u0039]\uFE0F?\u20E3
-/* Two geographic characters as a flag or GB regions as flags */
-EMOJI_FLAG = [\u{01F1E6}-\u{01F1FF}]{2,2}|\u{01F3F4}\u{0E0067}\u{0E0062}[\u{0E0061}-\u{0E007A}]+\u{0E007F}
-/* Rainbow flag etc. */
-EMOJI_MISC = [\u{01F3F3}\u{01F441}][\uFE0E\uFE0F]?\u200D[\u{01F308}\u{01F5E8}][\uFE0E\uFE0F]?|{EMOJI_KEYCAPS}
-/* Things that have an emoji presentation form */
-EMOJI_PRESENTATION = [\u00A9\u00AE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9-\u21AA\u231A-\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA-\u25AB\u25B6\u25C0\u25FB-\u27BF\u2934-\u2935\u2B05-\u2B07\u2B1B-\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299\u{01F000}-\u{01F9FF}]
-/* Human modifier is something that appears after a zero-width joiner (zwj) U+200D */
-HUMAN_MODIFIER = [\u2640\u2642\u2695-\u2696\u2708\u2764\u{01F33E}\u{01F373}\u{01F393}\u{01F3A4}\u{01F3A8}\u{01F3EB}\u{01F3ED}\u{01F468}-\u{01F469}\u{01F48B}\u{01F4BB}-\u{01F4BC}\u{01F527}\u{01F52C}\u{01F680}\u{01F692}][\uFE0E\uFE0F]?
+/* Flags (changed to use \U to avoid bug in IntelliJ JFlex plugin).
+ * 1st disjunct: Two geographic characters as a flag
+ * 2nd disjunct: Tag digits and small letters, currently used only for GB regions flags (Scotland, Wales, England)
+ * 3rd disjunct: emoji tag sequence (ETS) support for certain additional flags: gay, transgender, pirate
+ */
+EMOJI_FLAG = [\U01F1E6-\U01F1FF]{2,2}|\U01F3F4[\u{E0030}-\u{E0039}\u{E0061}-\u{E007A}]+\U0E007F
+/* Rainbow flag, transgender flag, etc. */
+EMOJI_MISC = [\u{01F3F3}\u{01F3F4}\u{01F441}][\uFE0E\uFE0F]?\u200D[\u2620\u26A7\u{01F308}\u{01F5E8}][\uFE0E\uFE0F]?|{EMOJI_KEYCAPS}
+/* Things that have an emoji presentation form. This is where the general single character emoji appear */
+EMOJI_PRESENTATION = [\u00A9\u00AE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9-\u21AA\u231A-\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA-\u25AB\u25B6\u25C0\u25FB-\u27BF\u2934-\u2935\u2B05-\u2B07\u2B1B-\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299\u{01F000}-\u{01FAFF}]
+/* Emoji modifier is something that appears after a zero-width joiner (zwj) U+200D */
+EMOJI_MODIFIER = [\u2640\u2642\u2695-\u2696\u2708\u2744\u2764\u2B1B\u{01F32B}\u{01F33E}\u{01F373}\u{01F37C}\u{01F384}\u{01F393}\u{01F3A4}\u{01F3A8}\u{01F3EB}\u{01F3ED}\u{01F466}-\u{01F469}\u{01F468}-\u{01F469}\u{01F48B}\u{01F4A8}\u{01F4AB}\u{01F4BB}-\u{01F4BC}\u{01F525}\u{01F527}\u{01F52C}\u{01F5E8}\u{01F680}\u{01F692}\u{01F91D}\u{01F9AF}\u{01F9B0}-\u{01F9B3}\u{01F9BA}-\u{01F9BD}\u{01F9D1}\u{01FA79}\u{01FAF2}]
 /* flag | emoji optionally with follower | precomposed gendered/family consisting of human followed by one or more of zero width joiner then another human/profession | Misc */
-EMOJI = {EMOJI_FLAG}|{EMOJI_PRESENTATION}{EMOJI_FOLLOW}?|{EMOJI_GENDERED}{EMOJI_FOLLOW}?(\u200D([\u{01F466}-\u{01F469}]{EMOJI_FOLLOW}?|{HUMAN_MODIFIER})){1,3}|{EMOJI_MISC}
+EMOJI = {EMOJI_FLAG}|{EMOJI_PRESENTATION}{EMOJI_FOLLOW}?|{EMOJI_GENDERED}{EMOJI_FOLLOW}?(\u200D{EMOJI_MODIFIER}{EMOJI_FOLLOW}?){1,3}|{EMOJI_MISC}
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
 MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2023\u2030-\u2038\u203B\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3012\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
