@@ -687,7 +687,7 @@ public class SemanticGraph implements Serializable  {
    */
   public Set<IndexedWord> descendants(IndexedWord vertex) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
     }
     // Do a depth first search
     Set<IndexedWord> descendantSet = wordMapFactory.newSet();
@@ -711,7 +711,7 @@ public class SemanticGraph implements Serializable  {
    */
   public List<Pair<GrammaticalRelation, IndexedWord>> childPairs(IndexedWord vertex) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
     }
     List<Pair<GrammaticalRelation, IndexedWord>> childPairs =
       Generics.newArrayList();
@@ -727,7 +727,7 @@ public class SemanticGraph implements Serializable  {
    */
   public List<Pair<GrammaticalRelation, IndexedWord>> parentPairs(IndexedWord vertex) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
     }
     List<Pair<GrammaticalRelation, IndexedWord>> parentPairs = Generics.newArrayList();
     for (SemanticGraphEdge e : incomingEdgeIterable(vertex)) {
@@ -743,7 +743,7 @@ public class SemanticGraph implements Serializable  {
    */
   public Set<GrammaticalRelation> relns(IndexedWord vertex) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
     }
     Set<GrammaticalRelation> relns = Generics.newHashSet();
     List<Pair<GrammaticalRelation, IndexedWord>> pairs = parentPairs(vertex);
@@ -761,7 +761,7 @@ public class SemanticGraph implements Serializable  {
    */
   public GrammaticalRelation reln(IndexedWord a, IndexedWord b) {
     if (!containsVertex(a)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(a, this);
     }
 
     List<Pair<GrammaticalRelation, IndexedWord>> pairs = childPairs(a);
@@ -777,7 +777,7 @@ public class SemanticGraph implements Serializable  {
    */
   public Set<GrammaticalRelation> childRelns(IndexedWord vertex) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
     }
     Set<GrammaticalRelation> relns = Generics.newHashSet();
     List<Pair<GrammaticalRelation, IndexedWord>> pairs = childPairs(vertex);
@@ -910,7 +910,7 @@ public class SemanticGraph implements Serializable  {
    */
   public boolean hasChild(IndexedWord vertex, GrammaticalRelation reln, String childLemma) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
     }
     for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
       if (edge.getRelation().equals(reln)) {
@@ -927,7 +927,7 @@ public class SemanticGraph implements Serializable  {
    */
   public boolean hasChildWithReln(IndexedWord vertex, GrammaticalRelation reln) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
     }
     for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
       if (edge.getRelation().equals(reln)) {
@@ -946,7 +946,7 @@ public class SemanticGraph implements Serializable  {
    */
   public boolean hasParentWithReln(IndexedWord vertex, GrammaticalRelation reln) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
     }
     for (SemanticGraphEdge edge : incomingEdgeIterable(vertex)) {
       if (edge.getRelation().equals(reln)) {
@@ -964,7 +964,7 @@ public class SemanticGraph implements Serializable  {
     if (vertex.equals(IndexedWord.NO_WORD))
       return null;
     if (!containsVertex(vertex))
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
 
     for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
       if (edge.getRelation().equals(reln)) {
@@ -982,7 +982,7 @@ public class SemanticGraph implements Serializable  {
     if (vertex.equals(IndexedWord.NO_WORD))
       return Collections.emptySet();
     if (!containsVertex(vertex))
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
 
     Set<IndexedWord> parentList = wordMapFactory.newSet();
     for (SemanticGraphEdge edge : incomingEdgeIterable(vertex)) {
@@ -1001,7 +1001,7 @@ public class SemanticGraph implements Serializable  {
     if (vertex.equals(IndexedWord.NO_WORD))
       return Collections.emptySet();
     if (!containsVertex(vertex))
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
 
     Set<IndexedWord> parentList = wordMapFactory.newSet();
     for (SemanticGraphEdge edge : incomingEdgeIterable(vertex)) {
@@ -1020,7 +1020,7 @@ public class SemanticGraph implements Serializable  {
     if (vertex.equals(IndexedWord.NO_WORD))
       return Collections.emptySet();
     if (!containsVertex(vertex))
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
 
     Set<IndexedWord> childList = wordMapFactory.newSet();
     for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
@@ -1043,7 +1043,7 @@ public class SemanticGraph implements Serializable  {
     if (vertex.equals(IndexedWord.NO_WORD))
       return Collections.emptySet();
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
     }
     Set<IndexedWord> childList = wordMapFactory.newSet();
     for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
@@ -1077,7 +1077,7 @@ public class SemanticGraph implements Serializable  {
       return false;
     }
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException("Vertex " + vertex + " not in graph " + this);
+      throw new UnknownVertexException(vertex, this);
     }
 
     return (hasChildWithReln(vertex, EnglishGrammaticalRelations.NEGATION_MODIFIER) ||
@@ -1086,7 +1086,7 @@ public class SemanticGraph implements Serializable  {
 
   private boolean isNegatedVerb(IndexedWord vertex) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException();
+      throw new UnknownVertexException(vertex, this);
     }
     return (vertex.tag().startsWith("VB") && isNegatedVertex(vertex));
   }

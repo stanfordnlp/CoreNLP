@@ -21,12 +21,8 @@ public class SemanticGraphTest extends TestCase {
   private SemanticGraph graph;
 
   @Override
-    public void setUp() {
-    synchronized(SemanticGraphTest.class) {
-      if (graph == null) {
-        graph = makeGraph();
-      }
-    }
+  public void setUp() {
+    graph = makeGraph();
   }
 
   private static SemanticGraph makeGraph() {
@@ -41,6 +37,23 @@ public class SemanticGraphTest extends TestCase {
     }
 
     return SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, GrammaticalStructure.Extras.MAXIMAL);
+  }
+
+  public void testRemoveVertex() {
+    IndexedWord word = graph.getNodeByIndex(10);
+    assertTrue(graph.containsVertex(word));
+
+    int numNodes = graph.vertexSet().size();
+    graph.removeVertex(word);
+    assertEquals(graph.vertexSet().size(), numNodes - 1);
+    assertFalse(graph.containsVertex(word));
+
+    try {
+      Set<IndexedWord> desc = graph.descendants(word);
+      throw new AssertionError("Expected an UnknownVertexException");
+    } catch(UnknownVertexException e) {
+      // pass
+    }
   }
 
   public void testShortestPath() {

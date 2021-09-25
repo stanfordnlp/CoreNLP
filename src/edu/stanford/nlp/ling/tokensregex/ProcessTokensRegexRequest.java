@@ -68,8 +68,8 @@ public class ProcessTokensRegexRequest extends ProcessProtobufRequest {
       CoreNLPProtos.TokensRegexResponse.PatternMatch match = matchPattern(pattern, sentences);
       responseBuilder.addMatch(match);
     }
-    
-    return responseBuilder.build();    
+
+    return responseBuilder.build();
   }
 
   @Override
