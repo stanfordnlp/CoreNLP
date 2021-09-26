@@ -765,7 +765,7 @@ public class StringUtils  {
   }
 
   public static String padLeft(double d, int totalChars) {
-    return padLeft(new Double(d), totalChars);
+    return padLeft(Double.valueOf(d), totalChars);
   }
 
   /**

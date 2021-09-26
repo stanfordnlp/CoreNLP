@@ -205,7 +205,7 @@ public interface DataSeries  {
       if (i < 0 || i >= data.size()) return; // no-op
       data.set(i, x);
     }
-    public void add(double x) { data.add(new Double(x)); }
+    public void add(double x) { data.add(Double.valueOf(x)); }
 
     public int size() { return data.size(); }
 
