@@ -16,6 +16,7 @@ import java.util.List;
  * @author Jenny Finkel
  */
 public class MultiClassAccuracyStats<L> implements Scorer<L> {
+
   double[] scores; //sorted scores
   boolean[] isCorrect; // is the i-th example correct
   double logLikelihood;
@@ -111,7 +112,7 @@ public class MultiClassAccuracyStats<L> implements Scorer<L> {
         correct++;
       }
       logLikelihood += correctScore;
-      q.add(new Pair<>(Integer.valueOf(i), new Pair<>(new Double(guessScore), Boolean.valueOf(guessInd == correctInd))), -guessScore);
+      q.add(new Pair<>(Integer.valueOf(i), new Pair<>(Double.valueOf(guessScore), Boolean.valueOf(guessInd == correctInd))), -guessScore);
     }
     accuracy = (double) correct / (double) total;
     List<Pair<Integer, Pair<Double, Boolean>>> sorted = q.toSortedList();
@@ -172,13 +173,14 @@ public class MultiClassAccuracyStats<L> implements Scorer<L> {
 
   @Override
   public String toString() {
-    String accuracyType = null;
-    if(scoreType == USE_ACCURACY)
+    String accuracyType; // initialized below
+    if (scoreType == USE_ACCURACY) {
       accuracyType = "classification_accuracy";
-    else if(scoreType == USE_LOGLIKELIHOOD)
+    } else if(scoreType == USE_LOGLIKELIHOOD) {
       accuracyType = "log_likelihood";
-    else
+    } else {
       accuracyType = "unknown";
+    }
     return "MultiClassAccuracyStats(" + accuracyType  + ")" + scoreType + USE_ACCURACY + USE_LOGLIKELIHOOD;
   }
 
