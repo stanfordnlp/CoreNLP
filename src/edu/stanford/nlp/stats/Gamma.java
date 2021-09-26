@@ -72,16 +72,16 @@ public class Gamma implements ProbabilityDistribution<Double> {
   }
 
   public double probabilityOf(Double x) {
-    return 0.0; // cos its not discrete
+    return 0.0; // cos it's not discrete
   }
 
   public double logProbabilityOf(Double x) {
-    return 0.0; // cos its not discrete
+    return 0.0; // cos it's not discrete
   }
 
   @Override
   public int hashCode() {
-    return (new Double(alpha)).hashCode();
+    return Double.valueOf(alpha).hashCode();
   }
 
   @Override

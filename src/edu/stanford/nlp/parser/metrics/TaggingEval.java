@@ -39,7 +39,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class TaggingEval extends AbstractEval  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TaggingEval.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TaggingEval.class);
 
   private final Lexicon lex;
 
@@ -197,8 +197,8 @@ public class TaggingEval extends AbstractEval  {
         double rec = recalls2.getCount(cat) / rnum2;
         double f1 = 2.0 / (1.0 / prec + 1.0 / rec);
 
-        if(new Double(f1).equals(Double.NaN)) f1 = -1.0;
-        if(f1Map.containsKey(f1))
+        if (Double.valueOf(f1).equals(Double.NaN)) f1 = -1.0;
+        if (f1Map.containsKey(f1))
           f1Map.put(f1 + (rand.nextDouble()/1000.0), cat);
         else
           f1Map.put(f1, cat);

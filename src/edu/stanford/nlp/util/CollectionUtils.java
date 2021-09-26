@@ -25,7 +25,7 @@ import edu.stanford.nlp.stats.Counters;
 public class CollectionUtils  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CollectionUtils.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CollectionUtils.class);
 
   /**
    * Private constructor to prevent direct instantiation.
@@ -46,7 +46,7 @@ public class CollectionUtils  {
   public static List<Double> asList(double[] a) {
     List<Double> result = new ArrayList<>(a.length);
     for (double v : a) {
-      result.add(new Double(v));
+      result.add(Double.valueOf(v));
     }
     return result;
   }

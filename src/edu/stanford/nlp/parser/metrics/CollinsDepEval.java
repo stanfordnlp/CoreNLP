@@ -35,7 +35,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class CollinsDepEval extends AbstractEval  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CollinsDepEval.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CollinsDepEval.class);
 
   private static final boolean DEBUG = false;
 
@@ -77,9 +77,9 @@ public class CollinsDepEval extends AbstractEval  {
     final Map<CollinsRelation,Set<CollinsDependency>> relMap = Generics.newHashMap();
     final Set<CollinsDependency> deps = CollinsDependency.extractNormalizedFromTree(t, startSymbol, hf);
 
-    for(CollinsDependency dep : deps) {
-      if(DEBUG) System.out.println(dep.toString());
-      if(relMap.get(dep.getRelation()) == null)
+    for (CollinsDependency dep : deps) {
+      if (DEBUG) System.out.println(dep.toString());
+      if (relMap.get(dep.getRelation()) == null)
         relMap.put(dep.getRelation(), Generics.<CollinsDependency>newHashSet());
       relMap.get(dep.getRelation()).add(dep);
     }
@@ -159,8 +159,8 @@ public class CollinsDepEval extends AbstractEval  {
       double rec = recalls2.getCount(cat) / rnum2;//(num > 0.0 ? recall/num : 0.0);
       double f1 = 2.0 / (1.0 / prec + 1.0 / rec);//(num > 0.0 ? f1/num : 0.0);
 
-      if(new Double(f1).equals(Double.NaN)) f1 = -1.0;
-      if(f1Map.containsKey(f1))
+      if (Double.valueOf(f1).equals(Double.NaN)) f1 = -1.0;
+      if (f1Map.containsKey(f1))
         f1Map.put(f1 + (rand.nextDouble()/1000.0), cat);
       else
         f1Map.put(f1, cat);

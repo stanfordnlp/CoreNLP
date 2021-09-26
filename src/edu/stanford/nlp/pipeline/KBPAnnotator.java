@@ -277,7 +277,7 @@ public class KBPAnnotator implements Annotator {
     }).collect(Collectors.toList());
     // map kbp mentions to the lengths of their text
     List<Integer> kbpMentionLengths = kbpMentionsForCorefChain.stream().map(
-        km -> (new Integer(km == null ? 0 : km.get(CoreAnnotations.TextAnnotation.class).length()))).collect(
+        km -> (Integer.valueOf(km == null ? 0 : km.get(CoreAnnotations.TextAnnotation.class).length()))).collect(
         Collectors.toList());
     int bestIndex = kbpMentionLengths.indexOf(kbpMentionLengths.stream().reduce(0, (a, b) -> Math.max(a, b)));
     // return the first occurrence of the kbp mention with max length (possibly null)
