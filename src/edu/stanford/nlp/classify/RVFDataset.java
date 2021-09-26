@@ -588,7 +588,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
       for (int j = 0; j < data[i].length; j++) {
         int feature = data[i][j];
         double val = values[i][j];
-        feats.put(Integer.valueOf(feature), new Double(val));
+        feats.put(Integer.valueOf(feature), Double.valueOf(val));
       }
       for (int j = 0; j < featureIndex.size(); j++) {
         if (feats.containsKey(Integer.valueOf(j))) {

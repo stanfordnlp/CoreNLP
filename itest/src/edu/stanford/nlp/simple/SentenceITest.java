@@ -102,11 +102,11 @@ public class SentenceITest {
   @Test
   public void testDependencyParse() {
     Sentence sentence = new Sentence("The cat is blue.");
-    assertEquals(new Integer(1), sentence.governor(0).orElse(-42));
-    assertEquals(new Integer(3), sentence.governor(1).orElse(-42));
-    assertEquals(new Integer(3), sentence.governor(2).orElse(-42));
-    assertEquals(new Integer(-1), sentence.governor(3).orElse(-42));
-    assertEquals(new Integer(3), sentence.governor(4).orElse(-42));
+    assertEquals(Integer.valueOf(1), sentence.governor(0).orElse(-42));
+    assertEquals(Integer.valueOf(3), sentence.governor(1).orElse(-42));
+    assertEquals(Integer.valueOf(3), sentence.governor(2).orElse(-42));
+    assertEquals(Integer.valueOf(-1), sentence.governor(3).orElse(-42));
+    assertEquals(Integer.valueOf(3), sentence.governor(4).orElse(-42));
 
     assertEquals("det", sentence.incomingDependencyLabel(0).orElse("???"));
     assertEquals("nsubj", sentence.incomingDependencyLabel(1).orElse("???"));
@@ -131,11 +131,11 @@ public class SentenceITest {
   public void testDependencyParseWithParseAnnotator() {
     Sentence sentence = new Sentence("The cat is blue.");
     sentence.parse();
-    assertEquals(new Integer(1), sentence.governor(0).orElse(-42));
-    assertEquals(new Integer(3), sentence.governor(1).orElse(-42));
-    assertEquals(new Integer(3), sentence.governor(2).orElse(-42));
-    assertEquals(new Integer(-1), sentence.governor(3).orElse(-42));
-//    assertEquals(new Integer(3), sentence.governor(4).orElse(-42));
+    assertEquals(Integer.valueOf(1), sentence.governor(0).orElse(-42));
+    assertEquals(Integer.valueOf(3), sentence.governor(1).orElse(-42));
+    assertEquals(Integer.valueOf(3), sentence.governor(2).orElse(-42));
+    assertEquals(Integer.valueOf(-1), sentence.governor(3).orElse(-42));
+//    assertEquals(Integer.valueOf(3), sentence.governor(4).orElse(-42));
 
     assertEquals("det", sentence.incomingDependencyLabel(0).orElse("???"));
     assertEquals("nsubj", sentence.incomingDependencyLabel(1).orElse("???"));

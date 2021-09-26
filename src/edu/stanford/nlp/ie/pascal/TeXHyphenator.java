@@ -12,13 +12,13 @@ import edu.stanford.nlp.util.StringUtils;
 public class TeXHyphenator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TeXHyphenator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TeXHyphenator.class);
 
   private static class Node {
     HashMap children = new HashMap();
 
     int [] pattern = null;
-  };
+  }
 
   /**
    * Loads the default hyphenation rules in DefaultTeXHyphenator.
@@ -79,7 +79,7 @@ public class TeXHyphenator  {
     // find target node, building as we go
     Node cur = head;
     for (char aChar : chars) {
-      Character curchar = new Character(aChar);
+      Character curchar = Character.valueOf(aChar);
       Node next = (Node) cur.children.get(curchar);
       if (next == null) {
         next = new Node();
@@ -91,14 +91,14 @@ public class TeXHyphenator  {
     cur.pattern = pattern;
   }
 
-  private List getMatchingPatterns( char[] chars, int startingIdx ) {
+  private List<int[]> getMatchingPatterns( char[] chars, int startingIdx ) {
     Node cur = head;
-    LinkedList matchingPatterns = new LinkedList();
-    if( cur.pattern != null ) {
+    LinkedList<int[]> matchingPatterns = new LinkedList<>();
+    if ( cur.pattern != null ) {
       matchingPatterns.add(cur.pattern);
     }
-    for(int c = startingIdx; cur != null && c < chars.length; ++c ) {
-      Character curchar = new Character(chars[c]);
+    for (int c = startingIdx; cur != null && c < chars.length; ++c ) {
+      Character curchar = Character.valueOf(chars[c]);
       Node next = (Node) cur.children.get(curchar);
       cur = next;
       if( cur != null && cur.pattern != null ) {
@@ -122,13 +122,11 @@ public class TeXHyphenator  {
     int [] breakScore = new int [word.length + 1];
 
     for( int c = 0; c < word.length; ++c ) {
-      List patterns = getMatchingPatterns(word, c);
-      Iterator iter = patterns.iterator();
-      while(iter.hasNext()) {
-        int [] pattern = (int[]) iter.next();
-        for( int i = 0; i < pattern.length; ++i ) {
-          if( breakScore[c+i] < pattern[i] ) {
-            breakScore[c+i] = pattern[i];
+      List<int[]> patterns = getMatchingPatterns(word, c);
+      for (int[] pattern : patterns) {
+        for (int i = 0; i < pattern.length; ++i) {
+          if (breakScore[c + i] < pattern[i]) {
+            breakScore[c + i] = pattern[i];
           }
         }
       }
@@ -188,9 +186,8 @@ public class TeXHyphenator  {
           sb.append("-");
         }
       }
-      System.out.println(sb.toString());
+      System.out.println(sb);
     }
   }
-    
 
 }

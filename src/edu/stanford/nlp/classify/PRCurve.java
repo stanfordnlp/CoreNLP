@@ -65,7 +65,7 @@ public class PRCurve {
           cls = 0;
         }
         double score = Double.valueOf(elems.get(1)) + 0.5;
-        Pair<Double, Integer> p = new Pair<>(new Double(score), Integer.valueOf(cls));
+        Pair<Double, Integer> p = new Pair<>(Double.valueOf(score), Integer.valueOf(cls));
         dataScores.add(p);
       }
       init(dataScores);
@@ -144,9 +144,9 @@ public class PRCurve {
       numpositive[i] = numpositive[i - 1] + (classes[num - i] == 0 ? 0 : 1);
     }
     logger.info("total positive " + numpositive[num] + " total negative " + numnegative[num] + " total " + num);
-    for (int i = 1; i < numpositive.length; i++) {
-      //System.out.println(i + " positive " + numpositive[i] + " negative " + numnegative[i] + " classes " + classes[i - 1] + " " + classes[num - i]);
-    }
+    // for (int i = 1; i < numpositive.length; i++) {
+      // System.out.println(i + " positive " + numpositive[i] + " negative " + numnegative[i] + " classes " + classes[i - 1] + " " + classes[num - i]);
+    // }
   }
 
   int numSamples() {
