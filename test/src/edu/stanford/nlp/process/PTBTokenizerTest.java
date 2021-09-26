@@ -830,6 +830,7 @@ public class PTBTokenizerTest {
           "stems reach a max. of 3.5 m",
           "for min. 14 days",
           "stems reach a min. of 3.5 m",
+          "Apple released the iPhone 11 Pro Max. The iPhone family expanded."
   };
 
   private final String[][] tweetGold = {
@@ -865,6 +866,7 @@ public class PTBTokenizerTest {
           { "stems", "reach", "a", "max.", "of", "3.5", "m" },
           { "for", "min.", "14", "days" },
           { "stems", "reach", "a", "min.", "of", "3.5", "m" },
+          { "Apple", "released", "the", "iPhone", "11", "Pro", "Max", ".", "The", "iPhone", "family", "expanded", "." },
   };
 
   @Test
