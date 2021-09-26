@@ -16,8 +16,7 @@ public class QuasiDeterminizer implements TransducerGraph.GraphProcessor {
     // compute lambda function
     ClassicCounter lambda = computeLambda(graph); // not destructive
     // do the pushing
-    TransducerGraph result = pushLambdas(graph, lambda); // creates a new one
-    return result;
+    return pushLambdas(graph, lambda);
   }
 
   /**
@@ -96,7 +95,7 @@ public class QuasiDeterminizer implements TransducerGraph.GraphProcessor {
       double targetLambda = lambda.getCount(arc.getTargetNode());
       double oldOutput = ((Double) arc.getOutput()).doubleValue();
       double newOutput = oldOutput + targetLambda - sourceLambda;
-      arc.setOutput(new Double(newOutput));
+      arc.setOutput(Double.valueOf(newOutput));
     }
     // do initialOutput
     double startLambda = lambda.getCount(result.getStartNode());
@@ -106,7 +105,7 @@ public class QuasiDeterminizer implements TransducerGraph.GraphProcessor {
       for (TransducerGraph.Arc arc : startArcs) {
         double oldOutput = ((Double) arc.getOutput()).doubleValue();
         double newOutput = oldOutput + startLambda;
-        arc.setOutput(new Double(newOutput));
+        arc.setOutput(Double.valueOf(newOutput));
       }
     }
     // do finalOutput
@@ -118,7 +117,7 @@ public class QuasiDeterminizer implements TransducerGraph.GraphProcessor {
         for (TransducerGraph.Arc arc : endArcs) {
           double oldOutput = ((Double) arc.getOutput()).doubleValue();
           double newOutput = oldOutput - endLambda;
-          arc.setOutput(new Double(newOutput));
+          arc.setOutput(Double.valueOf(newOutput));
         }
       }
 

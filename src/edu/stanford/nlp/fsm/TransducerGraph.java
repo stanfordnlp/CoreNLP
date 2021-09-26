@@ -1,5 +1,4 @@
-package edu.stanford.nlp.fsm; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.fsm;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -17,6 +16,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Maps;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * TransducerGraph represents a deterministic finite state automaton
@@ -31,7 +31,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class TransducerGraph implements Cloneable  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TransducerGraph.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TransducerGraph.class);
 
   public static final String EPSILON_INPUT = "EPSILON";
 

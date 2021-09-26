@@ -164,7 +164,7 @@ public class CollectionValuedMapTest {
     cvmToMerge.add("key1", 11);
     cvmToMerge.add("key5", 55);
 
-    Assert.assertFalse(cvmToMerge.equals(cvm));
+    Assert.assertNotEquals(cvmToMerge, cvm);
 
     cvm.addAll(cvmToMerge);
 
@@ -187,13 +187,13 @@ public class CollectionValuedMapTest {
     CollectionValuedMap<Integer, Integer> expectedMap = new CollectionValuedMap<>();
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
-        fooMap.add(new Integer(i), new Integer(j));
+        fooMap.add(Integer.valueOf(i), Integer.valueOf(j));
         if (i!=2){
-          expectedMap.add(new Integer(i), new Integer(j));
+          expectedMap.add(Integer.valueOf(i), Integer.valueOf(j));
         }
       }
     }
-    fooMap.remove(new Integer(2));
+    fooMap.remove(Integer.valueOf(2));
     Assert.assertEquals(expectedMap,fooMap);
   }
 

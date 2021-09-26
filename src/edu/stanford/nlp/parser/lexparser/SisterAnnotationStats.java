@@ -26,14 +26,14 @@ public class SisterAnnotationStats implements TreeVisitor {
   /**
    * nodeRules is a HashMap -&gt; Counter: label-&gt;rewrite-&gt;count
    */
-  private Map nodeRules = new HashMap();
+  private final Map nodeRules = new HashMap();
 
   /**
    * leftRules and rightRules are HashMap -&gt; HashMap -&gt; Counter:
    * label-&gt;sister_label-&gt;rewrite-&gt;count
    */
-  private Map leftRules = new HashMap();
-  private Map rightRules = new HashMap();
+  private final Map leftRules = new HashMap();
+  private final Map rightRules = new HashMap();
 
   /**
    * Minimum support * KL to be included in output and as feature
@@ -174,8 +174,7 @@ public class SisterAnnotationStats implements TreeVisitor {
       javaSB[i] = new StringBuilder("  private static String[] sisterSplit" + (i + 1) + " = new String[] {");
     }
 
-    /** topScores contains all enriched categories, to be sorted
-     * later */
+    /** topScores contains all enriched categories, to be sorted later */
     List<Pair> topScores = new ArrayList<>();
 
     for (Object o : nodeRules.keySet()) {
@@ -212,8 +211,8 @@ public class SisterAnnotationStats implements TreeVisitor {
 
         String annotatedLabel = label + "=l=" + sis;
         System.out.println("KL(" + annotatedLabel + "||" + label + ") = " + nf.format(kl) + "\t" + "support(" + sis + ") = " + support2);
-        answers.add(new Pair<>(annotatedLabel, new Double(kl * support2)));
-        topScores.add(new Pair<>(annotatedLabel, new Double(kl * support2)));
+        answers.add(new Pair<>(annotatedLabel, Double.valueOf(kl * support2)));
+        topScores.add(new Pair<>(annotatedLabel, Double.valueOf(kl * support2)));
       }
 
       for (Object o3 : ((HashMap) rightRules.get(label)).keySet()) {
@@ -223,8 +222,8 @@ public class SisterAnnotationStats implements TreeVisitor {
         double kl = Counters.klDivergence(cntr2, cntr);
         String annotatedLabel = label + "=r=" + sis;
         System.out.println("KL(" + annotatedLabel + "||" + label + ") = " + nf.format(kl) + "\t" + "support(" + sis + ") = " + support2);
-        answers.add(new Pair(annotatedLabel, new Double(kl * support2)));
-        topScores.add(new Pair(annotatedLabel, new Double(kl * support2)));
+        answers.add(new Pair(annotatedLabel, Double.valueOf(kl * support2)));
+        topScores.add(new Pair(annotatedLabel, Double.valueOf(kl * support2)));
       }
 
 

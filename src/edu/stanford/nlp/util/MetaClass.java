@@ -288,8 +288,7 @@ public class MetaClass {
   /**
    * Creates a new MetaClass producing objects of the given type
    *
-   * @param classname
-   *            The full classname of the objects to create
+   * @param classname The full classname of the objects to create
    */
   public MetaClass(String classname) {
     this.classname = classname;
@@ -298,8 +297,7 @@ public class MetaClass {
   /**
    * Creates a new MetaClass producing objects of the given type
    *
-   * @param classname
-   *            The class to create
+   * @param classname The class to create
    */
   public MetaClass(Class<?> classname) {
     this.classname = classname.getName();
@@ -309,10 +307,8 @@ public class MetaClass {
    * Creates a factory for producing instances of this class from a
    * constructor taking the given types as arguments
    *
-   * @param <E>
-   *            The type of the objects to be produced
-   * @param classes
-   *            The types used in the constructor
+   * @param <E> The type of the objects to be produced
+   * @param classes The types used in the constructor
    * @return A ClassFactory of the given type
    */
   public <E> ClassFactory<E> createFactory(Class<?>... classes) {
@@ -329,10 +325,8 @@ public class MetaClass {
    * Creates a factory for producing instances of this class from a
    * constructor taking the given types as arguments
    *
-   * @param <E>
-   *            The type of the objects to be produced
-   * @param classes
-   *            The types used in the constructor
+   * @param <E> The type of the objects to be produced
+   * @param classes The types used in the constructor
    * @return A ClassFactory of the given type
    */
   public <E> ClassFactory<E> createFactory(String... classes) {
@@ -349,10 +343,8 @@ public class MetaClass {
    * Creates a factory for producing instances of this class from a
    * constructor taking objects of the types given
    *
-   * @param <E>
-   *            The type of the objects to be produced
-   * @param objects
-   *            Instances of the types used in the constructor
+   * @param <E> The type of the objects to be produced
+   * @param objects Instances of the types used in the constructor
    * @return A ClassFactory of the given type
    */
   public <E> ClassFactory<E> createFactory(Object... objects) {
@@ -371,10 +363,8 @@ public class MetaClass {
    * instance will [unlike java] invoke the most narrow constructor rather
    * than the one which matches the signature passed to this function
    *
-   * @param <E>
-   *            The type of the object returned
-   * @param objects
-   *            The arguments to the constructor of the class
+   * @param <E> The type of the object returned
+   * @param objects The arguments to the constructor of the class
    * @return An instance of the class
    */
   public <E> E createInstance(Object... objects) {
@@ -388,12 +378,9 @@ public class MetaClass {
    * instance will [unlike java] invoke the most narrow constructor rather
    * than the one which matches the signature passed to this function
    *
-   * @param <E>
-   *            The type of the object returned
-   * @param type
-   *            The class of the object returned
-   * @param params
-   *            The arguments to the constructor of the class
+   * @param <E> The type of the object returned
+   * @param type The class of the object returned
+   * @param params The arguments to the constructor of the class
    * @return An instance of the class
    */
   @SuppressWarnings("unchecked")
@@ -408,7 +395,7 @@ public class MetaClass {
   }
 
   public boolean checkConstructor(Object... params){
-    try{
+    try {
       createInstance(params);
       return true;
     } catch(ConstructorNotFoundException e){
@@ -437,8 +424,7 @@ public class MetaClass {
   /**
    * Creates a new MetaClass (helper method)
    *
-   * @param classname
-   *            The name of the class to create
+   * @param classname The name of the class to create
    * @return A new MetaClass object of the given class
    */
   public static MetaClass create(String classname) {
@@ -448,8 +434,7 @@ public class MetaClass {
   /**
    * Creates a new MetaClass (helper method)
    *
-   * @param clazz
-   *            The class to create
+   * @param clazz The class to create
    * @return A new MetaClass object of the given class
    */
   public static MetaClass create(Class <?> clazz) {
@@ -510,9 +495,9 @@ public class MetaClass {
     } else if (Integer.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz)) {
       //(case: integer)
       try {
-        return (E) new Integer(Integer.parseInt(value));
+        return (E) Integer.valueOf(Integer.parseInt(value));
       } catch (NumberFormatException e) {
-        return (E) new Integer((int) Double.parseDouble(value));
+        return (E) Integer.valueOf((int) Double.parseDouble(value));
       }
     } else if (BigInteger.class.isAssignableFrom(clazz)) {
       //(case: biginteger)
@@ -521,18 +506,18 @@ public class MetaClass {
     } else if (Long.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz)) {
       //(case: long)
       try {
-        return (E) new Long(Long.parseLong(value));
+        return (E) Long.valueOf(Long.parseLong(value));
       } catch (NumberFormatException e) {
-        return (E) new Long((long) Double.parseDouble(value));
+        return (E) Long.valueOf((long) Double.parseDouble(value));
       }
     } else if (Float.class.isAssignableFrom(clazz) || float.class.isAssignableFrom(clazz)) {
       //(case: float)
-      if(value == null){ return (E) new Float(Float.NaN); }
-      return (E) new Float(Float.parseFloat(value));
+      if(value == null){ return (E) Float.valueOf(Float.NaN); }
+      return (E) Float.valueOf(Float.parseFloat(value));
     } else if (Double.class.isAssignableFrom(clazz) || double.class.isAssignableFrom(clazz)) {
       //(case: double)
-      if(value == null){ return (E) new Double(Double.NaN); }
-      return (E) new Double(Double.parseDouble(value));
+      if(value == null){ return (E) Double.valueOf(Double.NaN); }
+      return (E) Double.valueOf(Double.parseDouble(value));
     } else if (BigDecimal.class.isAssignableFrom(clazz)) {
       //(case: bigdecimal)
       if(value == null){ return (E) BigDecimal.ZERO; }
@@ -540,20 +525,20 @@ public class MetaClass {
     } else if (Short.class.isAssignableFrom(clazz) || short.class.isAssignableFrom(clazz)) {
       //(case: short)
       try {
-        return (E) new Short(Short.parseShort(value));
+        return (E) Short.valueOf(Short.parseShort(value));
       } catch (NumberFormatException e) {
-        return (E) new Short((short) Double.parseDouble(value));
+        return (E) Short.valueOf((short) Double.parseDouble(value));
       }
     } else if (Byte.class.isAssignableFrom(clazz) || byte.class.isAssignableFrom(clazz)) {
       //(case: byte)
       try {
-        return (E) new Byte(Byte.parseByte(value));
+        return (E) Byte.valueOf(Byte.parseByte(value));
       } catch (NumberFormatException e) {
-        return (E) new Byte((byte) Double.parseDouble(value));
+        return (E) Byte.valueOf((byte) Double.parseDouble(value));
       }
     } else if(Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)) {
       //(case: char)
-      return (E) new Character((char) Integer.parseInt(value));
+      return (E) Character.valueOf((char) Integer.parseInt(value));
     } else if(Lazy.class.isAssignableFrom(clazz)) {
       //(case: Lazy)
       final String v = value;

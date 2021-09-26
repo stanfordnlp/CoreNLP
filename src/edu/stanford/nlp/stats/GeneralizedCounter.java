@@ -36,7 +36,7 @@ public class GeneralizedCounter<K> implements Serializable {
 
   private static final Object[] zeroKey = new Object[0];
 
-  private Map<K,Object> map = Generics.newHashMap();
+  private final Map<K,Object> map = Generics.newHashMap();
 
   private int depth;
   private double total;
@@ -85,7 +85,7 @@ public class GeneralizedCounter<K> implements Serializable {
         }
         newKey[key.length] = finalKey;
         MutableDouble value = (MutableDouble) map.get(finalKey);
-        Double value1 = new Double(value.doubleValue());
+        Double value1 = Double.valueOf(value.doubleValue());
         if (useLists) {
           s.add(new Entry<>(Arrays.asList(newKey), value1));
         } else {
