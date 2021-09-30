@@ -20,9 +20,7 @@ jobs:
       - name: Run Basic ITest
         if: always()
         run: |
-          export CLASSPATH=/home/stanzabuild/corenlp-github-actions/actions-runner/_work/CoreNLP/CoreNLP/classes:\
-          /home/stanzabuild/corenlp-github-actions/actions-runner/_work/CoreNLP/CoreNLP/classes:\
-          /scr/CoreNLP-models/*:
+          export CLASSPATH=/home/stanzabuild/corenlp-github-actions/actions-runner/_work/CoreNLP/CoreNLP/classes:/home/stanzabuild/corenlp-github-actions/actions-runner/_work/CoreNLP/CoreNLP/liblocal/*:/home/stanzabuild/corenlp-github-actions/actions-runner/_work/CoreNLP/CoreNLP/lib/*:/scr/CoreNLP-models/*:
           echo $CLASSPATH
           java -Xmx10g org.junit.runner.JUnitCore edu.stanford.nlp.pipeline.KBPAnnotatorChineseBenchmarkSlowITest
       - run: echo "All tests finished!"
