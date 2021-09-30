@@ -19,6 +19,7 @@ jobs:
       - name: Run Basic ITests
         if: always()
         run: |
+          echo $CORENLP_MODELS_HOME
           ant itest
       - run: echo "All tests finished!"
       - run: echo "🍏 This job's status is ${{ job.status }}."
