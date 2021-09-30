@@ -40,8 +40,7 @@ import edu.stanford.nlp.util.TestPaths;
 public class NERServerITest {
   private static CRFClassifier crf = null;
 
-  private static final String englishCRFPath =
-    String.format("%s/ner/goodClassifiers/english.all.3class.nodistsim.crf.ser.gz", TestPaths.testHome());
+  private static final String englishCRFPath = "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
   private static final String englishTestFile =
     String.format("%s/ner/column_data/conll.testa", TestPaths.testHome());
   private static String loadedQueryFile = null;

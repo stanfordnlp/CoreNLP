@@ -26,8 +26,8 @@ public class LexicalizedParserServerITest {
 
   static final String lexmodel = LexicalizedParser.DEFAULT_PARSER_LOC;
 
-  static final String srmodel = String.format("%s/srparser/englishSR.ser.gz", TestPaths.testHome());
-  static final String tagger = String.format("%s/pos-tagger/distrib/wsj-0-18-left3words-distsim.tagger", TestPaths.testHome());
+  static final String srmodel = "edu/stanford/nlp/models/srparser/englishSR.ser.gz";
+  static final String tagger = "edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger";
 
   static final String testString = "John Bauer works at Stanford.";
   static final String resultString = "(ROOT (S (NP (NNP John) (NNP Bauer)) (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .)))";

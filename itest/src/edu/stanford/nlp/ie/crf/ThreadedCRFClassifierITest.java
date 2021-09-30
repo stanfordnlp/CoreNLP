@@ -25,10 +25,8 @@ public class ThreadedCRFClassifierITest {
   */
   private static final String germanTestFile = String.format("%s/german/ner/2016/deu.io.f15.utf8.testa", TestPaths.testHome());
 
-  private static final String english1 =
-    String.format("%s/ner/goodClassifiers/english.all.3class.nodistsim.crf.ser.gz", TestPaths.testHome());
-  private static final String english2 =
-    String.format("%s/ner/goodClassifiers/english.conll.4class.distsim.crf.ser.gz", TestPaths.testHome());
+  private static final String english1 = "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
+  private static final String english2 = "edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz";
   private static final String englishTestFile = String.format("%s/ner/column_data/conll.4class.testa", TestPaths.testHome());
 
   private static final String germanEncoding = "utf-8";

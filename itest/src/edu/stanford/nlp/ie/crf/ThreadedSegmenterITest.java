@@ -33,7 +33,7 @@ public class ThreadedSegmenterITest {
     props.setProperty("sighanCorporaDict", 
                       String.format("%s/gale/segtool/stanford-seg/data", TestPaths.testHome()));
     props.setProperty("testFile",
-                      "%s/gale/segtool/stanford-seg/data/Sighan2006/CTB_train_test/test/CTB.utf8.simp");
+                      String.format("%s/gale/segtool/stanford-seg/data/Sighan2006/CTB_train_test/test/CTB.utf8.simp", TestPaths.testHome()));
     props.setProperty("inputEncoding", "utf-8");
     props.setProperty("sighanPostProcessing", "true");
     props.setProperty("serDictionary", 
