@@ -1,7 +1,7 @@
 name: Run Tests
 on: [push]
 jobs:
-  Run-Mistral-Tests:
+  Run-CoreNLP-Tests:
     runs-on: self-hosted
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -14,12 +14,11 @@ jobs:
       - name: Setup
         run: |
           pwd
-          ant clean
-          ant
-      - name: Run Basic ITest
+          ant clean compile
+          echo $CLASSPATH
+      - name: Run Basic ITests
         if: always()
         run: |
-          echo $CLASSPATH
-          java -Xmx10g org.junit.runner.JUnitCore edu.stanford.nlp.pipeline.KBPAnnotatorChineseBenchmarkSlowITest
+          ant itest
       - run: echo "All tests finished!"
       - run: echo "🍏 This job's status is ${{ job.status }}."
