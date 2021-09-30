@@ -16,7 +16,6 @@ jobs:
           pwd
           ant clean
           ant
-          echo "Done compiling."
       - name: Run Basic ITest
         if: always()
         run: |
