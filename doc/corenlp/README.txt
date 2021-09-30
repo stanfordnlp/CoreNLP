@@ -41,6 +41,11 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2021-09-26    4.3.0     Add trained tokenizer from corenlp-it, add 
+                        Italian and Hungarian pipelines using data 
+                        from FBK, UD, Szeged, NYTK, and SPMRL.  Better 
+                        emoji support in the PTB tokenizer 
+
 2021-05-14    4.2.2     Fix issue with demo. 
 
 2021-05-05    4.2.1     Fix Turkish locale bug, QuoteAnnotator crash
