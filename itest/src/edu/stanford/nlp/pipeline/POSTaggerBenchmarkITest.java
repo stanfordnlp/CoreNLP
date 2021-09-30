@@ -69,13 +69,13 @@ public class POSTaggerBenchmarkITest extends TestCase {
   public void testGermanDevPOS()  throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/german-ud.tagger",
             String.format("format=TSV,wordColumn=1,tagColumn=3,%s/depparser/nn/models-4.0.0/data/clean/de_gsd-ud-dev.conllu.clean", TestPaths.testHome()),
-            93.07);
+            95.37);
   }
 
   public void testGermanTestPOS()  throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/german-ud.tagger",
             String.format("format=TSV,wordColumn=1,tagColumn=3,%s/depparser/nn/models-4.0.0/data/clean/de_gsd-ud-test.conllu.clean", TestPaths.testHome()),
-            92.84);
+            92.82);
   }
 
   public void testSpanishDevPOS()  throws IOException {
