@@ -16,10 +16,13 @@ jobs:
           pwd
           ant clean compile
           echo $CLASSPATH
+      - name: Run Unit Tests
+        if: always()
+        run: |
+          ant test
       - name: Run Basic ITests
         if: always()
         run: |
-          echo $CORENLP_MODELS_HOME
           ant itest
       - run: echo "All tests finished!"
       - run: echo "🍏 This job's status is ${{ job.status }}."
