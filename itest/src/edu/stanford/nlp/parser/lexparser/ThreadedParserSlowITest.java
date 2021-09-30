@@ -18,6 +18,7 @@ import edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
+import edu.stanford.nlp.util.TestPaths;
 
 /**
  * Tests that the parser doesn't crash and comes up with the same
@@ -88,28 +89,23 @@ public class ThreadedParserSlowITest {
     }
   }
 
-  public static final String englishTrees = "/u/nlp/data/lexparser/testtrees/engwsj160.mrg";
+  public static final String englishTrees = String.format("%s/lexparser/testtrees/engwsj160.mrg", TestPaths.testHome());
   public static final String englishEncoding = "utf-8";
-  public static final String englishPCFG = "/u/nlp/data/lexparser/englishPCFG.ser.gz";
-  public static final String englishFactored = "/u/nlp/data/lexparser/englishFactored.ser.gz";
+  public static final String englishPCFG = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
 
-  public static final String germanTrees = "/u/nlp/data/lexparser/testtrees/german133.mrg";
+  public static final String germanTrees = String.format("%s/lexparser/testtrees/german133.mrg", TestPaths.testHome());
   public static final String germanEncoding = "ISO-8859-1";
-  public static final String germanPCFG = "/u/nlp/data/lexparser/germanPCFG.ser.gz";
-  public static final String germanFactored = "/u/nlp/data/lexparser/germanFactored.ser.gz";
+  public static final String germanPCFG = "edu/stanford/nlp/models/lexparser/germanPCFG.ser.gz";
 
-  public static final String frenchTrees = "/u/nlp/data/lexparser/testtrees/french99.mrg";
+  public static final String frenchTrees = String.format("%s/lexparser/testtrees/french99.mrg", TestPaths.testHome());
   public static final String frenchEncoding = "UTF-8";
-  public static final String frenchFactored = "/u/nlp/data/lexparser/frenchFactored.ser.gz";
 
-  public static final String arabicTrees = "/u/nlp/data/lexparser/testtrees/arabic99.mrg";
+  public static final String arabicTrees = String.format("%s/lexparser/testtrees/arabic99.mrg", TestPaths.testHome());
   public static final String arabicEncoding = "UTF-8";
-  public static final String arabicFactored = "/u/nlp/data/lexparser/arabicFactored.ser.gz";
 
-  public static final String chineseTrees = "/u/nlp/data/lexparser/testtrees/chinese100.mrg";
+  public static final String chineseTrees = String.format("%s/lexparser/testtrees/chinese100.mrg", TestPaths.testHome());
   public static final String chineseEncoding = "utf-8";
-  public static final String chinesePCFG = "/u/nlp/data/lexparser/chinesePCFG.ser.gz";
-  public static final String chineseFactored = "/u/nlp/data/lexparser/chineseFactored.ser.gz";
+  public static final String chinesePCFG = "edu/stanford/nlp/models/lexparser/chinesePCFG.ser.gz";
 
   public static Map<String, List<Tree>> expectedResults;
   public static Map<String, List<Tree>> inputTrees;
@@ -120,40 +116,40 @@ public class ThreadedParserSlowITest {
 
     List<Tree> input = readTrees(englishTrees, englishEncoding);
     inputTrees.put(englishPCFG, input);
-    inputTrees.put(englishFactored, input);
+    //inputTrees.put(englishFactored, input);
     input = readTrees(germanTrees, germanEncoding);
     inputTrees.put(germanPCFG, input);
-    inputTrees.put(germanFactored, input);
+    //inputTrees.put(germanFactored, input);
     input = readTrees(frenchTrees, frenchEncoding);
-    inputTrees.put(frenchFactored, input);
+    //inputTrees.put(frenchFactored, input);
     input = readTrees(arabicTrees, arabicEncoding);
-    inputTrees.put(arabicFactored, input);
+    //inputTrees.put(arabicFactored, input);
     input = readTrees(chineseTrees, chineseEncoding);
     inputTrees.put(chinesePCFG, input);
-    inputTrees.put(chineseFactored, input);
+    //inputTrees.put(chineseFactored, input);
 
     LexicalizedParser parser = LexicalizedParser.loadModel(englishPCFG);
     List<Tree> results = processFile(parser, inputTrees.get(englishPCFG));
     expectedResults.put(englishPCFG, results);
 
-    parser = LexicalizedParser.loadModel(englishFactored);
-    results = processFile(parser, inputTrees.get(englishFactored));
-    expectedResults.put(englishFactored, results);
+    //parser = LexicalizedParser.loadModel(englishFactored);
+    //results = processFile(parser, inputTrees.get(englishFactored));
+    //expectedResults.put(englishFactored, results);
 
     parser = LexicalizedParser.loadModel(germanPCFG);
     results = processFile(parser, inputTrees.get(germanPCFG));
     expectedResults.put(germanPCFG, results);
 
-    parser = LexicalizedParser.loadModel(germanFactored);
-    results = processFile(parser, inputTrees.get(germanFactored));
-    expectedResults.put(germanFactored, results);
+    //parser = LexicalizedParser.loadModel(germanFactored);
+    //results = processFile(parser, inputTrees.get(germanFactored));
+    //expectedResults.put(germanFactored, results);
 
     // TODO: Problem: too slow
-    parser = LexicalizedParser.loadModel(frenchFactored);
+    //parser = LexicalizedParser.loadModel(frenchFactored);
     // results = processFile(parser, inputTrees.get(frenchFactored));
     // expectedResults.put(frenchFactored, results);
 
-    parser = LexicalizedParser.loadModel(arabicFactored);
+    //parser = LexicalizedParser.loadModel(arabicFactored);
     //results = processFile(parser, inputTrees.get(arabicFactored));
     //expectedResults.put(arabicFactored, results);
 
@@ -161,7 +157,7 @@ public class ThreadedParserSlowITest {
     results = processFile(parser, inputTrees.get(chinesePCFG));
     expectedResults.put(chinesePCFG, results);
 
-    parser = LexicalizedParser.loadModel(chineseFactored);
+    //parser = LexicalizedParser.loadModel(chineseFactored);
     // results = processFile(parser, inputTrees.get(chineseFactored));
     // expectedResults.put(chineseFactored, results);
   }
@@ -190,17 +186,17 @@ public class ThreadedParserSlowITest {
             new ParserThread(parser, pcfgInput, pcfgResults));
 
     // test two of the same factored
-    parser = LexicalizedParser.loadModel(factored);
-    runTest(new ParserThread(parser, factoredInput, factoredResults),
-            new ParserThread(parser, factoredInput, factoredResults));
+    //parser = LexicalizedParser.loadModel(factored);
+    //runTest(new ParserThread(parser, factoredInput, factoredResults),
+            //new ParserThread(parser, factoredInput, factoredResults));
 
     // test two different instantiations of the same pcfg
     runTest(new ParserThread(pcfg, pcfgInput, pcfgResults),
             new ParserThread(pcfg, pcfgInput, pcfgResults));
 
     // test one of each
-    runTest(new ParserThread(pcfg, pcfgInput, pcfgResults),
-            new ParserThread(factored, factoredInput, factoredResults));
+    //runTest(new ParserThread(pcfg, pcfgInput, pcfgResults),
+            //new ParserThread(factored, factoredInput, factoredResults));
   }
 
   public static void runTwoTests(String parserPath)
@@ -223,14 +219,14 @@ public class ThreadedParserSlowITest {
   public void testEnglish()
     throws Exception
   {
-    runFourTests(englishPCFG, englishFactored);
+    runTwoTests(englishPCFG);
   }
 
   @Test
   public void testGerman()
     throws Exception
   {
-    runFourTests(germanPCFG, germanFactored);
+    runTwoTests(germanPCFG);
   }
 
   @Test

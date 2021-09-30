@@ -33,6 +33,7 @@ import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
 import edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.TestPaths;
 
 
 /**
@@ -45,7 +46,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class NERBenchmarkSlowITest {
     private static Redwood.RedwoodChannels log = Redwood.channels(NERBenchmarkSlowITest.class);
     // Conll paths
-    private static final String CONLL_BASE_DIR = "/u/nlp/data/ner/conll/";
+    private static final String CONLL_BASE_DIR = String.format("%s/ner/conll/", TestPaths.testHome());
     private static final String CONLL_TRAIN = CONLL_BASE_DIR + "eng.train";
     private static final String CONLL_DEV = CONLL_BASE_DIR + "eng.testa";
     private static final String CONLL_TEST = CONLL_BASE_DIR + "eng.testb";
@@ -54,13 +55,13 @@ public class NERBenchmarkSlowITest {
     private static final String CONLL_OUTPUT_TEST = "conll_output_test.txt";
 
     // Onto paths
-    private static final String ONTO_BASE_DIR = "/u/nlp/data/ner/ontonotes/";
+    private static final String ONTO_BASE_DIR = String.format("%s/ner/ontonotes/", TestPaths.testHome());
     private static final String ONTO_DEV = ONTO_BASE_DIR + "onto-3class-dev.tsv";
     private static final String ONTO_TEST = ONTO_BASE_DIR + "onto-3class-test.tsv";
 
     // TODO: use the model directly to run the test
     /** official CoNLL NER evaluation script **/
-    private static final String CONLL_EVAL = "/u/nlp/data/ner/benchmark/eval_conll.sh";
+    private static final String CONLL_EVAL = String.format("%s/ner/benchmark/eval_conll.sh", TestPaths.testHome());
     // private static final String CONLL_EVAL = (new File("projects/core/scripts/ner/eval_conll_cmd.sh").exists() ?
     //                                           "projects/core/scripts/ner/eval_conll_cmd.sh" :
     //                                           "../../scripts/ner/eval_conll_cmd.sh");

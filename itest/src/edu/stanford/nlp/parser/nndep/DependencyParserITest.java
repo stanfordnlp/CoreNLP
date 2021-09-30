@@ -27,6 +27,8 @@ import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.TestPaths;
+
 
 /**
  *  @author Christopher Manning
@@ -42,8 +44,8 @@ public class DependencyParserITest {
   @Test
   public void testDependencyParserEnglishSD() {
     DependencyParser parser = new DependencyParser();
-    parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2014-10-26/PTB_Stanford_params.txt.gz");
-    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/PTB/Stanford_3_3_0/dev.conll", null);
+    parser.loadModelFile(String.format("%s/depparser/nn/distrib-2014-10-26/PTB_Stanford_params.txt.gz", TestPaths.testHome()));
+    double las = parser.testCoNLL(String.format("%s/depparser/nn/data/dependency_treebanks/PTB/Stanford_3_3_0/dev.conll", TestPaths.testHome()), null);
     assertEquals(String.format("English SD LAS should be %.2f but was %.2f",
             EnglishSdLas, las), EnglishSdLas, las, 1e-4);
   }
@@ -57,8 +59,8 @@ public class DependencyParserITest {
   @Test
   public void testDependencyParserEnglishUD() {
     DependencyParser parser = new DependencyParser();
-    parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2015-04-16/english_UD.gz");
-    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/UD-converted/dev.conll", null);
+    parser.loadModelFile(String.format("%s/depparser/nn/distrib-2015-04-16/english_UD.gz", TestPaths.testHome()));
+    double las = parser.testCoNLL(String.format("%s/depparser/nn/data/dependency_treebanks/UD-converted/dev.conll", TestPaths.testHome()), null);
     assertEquals(String.format("English UD LAS should be %.2f but was %.2f",
         EnglishUdLas, las), EnglishUdLas, las, 1e-4);
   }
@@ -71,8 +73,8 @@ public class DependencyParserITest {
   @Test
   public void testDependencyParserEnglishCoNLL2008() {
     DependencyParser parser = new DependencyParser();
-    parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2014-10-26/PTB_CoNLL_params.txt.gz");
-    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/PTB/CoNLL/dev.conll", null);
+    parser.loadModelFile(String.format("%s/depparser/nn/distrib-2014-10-26/PTB_CoNLL_params.txt.gz", TestPaths.testHome()));
+    double las = parser.testCoNLL(String.format("%s/depparser/nn/data/dependency_treebanks/PTB/CoNLL/dev.conll", TestPaths.testHome()), null);
     assertEquals(String.format("English CoNLL2008 LAS should be %.2f but was %.2f",
             EnglishConll2008Las, las), EnglishConll2008Las, las, 1e-4);
   }
@@ -86,9 +88,9 @@ public class DependencyParserITest {
   public void testDependencyParserChineseCoNLLX() {
     Properties props = StringUtils.stringToProperties("language=Chinese");
     DependencyParser parser = new DependencyParser(props);
-    parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2014-10-26/CTB_CoNLL_params.txt.gz");
-    // [was but now no such file:] double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/CTB/ctb5.1/dev.gold.conll", null);
-    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/CTB/dev.gold.conll", null);
+    parser.loadModelFile(String.format("%s/depparser/nn/distrib-2014-10-26/CTB_CoNLL_params.txt.gz", TestPaths.testHome()));
+    // [was but now no such file:] double las = parser.testCoNLL(String.format("%s/depparser/nn/data/dependency_treebanks/CTB/ctb5.1/dev.gold.conll", TestPaths.testHome()), null);
+    double las = parser.testCoNLL(String.format("%s/depparser/nn/data/dependency_treebanks/CTB/dev.gold.conll", TestPaths.testHome()), null);
     assertEquals(String.format("Chinese CoNLLX gold tags LAS should be %.2f but was %.2f",
             ChineseConllxGoldTagsLas, las), ChineseConllxGoldTagsLas, las, 1e-4);
   }

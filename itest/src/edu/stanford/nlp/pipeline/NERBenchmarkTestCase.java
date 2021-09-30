@@ -4,6 +4,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.TestPaths;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,7 +20,7 @@ import org.junit.Test;
 public abstract class NERBenchmarkTestCase {
 
   /** official CoNLL NER evaluation script **/
-  public static final String NER_EVAL_SCRIPT = "/u/nlp/data/ner/benchmark/eval_conll.sh";
+  public static final String NER_EVAL_SCRIPT = String.format("%s/ner/benchmark/eval_conll.sh", TestPaths.testHome());
 
   /** regex for matching F1 score line in official script output **/
   private static final Pattern FB1_Pattern = Pattern.compile("FB1:  (\\d+\\.\\d+)");

@@ -5,6 +5,8 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.stanford.nlp.util.TestPaths;
+
 /** 
  * Test that the CRFClassifier works when multiple classifiers are run
  * in multiple threads, in Chinese Segmentation mode.
@@ -21,21 +23,21 @@ public class ThreadedSegmenterITest {
   Properties props;
 
   static final String crf1 = 
-    "/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/pk-chris6.lex.gz";
+    String.format("%s/gale/segtool/stanford-seg/classifiers-2010/pk-chris6.lex.gz", TestPaths.testHome());
   
-  static final String crf2 = "/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz";
+  static final String crf2 = String.format("%s/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz", TestPaths.testHome());
 
   @Before
   public void setUp() {
     props = new Properties();
     props.setProperty("sighanCorporaDict", 
-                      "/u/nlp/data/gale/segtool/stanford-seg/data");
+                      String.format("%s/gale/segtool/stanford-seg/data", TestPaths.testHome()));
     props.setProperty("testFile",
-                      "/u/nlp/segtool/stanford-seg/data/Sighan2006/CTB_train_test/test/CTB.utf8.simp");
+                      "%s/gale/segtool/stanford-seg/data/Sighan2006/CTB_train_test/test/CTB.utf8.simp");
     props.setProperty("inputEncoding", "utf-8");
     props.setProperty("sighanPostProcessing", "true");
     props.setProperty("serDictionary", 
-                      "/u/nlp/data/gale/segtool/stanford-seg/classifiers/dict-chris6.ser.gz");
+                      String.format("%s/gale/segtool/stanford-seg/classifiers/dict-chris6.ser.gz", TestPaths.testHome()));
     props.setProperty("keepAllWhitespaces", "false");
   }
 

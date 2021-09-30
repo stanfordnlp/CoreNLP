@@ -10,7 +10,7 @@ import java.util.*;
 
 public class StanfordCoreNLPSpeedSlowITest extends TestCase {
 
-  public String WORKING_DIR = "/u/scr/nlp/data/stanford-corenlp-testing/speed-test";
+  public String WORKING_DIR = String.format("%s/stanford-corenlp-testing/speed-test", TestPaths.testHome());
 
   @Override
   public void setUp() {

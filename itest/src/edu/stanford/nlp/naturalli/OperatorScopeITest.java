@@ -33,8 +33,6 @@ public class OperatorScopeITest {
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
     setProperty("natlog.neQuantifiers", "true");
-    //setProperty("parse.model", "/u/nlp/data/stanford-corenlp-models/models/englishPCFG-full-exp1.ser.gz");
-    //setProperty("pos.model", "/u/nlp/data/stanford-corenlp-models/models/english-left3words-distsim-exp1.tagger");
   }});
 
   @SuppressWarnings("unchecked")

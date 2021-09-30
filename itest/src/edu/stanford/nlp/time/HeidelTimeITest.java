@@ -5,6 +5,8 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.TestPaths;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,7 +18,7 @@ import java.util.Properties;
  */
 public class HeidelTimeITest {
 
-  public static final String DEFAULT_HEIDELTIME_LOCATION = "/u/nlp/data/stanford-corenlp/testing/packages/heideltime/";
+  public static final String DEFAULT_HEIDELTIME_LOCATION = String.format("%s/stanford-corenlp/testing/packages/heideltime/", TestPaths.testHome());
 
   @Test
   public void runHeidelTimeEnglish() throws Exception {

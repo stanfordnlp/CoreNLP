@@ -5,6 +5,8 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.stanford.nlp.util.TestPaths;
+
 /**
  * Test that the CRFClassifier works when multiple classifiers are run
  * in multiple threads.
@@ -19,15 +21,15 @@ public class ThreadedCRFClassifierITest {
     "edu/stanford/nlp/models/ner/german.distsim.crf.ser.gz";
   /** -- We're no longer supporting this one
   private String german2 =
-    "/u/nlp/data/ner/goodClassifiers/german.dewac_175m_600.crf.ser.gz";
+    String.format("%s/ner/goodClassifiers/german.dewac_175m_600.crf.ser.gz", TestPaths.testHome());
   */
-  private static final String germanTestFile = "/u/nlp/data/german/ner/2016/deu.io.f15.utf8.testa";
+  private static final String germanTestFile = String.format("%s/german/ner/2016/deu.io.f15.utf8.testa", TestPaths.testHome());
 
   private static final String english1 =
-    "/u/nlp/data/ner/goodClassifiers/english.all.3class.nodistsim.crf.ser.gz";
+    String.format("%s/ner/goodClassifiers/english.all.3class.nodistsim.crf.ser.gz", TestPaths.testHome());
   private static final String english2 =
-    "/u/nlp/data/ner/goodClassifiers/english.conll.4class.distsim.crf.ser.gz";
-  private static final String englishTestFile = "/u/nlp/data/ner/column_data/conll.4class.testa";
+    String.format("%s/ner/goodClassifiers/english.conll.4class.distsim.crf.ser.gz", TestPaths.testHome());
+  private static final String englishTestFile = String.format("%s/ner/column_data/conll.4class.testa", TestPaths.testHome());
 
   private static final String germanEncoding = "utf-8";
   private static final String englishEncoding = "utf-8";
