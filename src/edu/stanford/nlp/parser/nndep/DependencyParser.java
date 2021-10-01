@@ -1086,15 +1086,22 @@ public class DependencyParser  {
     return predict(sentenceLabel);
   }
 
+  /**
+   * Legacy version of testCoNLLReturnScores that only returns LAS for backwards compatibility
+   */
+  public double testCoNLL(String testFile, String outFile) {
+    return testCoNLLReturnScores(testFile, outFile).second;
+  }
+
   //TODO: support sentence-only files as input
 
   /** Run the parser in the modelFile on a testFile and perhaps save output.
    *
    *  @param testFile File to parse. In CoNLL-X format. Assumed to have gold answers included.
    *  @param outFile File to write results to in CoNLL-X format.  If null, no output is written
-   *  @return The LAS score on the dataset
+   *  @return The UAS and LAS score on the dataset
    */
-  public double testCoNLL(String testFile, String outFile) {
+  public Pair<Double, Double> testCoNLLReturnScores(String testFile, String outFile) {
     log.info("Test File: " + testFile);
     Timing timer = new Timing();
     List<CoreMap> testSents = new ArrayList<>();
@@ -1134,7 +1141,7 @@ public class DependencyParser  {
     if (outFile != null) {
         Util.writeConllFile(outFile, testSents, predicted);
     }
-    return las;
+    return new Pair<>(uas, las);
   }
 
   private void parseTextFile(BufferedReader input, PrintWriter output) {

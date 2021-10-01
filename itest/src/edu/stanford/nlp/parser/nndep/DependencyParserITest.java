@@ -25,6 +25,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.TestPaths;
@@ -36,64 +37,38 @@ import edu.stanford.nlp.util.TestPaths;
  */
 public class DependencyParserITest {
 
-  private static final double EnglishSdLas = 89.55236534222574; // was until Sept 2016: 89.46997859637266;
-
-  /**
-   * Test that the NN dependency parser performance doesn't change.
-   */
   @Test
-  public void testDependencyParserEnglishSD() {
-    DependencyParser parser = new DependencyParser();
-    parser.loadModelFile(String.format("%s/depparser/nn/distrib-2014-10-26/PTB_Stanford_params.txt.gz", TestPaths.testHome()));
-    double las = parser.testCoNLL(String.format("%s/depparser/nn/data/dependency_treebanks/PTB/Stanford_3_3_0/dev.conll", TestPaths.testHome()), null);
-    assertEquals(String.format("English SD LAS should be %.2f but was %.2f",
-            EnglishSdLas, las), EnglishSdLas, las, 1e-4);
-  }
-
-  // Lower because we're evaluating on PTB + extraDevTest, not just PTB
-  private static final double EnglishUdLas = 88.84021929576669; // was until Sept 2016: 88.72648417258083;
-
-  /**
-   * Test that the NN dependency parser performance doesn't change.
-   */
-  @Test
-  public void testDependencyParserEnglishUD() {
-    DependencyParser parser = new DependencyParser();
-    parser.loadModelFile(String.format("%s/depparser/nn/distrib-2015-04-16/english_UD.gz", TestPaths.testHome()));
-    double las = parser.testCoNLL(String.format("%s/depparser/nn/data/dependency_treebanks/UD-converted/dev.conll", TestPaths.testHome()), null);
-    assertEquals(String.format("English UD LAS should be %.2f but was %.2f",
-        EnglishUdLas, las), EnglishUdLas, las, 1e-4);
-  }
-
-  private static final double EnglishConll2008Las = 90.97206578058122;
-
-  /**
-   * Test that the NN dependency parser performance doesn't change.
-   */
-  @Test
-  public void testDependencyParserEnglishCoNLL2008() {
-    DependencyParser parser = new DependencyParser();
-    parser.loadModelFile(String.format("%s/depparser/nn/distrib-2014-10-26/PTB_CoNLL_params.txt.gz", TestPaths.testHome()));
-    double las = parser.testCoNLL(String.format("%s/depparser/nn/data/dependency_treebanks/PTB/CoNLL/dev.conll", TestPaths.testHome()), null);
-    assertEquals(String.format("English CoNLL2008 LAS should be %.2f but was %.2f",
-            EnglishConll2008Las, las), EnglishConll2008Las, las, 1e-4);
-  }
-
-  private static final double ChineseConllxGoldTagsLas = 82.42855503270974;
-
-  /**
-   * Test that the NN dependency parser performance doesn't change.
-   */
-  @Test
-  public void testDependencyParserChineseCoNLLX() {
-    Properties props = StringUtils.stringToProperties("language=Chinese");
+  public void testEnglishOnWSJDev() {
+    Properties props = new Properties();
+    props.put("testFile", String.format("%s/depparser/nn/benchmark/wsj-dev.conllu", TestPaths.testHome()));
+    props.put("model", "edu/stanford/nlp/models/parser/nndep/english_UD.gz");
+    props.put("outFile", "tmp.conll");
     DependencyParser parser = new DependencyParser(props);
-    parser.loadModelFile(String.format("%s/depparser/nn/distrib-2014-10-26/CTB_CoNLL_params.txt.gz", TestPaths.testHome()));
-    // [was but now no such file:] double las = parser.testCoNLL(String.format("%s/depparser/nn/data/dependency_treebanks/CTB/ctb5.1/dev.gold.conll", TestPaths.testHome()), null);
-    double las = parser.testCoNLL(String.format("%s/depparser/nn/data/dependency_treebanks/CTB/dev.gold.conll", TestPaths.testHome()), null);
-    assertEquals(String.format("Chinese CoNLLX gold tags LAS should be %.2f but was %.2f",
-            ChineseConllxGoldTagsLas, las), ChineseConllxGoldTagsLas, las, 1e-4);
+    parser.loadModelFile(props.getProperty("model"));
+    Pair<Double, Double> scores =
+        parser.testCoNLLReturnScores(props.getProperty("testFile"), props.getProperty("outFile"));
+    double uas = scores.first;
+    double las = scores.second;
+    assertTrue(uas >= 93.4);
+    assertTrue(las >= 91.9);
   }
+
+  @Test
+  public void testEnglishOnWSJTest() {
+    Properties props = new Properties();
+    props.put("testFile", String.format("%s/depparser/nn/benchmark/wsj-test.conllu", TestPaths.testHome()));
+    props.put("model", "edu/stanford/nlp/models/parser/nndep/english_UD.gz");
+    props.put("outFile", "tmp.conll");
+    DependencyParser parser = new DependencyParser(props);
+    parser.loadModelFile(props.getProperty("model"));
+    Pair<Double, Double> scores =
+        parser.testCoNLLReturnScores(props.getProperty("testFile"), props.getProperty("outFile"));
+    double uas = scores.first;
+    double las = scores.second;
+    assertTrue(uas >= 93.4);
+    assertTrue(las >= 92.09);
+  }
+
 
   /**
    * Test that postprocessing like CC-processing can handle the parser
