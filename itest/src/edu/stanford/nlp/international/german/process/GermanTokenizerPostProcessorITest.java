@@ -49,4 +49,20 @@ public class GermanTokenizerPostProcessorITest extends TestCase {
     testExample(abbreviationExample,abbreviationExampleGoldTokens);
   }
 
+  /**
+   * You probably can't tell in your editor, but the input has 4 characters for 
+   * <pre>für</pre>
+   * and the output has 3
+   */
+  public void testUmlauts() {
+    String fur = "für";
+    assertEquals(4, fur.length());
+
+    String furry = "für";
+    assertEquals(3, furry.length());
+
+    String umlautExample = "Welcher der Befunde ist " + fur + " eine Gehirnerkrankung typisch?";
+    List<String> umlautGoldTokens = Arrays.asList("Welcher", "der", "Befunde", "ist", furry, "eine", "Gehirnerkrankung", "typisch", "?");
+    testExample(umlautExample, umlautGoldTokens);
+  }
 }
