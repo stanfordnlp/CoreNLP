@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
@@ -37,20 +39,30 @@ import edu.stanford.nlp.util.TestPaths;
  */
 public class DependencyParserITest {
 
-  @Test
-  public void testEnglishOnWSJDev() {
-    Properties props = new Properties();
-    props.put("testFile", String.format("%s/depparser/nn/benchmark/wsj-dev.conllu", TestPaths.testHome()));
-    props.put("model", "edu/stanford/nlp/models/parser/nndep/english_UD.gz");
-    props.put("outFile", "tmp.conll");
+  public void runDepparseTest(Properties props, double uasThreshold, double lasThreshold) {
     DependencyParser parser = new DependencyParser(props);
     parser.loadModelFile(props.getProperty("model"));
     Pair<Double, Double> scores =
         parser.testCoNLLReturnScores(props.getProperty("testFile"), props.getProperty("outFile"));
     double uas = scores.first;
     double las = scores.second;
-    assertTrue(uas >= 93.4);
-    assertTrue(las >= 91.9);
+    assertTrue(uas >= uasThreshold);
+    assertTrue(las >= lasThreshold);
+    // clean up after test
+    try {
+      Files.deleteIfExists(Paths.get("tmp.conll"));
+    } catch (IOException e) {
+      System.err.println("Error with removing tmp.conll");
+    }
+  }
+
+  @Test
+  public void testEnglishOnWSJDev() {
+    Properties props = new Properties();
+    props.put("testFile", String.format("%s/depparser/nn/benchmark/wsj-dev.conllu", TestPaths.testHome()));
+    props.put("model", "edu/stanford/nlp/models/parser/nndep/english_UD.gz");
+    props.put("outFile", "tmp.conll");
+    runDepparseTest(props,93.4, 91.9);
   }
 
   @Test
@@ -59,14 +71,7 @@ public class DependencyParserITest {
     props.put("testFile", String.format("%s/depparser/nn/benchmark/wsj-test.conllu", TestPaths.testHome()));
     props.put("model", "edu/stanford/nlp/models/parser/nndep/english_UD.gz");
     props.put("outFile", "tmp.conll");
-    DependencyParser parser = new DependencyParser(props);
-    parser.loadModelFile(props.getProperty("model"));
-    Pair<Double, Double> scores =
-        parser.testCoNLLReturnScores(props.getProperty("testFile"), props.getProperty("outFile"));
-    double uas = scores.first;
-    double las = scores.second;
-    assertTrue(uas >= 93.4);
-    assertTrue(las >= 92.09);
+    runDepparseTest(props, 93.4, 92.09);
   }
 
 
