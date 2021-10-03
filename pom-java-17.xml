@@ -193,7 +193,7 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>${project.basedir}/stanford-corenlp-4.2.2-models.jar</file>
+                  <file>${project.basedir}/stanford-corenlp-4.3.0-models.jar</file>
                   <type>jar</type>
                   <classifier>models</classifier>
                 </artifact>
