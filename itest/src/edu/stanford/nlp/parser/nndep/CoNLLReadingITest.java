@@ -17,6 +17,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.AnnotationComparator;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.TestPaths;
 
 /**
  * Test that dependency parsing code reads in CoNLL lines correctly.
@@ -24,7 +25,7 @@ import edu.stanford.nlp.util.CoreMap;
 
 public class CoNLLReadingITest {
 
-    String exampleCoNLLXPath = "/u/nlp/data/stanford-corenlp/testing/data/conllu/fr_gsd-ud-train.conllu.clean";
+    String exampleCoNLLXPath = String.format("%s/stanford-corenlp/testing/data/conllu/fr_gsd-ud-train.conllu.clean", TestPaths.testHome());
     String exampleCoNLLUPath = "";
 
     public static void loadConllFileOriginal(String inFile, List<CoreMap> sents, List<DependencyTree> trees, boolean unlabeled, boolean cPOS)

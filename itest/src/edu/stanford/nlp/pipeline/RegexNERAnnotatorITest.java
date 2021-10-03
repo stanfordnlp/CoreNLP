@@ -10,10 +10,11 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.TestPaths;
 
 /** @author jtibs */
 public class RegexNERAnnotatorITest extends TestCase {
-  private static final String MAPPING = "/u/nlp/data/TAC-KBP2010/sentence_extraction/itest_map";
+  private static final String MAPPING = String.format("%s/TAC-KBP2010/sentence_extraction/itest_map", TestPaths.testHome());
   private static RegexNERAnnotator annotator;
 
   @Override

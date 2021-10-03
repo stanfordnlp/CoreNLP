@@ -547,7 +547,7 @@ public class ProtobufAnnotationSerializerSlowITest {
       if (!annotatorsToConsider.isEmpty()) { continue; }  // continue if we couldn't add all the annotators
 
       // Create pipeline
-      if (!annotators.contains("dcoref") && !annotators.contains("entitymentions")) {  // TODO(gabor) eventually, don't ignore entitymentions!
+      if (!annotators.contains("dcoref") && !annotators.contains("entitymentions") && !annotators.contains("cdc_tokenize")) { 
         System.err.println(">>TESTING " + StringUtils.join(annotators, ","));
         testAnnotators(StringUtils.join(annotators, ","));
       }

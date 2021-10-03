@@ -603,6 +603,9 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser  {
 
   @Override
   public double getBestScore() {
+    if (sentence == null) {
+      return Float.NEGATIVE_INFINITY;
+    }
     int length = sentence.size();
     if (length > arraySize) {
       return Float.NEGATIVE_INFINITY;

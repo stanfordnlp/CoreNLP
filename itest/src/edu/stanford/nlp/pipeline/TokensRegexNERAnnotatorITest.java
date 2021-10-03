@@ -5,6 +5,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.TestPaths;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,7 +24,7 @@ import java.util.Properties;
 public class TokensRegexNERAnnotatorITest {
 
   private static final String REGEX_ANNOTATOR_NAME = "tokensregexner";
-  private static final String MAPPING = "/u/nlp/data/TAC-KBP2010/sentence_extraction/itest_map";
+  private static final String MAPPING = String.format("%s/TAC-KBP2010/sentence_extraction/itest_map", TestPaths.testHome());
 
   private static StanfordCoreNLP pipeline;
   private static Annotator caseless;

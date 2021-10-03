@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.util.TestPaths;
 
 import junit.framework.TestCase;
 
@@ -18,7 +19,7 @@ import java.util.stream.*;
 
 public class NERTokenizationSlowITest extends TestCase {
 
-  public static String DATA_PATH = "/u/nlp/data/stanford-corenlp/testing/data/ner";
+  public static String DATA_PATH = String.format("%s/stanford-corenlp/testing/data/ner", TestPaths.testHome());
 
   public StanfordCoreNLP nerTokenizationPipeline;
   public StanfordCoreNLP standardTokenizationPipeline;

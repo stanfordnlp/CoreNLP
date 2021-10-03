@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.TestPaths;
 
 public class ArabicSegmenterAnnotatorITest {
   StanfordCoreNLP pipeline = null;
@@ -24,7 +25,7 @@ public class ArabicSegmenterAnnotatorITest {
     Properties props = new Properties();
     props.setProperty("annotators", "segment");
     props.setProperty("customAnnotatorClass.segment", "edu.stanford.nlp.pipeline.ArabicSegmenterAnnotator");
-    props.setProperty("segment.model", "/u/nlp/data/arabic-segmenter/arabic-segmenter-atb+bn+arztrain.ser.gz");
+    props.setProperty("segment.model", String.format("%s/arabic-segmenter/arabic-segmenter-atb+bn+arztrain.ser.gz", TestPaths.testHome()));
     pipeline = new StanfordCoreNLP(props);
   }
 

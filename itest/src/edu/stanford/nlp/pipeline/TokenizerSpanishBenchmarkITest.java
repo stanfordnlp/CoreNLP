@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.TestPaths;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,13 +21,13 @@ public class TokenizerSpanishBenchmarkITest extends TokenizerBenchmarkTestCase {
 
   @Test
   public void testOnDev() {
-    goldFilePath = "/u/nlp/data/stanford-corenlp/testing/data/tokenize/es_ancora-ud-dev.conllu";
+    goldFilePath = String.format("%s/stanford-corenlp/testing/data/tokenize/es_ancora-ud-dev.conllu", TestPaths.testHome());
     runTest("dev", "es", 0.9955);
   }
 
   @Test
   public void testOnTest() {
-    goldFilePath = "/u/nlp/data/stanford-corenlp/testing/data/tokenize/es_ancora-ud-test.conllu";
+    goldFilePath = String.format("%s/stanford-corenlp/testing/data/tokenize/es_ancora-ud-test.conllu", TestPaths.testHome());
     runTest("test", "es", 0.996);
   }
 

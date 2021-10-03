@@ -22,6 +22,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.BenchmarkingHelper;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.TestPaths;
 import edu.stanford.nlp.util.Triple;
 
 
@@ -34,8 +35,8 @@ public class CRFClassifierITest {
   private static final String nerPath = "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
 
   private static final String caselessPath = "edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz";
-  // private static final String caselessPath = "/u/nlp/data/ner/goodClassifiers/english.all.3class.caseless.distsim.crf.ser.gz"; // now works!
-  // private static final String caselessPath = "/u/nlp/data/ner/classifiers-2014-08-31/english.all.3class.caseless.distsim.crf.ser.gz";
+  // private static final String caselessPath = String.format("%s/ner/goodClassifiers/english.all.3class.caseless.distsim.crf.ser.gz", TestPaths.testHome()); // now works!
+  // private static final String caselessPath = String.format("%s/ner/classifiers-2014-08-31/english.all.3class.caseless.distsim.crf.ser.gz", TestPaths.testHome());
 
   /* The extra spaces and tab (after fate) are there to test space preservation.
    * Each item of the top level array is an array of 7 Strings:
@@ -330,7 +331,7 @@ public class CRFClassifierITest {
         System.getProperty("ner.caseless.model", caselessPath));
 
     try {
-      Triple<Double, Double, Double> prf = crfCaseless.classifyAndWriteAnswers("/u/nlp/data/ner/column_data/ritter.3class.test", true);
+      Triple<Double, Double, Double> prf = crfCaseless.classifyAndWriteAnswers(String.format("%s/ner/column_data/ritter.3class.test", TestPaths.testHome()), true);
       Counter<String> results = new ClassicCounter<>();
       results.setCount("NER F1", prf.third());
       Counter<String> lowResults = new ClassicCounter<>();

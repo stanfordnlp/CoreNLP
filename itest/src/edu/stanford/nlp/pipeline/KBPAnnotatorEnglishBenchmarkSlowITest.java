@@ -6,13 +6,15 @@ import java.util.Set;
 
 import org.junit.Before;
 
+import edu.stanford.nlp.util.TestPaths;
+
 public class KBPAnnotatorEnglishBenchmarkSlowITest extends KBPAnnotatorBenchmark {
 
   @Before
   public void setUp() {
     // set the English specific settings
-    KBP_DOCS_DIR = "/u/nlp/data/kbp-resources/benchmark/kbp-docs";
-    GOLD_RELATIONS_PATH = "/u/nlp/data/kbp-resources/benchmark/kbp-gold-relations.txt";
+    KBP_DOCS_DIR = String.format("%s/kbp-resources/benchmark/kbp-docs", TestPaths.testHome());
+    GOLD_RELATIONS_PATH = String.format("%s/kbp-resources/benchmark/kbp-gold-relations.txt", TestPaths.testHome());
     KBP_MINIMUM_SCORE = .455;
     docIDToText = new HashMap<String,String>();
     docIDToRelations = new HashMap<String,Set<String>>();
