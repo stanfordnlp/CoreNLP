@@ -99,6 +99,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
     System.err.println(modelPath);
     System.err.println(dataPath);
     System.err.println(testClassifier.tagAccuracy());
+    System.err.println(expectedTokenAccuracy);
     assertTrue(testClassifier.tagAccuracy() >= expectedTokenAccuracy);
   }
 
