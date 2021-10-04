@@ -86,7 +86,7 @@ CoreNLP generates a variety of linguistic annotations, including:
 | French | [download](https://huggingface.co/stanfordnlp/corenlp-french/resolve/main/stanford-corenlp-models-french.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-french.jar) | 4.3.0 |
 | German | [download](https://huggingface.co/stanfordnlp/corenlp-german/resolve/main/stanford-corenlp-models-german.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-german.jar) | 4.3.0 |
 | Hungarian | [download](https://huggingface.co/stanfordnlp/corenlp-hungarian/resolve/main/stanford-corenlp-models-hungarian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-hungarian.jar) | 4.3.0 |
-| Italian | [download](https://huggingface.co/stanfordnlp/corenlp-italian/resolve/main/stanford-corenlp-models-hungarian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-italian.jar) | 4.3.0 |
+| Italian | [download](https://huggingface.co/stanfordnlp/corenlp-italian/resolve/main/stanford-corenlp-models-italian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-italian.jar) | 4.3.0 |
 | Spanish | [download](https://huggingface.co/stanfordnlp/corenlp-spanish/resolve/main/stanford-corenlp-models-spanish.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-spanish.jar) | 4.3.0 |
 
 Thank you to [HuggingFace](https://huggingface.co/) for helping with our hosting!
