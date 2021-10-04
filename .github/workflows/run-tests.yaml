@@ -1,5 +1,6 @@
 name: Run Tests
 on: [push]
+concurrency: basic-itest
 jobs:
   Run-CoreNLP-Tests:
     runs-on: self-hosted
