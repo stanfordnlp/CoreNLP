@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.TestPaths;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -19,7 +20,9 @@ public class DVParserCostAndGradientITest extends TestCase {
       if (parser == null) {
         parser = LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
         op = parser.getOp();
-        op.lexOptions.wordVectorFile = Options.LexOptions.DEFAULT_WORD_VECTOR_FILE;
+	op.lexOptions.wordVectorFile = 
+	  String.format("%s/deeplearning/datasets/turian/embeddings-scaled.EMBEDDING_SIZE=25.txt", 
+			TestPaths.testHome());
         op.lexOptions.numHid = 3;
       }
     }
