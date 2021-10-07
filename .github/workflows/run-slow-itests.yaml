@@ -1,0 +1,27 @@
+name: Run Tests
+on:
+  schedule:
+    - cron 5 15 * * 4
+concurrency: basic-itest
+jobs:
+  Run-CoreNLP-Tests:
+    runs-on: self-hosted
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: Setup
+        run: |
+          pwd
+          ant clean compile
+          echo $CLASSPATH
+      - name: Run KBP Tests
+        if: always()
+        run: |
+          ant itest-kbp
+      - run: echo "All tests finished!"
+      - run: echo "🍏 This job's status is ${{ job.status }}."
