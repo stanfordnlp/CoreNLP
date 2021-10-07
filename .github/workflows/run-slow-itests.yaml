@@ -19,9 +19,28 @@ jobs:
           pwd
           ant clean compile
           echo $CLASSPATH
+      - name: Run Misc Slow Tests
+        if: always()
+        run: |
+          ant itest-misc
       - name: Run KBP Tests
         if: always()
         run: |
           ant itest-kbp
+      - name: Run NER Tests
+        if: always()
+        run: |
+          ant itest-ner
+      - name: Run Coref Tests
+        run: |
+          ant itest-coreference
+      - name: Run Many Docs Tests
+        if: always()
+        run: |
+          ant itest-many-docs
+      - name: Run Protobuf Slow Test
+        if: always()
+        run: |
+          ant itest-protobuf
       - run: echo "All tests finished!"
       - run: echo "🍏 This job's status is ${{ job.status }}."
