@@ -1,7 +1,7 @@
 name: Run Tests
 on:
   schedule:
-    - cron 5 15 * * 4
+    - cron 32 15 * * 4
 concurrency: basic-itest
 jobs:
   Run-CoreNLP-Tests:
