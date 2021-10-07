@@ -2,7 +2,7 @@ name: Run Slow Tests
 on: [push]
 concurrency: slow-itests
 jobs:
-  Run-CoreNLP-Tests:
+  Run-CoreNLP-Slow-Tests:
     runs-on: self-hosted
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
