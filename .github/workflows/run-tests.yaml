@@ -1,7 +1,5 @@
 name: Run Tests
-on:
-  schedule: 
-    - cron: 0 15 * * 4
+on: [push]
 concurrency: basic-itest
 jobs:
   Run-CoreNLP-Tests:
@@ -19,9 +17,9 @@ jobs:
           pwd
           ant clean compile
           echo $CLASSPATH
-      - name: Run KBP Tests
+      - name: Run Basic ITests
         if: always()
         run: |
-          ant itest-kbp
+          ant itest
       - run: echo "All tests finished!"
       - run: echo "🍏 This job's status is ${{ job.status }}."
