@@ -17,6 +17,7 @@ jobs:
           pwd
           ant clean compile
           echo $CLASSPATH
+          echo $PATH
       - name: Run Misc Slow Tests
         if: always()
         run: |
