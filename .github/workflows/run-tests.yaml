@@ -17,13 +17,9 @@ jobs:
           pwd
           ant clean compile
           echo $CLASSPATH
-      - name: Run Unit Tests
+      - name: Run KBP Tests
         if: always()
         run: |
-          ant test
-      - name: Run Basic ITests
-        if: always()
-        run: |
-          ant itest
+          ant itest-kbp
       - run: echo "All tests finished!"
       - run: echo "🍏 This job's status is ${{ job.status }}."
