@@ -17,7 +17,7 @@ jobs:
           pwd
           ant clean compile
           echo $CLASSPATH
-      - name: Run KBP Tests
+      - name: Run Basic ITests
         if: always()
         run: |
           ant itest
