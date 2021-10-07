@@ -1,7 +1,5 @@
 name: Run Tests
-on:
-  schedule: 
-    - cron: 0 15 * * 4
+on: [push]
 concurrency: basic-itest
 jobs:
   Run-CoreNLP-Tests:
@@ -22,6 +20,6 @@ jobs:
       - name: Run KBP Tests
         if: always()
         run: |
-          ant itest-kbp
+          ant itest
       - run: echo "All tests finished!"
       - run: echo "🍏 This job's status is ${{ job.status }}."
