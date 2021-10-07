@@ -1,6 +1,7 @@
 package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.io.StringOutputStream;
+import static edu.stanford.nlp.util.XMLUtils.safeDocumentBuilderFactory;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -63,7 +64,7 @@ public class XMLUtils {
 
   public static Document createDocument() {
     try {
-      DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilderFactory dbFactory = safeDocumentBuilderFactory();
       DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
       Document doc = docBuilder.newDocument();
       return doc;
@@ -82,7 +83,7 @@ public class XMLUtils {
 
   public static Element parseElement(String xml) {
     try {
-      DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilderFactory dbFactory = safeDocumentBuilderFactory();
       DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
       Document doc = docBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
       return doc.getDocumentElement();
