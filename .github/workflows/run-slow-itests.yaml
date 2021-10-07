@@ -1,7 +1,7 @@
 name: Run Slow Tests
 on:
   schedule:
-    - cron: 50 15 * * 4
+    - cron: 54 15 * * 4
 concurrency: slow-itests
 jobs:
   Run-CoreNLP-Tests:
