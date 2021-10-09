@@ -45,64 +45,6 @@ public class GermanTokenizerPostProcessor extends CoreLabelProcessor {
     token.setValue(token.word()+"-"+token.sentIndex());
   }
 
-  /**
-   * Some people write umlauts as two characters instead of just one
-   *<br>
-   * German CoreNLP doesn't handle the two character versions correctly,
-   * so here we condense it into the one character version
-   */
-  public static void condenseUmlauts(CoreLabel token) {
-    String value = token.value();
-    String updatedValue = condenseUmlauts(value);
-    if (updatedValue != null) {
-      token.setValue(updatedValue);
-    }
-
-    String word = token.word();
-    String updatedWord = condenseUmlauts(word);
-    if (updatedWord != null) {
-      token.setWord(updatedWord);
-    }
-  }
-    
-  public static String condenseUmlauts(String value) {
-    StringBuilder ns = null;
-    for (int i = 0; i < value.length(); ++i) {
-      final char cur = value.charAt(i);
-      if ((int) cur == 776) {
-        // this is the umlaut character
-        if (ns == null) {
-          ns = new StringBuilder(value.length());
-          ns.append(value.substring(0, i));
-        }
-        final char prev = ns.length() == 0 ? ' ' : ns.charAt(ns.length() - 1);
-        if (prev == 'a') {
-          ns.setCharAt(ns.length() - 1, 'ä');
-        } else if (prev == 'A') {
-          ns.setCharAt(ns.length() - 1, 'Ä');
-        } else if (prev == 'o') {
-          ns.setCharAt(ns.length() - 1, 'ö');
-        } else if (prev == 'O') {
-          ns.setCharAt(ns.length() - 1, 'Ö');
-        } else if (prev == 'u') {
-          ns.setCharAt(ns.length() - 1, 'ü');
-        } else if (prev == 'U') {
-          ns.setCharAt(ns.length() - 1, 'Ü');
-        } else {
-          ns.append(cur);
-        }
-      } else {
-        if (ns != null) {
-          ns.append(cur);
-        }
-      }
-    }
-    if (ns != null) {
-      return ns.toString();
-    }
-    return null;
-  }
-
   @Override
   public List<CoreLabel> process(List<CoreLabel> tokens) {
     List<CoreLabel> processedTokens = new ArrayList<CoreLabel>();
@@ -134,9 +76,6 @@ public class GermanTokenizerPostProcessor extends CoreLabelProcessor {
       }
     }
 
-    for (CoreLabel label : processedTokens) {
-      condenseUmlauts(label);
-    }
     return processedTokens;
   }
 

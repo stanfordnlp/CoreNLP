@@ -27,6 +27,7 @@ package edu.stanford.nlp.process;
 
 
 import java.io.Reader;
+import java.text.Normalizer;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -488,6 +489,7 @@ import edu.stanford.nlp.util.logging.Redwood;
    *  @param originalText The original String that got transformed into txt
    */
   private Object getNext(String txt, String originalText) {
+    txt = Normalizer.normalize(txt, Normalizer.Form.NFC);
     int begin = Math.toIntExact(yychar);
     if (invertible) {
       String str = prevWordAfter.toString();
