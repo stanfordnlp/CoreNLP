@@ -16,6 +16,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import edu.stanford.nlp.util.XMLUtils;
+
 /**
  * Generic DOM reader for an XML file
  */
@@ -127,7 +129,7 @@ public class DomReader {
 	public static Document readDocument(File f) throws IOException, SAXException, ParserConfigurationException {
 		Document document = null;
 
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory factory = XMLUtils.safeDocumentBuilderFactory();
 		// factory.setValidating(true);
 		// factory.setNamespaceAware(true);
 

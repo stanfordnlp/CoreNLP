@@ -27,6 +27,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.*;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.XMLUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 
@@ -397,7 +398,7 @@ public class Ssurgeon  {
 
   private static Document createPatternXMLDoc(List<SsurgeonPattern> patterns) {
     try {
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      DocumentBuilderFactory dbf = XMLUtils.safeDocumentBuilderFactory();
       DocumentBuilder db = dbf.newDocumentBuilder();
       Document domDoc = db.newDocument();
       Element rootElt = domDoc.createElement(SsurgeonPattern.ELT_LIST_TAG);
@@ -452,7 +453,7 @@ public class Ssurgeon  {
   @SuppressWarnings("unchecked")
   public List<SsurgeonPattern> readFromFile(File file) throws Exception {
     List<SsurgeonPattern> retList = new ArrayList<>();
-    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
+    Document doc = XMLUtils.safeDocumentBuilderFactory().newDocumentBuilder().parse(file);
 
     if (VERBOSE)
       System.out.println("Reading ssurgeon file="+file.getAbsolutePath());
