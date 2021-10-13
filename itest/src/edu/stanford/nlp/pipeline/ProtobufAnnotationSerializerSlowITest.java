@@ -506,51 +506,18 @@ public class ProtobufAnnotationSerializerSlowITest {
   }
 
   /**
-   * Is the protobuf annotator "CoreNLP complete?"
-   * That is, does it effectively save every combination of annotators possible?
+   * Check various pipeline combinations.
    */
   @Test
-  public void testAllAnnotatorCombinations() {
-    String[] possibleAnnotators = possibleAnnotators();
-    for (int i = 1; i < (0x1 << (possibleAnnotators.length)); ++i) {
-      // Get annotators
-      Set<String> annotatorsToConsider = new LinkedHashSet<>();
-      for (int k = 0; k < possibleAnnotators.length; ++k) {
-        int mask = (0x1 << k);
-        if ((i & mask) != 0) { annotatorsToConsider.add(possibleAnnotators[k]); }
-      }
+  public void testAnnotatorCombinations() {
+    String[] combinationsToTry = new String[]{
+      "tokenize,ssplit,pos,truecase",
+      "tokenize,ssplit,pos,lemma,ner,gender"
+    };
 
-      // Sort annotators
-      new StanfordCoreNLP();  // construct annotator pool
-      List<String> annotators = new ArrayList<>();
-      Set<String> annotatorsAdded = new LinkedHashSet<>();
-      boolean wasChanged = true;
-      while (wasChanged) {
-        wasChanged = false;
-        Iterator<String> iter = annotatorsToConsider.iterator();
-        while(iter.hasNext()) {
-          String annotator = iter.next();
-          boolean valid = true;
-          try {
-            for (Class<? extends CoreAnnotation> requirement : StanfordCoreNLP.getExistingAnnotator(annotator).requires()) {
-              if (!annotatorsAdded.contains(requirement.toString())) { valid = false; }
-            }
-          } catch (NullPointerException ignored) { }
-          if (valid) {
-            annotators.add(annotator);
-            annotatorsAdded.add(annotator);
-            iter.remove();
-            wasChanged = true;
-          }
-        }
-      }
-      if (!annotatorsToConsider.isEmpty()) { continue; }  // continue if we couldn't add all the annotators
-
-      // Create pipeline
-      if (!annotators.contains("dcoref") && !annotators.contains("entitymentions") && !annotators.contains("cdc_tokenize")) { 
-        System.err.println(">>TESTING " + StringUtils.join(annotators, ","));
-        testAnnotators(StringUtils.join(annotators, ","));
-      }
+    for (String combination : combinationsToTry) {
+      System.err.println(">>TESTING " + combination);
+      testAnnotators(combination);
     }
   }
 
