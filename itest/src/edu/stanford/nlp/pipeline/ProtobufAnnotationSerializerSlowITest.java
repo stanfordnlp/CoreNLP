@@ -512,7 +512,8 @@ public class ProtobufAnnotationSerializerSlowITest {
   public void testAnnotatorCombinations() {
     String[] combinationsToTry = new String[]{
       "tokenize,ssplit,pos,truecase",
-      "tokenize,ssplit,pos,lemma,ner,gender"
+      "tokenize,ssplit,pos,lemma,ner,gender",
+      "tokenize,ssplit,docdate"
     };
 
     for (String combination : combinationsToTry) {
