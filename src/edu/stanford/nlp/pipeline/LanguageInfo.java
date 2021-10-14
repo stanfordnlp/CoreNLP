@@ -13,7 +13,7 @@ import java.util.*;
 public class LanguageInfo {
 
   /** languages supported **/
-  public enum HumanLanguage {ARABIC, CHINESE, ENGLISH, FRENCH, GERMAN, SPANISH}
+  public enum HumanLanguage {ARABIC, CHINESE, ENGLISH, FRENCH, GERMAN, HUNGARIAN, ITALIAN, SPANISH}
 
   /** list of properties files for each language **/
   public static final String ARABIC_PROPERTIES = "StanfordCoreNLP-arabic.properties";
@@ -21,6 +21,8 @@ public class LanguageInfo {
   public static final String ENGLISH_PROPERTIES = "StanfordCoreNLP.properties";
   public static final String FRENCH_PROPERTIES = "StanfordCoreNLP-french.properties";
   public static final String GERMAN_PROPERTIES = "StanfordCoreNLP-german.properties";
+  public static final String HUNGARIAN_PROPERTIES = "StanfordCoreNLP-hungarian.properties";
+  public static final String ITALIAN_PROPERTIES = "StanfordCoreNLP-italian.properties";
   public static final String SPANISH_PROPERTIES = "StanfordCoreNLP-spanish.properties";
 
   /** map enum to properties file **/
@@ -33,6 +35,8 @@ public class LanguageInfo {
     languageToPropertiesFile.put(HumanLanguage.ENGLISH, ENGLISH_PROPERTIES);
     languageToPropertiesFile.put(HumanLanguage.FRENCH, FRENCH_PROPERTIES);
     languageToPropertiesFile.put(HumanLanguage.GERMAN, GERMAN_PROPERTIES);
+    languageToPropertiesFile.put(HumanLanguage.HUNGARIAN, HUNGARIAN_PROPERTIES);
+    languageToPropertiesFile.put(HumanLanguage.ITALIAN, ITALIAN_PROPERTIES);
     languageToPropertiesFile.put(HumanLanguage.SPANISH, SPANISH_PROPERTIES);
   }
 
@@ -69,19 +73,24 @@ public class LanguageInfo {
   public static HumanLanguage getLanguageFromString(String inputString) {
     if (inputString.toLowerCase().equals("arabic") || inputString.toLowerCase().equals("ar"))
       return HumanLanguage.ARABIC;
-    if (inputString.toLowerCase().equals("english") || inputString.toLowerCase().equals("en"))
-      return HumanLanguage.ENGLISH;
     if (inputString.toLowerCase().equals("chinese") || inputString.toLowerCase().equals("zh"))
       return HumanLanguage.CHINESE;
+    if (inputString.toLowerCase().equals("english") || inputString.toLowerCase().equals("en"))
+      return HumanLanguage.ENGLISH;
     if (inputString.toLowerCase().equals("french") || inputString.toLowerCase().equals("fr"))
       return HumanLanguage.FRENCH;
     if (inputString.toLowerCase().equals("german") || inputString.toLowerCase().equals("de"))
       return HumanLanguage.GERMAN;
+    if (inputString.toLowerCase().equals("hungarian") || inputString.toLowerCase().equals("hu"))
+      return HumanLanguage.HUNGARIAN;
+    if (inputString.toLowerCase().equals("italian") || inputString.toLowerCase().equals("it"))
+      return HumanLanguage.ITALIAN;
     if (inputString.toLowerCase().equals("spanish") || inputString.toLowerCase().equals("es"))
       return HumanLanguage.SPANISH;
     else
       return null;
   }
+
 
   /** boolean saying whether String represents a Stanford CoreNLP supported language **/
   public static boolean isStanfordCoreNLPSupportedLang(String lang) {
