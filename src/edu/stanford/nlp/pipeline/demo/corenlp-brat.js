@@ -1019,6 +1019,10 @@ $(document).ready(function() {
       $('#text').attr('placeholder', 'Par exemple, le renard brun rapide a sauté sur le chien paresseux.');
     } else if ($('#language').val() === 'de') {
       $('#text').attr('placeholder', 'Z. B. sprang der schnelle braune Fuchs über den faulen Hund.');
+    } else if ($('#language').val() === 'it') {
+      $('#text').attr('placeholder', 'Roma sorge sulle rive del fiume Tevere.');
+    } else if ($('#language').val() === 'hu') {
+      $('#text').attr('placeholder', 'Budapest története a keltákig nyúlik vissza, mivel a város eredetileg kelta település volt.');
     } else if ($('#language').val() === 'es') {
       $('#text').attr('placeholder', 'Por ejemplo, el rápido zorro marrón saltó sobre el perro perezoso.');
     } else {
@@ -1063,6 +1067,10 @@ $(document).ready(function() {
         currentQuery = 'Sprang der schnelle braune Fuchs über den faulen Hund.';
       } else if ($('#language').val() === 'es') {
         currentQuery = 'El rápido zorro marrón saltó sobre el perro perezoso.';
+      } else if ($('#language').val() === 'it') {
+        currentQuery = 'Roma sorge sulle rive del fiume Tevere.';
+      } else if ($('#language').val() === 'hu') {
+        currentQuery = 'Budapest története a keltákig nyúlik vissza, mivel a város eredetileg kelta település volt.';
       } else {
         currentQuery = 'Unknown language for default query: ' + $('#language').val();
       }
