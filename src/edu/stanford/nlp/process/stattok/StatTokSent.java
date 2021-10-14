@@ -225,14 +225,14 @@ public class StatTokSent{
       // if token is not the last one, add class C
       if (backwardsPartsIterator.hasPrevious()){
         int partLength = part.length();
-        partToken = factory.makeToken(part, token.originalText(), tokenEndPosition-partLength, partLength);
+        partToken = factory.makeToken(part, token.originalText(), tokenEndPosition-partLength, partLength+1);
         tokenEndPosition = tokenEndPosition-partLength;
         partTokenAndClass = new Pair<CoreLabel,String>(partToken, "C");	
       }
       // if last token (first part), add original class (S or T)
       else{
         int partLength = part.length();
-        partToken = factory.makeToken(part, token.originalText(), tokenBeginPosition, partLength);
+        partToken = factory.makeToken(part, token.originalText(), tokenBeginPosition, partLength+1);
         partTokenAndClass = new Pair<CoreLabel, String>(partToken, originalClass);	
       }			
       splittedTokenAndClass.add(0, partTokenAndClass);			
@@ -388,7 +388,7 @@ public class StatTokSent{
           //If there hasn't been O class between tokens, create token for last word
           if (currentWord != ""){
             endToken = i-1;
-            CoreLabel newToken = factory.makeToken(currentWord, currentWord, beginToken, endToken-beginToken);
+            CoreLabel newToken = factory.makeToken(currentWord, currentWord, beginToken, endToken-beginToken+1);
             Pair<CoreLabel, String> tokenAndClass = new Pair<CoreLabel, String>(newToken,lastBeginChar);
             sentenceTokensBase.add(tokenAndClass);
             tokensCounter++;
@@ -412,7 +412,7 @@ public class StatTokSent{
         //If there hasn't been O class between tokens, create token for last word
         if (currentWord != ""){
           endToken = i-1;
-          CoreLabel newToken = factory.makeToken(currentWord, currentWord, beginToken, endToken-beginToken);
+          CoreLabel newToken = factory.makeToken(currentWord, currentWord, beginToken, endToken-beginToken+1);
           Pair<CoreLabel, String> tokenAndClass = new Pair<CoreLabel, String>(newToken,lastBeginChar);
           sentenceTokensBase.add(tokenAndClass);
           tokensCounter++;
@@ -437,7 +437,7 @@ public class StatTokSent{
       if (currentClass.equals("O")){
         endToken = i-1;
         //Create new token with previous character, add it with its class to list, increment token counter
-        CoreLabel newToken = factory.makeToken(currentWord, currentWord, beginToken, endToken-beginToken);
+        CoreLabel newToken = factory.makeToken(currentWord, currentWord, beginToken, endToken-beginToken+1);
         Pair<CoreLabel, String> tokenAndClass = new Pair<CoreLabel, String>(newToken,lastBeginChar);
         sentenceTokensBase.add(tokenAndClass);
         tokensCounter++;
@@ -449,7 +449,7 @@ public class StatTokSent{
       //End of text
       if (i==(classificationResults.size()-1)) {
         endToken = i-1;
-        CoreLabel newToken = factory.makeToken(currentWord, currentWord, beginToken, endToken-beginToken);
+        CoreLabel newToken = factory.makeToken(currentWord, currentWord, beginToken, endToken-beginToken+1);
         Pair<CoreLabel, String> tokenAndClass = new Pair<CoreLabel, String>(newToken,lastBeginChar);
         sentenceTokensBase.add(tokenAndClass);
         tokensCounter++;
