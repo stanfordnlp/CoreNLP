@@ -214,6 +214,8 @@ function annotators() {
   var annotators = "tokenize,ssplit";
   if ($('#language').val() === 'de' | $('#language').val() === 'fr' | $('#language').val() === 'es') {
     annotators += ",mwt";
+  } else if ($('#language').val() === 'hu' | $('#language').val() === 'it') {
+    annotators = "cdc_tokenize";
   }
   $('#annotators').find('option:selected').each(function () {
     annotators += "," + $(this).val();
