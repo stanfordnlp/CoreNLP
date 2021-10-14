@@ -439,6 +439,9 @@ public class StanfordCoreNLPServer implements Runnable {
           Properties languageSpecificProperties = new Properties();
           languageSpecificProperties.load(is);
           PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
+          // don't enforce requirements for non-English
+          if (!LanguageInfo.getLanguageFromString(language).equals(LanguageInfo.HumanLanguage.ENGLISH))
+              props.setProperty("enforceRequirements", "false");
         } catch (IOException e) {
           err("Failure to load language specific properties: " + languagePropertiesFile + " for " + language);
         }
