@@ -1022,7 +1022,7 @@ $(document).ready(function() {
     } else if ($('#language').val() === 'it') {
       $('#text').attr('placeholder', 'Roma sorge sulle rive del fiume Tevere.');
     } else if ($('#language').val() === 'hu') {
-      $('#text').attr('placeholder', 'Budapest története a keltákig nyúlik vissza, mivel a város eredetileg kelta település volt.');
+      $('#text').attr('placeholder', 'Budapest az ország politikai, kulturális, kereskedelmi, ipari és közlekedési központja.');
     } else if ($('#language').val() === 'es') {
       $('#text').attr('placeholder', 'Por ejemplo, el rápido zorro marrón saltó sobre el perro perezoso.');
     } else {
@@ -1070,7 +1070,7 @@ $(document).ready(function() {
       } else if ($('#language').val() === 'it') {
         currentQuery = 'Roma sorge sulle rive del fiume Tevere.';
       } else if ($('#language').val() === 'hu') {
-        currentQuery = 'Budapest története a keltákig nyúlik vissza, mivel a város eredetileg kelta település volt.';
+        currentQuery = 'Budapest az ország politikai, kulturális, kereskedelmi, ipari és közlekedési központja.';
       } else {
         currentQuery = 'Unknown language for default query: ' + $('#language').val();
       }
