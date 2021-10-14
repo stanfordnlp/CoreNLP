@@ -77,8 +77,6 @@ CoreNLP generates a variety of linguistic annotations, including:
 
 * Download model jars for the language you want to work on and move the jars to the distribution directory.
 
-<a download="stanford-corenlp-models-arabic.jar" href="https://huggingface.co/stanfordnlp/corenlp-arabic/resolve/main/stanford-corenlp-models-arabic.jar">download arabic</a>
-
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
 | Arabic  | [download](https://huggingface.co/stanfordnlp/corenlp-arabic/resolve/main/stanford-corenlp-models-arabic.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-arabic.jar) | 4.3.1 |
