@@ -65,4 +65,15 @@ public class GermanTokenizerPostProcessorITest extends TestCase {
     List<String> umlautGoldTokens = Arrays.asList("Welcher", "der", "Befunde", "ist", furry, "eine", "Gehirnerkrankung", "typisch", "?");
     testExample(umlautExample, umlautGoldTokens);
   }
+
+  /**
+   * Test that an umlaut at the start of a word doesn't crash
+   */
+  public void testUmlautSpaces() {
+    String antik = "Antik ̈orper";
+    assertEquals(12, antik.length());
+
+    List<String> goldTokens = Arrays.asList(antik.substring(0, 5), antik.substring(6, 12));
+    testExample(antik, goldTokens);
+  }
 }
