@@ -11,7 +11,7 @@ parent: Usage
 
 Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. This is everything for getting going on English!  Unzip this file, open the folder that results and you're ready to use it.
 
-[<i class="fab fa-java"></i> Download CoreNLP 4.3.0](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-latest.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
+[<i class="fab fa-java"></i> Download CoreNLP 4.3.1](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-latest.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 
 **Other languages:** For working with another (human) language, you need additional model files. We have model files for several other languages. And we have more
 model files for English, including for dealing with uncased English (that is, English which is not conventionally capitalized, whether texting or telegrams).
@@ -19,15 +19,15 @@ You can find the latest models in the table below.  Versions for earlier release
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](https://huggingface.co/stanfordnlp/corenlp-arabic/resolve/main/stanford-corenlp-models-arabic.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-arabic.jar) | 4.3.0 |
-| Chinese | [download](https://huggingface.co/stanfordnlp/corenlp-chinese/resolve/main/stanford-corenlp-models-chinese.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-chinese.jar) | 4.3.0 |
-| English (extra) | [download](https://huggingface.co/stanfordnlp/corenlp-english-extra/resolve/main/stanford-corenlp-models-english-extra.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-english.jar) | 4.3.0 |
-| English (KBP) | [download](https://huggingface.co/stanfordnlp/corenlp-english-kbp/resolve/main/stanford-corenlp-models-english-kbp.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-english-kbp.jar) | 4.3.0 |
-| French | [download](https://huggingface.co/stanfordnlp/corenlp-french/resolve/main/stanford-corenlp-models-french.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-french.jar) | 4.3.0 |
-| German | [download](https://huggingface.co/stanfordnlp/corenlp-german/resolve/main/stanford-corenlp-models-german.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-german.jar) | 4.3.0 |
-| Hungarian | [download](https://huggingface.co/stanfordnlp/corenlp-hungarian/resolve/main/stanford-corenlp-models-hungarian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-hungarian.jar) | 4.3.0 |
-| Italian | [download](https://huggingface.co/stanfordnlp/corenlp-italian/resolve/main/stanford-corenlp-models-italian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-italian.jar) | 4.3.0 |
-| Spanish | [download](https://huggingface.co/stanfordnlp/corenlp-spanish/resolve/main/stanford-corenlp-models-spanish.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.0-models-spanish.jar) | 4.3.0 |
+| Arabic  | [download](https://huggingface.co/stanfordnlp/corenlp-arabic/resolve/main/stanford-corenlp-models-arabic.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-arabic.jar) | 4.3.1 |
+| Chinese | [download](https://huggingface.co/stanfordnlp/corenlp-chinese/resolve/main/stanford-corenlp-models-chinese.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-chinese.jar) | 4.3.1 |
+| English (extra) | [download](https://huggingface.co/stanfordnlp/corenlp-english-extra/resolve/main/stanford-corenlp-models-english-extra.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-english.jar) | 4.3.1 |
+| English (KBP) | [download](https://huggingface.co/stanfordnlp/corenlp-english-kbp/resolve/main/stanford-corenlp-models-english-kbp.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-english-kbp.jar) | 4.3.1 |
+| French | [download](https://huggingface.co/stanfordnlp/corenlp-french/resolve/main/stanford-corenlp-models-french.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-french.jar) | 4.3.1 |
+| German | [download](https://huggingface.co/stanfordnlp/corenlp-german/resolve/main/stanford-corenlp-models-german.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-german.jar) | 4.3.1 |
+| Hungarian | [download](https://huggingface.co/stanfordnlp/corenlp-hungarian/resolve/main/stanford-corenlp-models-hungarian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-hungarian.jar) | 4.3.1 |
+| Italian | [download](https://huggingface.co/stanfordnlp/corenlp-italian/resolve/main/stanford-corenlp-models-italian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-italian.jar) | 4.3.1 |
+| Spanish | [download](https://huggingface.co/stanfordnlp/corenlp-spanish/resolve/main/stanford-corenlp-models-spanish.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-spanish.jar) | 4.3.1 |
 
 
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
