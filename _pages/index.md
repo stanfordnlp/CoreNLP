@@ -13,7 +13,7 @@ homepage: true
    <img src="assets/images/corenlp-title.png">
 </p>
 
-[<i class="fab fa-java"></i> Download CoreNLP 4.3.1](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-latest.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
+[<i class="fab fa-java"></i> Download CoreNLP 4.3.1](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 [<i class="fab fa-github"></i> CoreNLP on GitHub](https://github.com/stanfordnlp/CoreNLP){: .btn .fs-5 .mr-2 .mb-md-0 }
 [<i class="fab fa-sonatype"></i> CoreNLP on Maven](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.3.1/jar){: .btn .fs-5 .mr-2 .mb-md-0 }
 
@@ -73,7 +73,7 @@ CoreNLP generates a variety of linguistic annotations, including:
 
 ## Quickstart
 
-* Download and unzip [CoreNLP 4.3.1](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-latest.zip) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1.zip)
+* Download and unzip [CoreNLP 4.3.1](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip)
 
 * Download model jars for the language you want to work on and move the jars to the distribution directory.
 
