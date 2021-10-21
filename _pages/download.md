@@ -11,7 +11,7 @@ parent: Usage
 
 Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. This is everything for getting going on English!  Unzip this file, open the folder that results and you're ready to use it.
 
-[<i class="fab fa-java"></i> Download CoreNLP 4.3.1](https://huggingface.co/stanfordnlp/CoreNLP/resolve/main/stanford-corenlp-latest.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
+[<i class="fab fa-java"></i> Download CoreNLP 4.3.1](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 
 **Other languages:** For working with another (human) language, you need additional model files. We have model files for several other languages. And we have more
 model files for English, including for dealing with uncased English (that is, English which is not conventionally capitalized, whether texting or telegrams).
@@ -47,12 +47,12 @@ parts beyond the tokenizer and sentence splitter) and so you need to specify bot
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>4.0.0</version>
+    <version>4.3.1</version>
 </dependency>
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>4.0.0</version>
+    <version>4.3.1</version>
     <classifier>models</classifier>
 </dependency>
 </dependencies>
@@ -65,7 +65,7 @@ Chinese, German, or Spanish, also add this inside `dependencies` to your `pom.xm
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>4.0.0</version>
+    <version>4.3.1</version>
     <classifier>models-chinese</classifier>
 </dependency>
 ```
@@ -117,7 +117,7 @@ unzip stanford-corenlp-latest.zip
 ```
 1. Enter the newly unzipped directory:
 ```
-cd stanford-corenlp-4.2.1
+cd stanford-corenlp-4.3.1
 ```
 1. Set up your classpath. If you're using an IDE, you should set the
    classpath in your IDE. If you are using bash or a bash-like shell,
