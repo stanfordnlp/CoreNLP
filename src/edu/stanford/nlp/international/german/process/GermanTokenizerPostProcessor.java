@@ -75,7 +75,7 @@ public class GermanTokenizerPostProcessor extends CoreLabelProcessor {
           ns = new StringBuilder(value.length());
           ns.append(value.substring(0, i));
         }
-        final char prev = ns.charAt(ns.length() - 1);
+        final char prev = ns.length() == 0 ? ' ' : ns.charAt(ns.length() - 1);
         if (prev == 'a') {
           ns.setCharAt(ns.length() - 1, 'ä');
         } else if (prev == 'A') {

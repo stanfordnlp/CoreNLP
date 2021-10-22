@@ -41,8 +41,8 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2021-10-14    4.3.1     Fix some issues with Hungarian and Italian 
-                        pipelines. 
+2021-10-14    4.3.1     Minor bugfixes to German umlaut tokenization,
+                        CDC tokenizer offset, Hungarian model package
 
 2021-09-26    4.3.0     Add trained tokenizer from corenlp-it, add 
                         Italian and Hungarian pipelines using data 
