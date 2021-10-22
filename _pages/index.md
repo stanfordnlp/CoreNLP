@@ -75,19 +75,19 @@ CoreNLP generates a variety of linguistic annotations, including:
 
 * Download and unzip [CoreNLP 4.3.1](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip)
 
-* Download model jars for the language you want to work on and move the jars to the distribution directory.
+* Download model jars for the language you want to work on and move the jars to the distribution directory. Jars are available directly from us, from Maven, and from Hugging Face.
 
-| Language | model jar | version |
+| Language | Model Jar | Version |
 | :------- | :-------- | | :----- |
-| Arabic | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-arabic.jar) | [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-arabic.jar) | 4.3.1 |
-| Chinese | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-chinese.jar) | [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-chinese.jar) | 4.3.1 |
-| English (extra) | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-english.jar) | [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-english.jar) | 4.3.1 |
-| English (KBP) | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-english-kbp.jar) | [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-english-kbp.jar) | 4.3.1 |
-| French | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-french.jar) | [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-french.jar) | 4.3.1 |
-| German | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-german.jar) | [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-german.jar) | 4.3.1 |
-| Hungarian | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-hungarian.jar) | [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-hungarian.jar) | 4.3.1 |
-| Italian | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-italian.jar) | [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-italian.jar) | 4.3.1 |
-| Spanish | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-spanish.jar) | [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-spanish.jar) | 4.3.1 |
+| Arabic | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-arabic.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-arabic.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-arabic/tree/main) | 4.3.1 |
+| Chinese | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-chinese.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-chinese.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-chinese/tree/main) | 4.3.1 |
+| English (extra) | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-english.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-english.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-extra/tree/main) | 4.3.1 |
+| English (KBP) | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-english-kbp.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-english-kbp.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-kbp/tree/main) | 4.3.1 |
+| French | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-french.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-french.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-french/tree/main) | 4.3.1 |
+| German | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-german.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-german.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-german/tree/main) | 4.3.1 |
+| Hungarian | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-hungarian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-hungarian.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-hungarian/tree/main) | 4.3.1 |
+| Italian | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-italian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-italian.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-italian/tree/main) | 4.3.1 |
+| Spanish | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.3.1/stanford-corenlp-4.3.1-models-spanish.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.3.1-models-spanish.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-spanish/tree/main) | 4.3.1 |
 
 Thank you to [HuggingFace](https://huggingface.co/) for helping with our hosting!
 
