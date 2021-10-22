@@ -1,6 +1,6 @@
 # Stanford CoreNLP
 
-[![Build Status](https://travis-ci.org/stanfordnlp/CoreNLP.svg?branch=master)](https://github.com/stanfordnlp/CoreNLP/actions/workflows/run-tests.yaml/badge.svg?branch=dev)
+![Build Status](https://github.com/stanfordnlp/CoreNLP/actions/workflows/run-tests.yaml/badge.svg?branch=dev)
 [![Maven Central](https://img.shields.io/maven-central/v/edu.stanford.nlp/stanford-corenlp.svg)](https://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp)
 [![Twitter](https://img.shields.io/twitter/follow/stanfordnlp.svg?style=social&label=Follow)](https://twitter.com/stanfordnlp/)
 
