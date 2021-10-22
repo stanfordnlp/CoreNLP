@@ -73,7 +73,7 @@ CoreNLP generates a variety of linguistic annotations, including:
 
 ## Quickstart
 
-* Download and unzip [CoreNLP 4.3.1](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip)
+* Download and unzip [CoreNLP 4.3.1](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip) [(HF Hub)](https://huggingface.co/stanfordnlp/CoreNLP/tree/main)
 
 * Download model jars for the language you want to work on and move the jars to the distribution directory. Jars are available directly from us, from Maven, and from Hugging Face.
 
