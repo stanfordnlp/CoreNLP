@@ -15,6 +15,7 @@ homepage: true
 
 [<i class="fab fa-java"></i> Download CoreNLP 4.3.1](https://nlp.stanford.edu/software/stanford-corenlp-latest.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 [<i class="fab fa-github"></i> CoreNLP on GitHub](https://github.com/stanfordnlp/CoreNLP){: .btn .fs-5 .mr-2 .mb-md-0 }
+[CoreNLP on 🤗](https://huggingface.co/stanfordnlp/CoreNLP/tree/main){: .btn .fs-5 .mr-2 .mb-md-0 }
 [<i class="fab fa-sonatype"></i> CoreNLP on Maven](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.3.1/jar){: .btn .fs-5 .mr-2 .mb-md-0 }
 
 {: .no_toc }
