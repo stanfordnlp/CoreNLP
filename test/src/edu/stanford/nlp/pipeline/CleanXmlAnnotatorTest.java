@@ -111,7 +111,7 @@ public class CleanXmlAnnotatorTest {
     }
   }
 
-  private static void checkInvert(Annotation annotation, String gold) {
+  private static void checkBeforeInvert(Annotation annotation, String gold) {
     List<CoreLabel> annotationLabels =
       annotation.get(CoreAnnotations.TokensAnnotation.class);
     StringBuilder original = new StringBuilder();
@@ -121,6 +121,18 @@ public class CleanXmlAnnotatorTest {
     }
     original.append(annotationLabels.get(annotationLabels.size() - 1).
                     get(CoreAnnotations.AfterAnnotation.class));
+    assertEquals(gold, original.toString());
+  }
+
+  private static void checkAfterInvert(Annotation annotation, String gold) {
+    List<CoreLabel> annotationLabels =
+      annotation.get(CoreAnnotations.TokensAnnotation.class);
+    StringBuilder original = new StringBuilder();
+    original.append(annotationLabels.get(0).get(CoreAnnotations.BeforeAnnotation.class));
+    for (CoreLabel label : annotationLabels) {
+      original.append(label.get(CoreAnnotations.OriginalTextAnnotation.class));
+      original.append(label.get(CoreAnnotations.AfterAnnotation.class));
+    }
     assertEquals(gold, original.toString());
   }
 
@@ -216,17 +228,20 @@ public class CleanXmlAnnotatorTest {
     Annotation annotation = annotate(testNoTags, ptbInvertible,
                                      cleanXmlAllTags, wtsSplitter);
     checkResult(annotation, testNoTags);
-    checkInvert(annotation, testNoTags);
+    checkBeforeInvert(annotation, testNoTags);
+    checkAfterInvert(annotation, testNoTags);
 
     annotation = annotate(testTags, ptbInvertible,
                           cleanXmlAllTags, wtsSplitter);
     checkResult(annotation, testNoTags);
-    checkInvert(annotation, testTags);
+    checkBeforeInvert(annotation, testTags);
+    checkAfterInvert(annotation, testTags);
 
     annotation = annotate(testManyTags, ptbInvertible,
                           cleanXmlAllTags, wtsSplitter);
     checkResult(annotation, testNoTags);
-    checkInvert(annotation, testManyTags);
+    checkBeforeInvert(annotation, testManyTags);
+    checkAfterInvert(annotation, testManyTags);
   }
 
   @Test
@@ -287,7 +302,8 @@ public class CleanXmlAnnotatorTest {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(anno);
 
-    checkInvert(anno, testManyTags);
+    checkBeforeInvert(anno, testManyTags);
+    checkAfterInvert(anno, testManyTags);
     List<CoreLabel> annotationLabels =
       anno.get(CoreAnnotations.TokensAnnotation.class);
     for (int i = 0; i < 3; ++i) {
