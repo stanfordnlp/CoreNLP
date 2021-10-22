@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run-Tests
 on: [push]
 concurrency: basic-itest
 jobs:
