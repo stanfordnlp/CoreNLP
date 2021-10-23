@@ -219,11 +219,11 @@ public class CleanXmlAnnotatorTest {
   @Test
   public void testInvertible() {
     String testNoTags = "This sentence should be invertible.";
-    String testTags =
-      "  <xml>  This sentence should  be  invertible.  </xml>  ";
-    String testManyTags =
-      " <xml>   <foo>       <bar>This sentence should  " +
-      "   </bar>be invertible.   </foo>   </xml> ";
+    String[] testInvertibles = { "  <xml>  This sentence should  be  invertible.  </xml>  ",
+                                 " <xml>   <foo>       <bar>This sentence should     </bar>be invertible.   </foo>   </xml> ",
+                                 "  This sentence <xml>should</xml>  be  invertible.  ",
+                                 "  This sentence<xml> should </xml>be  invertible.  ",
+                                 "  This sentence <xml> should </xml>  be  invertible.  " };
 
     Annotation annotation = annotate(testNoTags, ptbInvertible,
                                      cleanXmlAllTags, wtsSplitter);
@@ -231,17 +231,13 @@ public class CleanXmlAnnotatorTest {
     checkBeforeInvert(annotation, testNoTags);
     checkAfterInvert(annotation, testNoTags);
 
-    annotation = annotate(testTags, ptbInvertible,
-                          cleanXmlAllTags, wtsSplitter);
-    checkResult(annotation, testNoTags);
-    checkBeforeInvert(annotation, testTags);
-    checkAfterInvert(annotation, testTags);
-
-    annotation = annotate(testManyTags, ptbInvertible,
-                          cleanXmlAllTags, wtsSplitter);
-    checkResult(annotation, testNoTags);
-    checkBeforeInvert(annotation, testManyTags);
-    checkAfterInvert(annotation, testManyTags);
+    for (String test : testInvertibles) {
+      annotation = annotate(test, ptbInvertible,
+                            cleanXmlAllTags, wtsSplitter);
+      checkResult(annotation, testNoTags);
+      checkBeforeInvert(annotation, test);
+      checkAfterInvert(annotation, test);
+    }
   }
 
   @Test
