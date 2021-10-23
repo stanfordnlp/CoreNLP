@@ -581,7 +581,8 @@ public class CleanXmlAnnotator implements Annotator {
             CoreLabel previous = newTokens.get(newTokens.size() - 2);
             // Note that the original AfterAnnotation is not needed.
             // The BeforeAnnotation of the removed tokens already covers that.
-            previous.set(CoreAnnotations.AfterAnnotation.class, removedText.toString());
+            // However, the `before` text of the next token needs to be included.
+            previous.set(CoreAnnotations.AfterAnnotation.class, removedText + before);
           }
           removedText = new StringBuilder();
         }
