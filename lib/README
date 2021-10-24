@@ -442,6 +442,19 @@ SOURCE AVAILABLE: yes (https://code.google.com/p/json-simple/)
 DESCRIPTION: Simple JSON library
 LAST UPDATE BY: Angel Chang
 -----------------------------------------------------------------
+istack-commons-runtime
+
+VERSION: 3.0.7
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: replaced jaxb-core-2.3.0.1 with suitable istack
+  implementation. you can only use one implementation of
+  com.sun.xml.bind at a time
+LAST UPDATE BY: Stephan (outside user) & John Bauer
+
+-----------------------------------------------------------------
+
+
 foo.jar
 
 ORIGINAL JAR NAME:
