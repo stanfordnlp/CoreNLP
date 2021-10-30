@@ -61,7 +61,6 @@ public class StatTokSentTrainer{
    * This method generates the training set for the classifier given a CoNLL-U formatted training set and set of multi-word rules (either generated from the training or written in a file).
    */
   public ArrayList<Pair<String, String>> fileToTrainSet(String trainFile, Map<String, String[]> multiWordRules)throws IOException, FileNotFoundException{
-
     ArrayList<Pair<String, String>> classChars = new ArrayList<Pair<String, String>>();
 
     for (String filename : trainFile.split("[,;]")) {
@@ -310,7 +309,7 @@ public class StatTokSentTrainer{
   /**
    * Method to read multi-word token rules from a file.
    */
-  private Map<String, String[]> readMultiWordRules(String multiWordRulesFile){
+  public static Map<String, String[]> readMultiWordRules(String multiWordRulesFile) throws IOException {
     Map<String, String[]> multiWordRules = new HashMap<String, String[]>();
     // buffered and decoded from utf-8
     try (BufferedReader reader = IOUtils.readerFromString(multiWordRulesFile)) {
@@ -321,16 +320,27 @@ public class StatTokSentTrainer{
         String[] tokenComponents = parts[1].split(",");
         multiWordRules.put(token, tokenComponents);
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     }
     return multiWordRules;
+  }
+
+  public static void writeMultiWordRules(String multiWordRulesFile, Map<String, String[]> rules) throws IOException {
+    List<String> keys = new ArrayList<>(rules.keySet());
+    Collections.sort(keys);
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(multiWordRulesFile))) {
+      for (String key : keys) {
+        bw.write(key);
+        bw.write("\t");
+        bw.write(String.join(",", rules.get(key)));
+        bw.write("\n");
+      }
+    }
   }
 
   /**
    * Method to infer multi-word token rules directly from the training set for tokenization.
    */
-  private Map<String, String[]> inferMultiWordRules (String trainFile) throws IOException, FileNotFoundException {
+  public static Map<String, String[]> inferMultiWordRules (String trainFile) throws IOException, FileNotFoundException {
     Map<String, String[]> multiWordRules = new HashMap<String, String[]>();
     for (String filename : trainFile.split("[,;]")) {
       try (BufferedReader reader = IOUtils.readerFromString(filename)) {
