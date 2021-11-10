@@ -19,6 +19,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.LinkedHashMap;
 
 import edu.stanford.nlp.util.concurrent.SynchronizedInterner;
 
@@ -167,7 +168,7 @@ public class Generics  {
   private static Class getHashMapClass() {
     try {
       if (HASH_MAP_CLASSNAME == null) {
-        return HashMap.class;
+        return LinkedHashMap.class;
       } else {
         return Class.forName(HASH_MAP_CLASSNAME);
       }
