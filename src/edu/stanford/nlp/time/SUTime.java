@@ -791,6 +791,8 @@ public class SUTime  {
       .hourOfDay(), 17)))));
   public static final Time DINNERTIME = createTemporal(StandardTemporalType.TIME_OF_DAY, "EV", new InexactTime(new Range(new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 18)), new InexactTime(new Partial(DateTimeFieldType
       .hourOfDay(), 20)))));
+  public static final Time WORKDAY = createTemporal(StandardTemporalType.TIME_OF_DAY, "WH", new InexactTime(new Range(new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 9)),
+          new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 17)))));
 
   public static final Time MORNING_TWILIGHT = createTemporal(StandardTemporalType.TIME_OF_DAY, "MO", new InexactTime(new Range(DAWN, SUNRISE)));
   public static final Time EVENING_TWILIGHT = createTemporal(StandardTemporalType.TIME_OF_DAY, "EV", new InexactTime(new Range(SUNSET, DUSK)));
@@ -809,7 +811,7 @@ public class SUTime  {
     YEAR(SUTime.YEAR), DECADE(SUTime.DECADE), CENTURY(SUTime.CENTURY), MILLENNIUM(SUTime.MILLENNIUM),
     UNKNOWN(SUTime.DURATION_UNKNOWN);
 
-    protected Duration duration;
+    private final Duration duration;
 
     TimeUnit(Duration d) {
       this.duration = d;

@@ -195,6 +195,7 @@
   LUNCHTIME = InexactTime( TimeRange( IsoTime(12, NONE, NONE), IsoTime(14, NONE, NONE) ))
   TEATIME = InexactTime( TimeRange( IsoTime(15, NONE, NONE), IsoTime(17, NONE, NONE) ))
   DINNERTIME = InexactTime( TimeRange( IsoTime(18, NONE, NONE), IsoTime(20, NONE, NONE) ))
+  WORKDAY = InexactTime( TimeRange( IsoTime(9, NONE, NONE), IsoTime(17, NONE, NONE) ))
 
   DAYTIME = {
      type: TIME_OF_DAY,
