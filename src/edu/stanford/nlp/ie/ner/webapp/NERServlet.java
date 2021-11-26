@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.crf.NERGUI;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.ling.CoreAnnotations;
 
 /**
