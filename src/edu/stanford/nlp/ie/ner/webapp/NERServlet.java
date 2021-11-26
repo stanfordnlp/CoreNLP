@@ -63,9 +63,9 @@ public class NERServlet extends HttpServlet {
       log(classifier);
     }
 
-    ners = Generics.newHashMap();
+    ners = new HashMap<>();
     for (String classifier : classifiers) {
-      CRFClassifier model = null;
+      CRFClassifier<CoreMap> model = null;
       String filename = "/WEB-INF/data/models/" + classifier;
       InputStream is = getServletConfig().getServletContext().getResourceAsStream(filename);
 
@@ -154,15 +154,23 @@ public class NERServlet extends HttpServlet {
       classifier = this.defaultClassifier;
     }
 
-    response.addHeader("classifier", classifier);
-    response.addHeader("outputFormat", outputFormat);
-    response.addHeader("preserveSpacing", String.valueOf(preserveSpacing));
+    CRFClassifier<CoreMap> nerModel = ners.get(classifier);
+    // check that we weren't asked for a classifier that doesn't exist
+    if (nerModel == null) {
+      out.print(StringEscapeUtils.escapeHtml4("Unknown model " + classifier));
+      return;
+    }
 
     if (outputFormat.equals("highlighted")) {
-      outputHighlighting(out, ners.get(classifier), input);
+      outputHighlighting(out, nerModel, input);
     } else {
-      out.print(StringEscapeUtils.escapeHtml4(ners.get(classifier).classifyToString(input, outputFormat, preserveSpacing)));
+      out.print(StringEscapeUtils.escapeHtml4(nerModel.classifyToString(input, outputFormat, preserveSpacing)));
     }
+
+    response.addHeader("classifier", classifier);
+    // a non-existent outputFormat would have just thrown an exception
+    response.addHeader("outputFormat", outputFormat);
+    response.addHeader("preserveSpacing", String.valueOf(preserveSpacing));
   }
 
   private static void outputHighlighting(PrintWriter out,
