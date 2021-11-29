@@ -3,6 +3,7 @@ package edu.stanford.nlp.semgraph.semgrex;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -10,7 +11,6 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -55,7 +55,9 @@ public class NodePattern extends SemgrexPattern  {
                      List<Pair<Integer, String>> variableGroups) {
     this.reln = r;
     this.negDesc = negDesc;
-    attributes = Generics.newHashMap();
+    // order the attributes so that the pattern stays the same when
+    // printing a compiled pattern
+    attributes = new LinkedHashMap<>();
     descString = "{";
     for (Map.Entry<String, String> entry : attrs.entrySet()) {
       if (!descString.equals("{"))
