@@ -103,9 +103,6 @@ public class EvaluateExternalParser extends ProcessProtobufRequest {
 
   /**
    * Puts the list of gold trees and a list of list of results into EvaluateTreebank
-   *
-   * TODO: instead pass in the trees to EvaluateTreebank as dependency injection?
-   * That way we can process them in an exact order
    */
   public double scoreDataset(List<Tree> goldTrees, List<List<Tree>> results) {
     List<Pair<ParserQuery, Tree>> treebank = convertDataset(goldTrees, results);
