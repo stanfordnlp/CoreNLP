@@ -84573,6 +84573,17 @@ public final class CoreNLPProtos {
      * @return The f1.
      */
     double getF1();
+
+    /**
+     * <code>optional double kbestF1 = 2;</code>
+     * @return Whether the kbestF1 field is set.
+     */
+    boolean hasKbestF1();
+    /**
+     * <code>optional double kbestF1 = 2;</code>
+     * @return The kbestF1.
+     */
+    double getKbestF1();
   }
   /**
    * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserResponse}
@@ -84625,6 +84636,11 @@ public final class CoreNLPProtos {
               f1_ = input.readDouble();
               break;
             }
+            case 17: {
+              bitField0_ |= 0x00000002;
+              kbestF1_ = input.readDouble();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -84675,6 +84691,23 @@ public final class CoreNLPProtos {
       return f1_;
     }
 
+    public static final int KBESTF1_FIELD_NUMBER = 2;
+    private double kbestF1_;
+    /**
+     * <code>optional double kbestF1 = 2;</code>
+     * @return Whether the kbestF1 field is set.
+     */
+    public boolean hasKbestF1() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional double kbestF1 = 2;</code>
+     * @return The kbestF1.
+     */
+    public double getKbestF1() {
+      return kbestF1_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -84696,6 +84729,9 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeDouble(1, f1_);
       }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeDouble(2, kbestF1_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -84708,6 +84744,10 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, f1_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(2, kbestF1_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -84730,6 +84770,12 @@ public final class CoreNLPProtos {
             != java.lang.Double.doubleToLongBits(
                 other.getF1())) return false;
       }
+      if (hasKbestF1() != other.hasKbestF1()) return false;
+      if (hasKbestF1()) {
+        if (java.lang.Double.doubleToLongBits(getKbestF1())
+            != java.lang.Double.doubleToLongBits(
+                other.getKbestF1())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -84745,6 +84791,11 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + F1_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getF1()));
+      }
+      if (hasKbestF1()) {
+        hash = (37 * hash) + KBESTF1_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            java.lang.Double.doubleToLongBits(getKbestF1()));
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -84881,6 +84932,8 @@ public final class CoreNLPProtos {
         super.clear();
         f1_ = 0D;
         bitField0_ = (bitField0_ & ~0x00000001);
+        kbestF1_ = 0D;
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -84912,6 +84965,10 @@ public final class CoreNLPProtos {
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.f1_ = f1_;
           to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.kbestF1_ = kbestF1_;
+          to_bitField0_ |= 0x00000002;
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -84964,6 +85021,9 @@ public final class CoreNLPProtos {
         if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse.getDefaultInstance()) return this;
         if (other.hasF1()) {
           setF1(other.getF1());
+        }
+        if (other.hasKbestF1()) {
+          setKbestF1(other.getKbestF1());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -85031,6 +85091,43 @@ public final class CoreNLPProtos {
       public Builder clearF1() {
         bitField0_ = (bitField0_ & ~0x00000001);
         f1_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double kbestF1_ ;
+      /**
+       * <code>optional double kbestF1 = 2;</code>
+       * @return Whether the kbestF1 field is set.
+       */
+      public boolean hasKbestF1() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional double kbestF1 = 2;</code>
+       * @return The kbestF1.
+       */
+      public double getKbestF1() {
+        return kbestF1_;
+      }
+      /**
+       * <code>optional double kbestF1 = 2;</code>
+       * @param value The kbestF1 to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKbestF1(double value) {
+        bitField0_ |= 0x00000002;
+        kbestF1_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional double kbestF1 = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKbestF1() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        kbestF1_ = 0D;
         onChanged();
         return this;
       }
@@ -85610,20 +85707,20 @@ public final class CoreNLPProtos {
       "ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stanford" +
       ".nlp.pipeline.FlattenedParseTree\022@\n\tpred" +
       "icted\030\002 \003(\0132-.edu.stanford.nlp.pipeline." +
-      "FlattenedParseTree\"$\n\026EvaluateParserResp" +
-      "onse\022\n\n\002f1\030\001 \002(\001*\243\001\n\010Language\022\013\n\007Unknown" +
-      "\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007" +
-      "English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Heb" +
-      "rew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglish\020\t" +
-      "\022\024\n\020UniversalChinese\020\n*h\n\tSentiment\022\023\n\017S" +
-      "TRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007N" +
-      "EUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_PO" +
-      "SITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013EQU" +
-      "IVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022RE" +
-      "VERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTE" +
-      "RNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*" +
-      "\n\031edu.stanford.nlp.pipelineB\rCoreNLPProt" +
-      "os"
+      "FlattenedParseTree\"5\n\026EvaluateParserResp" +
+      "onse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001*\243\001\n\010La" +
+      "nguage\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002" +
+      "\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n" +
+      "\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020U" +
+      "niversalEnglish\020\t\022\024\n\020UniversalChinese\020\n*" +
+      "h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEA" +
+      "K_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITI" +
+      "VE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024NaturalLog" +
+      "icRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_E" +
+      "NTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010N" +
+      "EGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n" +
+      "\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp.pipe" +
+      "lineB\rCoreNLPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -85898,7 +85995,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor,
-        new java.lang.String[] { "F1", });
+        new java.lang.String[] { "F1", "KbestF1", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -88,6 +88,7 @@ public class EvaluateTreebank  {
   AbstractEval.ScoreEval factLL = null;
   AbstractEval kGoodLB = null;
 
+  BestOfTopKEval pcfgTopK = null;
   private final List<BestOfTopKEval> topKEvals = new ArrayList<>();
 
   private int kbestPCFG = 0;
@@ -220,7 +221,8 @@ public class EvaluateTreebank  {
     kGoodLB = new Evalb("kGood LP/LR", false);
 
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgTopK"))) {
-      topKEvals.add(new BestOfTopKEval(new Evalb("pcfg top k comparisons", false), new Evalb("pcfg top k LP/LR", runningAverages)));
+      pcfgTopK = new BestOfTopKEval(new Evalb("pcfg top k comparisons", false), new Evalb("pcfg top k LP/LR", runningAverages));
+      topKEvals.add(pcfgTopK);
     }
 
     if (topKEvals.size() > 0) {
@@ -252,6 +254,16 @@ public class EvaluateTreebank  {
     return 0.0;
   }
 
+  public double getPCFGTopKF1() {
+    if (pcfgTopK == null) {
+      return 0.0;
+    }
+    return pcfgTopK.getEvalbF1();
+  }
+
+  public boolean hasPCFGTopKF1() {
+    return pcfgTopK != null;
+  }
 
   /**
    * Remove tree scores, so they don't print.
