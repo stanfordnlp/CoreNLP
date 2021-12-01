@@ -353,7 +353,9 @@ public class Util {
     for (SemanticGraphEdge edge : toClean) {
       tree.removeEdge(edge);
       tree.removeVertex(edge.getDependent());
-      assert isTree(tree);
+      if (!isTree(tree)) {
+        throw new NotTreeException(tree, edge);
+      }
     }
   }
 
