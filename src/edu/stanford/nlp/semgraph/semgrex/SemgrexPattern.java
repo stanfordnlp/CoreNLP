@@ -249,7 +249,7 @@ public abstract class SemgrexPattern implements Serializable  {
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg) {
-    return matcher(sg, sg.getFirstRoot(), Generics.newHashMap(), Generics.newHashMap(),
+    return matcher(sg, sg.getFirstRoot(), new LinkedHashMap<String,IndexedWord>(), new LinkedHashMap<String,String>(),
         new VariableStrings(), false);
   }
 

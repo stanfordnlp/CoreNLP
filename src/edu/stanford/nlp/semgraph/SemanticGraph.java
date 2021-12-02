@@ -72,7 +72,7 @@ public class SemanticGraph implements Serializable  {
   private final DirectedMultiGraph<IndexedWord, SemanticGraphEdge> graph;
 
   private static final MapFactory<IndexedWord, Map<IndexedWord, List<SemanticGraphEdge>>> outerMapFactory = MapFactory.hashMapFactory();
-  private static final MapFactory<IndexedWord, List<SemanticGraphEdge>> innerMapFactory = MapFactory.hashMapFactory();
+  private static final MapFactory<IndexedWord, List<SemanticGraphEdge>> innerMapFactory = MapFactory.linkedHashMapFactory();
   private static final MapFactory<IndexedWord, IndexedWord> wordMapFactory = MapFactory.hashMapFactory();
 
   private LinkedList<String> comments = new LinkedList<>();
