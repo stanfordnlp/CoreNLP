@@ -111,7 +111,7 @@ public class CleanXmlAnnotatorTest {
     }
   }
 
-  private static void checkInvert(Annotation annotation, String gold) {
+  private static void checkBeforeInvert(Annotation annotation, String gold) {
     List<CoreLabel> annotationLabels =
       annotation.get(CoreAnnotations.TokensAnnotation.class);
     StringBuilder original = new StringBuilder();
@@ -121,6 +121,18 @@ public class CleanXmlAnnotatorTest {
     }
     original.append(annotationLabels.get(annotationLabels.size() - 1).
                     get(CoreAnnotations.AfterAnnotation.class));
+    assertEquals(gold, original.toString());
+  }
+
+  private static void checkAfterInvert(Annotation annotation, String gold) {
+    List<CoreLabel> annotationLabels =
+      annotation.get(CoreAnnotations.TokensAnnotation.class);
+    StringBuilder original = new StringBuilder();
+    original.append(annotationLabels.get(0).get(CoreAnnotations.BeforeAnnotation.class));
+    for (CoreLabel label : annotationLabels) {
+      original.append(label.get(CoreAnnotations.OriginalTextAnnotation.class));
+      original.append(label.get(CoreAnnotations.AfterAnnotation.class));
+    }
     assertEquals(gold, original.toString());
   }
 
@@ -207,26 +219,25 @@ public class CleanXmlAnnotatorTest {
   @Test
   public void testInvertible() {
     String testNoTags = "This sentence should be invertible.";
-    String testTags =
-      "  <xml>  This sentence should  be  invertible.  </xml>  ";
-    String testManyTags =
-      " <xml>   <foo>       <bar>This sentence should  " +
-      "   </bar>be invertible.   </foo>   </xml> ";
+    String[] testInvertibles = { "  <xml>  This sentence should  be  invertible.  </xml>  ",
+                                 " <xml>   <foo>       <bar>This sentence should     </bar>be invertible.   </foo>   </xml> ",
+                                 "  This sentence <xml>should</xml>  be  invertible.  ",
+                                 "  This sentence<xml> should </xml>be  invertible.  ",
+                                 "  This sentence <xml> should </xml>  be  invertible.  " };
 
     Annotation annotation = annotate(testNoTags, ptbInvertible,
                                      cleanXmlAllTags, wtsSplitter);
     checkResult(annotation, testNoTags);
-    checkInvert(annotation, testNoTags);
+    checkBeforeInvert(annotation, testNoTags);
+    checkAfterInvert(annotation, testNoTags);
 
-    annotation = annotate(testTags, ptbInvertible,
-                          cleanXmlAllTags, wtsSplitter);
-    checkResult(annotation, testNoTags);
-    checkInvert(annotation, testTags);
-
-    annotation = annotate(testManyTags, ptbInvertible,
-                          cleanXmlAllTags, wtsSplitter);
-    checkResult(annotation, testNoTags);
-    checkInvert(annotation, testManyTags);
+    for (String test : testInvertibles) {
+      annotation = annotate(test, ptbInvertible,
+                            cleanXmlAllTags, wtsSplitter);
+      checkResult(annotation, testNoTags);
+      checkBeforeInvert(annotation, test);
+      checkAfterInvert(annotation, test);
+    }
   }
 
   @Test
@@ -287,7 +298,8 @@ public class CleanXmlAnnotatorTest {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(anno);
 
-    checkInvert(anno, testManyTags);
+    checkBeforeInvert(anno, testManyTags);
+    checkAfterInvert(anno, testManyTags);
     List<CoreLabel> annotationLabels =
       anno.get(CoreAnnotations.TokensAnnotation.class);
     for (int i = 0; i < 3; ++i) {

@@ -9,10 +9,10 @@ HU_TEST_GOLD = /u/nlp/software/CoreNLP-models/hu/stattok/4.3.0/hu_szeged-ud-test
 
 # ignoring twittiro and postwita because this model gets thrown off
 # quite a lot by the non-standard sentence endings
-IT_TRAINING = /u/nlp/software/CoreNLP-models/it/stattok/4.3.0/it_isdt-ud-train.conllu,/u/nlp/software/CoreNLP-models/it/stattok/4.3.0/it_vit-ud-train.conllu,/u/nlp/software/CoreNLP-models/it/stattok/4.3.0/italian.mwt
+IT_TRAINING = /u/nlp/software/CoreNLP-models/it/stattok/4.3.1/it_isdt-ud-train.conllu,/u/nlp/software/CoreNLP-models/it/stattok/4.3.1/it_vit-ud-train.conllu,/u/nlp/software/CoreNLP-models/it/stattok/4.3.1/italian.mwt
 
-IT_TEST_INPUT = /u/nlp/software/CoreNLP-models/it/stattok/4.3.0/it_isdt-ud-test.txt
-IT_TEST_GOLD = /u/nlp/software/CoreNLP-models/it/stattok/4.3.0/it_isdt-ud-test.conllu
+IT_TEST_INPUT = /u/nlp/software/CoreNLP-models/it/stattok/4.3.1/it_isdt-ud-test.txt
+IT_TEST_GOLD = /u/nlp/software/CoreNLP-models/it/stattok/4.3.1/it_isdt-ud-test.conllu
 
 .SECONDEXPANSION:
 
@@ -29,8 +29,12 @@ hu-tokenizer.ser.gz:
 
 italian: it-tokenizer.ser.gz
 
-it-tokenizer.ser.gz:
+it-multiword.txt:
+	@echo Building $@
+	java edu.stanford.nlp.process.stattok.BuildMultiWordRules -trainFile $(IT_TRAINING) -multiWordRulesFile $@
+
+it-tokenizer.ser.gz: it-multiword.txt
 	@echo Training $@
-	java edu.stanford.nlp.process.stattok.StatTokSentTrainer -inferMultiWordRules 1 -trainFile $(IT_TRAINING) -serializeTo $@
-	java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators cdc_tokenize -cdc_tokenize.model $@ -file $(IT_TEST_INPUT) -outputFormat conllu -output.printFakeDeps True -outputDirectory /tmp/$@.out
+	java edu.stanford.nlp.process.stattok.StatTokSentTrainer -trainFile $(IT_TRAINING) -multiWordRulesFile $< -serializeTo $@
+	java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators cdc_tokenize -cdc_tokenize.model $@ -cdc_tokenize.multiWordRules $< -file $(IT_TEST_INPUT) -outputFormat conllu -output.printFakeDeps True -outputDirectory /tmp/$@.out
 	$(PYTHON) $(EVAL_SCRIPT) -v $(IT_TEST_GOLD) /tmp/$@.out/$(notdir $(IT_TEST_INPUT)).conllu

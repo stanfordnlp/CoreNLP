@@ -579,12 +579,10 @@ public class CleanXmlAnnotator implements Annotator {
           }
           if (added && newTokens.size() > 1) {
             CoreLabel previous = newTokens.get(newTokens.size() - 2);
-            String after = previous.get(CoreAnnotations.AfterAnnotation.class);
-            if (after != null) {
-              previous.set(CoreAnnotations.AfterAnnotation.class, after + removedText);
-            } else {
-              previous.set(CoreAnnotations.AfterAnnotation.class, removedText.toString());
-            }
+            // Note that the original AfterAnnotation is not needed.
+            // The BeforeAnnotation of the removed tokens already covers that.
+            // However, the `before` text of the next token needs to be included.
+            previous.set(CoreAnnotations.AfterAnnotation.class, removedText + before);
           }
           removedText = new StringBuilder();
         }
@@ -650,6 +648,7 @@ public class CleanXmlAnnotator implements Annotator {
       currentRemoval = token.get(CoreAnnotations.OriginalTextAnnotation.class);
       if (currentRemoval != null)
         removedText.append(currentRemoval);
+      // We only process the after text if it's the last token
       if (token == tokens.get(tokens.size() - 1)) {
         currentRemoval = token.get(CoreAnnotations.AfterAnnotation.class);
         if (currentRemoval != null)
