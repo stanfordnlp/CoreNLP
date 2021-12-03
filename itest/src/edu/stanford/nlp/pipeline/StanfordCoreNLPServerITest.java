@@ -125,7 +125,7 @@ public class StanfordCoreNLPServerITest {
 
   @Test
   public void testSemgrexJson() throws IOException {
-    String expected="{ \"sentences\": [ { \"0\": { \"text\": \"ate\", \"begin\": 2, \"end\": 3, \"$obj\": { \"text\": \"fish\", \"begin\": 4, \"end\": 5 }, \"$verb\": { \"text\": \"ate\", \"begin\": 2, \"end\": 3 } }, \"length\": 1 }  ]}".replaceAll(" ", "");
+    String expected="{ \"sentences\": [ { \"0\": { \"text\": \"ate\", \"begin\": 2, \"end\": 3, \"$verb\": { \"text\": \"ate\", \"begin\": 2, \"end\": 3 }, \"$obj\": { \"text\": \"fish\", \"begin\": 4, \"end\": 5 } }, \"length\": 1 }  ]}".replaceAll(" ", "");
 
     String query = "The dog ate a fish";
     byte[] message = query.getBytes("utf-8");
@@ -143,7 +143,7 @@ public class StanfordCoreNLPServerITest {
 
   @Test
   public void testSemgrexAnnotation() throws IOException {
-    String expected = "result { result { match { matchIndex: 3 node { name: \"obj\" matchIndex: 5 } node { name: \"verb\" matchIndex: 3 } } }}".replaceAll(" ", "");
+    String expected = "result { result { match { matchIndex: 3 node { name: \"verb\" matchIndex: 3 } node { name: \"obj\" matchIndex: 5 } } }}".replaceAll(" ", "");
     String query = "The dog ate a fish";
     byte[] message = query.getBytes("utf-8");
     Properties props = new Properties();
