@@ -33,7 +33,7 @@ public class NodePattern extends SemgrexPattern  {
   private final Map<String, Pair<Object, Object>> attributes;
   private final boolean isRoot;
   private boolean isLink;
-  private boolean isEmpty;
+  private final boolean isEmpty;
   private final String name;
   private String descString;
   SemgrexPattern child;
@@ -124,7 +124,7 @@ public class NodePattern extends SemgrexPattern  {
     this.isRoot = root;
     this.isEmpty = empty;
 
-    this.variableGroups = variableGroups;
+    this.variableGroups = Collections.unmodifiableList(variableGroups);
   }
 
   @SuppressWarnings("unchecked")
