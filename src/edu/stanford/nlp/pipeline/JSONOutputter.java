@@ -616,11 +616,15 @@ public class JSONOutputter extends AnnotationOutputter {
     }
 
     public static String objectToJSON(Consumer<Writer> callback) {
-      OutputStream os = new ByteArrayOutputStream();
-      PrintWriter out = new PrintWriter(os);
-      new JSONWriter(out, new Options()).object(callback);
-      out.close();
-      return os.toString();
+      try {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
+        new JSONWriter(out, new Options()).object(callback);
+        out.close();
+        return os.toString();
+      } catch(UnsupportedEncodingException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
