@@ -462,16 +462,16 @@ public class OpenIE implements Annotator  {
     } else {
 
       // Get the dependency tree
-      SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
-      if (parse == null) {
-        parse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+      SemanticGraph originalParse = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
+      if (originalParse == null) {
+        originalParse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       }
-      if (parse == null) {
+      if (originalParse == null) {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
       // Clean the tree
-      parse = new SemanticGraph(parse);
-      Util.cleanTree(parse);
+      SemanticGraph parse = new SemanticGraph(originalParse);
+      Util.cleanTree(parse, originalParse);
 
       // Resolve Coreference
       SemanticGraph canonicalizedParse = parse;

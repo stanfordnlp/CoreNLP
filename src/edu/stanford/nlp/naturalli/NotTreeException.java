@@ -4,7 +4,12 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 
 public class NotTreeException extends RuntimeException {
-  public NotTreeException(SemanticGraph graph, SemanticGraphEdge edge) {
-    super("The graph \n" + graph + "\nis not a tree after removing\n" + edge);
+  SemanticGraph brokenGraph;
+  SemanticGraph originalGraph;
+
+  public NotTreeException(SemanticGraph graph, SemanticGraph originalGraph) {
+    super("The graph \n" + graph + "\nis not a tree after its surgery.  Original graph:\n" + originalGraph);
+    this.brokenGraph = graph;
+    this.originalGraph = originalGraph;
   }
 }
