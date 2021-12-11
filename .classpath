@@ -11,7 +11,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/tomcat/jasper-el.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/tomcat/jsp-api.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/tomcat/tomcat-api.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar" sourcepath="libsrc/commons-logging-1.1.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar" sourcepath="libsrc/commons-logging-1.2-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit-4.13.1.jar" sourcepath="libsrc/junit-4.13.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javax.servlet.jar" sourcepath="libsrc/tomcat/apache-tomcat-7.0.12-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/AppleJavaExtensions.jar"/>

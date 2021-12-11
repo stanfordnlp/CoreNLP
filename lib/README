@@ -132,8 +132,8 @@ LAST UPDATE BY: Sonal Gupta
 commons-logging.jar
 
 ORIGINAL JAR NAME: commons-logging.jar
-VERSION: 1.1.1
-RELEASE DATE: ?
+VERSION: 1.2
+RELEASE DATE: July 2014
 SOURCE AVAILABLE: yes
 DESCRIPTION: "The Logging package is an ultri-thin bridge between different
 logging implementations.  A library that uses the commons-logging API can be
@@ -143,8 +143,8 @@ URL: http://jakarta.apache.org/commons/logging
 USED BY: el-api.jar, jwnl, hadoop, etc. (Only by various external libraries.)
 Not needed by CoreNLP distributions.
 
-LAST UPDATE: ?
-LAST UPDATE BY: ?
+LAST UPDATE: 2021-12-10
+LAST UPDATE BY: John Bauer
 
 
 -----------------------------------------------------------------------
