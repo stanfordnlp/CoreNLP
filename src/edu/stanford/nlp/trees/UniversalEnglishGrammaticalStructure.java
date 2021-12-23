@@ -270,18 +270,18 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
 
   /* Semgrex patterns for prepositional phrases. */
-  private static SemgrexPattern PASSIVE_AGENT_PATTERN = SemgrexPattern.compile("{}=gov >obl=reln ({}=mod >case {word:/^(?i:by)$/}=c1) >/^aux:pass$/ {}");
-  private static SemgrexPattern[] PREP_MW3_PATTERNS = {
+  private static final SemgrexPattern PASSIVE_AGENT_PATTERN = SemgrexPattern.compile("{}=gov >obl=reln ({}=mod >case {word:/^(?i:by)$/}=c1) >/^aux:pass$/ {}");
+  private static final SemgrexPattern[] PREP_MW3_PATTERNS = {
       SemgrexPattern.compile("{}=gov   [>/^(nmod|obl)$/=reln ({}=mod >case ({}=c1 >fixed {}=c2 >fixed ({}=c3 !== {}=c2) ))]"),
       SemgrexPattern.compile("{}=gov   [>/^(advcl|acl)$/=reln ({}=mod >/^(mark|case)$/ ({}=c1 >fixed {}=c2 >fixed ({}=c3 !== {}=c2) ))]")
 
   };
-  private static SemgrexPattern[] PREP_MW2_PATTERNS = {
+  private static final SemgrexPattern[] PREP_MW2_PATTERNS = {
       SemgrexPattern.compile("{}=gov >/^(nmod|obl)$/=reln ({}=mod >case ({}=c1 >fixed {}=c2))"),
     SemgrexPattern.compile("{}=gov >/^(advcl|acl)$/=reln ({}=mod >/^(mark|case)$/ ({}=c1 >fixed {}=c2))")
 
   };
-  private static SemgrexPattern[] PREP_PATTERNS = {
+  private static final SemgrexPattern[] PREP_PATTERNS = {
       SemgrexPattern.compile("{}=gov   >/^(nmod|obl)$/=reln ({}=mod >case {}=c1)"),
       SemgrexPattern.compile("{}=gov   >/^(advcl|acl)$/=reln ({}=mod >/^(mark|case)$/ {}=c1)")
   };

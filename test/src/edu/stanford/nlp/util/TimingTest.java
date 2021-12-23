@@ -33,14 +33,17 @@ public class TimingTest extends TestCase {
     sleepTen();
     long val = t.report();
     // System.err.println(val);
-    assertEquals("Wrong sleep", 20, val, 20);
+    assertEquals("Wrong sleep", 25, val, 25);
     // On Linux, 6 loops is ~80ms which gets rounded up to 100 by the DecimalFormat.
     // On Windows, 6 loops is ~130ms which gets rounded down to 100
     for (int i = 0; i < 6; i++) {
       sleepTen();
     }
     long val3 = t.report();
-    assertEquals("Wrong formatted time", new DecimalFormat("0.0", DecimalFormatSymbols.getInstance(Locale.ROOT)).format(0.1), Timing.toSecondsString(val3));
+    String timingString = Timing.toSecondsString(val3);
+    String exp1 = new DecimalFormat("0.0", DecimalFormatSymbols.getInstance(Locale.ROOT)).format(0.1);
+    String exp2 = new DecimalFormat("0.0", DecimalFormatSymbols.getInstance(Locale.ROOT)).format(0.2);
+    assertTrue("Wrong formatted time", exp1.equals(timingString) || exp2.equals(timingString));
   }
 
   private static void sleepTen() {

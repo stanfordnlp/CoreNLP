@@ -729,4 +729,5 @@ message EvaluateParserRequest {
 
 message EvaluateParserResponse {
   required double              f1             = 1;
+  optional double              kbestF1        = 2;
 }

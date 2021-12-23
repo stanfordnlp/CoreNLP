@@ -166,7 +166,7 @@ public class ForwardEntailerSearchProblem  {
       }
     }
     // Clean the tree
-    Util.cleanTree(parseTree);
+    Util.cleanTree(parseTree, this.parseTree);
     assert Util.isTree(parseTree);
 
     // Find the subject / object split

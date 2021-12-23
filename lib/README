@@ -132,8 +132,8 @@ LAST UPDATE BY: Sonal Gupta
 commons-logging.jar
 
 ORIGINAL JAR NAME: commons-logging.jar
-VERSION: 1.1.1
-RELEASE DATE: ?
+VERSION: 1.2
+RELEASE DATE: July 2014
 SOURCE AVAILABLE: yes
 DESCRIPTION: "The Logging package is an ultri-thin bridge between different
 logging implementations.  A library that uses the commons-logging API can be
@@ -143,8 +143,8 @@ URL: http://jakarta.apache.org/commons/logging
 USED BY: el-api.jar, jwnl, hadoop, etc. (Only by various external libraries.)
 Not needed by CoreNLP distributions.
 
-LAST UPDATE: ?
-LAST UPDATE BY: ?
+LAST UPDATE: 2021-12-10
+LAST UPDATE BY: John Bauer
 
 
 -----------------------------------------------------------------------
@@ -240,10 +240,10 @@ LAST UPDATE: 2020-11-04
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-log4j-1.2.16.jar
-ORIGINAL JAR NAME: log4j-1.2.16.jar
-VERSION: 1.2.16
-RELEASE DATE: 2010-04-06
+log4j-core-2.15.0.jar
+ORIGINAL JAR NAME: log4j-core-2.15.0.jar
+VERSION: 2.15.0
+RELEASE DATE: 2021-12-10
 SOURCE AVAILABLE: yes
 DESCRIPTION: Java logging
 URL: http://logging.apache.org/log4j/1.2/index.html
@@ -252,7 +252,40 @@ USED BY: edu.stanford.nlp.parser.ensemble (library required by the Malt module)
   Also used by RTE and the Parser webapp.
 Not needed by CoreNLP distributions
 
-LAST UPDATE: 2011/11/20
+jars chosen based on this information:
+https://logging.apache.org/log4j/2.x/faq.html#which_jars
+
+LAST UPDATE: 2021-12-10
+LAST UPDATE BY: John Bauer
+
+-----------------------------------------------------------------------
+log4j-api-2.15.0.jar
+ORIGINAL JAR NAME: log4j-api-2.15.0.jar
+VERSION: 2.15.0
+RELEASE DATE: 2021-12-10
+SOURCE AVAILABLE: no
+DESCRIPTION: Java logging
+URL: https://logging.apache.org/log4j/2.x/log4j-api/index.html
+
+jars chosen based on this information:
+https://logging.apache.org/log4j/2.x/faq.html#which_jars
+
+LAST UPDATE: 2021-12-10
+LAST UPDATE BY: John Bauer
+
+-----------------------------------------------------------------------
+log4j-jcl-2.15.0.jar
+ORIGINAL JAR NAME: log4j-jcl-2.15.0.jar
+VERSION: 2.15.0
+RELEASE DATE: 2021-12-10
+SOURCE AVAILABLE: no
+DESCRIPTION: Java logging
+URL: https://logging.apache.org/log4j/2.x/log4j-jcl/index.html
+
+jars chosen based on this information (we also have commons-logging):
+https://logging.apache.org/log4j/2.x/faq.html#which_jars
+
+LAST UPDATE: 2021-12-10
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
