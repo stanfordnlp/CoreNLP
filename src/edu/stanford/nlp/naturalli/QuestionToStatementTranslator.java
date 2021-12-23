@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -405,7 +406,7 @@ public class QuestionToStatementTranslator {
   }
 
   /**
-   * The pattern for "what/which NN have ..." sentences.
+   * The pattern for "what/which NN (have|does|is) ..." sentences.
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#processWhNNHaveIs(edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher)
    */
   private final TokenSequencePattern triggerWhNNHave = TokenSequencePattern.compile(
@@ -430,7 +431,7 @@ public class QuestionToStatementTranslator {
     // Add prefix
     List<CoreLabel> sentence = new ArrayList<>((Collection<CoreLabel>) matcher.groupNodes("$pre_verb"));
 
-    // Add have/do
+    // Add have/be
     List<CoreLabel> have = (List<CoreLabel>) matcher.groupNodes("$have");
     if (have != null && have.size() > 0 && have.get(0).lemma() != null &&
         (have.get(0).lemma().equalsIgnoreCase("have") || have.get(0).lemma().equalsIgnoreCase("be"))) {
@@ -1151,7 +1152,7 @@ public class QuestionToStatementTranslator {
       }
     }
 
-    // 2. Property upper-case the sentence
+    // 2. Properly upper-case the sentence
     for (int i = 0; i < statement.size(); ++i) {
       CoreLabel token = statement.get(i);
       String originalText = token.get(CoreAnnotations.StatementTextAnnotation.class);
@@ -1162,15 +1163,10 @@ public class QuestionToStatementTranslator {
         token.set(CoreAnnotations.StatementTextAnnotation.class, uppercase);
       } else if (Optional.ofNullable(token.tag()).map(x -> x.startsWith("NNP")).orElse(false)) {
         token.set(CoreAnnotations.StatementTextAnnotation.class, uppercase);
+      } else if ("i".equals(originalText.toLowerCase())) {
+          token.set(CoreAnnotations.StatementTextAnnotation.class, uppercase);
       } else {
-        switch (originalText.toLowerCase()) {
-          case "i":
-            token.set(CoreAnnotations.StatementTextAnnotation.class, uppercase);
-            break;
-          default:
-            token.set(CoreAnnotations.StatementTextAnnotation.class, originalText.toLowerCase());
-            break;
-        }
+          token.set(CoreAnnotations.StatementTextAnnotation.class, originalText.toLowerCase());
       }
     }
 
@@ -1323,15 +1319,45 @@ public class QuestionToStatementTranslator {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma"));
     QuestionToStatementTranslator translator = new QuestionToStatementTranslator();
 
-    IOUtils.console("question> ", question -> {
-      Annotation ann = new Annotation(question);
-      pipeline.annotate(ann);
-      List<CoreLabel> tokens = ann.get(CoreAnnotations.TokensAnnotation.class);
-      List<List<CoreLabel>> statements = translator.toStatement(tokens);
-      for (List<CoreLabel> statement : statements) {
-        System.out.println("  -> " + StringUtils.join(statement.stream().map(CoreLabel::word), " "));
+    if (args.length > 0) {
+      int upto = 0;
+      for (String question : ObjectBank.getLineIterator(args[0])) {
+        System.out.println(upto);
+        System.out.println(question);
+        Annotation ann = new Annotation(question);
+        pipeline.annotate(ann);
+        List<CoreLabel> tokens = ann.get(CoreAnnotations.TokensAnnotation.class);
+        List<List<CoreLabel>> statements = translator.toStatement(tokens);
+        for (List<CoreLabel> statement : statements) {
+          // System.out.println("  -> " + StringUtils.join(statement.stream().map(CoreLabel::word), " "));
+          // System.out.println("  -> " + StringUtils.join(statement.stream().map(cl -> cl.get(UnknownTokenMarker.class)), " "));
+          System.out.println(StringUtils.join(statement.stream().map(cl -> {
+            if (cl.get(UnknownTokenMarker.class) != null && cl.get(UnknownTokenMarker.class)) {
+              return '[' + (cl.get(CoreAnnotations.StatementTextAnnotation.class) == null ? cl.word(): cl.get(CoreAnnotations.StatementTextAnnotation.class)) + ']';
+            } else {
+              if (cl.get(CoreAnnotations.StatementTextAnnotation.class) != null) {
+                return cl.get(CoreAnnotations.StatementTextAnnotation.class);
+              } else {
+                return cl.word();
+              }
+            }
+          }), " ") + ".");
+        }
+        System.out.println("----------");
+        upto++;
       }
-    });
+    } else {
+      IOUtils.console("question> ", question -> {
+        System.out.println(question);
+        Annotation ann = new Annotation(question);
+        pipeline.annotate(ann);
+        List<CoreLabel> tokens = ann.get(CoreAnnotations.TokensAnnotation.class);
+        List<List<CoreLabel>> statements = translator.toStatement(tokens);
+        for (List<CoreLabel> statement : statements) {
+          System.out.println("  -> " + StringUtils.join(statement.stream().map(CoreLabel::word), " "));
+        }
+      });
+    }
   }
 
 }
