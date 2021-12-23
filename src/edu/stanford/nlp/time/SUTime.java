@@ -272,19 +272,19 @@ public class SUTime  {
       builder.append("Temporal expressions:");
       int index = 0;
       for (TimeExpression exp : temporalExprIndex) {
-        builder.append("\n  " + index++ + ": " + exp);
+        builder.append("\n  ").append(index++).append(": ").append(exp);
       }
 
       builder.append("\nTemporals:");
       index = 0;
       for (Temporal exp : temporalIndex) {
-        builder.append("\n  " + index++ + ": " + exp);
+        builder.append("\n  ").append(index++).append(": ").append(exp);
       }
 
       builder.append("\nTemporal functions:");
       index = 0;
       for (Temporal exp : temporalFuncIndex) {
-        builder.append("\n  " + index++ + ": " + exp);
+        builder.append("\n  ").append(index++).append(": ").append(exp);
       }
       return builder.toString();
     }
@@ -1165,7 +1165,7 @@ public class SUTime  {
         }
         if (arg1 instanceof Time) {
           // TODO: flags?
-          return arg2.intersect((Time) arg1);
+          return arg2.intersect(arg1);
         } else {
           throw new UnsupportedOperationException("IN not implemented for arg1=" + arg1.getClass() + ", arg2=" + arg2.getClass());
         }
@@ -1794,17 +1794,19 @@ public class SUTime  {
       }
 
       Duration bd = (base != null) ? Duration.getDuration(JodaTimeUtils.getJodaTimePeriod(base)) : null;
-      if (tod != null) {
-        Duration d = tod.getDuration();
-        return (bd.compareTo(d) < 0) ? bd : d;
-      }
-      if (dow != null) {
-        Duration d = dow.getDuration();
-        return (bd.compareTo(d) < 0) ? bd : d;
-      }
-      if (poy != null) {
-        Duration d = poy.getDuration();
-        return (bd.compareTo(d) < 0) ? bd : d;
+      if (bd != null) {
+        if (tod != null) {
+          Duration d = tod.getDuration();
+          return (bd.compareTo(d) < 0) ? bd : d;
+        }
+        if (dow != null) {
+          Duration d = dow.getDuration();
+          return (bd.compareTo(d) < 0) ? bd : d;
+        }
+        if (poy != null) {
+          Duration d = poy.getDuration();
+          return (bd.compareTo(d) < 0) ? bd : d;
+        }
       }
       return bd;
     }
@@ -1832,17 +1834,19 @@ public class SUTime  {
         }
       }
 
-      if (poy != null) {
-        Duration d = poy.getPeriod();
-        return (bd.compareTo(d) > 0) ? bd : d;
-      }
-      if (dow != null) {
-        Duration d = dow.getPeriod();
-        return (bd.compareTo(d) > 0) ? bd : d;
-      }
-      if (tod != null) {
-        Duration d = tod.getPeriod();
-        return (bd.compareTo(d) > 0) ? bd : d;
+      if (bd != null) {
+        if (poy != null) {
+          Duration d = poy.getPeriod();
+          return (bd.compareTo(d) > 0) ? bd : d;
+        }
+        if (dow != null) {
+          Duration d = dow.getPeriod();
+          return (bd.compareTo(d) > 0) ? bd : d;
+        }
+        if (tod != null) {
+          Duration d = tod.getPeriod();
+          return (bd.compareTo(d) > 0) ? bd : d;
+        }
       }
       return bd;
     }
@@ -3627,7 +3631,6 @@ public class SUTime  {
    *
    * @return An instant corresponding to the value, if it could be parsed.
    */
-  @SuppressWarnings("LoopStatementThatDoesntLoop")
   public static Optional<java.time.Instant> parseInstant(String value, Optional<ZoneId> timezone) {
     for (java.time.format.DateTimeFormatter formatter : DATE_TIME_FORMATS) {
       try {
@@ -4361,7 +4364,7 @@ public class SUTime  {
       if (d instanceof DurationWithMillis) {
         return new DurationWithMillis(this, base.toDuration().plus(((DurationWithMillis) d).base));
       } else if (d instanceof DurationWithFields) {
-        return ((DurationWithFields) d).add(this);
+        return d.add(this);
       } else {
         throw new UnsupportedOperationException("Unknown duration type in add: " + d.getClass());
       }
