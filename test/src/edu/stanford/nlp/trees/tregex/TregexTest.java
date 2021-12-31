@@ -1457,6 +1457,22 @@ public class TregexTest extends TestCase {
   }
 
   /**
+   * A user supplied an example of a negated disjunction which went into an infinite loop.
+   * Apparently no one had ever used a negated disjunction of tree structures before!
+   * <br>
+   * The problem was that the logic at the time tried to backtrack in
+   * the disjunction to find a better match, but that resulted in it
+   * going back and forth between the failed clause which was accepted
+   * and the successful clause which was rejected.  The problem being
+   * that the first half of the disjunction doesn't match, so the
+   * pattern is successful up to that point, but the second half does
+   * match, causing the pattern to be rejected and restarted.
+   */
+  public void testNegatedDisjunction() {
+    runTest("NP![</,/|.(JJ<else)]", "( (NP (NP (NN anyone)) (ADJP (JJ else))))", "(NP (NP (NN anyone)) (ADJP (JJ else)))");
+  }
+
+  /**
    * Stores an input and the expected output.  Obviously this is only
    * expected to work with a given pattern, but this is a bit more
    * convenient than calling the same pattern by hand over and over

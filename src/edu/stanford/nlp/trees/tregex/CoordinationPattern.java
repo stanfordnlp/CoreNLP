@@ -155,8 +155,8 @@ class CoordinationPattern extends TregexPattern {
               }
               return true;
             }
-          } else {
-            // oops, this didn't work.
+          } else if (!myNode.isNegated()) {
+            // oops, this didn't work - positive conjunction version
             children[currChild].resetChildIter();
             // go backwards to see if we can continue matching from an
             // earlier location.
@@ -164,6 +164,16 @@ class CoordinationPattern extends TregexPattern {
             if (currChild < 0) {
               return myNode.isOptional();
             }
+          } else {
+            // oops, this didn't work - negated disjunction version
+            // here we just fail
+            // any previous children had to fail to get to this point,
+            // which means those children have only the one correct state.
+            // backtracking to find other correct states is pointless
+            // and in fact causes an infinite loop of going backwards,
+            // then advancing back to this child and failing again
+            currChild = -1;
+            return myNode.isOptional();
           }
         }
       } else {
