@@ -552,7 +552,8 @@ public abstract class TregexPattern implements Serializable  {
    * <ul>
    * <li> {@code -C} suppresses printing of matches, so only the
    * number of matches is printed.
-   * <li> {@code -w} causes the whole of a tree that matches to be printed.
+   * <li> {@code -w} causes ONLY the whole of a tree that matches to be printed.
+   * <li> {@code -W} causes the whole of a tree that matches to be printed ALSO.
    * <li> {@code -f} causes the filename to be printed.
    * <li> {@code -i <filename>} causes the pattern to be matched to be read from {@code <filename>} rather than the command line.  Don't specify a pattern when this option is used.
    * <li> {@code -o} Specifies that each tree node can be reported only once as the root of a match (by default a node will
@@ -614,7 +615,8 @@ public abstract class TregexPattern implements Serializable  {
     String yieldOnly = "-t";
     String printAllTrees = "-T";
     String quietMode = "-C";
-    String wholeTreeMode = "-w";
+    String wholeTreeOnlyMode = "-w";
+    String wholeTreeAlsoMode = "-W";
     String filenameOption = "-f";
     String oneMatchPerRootNodeMode = "-o";
     String reportTreeNumbers = "-n";
@@ -638,7 +640,8 @@ public abstract class TregexPattern implements Serializable  {
     flagMap.put(macroOption, 1);
     flagMap.put(yieldOnly, 0);
     flagMap.put(quietMode, 0);
-    flagMap.put(wholeTreeMode, 0);
+    flagMap.put(wholeTreeOnlyMode, 0);
+    flagMap.put(wholeTreeAlsoMode, 0);
     flagMap.put(printAllTrees, 0);
     flagMap.put(filenameOption, 0);
     flagMap.put(oneMatchPerRootNodeMode, 0);
@@ -667,7 +670,7 @@ public abstract class TregexPattern implements Serializable  {
     }
 
     if (args.length < 1) {
-      errPW.println("Usage: java edu.stanford.nlp.trees.tregex.TregexPattern [-T] [-C] [-w] [-f] [-o] [-n] [-s] [-filter]  [-hf class] [-trf class] [-h handle]* [-e ext] pattern [filepath]");
+      errPW.println("Usage: java edu.stanford.nlp.trees.tregex.TregexPattern [-T] [-C] [-w] [-W] [-f] [-o] [-n] [-s] [-filter]  [-hf class] [-trf class] [-h handle]* [-e ext] pattern [filepath]");
       return;
     }
     String matchString = args[0];
@@ -711,8 +714,11 @@ public abstract class TregexPattern implements Serializable  {
       TRegexTreeVisitor.printSubtreeCode = true;
       TRegexTreeVisitor.printMatches = false;
     }
-    if (argsMap.containsKey(wholeTreeMode)) {
-      TRegexTreeVisitor.printWholeTree = true;
+    if (argsMap.containsKey(wholeTreeOnlyMode)) {
+      TRegexTreeVisitor.printWholeTreeOnly = true;
+    }
+    if (argsMap.containsKey(wholeTreeAlsoMode)) {
+      TRegexTreeVisitor.printWholeTreeAlso = true;
     }
     if (argsMap.containsKey(filenameOption)) {
       TRegexTreeVisitor.printFilename = true;
@@ -821,7 +827,8 @@ public abstract class TregexPattern implements Serializable  {
     static boolean printNonMatchingTrees = false;
     static boolean printSubtreeCode = false;
     static boolean printTree = false;
-    static boolean printWholeTree = false;
+    static boolean printWholeTreeOnly = false;
+    static boolean printWholeTreeAlso = false;
     static boolean printMatches = true;
     static boolean printFilename = false;
     static boolean oneMatchPerRootNode = false;
@@ -867,6 +874,7 @@ public abstract class TregexPattern implements Serializable  {
         return;
       }
       Tree lastMatchingRootNode = null;
+      boolean printedTree = false;
       while (match.find()) {
         if(oneMatchPerRootNode) {
           if(lastMatchingRootNode == match.getMatch())
@@ -893,9 +901,14 @@ public abstract class TregexPattern implements Serializable  {
           if (printTree) {
             pw.println("Found a full match:");
           }
-          if (printWholeTree) {
+          if (printWholeTreeOnly) {
             tp.printTree(t,pw);
           } else if (handles != null) {
+            if (printWholeTreeAlso && !printedTree && !printTree) {
+              pw.println("Matching tree:");
+              tp.printTree(t,pw);
+              printedTree = true;
+            }
             if (printTree) {
               pw.println("Here's the node you were interested in:");
             }
@@ -908,6 +921,11 @@ public abstract class TregexPattern implements Serializable  {
               }
             }
           } else {
+            if (printWholeTreeAlso && !printedTree && !printTree) {
+              pw.println("Matching tree:");
+              tp.printTree(t,pw);
+              printedTree = true;
+            }
             tp.printTree(match.getMatch(),pw);
           }
           // pw.println();  // TreePrint already puts a blank line in
