@@ -16,9 +16,10 @@ Below are interfaces and packages for running Stanford CoreNLP from other langua
 
 ### Clojure
 
-* [Clojure wrapper for CoreNLP](https://github.com/damienstanton/stanford-corenlp) by Cory Giles, Hans Engel, and Damien Stanton. Incomplete. Currently only a tagger and parser.
+* [DataLinguist](https://github.com/simongray/datalinguist) by Simon Gray wraps most of CoreNLP with an idiomatic Clojure API. As of 2022, this is the most complete and completely up-to-date Clojure API for CoreNLP.
+* [org.clojurenlp.core](https://github.com/clojurenlp/core) extended the earlier `https://github.com/damienstanton/stanford-corenlp`. It incorporates work by Cory Giles, Hans Engel, Damien Stanton, Andrew McCloud, Leon Talbot, and Marek Owsikowski. It covers tokenization, POS tagging, NER, and parsing, but is currently (2021) not very actively maintained.
 * [Clojure wrapper for CoreNLP](https://github.com/ngrunwald/stanford-nlp-tools)
-by Nils Gruenwald. Incomplete. Currently only wraps tagger and TokensRegex.
+by Nils Gruenwald. Very partial, currently only wrapping the tagger and TokensRegex, and not being developed.
 
 ### Docker
 
