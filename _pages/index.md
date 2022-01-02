@@ -21,7 +21,7 @@ homepage: true
 
 {: .no_toc }
 
-> **What's new:** The v4.3 releases (late 2021) added support for Italian and Hungarian.
+> [**What's new:** The v4.3 releases (late 2021) added support for Italian and Hungarian.](https://stanfordnlp.github.io/CoreNLP/history.html)
 
 ## About
 
