@@ -21,6 +21,8 @@ homepage: true
 
 {: .no_toc }
 
+> **What's new:** The v4.3 releases (late 2021) added support for Italian and Hungarian.
+
 ## About
 
 CoreNLP is your one stop shop for natural language processing in Java! CoreNLP enables users to derive linguistic annotations for text, including token
