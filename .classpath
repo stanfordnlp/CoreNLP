@@ -23,7 +23,7 @@
 	<classpathentry exported="true" kind="lib" path="log4j-api-2.15.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="log4j-jcl-2.15.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang3-3.1.jar" sourcepath="libsrc/commons-lang3-3.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/protobuf-java-3.11.4.jar" sourcepath="libsrc/protobuf-java-3.11.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/protobuf-java-3.19.2.jar" sourcepath="libsrc/protobuf-java-3.19.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javax.json.jar" sourcepath="libsrc/javax.json-api-1.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lucene-core-7.5.0.jar" sourcepath="libsrc/lucene-core-7.5.0-sources.jar"/>
