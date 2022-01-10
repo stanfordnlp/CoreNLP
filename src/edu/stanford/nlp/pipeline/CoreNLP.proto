@@ -731,3 +731,19 @@ message EvaluateParserResponse {
   required double              f1             = 1;
   optional double              kbestF1        = 2;
 }
+
+
+// A protobuf for running Tsurgeon operations on constituency trees
+message TsurgeonRequest {
+  message Operation {
+    required string                tregex         = 1;
+    repeated string                tsurgeon       = 2;
+  }
+  repeated Operation               operations     = 1;
+  repeated FlattenedParseTree      trees          = 2;
+}
+
+// The results of the Tsurgeon operation
+message TsurgeonResponse {
+  repeated FlattenedParseTree      trees          = 1;
+}
