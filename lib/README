@@ -22,7 +22,7 @@ can have version numbers in the name.  Example: colt1.0.3.jar.
 If you're adding a new .jar to the repository, please:
  - make sure the jar isn't already somewhere in the repository.
    If it is, try to converge on one version and promote placement to
-   more if it is used in multiple projects
+   core if it is used in both core and research
  - add the jar itself to the lib directory (with or without version number)
  - add its source zip with version number to the libsrc directory
  - check to make sure that the jar file doesn't have other libraries
@@ -33,7 +33,7 @@ If you're adding a new .jar to the repository, please:
    to its source -- this is essential to keep things working for 
    Eclipse/IntelliJ users!
  - also update this file with information about the jar
- - If it will be needed by releases of CoreNLP, also add it to the *2* pom files.
+ - If it will be needed by releases of CoreNLP, also add it to the *3* pom files.
  - If it will be needed by releases of CoreNLP, also document the
    licensing in LIBRARY-LICENSES.
 
@@ -399,13 +399,13 @@ LAST UPDATE BY: Spence Green
 -----------------------------------------------------------------
 protobuf.jar
 ORIGINAL JAR NAME: <compiled from source>
-VERSION: 3.11.4
-RELEASE DATE: Oct 2020
+VERSION: 3.19.2
+RELEASE DATE: Jan 2022
 SOURCE AVAILABLE: yes
 DESCRIPTION: Google's protocol buffer library
 URL: https://developers.google.com/protocol-buffers/
 USED BY: CoreMapProtos (and associated serializers)
-LAST UPDATE: 2021-04-06
+LAST UPDATE: 2022-01-10
 LAST UPDATE BY: John Bauer
 
 ----------------------------------------------------------------

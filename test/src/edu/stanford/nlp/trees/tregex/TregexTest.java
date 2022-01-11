@@ -961,6 +961,29 @@ public class TregexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  /** Test another variant of using links, this time with pattern partitions */
+  public void testBackref() {
+    TregexPattern tregex = TregexPattern.compile("__ <1 B=n <2 ~n");
+    Tree tree = treeFromString("(A (B w) (B x))");
+    TregexMatcher matcher = tregex.matcher(tree);
+    assertTrue(matcher.find());
+    Tree match = matcher.getMatch();
+    assertEquals("(A (B w) (B x))", match.toString());
+    Tree node = matcher.getNode("n");
+    assertEquals("(B w)", node.toString());
+    assertFalse(matcher.find());
+
+    tregex = TregexPattern.compile("__ < B=n <2 B=m : (=n !== =m)");
+    tree = treeFromString("(A (B w) (B x))");
+    matcher = tregex.matcher(tree);
+    assertTrue(matcher.find());
+    match = matcher.getMatch();
+    assertEquals("(A (B w) (B x))", match.toString());
+    node = matcher.getNode("n");
+    assertEquals("(B w)", node.toString());
+    assertFalse(matcher.find());
+  }
+
   public void testNonsense() {
     // can't name a variable twice
     try {

@@ -904,7 +904,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.Document}
    */
-  public  static final class Document extends
+  public static final class Document extends
       com.google.protobuf.GeneratedMessageV3.ExtendableMessage<
         Document> implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Document)
@@ -1187,6 +1187,7 @@ public final class CoreNLPProtos {
      * <code>required string text = 1;</code>
      * @return Whether the text field is set.
      */
+    @java.lang.Override
     public boolean hasText() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -1194,6 +1195,7 @@ public final class CoreNLPProtos {
      * <code>required string text = 1;</code>
      * @return The text.
      */
+    @java.lang.Override
     public java.lang.String getText() {
       java.lang.Object ref = text_;
       if (ref instanceof java.lang.String) {
@@ -1212,6 +1214,7 @@ public final class CoreNLPProtos {
      * <code>required string text = 1;</code>
      * @return The bytes for text.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTextBytes() {
       java.lang.Object ref = text_;
@@ -1231,12 +1234,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentence = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence> getSentenceList() {
       return sentence_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentence = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder> 
         getSentenceOrBuilderList() {
       return sentence_;
@@ -1244,18 +1249,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentence = 2;</code>
      */
+    @java.lang.Override
     public int getSentenceCount() {
       return sentence_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentence = 2;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence getSentence(int index) {
       return sentence_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Sentence sentence = 2;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder getSentenceOrBuilder(
         int index) {
       return sentence_.get(index);
@@ -1266,12 +1274,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.CorefChain corefChain = 3;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain> getCorefChainList() {
       return corefChain_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.CorefChain corefChain = 3;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChainOrBuilder> 
         getCorefChainOrBuilderList() {
       return corefChain_;
@@ -1279,18 +1289,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.CorefChain corefChain = 3;</code>
      */
+    @java.lang.Override
     public int getCorefChainCount() {
       return corefChain_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.CorefChain corefChain = 3;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain getCorefChain(int index) {
       return corefChain_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.CorefChain corefChain = 3;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChainOrBuilder getCorefChainOrBuilder(
         int index) {
       return corefChain_.get(index);
@@ -1302,6 +1315,7 @@ public final class CoreNLPProtos {
      * <code>optional string docID = 4;</code>
      * @return Whether the docID field is set.
      */
+    @java.lang.Override
     public boolean hasDocID() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -1309,6 +1323,7 @@ public final class CoreNLPProtos {
      * <code>optional string docID = 4;</code>
      * @return The docID.
      */
+    @java.lang.Override
     public java.lang.String getDocID() {
       java.lang.Object ref = docID_;
       if (ref instanceof java.lang.String) {
@@ -1327,6 +1342,7 @@ public final class CoreNLPProtos {
      * <code>optional string docID = 4;</code>
      * @return The bytes for docID.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDocIDBytes() {
       java.lang.Object ref = docID_;
@@ -1347,6 +1363,7 @@ public final class CoreNLPProtos {
      * <code>optional string docDate = 7;</code>
      * @return Whether the docDate field is set.
      */
+    @java.lang.Override
     public boolean hasDocDate() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -1354,6 +1371,7 @@ public final class CoreNLPProtos {
      * <code>optional string docDate = 7;</code>
      * @return The docDate.
      */
+    @java.lang.Override
     public java.lang.String getDocDate() {
       java.lang.Object ref = docDate_;
       if (ref instanceof java.lang.String) {
@@ -1372,6 +1390,7 @@ public final class CoreNLPProtos {
      * <code>optional string docDate = 7;</code>
      * @return The bytes for docDate.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDocDateBytes() {
       java.lang.Object ref = docDate_;
@@ -1392,6 +1411,7 @@ public final class CoreNLPProtos {
      * <code>optional uint64 calendar = 8;</code>
      * @return Whether the calendar field is set.
      */
+    @java.lang.Override
     public boolean hasCalendar() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -1399,6 +1419,7 @@ public final class CoreNLPProtos {
      * <code>optional uint64 calendar = 8;</code>
      * @return The calendar.
      */
+    @java.lang.Override
     public long getCalendar() {
       return calendar_;
     }
@@ -1414,6 +1435,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.Token sentencelessToken = 5;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token> getSentencelessTokenList() {
       return sentencelessToken_;
     }
@@ -1426,6 +1448,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.Token sentencelessToken = 5;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
         getSentencelessTokenOrBuilderList() {
       return sentencelessToken_;
@@ -1439,6 +1462,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.Token sentencelessToken = 5;</code>
      */
+    @java.lang.Override
     public int getSentencelessTokenCount() {
       return sentencelessToken_.size();
     }
@@ -1451,6 +1475,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.Token sentencelessToken = 5;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Token getSentencelessToken(int index) {
       return sentencelessToken_.get(index);
     }
@@ -1463,6 +1488,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.Token sentencelessToken = 5;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder getSentencelessTokenOrBuilder(
         int index) {
       return sentencelessToken_.get(index);
@@ -1473,12 +1499,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token character = 10;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token> getCharacterList() {
       return character_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token character = 10;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
         getCharacterOrBuilderList() {
       return character_;
@@ -1486,18 +1514,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token character = 10;</code>
      */
+    @java.lang.Override
     public int getCharacterCount() {
       return character_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token character = 10;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Token getCharacter(int index) {
       return character_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token character = 10;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder getCharacterOrBuilder(
         int index) {
       return character_.get(index);
@@ -1508,12 +1539,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Quote quote = 6;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Quote> getQuoteList() {
       return quote_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Quote quote = 6;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.QuoteOrBuilder> 
         getQuoteOrBuilderList() {
       return quote_;
@@ -1521,18 +1554,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Quote quote = 6;</code>
      */
+    @java.lang.Override
     public int getQuoteCount() {
       return quote_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Quote quote = 6;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Quote getQuote(int index) {
       return quote_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Quote quote = 6;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.QuoteOrBuilder getQuoteOrBuilder(
         int index) {
       return quote_.get(index);
@@ -1548,6 +1584,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.NERMention mentions = 9;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention> getMentionsList() {
       return mentions_;
     }
@@ -1559,6 +1596,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.NERMention mentions = 9;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.NERMentionOrBuilder> 
         getMentionsOrBuilderList() {
       return mentions_;
@@ -1571,6 +1609,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.NERMention mentions = 9;</code>
      */
+    @java.lang.Override
     public int getMentionsCount() {
       return mentions_.size();
     }
@@ -1582,6 +1621,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.NERMention mentions = 9;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention getMentions(int index) {
       return mentions_.get(index);
     }
@@ -1593,6 +1633,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.NERMention mentions = 9;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NERMentionOrBuilder getMentionsOrBuilder(
         int index) {
       return mentions_.get(index);
@@ -1608,6 +1649,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
      * @return Whether the hasEntityMentionsAnnotation field is set.
      */
+    @java.lang.Override
     public boolean hasHasEntityMentionsAnnotation() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -1619,6 +1661,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
      * @return The hasEntityMentionsAnnotation.
      */
+    @java.lang.Override
     public boolean getHasEntityMentionsAnnotation() {
       return hasEntityMentionsAnnotation_;
     }
@@ -1634,6 +1677,7 @@ public final class CoreNLPProtos {
      * <code>optional bool xmlDoc = 11;</code>
      * @return Whether the xmlDoc field is set.
      */
+    @java.lang.Override
     public boolean hasXmlDoc() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -1646,6 +1690,7 @@ public final class CoreNLPProtos {
      * <code>optional bool xmlDoc = 11;</code>
      * @return The xmlDoc.
      */
+    @java.lang.Override
     public boolean getXmlDoc() {
       return xmlDoc_;
     }
@@ -1655,12 +1700,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Section sections = 12;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Section> getSectionsList() {
       return sections_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Section sections = 12;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SectionOrBuilder> 
         getSectionsOrBuilderList() {
       return sections_;
@@ -1668,18 +1715,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Section sections = 12;</code>
      */
+    @java.lang.Override
     public int getSectionsCount() {
       return sections_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Section sections = 12;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Section getSections(int index) {
       return sections_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Section sections = 12;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SectionOrBuilder getSectionsOrBuilder(
         int index) {
       return sections_.get(index);
@@ -1694,6 +1744,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.Mention mentionsForCoref = 14;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Mention> getMentionsForCorefList() {
       return mentionsForCoref_;
     }
@@ -1704,6 +1755,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.Mention mentionsForCoref = 14;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.MentionOrBuilder> 
         getMentionsForCorefOrBuilderList() {
       return mentionsForCoref_;
@@ -1715,6 +1767,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.Mention mentionsForCoref = 14;</code>
      */
+    @java.lang.Override
     public int getMentionsForCorefCount() {
       return mentionsForCoref_.size();
     }
@@ -1725,6 +1778,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.Mention mentionsForCoref = 14;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Mention getMentionsForCoref(int index) {
       return mentionsForCoref_.get(index);
     }
@@ -1735,6 +1789,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.Mention mentionsForCoref = 14;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.MentionOrBuilder getMentionsForCorefOrBuilder(
         int index) {
       return mentionsForCoref_.get(index);
@@ -1746,6 +1801,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasCorefMentionAnnotation = 15;</code>
      * @return Whether the hasCorefMentionAnnotation field is set.
      */
+    @java.lang.Override
     public boolean hasHasCorefMentionAnnotation() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -1753,6 +1809,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasCorefMentionAnnotation = 15;</code>
      * @return The hasCorefMentionAnnotation.
      */
+    @java.lang.Override
     public boolean getHasCorefMentionAnnotation() {
       return hasCorefMentionAnnotation_;
     }
@@ -1763,6 +1820,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasCorefAnnotation = 16;</code>
      * @return Whether the hasCorefAnnotation field is set.
      */
+    @java.lang.Override
     public boolean hasHasCorefAnnotation() {
       return ((bitField0_ & 0x00000080) != 0);
     }
@@ -1770,6 +1828,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasCorefAnnotation = 16;</code>
      * @return The hasCorefAnnotation.
      */
+    @java.lang.Override
     public boolean getHasCorefAnnotation() {
       return hasCorefAnnotation_;
     }
@@ -1780,6 +1839,7 @@ public final class CoreNLPProtos {
      * <code>repeated int32 corefMentionToEntityMentionMappings = 17;</code>
      * @return A list containing the corefMentionToEntityMentionMappings.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getCorefMentionToEntityMentionMappingsList() {
       return corefMentionToEntityMentionMappings_;
@@ -1806,6 +1866,7 @@ public final class CoreNLPProtos {
      * <code>repeated int32 entityMentionToCorefMentionMappings = 18;</code>
      * @return A list containing the entityMentionToCorefMentionMappings.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getEntityMentionToCorefMentionMappingsList() {
       return entityMentionToCorefMentionMappings_;
@@ -3702,6 +3763,7 @@ public final class CoreNLPProtos {
        * <code>optional uint64 calendar = 8;</code>
        * @return Whether the calendar field is set.
        */
+      @java.lang.Override
       public boolean hasCalendar() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -3709,6 +3771,7 @@ public final class CoreNLPProtos {
        * <code>optional uint64 calendar = 8;</code>
        * @return The calendar.
        */
+      @java.lang.Override
       public long getCalendar() {
         return calendar_;
       }
@@ -4901,6 +4964,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
        * @return Whether the hasEntityMentionsAnnotation field is set.
        */
+      @java.lang.Override
       public boolean hasHasEntityMentionsAnnotation() {
         return ((bitField0_ & 0x00000400) != 0);
       }
@@ -4912,6 +4976,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasEntityMentionsAnnotation = 13;</code>
        * @return The hasEntityMentionsAnnotation.
        */
+      @java.lang.Override
       public boolean getHasEntityMentionsAnnotation() {
         return hasEntityMentionsAnnotation_;
       }
@@ -4955,6 +5020,7 @@ public final class CoreNLPProtos {
        * <code>optional bool xmlDoc = 11;</code>
        * @return Whether the xmlDoc field is set.
        */
+      @java.lang.Override
       public boolean hasXmlDoc() {
         return ((bitField0_ & 0x00000800) != 0);
       }
@@ -4967,6 +5033,7 @@ public final class CoreNLPProtos {
        * <code>optional bool xmlDoc = 11;</code>
        * @return The xmlDoc.
        */
+      @java.lang.Override
       public boolean getXmlDoc() {
         return xmlDoc_;
       }
@@ -5559,6 +5626,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasCorefMentionAnnotation = 15;</code>
        * @return Whether the hasCorefMentionAnnotation field is set.
        */
+      @java.lang.Override
       public boolean hasHasCorefMentionAnnotation() {
         return ((bitField0_ & 0x00004000) != 0);
       }
@@ -5566,6 +5634,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasCorefMentionAnnotation = 15;</code>
        * @return The hasCorefMentionAnnotation.
        */
+      @java.lang.Override
       public boolean getHasCorefMentionAnnotation() {
         return hasCorefMentionAnnotation_;
       }
@@ -5596,6 +5665,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasCorefAnnotation = 16;</code>
        * @return Whether the hasCorefAnnotation field is set.
        */
+      @java.lang.Override
       public boolean hasHasCorefAnnotation() {
         return ((bitField0_ & 0x00008000) != 0);
       }
@@ -5603,6 +5673,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasCorefAnnotation = 16;</code>
        * @return The hasCorefAnnotation.
        */
+      @java.lang.Override
       public boolean getHasCorefAnnotation() {
         return hasCorefAnnotation_;
       }
@@ -6848,7 +6919,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.Sentence}
    */
-  public  static final class Sentence extends
+  public static final class Sentence extends
       com.google.protobuf.GeneratedMessageV3.ExtendableMessage<
         Sentence> implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Sentence)
@@ -7353,12 +7424,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token token = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token> getTokenList() {
       return token_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token token = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
         getTokenOrBuilderList() {
       return token_;
@@ -7366,18 +7439,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token token = 1;</code>
      */
+    @java.lang.Override
     public int getTokenCount() {
       return token_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token token = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Token getToken(int index) {
       return token_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token token = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder getTokenOrBuilder(
         int index) {
       return token_.get(index);
@@ -7389,6 +7465,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 tokenOffsetBegin = 2;</code>
      * @return Whether the tokenOffsetBegin field is set.
      */
+    @java.lang.Override
     public boolean hasTokenOffsetBegin() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -7396,6 +7473,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 tokenOffsetBegin = 2;</code>
      * @return The tokenOffsetBegin.
      */
+    @java.lang.Override
     public int getTokenOffsetBegin() {
       return tokenOffsetBegin_;
     }
@@ -7406,6 +7484,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 tokenOffsetEnd = 3;</code>
      * @return Whether the tokenOffsetEnd field is set.
      */
+    @java.lang.Override
     public boolean hasTokenOffsetEnd() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -7413,6 +7492,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 tokenOffsetEnd = 3;</code>
      * @return The tokenOffsetEnd.
      */
+    @java.lang.Override
     public int getTokenOffsetEnd() {
       return tokenOffsetEnd_;
     }
@@ -7423,6 +7503,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sentenceIndex = 4;</code>
      * @return Whether the sentenceIndex field is set.
      */
+    @java.lang.Override
     public boolean hasSentenceIndex() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -7430,6 +7511,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sentenceIndex = 4;</code>
      * @return The sentenceIndex.
      */
+    @java.lang.Override
     public int getSentenceIndex() {
       return sentenceIndex_;
     }
@@ -7440,6 +7522,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 characterOffsetBegin = 5;</code>
      * @return Whether the characterOffsetBegin field is set.
      */
+    @java.lang.Override
     public boolean hasCharacterOffsetBegin() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -7447,6 +7530,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 characterOffsetBegin = 5;</code>
      * @return The characterOffsetBegin.
      */
+    @java.lang.Override
     public int getCharacterOffsetBegin() {
       return characterOffsetBegin_;
     }
@@ -7457,6 +7541,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 characterOffsetEnd = 6;</code>
      * @return Whether the characterOffsetEnd field is set.
      */
+    @java.lang.Override
     public boolean hasCharacterOffsetEnd() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -7464,6 +7549,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 characterOffsetEnd = 6;</code>
      * @return The characterOffsetEnd.
      */
+    @java.lang.Override
     public int getCharacterOffsetEnd() {
       return characterOffsetEnd_;
     }
@@ -7474,6 +7560,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree parseTree = 7;</code>
      * @return Whether the parseTree field is set.
      */
+    @java.lang.Override
     public boolean hasParseTree() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -7481,12 +7568,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree parseTree = 7;</code>
      * @return The parseTree.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getParseTree() {
       return parseTree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.getDefaultInstance() : parseTree_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree parseTree = 7;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder getParseTreeOrBuilder() {
       return parseTree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.getDefaultInstance() : parseTree_;
     }
@@ -7497,6 +7586,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree binarizedParseTree = 31;</code>
      * @return Whether the binarizedParseTree field is set.
      */
+    @java.lang.Override
     public boolean hasBinarizedParseTree() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -7504,12 +7594,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree binarizedParseTree = 31;</code>
      * @return The binarizedParseTree.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getBinarizedParseTree() {
       return binarizedParseTree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.getDefaultInstance() : binarizedParseTree_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree binarizedParseTree = 31;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder getBinarizedParseTreeOrBuilder() {
       return binarizedParseTree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.getDefaultInstance() : binarizedParseTree_;
     }
@@ -7520,6 +7612,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree annotatedParseTree = 32;</code>
      * @return Whether the annotatedParseTree field is set.
      */
+    @java.lang.Override
     public boolean hasAnnotatedParseTree() {
       return ((bitField0_ & 0x00000080) != 0);
     }
@@ -7527,12 +7620,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree annotatedParseTree = 32;</code>
      * @return The annotatedParseTree.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getAnnotatedParseTree() {
       return annotatedParseTree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.getDefaultInstance() : annotatedParseTree_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.ParseTree annotatedParseTree = 32;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder getAnnotatedParseTreeOrBuilder() {
       return annotatedParseTree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.getDefaultInstance() : annotatedParseTree_;
     }
@@ -7543,6 +7638,7 @@ public final class CoreNLPProtos {
      * <code>optional string sentiment = 33;</code>
      * @return Whether the sentiment field is set.
      */
+    @java.lang.Override
     public boolean hasSentiment() {
       return ((bitField0_ & 0x00000100) != 0);
     }
@@ -7550,6 +7646,7 @@ public final class CoreNLPProtos {
      * <code>optional string sentiment = 33;</code>
      * @return The sentiment.
      */
+    @java.lang.Override
     public java.lang.String getSentiment() {
       java.lang.Object ref = sentiment_;
       if (ref instanceof java.lang.String) {
@@ -7568,6 +7665,7 @@ public final class CoreNLPProtos {
      * <code>optional string sentiment = 33;</code>
      * @return The bytes for sentiment.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSentimentBytes() {
       java.lang.Object ref = sentiment_;
@@ -7587,12 +7685,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.ParseTree kBestParseTrees = 34;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree> getKBestParseTreesList() {
       return kBestParseTrees_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.ParseTree kBestParseTrees = 34;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder> 
         getKBestParseTreesOrBuilderList() {
       return kBestParseTrees_;
@@ -7600,18 +7700,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.ParseTree kBestParseTrees = 34;</code>
      */
+    @java.lang.Override
     public int getKBestParseTreesCount() {
       return kBestParseTrees_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.ParseTree kBestParseTrees = 34;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getKBestParseTrees(int index) {
       return kBestParseTrees_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.ParseTree kBestParseTrees = 34;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder getKBestParseTreesOrBuilder(
         int index) {
       return kBestParseTrees_.get(index);
@@ -7623,6 +7726,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph basicDependencies = 8;</code>
      * @return Whether the basicDependencies field is set.
      */
+    @java.lang.Override
     public boolean hasBasicDependencies() {
       return ((bitField0_ & 0x00000200) != 0);
     }
@@ -7630,12 +7734,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph basicDependencies = 8;</code>
      * @return The basicDependencies.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getBasicDependencies() {
       return basicDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : basicDependencies_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph basicDependencies = 8;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getBasicDependenciesOrBuilder() {
       return basicDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : basicDependencies_;
     }
@@ -7646,6 +7752,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedDependencies = 9;</code>
      * @return Whether the collapsedDependencies field is set.
      */
+    @java.lang.Override
     public boolean hasCollapsedDependencies() {
       return ((bitField0_ & 0x00000400) != 0);
     }
@@ -7653,12 +7760,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedDependencies = 9;</code>
      * @return The collapsedDependencies.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getCollapsedDependencies() {
       return collapsedDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : collapsedDependencies_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedDependencies = 9;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getCollapsedDependenciesOrBuilder() {
       return collapsedDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : collapsedDependencies_;
     }
@@ -7669,6 +7778,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedCCProcessedDependencies = 10;</code>
      * @return Whether the collapsedCCProcessedDependencies field is set.
      */
+    @java.lang.Override
     public boolean hasCollapsedCCProcessedDependencies() {
       return ((bitField0_ & 0x00000800) != 0);
     }
@@ -7676,12 +7786,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedCCProcessedDependencies = 10;</code>
      * @return The collapsedCCProcessedDependencies.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getCollapsedCCProcessedDependencies() {
       return collapsedCCProcessedDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : collapsedCCProcessedDependencies_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph collapsedCCProcessedDependencies = 10;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getCollapsedCCProcessedDependenciesOrBuilder() {
       return collapsedCCProcessedDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : collapsedCCProcessedDependencies_;
     }
@@ -7692,6 +7804,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph alternativeDependencies = 13;</code>
      * @return Whether the alternativeDependencies field is set.
      */
+    @java.lang.Override
     public boolean hasAlternativeDependencies() {
       return ((bitField0_ & 0x00001000) != 0);
     }
@@ -7699,12 +7812,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph alternativeDependencies = 13;</code>
      * @return The alternativeDependencies.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getAlternativeDependencies() {
       return alternativeDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : alternativeDependencies_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph alternativeDependencies = 13;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getAlternativeDependenciesOrBuilder() {
       return alternativeDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : alternativeDependencies_;
     }
@@ -7718,6 +7833,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> getOpenieTripleList() {
       return openieTriple_;
     }
@@ -7728,6 +7844,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> 
         getOpenieTripleOrBuilderList() {
       return openieTriple_;
@@ -7739,6 +7856,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      */
+    @java.lang.Override
     public int getOpenieTripleCount() {
       return openieTriple_.size();
     }
@@ -7749,6 +7867,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple getOpenieTriple(int index) {
       return openieTriple_.get(index);
     }
@@ -7759,6 +7878,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder getOpenieTripleOrBuilder(
         int index) {
       return openieTriple_.get(index);
@@ -7773,6 +7893,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> getKbpTripleList() {
       return kbpTriple_;
     }
@@ -7783,6 +7904,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> 
         getKbpTripleOrBuilderList() {
       return kbpTriple_;
@@ -7794,6 +7916,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
      */
+    @java.lang.Override
     public int getKbpTripleCount() {
       return kbpTriple_.size();
     }
@@ -7804,6 +7927,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple getKbpTriple(int index) {
       return kbpTriple_.get(index);
     }
@@ -7814,6 +7938,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder getKbpTripleOrBuilder(
         int index) {
       return kbpTriple_.get(index);
@@ -7828,6 +7953,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.SentenceFragment entailedSentence = 15;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment> getEntailedSentenceList() {
       return entailedSentence_;
     }
@@ -7838,6 +7964,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.SentenceFragment entailedSentence = 15;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragmentOrBuilder> 
         getEntailedSentenceOrBuilderList() {
       return entailedSentence_;
@@ -7849,6 +7976,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.SentenceFragment entailedSentence = 15;</code>
      */
+    @java.lang.Override
     public int getEntailedSentenceCount() {
       return entailedSentence_.size();
     }
@@ -7859,6 +7987,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.SentenceFragment entailedSentence = 15;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment getEntailedSentence(int index) {
       return entailedSentence_.get(index);
     }
@@ -7869,6 +7998,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.SentenceFragment entailedSentence = 15;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragmentOrBuilder getEntailedSentenceOrBuilder(
         int index) {
       return entailedSentence_.get(index);
@@ -7883,6 +8013,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.SentenceFragment entailedClause = 35;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment> getEntailedClauseList() {
       return entailedClause_;
     }
@@ -7893,6 +8024,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.SentenceFragment entailedClause = 35;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragmentOrBuilder> 
         getEntailedClauseOrBuilderList() {
       return entailedClause_;
@@ -7904,6 +8036,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.SentenceFragment entailedClause = 35;</code>
      */
+    @java.lang.Override
     public int getEntailedClauseCount() {
       return entailedClause_.size();
     }
@@ -7914,6 +8047,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.SentenceFragment entailedClause = 35;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment getEntailedClause(int index) {
       return entailedClause_.get(index);
     }
@@ -7924,6 +8058,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.SentenceFragment entailedClause = 35;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragmentOrBuilder getEntailedClauseOrBuilder(
         int index) {
       return entailedClause_.get(index);
@@ -7935,6 +8070,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedDependencies = 17;</code>
      * @return Whether the enhancedDependencies field is set.
      */
+    @java.lang.Override
     public boolean hasEnhancedDependencies() {
       return ((bitField0_ & 0x00002000) != 0);
     }
@@ -7942,12 +8078,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedDependencies = 17;</code>
      * @return The enhancedDependencies.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedDependencies() {
       return enhancedDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : enhancedDependencies_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedDependencies = 17;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getEnhancedDependenciesOrBuilder() {
       return enhancedDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : enhancedDependencies_;
     }
@@ -7958,6 +8096,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedPlusPlusDependencies = 18;</code>
      * @return Whether the enhancedPlusPlusDependencies field is set.
      */
+    @java.lang.Override
     public boolean hasEnhancedPlusPlusDependencies() {
       return ((bitField0_ & 0x00004000) != 0);
     }
@@ -7965,12 +8104,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedPlusPlusDependencies = 18;</code>
      * @return The enhancedPlusPlusDependencies.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedPlusPlusDependencies() {
       return enhancedPlusPlusDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : enhancedPlusPlusDependencies_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedPlusPlusDependencies = 18;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getEnhancedPlusPlusDependenciesOrBuilder() {
       return enhancedPlusPlusDependencies_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : enhancedPlusPlusDependencies_;
     }
@@ -7980,12 +8121,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token character = 19;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token> getCharacterList() {
       return character_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token character = 19;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
         getCharacterOrBuilderList() {
       return character_;
@@ -7993,18 +8136,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token character = 19;</code>
      */
+    @java.lang.Override
     public int getCharacterCount() {
       return character_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token character = 19;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Token getCharacter(int index) {
       return character_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Token character = 19;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder getCharacterOrBuilder(
         int index) {
       return character_.get(index);
@@ -8016,6 +8162,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 paragraph = 11;</code>
      * @return Whether the paragraph field is set.
      */
+    @java.lang.Override
     public boolean hasParagraph() {
       return ((bitField0_ & 0x00008000) != 0);
     }
@@ -8023,6 +8170,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 paragraph = 11;</code>
      * @return The paragraph.
      */
+    @java.lang.Override
     public int getParagraph() {
       return paragraph_;
     }
@@ -8037,6 +8185,7 @@ public final class CoreNLPProtos {
      * <code>optional string text = 12;</code>
      * @return Whether the text field is set.
      */
+    @java.lang.Override
     public boolean hasText() {
       return ((bitField0_ & 0x00010000) != 0);
     }
@@ -8048,6 +8197,7 @@ public final class CoreNLPProtos {
      * <code>optional string text = 12;</code>
      * @return The text.
      */
+    @java.lang.Override
     public java.lang.String getText() {
       java.lang.Object ref = text_;
       if (ref instanceof java.lang.String) {
@@ -8070,6 +8220,7 @@ public final class CoreNLPProtos {
      * <code>optional string text = 12;</code>
      * @return The bytes for text.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTextBytes() {
       java.lang.Object ref = text_;
@@ -8090,6 +8241,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 lineNumber = 20;</code>
      * @return Whether the lineNumber field is set.
      */
+    @java.lang.Override
     public boolean hasLineNumber() {
       return ((bitField0_ & 0x00020000) != 0);
     }
@@ -8097,6 +8249,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 lineNumber = 20;</code>
      * @return The lineNumber.
      */
+    @java.lang.Override
     public int getLineNumber() {
       return lineNumber_;
     }
@@ -8111,6 +8264,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasRelationAnnotations = 51;</code>
      * @return Whether the hasRelationAnnotations field is set.
      */
+    @java.lang.Override
     public boolean hasHasRelationAnnotations() {
       return ((bitField0_ & 0x00040000) != 0);
     }
@@ -8122,6 +8276,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasRelationAnnotations = 51;</code>
      * @return The hasRelationAnnotations.
      */
+    @java.lang.Override
     public boolean getHasRelationAnnotations() {
       return hasRelationAnnotations_;
     }
@@ -8131,12 +8286,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Entity entity = 52;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity> getEntityList() {
       return entity_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Entity entity = 52;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.EntityOrBuilder> 
         getEntityOrBuilderList() {
       return entity_;
@@ -8144,18 +8301,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Entity entity = 52;</code>
      */
+    @java.lang.Override
     public int getEntityCount() {
       return entity_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Entity entity = 52;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Entity getEntity(int index) {
       return entity_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Entity entity = 52;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.EntityOrBuilder getEntityOrBuilder(
         int index) {
       return entity_.get(index);
@@ -8166,12 +8326,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Relation relation = 53;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Relation> getRelationList() {
       return relation_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Relation relation = 53;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationOrBuilder> 
         getRelationOrBuilderList() {
       return relation_;
@@ -8179,18 +8341,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Relation relation = 53;</code>
      */
+    @java.lang.Override
     public int getRelationCount() {
       return relation_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Relation relation = 53;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Relation getRelation(int index) {
       return relation_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Relation relation = 53;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationOrBuilder getRelationOrBuilder(
         int index) {
       return relation_.get(index);
@@ -8202,6 +8367,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
      * @return Whether the hasNumerizedTokensAnnotation field is set.
      */
+    @java.lang.Override
     public boolean hasHasNumerizedTokensAnnotation() {
       return ((bitField0_ & 0x00080000) != 0);
     }
@@ -8209,6 +8375,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
      * @return The hasNumerizedTokensAnnotation.
      */
+    @java.lang.Override
     public boolean getHasNumerizedTokensAnnotation() {
       return hasNumerizedTokensAnnotation_;
     }
@@ -8218,12 +8385,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.NERMention mentions = 55;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention> getMentionsList() {
       return mentions_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.NERMention mentions = 55;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.NERMentionOrBuilder> 
         getMentionsOrBuilderList() {
       return mentions_;
@@ -8231,18 +8400,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.NERMention mentions = 55;</code>
      */
+    @java.lang.Override
     public int getMentionsCount() {
       return mentions_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.NERMention mentions = 55;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention getMentions(int index) {
       return mentions_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.NERMention mentions = 55;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.NERMentionOrBuilder getMentionsOrBuilder(
         int index) {
       return mentions_.get(index);
@@ -8253,12 +8425,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Mention mentionsForCoref = 56;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Mention> getMentionsForCorefList() {
       return mentionsForCoref_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Mention mentionsForCoref = 56;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.MentionOrBuilder> 
         getMentionsForCorefOrBuilderList() {
       return mentionsForCoref_;
@@ -8266,18 +8440,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Mention mentionsForCoref = 56;</code>
      */
+    @java.lang.Override
     public int getMentionsForCorefCount() {
       return mentionsForCoref_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Mention mentionsForCoref = 56;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Mention getMentionsForCoref(int index) {
       return mentionsForCoref_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Mention mentionsForCoref = 56;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.MentionOrBuilder getMentionsForCorefOrBuilder(
         int index) {
       return mentionsForCoref_.get(index);
@@ -8289,6 +8466,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
      * @return Whether the hasCorefMentionsAnnotation field is set.
      */
+    @java.lang.Override
     public boolean hasHasCorefMentionsAnnotation() {
       return ((bitField0_ & 0x00100000) != 0);
     }
@@ -8296,6 +8474,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
      * @return The hasCorefMentionsAnnotation.
      */
+    @java.lang.Override
     public boolean getHasCorefMentionsAnnotation() {
       return hasCorefMentionsAnnotation_;
     }
@@ -8310,6 +8489,7 @@ public final class CoreNLPProtos {
      * <code>optional string sentenceID = 58;</code>
      * @return Whether the sentenceID field is set.
      */
+    @java.lang.Override
     public boolean hasSentenceID() {
       return ((bitField0_ & 0x00200000) != 0);
     }
@@ -8321,6 +8501,7 @@ public final class CoreNLPProtos {
      * <code>optional string sentenceID = 58;</code>
      * @return The sentenceID.
      */
+    @java.lang.Override
     public java.lang.String getSentenceID() {
       java.lang.Object ref = sentenceID_;
       if (ref instanceof java.lang.String) {
@@ -8343,6 +8524,7 @@ public final class CoreNLPProtos {
      * <code>optional string sentenceID = 58;</code>
      * @return The bytes for sentenceID.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSentenceIDBytes() {
       java.lang.Object ref = sentenceID_;
@@ -8367,6 +8549,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionDate = 59;</code>
      * @return Whether the sectionDate field is set.
      */
+    @java.lang.Override
     public boolean hasSectionDate() {
       return ((bitField0_ & 0x00400000) != 0);
     }
@@ -8378,6 +8561,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionDate = 59;</code>
      * @return The sectionDate.
      */
+    @java.lang.Override
     public java.lang.String getSectionDate() {
       java.lang.Object ref = sectionDate_;
       if (ref instanceof java.lang.String) {
@@ -8400,6 +8584,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionDate = 59;</code>
      * @return The bytes for sectionDate.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSectionDateBytes() {
       java.lang.Object ref = sectionDate_;
@@ -8424,6 +8609,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sectionIndex = 60;</code>
      * @return Whether the sectionIndex field is set.
      */
+    @java.lang.Override
     public boolean hasSectionIndex() {
       return ((bitField0_ & 0x00800000) != 0);
     }
@@ -8435,6 +8621,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sectionIndex = 60;</code>
      * @return The sectionIndex.
      */
+    @java.lang.Override
     public int getSectionIndex() {
       return sectionIndex_;
     }
@@ -8449,6 +8636,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionName = 61;</code>
      * @return Whether the sectionName field is set.
      */
+    @java.lang.Override
     public boolean hasSectionName() {
       return ((bitField0_ & 0x01000000) != 0);
     }
@@ -8460,6 +8648,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionName = 61;</code>
      * @return The sectionName.
      */
+    @java.lang.Override
     public java.lang.String getSectionName() {
       java.lang.Object ref = sectionName_;
       if (ref instanceof java.lang.String) {
@@ -8482,6 +8671,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionName = 61;</code>
      * @return The bytes for sectionName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSectionNameBytes() {
       java.lang.Object ref = sectionName_;
@@ -8506,6 +8696,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionAuthor = 62;</code>
      * @return Whether the sectionAuthor field is set.
      */
+    @java.lang.Override
     public boolean hasSectionAuthor() {
       return ((bitField0_ & 0x02000000) != 0);
     }
@@ -8517,6 +8708,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionAuthor = 62;</code>
      * @return The sectionAuthor.
      */
+    @java.lang.Override
     public java.lang.String getSectionAuthor() {
       java.lang.Object ref = sectionAuthor_;
       if (ref instanceof java.lang.String) {
@@ -8539,6 +8731,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionAuthor = 62;</code>
      * @return The bytes for sectionAuthor.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSectionAuthorBytes() {
       java.lang.Object ref = sectionAuthor_;
@@ -8563,6 +8756,7 @@ public final class CoreNLPProtos {
      * <code>optional string docID = 63;</code>
      * @return Whether the docID field is set.
      */
+    @java.lang.Override
     public boolean hasDocID() {
       return ((bitField0_ & 0x04000000) != 0);
     }
@@ -8574,6 +8768,7 @@ public final class CoreNLPProtos {
      * <code>optional string docID = 63;</code>
      * @return The docID.
      */
+    @java.lang.Override
     public java.lang.String getDocID() {
       java.lang.Object ref = docID_;
       if (ref instanceof java.lang.String) {
@@ -8596,6 +8791,7 @@ public final class CoreNLPProtos {
      * <code>optional string docID = 63;</code>
      * @return The bytes for docID.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDocIDBytes() {
       java.lang.Object ref = docID_;
@@ -8620,6 +8816,7 @@ public final class CoreNLPProtos {
      * <code>optional bool sectionQuoted = 64;</code>
      * @return Whether the sectionQuoted field is set.
      */
+    @java.lang.Override
     public boolean hasSectionQuoted() {
       return ((bitField0_ & 0x08000000) != 0);
     }
@@ -8631,6 +8828,7 @@ public final class CoreNLPProtos {
      * <code>optional bool sectionQuoted = 64;</code>
      * @return The sectionQuoted.
      */
+    @java.lang.Override
     public boolean getSectionQuoted() {
       return sectionQuoted_;
     }
@@ -8645,6 +8843,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
      * @return Whether the hasEntityMentionsAnnotation field is set.
      */
+    @java.lang.Override
     public boolean hasHasEntityMentionsAnnotation() {
       return ((bitField0_ & 0x10000000) != 0);
     }
@@ -8656,6 +8855,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
      * @return The hasEntityMentionsAnnotation.
      */
+    @java.lang.Override
     public boolean getHasEntityMentionsAnnotation() {
       return hasEntityMentionsAnnotation_;
     }
@@ -8670,6 +8870,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
      * @return Whether the hasKBPTriplesAnnotation field is set.
      */
+    @java.lang.Override
     public boolean hasHasKBPTriplesAnnotation() {
       return ((bitField0_ & 0x20000000) != 0);
     }
@@ -8681,6 +8882,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
      * @return The hasKBPTriplesAnnotation.
      */
+    @java.lang.Override
     public boolean getHasKBPTriplesAnnotation() {
       return hasKBPTriplesAnnotation_;
     }
@@ -8695,6 +8897,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
      * @return Whether the hasOpenieTriplesAnnotation field is set.
      */
+    @java.lang.Override
     public boolean hasHasOpenieTriplesAnnotation() {
       return ((bitField0_ & 0x40000000) != 0);
     }
@@ -8706,6 +8909,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
      * @return The hasOpenieTriplesAnnotation.
      */
+    @java.lang.Override
     public boolean getHasOpenieTriplesAnnotation() {
       return hasOpenieTriplesAnnotation_;
     }
@@ -8720,6 +8924,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 chapterIndex = 66;</code>
      * @return Whether the chapterIndex field is set.
      */
+    @java.lang.Override
     public boolean hasChapterIndex() {
       return ((bitField0_ & 0x80000000) != 0);
     }
@@ -8731,6 +8936,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 chapterIndex = 66;</code>
      * @return The chapterIndex.
      */
+    @java.lang.Override
     public int getChapterIndex() {
       return chapterIndex_;
     }
@@ -8741,6 +8947,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 paragraphIndex = 67;</code>
      * @return Whether the paragraphIndex field is set.
      */
+    @java.lang.Override
     public boolean hasParagraphIndex() {
       return ((bitField1_ & 0x00000001) != 0);
     }
@@ -8748,6 +8955,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 paragraphIndex = 67;</code>
      * @return The paragraphIndex.
      */
+    @java.lang.Override
     public int getParagraphIndex() {
       return paragraphIndex_;
     }
@@ -8762,6 +8970,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Sentence enhancedSentence = 70;</code>
      * @return Whether the enhancedSentence field is set.
      */
+    @java.lang.Override
     public boolean hasEnhancedSentence() {
       return ((bitField1_ & 0x00000002) != 0);
     }
@@ -8773,6 +8982,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Sentence enhancedSentence = 70;</code>
      * @return The enhancedSentence.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence getEnhancedSentence() {
       return enhancedSentence_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.getDefaultInstance() : enhancedSentence_;
     }
@@ -8783,6 +8993,7 @@ public final class CoreNLPProtos {
      *
      * <code>optional .edu.stanford.nlp.pipeline.Sentence enhancedSentence = 70;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder getEnhancedSentenceOrBuilder() {
       return enhancedSentence_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.getDefaultInstance() : enhancedSentence_;
     }
@@ -8797,6 +9008,7 @@ public final class CoreNLPProtos {
      * <code>optional string speaker = 71;</code>
      * @return Whether the speaker field is set.
      */
+    @java.lang.Override
     public boolean hasSpeaker() {
       return ((bitField1_ & 0x00000004) != 0);
     }
@@ -8808,6 +9020,7 @@ public final class CoreNLPProtos {
      * <code>optional string speaker = 71;</code>
      * @return The speaker.
      */
+    @java.lang.Override
     public java.lang.String getSpeaker() {
       java.lang.Object ref = speaker_;
       if (ref instanceof java.lang.String) {
@@ -8830,6 +9043,7 @@ public final class CoreNLPProtos {
      * <code>optional string speaker = 71;</code>
      * @return The bytes for speaker.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSpeakerBytes() {
       java.lang.Object ref = speaker_;
@@ -8854,6 +9068,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerType = 72;</code>
      * @return Whether the speakerType field is set.
      */
+    @java.lang.Override
     public boolean hasSpeakerType() {
       return ((bitField1_ & 0x00000008) != 0);
     }
@@ -8865,6 +9080,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerType = 72;</code>
      * @return The speakerType.
      */
+    @java.lang.Override
     public java.lang.String getSpeakerType() {
       java.lang.Object ref = speakerType_;
       if (ref instanceof java.lang.String) {
@@ -8887,6 +9103,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerType = 72;</code>
      * @return The bytes for speakerType.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSpeakerTypeBytes() {
       java.lang.Object ref = speakerType_;
@@ -11244,6 +11461,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 tokenOffsetBegin = 2;</code>
        * @return Whether the tokenOffsetBegin field is set.
        */
+      @java.lang.Override
       public boolean hasTokenOffsetBegin() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -11251,6 +11469,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 tokenOffsetBegin = 2;</code>
        * @return The tokenOffsetBegin.
        */
+      @java.lang.Override
       public int getTokenOffsetBegin() {
         return tokenOffsetBegin_;
       }
@@ -11281,6 +11500,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 tokenOffsetEnd = 3;</code>
        * @return Whether the tokenOffsetEnd field is set.
        */
+      @java.lang.Override
       public boolean hasTokenOffsetEnd() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -11288,6 +11508,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 tokenOffsetEnd = 3;</code>
        * @return The tokenOffsetEnd.
        */
+      @java.lang.Override
       public int getTokenOffsetEnd() {
         return tokenOffsetEnd_;
       }
@@ -11318,6 +11539,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceIndex = 4;</code>
        * @return Whether the sentenceIndex field is set.
        */
+      @java.lang.Override
       public boolean hasSentenceIndex() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -11325,6 +11547,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceIndex = 4;</code>
        * @return The sentenceIndex.
        */
+      @java.lang.Override
       public int getSentenceIndex() {
         return sentenceIndex_;
       }
@@ -11355,6 +11578,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 characterOffsetBegin = 5;</code>
        * @return Whether the characterOffsetBegin field is set.
        */
+      @java.lang.Override
       public boolean hasCharacterOffsetBegin() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -11362,6 +11586,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 characterOffsetBegin = 5;</code>
        * @return The characterOffsetBegin.
        */
+      @java.lang.Override
       public int getCharacterOffsetBegin() {
         return characterOffsetBegin_;
       }
@@ -11392,6 +11617,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 characterOffsetEnd = 6;</code>
        * @return Whether the characterOffsetEnd field is set.
        */
+      @java.lang.Override
       public boolean hasCharacterOffsetEnd() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -11399,6 +11625,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 characterOffsetEnd = 6;</code>
        * @return The characterOffsetEnd.
        */
+      @java.lang.Override
       public int getCharacterOffsetEnd() {
         return characterOffsetEnd_;
       }
@@ -14321,6 +14548,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 paragraph = 11;</code>
        * @return Whether the paragraph field is set.
        */
+      @java.lang.Override
       public boolean hasParagraph() {
         return ((bitField0_ & 0x00400000) != 0);
       }
@@ -14328,6 +14556,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 paragraph = 11;</code>
        * @return The paragraph.
        */
+      @java.lang.Override
       public int getParagraph() {
         return paragraph_;
       }
@@ -14466,6 +14695,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 lineNumber = 20;</code>
        * @return Whether the lineNumber field is set.
        */
+      @java.lang.Override
       public boolean hasLineNumber() {
         return ((bitField0_ & 0x01000000) != 0);
       }
@@ -14473,6 +14703,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 lineNumber = 20;</code>
        * @return The lineNumber.
        */
+      @java.lang.Override
       public int getLineNumber() {
         return lineNumber_;
       }
@@ -14507,6 +14738,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasRelationAnnotations = 51;</code>
        * @return Whether the hasRelationAnnotations field is set.
        */
+      @java.lang.Override
       public boolean hasHasRelationAnnotations() {
         return ((bitField0_ & 0x02000000) != 0);
       }
@@ -14518,6 +14750,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasRelationAnnotations = 51;</code>
        * @return The hasRelationAnnotations.
        */
+      @java.lang.Override
       public boolean getHasRelationAnnotations() {
         return hasRelationAnnotations_;
       }
@@ -15036,6 +15269,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
        * @return Whether the hasNumerizedTokensAnnotation field is set.
        */
+      @java.lang.Override
       public boolean hasHasNumerizedTokensAnnotation() {
         return ((bitField0_ & 0x10000000) != 0);
       }
@@ -15043,6 +15277,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
        * @return The hasNumerizedTokensAnnotation.
        */
+      @java.lang.Override
       public boolean getHasNumerizedTokensAnnotation() {
         return hasNumerizedTokensAnnotation_;
       }
@@ -15553,6 +15788,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
        * @return Whether the hasCorefMentionsAnnotation field is set.
        */
+      @java.lang.Override
       public boolean hasHasCorefMentionsAnnotation() {
         return ((bitField0_ & 0x80000000) != 0);
       }
@@ -15560,6 +15796,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
        * @return The hasCorefMentionsAnnotation.
        */
+      @java.lang.Override
       public boolean getHasCorefMentionsAnnotation() {
         return hasCorefMentionsAnnotation_;
       }
@@ -15810,6 +16047,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sectionIndex = 60;</code>
        * @return Whether the sectionIndex field is set.
        */
+      @java.lang.Override
       public boolean hasSectionIndex() {
         return ((bitField1_ & 0x00000004) != 0);
       }
@@ -15821,6 +16059,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sectionIndex = 60;</code>
        * @return The sectionIndex.
        */
+      @java.lang.Override
       public int getSectionIndex() {
         return sectionIndex_;
       }
@@ -16187,6 +16426,7 @@ public final class CoreNLPProtos {
        * <code>optional bool sectionQuoted = 64;</code>
        * @return Whether the sectionQuoted field is set.
        */
+      @java.lang.Override
       public boolean hasSectionQuoted() {
         return ((bitField1_ & 0x00000040) != 0);
       }
@@ -16198,6 +16438,7 @@ public final class CoreNLPProtos {
        * <code>optional bool sectionQuoted = 64;</code>
        * @return The sectionQuoted.
        */
+      @java.lang.Override
       public boolean getSectionQuoted() {
         return sectionQuoted_;
       }
@@ -16240,6 +16481,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
        * @return Whether the hasEntityMentionsAnnotation field is set.
        */
+      @java.lang.Override
       public boolean hasHasEntityMentionsAnnotation() {
         return ((bitField1_ & 0x00000080) != 0);
       }
@@ -16251,6 +16493,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasEntityMentionsAnnotation = 65;</code>
        * @return The hasEntityMentionsAnnotation.
        */
+      @java.lang.Override
       public boolean getHasEntityMentionsAnnotation() {
         return hasEntityMentionsAnnotation_;
       }
@@ -16293,6 +16536,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
        * @return Whether the hasKBPTriplesAnnotation field is set.
        */
+      @java.lang.Override
       public boolean hasHasKBPTriplesAnnotation() {
         return ((bitField1_ & 0x00000100) != 0);
       }
@@ -16304,6 +16548,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasKBPTriplesAnnotation = 68;</code>
        * @return The hasKBPTriplesAnnotation.
        */
+      @java.lang.Override
       public boolean getHasKBPTriplesAnnotation() {
         return hasKBPTriplesAnnotation_;
       }
@@ -16346,6 +16591,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
        * @return Whether the hasOpenieTriplesAnnotation field is set.
        */
+      @java.lang.Override
       public boolean hasHasOpenieTriplesAnnotation() {
         return ((bitField1_ & 0x00000200) != 0);
       }
@@ -16357,6 +16603,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasOpenieTriplesAnnotation = 69;</code>
        * @return The hasOpenieTriplesAnnotation.
        */
+      @java.lang.Override
       public boolean getHasOpenieTriplesAnnotation() {
         return hasOpenieTriplesAnnotation_;
       }
@@ -16399,6 +16646,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 chapterIndex = 66;</code>
        * @return Whether the chapterIndex field is set.
        */
+      @java.lang.Override
       public boolean hasChapterIndex() {
         return ((bitField1_ & 0x00000400) != 0);
       }
@@ -16410,6 +16658,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 chapterIndex = 66;</code>
        * @return The chapterIndex.
        */
+      @java.lang.Override
       public int getChapterIndex() {
         return chapterIndex_;
       }
@@ -16448,6 +16697,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 paragraphIndex = 67;</code>
        * @return Whether the paragraphIndex field is set.
        */
+      @java.lang.Override
       public boolean hasParagraphIndex() {
         return ((bitField1_ & 0x00000800) != 0);
       }
@@ -16455,6 +16705,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 paragraphIndex = 67;</code>
        * @return The paragraphIndex.
        */
+      @java.lang.Override
       public int getParagraphIndex() {
         return paragraphIndex_;
       }
@@ -18388,7 +18639,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.Token}
    */
-  public  static final class Token extends
+  public static final class Token extends
       com.google.protobuf.GeneratedMessageV3.ExtendableMessage<
         Token> implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Token)
@@ -18959,6 +19210,7 @@ public final class CoreNLPProtos {
      * <code>optional string word = 1;</code>
      * @return Whether the word field is set.
      */
+    @java.lang.Override
     public boolean hasWord() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -18970,6 +19222,7 @@ public final class CoreNLPProtos {
      * <code>optional string word = 1;</code>
      * @return The word.
      */
+    @java.lang.Override
     public java.lang.String getWord() {
       java.lang.Object ref = word_;
       if (ref instanceof java.lang.String) {
@@ -18992,6 +19245,7 @@ public final class CoreNLPProtos {
      * <code>optional string word = 1;</code>
      * @return The bytes for word.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getWordBytes() {
       java.lang.Object ref = word_;
@@ -19016,6 +19270,7 @@ public final class CoreNLPProtos {
      * <code>optional string pos = 2;</code>
      * @return Whether the pos field is set.
      */
+    @java.lang.Override
     public boolean hasPos() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -19027,6 +19282,7 @@ public final class CoreNLPProtos {
      * <code>optional string pos = 2;</code>
      * @return The pos.
      */
+    @java.lang.Override
     public java.lang.String getPos() {
       java.lang.Object ref = pos_;
       if (ref instanceof java.lang.String) {
@@ -19049,6 +19305,7 @@ public final class CoreNLPProtos {
      * <code>optional string pos = 2;</code>
      * @return The bytes for pos.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getPosBytes() {
       java.lang.Object ref = pos_;
@@ -19073,6 +19330,7 @@ public final class CoreNLPProtos {
      * <code>optional string value = 3;</code>
      * @return Whether the value field is set.
      */
+    @java.lang.Override
     public boolean hasValue() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -19084,6 +19342,7 @@ public final class CoreNLPProtos {
      * <code>optional string value = 3;</code>
      * @return The value.
      */
+    @java.lang.Override
     public java.lang.String getValue() {
       java.lang.Object ref = value_;
       if (ref instanceof java.lang.String) {
@@ -19106,6 +19365,7 @@ public final class CoreNLPProtos {
      * <code>optional string value = 3;</code>
      * @return The bytes for value.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getValueBytes() {
       java.lang.Object ref = value_;
@@ -19130,6 +19390,7 @@ public final class CoreNLPProtos {
      * <code>optional string category = 4;</code>
      * @return Whether the category field is set.
      */
+    @java.lang.Override
     public boolean hasCategory() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -19141,6 +19402,7 @@ public final class CoreNLPProtos {
      * <code>optional string category = 4;</code>
      * @return The category.
      */
+    @java.lang.Override
     public java.lang.String getCategory() {
       java.lang.Object ref = category_;
       if (ref instanceof java.lang.String) {
@@ -19163,6 +19425,7 @@ public final class CoreNLPProtos {
      * <code>optional string category = 4;</code>
      * @return The bytes for category.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCategoryBytes() {
       java.lang.Object ref = category_;
@@ -19187,6 +19450,7 @@ public final class CoreNLPProtos {
      * <code>optional string before = 5;</code>
      * @return Whether the before field is set.
      */
+    @java.lang.Override
     public boolean hasBefore() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -19198,6 +19462,7 @@ public final class CoreNLPProtos {
      * <code>optional string before = 5;</code>
      * @return The before.
      */
+    @java.lang.Override
     public java.lang.String getBefore() {
       java.lang.Object ref = before_;
       if (ref instanceof java.lang.String) {
@@ -19220,6 +19485,7 @@ public final class CoreNLPProtos {
      * <code>optional string before = 5;</code>
      * @return The bytes for before.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBeforeBytes() {
       java.lang.Object ref = before_;
@@ -19244,6 +19510,7 @@ public final class CoreNLPProtos {
      * <code>optional string after = 6;</code>
      * @return Whether the after field is set.
      */
+    @java.lang.Override
     public boolean hasAfter() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -19255,6 +19522,7 @@ public final class CoreNLPProtos {
      * <code>optional string after = 6;</code>
      * @return The after.
      */
+    @java.lang.Override
     public java.lang.String getAfter() {
       java.lang.Object ref = after_;
       if (ref instanceof java.lang.String) {
@@ -19277,6 +19545,7 @@ public final class CoreNLPProtos {
      * <code>optional string after = 6;</code>
      * @return The bytes for after.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAfterBytes() {
       java.lang.Object ref = after_;
@@ -19301,6 +19570,7 @@ public final class CoreNLPProtos {
      * <code>optional string originalText = 7;</code>
      * @return Whether the originalText field is set.
      */
+    @java.lang.Override
     public boolean hasOriginalText() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -19312,6 +19582,7 @@ public final class CoreNLPProtos {
      * <code>optional string originalText = 7;</code>
      * @return The originalText.
      */
+    @java.lang.Override
     public java.lang.String getOriginalText() {
       java.lang.Object ref = originalText_;
       if (ref instanceof java.lang.String) {
@@ -19334,6 +19605,7 @@ public final class CoreNLPProtos {
      * <code>optional string originalText = 7;</code>
      * @return The bytes for originalText.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getOriginalTextBytes() {
       java.lang.Object ref = originalText_;
@@ -19358,6 +19630,7 @@ public final class CoreNLPProtos {
      * <code>optional string ner = 8;</code>
      * @return Whether the ner field is set.
      */
+    @java.lang.Override
     public boolean hasNer() {
       return ((bitField0_ & 0x00000080) != 0);
     }
@@ -19369,6 +19642,7 @@ public final class CoreNLPProtos {
      * <code>optional string ner = 8;</code>
      * @return The ner.
      */
+    @java.lang.Override
     public java.lang.String getNer() {
       java.lang.Object ref = ner_;
       if (ref instanceof java.lang.String) {
@@ -19391,6 +19665,7 @@ public final class CoreNLPProtos {
      * <code>optional string ner = 8;</code>
      * @return The bytes for ner.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNerBytes() {
       java.lang.Object ref = ner_;
@@ -19415,6 +19690,7 @@ public final class CoreNLPProtos {
      * <code>optional string coarseNER = 62;</code>
      * @return Whether the coarseNER field is set.
      */
+    @java.lang.Override
     public boolean hasCoarseNER() {
       return ((bitField0_ & 0x00000100) != 0);
     }
@@ -19426,6 +19702,7 @@ public final class CoreNLPProtos {
      * <code>optional string coarseNER = 62;</code>
      * @return The coarseNER.
      */
+    @java.lang.Override
     public java.lang.String getCoarseNER() {
       java.lang.Object ref = coarseNER_;
       if (ref instanceof java.lang.String) {
@@ -19448,6 +19725,7 @@ public final class CoreNLPProtos {
      * <code>optional string coarseNER = 62;</code>
      * @return The bytes for coarseNER.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCoarseNERBytes() {
       java.lang.Object ref = coarseNER_;
@@ -19472,6 +19750,7 @@ public final class CoreNLPProtos {
      * <code>optional string fineGrainedNER = 63;</code>
      * @return Whether the fineGrainedNER field is set.
      */
+    @java.lang.Override
     public boolean hasFineGrainedNER() {
       return ((bitField0_ & 0x00000200) != 0);
     }
@@ -19483,6 +19762,7 @@ public final class CoreNLPProtos {
      * <code>optional string fineGrainedNER = 63;</code>
      * @return The fineGrainedNER.
      */
+    @java.lang.Override
     public java.lang.String getFineGrainedNER() {
       java.lang.Object ref = fineGrainedNER_;
       if (ref instanceof java.lang.String) {
@@ -19505,6 +19785,7 @@ public final class CoreNLPProtos {
      * <code>optional string fineGrainedNER = 63;</code>
      * @return The bytes for fineGrainedNER.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFineGrainedNERBytes() {
       java.lang.Object ref = fineGrainedNER_;
@@ -19580,6 +19861,7 @@ public final class CoreNLPProtos {
      * <code>optional string normalizedNER = 9;</code>
      * @return Whether the normalizedNER field is set.
      */
+    @java.lang.Override
     public boolean hasNormalizedNER() {
       return ((bitField0_ & 0x00000400) != 0);
     }
@@ -19591,6 +19873,7 @@ public final class CoreNLPProtos {
      * <code>optional string normalizedNER = 9;</code>
      * @return The normalizedNER.
      */
+    @java.lang.Override
     public java.lang.String getNormalizedNER() {
       java.lang.Object ref = normalizedNER_;
       if (ref instanceof java.lang.String) {
@@ -19613,6 +19896,7 @@ public final class CoreNLPProtos {
      * <code>optional string normalizedNER = 9;</code>
      * @return The bytes for normalizedNER.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNormalizedNERBytes() {
       java.lang.Object ref = normalizedNER_;
@@ -19637,6 +19921,7 @@ public final class CoreNLPProtos {
      * <code>optional string lemma = 10;</code>
      * @return Whether the lemma field is set.
      */
+    @java.lang.Override
     public boolean hasLemma() {
       return ((bitField0_ & 0x00000800) != 0);
     }
@@ -19648,6 +19933,7 @@ public final class CoreNLPProtos {
      * <code>optional string lemma = 10;</code>
      * @return The lemma.
      */
+    @java.lang.Override
     public java.lang.String getLemma() {
       java.lang.Object ref = lemma_;
       if (ref instanceof java.lang.String) {
@@ -19670,6 +19956,7 @@ public final class CoreNLPProtos {
      * <code>optional string lemma = 10;</code>
      * @return The bytes for lemma.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getLemmaBytes() {
       java.lang.Object ref = lemma_;
@@ -19694,6 +19981,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 beginChar = 11;</code>
      * @return Whether the beginChar field is set.
      */
+    @java.lang.Override
     public boolean hasBeginChar() {
       return ((bitField0_ & 0x00001000) != 0);
     }
@@ -19705,6 +19993,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 beginChar = 11;</code>
      * @return The beginChar.
      */
+    @java.lang.Override
     public int getBeginChar() {
       return beginChar_;
     }
@@ -19719,6 +20008,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 endChar = 12;</code>
      * @return Whether the endChar field is set.
      */
+    @java.lang.Override
     public boolean hasEndChar() {
       return ((bitField0_ & 0x00002000) != 0);
     }
@@ -19730,6 +20020,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 endChar = 12;</code>
      * @return The endChar.
      */
+    @java.lang.Override
     public int getEndChar() {
       return endChar_;
     }
@@ -19744,6 +20035,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 utterance = 13;</code>
      * @return Whether the utterance field is set.
      */
+    @java.lang.Override
     public boolean hasUtterance() {
       return ((bitField0_ & 0x00004000) != 0);
     }
@@ -19755,6 +20047,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 utterance = 13;</code>
      * @return The utterance.
      */
+    @java.lang.Override
     public int getUtterance() {
       return utterance_;
     }
@@ -19769,6 +20062,7 @@ public final class CoreNLPProtos {
      * <code>optional string speaker = 14;</code>
      * @return Whether the speaker field is set.
      */
+    @java.lang.Override
     public boolean hasSpeaker() {
       return ((bitField0_ & 0x00008000) != 0);
     }
@@ -19780,6 +20074,7 @@ public final class CoreNLPProtos {
      * <code>optional string speaker = 14;</code>
      * @return The speaker.
      */
+    @java.lang.Override
     public java.lang.String getSpeaker() {
       java.lang.Object ref = speaker_;
       if (ref instanceof java.lang.String) {
@@ -19802,6 +20097,7 @@ public final class CoreNLPProtos {
      * <code>optional string speaker = 14;</code>
      * @return The bytes for speaker.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSpeakerBytes() {
       java.lang.Object ref = speaker_;
@@ -19826,6 +20122,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerType = 77;</code>
      * @return Whether the speakerType field is set.
      */
+    @java.lang.Override
     public boolean hasSpeakerType() {
       return ((bitField0_ & 0x00010000) != 0);
     }
@@ -19837,6 +20134,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerType = 77;</code>
      * @return The speakerType.
      */
+    @java.lang.Override
     public java.lang.String getSpeakerType() {
       java.lang.Object ref = speakerType_;
       if (ref instanceof java.lang.String) {
@@ -19859,6 +20157,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerType = 77;</code>
      * @return The bytes for speakerType.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSpeakerTypeBytes() {
       java.lang.Object ref = speakerType_;
@@ -19883,6 +20182,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 beginIndex = 15;</code>
      * @return Whether the beginIndex field is set.
      */
+    @java.lang.Override
     public boolean hasBeginIndex() {
       return ((bitField0_ & 0x00020000) != 0);
     }
@@ -19894,6 +20194,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 beginIndex = 15;</code>
      * @return The beginIndex.
      */
+    @java.lang.Override
     public int getBeginIndex() {
       return beginIndex_;
     }
@@ -19908,6 +20209,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 endIndex = 16;</code>
      * @return Whether the endIndex field is set.
      */
+    @java.lang.Override
     public boolean hasEndIndex() {
       return ((bitField0_ & 0x00040000) != 0);
     }
@@ -19919,6 +20221,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 endIndex = 16;</code>
      * @return The endIndex.
      */
+    @java.lang.Override
     public int getEndIndex() {
       return endIndex_;
     }
@@ -19933,6 +20236,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 tokenBeginIndex = 17;</code>
      * @return Whether the tokenBeginIndex field is set.
      */
+    @java.lang.Override
     public boolean hasTokenBeginIndex() {
       return ((bitField0_ & 0x00080000) != 0);
     }
@@ -19944,6 +20248,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 tokenBeginIndex = 17;</code>
      * @return The tokenBeginIndex.
      */
+    @java.lang.Override
     public int getTokenBeginIndex() {
       return tokenBeginIndex_;
     }
@@ -19958,6 +20263,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 tokenEndIndex = 18;</code>
      * @return Whether the tokenEndIndex field is set.
      */
+    @java.lang.Override
     public boolean hasTokenEndIndex() {
       return ((bitField0_ & 0x00100000) != 0);
     }
@@ -19969,6 +20275,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 tokenEndIndex = 18;</code>
      * @return The tokenEndIndex.
      */
+    @java.lang.Override
     public int getTokenEndIndex() {
       return tokenEndIndex_;
     }
@@ -19983,6 +20290,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Timex timexValue = 19;</code>
      * @return Whether the timexValue field is set.
      */
+    @java.lang.Override
     public boolean hasTimexValue() {
       return ((bitField0_ & 0x00200000) != 0);
     }
@@ -19994,6 +20302,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Timex timexValue = 19;</code>
      * @return The timexValue.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Timex getTimexValue() {
       return timexValue_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.getDefaultInstance() : timexValue_;
     }
@@ -20004,6 +20313,7 @@ public final class CoreNLPProtos {
      *
      * <code>optional .edu.stanford.nlp.pipeline.Timex timexValue = 19;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TimexOrBuilder getTimexValueOrBuilder() {
       return timexValue_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.getDefaultInstance() : timexValue_;
     }
@@ -20018,6 +20328,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasXmlContext = 21;</code>
      * @return Whether the hasXmlContext field is set.
      */
+    @java.lang.Override
     public boolean hasHasXmlContext() {
       return ((bitField0_ & 0x00400000) != 0);
     }
@@ -20029,6 +20340,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasXmlContext = 21;</code>
      * @return The hasXmlContext.
      */
+    @java.lang.Override
     public boolean getHasXmlContext() {
       return hasXmlContext_;
     }
@@ -20094,6 +20406,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 corefClusterID = 23;</code>
      * @return Whether the corefClusterID field is set.
      */
+    @java.lang.Override
     public boolean hasCorefClusterID() {
       return ((bitField0_ & 0x00800000) != 0);
     }
@@ -20105,6 +20418,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 corefClusterID = 23;</code>
      * @return The corefClusterID.
      */
+    @java.lang.Override
     public int getCorefClusterID() {
       return corefClusterID_;
     }
@@ -20119,6 +20433,7 @@ public final class CoreNLPProtos {
      * <code>optional string answer = 24;</code>
      * @return Whether the answer field is set.
      */
+    @java.lang.Override
     public boolean hasAnswer() {
       return ((bitField0_ & 0x01000000) != 0);
     }
@@ -20130,6 +20445,7 @@ public final class CoreNLPProtos {
      * <code>optional string answer = 24;</code>
      * @return The answer.
      */
+    @java.lang.Override
     public java.lang.String getAnswer() {
       java.lang.Object ref = answer_;
       if (ref instanceof java.lang.String) {
@@ -20152,6 +20468,7 @@ public final class CoreNLPProtos {
      * <code>optional string answer = 24;</code>
      * @return The bytes for answer.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAnswerBytes() {
       java.lang.Object ref = answer_;
@@ -20176,6 +20493,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 headWordIndex = 26;</code>
      * @return Whether the headWordIndex field is set.
      */
+    @java.lang.Override
     public boolean hasHeadWordIndex() {
       return ((bitField0_ & 0x02000000) != 0);
     }
@@ -20187,6 +20505,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 headWordIndex = 26;</code>
      * @return The headWordIndex.
      */
+    @java.lang.Override
     public int getHeadWordIndex() {
       return headWordIndex_;
     }
@@ -20201,6 +20520,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Operator operator = 27;</code>
      * @return Whether the operator field is set.
      */
+    @java.lang.Override
     public boolean hasOperator() {
       return ((bitField0_ & 0x04000000) != 0);
     }
@@ -20212,6 +20532,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Operator operator = 27;</code>
      * @return The operator.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Operator getOperator() {
       return operator_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Operator.getDefaultInstance() : operator_;
     }
@@ -20222,6 +20543,7 @@ public final class CoreNLPProtos {
      *
      * <code>optional .edu.stanford.nlp.pipeline.Operator operator = 27;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.OperatorOrBuilder getOperatorOrBuilder() {
       return operator_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Operator.getDefaultInstance() : operator_;
     }
@@ -20236,6 +20558,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Polarity polarity = 28;</code>
      * @return Whether the polarity field is set.
      */
+    @java.lang.Override
     public boolean hasPolarity() {
       return ((bitField0_ & 0x08000000) != 0);
     }
@@ -20247,6 +20570,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Polarity polarity = 28;</code>
      * @return The polarity.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity getPolarity() {
       return polarity_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity.getDefaultInstance() : polarity_;
     }
@@ -20257,6 +20581,7 @@ public final class CoreNLPProtos {
      *
      * <code>optional .edu.stanford.nlp.pipeline.Polarity polarity = 28;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.PolarityOrBuilder getPolarityOrBuilder() {
       return polarity_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity.getDefaultInstance() : polarity_;
     }
@@ -20271,6 +20596,7 @@ public final class CoreNLPProtos {
      * <code>optional string polarity_dir = 39;</code>
      * @return Whether the polarityDir field is set.
      */
+    @java.lang.Override
     public boolean hasPolarityDir() {
       return ((bitField0_ & 0x10000000) != 0);
     }
@@ -20282,6 +20608,7 @@ public final class CoreNLPProtos {
      * <code>optional string polarity_dir = 39;</code>
      * @return The polarityDir.
      */
+    @java.lang.Override
     public java.lang.String getPolarityDir() {
       java.lang.Object ref = polarityDir_;
       if (ref instanceof java.lang.String) {
@@ -20304,6 +20631,7 @@ public final class CoreNLPProtos {
      * <code>optional string polarity_dir = 39;</code>
      * @return The bytes for polarityDir.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getPolarityDirBytes() {
       java.lang.Object ref = polarityDir_;
@@ -20328,6 +20656,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Span span = 29;</code>
      * @return Whether the span field is set.
      */
+    @java.lang.Override
     public boolean hasSpan() {
       return ((bitField0_ & 0x20000000) != 0);
     }
@@ -20339,6 +20668,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Span span = 29;</code>
      * @return The span.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Span getSpan() {
       return span_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Span.getDefaultInstance() : span_;
     }
@@ -20349,6 +20679,7 @@ public final class CoreNLPProtos {
      *
      * <code>optional .edu.stanford.nlp.pipeline.Span span = 29;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SpanOrBuilder getSpanOrBuilder() {
       return span_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Span.getDefaultInstance() : span_;
     }
@@ -20363,6 +20694,7 @@ public final class CoreNLPProtos {
      * <code>optional string sentiment = 30;</code>
      * @return Whether the sentiment field is set.
      */
+    @java.lang.Override
     public boolean hasSentiment() {
       return ((bitField0_ & 0x40000000) != 0);
     }
@@ -20374,6 +20706,7 @@ public final class CoreNLPProtos {
      * <code>optional string sentiment = 30;</code>
      * @return The sentiment.
      */
+    @java.lang.Override
     public java.lang.String getSentiment() {
       java.lang.Object ref = sentiment_;
       if (ref instanceof java.lang.String) {
@@ -20396,6 +20729,7 @@ public final class CoreNLPProtos {
      * <code>optional string sentiment = 30;</code>
      * @return The bytes for sentiment.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSentimentBytes() {
       java.lang.Object ref = sentiment_;
@@ -20420,6 +20754,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 quotationIndex = 31;</code>
      * @return Whether the quotationIndex field is set.
      */
+    @java.lang.Override
     public boolean hasQuotationIndex() {
       return ((bitField0_ & 0x80000000) != 0);
     }
@@ -20431,6 +20766,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 quotationIndex = 31;</code>
      * @return The quotationIndex.
      */
+    @java.lang.Override
     public int getQuotationIndex() {
       return quotationIndex_;
     }
@@ -20441,6 +20777,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUFeatures = 32;</code>
      * @return Whether the conllUFeatures field is set.
      */
+    @java.lang.Override
     public boolean hasConllUFeatures() {
       return ((bitField1_ & 0x00000001) != 0);
     }
@@ -20448,12 +20785,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUFeatures = 32;</code>
      * @return The conllUFeatures.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUFeatures() {
       return conllUFeatures_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance() : conllUFeatures_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUFeatures = 32;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder getConllUFeaturesOrBuilder() {
       return conllUFeatures_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance() : conllUFeatures_;
     }
@@ -20468,6 +20807,7 @@ public final class CoreNLPProtos {
      * <code>optional string coarseTag = 33;</code>
      * @return Whether the coarseTag field is set.
      */
+    @java.lang.Override
     public boolean hasCoarseTag() {
       return ((bitField1_ & 0x00000002) != 0);
     }
@@ -20479,6 +20819,7 @@ public final class CoreNLPProtos {
      * <code>optional string coarseTag = 33;</code>
      * @return The coarseTag.
      */
+    @java.lang.Override
     public java.lang.String getCoarseTag() {
       java.lang.Object ref = coarseTag_;
       if (ref instanceof java.lang.String) {
@@ -20501,6 +20842,7 @@ public final class CoreNLPProtos {
      * <code>optional string coarseTag = 33;</code>
      * @return The bytes for coarseTag.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCoarseTagBytes() {
       java.lang.Object ref = coarseTag_;
@@ -20521,6 +20863,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Span conllUTokenSpan = 34;</code>
      * @return Whether the conllUTokenSpan field is set.
      */
+    @java.lang.Override
     public boolean hasConllUTokenSpan() {
       return ((bitField1_ & 0x00000004) != 0);
     }
@@ -20528,12 +20871,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Span conllUTokenSpan = 34;</code>
      * @return The conllUTokenSpan.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Span getConllUTokenSpan() {
       return conllUTokenSpan_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Span.getDefaultInstance() : conllUTokenSpan_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Span conllUTokenSpan = 34;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SpanOrBuilder getConllUTokenSpanOrBuilder() {
       return conllUTokenSpan_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Span.getDefaultInstance() : conllUTokenSpan_;
     }
@@ -20544,6 +20889,7 @@ public final class CoreNLPProtos {
      * <code>optional string conllUMisc = 35;</code>
      * @return Whether the conllUMisc field is set.
      */
+    @java.lang.Override
     public boolean hasConllUMisc() {
       return ((bitField1_ & 0x00000008) != 0);
     }
@@ -20551,6 +20897,7 @@ public final class CoreNLPProtos {
      * <code>optional string conllUMisc = 35;</code>
      * @return The conllUMisc.
      */
+    @java.lang.Override
     public java.lang.String getConllUMisc() {
       java.lang.Object ref = conllUMisc_;
       if (ref instanceof java.lang.String) {
@@ -20569,6 +20916,7 @@ public final class CoreNLPProtos {
      * <code>optional string conllUMisc = 35;</code>
      * @return The bytes for conllUMisc.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getConllUMiscBytes() {
       java.lang.Object ref = conllUMisc_;
@@ -20589,6 +20937,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
      * @return Whether the conllUSecondaryDeps field is set.
      */
+    @java.lang.Override
     public boolean hasConllUSecondaryDeps() {
       return ((bitField1_ & 0x00000010) != 0);
     }
@@ -20596,12 +20945,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
      * @return The conllUSecondaryDeps.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString getConllUSecondaryDeps() {
       return conllUSecondaryDeps_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance() : conllUSecondaryDeps_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.MapStringString conllUSecondaryDeps = 36;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder getConllUSecondaryDepsOrBuilder() {
       return conllUSecondaryDeps_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.getDefaultInstance() : conllUSecondaryDeps_;
     }
@@ -20612,6 +20963,7 @@ public final class CoreNLPProtos {
      * <code>optional string wikipediaEntity = 37;</code>
      * @return Whether the wikipediaEntity field is set.
      */
+    @java.lang.Override
     public boolean hasWikipediaEntity() {
       return ((bitField1_ & 0x00000020) != 0);
     }
@@ -20619,6 +20971,7 @@ public final class CoreNLPProtos {
      * <code>optional string wikipediaEntity = 37;</code>
      * @return The wikipediaEntity.
      */
+    @java.lang.Override
     public java.lang.String getWikipediaEntity() {
       java.lang.Object ref = wikipediaEntity_;
       if (ref instanceof java.lang.String) {
@@ -20637,6 +20990,7 @@ public final class CoreNLPProtos {
      * <code>optional string wikipediaEntity = 37;</code>
      * @return The bytes for wikipediaEntity.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getWikipediaEntityBytes() {
       java.lang.Object ref = wikipediaEntity_;
@@ -20657,6 +21011,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isNewline = 38;</code>
      * @return Whether the isNewline field is set.
      */
+    @java.lang.Override
     public boolean hasIsNewline() {
       return ((bitField1_ & 0x00000040) != 0);
     }
@@ -20664,6 +21019,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isNewline = 38;</code>
      * @return The isNewline.
      */
+    @java.lang.Override
     public boolean getIsNewline() {
       return isNewline_;
     }
@@ -20678,6 +21034,7 @@ public final class CoreNLPProtos {
      * <code>optional string gender = 51;</code>
      * @return Whether the gender field is set.
      */
+    @java.lang.Override
     public boolean hasGender() {
       return ((bitField1_ & 0x00000080) != 0);
     }
@@ -20689,6 +21046,7 @@ public final class CoreNLPProtos {
      * <code>optional string gender = 51;</code>
      * @return The gender.
      */
+    @java.lang.Override
     public java.lang.String getGender() {
       java.lang.Object ref = gender_;
       if (ref instanceof java.lang.String) {
@@ -20711,6 +21069,7 @@ public final class CoreNLPProtos {
      * <code>optional string gender = 51;</code>
      * @return The bytes for gender.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getGenderBytes() {
       java.lang.Object ref = gender_;
@@ -20735,6 +21094,7 @@ public final class CoreNLPProtos {
      * <code>optional string trueCase = 52;</code>
      * @return Whether the trueCase field is set.
      */
+    @java.lang.Override
     public boolean hasTrueCase() {
       return ((bitField1_ & 0x00000100) != 0);
     }
@@ -20746,6 +21106,7 @@ public final class CoreNLPProtos {
      * <code>optional string trueCase = 52;</code>
      * @return The trueCase.
      */
+    @java.lang.Override
     public java.lang.String getTrueCase() {
       java.lang.Object ref = trueCase_;
       if (ref instanceof java.lang.String) {
@@ -20768,6 +21129,7 @@ public final class CoreNLPProtos {
      * <code>optional string trueCase = 52;</code>
      * @return The bytes for trueCase.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTrueCaseBytes() {
       java.lang.Object ref = trueCase_;
@@ -20792,6 +21154,7 @@ public final class CoreNLPProtos {
      * <code>optional string trueCaseText = 53;</code>
      * @return Whether the trueCaseText field is set.
      */
+    @java.lang.Override
     public boolean hasTrueCaseText() {
       return ((bitField1_ & 0x00000200) != 0);
     }
@@ -20803,6 +21166,7 @@ public final class CoreNLPProtos {
      * <code>optional string trueCaseText = 53;</code>
      * @return The trueCaseText.
      */
+    @java.lang.Override
     public java.lang.String getTrueCaseText() {
       java.lang.Object ref = trueCaseText_;
       if (ref instanceof java.lang.String) {
@@ -20825,6 +21189,7 @@ public final class CoreNLPProtos {
      * <code>optional string trueCaseText = 53;</code>
      * @return The bytes for trueCaseText.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTrueCaseTextBytes() {
       java.lang.Object ref = trueCaseText_;
@@ -20849,6 +21214,7 @@ public final class CoreNLPProtos {
      * <code>optional string chineseChar = 54;</code>
      * @return Whether the chineseChar field is set.
      */
+    @java.lang.Override
     public boolean hasChineseChar() {
       return ((bitField1_ & 0x00000400) != 0);
     }
@@ -20860,6 +21226,7 @@ public final class CoreNLPProtos {
      * <code>optional string chineseChar = 54;</code>
      * @return The chineseChar.
      */
+    @java.lang.Override
     public java.lang.String getChineseChar() {
       java.lang.Object ref = chineseChar_;
       if (ref instanceof java.lang.String) {
@@ -20882,6 +21249,7 @@ public final class CoreNLPProtos {
      * <code>optional string chineseChar = 54;</code>
      * @return The bytes for chineseChar.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getChineseCharBytes() {
       java.lang.Object ref = chineseChar_;
@@ -20902,6 +21270,7 @@ public final class CoreNLPProtos {
      * <code>optional string chineseSeg = 55;</code>
      * @return Whether the chineseSeg field is set.
      */
+    @java.lang.Override
     public boolean hasChineseSeg() {
       return ((bitField1_ & 0x00000800) != 0);
     }
@@ -20909,6 +21278,7 @@ public final class CoreNLPProtos {
      * <code>optional string chineseSeg = 55;</code>
      * @return The chineseSeg.
      */
+    @java.lang.Override
     public java.lang.String getChineseSeg() {
       java.lang.Object ref = chineseSeg_;
       if (ref instanceof java.lang.String) {
@@ -20927,6 +21297,7 @@ public final class CoreNLPProtos {
      * <code>optional string chineseSeg = 55;</code>
      * @return The bytes for chineseSeg.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getChineseSegBytes() {
       java.lang.Object ref = chineseSeg_;
@@ -20947,6 +21318,7 @@ public final class CoreNLPProtos {
      * <code>optional string chineseXMLChar = 60;</code>
      * @return Whether the chineseXMLChar field is set.
      */
+    @java.lang.Override
     public boolean hasChineseXMLChar() {
       return ((bitField1_ & 0x00001000) != 0);
     }
@@ -20954,6 +21326,7 @@ public final class CoreNLPProtos {
      * <code>optional string chineseXMLChar = 60;</code>
      * @return The chineseXMLChar.
      */
+    @java.lang.Override
     public java.lang.String getChineseXMLChar() {
       java.lang.Object ref = chineseXMLChar_;
       if (ref instanceof java.lang.String) {
@@ -20972,6 +21345,7 @@ public final class CoreNLPProtos {
      * <code>optional string chineseXMLChar = 60;</code>
      * @return The bytes for chineseXMLChar.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getChineseXMLCharBytes() {
       java.lang.Object ref = chineseXMLChar_;
@@ -20996,6 +21370,7 @@ public final class CoreNLPProtos {
      * <code>optional string arabicSeg = 76;</code>
      * @return Whether the arabicSeg field is set.
      */
+    @java.lang.Override
     public boolean hasArabicSeg() {
       return ((bitField1_ & 0x00002000) != 0);
     }
@@ -21007,6 +21382,7 @@ public final class CoreNLPProtos {
      * <code>optional string arabicSeg = 76;</code>
      * @return The arabicSeg.
      */
+    @java.lang.Override
     public java.lang.String getArabicSeg() {
       java.lang.Object ref = arabicSeg_;
       if (ref instanceof java.lang.String) {
@@ -21029,6 +21405,7 @@ public final class CoreNLPProtos {
      * <code>optional string arabicSeg = 76;</code>
      * @return The bytes for arabicSeg.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getArabicSegBytes() {
       java.lang.Object ref = arabicSeg_;
@@ -21053,6 +21430,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionName = 56;</code>
      * @return Whether the sectionName field is set.
      */
+    @java.lang.Override
     public boolean hasSectionName() {
       return ((bitField1_ & 0x00004000) != 0);
     }
@@ -21064,6 +21442,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionName = 56;</code>
      * @return The sectionName.
      */
+    @java.lang.Override
     public java.lang.String getSectionName() {
       java.lang.Object ref = sectionName_;
       if (ref instanceof java.lang.String) {
@@ -21086,6 +21465,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionName = 56;</code>
      * @return The bytes for sectionName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSectionNameBytes() {
       java.lang.Object ref = sectionName_;
@@ -21106,6 +21486,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionAuthor = 57;</code>
      * @return Whether the sectionAuthor field is set.
      */
+    @java.lang.Override
     public boolean hasSectionAuthor() {
       return ((bitField1_ & 0x00008000) != 0);
     }
@@ -21113,6 +21494,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionAuthor = 57;</code>
      * @return The sectionAuthor.
      */
+    @java.lang.Override
     public java.lang.String getSectionAuthor() {
       java.lang.Object ref = sectionAuthor_;
       if (ref instanceof java.lang.String) {
@@ -21131,6 +21513,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionAuthor = 57;</code>
      * @return The bytes for sectionAuthor.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSectionAuthorBytes() {
       java.lang.Object ref = sectionAuthor_;
@@ -21151,6 +21534,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionDate = 58;</code>
      * @return Whether the sectionDate field is set.
      */
+    @java.lang.Override
     public boolean hasSectionDate() {
       return ((bitField1_ & 0x00010000) != 0);
     }
@@ -21158,6 +21542,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionDate = 58;</code>
      * @return The sectionDate.
      */
+    @java.lang.Override
     public java.lang.String getSectionDate() {
       java.lang.Object ref = sectionDate_;
       if (ref instanceof java.lang.String) {
@@ -21176,6 +21561,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionDate = 58;</code>
      * @return The bytes for sectionDate.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSectionDateBytes() {
       java.lang.Object ref = sectionDate_;
@@ -21196,6 +21582,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionEndLabel = 59;</code>
      * @return Whether the sectionEndLabel field is set.
      */
+    @java.lang.Override
     public boolean hasSectionEndLabel() {
       return ((bitField1_ & 0x00020000) != 0);
     }
@@ -21203,6 +21590,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionEndLabel = 59;</code>
      * @return The sectionEndLabel.
      */
+    @java.lang.Override
     public java.lang.String getSectionEndLabel() {
       java.lang.Object ref = sectionEndLabel_;
       if (ref instanceof java.lang.String) {
@@ -21221,6 +21609,7 @@ public final class CoreNLPProtos {
      * <code>optional string sectionEndLabel = 59;</code>
      * @return The bytes for sectionEndLabel.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSectionEndLabelBytes() {
       java.lang.Object ref = sectionEndLabel_;
@@ -21245,6 +21634,7 @@ public final class CoreNLPProtos {
      * <code>optional string parent = 61;</code>
      * @return Whether the parent field is set.
      */
+    @java.lang.Override
     public boolean hasParent() {
       return ((bitField1_ & 0x00040000) != 0);
     }
@@ -21256,6 +21646,7 @@ public final class CoreNLPProtos {
      * <code>optional string parent = 61;</code>
      * @return The parent.
      */
+    @java.lang.Override
     public java.lang.String getParent() {
       java.lang.Object ref = parent_;
       if (ref instanceof java.lang.String) {
@@ -21278,6 +21669,7 @@ public final class CoreNLPProtos {
      * <code>optional string parent = 61;</code>
      * @return The bytes for parent.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getParentBytes() {
       java.lang.Object ref = parent_;
@@ -21302,6 +21694,7 @@ public final class CoreNLPProtos {
      * <code>repeated uint32 corefMentionIndex = 64;</code>
      * @return A list containing the corefMentionIndex.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getCorefMentionIndexList() {
       return corefMentionIndex_;
@@ -21336,6 +21729,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 entityMentionIndex = 65;</code>
      * @return Whether the entityMentionIndex field is set.
      */
+    @java.lang.Override
     public boolean hasEntityMentionIndex() {
       return ((bitField1_ & 0x00080000) != 0);
     }
@@ -21343,6 +21737,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 entityMentionIndex = 65;</code>
      * @return The entityMentionIndex.
      */
+    @java.lang.Override
     public int getEntityMentionIndex() {
       return entityMentionIndex_;
     }
@@ -21357,6 +21752,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isMWT = 67;</code>
      * @return Whether the isMWT field is set.
      */
+    @java.lang.Override
     public boolean hasIsMWT() {
       return ((bitField1_ & 0x00100000) != 0);
     }
@@ -21368,6 +21764,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isMWT = 67;</code>
      * @return The isMWT.
      */
+    @java.lang.Override
     public boolean getIsMWT() {
       return isMWT_;
     }
@@ -21378,6 +21775,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isFirstMWT = 68;</code>
      * @return Whether the isFirstMWT field is set.
      */
+    @java.lang.Override
     public boolean hasIsFirstMWT() {
       return ((bitField1_ & 0x00200000) != 0);
     }
@@ -21385,6 +21783,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isFirstMWT = 68;</code>
      * @return The isFirstMWT.
      */
+    @java.lang.Override
     public boolean getIsFirstMWT() {
       return isFirstMWT_;
     }
@@ -21395,6 +21794,7 @@ public final class CoreNLPProtos {
      * <code>optional string mwtText = 69;</code>
      * @return Whether the mwtText field is set.
      */
+    @java.lang.Override
     public boolean hasMwtText() {
       return ((bitField1_ & 0x00400000) != 0);
     }
@@ -21402,6 +21802,7 @@ public final class CoreNLPProtos {
      * <code>optional string mwtText = 69;</code>
      * @return The mwtText.
      */
+    @java.lang.Override
     public java.lang.String getMwtText() {
       java.lang.Object ref = mwtText_;
       if (ref instanceof java.lang.String) {
@@ -21420,6 +21821,7 @@ public final class CoreNLPProtos {
      * <code>optional string mwtText = 69;</code>
      * @return The bytes for mwtText.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getMwtTextBytes() {
       java.lang.Object ref = mwtText_;
@@ -21444,6 +21846,7 @@ public final class CoreNLPProtos {
      * <code>optional uint64 numericValue = 70;</code>
      * @return Whether the numericValue field is set.
      */
+    @java.lang.Override
     public boolean hasNumericValue() {
       return ((bitField1_ & 0x00800000) != 0);
     }
@@ -21455,6 +21858,7 @@ public final class CoreNLPProtos {
      * <code>optional uint64 numericValue = 70;</code>
      * @return The numericValue.
      */
+    @java.lang.Override
     public long getNumericValue() {
       return numericValue_;
     }
@@ -21465,6 +21869,7 @@ public final class CoreNLPProtos {
      * <code>optional string numericType = 71;</code>
      * @return Whether the numericType field is set.
      */
+    @java.lang.Override
     public boolean hasNumericType() {
       return ((bitField1_ & 0x01000000) != 0);
     }
@@ -21472,6 +21877,7 @@ public final class CoreNLPProtos {
      * <code>optional string numericType = 71;</code>
      * @return The numericType.
      */
+    @java.lang.Override
     public java.lang.String getNumericType() {
       java.lang.Object ref = numericType_;
       if (ref instanceof java.lang.String) {
@@ -21490,6 +21896,7 @@ public final class CoreNLPProtos {
      * <code>optional string numericType = 71;</code>
      * @return The bytes for numericType.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNumericTypeBytes() {
       java.lang.Object ref = numericType_;
@@ -21510,6 +21917,7 @@ public final class CoreNLPProtos {
      * <code>optional uint64 numericCompositeValue = 72;</code>
      * @return Whether the numericCompositeValue field is set.
      */
+    @java.lang.Override
     public boolean hasNumericCompositeValue() {
       return ((bitField1_ & 0x02000000) != 0);
     }
@@ -21517,6 +21925,7 @@ public final class CoreNLPProtos {
      * <code>optional uint64 numericCompositeValue = 72;</code>
      * @return The numericCompositeValue.
      */
+    @java.lang.Override
     public long getNumericCompositeValue() {
       return numericCompositeValue_;
     }
@@ -21527,6 +21936,7 @@ public final class CoreNLPProtos {
      * <code>optional string numericCompositeType = 73;</code>
      * @return Whether the numericCompositeType field is set.
      */
+    @java.lang.Override
     public boolean hasNumericCompositeType() {
       return ((bitField1_ & 0x04000000) != 0);
     }
@@ -21534,6 +21944,7 @@ public final class CoreNLPProtos {
      * <code>optional string numericCompositeType = 73;</code>
      * @return The numericCompositeType.
      */
+    @java.lang.Override
     public java.lang.String getNumericCompositeType() {
       java.lang.Object ref = numericCompositeType_;
       if (ref instanceof java.lang.String) {
@@ -21552,6 +21963,7 @@ public final class CoreNLPProtos {
      * <code>optional string numericCompositeType = 73;</code>
      * @return The bytes for numericCompositeType.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNumericCompositeTypeBytes() {
       java.lang.Object ref = numericCompositeType_;
@@ -21572,6 +21984,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 codepointOffsetBegin = 74;</code>
      * @return Whether the codepointOffsetBegin field is set.
      */
+    @java.lang.Override
     public boolean hasCodepointOffsetBegin() {
       return ((bitField1_ & 0x08000000) != 0);
     }
@@ -21579,6 +21992,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 codepointOffsetBegin = 74;</code>
      * @return The codepointOffsetBegin.
      */
+    @java.lang.Override
     public int getCodepointOffsetBegin() {
       return codepointOffsetBegin_;
     }
@@ -21589,6 +22003,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 codepointOffsetEnd = 75;</code>
      * @return Whether the codepointOffsetEnd field is set.
      */
+    @java.lang.Override
     public boolean hasCodepointOffsetEnd() {
       return ((bitField1_ & 0x10000000) != 0);
     }
@@ -21596,6 +22011,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 codepointOffsetEnd = 75;</code>
      * @return The codepointOffsetEnd.
      */
+    @java.lang.Override
     public int getCodepointOffsetEnd() {
       return codepointOffsetEnd_;
     }
@@ -25167,6 +25583,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 beginChar = 11;</code>
        * @return Whether the beginChar field is set.
        */
+      @java.lang.Override
       public boolean hasBeginChar() {
         return ((bitField0_ & 0x00002000) != 0);
       }
@@ -25178,6 +25595,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 beginChar = 11;</code>
        * @return The beginChar.
        */
+      @java.lang.Override
       public int getBeginChar() {
         return beginChar_;
       }
@@ -25220,6 +25638,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 endChar = 12;</code>
        * @return Whether the endChar field is set.
        */
+      @java.lang.Override
       public boolean hasEndChar() {
         return ((bitField0_ & 0x00004000) != 0);
       }
@@ -25231,6 +25650,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 endChar = 12;</code>
        * @return The endChar.
        */
+      @java.lang.Override
       public int getEndChar() {
         return endChar_;
       }
@@ -25273,6 +25693,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 utterance = 13;</code>
        * @return Whether the utterance field is set.
        */
+      @java.lang.Override
       public boolean hasUtterance() {
         return ((bitField0_ & 0x00008000) != 0);
       }
@@ -25284,6 +25705,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 utterance = 13;</code>
        * @return The utterance.
        */
+      @java.lang.Override
       public int getUtterance() {
         return utterance_;
       }
@@ -25542,6 +25964,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 beginIndex = 15;</code>
        * @return Whether the beginIndex field is set.
        */
+      @java.lang.Override
       public boolean hasBeginIndex() {
         return ((bitField0_ & 0x00040000) != 0);
       }
@@ -25553,6 +25976,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 beginIndex = 15;</code>
        * @return The beginIndex.
        */
+      @java.lang.Override
       public int getBeginIndex() {
         return beginIndex_;
       }
@@ -25595,6 +26019,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 endIndex = 16;</code>
        * @return Whether the endIndex field is set.
        */
+      @java.lang.Override
       public boolean hasEndIndex() {
         return ((bitField0_ & 0x00080000) != 0);
       }
@@ -25606,6 +26031,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 endIndex = 16;</code>
        * @return The endIndex.
        */
+      @java.lang.Override
       public int getEndIndex() {
         return endIndex_;
       }
@@ -25648,6 +26074,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 tokenBeginIndex = 17;</code>
        * @return Whether the tokenBeginIndex field is set.
        */
+      @java.lang.Override
       public boolean hasTokenBeginIndex() {
         return ((bitField0_ & 0x00100000) != 0);
       }
@@ -25659,6 +26086,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 tokenBeginIndex = 17;</code>
        * @return The tokenBeginIndex.
        */
+      @java.lang.Override
       public int getTokenBeginIndex() {
         return tokenBeginIndex_;
       }
@@ -25701,6 +26129,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 tokenEndIndex = 18;</code>
        * @return Whether the tokenEndIndex field is set.
        */
+      @java.lang.Override
       public boolean hasTokenEndIndex() {
         return ((bitField0_ & 0x00200000) != 0);
       }
@@ -25712,6 +26141,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 tokenEndIndex = 18;</code>
        * @return The tokenEndIndex.
        */
+      @java.lang.Override
       public int getTokenEndIndex() {
         return tokenEndIndex_;
       }
@@ -25910,6 +26340,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasXmlContext = 21;</code>
        * @return Whether the hasXmlContext field is set.
        */
+      @java.lang.Override
       public boolean hasHasXmlContext() {
         return ((bitField0_ & 0x00800000) != 0);
       }
@@ -25921,6 +26352,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasXmlContext = 21;</code>
        * @return The hasXmlContext.
        */
+      @java.lang.Override
       public boolean getHasXmlContext() {
         return hasXmlContext_;
       }
@@ -26108,6 +26540,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 corefClusterID = 23;</code>
        * @return Whether the corefClusterID field is set.
        */
+      @java.lang.Override
       public boolean hasCorefClusterID() {
         return ((bitField0_ & 0x02000000) != 0);
       }
@@ -26119,6 +26552,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 corefClusterID = 23;</code>
        * @return The corefClusterID.
        */
+      @java.lang.Override
       public int getCorefClusterID() {
         return corefClusterID_;
       }
@@ -26269,6 +26703,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 headWordIndex = 26;</code>
        * @return Whether the headWordIndex field is set.
        */
+      @java.lang.Override
       public boolean hasHeadWordIndex() {
         return ((bitField0_ & 0x08000000) != 0);
       }
@@ -26280,6 +26715,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 headWordIndex = 26;</code>
        * @return The headWordIndex.
        */
+      @java.lang.Override
       public int getHeadWordIndex() {
         return headWordIndex_;
       }
@@ -27006,6 +27442,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 quotationIndex = 31;</code>
        * @return Whether the quotationIndex field is set.
        */
+      @java.lang.Override
       public boolean hasQuotationIndex() {
         return ((bitField1_ & 0x00000002) != 0);
       }
@@ -27017,6 +27454,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 quotationIndex = 31;</code>
        * @return The quotationIndex.
        */
+      @java.lang.Override
       public int getQuotationIndex() {
         return quotationIndex_;
       }
@@ -27691,6 +28129,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isNewline = 38;</code>
        * @return Whether the isNewline field is set.
        */
+      @java.lang.Override
       public boolean hasIsNewline() {
         return ((bitField1_ & 0x00000100) != 0);
       }
@@ -27698,6 +28137,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isNewline = 38;</code>
        * @return The isNewline.
        */
+      @java.lang.Override
       public boolean getIsNewline() {
         return isNewline_;
       }
@@ -29011,6 +29451,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 entityMentionIndex = 65;</code>
        * @return Whether the entityMentionIndex field is set.
        */
+      @java.lang.Override
       public boolean hasEntityMentionIndex() {
         return ((bitField1_ & 0x00400000) != 0);
       }
@@ -29018,6 +29459,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 entityMentionIndex = 65;</code>
        * @return The entityMentionIndex.
        */
+      @java.lang.Override
       public int getEntityMentionIndex() {
         return entityMentionIndex_;
       }
@@ -29052,6 +29494,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isMWT = 67;</code>
        * @return Whether the isMWT field is set.
        */
+      @java.lang.Override
       public boolean hasIsMWT() {
         return ((bitField1_ & 0x00800000) != 0);
       }
@@ -29063,6 +29506,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isMWT = 67;</code>
        * @return The isMWT.
        */
+      @java.lang.Override
       public boolean getIsMWT() {
         return isMWT_;
       }
@@ -29101,6 +29545,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isFirstMWT = 68;</code>
        * @return Whether the isFirstMWT field is set.
        */
+      @java.lang.Override
       public boolean hasIsFirstMWT() {
         return ((bitField1_ & 0x01000000) != 0);
       }
@@ -29108,6 +29553,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isFirstMWT = 68;</code>
        * @return The isFirstMWT.
        */
+      @java.lang.Override
       public boolean getIsFirstMWT() {
         return isFirstMWT_;
       }
@@ -29226,6 +29672,7 @@ public final class CoreNLPProtos {
        * <code>optional uint64 numericValue = 70;</code>
        * @return Whether the numericValue field is set.
        */
+      @java.lang.Override
       public boolean hasNumericValue() {
         return ((bitField1_ & 0x04000000) != 0);
       }
@@ -29237,6 +29684,7 @@ public final class CoreNLPProtos {
        * <code>optional uint64 numericValue = 70;</code>
        * @return The numericValue.
        */
+      @java.lang.Override
       public long getNumericValue() {
         return numericValue_;
       }
@@ -29359,6 +29807,7 @@ public final class CoreNLPProtos {
        * <code>optional uint64 numericCompositeValue = 72;</code>
        * @return Whether the numericCompositeValue field is set.
        */
+      @java.lang.Override
       public boolean hasNumericCompositeValue() {
         return ((bitField1_ & 0x10000000) != 0);
       }
@@ -29366,6 +29815,7 @@ public final class CoreNLPProtos {
        * <code>optional uint64 numericCompositeValue = 72;</code>
        * @return The numericCompositeValue.
        */
+      @java.lang.Override
       public long getNumericCompositeValue() {
         return numericCompositeValue_;
       }
@@ -29480,6 +29930,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 codepointOffsetBegin = 74;</code>
        * @return Whether the codepointOffsetBegin field is set.
        */
+      @java.lang.Override
       public boolean hasCodepointOffsetBegin() {
         return ((bitField1_ & 0x40000000) != 0);
       }
@@ -29487,6 +29938,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 codepointOffsetBegin = 74;</code>
        * @return The codepointOffsetBegin.
        */
+      @java.lang.Override
       public int getCodepointOffsetBegin() {
         return codepointOffsetBegin_;
       }
@@ -29517,6 +29969,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 codepointOffsetEnd = 75;</code>
        * @return Whether the codepointOffsetEnd field is set.
        */
+      @java.lang.Override
       public boolean hasCodepointOffsetEnd() {
         return ((bitField1_ & 0x80000000) != 0);
       }
@@ -29524,6 +29977,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 codepointOffsetEnd = 75;</code>
        * @return The codepointOffsetEnd.
        */
+      @java.lang.Override
       public int getCodepointOffsetEnd() {
         return codepointOffsetEnd_;
       }
@@ -29901,7 +30355,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.Quote}
    */
-  public  static final class Quote extends
+  public static final class Quote extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Quote)
       QuoteOrBuilder {
@@ -30114,6 +30568,7 @@ public final class CoreNLPProtos {
      * <code>optional string text = 1;</code>
      * @return Whether the text field is set.
      */
+    @java.lang.Override
     public boolean hasText() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -30121,6 +30576,7 @@ public final class CoreNLPProtos {
      * <code>optional string text = 1;</code>
      * @return The text.
      */
+    @java.lang.Override
     public java.lang.String getText() {
       java.lang.Object ref = text_;
       if (ref instanceof java.lang.String) {
@@ -30139,6 +30595,7 @@ public final class CoreNLPProtos {
      * <code>optional string text = 1;</code>
      * @return The bytes for text.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTextBytes() {
       java.lang.Object ref = text_;
@@ -30159,6 +30616,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 begin = 2;</code>
      * @return Whether the begin field is set.
      */
+    @java.lang.Override
     public boolean hasBegin() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -30166,6 +30624,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 begin = 2;</code>
      * @return The begin.
      */
+    @java.lang.Override
     public int getBegin() {
       return begin_;
     }
@@ -30176,6 +30635,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 end = 3;</code>
      * @return Whether the end field is set.
      */
+    @java.lang.Override
     public boolean hasEnd() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -30183,6 +30643,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 end = 3;</code>
      * @return The end.
      */
+    @java.lang.Override
     public int getEnd() {
       return end_;
     }
@@ -30193,6 +30654,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sentenceBegin = 5;</code>
      * @return Whether the sentenceBegin field is set.
      */
+    @java.lang.Override
     public boolean hasSentenceBegin() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -30200,6 +30662,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sentenceBegin = 5;</code>
      * @return The sentenceBegin.
      */
+    @java.lang.Override
     public int getSentenceBegin() {
       return sentenceBegin_;
     }
@@ -30210,6 +30673,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sentenceEnd = 6;</code>
      * @return Whether the sentenceEnd field is set.
      */
+    @java.lang.Override
     public boolean hasSentenceEnd() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -30217,6 +30681,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sentenceEnd = 6;</code>
      * @return The sentenceEnd.
      */
+    @java.lang.Override
     public int getSentenceEnd() {
       return sentenceEnd_;
     }
@@ -30227,6 +30692,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 tokenBegin = 7;</code>
      * @return Whether the tokenBegin field is set.
      */
+    @java.lang.Override
     public boolean hasTokenBegin() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -30234,6 +30700,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 tokenBegin = 7;</code>
      * @return The tokenBegin.
      */
+    @java.lang.Override
     public int getTokenBegin() {
       return tokenBegin_;
     }
@@ -30244,6 +30711,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 tokenEnd = 8;</code>
      * @return Whether the tokenEnd field is set.
      */
+    @java.lang.Override
     public boolean hasTokenEnd() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -30251,6 +30719,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 tokenEnd = 8;</code>
      * @return The tokenEnd.
      */
+    @java.lang.Override
     public int getTokenEnd() {
       return tokenEnd_;
     }
@@ -30261,6 +30730,7 @@ public final class CoreNLPProtos {
      * <code>optional string docid = 9;</code>
      * @return Whether the docid field is set.
      */
+    @java.lang.Override
     public boolean hasDocid() {
       return ((bitField0_ & 0x00000080) != 0);
     }
@@ -30268,6 +30738,7 @@ public final class CoreNLPProtos {
      * <code>optional string docid = 9;</code>
      * @return The docid.
      */
+    @java.lang.Override
     public java.lang.String getDocid() {
       java.lang.Object ref = docid_;
       if (ref instanceof java.lang.String) {
@@ -30286,6 +30757,7 @@ public final class CoreNLPProtos {
      * <code>optional string docid = 9;</code>
      * @return The bytes for docid.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDocidBytes() {
       java.lang.Object ref = docid_;
@@ -30306,6 +30778,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 index = 10;</code>
      * @return Whether the index field is set.
      */
+    @java.lang.Override
     public boolean hasIndex() {
       return ((bitField0_ & 0x00000100) != 0);
     }
@@ -30313,6 +30786,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 index = 10;</code>
      * @return The index.
      */
+    @java.lang.Override
     public int getIndex() {
       return index_;
     }
@@ -30323,6 +30797,7 @@ public final class CoreNLPProtos {
      * <code>optional string author = 11;</code>
      * @return Whether the author field is set.
      */
+    @java.lang.Override
     public boolean hasAuthor() {
       return ((bitField0_ & 0x00000200) != 0);
     }
@@ -30330,6 +30805,7 @@ public final class CoreNLPProtos {
      * <code>optional string author = 11;</code>
      * @return The author.
      */
+    @java.lang.Override
     public java.lang.String getAuthor() {
       java.lang.Object ref = author_;
       if (ref instanceof java.lang.String) {
@@ -30348,6 +30824,7 @@ public final class CoreNLPProtos {
      * <code>optional string author = 11;</code>
      * @return The bytes for author.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAuthorBytes() {
       java.lang.Object ref = author_;
@@ -30368,6 +30845,7 @@ public final class CoreNLPProtos {
      * <code>optional string mention = 12;</code>
      * @return Whether the mention field is set.
      */
+    @java.lang.Override
     public boolean hasMention() {
       return ((bitField0_ & 0x00000400) != 0);
     }
@@ -30375,6 +30853,7 @@ public final class CoreNLPProtos {
      * <code>optional string mention = 12;</code>
      * @return The mention.
      */
+    @java.lang.Override
     public java.lang.String getMention() {
       java.lang.Object ref = mention_;
       if (ref instanceof java.lang.String) {
@@ -30393,6 +30872,7 @@ public final class CoreNLPProtos {
      * <code>optional string mention = 12;</code>
      * @return The bytes for mention.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getMentionBytes() {
       java.lang.Object ref = mention_;
@@ -30413,6 +30893,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 mentionBegin = 13;</code>
      * @return Whether the mentionBegin field is set.
      */
+    @java.lang.Override
     public boolean hasMentionBegin() {
       return ((bitField0_ & 0x00000800) != 0);
     }
@@ -30420,6 +30901,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 mentionBegin = 13;</code>
      * @return The mentionBegin.
      */
+    @java.lang.Override
     public int getMentionBegin() {
       return mentionBegin_;
     }
@@ -30430,6 +30912,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 mentionEnd = 14;</code>
      * @return Whether the mentionEnd field is set.
      */
+    @java.lang.Override
     public boolean hasMentionEnd() {
       return ((bitField0_ & 0x00001000) != 0);
     }
@@ -30437,6 +30920,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 mentionEnd = 14;</code>
      * @return The mentionEnd.
      */
+    @java.lang.Override
     public int getMentionEnd() {
       return mentionEnd_;
     }
@@ -30447,6 +30931,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionType = 15;</code>
      * @return Whether the mentionType field is set.
      */
+    @java.lang.Override
     public boolean hasMentionType() {
       return ((bitField0_ & 0x00002000) != 0);
     }
@@ -30454,6 +30939,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionType = 15;</code>
      * @return The mentionType.
      */
+    @java.lang.Override
     public java.lang.String getMentionType() {
       java.lang.Object ref = mentionType_;
       if (ref instanceof java.lang.String) {
@@ -30472,6 +30958,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionType = 15;</code>
      * @return The bytes for mentionType.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getMentionTypeBytes() {
       java.lang.Object ref = mentionType_;
@@ -30492,6 +30979,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionSieve = 16;</code>
      * @return Whether the mentionSieve field is set.
      */
+    @java.lang.Override
     public boolean hasMentionSieve() {
       return ((bitField0_ & 0x00004000) != 0);
     }
@@ -30499,6 +30987,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionSieve = 16;</code>
      * @return The mentionSieve.
      */
+    @java.lang.Override
     public java.lang.String getMentionSieve() {
       java.lang.Object ref = mentionSieve_;
       if (ref instanceof java.lang.String) {
@@ -30517,6 +31006,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionSieve = 16;</code>
      * @return The bytes for mentionSieve.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getMentionSieveBytes() {
       java.lang.Object ref = mentionSieve_;
@@ -30537,6 +31027,7 @@ public final class CoreNLPProtos {
      * <code>optional string speaker = 17;</code>
      * @return Whether the speaker field is set.
      */
+    @java.lang.Override
     public boolean hasSpeaker() {
       return ((bitField0_ & 0x00008000) != 0);
     }
@@ -30544,6 +31035,7 @@ public final class CoreNLPProtos {
      * <code>optional string speaker = 17;</code>
      * @return The speaker.
      */
+    @java.lang.Override
     public java.lang.String getSpeaker() {
       java.lang.Object ref = speaker_;
       if (ref instanceof java.lang.String) {
@@ -30562,6 +31054,7 @@ public final class CoreNLPProtos {
      * <code>optional string speaker = 17;</code>
      * @return The bytes for speaker.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSpeakerBytes() {
       java.lang.Object ref = speaker_;
@@ -30582,6 +31075,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerSieve = 18;</code>
      * @return Whether the speakerSieve field is set.
      */
+    @java.lang.Override
     public boolean hasSpeakerSieve() {
       return ((bitField0_ & 0x00010000) != 0);
     }
@@ -30589,6 +31083,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerSieve = 18;</code>
      * @return The speakerSieve.
      */
+    @java.lang.Override
     public java.lang.String getSpeakerSieve() {
       java.lang.Object ref = speakerSieve_;
       if (ref instanceof java.lang.String) {
@@ -30607,6 +31102,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerSieve = 18;</code>
      * @return The bytes for speakerSieve.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSpeakerSieveBytes() {
       java.lang.Object ref = speakerSieve_;
@@ -30627,6 +31123,7 @@ public final class CoreNLPProtos {
      * <code>optional string canonicalMention = 19;</code>
      * @return Whether the canonicalMention field is set.
      */
+    @java.lang.Override
     public boolean hasCanonicalMention() {
       return ((bitField0_ & 0x00020000) != 0);
     }
@@ -30634,6 +31131,7 @@ public final class CoreNLPProtos {
      * <code>optional string canonicalMention = 19;</code>
      * @return The canonicalMention.
      */
+    @java.lang.Override
     public java.lang.String getCanonicalMention() {
       java.lang.Object ref = canonicalMention_;
       if (ref instanceof java.lang.String) {
@@ -30652,6 +31150,7 @@ public final class CoreNLPProtos {
      * <code>optional string canonicalMention = 19;</code>
      * @return The bytes for canonicalMention.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCanonicalMentionBytes() {
       java.lang.Object ref = canonicalMention_;
@@ -30672,6 +31171,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 canonicalMentionBegin = 20;</code>
      * @return Whether the canonicalMentionBegin field is set.
      */
+    @java.lang.Override
     public boolean hasCanonicalMentionBegin() {
       return ((bitField0_ & 0x00040000) != 0);
     }
@@ -30679,6 +31179,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 canonicalMentionBegin = 20;</code>
      * @return The canonicalMentionBegin.
      */
+    @java.lang.Override
     public int getCanonicalMentionBegin() {
       return canonicalMentionBegin_;
     }
@@ -30689,6 +31190,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 canonicalMentionEnd = 21;</code>
      * @return Whether the canonicalMentionEnd field is set.
      */
+    @java.lang.Override
     public boolean hasCanonicalMentionEnd() {
       return ((bitField0_ & 0x00080000) != 0);
     }
@@ -30696,6 +31198,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 canonicalMentionEnd = 21;</code>
      * @return The canonicalMentionEnd.
      */
+    @java.lang.Override
     public int getCanonicalMentionEnd() {
       return canonicalMentionEnd_;
     }
@@ -30706,6 +31209,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph attributionDependencyGraph = 22;</code>
      * @return Whether the attributionDependencyGraph field is set.
      */
+    @java.lang.Override
     public boolean hasAttributionDependencyGraph() {
       return ((bitField0_ & 0x00100000) != 0);
     }
@@ -30713,12 +31217,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph attributionDependencyGraph = 22;</code>
      * @return The attributionDependencyGraph.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getAttributionDependencyGraph() {
       return attributionDependencyGraph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : attributionDependencyGraph_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph attributionDependencyGraph = 22;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getAttributionDependencyGraphOrBuilder() {
       return attributionDependencyGraph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : attributionDependencyGraph_;
     }
@@ -31659,6 +32165,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 begin = 2;</code>
        * @return Whether the begin field is set.
        */
+      @java.lang.Override
       public boolean hasBegin() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -31666,6 +32173,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 begin = 2;</code>
        * @return The begin.
        */
+      @java.lang.Override
       public int getBegin() {
         return begin_;
       }
@@ -31696,6 +32204,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 end = 3;</code>
        * @return Whether the end field is set.
        */
+      @java.lang.Override
       public boolean hasEnd() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -31703,6 +32212,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 end = 3;</code>
        * @return The end.
        */
+      @java.lang.Override
       public int getEnd() {
         return end_;
       }
@@ -31733,6 +32243,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceBegin = 5;</code>
        * @return Whether the sentenceBegin field is set.
        */
+      @java.lang.Override
       public boolean hasSentenceBegin() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -31740,6 +32251,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceBegin = 5;</code>
        * @return The sentenceBegin.
        */
+      @java.lang.Override
       public int getSentenceBegin() {
         return sentenceBegin_;
       }
@@ -31770,6 +32282,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceEnd = 6;</code>
        * @return Whether the sentenceEnd field is set.
        */
+      @java.lang.Override
       public boolean hasSentenceEnd() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -31777,6 +32290,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceEnd = 6;</code>
        * @return The sentenceEnd.
        */
+      @java.lang.Override
       public int getSentenceEnd() {
         return sentenceEnd_;
       }
@@ -31807,6 +32321,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 tokenBegin = 7;</code>
        * @return Whether the tokenBegin field is set.
        */
+      @java.lang.Override
       public boolean hasTokenBegin() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -31814,6 +32329,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 tokenBegin = 7;</code>
        * @return The tokenBegin.
        */
+      @java.lang.Override
       public int getTokenBegin() {
         return tokenBegin_;
       }
@@ -31844,6 +32360,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 tokenEnd = 8;</code>
        * @return Whether the tokenEnd field is set.
        */
+      @java.lang.Override
       public boolean hasTokenEnd() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -31851,6 +32368,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 tokenEnd = 8;</code>
        * @return The tokenEnd.
        */
+      @java.lang.Override
       public int getTokenEnd() {
         return tokenEnd_;
       }
@@ -31965,6 +32483,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 index = 10;</code>
        * @return Whether the index field is set.
        */
+      @java.lang.Override
       public boolean hasIndex() {
         return ((bitField0_ & 0x00000100) != 0);
       }
@@ -31972,6 +32491,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 index = 10;</code>
        * @return The index.
        */
+      @java.lang.Override
       public int getIndex() {
         return index_;
       }
@@ -32170,6 +32690,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 mentionBegin = 13;</code>
        * @return Whether the mentionBegin field is set.
        */
+      @java.lang.Override
       public boolean hasMentionBegin() {
         return ((bitField0_ & 0x00000800) != 0);
       }
@@ -32177,6 +32698,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 mentionBegin = 13;</code>
        * @return The mentionBegin.
        */
+      @java.lang.Override
       public int getMentionBegin() {
         return mentionBegin_;
       }
@@ -32207,6 +32729,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 mentionEnd = 14;</code>
        * @return Whether the mentionEnd field is set.
        */
+      @java.lang.Override
       public boolean hasMentionEnd() {
         return ((bitField0_ & 0x00001000) != 0);
       }
@@ -32214,6 +32737,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 mentionEnd = 14;</code>
        * @return The mentionEnd.
        */
+      @java.lang.Override
       public int getMentionEnd() {
         return mentionEnd_;
       }
@@ -32664,6 +33188,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 canonicalMentionBegin = 20;</code>
        * @return Whether the canonicalMentionBegin field is set.
        */
+      @java.lang.Override
       public boolean hasCanonicalMentionBegin() {
         return ((bitField0_ & 0x00040000) != 0);
       }
@@ -32671,6 +33196,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 canonicalMentionBegin = 20;</code>
        * @return The canonicalMentionBegin.
        */
+      @java.lang.Override
       public int getCanonicalMentionBegin() {
         return canonicalMentionBegin_;
       }
@@ -32701,6 +33227,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 canonicalMentionEnd = 21;</code>
        * @return Whether the canonicalMentionEnd field is set.
        */
+      @java.lang.Override
       public boolean hasCanonicalMentionEnd() {
         return ((bitField0_ & 0x00080000) != 0);
       }
@@ -32708,6 +33235,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 canonicalMentionEnd = 21;</code>
        * @return The canonicalMentionEnd.
        */
+      @java.lang.Override
       public int getCanonicalMentionEnd() {
         return canonicalMentionEnd_;
       }
@@ -33001,7 +33529,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.ParseTree}
    */
-  public  static final class ParseTree extends
+  public static final class ParseTree extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.ParseTree)
       ParseTreeOrBuilder {
@@ -33130,12 +33658,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.ParseTree child = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree> getChildList() {
       return child_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.ParseTree child = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder> 
         getChildOrBuilderList() {
       return child_;
@@ -33143,18 +33673,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.ParseTree child = 1;</code>
      */
+    @java.lang.Override
     public int getChildCount() {
       return child_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.ParseTree child = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree getChild(int index) {
       return child_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.ParseTree child = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder getChildOrBuilder(
         int index) {
       return child_.get(index);
@@ -33166,6 +33699,7 @@ public final class CoreNLPProtos {
      * <code>optional string value = 2;</code>
      * @return Whether the value field is set.
      */
+    @java.lang.Override
     public boolean hasValue() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -33173,6 +33707,7 @@ public final class CoreNLPProtos {
      * <code>optional string value = 2;</code>
      * @return The value.
      */
+    @java.lang.Override
     public java.lang.String getValue() {
       java.lang.Object ref = value_;
       if (ref instanceof java.lang.String) {
@@ -33191,6 +33726,7 @@ public final class CoreNLPProtos {
      * <code>optional string value = 2;</code>
      * @return The bytes for value.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getValueBytes() {
       java.lang.Object ref = value_;
@@ -33211,6 +33747,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 yieldBeginIndex = 3;</code>
      * @return Whether the yieldBeginIndex field is set.
      */
+    @java.lang.Override
     public boolean hasYieldBeginIndex() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -33218,6 +33755,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 yieldBeginIndex = 3;</code>
      * @return The yieldBeginIndex.
      */
+    @java.lang.Override
     public int getYieldBeginIndex() {
       return yieldBeginIndex_;
     }
@@ -33228,6 +33766,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 yieldEndIndex = 4;</code>
      * @return Whether the yieldEndIndex field is set.
      */
+    @java.lang.Override
     public boolean hasYieldEndIndex() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -33235,6 +33774,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 yieldEndIndex = 4;</code>
      * @return The yieldEndIndex.
      */
+    @java.lang.Override
     public int getYieldEndIndex() {
       return yieldEndIndex_;
     }
@@ -33245,6 +33785,7 @@ public final class CoreNLPProtos {
      * <code>optional double score = 5;</code>
      * @return Whether the score field is set.
      */
+    @java.lang.Override
     public boolean hasScore() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -33252,6 +33793,7 @@ public final class CoreNLPProtos {
      * <code>optional double score = 5;</code>
      * @return The score.
      */
+    @java.lang.Override
     public double getScore() {
       return score_;
     }
@@ -33262,14 +33804,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
      * @return Whether the sentiment field is set.
      */
-    public boolean hasSentiment() {
+    @java.lang.Override public boolean hasSentiment() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
      * @return The sentiment.
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment getSentiment() {
+    @java.lang.Override public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment getSentiment() {
       @SuppressWarnings("deprecation")
       edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment result = edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment.valueOf(sentiment_);
       return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment.STRONG_NEGATIVE : result;
@@ -34079,6 +34621,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 yieldBeginIndex = 3;</code>
        * @return Whether the yieldBeginIndex field is set.
        */
+      @java.lang.Override
       public boolean hasYieldBeginIndex() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -34086,6 +34629,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 yieldBeginIndex = 3;</code>
        * @return The yieldBeginIndex.
        */
+      @java.lang.Override
       public int getYieldBeginIndex() {
         return yieldBeginIndex_;
       }
@@ -34116,6 +34660,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 yieldEndIndex = 4;</code>
        * @return Whether the yieldEndIndex field is set.
        */
+      @java.lang.Override
       public boolean hasYieldEndIndex() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -34123,6 +34668,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 yieldEndIndex = 4;</code>
        * @return The yieldEndIndex.
        */
+      @java.lang.Override
       public int getYieldEndIndex() {
         return yieldEndIndex_;
       }
@@ -34153,6 +34699,7 @@ public final class CoreNLPProtos {
        * <code>optional double score = 5;</code>
        * @return Whether the score field is set.
        */
+      @java.lang.Override
       public boolean hasScore() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -34160,6 +34707,7 @@ public final class CoreNLPProtos {
        * <code>optional double score = 5;</code>
        * @return The score.
        */
+      @java.lang.Override
       public double getScore() {
         return score_;
       }
@@ -34190,13 +34738,14 @@ public final class CoreNLPProtos {
        * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
        * @return Whether the sentiment field is set.
        */
-      public boolean hasSentiment() {
+      @java.lang.Override public boolean hasSentiment() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Sentiment sentiment = 6;</code>
        * @return The sentiment.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment getSentiment() {
         @SuppressWarnings("deprecation")
         edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment result = edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment.valueOf(sentiment_);
@@ -34355,7 +34904,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyGraph}
    */
-  public  static final class DependencyGraph extends
+  public static final class DependencyGraph extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.DependencyGraph)
       DependencyGraphOrBuilder {
@@ -34521,7 +35070,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyGraph.Node}
      */
-    public  static final class Node extends
+    public static final class Node extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.DependencyGraph.Node)
         NodeOrBuilder {
@@ -34618,6 +35167,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 sentenceIndex = 1;</code>
        * @return Whether the sentenceIndex field is set.
        */
+      @java.lang.Override
       public boolean hasSentenceIndex() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -34625,6 +35175,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 sentenceIndex = 1;</code>
        * @return The sentenceIndex.
        */
+      @java.lang.Override
       public int getSentenceIndex() {
         return sentenceIndex_;
       }
@@ -34635,6 +35186,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 index = 2;</code>
        * @return Whether the index field is set.
        */
+      @java.lang.Override
       public boolean hasIndex() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -34642,6 +35194,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 index = 2;</code>
        * @return The index.
        */
+      @java.lang.Override
       public int getIndex() {
         return index_;
       }
@@ -34652,6 +35205,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 copyAnnotation = 3;</code>
        * @return Whether the copyAnnotation field is set.
        */
+      @java.lang.Override
       public boolean hasCopyAnnotation() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -34659,6 +35213,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 copyAnnotation = 3;</code>
        * @return The copyAnnotation.
        */
+      @java.lang.Override
       public int getCopyAnnotation() {
         return copyAnnotation_;
       }
@@ -35046,6 +35601,7 @@ public final class CoreNLPProtos {
          * <code>required uint32 sentenceIndex = 1;</code>
          * @return Whether the sentenceIndex field is set.
          */
+        @java.lang.Override
         public boolean hasSentenceIndex() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -35053,6 +35609,7 @@ public final class CoreNLPProtos {
          * <code>required uint32 sentenceIndex = 1;</code>
          * @return The sentenceIndex.
          */
+        @java.lang.Override
         public int getSentenceIndex() {
           return sentenceIndex_;
         }
@@ -35083,6 +35640,7 @@ public final class CoreNLPProtos {
          * <code>required uint32 index = 2;</code>
          * @return Whether the index field is set.
          */
+        @java.lang.Override
         public boolean hasIndex() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -35090,6 +35648,7 @@ public final class CoreNLPProtos {
          * <code>required uint32 index = 2;</code>
          * @return The index.
          */
+        @java.lang.Override
         public int getIndex() {
           return index_;
         }
@@ -35120,6 +35679,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 copyAnnotation = 3;</code>
          * @return Whether the copyAnnotation field is set.
          */
+        @java.lang.Override
         public boolean hasCopyAnnotation() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -35127,6 +35687,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 copyAnnotation = 3;</code>
          * @return The copyAnnotation.
          */
+        @java.lang.Override
         public int getCopyAnnotation() {
           return copyAnnotation_;
         }
@@ -35294,7 +35855,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyGraph.Edge}
      */
-    public  static final class Edge extends
+    public static final class Edge extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.DependencyGraph.Edge)
         EdgeOrBuilder {
@@ -35421,6 +35982,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 source = 1;</code>
        * @return Whether the source field is set.
        */
+      @java.lang.Override
       public boolean hasSource() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -35428,6 +35990,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 source = 1;</code>
        * @return The source.
        */
+      @java.lang.Override
       public int getSource() {
         return source_;
       }
@@ -35438,6 +36001,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 target = 2;</code>
        * @return Whether the target field is set.
        */
+      @java.lang.Override
       public boolean hasTarget() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -35445,6 +36009,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 target = 2;</code>
        * @return The target.
        */
+      @java.lang.Override
       public int getTarget() {
         return target_;
       }
@@ -35455,6 +36020,7 @@ public final class CoreNLPProtos {
        * <code>optional string dep = 3;</code>
        * @return Whether the dep field is set.
        */
+      @java.lang.Override
       public boolean hasDep() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -35462,6 +36028,7 @@ public final class CoreNLPProtos {
        * <code>optional string dep = 3;</code>
        * @return The dep.
        */
+      @java.lang.Override
       public java.lang.String getDep() {
         java.lang.Object ref = dep_;
         if (ref instanceof java.lang.String) {
@@ -35480,6 +36047,7 @@ public final class CoreNLPProtos {
        * <code>optional string dep = 3;</code>
        * @return The bytes for dep.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getDepBytes() {
         java.lang.Object ref = dep_;
@@ -35500,6 +36068,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isExtra = 4;</code>
        * @return Whether the isExtra field is set.
        */
+      @java.lang.Override
       public boolean hasIsExtra() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -35507,6 +36076,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isExtra = 4;</code>
        * @return The isExtra.
        */
+      @java.lang.Override
       public boolean getIsExtra() {
         return isExtra_;
       }
@@ -35517,6 +36087,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sourceCopy = 5;</code>
        * @return Whether the sourceCopy field is set.
        */
+      @java.lang.Override
       public boolean hasSourceCopy() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -35524,6 +36095,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sourceCopy = 5;</code>
        * @return The sourceCopy.
        */
+      @java.lang.Override
       public int getSourceCopy() {
         return sourceCopy_;
       }
@@ -35534,6 +36106,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 targetCopy = 6;</code>
        * @return Whether the targetCopy field is set.
        */
+      @java.lang.Override
       public boolean hasTargetCopy() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -35541,6 +36114,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 targetCopy = 6;</code>
        * @return The targetCopy.
        */
+      @java.lang.Override
       public int getTargetCopy() {
         return targetCopy_;
       }
@@ -35551,14 +36125,14 @@ public final class CoreNLPProtos {
        * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
        * @return Whether the language field is set.
        */
-      public boolean hasLanguage() {
+      @java.lang.Override public boolean hasLanguage() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
        * @return The language.
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
+      @java.lang.Override public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
         @SuppressWarnings("deprecation")
         edu.stanford.nlp.pipeline.CoreNLPProtos.Language result = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.valueOf(language_);
         return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Language.Unknown : result;
@@ -36048,6 +36622,7 @@ public final class CoreNLPProtos {
          * <code>required uint32 source = 1;</code>
          * @return Whether the source field is set.
          */
+        @java.lang.Override
         public boolean hasSource() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -36055,6 +36630,7 @@ public final class CoreNLPProtos {
          * <code>required uint32 source = 1;</code>
          * @return The source.
          */
+        @java.lang.Override
         public int getSource() {
           return source_;
         }
@@ -36085,6 +36661,7 @@ public final class CoreNLPProtos {
          * <code>required uint32 target = 2;</code>
          * @return Whether the target field is set.
          */
+        @java.lang.Override
         public boolean hasTarget() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -36092,6 +36669,7 @@ public final class CoreNLPProtos {
          * <code>required uint32 target = 2;</code>
          * @return The target.
          */
+        @java.lang.Override
         public int getTarget() {
           return target_;
         }
@@ -36206,6 +36784,7 @@ public final class CoreNLPProtos {
          * <code>optional bool isExtra = 4;</code>
          * @return Whether the isExtra field is set.
          */
+        @java.lang.Override
         public boolean hasIsExtra() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -36213,6 +36792,7 @@ public final class CoreNLPProtos {
          * <code>optional bool isExtra = 4;</code>
          * @return The isExtra.
          */
+        @java.lang.Override
         public boolean getIsExtra() {
           return isExtra_;
         }
@@ -36243,6 +36823,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 sourceCopy = 5;</code>
          * @return Whether the sourceCopy field is set.
          */
+        @java.lang.Override
         public boolean hasSourceCopy() {
           return ((bitField0_ & 0x00000010) != 0);
         }
@@ -36250,6 +36831,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 sourceCopy = 5;</code>
          * @return The sourceCopy.
          */
+        @java.lang.Override
         public int getSourceCopy() {
           return sourceCopy_;
         }
@@ -36280,6 +36862,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 targetCopy = 6;</code>
          * @return Whether the targetCopy field is set.
          */
+        @java.lang.Override
         public boolean hasTargetCopy() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -36287,6 +36870,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 targetCopy = 6;</code>
          * @return The targetCopy.
          */
+        @java.lang.Override
         public int getTargetCopy() {
           return targetCopy_;
         }
@@ -36317,13 +36901,14 @@ public final class CoreNLPProtos {
          * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
          * @return Whether the language field is set.
          */
-        public boolean hasLanguage() {
+        @java.lang.Override public boolean hasLanguage() {
           return ((bitField0_ & 0x00000040) != 0);
         }
         /**
          * <code>optional .edu.stanford.nlp.pipeline.Language language = 7 [default = Unknown];</code>
          * @return The language.
          */
+        @java.lang.Override
         public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
           @SuppressWarnings("deprecation")
           edu.stanford.nlp.pipeline.CoreNLPProtos.Language result = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.valueOf(language_);
@@ -36411,12 +36996,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph.Node node = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node> getNodeList() {
       return node_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph.Node node = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.NodeOrBuilder> 
         getNodeOrBuilderList() {
       return node_;
@@ -36424,18 +37011,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph.Node node = 1;</code>
      */
+    @java.lang.Override
     public int getNodeCount() {
       return node_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph.Node node = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node getNode(int index) {
       return node_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph.Node node = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.NodeOrBuilder getNodeOrBuilder(
         int index) {
       return node_.get(index);
@@ -36446,12 +37036,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph.Edge edge = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge> getEdgeList() {
       return edge_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph.Edge edge = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.EdgeOrBuilder> 
         getEdgeOrBuilderList() {
       return edge_;
@@ -36459,18 +37051,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph.Edge edge = 2;</code>
      */
+    @java.lang.Override
     public int getEdgeCount() {
       return edge_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph.Edge edge = 2;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge getEdge(int index) {
       return edge_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph.Edge edge = 2;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.EdgeOrBuilder getEdgeOrBuilder(
         int index) {
       return edge_.get(index);
@@ -36482,6 +37077,7 @@ public final class CoreNLPProtos {
      * <code>repeated uint32 root = 3 [packed = true];</code>
      * @return A list containing the root.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getRootList() {
       return root_;
@@ -37640,7 +38236,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.CorefChain}
    */
-  public  static final class CorefChain extends
+  public static final class CorefChain extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.CorefChain)
       CorefChainOrBuilder {
@@ -37887,7 +38483,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.CorefChain.CorefMention}
      */
-    public  static final class CorefMention extends
+    public static final class CorefMention extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.CorefChain.CorefMention)
         CorefMentionOrBuilder {
@@ -38027,6 +38623,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 mentionID = 1;</code>
        * @return Whether the mentionID field is set.
        */
+      @java.lang.Override
       public boolean hasMentionID() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -38034,6 +38631,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 mentionID = 1;</code>
        * @return The mentionID.
        */
+      @java.lang.Override
       public int getMentionID() {
         return mentionID_;
       }
@@ -38044,6 +38642,7 @@ public final class CoreNLPProtos {
        * <code>optional string mentionType = 2;</code>
        * @return Whether the mentionType field is set.
        */
+      @java.lang.Override
       public boolean hasMentionType() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -38051,6 +38650,7 @@ public final class CoreNLPProtos {
        * <code>optional string mentionType = 2;</code>
        * @return The mentionType.
        */
+      @java.lang.Override
       public java.lang.String getMentionType() {
         java.lang.Object ref = mentionType_;
         if (ref instanceof java.lang.String) {
@@ -38069,6 +38669,7 @@ public final class CoreNLPProtos {
        * <code>optional string mentionType = 2;</code>
        * @return The bytes for mentionType.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getMentionTypeBytes() {
         java.lang.Object ref = mentionType_;
@@ -38089,6 +38690,7 @@ public final class CoreNLPProtos {
        * <code>optional string number = 3;</code>
        * @return Whether the number field is set.
        */
+      @java.lang.Override
       public boolean hasNumber() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -38096,6 +38698,7 @@ public final class CoreNLPProtos {
        * <code>optional string number = 3;</code>
        * @return The number.
        */
+      @java.lang.Override
       public java.lang.String getNumber() {
         java.lang.Object ref = number_;
         if (ref instanceof java.lang.String) {
@@ -38114,6 +38717,7 @@ public final class CoreNLPProtos {
        * <code>optional string number = 3;</code>
        * @return The bytes for number.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getNumberBytes() {
         java.lang.Object ref = number_;
@@ -38134,6 +38738,7 @@ public final class CoreNLPProtos {
        * <code>optional string gender = 4;</code>
        * @return Whether the gender field is set.
        */
+      @java.lang.Override
       public boolean hasGender() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -38141,6 +38746,7 @@ public final class CoreNLPProtos {
        * <code>optional string gender = 4;</code>
        * @return The gender.
        */
+      @java.lang.Override
       public java.lang.String getGender() {
         java.lang.Object ref = gender_;
         if (ref instanceof java.lang.String) {
@@ -38159,6 +38765,7 @@ public final class CoreNLPProtos {
        * <code>optional string gender = 4;</code>
        * @return The bytes for gender.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getGenderBytes() {
         java.lang.Object ref = gender_;
@@ -38179,6 +38786,7 @@ public final class CoreNLPProtos {
        * <code>optional string animacy = 5;</code>
        * @return Whether the animacy field is set.
        */
+      @java.lang.Override
       public boolean hasAnimacy() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -38186,6 +38794,7 @@ public final class CoreNLPProtos {
        * <code>optional string animacy = 5;</code>
        * @return The animacy.
        */
+      @java.lang.Override
       public java.lang.String getAnimacy() {
         java.lang.Object ref = animacy_;
         if (ref instanceof java.lang.String) {
@@ -38204,6 +38813,7 @@ public final class CoreNLPProtos {
        * <code>optional string animacy = 5;</code>
        * @return The bytes for animacy.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getAnimacyBytes() {
         java.lang.Object ref = animacy_;
@@ -38224,6 +38834,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 beginIndex = 6;</code>
        * @return Whether the beginIndex field is set.
        */
+      @java.lang.Override
       public boolean hasBeginIndex() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -38231,6 +38842,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 beginIndex = 6;</code>
        * @return The beginIndex.
        */
+      @java.lang.Override
       public int getBeginIndex() {
         return beginIndex_;
       }
@@ -38241,6 +38853,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 endIndex = 7;</code>
        * @return Whether the endIndex field is set.
        */
+      @java.lang.Override
       public boolean hasEndIndex() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -38248,6 +38861,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 endIndex = 7;</code>
        * @return The endIndex.
        */
+      @java.lang.Override
       public int getEndIndex() {
         return endIndex_;
       }
@@ -38258,6 +38872,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 headIndex = 9;</code>
        * @return Whether the headIndex field is set.
        */
+      @java.lang.Override
       public boolean hasHeadIndex() {
         return ((bitField0_ & 0x00000080) != 0);
       }
@@ -38265,6 +38880,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 headIndex = 9;</code>
        * @return The headIndex.
        */
+      @java.lang.Override
       public int getHeadIndex() {
         return headIndex_;
       }
@@ -38275,6 +38891,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceIndex = 10;</code>
        * @return Whether the sentenceIndex field is set.
        */
+      @java.lang.Override
       public boolean hasSentenceIndex() {
         return ((bitField0_ & 0x00000100) != 0);
       }
@@ -38282,6 +38899,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceIndex = 10;</code>
        * @return The sentenceIndex.
        */
+      @java.lang.Override
       public int getSentenceIndex() {
         return sentenceIndex_;
       }
@@ -38296,6 +38914,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 position = 11;</code>
        * @return Whether the position field is set.
        */
+      @java.lang.Override
       public boolean hasPosition() {
         return ((bitField0_ & 0x00000200) != 0);
       }
@@ -38307,6 +38926,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 position = 11;</code>
        * @return The position.
        */
+      @java.lang.Override
       public int getPosition() {
         return position_;
       }
@@ -38859,6 +39479,7 @@ public final class CoreNLPProtos {
          * <code>optional int32 mentionID = 1;</code>
          * @return Whether the mentionID field is set.
          */
+        @java.lang.Override
         public boolean hasMentionID() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -38866,6 +39487,7 @@ public final class CoreNLPProtos {
          * <code>optional int32 mentionID = 1;</code>
          * @return The mentionID.
          */
+        @java.lang.Override
         public int getMentionID() {
           return mentionID_;
         }
@@ -39232,6 +39854,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 beginIndex = 6;</code>
          * @return Whether the beginIndex field is set.
          */
+        @java.lang.Override
         public boolean hasBeginIndex() {
           return ((bitField0_ & 0x00000020) != 0);
         }
@@ -39239,6 +39862,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 beginIndex = 6;</code>
          * @return The beginIndex.
          */
+        @java.lang.Override
         public int getBeginIndex() {
           return beginIndex_;
         }
@@ -39269,6 +39893,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 endIndex = 7;</code>
          * @return Whether the endIndex field is set.
          */
+        @java.lang.Override
         public boolean hasEndIndex() {
           return ((bitField0_ & 0x00000040) != 0);
         }
@@ -39276,6 +39901,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 endIndex = 7;</code>
          * @return The endIndex.
          */
+        @java.lang.Override
         public int getEndIndex() {
           return endIndex_;
         }
@@ -39306,6 +39932,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 headIndex = 9;</code>
          * @return Whether the headIndex field is set.
          */
+        @java.lang.Override
         public boolean hasHeadIndex() {
           return ((bitField0_ & 0x00000080) != 0);
         }
@@ -39313,6 +39940,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 headIndex = 9;</code>
          * @return The headIndex.
          */
+        @java.lang.Override
         public int getHeadIndex() {
           return headIndex_;
         }
@@ -39343,6 +39971,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 sentenceIndex = 10;</code>
          * @return Whether the sentenceIndex field is set.
          */
+        @java.lang.Override
         public boolean hasSentenceIndex() {
           return ((bitField0_ & 0x00000100) != 0);
         }
@@ -39350,6 +39979,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 sentenceIndex = 10;</code>
          * @return The sentenceIndex.
          */
+        @java.lang.Override
         public int getSentenceIndex() {
           return sentenceIndex_;
         }
@@ -39384,6 +40014,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 position = 11;</code>
          * @return Whether the position field is set.
          */
+        @java.lang.Override
         public boolean hasPosition() {
           return ((bitField0_ & 0x00000200) != 0);
         }
@@ -39395,6 +40026,7 @@ public final class CoreNLPProtos {
          * <code>optional uint32 position = 11;</code>
          * @return The position.
          */
+        @java.lang.Override
         public int getPosition() {
           return position_;
         }
@@ -39487,6 +40119,7 @@ public final class CoreNLPProtos {
      * <code>required int32 chainID = 1;</code>
      * @return Whether the chainID field is set.
      */
+    @java.lang.Override
     public boolean hasChainID() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -39494,6 +40127,7 @@ public final class CoreNLPProtos {
      * <code>required int32 chainID = 1;</code>
      * @return The chainID.
      */
+    @java.lang.Override
     public int getChainID() {
       return chainID_;
     }
@@ -39503,12 +40137,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.CorefChain.CorefMention mention = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention> getMentionList() {
       return mention_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.CorefChain.CorefMention mention = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMentionOrBuilder> 
         getMentionOrBuilderList() {
       return mention_;
@@ -39516,18 +40152,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.CorefChain.CorefMention mention = 2;</code>
      */
+    @java.lang.Override
     public int getMentionCount() {
       return mention_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.CorefChain.CorefMention mention = 2;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention getMention(int index) {
       return mention_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.CorefChain.CorefMention mention = 2;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMentionOrBuilder getMentionOrBuilder(
         int index) {
       return mention_.get(index);
@@ -39539,6 +40178,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 representative = 3;</code>
      * @return Whether the representative field is set.
      */
+    @java.lang.Override
     public boolean hasRepresentative() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -39546,6 +40186,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 representative = 3;</code>
      * @return The representative.
      */
+    @java.lang.Override
     public int getRepresentative() {
       return representative_;
     }
@@ -39968,6 +40609,7 @@ public final class CoreNLPProtos {
        * <code>required int32 chainID = 1;</code>
        * @return Whether the chainID field is set.
        */
+      @java.lang.Override
       public boolean hasChainID() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -39975,6 +40617,7 @@ public final class CoreNLPProtos {
        * <code>required int32 chainID = 1;</code>
        * @return The chainID.
        */
+      @java.lang.Override
       public int getChainID() {
         return chainID_;
       }
@@ -40245,6 +40888,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 representative = 3;</code>
        * @return Whether the representative field is set.
        */
+      @java.lang.Override
       public boolean hasRepresentative() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -40252,6 +40896,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 representative = 3;</code>
        * @return The representative.
        */
+      @java.lang.Override
       public int getRepresentative() {
         return representative_;
       }
@@ -40929,7 +41574,7 @@ public final class CoreNLPProtos {
   /**
    * Protobuf type {@code edu.stanford.nlp.pipeline.Mention}
    */
-  public  static final class Mention extends
+  public static final class Mention extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Mention)
       MentionOrBuilder {
@@ -41395,6 +42040,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 mentionID = 1;</code>
      * @return Whether the mentionID field is set.
      */
+    @java.lang.Override
     public boolean hasMentionID() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -41402,6 +42048,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 mentionID = 1;</code>
      * @return The mentionID.
      */
+    @java.lang.Override
     public int getMentionID() {
       return mentionID_;
     }
@@ -41412,6 +42059,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionType = 2;</code>
      * @return Whether the mentionType field is set.
      */
+    @java.lang.Override
     public boolean hasMentionType() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -41419,6 +42067,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionType = 2;</code>
      * @return The mentionType.
      */
+    @java.lang.Override
     public java.lang.String getMentionType() {
       java.lang.Object ref = mentionType_;
       if (ref instanceof java.lang.String) {
@@ -41437,6 +42086,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionType = 2;</code>
      * @return The bytes for mentionType.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getMentionTypeBytes() {
       java.lang.Object ref = mentionType_;
@@ -41457,6 +42107,7 @@ public final class CoreNLPProtos {
      * <code>optional string number = 3;</code>
      * @return Whether the number field is set.
      */
+    @java.lang.Override
     public boolean hasNumber() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -41464,6 +42115,7 @@ public final class CoreNLPProtos {
      * <code>optional string number = 3;</code>
      * @return The number.
      */
+    @java.lang.Override
     public java.lang.String getNumber() {
       java.lang.Object ref = number_;
       if (ref instanceof java.lang.String) {
@@ -41482,6 +42134,7 @@ public final class CoreNLPProtos {
      * <code>optional string number = 3;</code>
      * @return The bytes for number.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNumberBytes() {
       java.lang.Object ref = number_;
@@ -41502,6 +42155,7 @@ public final class CoreNLPProtos {
      * <code>optional string gender = 4;</code>
      * @return Whether the gender field is set.
      */
+    @java.lang.Override
     public boolean hasGender() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -41509,6 +42163,7 @@ public final class CoreNLPProtos {
      * <code>optional string gender = 4;</code>
      * @return The gender.
      */
+    @java.lang.Override
     public java.lang.String getGender() {
       java.lang.Object ref = gender_;
       if (ref instanceof java.lang.String) {
@@ -41527,6 +42182,7 @@ public final class CoreNLPProtos {
      * <code>optional string gender = 4;</code>
      * @return The bytes for gender.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getGenderBytes() {
       java.lang.Object ref = gender_;
@@ -41547,6 +42203,7 @@ public final class CoreNLPProtos {
      * <code>optional string animacy = 5;</code>
      * @return Whether the animacy field is set.
      */
+    @java.lang.Override
     public boolean hasAnimacy() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -41554,6 +42211,7 @@ public final class CoreNLPProtos {
      * <code>optional string animacy = 5;</code>
      * @return The animacy.
      */
+    @java.lang.Override
     public java.lang.String getAnimacy() {
       java.lang.Object ref = animacy_;
       if (ref instanceof java.lang.String) {
@@ -41572,6 +42230,7 @@ public final class CoreNLPProtos {
      * <code>optional string animacy = 5;</code>
      * @return The bytes for animacy.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAnimacyBytes() {
       java.lang.Object ref = animacy_;
@@ -41592,6 +42251,7 @@ public final class CoreNLPProtos {
      * <code>optional string person = 6;</code>
      * @return Whether the person field is set.
      */
+    @java.lang.Override
     public boolean hasPerson() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -41599,6 +42259,7 @@ public final class CoreNLPProtos {
      * <code>optional string person = 6;</code>
      * @return The person.
      */
+    @java.lang.Override
     public java.lang.String getPerson() {
       java.lang.Object ref = person_;
       if (ref instanceof java.lang.String) {
@@ -41617,6 +42278,7 @@ public final class CoreNLPProtos {
      * <code>optional string person = 6;</code>
      * @return The bytes for person.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getPersonBytes() {
       java.lang.Object ref = person_;
@@ -41637,6 +42299,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 startIndex = 7;</code>
      * @return Whether the startIndex field is set.
      */
+    @java.lang.Override
     public boolean hasStartIndex() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -41644,6 +42307,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 startIndex = 7;</code>
      * @return The startIndex.
      */
+    @java.lang.Override
     public int getStartIndex() {
       return startIndex_;
     }
@@ -41654,6 +42318,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 endIndex = 9;</code>
      * @return Whether the endIndex field is set.
      */
+    @java.lang.Override
     public boolean hasEndIndex() {
       return ((bitField0_ & 0x00000080) != 0);
     }
@@ -41661,6 +42326,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 endIndex = 9;</code>
      * @return The endIndex.
      */
+    @java.lang.Override
     public int getEndIndex() {
       return endIndex_;
     }
@@ -41671,6 +42337,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 headIndex = 10;</code>
      * @return Whether the headIndex field is set.
      */
+    @java.lang.Override
     public boolean hasHeadIndex() {
       return ((bitField0_ & 0x00000100) != 0);
     }
@@ -41678,6 +42345,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 headIndex = 10;</code>
      * @return The headIndex.
      */
+    @java.lang.Override
     public int getHeadIndex() {
       return headIndex_;
     }
@@ -41688,6 +42356,7 @@ public final class CoreNLPProtos {
      * <code>optional string headString = 11;</code>
      * @return Whether the headString field is set.
      */
+    @java.lang.Override
     public boolean hasHeadString() {
       return ((bitField0_ & 0x00000200) != 0);
     }
@@ -41695,6 +42364,7 @@ public final class CoreNLPProtos {
      * <code>optional string headString = 11;</code>
      * @return The headString.
      */
+    @java.lang.Override
     public java.lang.String getHeadString() {
       java.lang.Object ref = headString_;
       if (ref instanceof java.lang.String) {
@@ -41713,6 +42383,7 @@ public final class CoreNLPProtos {
      * <code>optional string headString = 11;</code>
      * @return The bytes for headString.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getHeadStringBytes() {
       java.lang.Object ref = headString_;
@@ -41733,6 +42404,7 @@ public final class CoreNLPProtos {
      * <code>optional string nerString = 12;</code>
      * @return Whether the nerString field is set.
      */
+    @java.lang.Override
     public boolean hasNerString() {
       return ((bitField0_ & 0x00000400) != 0);
     }
@@ -41740,6 +42412,7 @@ public final class CoreNLPProtos {
      * <code>optional string nerString = 12;</code>
      * @return The nerString.
      */
+    @java.lang.Override
     public java.lang.String getNerString() {
       java.lang.Object ref = nerString_;
       if (ref instanceof java.lang.String) {
@@ -41758,6 +42431,7 @@ public final class CoreNLPProtos {
      * <code>optional string nerString = 12;</code>
      * @return The bytes for nerString.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNerStringBytes() {
       java.lang.Object ref = nerString_;
@@ -41778,6 +42452,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 originalRef = 13;</code>
      * @return Whether the originalRef field is set.
      */
+    @java.lang.Override
     public boolean hasOriginalRef() {
       return ((bitField0_ & 0x00000800) != 0);
     }
@@ -41785,6 +42460,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 originalRef = 13;</code>
      * @return The originalRef.
      */
+    @java.lang.Override
     public int getOriginalRef() {
       return originalRef_;
     }
@@ -41795,6 +42471,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 goldCorefClusterID = 14;</code>
      * @return Whether the goldCorefClusterID field is set.
      */
+    @java.lang.Override
     public boolean hasGoldCorefClusterID() {
       return ((bitField0_ & 0x00001000) != 0);
     }
@@ -41802,6 +42479,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 goldCorefClusterID = 14;</code>
      * @return The goldCorefClusterID.
      */
+    @java.lang.Override
     public int getGoldCorefClusterID() {
       return goldCorefClusterID_;
     }
@@ -41812,6 +42490,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 corefClusterID = 15;</code>
      * @return Whether the corefClusterID field is set.
      */
+    @java.lang.Override
     public boolean hasCorefClusterID() {
       return ((bitField0_ & 0x00002000) != 0);
     }
@@ -41819,6 +42498,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 corefClusterID = 15;</code>
      * @return The corefClusterID.
      */
+    @java.lang.Override
     public int getCorefClusterID() {
       return corefClusterID_;
     }
@@ -41829,6 +42509,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 mentionNum = 16;</code>
      * @return Whether the mentionNum field is set.
      */
+    @java.lang.Override
     public boolean hasMentionNum() {
       return ((bitField0_ & 0x00004000) != 0);
     }
@@ -41836,6 +42517,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 mentionNum = 16;</code>
      * @return The mentionNum.
      */
+    @java.lang.Override
     public int getMentionNum() {
       return mentionNum_;
     }
@@ -41846,6 +42528,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 sentNum = 17;</code>
      * @return Whether the sentNum field is set.
      */
+    @java.lang.Override
     public boolean hasSentNum() {
       return ((bitField0_ & 0x00008000) != 0);
     }
@@ -41853,6 +42536,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 sentNum = 17;</code>
      * @return The sentNum.
      */
+    @java.lang.Override
     public int getSentNum() {
       return sentNum_;
     }
@@ -41863,6 +42547,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 utter = 18;</code>
      * @return Whether the utter field is set.
      */
+    @java.lang.Override
     public boolean hasUtter() {
       return ((bitField0_ & 0x00010000) != 0);
     }
@@ -41870,6 +42555,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 utter = 18;</code>
      * @return The utter.
      */
+    @java.lang.Override
     public int getUtter() {
       return utter_;
     }
@@ -41880,6 +42566,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 paragraph = 19;</code>
      * @return Whether the paragraph field is set.
      */
+    @java.lang.Override
     public boolean hasParagraph() {
       return ((bitField0_ & 0x00020000) != 0);
     }
@@ -41887,6 +42574,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 paragraph = 19;</code>
      * @return The paragraph.
      */
+    @java.lang.Override
     public int getParagraph() {
       return paragraph_;
     }
@@ -41897,6 +42585,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isSubject = 20;</code>
      * @return Whether the isSubject field is set.
      */
+    @java.lang.Override
     public boolean hasIsSubject() {
       return ((bitField0_ & 0x00040000) != 0);
     }
@@ -41904,6 +42593,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isSubject = 20;</code>
      * @return The isSubject.
      */
+    @java.lang.Override
     public boolean getIsSubject() {
       return isSubject_;
     }
@@ -41914,6 +42604,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isDirectObject = 21;</code>
      * @return Whether the isDirectObject field is set.
      */
+    @java.lang.Override
     public boolean hasIsDirectObject() {
       return ((bitField0_ & 0x00080000) != 0);
     }
@@ -41921,6 +42612,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isDirectObject = 21;</code>
      * @return The isDirectObject.
      */
+    @java.lang.Override
     public boolean getIsDirectObject() {
       return isDirectObject_;
     }
@@ -41931,6 +42623,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isIndirectObject = 22;</code>
      * @return Whether the isIndirectObject field is set.
      */
+    @java.lang.Override
     public boolean hasIsIndirectObject() {
       return ((bitField0_ & 0x00100000) != 0);
     }
@@ -41938,6 +42631,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isIndirectObject = 22;</code>
      * @return The isIndirectObject.
      */
+    @java.lang.Override
     public boolean getIsIndirectObject() {
       return isIndirectObject_;
     }
@@ -41948,6 +42642,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isPrepositionObject = 23;</code>
      * @return Whether the isPrepositionObject field is set.
      */
+    @java.lang.Override
     public boolean hasIsPrepositionObject() {
       return ((bitField0_ & 0x00200000) != 0);
     }
@@ -41955,6 +42650,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isPrepositionObject = 23;</code>
      * @return The isPrepositionObject.
      */
+    @java.lang.Override
     public boolean getIsPrepositionObject() {
       return isPrepositionObject_;
     }
@@ -41965,6 +42661,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasTwin = 24;</code>
      * @return Whether the hasTwin field is set.
      */
+    @java.lang.Override
     public boolean hasHasTwin() {
       return ((bitField0_ & 0x00400000) != 0);
     }
@@ -41972,6 +42669,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasTwin = 24;</code>
      * @return The hasTwin.
      */
+    @java.lang.Override
     public boolean getHasTwin() {
       return hasTwin_;
     }
@@ -41982,6 +42680,7 @@ public final class CoreNLPProtos {
      * <code>optional bool generic = 25;</code>
      * @return Whether the generic field is set.
      */
+    @java.lang.Override
     public boolean hasGeneric() {
       return ((bitField0_ & 0x00800000) != 0);
     }
@@ -41989,6 +42688,7 @@ public final class CoreNLPProtos {
      * <code>optional bool generic = 25;</code>
      * @return The generic.
      */
+    @java.lang.Override
     public boolean getGeneric() {
       return generic_;
     }
@@ -41999,6 +42699,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isSingleton = 26;</code>
      * @return Whether the isSingleton field is set.
      */
+    @java.lang.Override
     public boolean hasIsSingleton() {
       return ((bitField0_ & 0x01000000) != 0);
     }
@@ -42006,6 +42707,7 @@ public final class CoreNLPProtos {
      * <code>optional bool isSingleton = 26;</code>
      * @return The isSingleton.
      */
+    @java.lang.Override
     public boolean getIsSingleton() {
       return isSingleton_;
     }
@@ -42016,6 +42718,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasBasicDependency = 27;</code>
      * @return Whether the hasBasicDependency field is set.
      */
+    @java.lang.Override
     public boolean hasHasBasicDependency() {
       return ((bitField0_ & 0x02000000) != 0);
     }
@@ -42023,6 +42726,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasBasicDependency = 27;</code>
      * @return The hasBasicDependency.
      */
+    @java.lang.Override
     public boolean getHasBasicDependency() {
       return hasBasicDependency_;
     }
@@ -42033,6 +42737,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasEnhancedDepenedncy = 28;</code>
      * @return Whether the hasEnhancedDepenedncy field is set.
      */
+    @java.lang.Override
     public boolean hasHasEnhancedDepenedncy() {
       return ((bitField0_ & 0x04000000) != 0);
     }
@@ -42040,6 +42745,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasEnhancedDepenedncy = 28;</code>
      * @return The hasEnhancedDepenedncy.
      */
+    @java.lang.Override
     public boolean getHasEnhancedDepenedncy() {
       return hasEnhancedDepenedncy_;
     }
@@ -42050,6 +42756,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasContextParseTree = 29;</code>
      * @return Whether the hasContextParseTree field is set.
      */
+    @java.lang.Override
     public boolean hasHasContextParseTree() {
       return ((bitField0_ & 0x08000000) != 0);
     }
@@ -42057,6 +42764,7 @@ public final class CoreNLPProtos {
      * <code>optional bool hasContextParseTree = 29;</code>
      * @return The hasContextParseTree.
      */
+    @java.lang.Override
     public boolean getHasContextParseTree() {
       return hasContextParseTree_;
     }
@@ -42067,6 +42775,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headIndexedWord = 30;</code>
      * @return Whether the headIndexedWord field is set.
      */
+    @java.lang.Override
     public boolean hasHeadIndexedWord() {
       return ((bitField0_ & 0x10000000) != 0);
     }
@@ -42074,12 +42783,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headIndexedWord = 30;</code>
      * @return The headIndexedWord.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getHeadIndexedWord() {
       return headIndexedWord_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance() : headIndexedWord_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headIndexedWord = 30;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder getHeadIndexedWordOrBuilder() {
       return headIndexedWord_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance() : headIndexedWord_;
     }
@@ -42090,6 +42801,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord dependingVerb = 31;</code>
      * @return Whether the dependingVerb field is set.
      */
+    @java.lang.Override
     public boolean hasDependingVerb() {
       return ((bitField0_ & 0x20000000) != 0);
     }
@@ -42097,12 +42809,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord dependingVerb = 31;</code>
      * @return The dependingVerb.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getDependingVerb() {
       return dependingVerb_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance() : dependingVerb_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord dependingVerb = 31;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder getDependingVerbOrBuilder() {
       return dependingVerb_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance() : dependingVerb_;
     }
@@ -42113,6 +42827,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headWord = 32;</code>
      * @return Whether the headWord field is set.
      */
+    @java.lang.Override
     public boolean hasHeadWord() {
       return ((bitField0_ & 0x40000000) != 0);
     }
@@ -42120,12 +42835,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headWord = 32;</code>
      * @return The headWord.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getHeadWord() {
       return headWord_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance() : headWord_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.IndexedWord headWord = 32;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder getHeadWordOrBuilder() {
       return headWord_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance() : headWord_;
     }
@@ -42136,6 +42853,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
      * @return Whether the speakerInfo field is set.
      */
+    @java.lang.Override
     public boolean hasSpeakerInfo() {
       return ((bitField0_ & 0x80000000) != 0);
     }
@@ -42143,12 +42861,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
      * @return The speakerInfo.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo getSpeakerInfo() {
       return speakerInfo_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.getDefaultInstance() : speakerInfo_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfoOrBuilder getSpeakerInfoOrBuilder() {
       return speakerInfo_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.getDefaultInstance() : speakerInfo_;
     }
@@ -42158,12 +42878,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord sentenceWords = 50;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord> getSentenceWordsList() {
       return sentenceWords_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord sentenceWords = 50;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder> 
         getSentenceWordsOrBuilderList() {
       return sentenceWords_;
@@ -42171,18 +42893,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord sentenceWords = 50;</code>
      */
+    @java.lang.Override
     public int getSentenceWordsCount() {
       return sentenceWords_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord sentenceWords = 50;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getSentenceWords(int index) {
       return sentenceWords_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord sentenceWords = 50;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder getSentenceWordsOrBuilder(
         int index) {
       return sentenceWords_.get(index);
@@ -42193,12 +42918,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord originalSpan = 51;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord> getOriginalSpanList() {
       return originalSpan_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord originalSpan = 51;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder> 
         getOriginalSpanOrBuilderList() {
       return originalSpan_;
@@ -42206,18 +42933,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord originalSpan = 51;</code>
      */
+    @java.lang.Override
     public int getOriginalSpanCount() {
       return originalSpan_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord originalSpan = 51;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord getOriginalSpan(int index) {
       return originalSpan_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord originalSpan = 51;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder getOriginalSpanOrBuilder(
         int index) {
       return originalSpan_.get(index);
@@ -42299,6 +43029,7 @@ public final class CoreNLPProtos {
      * <code>repeated int32 appositions = 54;</code>
      * @return A list containing the appositions.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getAppositionsList() {
       return appositions_;
@@ -42325,6 +43056,7 @@ public final class CoreNLPProtos {
      * <code>repeated int32 predicateNominatives = 55;</code>
      * @return A list containing the predicateNominatives.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getPredicateNominativesList() {
       return predicateNominatives_;
@@ -42351,6 +43083,7 @@ public final class CoreNLPProtos {
      * <code>repeated int32 relativePronouns = 56;</code>
      * @return A list containing the relativePronouns.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getRelativePronounsList() {
       return relativePronouns_;
@@ -42377,6 +43110,7 @@ public final class CoreNLPProtos {
      * <code>repeated int32 listMembers = 57;</code>
      * @return A list containing the listMembers.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getListMembersList() {
       return listMembers_;
@@ -42403,6 +43137,7 @@ public final class CoreNLPProtos {
      * <code>repeated int32 belongToLists = 58;</code>
      * @return A list containing the belongToLists.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getBelongToListsList() {
       return belongToLists_;
@@ -43925,6 +44660,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 mentionID = 1;</code>
        * @return Whether the mentionID field is set.
        */
+      @java.lang.Override
       public boolean hasMentionID() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -43932,6 +44668,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 mentionID = 1;</code>
        * @return The mentionID.
        */
+      @java.lang.Override
       public int getMentionID() {
         return mentionID_;
       }
@@ -44382,6 +45119,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 startIndex = 7;</code>
        * @return Whether the startIndex field is set.
        */
+      @java.lang.Override
       public boolean hasStartIndex() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -44389,6 +45127,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 startIndex = 7;</code>
        * @return The startIndex.
        */
+      @java.lang.Override
       public int getStartIndex() {
         return startIndex_;
       }
@@ -44419,6 +45158,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 endIndex = 9;</code>
        * @return Whether the endIndex field is set.
        */
+      @java.lang.Override
       public boolean hasEndIndex() {
         return ((bitField0_ & 0x00000080) != 0);
       }
@@ -44426,6 +45166,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 endIndex = 9;</code>
        * @return The endIndex.
        */
+      @java.lang.Override
       public int getEndIndex() {
         return endIndex_;
       }
@@ -44456,6 +45197,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 headIndex = 10;</code>
        * @return Whether the headIndex field is set.
        */
+      @java.lang.Override
       public boolean hasHeadIndex() {
         return ((bitField0_ & 0x00000100) != 0);
       }
@@ -44463,6 +45205,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 headIndex = 10;</code>
        * @return The headIndex.
        */
+      @java.lang.Override
       public int getHeadIndex() {
         return headIndex_;
       }
@@ -44661,6 +45404,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 originalRef = 13;</code>
        * @return Whether the originalRef field is set.
        */
+      @java.lang.Override
       public boolean hasOriginalRef() {
         return ((bitField0_ & 0x00000800) != 0);
       }
@@ -44668,6 +45412,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 originalRef = 13;</code>
        * @return The originalRef.
        */
+      @java.lang.Override
       public int getOriginalRef() {
         return originalRef_;
       }
@@ -44698,6 +45443,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 goldCorefClusterID = 14;</code>
        * @return Whether the goldCorefClusterID field is set.
        */
+      @java.lang.Override
       public boolean hasGoldCorefClusterID() {
         return ((bitField0_ & 0x00001000) != 0);
       }
@@ -44705,6 +45451,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 goldCorefClusterID = 14;</code>
        * @return The goldCorefClusterID.
        */
+      @java.lang.Override
       public int getGoldCorefClusterID() {
         return goldCorefClusterID_;
       }
@@ -44735,6 +45482,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 corefClusterID = 15;</code>
        * @return Whether the corefClusterID field is set.
        */
+      @java.lang.Override
       public boolean hasCorefClusterID() {
         return ((bitField0_ & 0x00002000) != 0);
       }
@@ -44742,6 +45490,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 corefClusterID = 15;</code>
        * @return The corefClusterID.
        */
+      @java.lang.Override
       public int getCorefClusterID() {
         return corefClusterID_;
       }
@@ -44772,6 +45521,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 mentionNum = 16;</code>
        * @return Whether the mentionNum field is set.
        */
+      @java.lang.Override
       public boolean hasMentionNum() {
         return ((bitField0_ & 0x00004000) != 0);
       }
@@ -44779,6 +45529,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 mentionNum = 16;</code>
        * @return The mentionNum.
        */
+      @java.lang.Override
       public int getMentionNum() {
         return mentionNum_;
       }
@@ -44809,6 +45560,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 sentNum = 17;</code>
        * @return Whether the sentNum field is set.
        */
+      @java.lang.Override
       public boolean hasSentNum() {
         return ((bitField0_ & 0x00008000) != 0);
       }
@@ -44816,6 +45568,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 sentNum = 17;</code>
        * @return The sentNum.
        */
+      @java.lang.Override
       public int getSentNum() {
         return sentNum_;
       }
@@ -44846,6 +45599,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 utter = 18;</code>
        * @return Whether the utter field is set.
        */
+      @java.lang.Override
       public boolean hasUtter() {
         return ((bitField0_ & 0x00010000) != 0);
       }
@@ -44853,6 +45607,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 utter = 18;</code>
        * @return The utter.
        */
+      @java.lang.Override
       public int getUtter() {
         return utter_;
       }
@@ -44883,6 +45638,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 paragraph = 19;</code>
        * @return Whether the paragraph field is set.
        */
+      @java.lang.Override
       public boolean hasParagraph() {
         return ((bitField0_ & 0x00020000) != 0);
       }
@@ -44890,6 +45646,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 paragraph = 19;</code>
        * @return The paragraph.
        */
+      @java.lang.Override
       public int getParagraph() {
         return paragraph_;
       }
@@ -44920,6 +45677,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isSubject = 20;</code>
        * @return Whether the isSubject field is set.
        */
+      @java.lang.Override
       public boolean hasIsSubject() {
         return ((bitField0_ & 0x00040000) != 0);
       }
@@ -44927,6 +45685,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isSubject = 20;</code>
        * @return The isSubject.
        */
+      @java.lang.Override
       public boolean getIsSubject() {
         return isSubject_;
       }
@@ -44957,6 +45716,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isDirectObject = 21;</code>
        * @return Whether the isDirectObject field is set.
        */
+      @java.lang.Override
       public boolean hasIsDirectObject() {
         return ((bitField0_ & 0x00080000) != 0);
       }
@@ -44964,6 +45724,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isDirectObject = 21;</code>
        * @return The isDirectObject.
        */
+      @java.lang.Override
       public boolean getIsDirectObject() {
         return isDirectObject_;
       }
@@ -44994,6 +45755,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isIndirectObject = 22;</code>
        * @return Whether the isIndirectObject field is set.
        */
+      @java.lang.Override
       public boolean hasIsIndirectObject() {
         return ((bitField0_ & 0x00100000) != 0);
       }
@@ -45001,6 +45763,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isIndirectObject = 22;</code>
        * @return The isIndirectObject.
        */
+      @java.lang.Override
       public boolean getIsIndirectObject() {
         return isIndirectObject_;
       }
@@ -45031,6 +45794,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isPrepositionObject = 23;</code>
        * @return Whether the isPrepositionObject field is set.
        */
+      @java.lang.Override
       public boolean hasIsPrepositionObject() {
         return ((bitField0_ & 0x00200000) != 0);
       }
@@ -45038,6 +45802,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isPrepositionObject = 23;</code>
        * @return The isPrepositionObject.
        */
+      @java.lang.Override
       public boolean getIsPrepositionObject() {
         return isPrepositionObject_;
       }
@@ -45068,6 +45833,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasTwin = 24;</code>
        * @return Whether the hasTwin field is set.
        */
+      @java.lang.Override
       public boolean hasHasTwin() {
         return ((bitField0_ & 0x00400000) != 0);
       }
@@ -45075,6 +45841,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasTwin = 24;</code>
        * @return The hasTwin.
        */
+      @java.lang.Override
       public boolean getHasTwin() {
         return hasTwin_;
       }
@@ -45105,6 +45872,7 @@ public final class CoreNLPProtos {
        * <code>optional bool generic = 25;</code>
        * @return Whether the generic field is set.
        */
+      @java.lang.Override
       public boolean hasGeneric() {
         return ((bitField0_ & 0x00800000) != 0);
       }
@@ -45112,6 +45880,7 @@ public final class CoreNLPProtos {
        * <code>optional bool generic = 25;</code>
        * @return The generic.
        */
+      @java.lang.Override
       public boolean getGeneric() {
         return generic_;
       }
@@ -45142,6 +45911,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isSingleton = 26;</code>
        * @return Whether the isSingleton field is set.
        */
+      @java.lang.Override
       public boolean hasIsSingleton() {
         return ((bitField0_ & 0x01000000) != 0);
       }
@@ -45149,6 +45919,7 @@ public final class CoreNLPProtos {
        * <code>optional bool isSingleton = 26;</code>
        * @return The isSingleton.
        */
+      @java.lang.Override
       public boolean getIsSingleton() {
         return isSingleton_;
       }
@@ -45179,6 +45950,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasBasicDependency = 27;</code>
        * @return Whether the hasBasicDependency field is set.
        */
+      @java.lang.Override
       public boolean hasHasBasicDependency() {
         return ((bitField0_ & 0x02000000) != 0);
       }
@@ -45186,6 +45958,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasBasicDependency = 27;</code>
        * @return The hasBasicDependency.
        */
+      @java.lang.Override
       public boolean getHasBasicDependency() {
         return hasBasicDependency_;
       }
@@ -45216,6 +45989,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasEnhancedDepenedncy = 28;</code>
        * @return Whether the hasEnhancedDepenedncy field is set.
        */
+      @java.lang.Override
       public boolean hasHasEnhancedDepenedncy() {
         return ((bitField0_ & 0x04000000) != 0);
       }
@@ -45223,6 +45997,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasEnhancedDepenedncy = 28;</code>
        * @return The hasEnhancedDepenedncy.
        */
+      @java.lang.Override
       public boolean getHasEnhancedDepenedncy() {
         return hasEnhancedDepenedncy_;
       }
@@ -45253,6 +46028,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasContextParseTree = 29;</code>
        * @return Whether the hasContextParseTree field is set.
        */
+      @java.lang.Override
       public boolean hasHasContextParseTree() {
         return ((bitField0_ & 0x08000000) != 0);
       }
@@ -45260,6 +46036,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasContextParseTree = 29;</code>
        * @return The hasContextParseTree.
        */
+      @java.lang.Override
       public boolean getHasContextParseTree() {
         return hasContextParseTree_;
       }
@@ -46961,7 +47738,7 @@ public final class CoreNLPProtos {
   /**
    * Protobuf type {@code edu.stanford.nlp.pipeline.IndexedWord}
    */
-  public  static final class IndexedWord extends
+  public static final class IndexedWord extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.IndexedWord)
       IndexedWordOrBuilder {
@@ -47063,6 +47840,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 sentenceNum = 1;</code>
      * @return Whether the sentenceNum field is set.
      */
+    @java.lang.Override
     public boolean hasSentenceNum() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -47070,6 +47848,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 sentenceNum = 1;</code>
      * @return The sentenceNum.
      */
+    @java.lang.Override
     public int getSentenceNum() {
       return sentenceNum_;
     }
@@ -47080,6 +47859,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 tokenIndex = 2;</code>
      * @return Whether the tokenIndex field is set.
      */
+    @java.lang.Override
     public boolean hasTokenIndex() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -47087,6 +47867,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 tokenIndex = 2;</code>
      * @return The tokenIndex.
      */
+    @java.lang.Override
     public int getTokenIndex() {
       return tokenIndex_;
     }
@@ -47097,6 +47878,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 docID = 3;</code>
      * @return Whether the docID field is set.
      */
+    @java.lang.Override
     public boolean hasDocID() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -47104,6 +47886,7 @@ public final class CoreNLPProtos {
      * <code>optional int32 docID = 3;</code>
      * @return The docID.
      */
+    @java.lang.Override
     public int getDocID() {
       return docID_;
     }
@@ -47114,6 +47897,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 copyCount = 4;</code>
      * @return Whether the copyCount field is set.
      */
+    @java.lang.Override
     public boolean hasCopyCount() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -47121,6 +47905,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 copyCount = 4;</code>
      * @return The copyCount.
      */
+    @java.lang.Override
     public int getCopyCount() {
       return copyCount_;
     }
@@ -47519,6 +48304,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 sentenceNum = 1;</code>
        * @return Whether the sentenceNum field is set.
        */
+      @java.lang.Override
       public boolean hasSentenceNum() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -47526,6 +48312,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 sentenceNum = 1;</code>
        * @return The sentenceNum.
        */
+      @java.lang.Override
       public int getSentenceNum() {
         return sentenceNum_;
       }
@@ -47556,6 +48343,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 tokenIndex = 2;</code>
        * @return Whether the tokenIndex field is set.
        */
+      @java.lang.Override
       public boolean hasTokenIndex() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -47563,6 +48351,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 tokenIndex = 2;</code>
        * @return The tokenIndex.
        */
+      @java.lang.Override
       public int getTokenIndex() {
         return tokenIndex_;
       }
@@ -47593,6 +48382,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 docID = 3;</code>
        * @return Whether the docID field is set.
        */
+      @java.lang.Override
       public boolean hasDocID() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -47600,6 +48390,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 docID = 3;</code>
        * @return The docID.
        */
+      @java.lang.Override
       public int getDocID() {
         return docID_;
       }
@@ -47630,6 +48421,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 copyCount = 4;</code>
        * @return Whether the copyCount field is set.
        */
+      @java.lang.Override
       public boolean hasCopyCount() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -47637,6 +48429,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 copyCount = 4;</code>
        * @return The copyCount.
        */
+      @java.lang.Override
       public int getCopyCount() {
         return copyCount_;
       }
@@ -47755,7 +48548,7 @@ public final class CoreNLPProtos {
   /**
    * Protobuf type {@code edu.stanford.nlp.pipeline.SpeakerInfo}
    */
-  public  static final class SpeakerInfo extends
+  public static final class SpeakerInfo extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SpeakerInfo)
       SpeakerInfoOrBuilder {
@@ -47869,6 +48662,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerName = 1;</code>
      * @return Whether the speakerName field is set.
      */
+    @java.lang.Override
     public boolean hasSpeakerName() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -47876,6 +48670,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerName = 1;</code>
      * @return The speakerName.
      */
+    @java.lang.Override
     public java.lang.String getSpeakerName() {
       java.lang.Object ref = speakerName_;
       if (ref instanceof java.lang.String) {
@@ -47894,6 +48689,7 @@ public final class CoreNLPProtos {
      * <code>optional string speakerName = 1;</code>
      * @return The bytes for speakerName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSpeakerNameBytes() {
       java.lang.Object ref = speakerName_;
@@ -47914,6 +48710,7 @@ public final class CoreNLPProtos {
      * <code>repeated int32 mentions = 2;</code>
      * @return A list containing the mentions.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getMentionsList() {
       return mentions_;
@@ -48532,7 +49329,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.Span}
    */
-  public  static final class Span extends
+  public static final class Span extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Span)
       SpanOrBuilder {
@@ -48624,6 +49421,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 begin = 1;</code>
      * @return Whether the begin field is set.
      */
+    @java.lang.Override
     public boolean hasBegin() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -48631,6 +49429,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 begin = 1;</code>
      * @return The begin.
      */
+    @java.lang.Override
     public int getBegin() {
       return begin_;
     }
@@ -48641,6 +49440,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 end = 2;</code>
      * @return Whether the end field is set.
      */
+    @java.lang.Override
     public boolean hasEnd() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -48648,6 +49448,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 end = 2;</code>
      * @return The end.
      */
+    @java.lang.Override
     public int getEnd() {
       return end_;
     }
@@ -49014,6 +49815,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 begin = 1;</code>
        * @return Whether the begin field is set.
        */
+      @java.lang.Override
       public boolean hasBegin() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -49021,6 +49823,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 begin = 1;</code>
        * @return The begin.
        */
+      @java.lang.Override
       public int getBegin() {
         return begin_;
       }
@@ -49051,6 +49854,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 end = 2;</code>
        * @return Whether the end field is set.
        */
+      @java.lang.Override
       public boolean hasEnd() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -49058,6 +49862,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 end = 2;</code>
        * @return The end.
        */
+      @java.lang.Override
       public int getEnd() {
         return end_;
       }
@@ -49254,7 +50059,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.Timex}
    */
-  public  static final class Timex extends
+  public static final class Timex extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Timex)
       TimexOrBuilder {
@@ -49381,6 +50186,7 @@ public final class CoreNLPProtos {
      * <code>optional string value = 1;</code>
      * @return Whether the value field is set.
      */
+    @java.lang.Override
     public boolean hasValue() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -49388,6 +50194,7 @@ public final class CoreNLPProtos {
      * <code>optional string value = 1;</code>
      * @return The value.
      */
+    @java.lang.Override
     public java.lang.String getValue() {
       java.lang.Object ref = value_;
       if (ref instanceof java.lang.String) {
@@ -49406,6 +50213,7 @@ public final class CoreNLPProtos {
      * <code>optional string value = 1;</code>
      * @return The bytes for value.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getValueBytes() {
       java.lang.Object ref = value_;
@@ -49426,6 +50234,7 @@ public final class CoreNLPProtos {
      * <code>optional string altValue = 2;</code>
      * @return Whether the altValue field is set.
      */
+    @java.lang.Override
     public boolean hasAltValue() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -49433,6 +50242,7 @@ public final class CoreNLPProtos {
      * <code>optional string altValue = 2;</code>
      * @return The altValue.
      */
+    @java.lang.Override
     public java.lang.String getAltValue() {
       java.lang.Object ref = altValue_;
       if (ref instanceof java.lang.String) {
@@ -49451,6 +50261,7 @@ public final class CoreNLPProtos {
      * <code>optional string altValue = 2;</code>
      * @return The bytes for altValue.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAltValueBytes() {
       java.lang.Object ref = altValue_;
@@ -49471,6 +50282,7 @@ public final class CoreNLPProtos {
      * <code>optional string text = 3;</code>
      * @return Whether the text field is set.
      */
+    @java.lang.Override
     public boolean hasText() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -49478,6 +50290,7 @@ public final class CoreNLPProtos {
      * <code>optional string text = 3;</code>
      * @return The text.
      */
+    @java.lang.Override
     public java.lang.String getText() {
       java.lang.Object ref = text_;
       if (ref instanceof java.lang.String) {
@@ -49496,6 +50309,7 @@ public final class CoreNLPProtos {
      * <code>optional string text = 3;</code>
      * @return The bytes for text.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTextBytes() {
       java.lang.Object ref = text_;
@@ -49516,6 +50330,7 @@ public final class CoreNLPProtos {
      * <code>optional string type = 4;</code>
      * @return Whether the type field is set.
      */
+    @java.lang.Override
     public boolean hasType() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -49523,6 +50338,7 @@ public final class CoreNLPProtos {
      * <code>optional string type = 4;</code>
      * @return The type.
      */
+    @java.lang.Override
     public java.lang.String getType() {
       java.lang.Object ref = type_;
       if (ref instanceof java.lang.String) {
@@ -49541,6 +50357,7 @@ public final class CoreNLPProtos {
      * <code>optional string type = 4;</code>
      * @return The bytes for type.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTypeBytes() {
       java.lang.Object ref = type_;
@@ -49561,6 +50378,7 @@ public final class CoreNLPProtos {
      * <code>optional string tid = 5;</code>
      * @return Whether the tid field is set.
      */
+    @java.lang.Override
     public boolean hasTid() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -49568,6 +50386,7 @@ public final class CoreNLPProtos {
      * <code>optional string tid = 5;</code>
      * @return The tid.
      */
+    @java.lang.Override
     public java.lang.String getTid() {
       java.lang.Object ref = tid_;
       if (ref instanceof java.lang.String) {
@@ -49586,6 +50405,7 @@ public final class CoreNLPProtos {
      * <code>optional string tid = 5;</code>
      * @return The bytes for tid.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTidBytes() {
       java.lang.Object ref = tid_;
@@ -49606,6 +50426,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 beginPoint = 6;</code>
      * @return Whether the beginPoint field is set.
      */
+    @java.lang.Override
     public boolean hasBeginPoint() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -49613,6 +50434,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 beginPoint = 6;</code>
      * @return The beginPoint.
      */
+    @java.lang.Override
     public int getBeginPoint() {
       return beginPoint_;
     }
@@ -49623,6 +50445,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 endPoint = 7;</code>
      * @return Whether the endPoint field is set.
      */
+    @java.lang.Override
     public boolean hasEndPoint() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -49630,6 +50453,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 endPoint = 7;</code>
      * @return The endPoint.
      */
+    @java.lang.Override
     public int getEndPoint() {
       return endPoint_;
     }
@@ -50533,6 +51357,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 beginPoint = 6;</code>
        * @return Whether the beginPoint field is set.
        */
+      @java.lang.Override
       public boolean hasBeginPoint() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -50540,6 +51365,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 beginPoint = 6;</code>
        * @return The beginPoint.
        */
+      @java.lang.Override
       public int getBeginPoint() {
         return beginPoint_;
       }
@@ -50570,6 +51396,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 endPoint = 7;</code>
        * @return Whether the endPoint field is set.
        */
+      @java.lang.Override
       public boolean hasEndPoint() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -50577,6 +51404,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 endPoint = 7;</code>
        * @return The endPoint.
        */
+      @java.lang.Override
       public int getEndPoint() {
         return endPoint_;
       }
@@ -50851,7 +51679,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.Entity}
    */
-  public  static final class Entity extends
+  public static final class Entity extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Entity)
       EntityOrBuilder {
@@ -51000,6 +51828,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 headStart = 6;</code>
      * @return Whether the headStart field is set.
      */
+    @java.lang.Override
     public boolean hasHeadStart() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -51007,6 +51836,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 headStart = 6;</code>
      * @return The headStart.
      */
+    @java.lang.Override
     public int getHeadStart() {
       return headStart_;
     }
@@ -51017,6 +51847,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 headEnd = 7;</code>
      * @return Whether the headEnd field is set.
      */
+    @java.lang.Override
     public boolean hasHeadEnd() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -51024,6 +51855,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 headEnd = 7;</code>
      * @return The headEnd.
      */
+    @java.lang.Override
     public int getHeadEnd() {
       return headEnd_;
     }
@@ -51034,6 +51866,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionType = 8;</code>
      * @return Whether the mentionType field is set.
      */
+    @java.lang.Override
     public boolean hasMentionType() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -51041,6 +51874,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionType = 8;</code>
      * @return The mentionType.
      */
+    @java.lang.Override
     public java.lang.String getMentionType() {
       java.lang.Object ref = mentionType_;
       if (ref instanceof java.lang.String) {
@@ -51059,6 +51893,7 @@ public final class CoreNLPProtos {
      * <code>optional string mentionType = 8;</code>
      * @return The bytes for mentionType.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getMentionTypeBytes() {
       java.lang.Object ref = mentionType_;
@@ -51079,6 +51914,7 @@ public final class CoreNLPProtos {
      * <code>optional string normalizedName = 9;</code>
      * @return Whether the normalizedName field is set.
      */
+    @java.lang.Override
     public boolean hasNormalizedName() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -51086,6 +51922,7 @@ public final class CoreNLPProtos {
      * <code>optional string normalizedName = 9;</code>
      * @return The normalizedName.
      */
+    @java.lang.Override
     public java.lang.String getNormalizedName() {
       java.lang.Object ref = normalizedName_;
       if (ref instanceof java.lang.String) {
@@ -51104,6 +51941,7 @@ public final class CoreNLPProtos {
      * <code>optional string normalizedName = 9;</code>
      * @return The bytes for normalizedName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNormalizedNameBytes() {
       java.lang.Object ref = normalizedName_;
@@ -51124,6 +51962,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 headTokenIndex = 10;</code>
      * @return Whether the headTokenIndex field is set.
      */
+    @java.lang.Override
     public boolean hasHeadTokenIndex() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -51131,6 +51970,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 headTokenIndex = 10;</code>
      * @return The headTokenIndex.
      */
+    @java.lang.Override
     public int getHeadTokenIndex() {
       return headTokenIndex_;
     }
@@ -51141,6 +51981,7 @@ public final class CoreNLPProtos {
      * <code>optional string corefID = 11;</code>
      * @return Whether the corefID field is set.
      */
+    @java.lang.Override
     public boolean hasCorefID() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -51148,6 +51989,7 @@ public final class CoreNLPProtos {
      * <code>optional string corefID = 11;</code>
      * @return The corefID.
      */
+    @java.lang.Override
     public java.lang.String getCorefID() {
       java.lang.Object ref = corefID_;
       if (ref instanceof java.lang.String) {
@@ -51166,6 +52008,7 @@ public final class CoreNLPProtos {
      * <code>optional string corefID = 11;</code>
      * @return The bytes for corefID.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCorefIDBytes() {
       java.lang.Object ref = corefID_;
@@ -51190,6 +52033,7 @@ public final class CoreNLPProtos {
      * <code>optional string objectID = 1;</code>
      * @return Whether the objectID field is set.
      */
+    @java.lang.Override
     public boolean hasObjectID() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -51201,6 +52045,7 @@ public final class CoreNLPProtos {
      * <code>optional string objectID = 1;</code>
      * @return The objectID.
      */
+    @java.lang.Override
     public java.lang.String getObjectID() {
       java.lang.Object ref = objectID_;
       if (ref instanceof java.lang.String) {
@@ -51223,6 +52068,7 @@ public final class CoreNLPProtos {
      * <code>optional string objectID = 1;</code>
      * @return The bytes for objectID.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getObjectIDBytes() {
       java.lang.Object ref = objectID_;
@@ -51243,6 +52089,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 extentStart = 2;</code>
      * @return Whether the extentStart field is set.
      */
+    @java.lang.Override
     public boolean hasExtentStart() {
       return ((bitField0_ & 0x00000080) != 0);
     }
@@ -51250,6 +52097,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 extentStart = 2;</code>
      * @return The extentStart.
      */
+    @java.lang.Override
     public int getExtentStart() {
       return extentStart_;
     }
@@ -51260,6 +52108,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 extentEnd = 3;</code>
      * @return Whether the extentEnd field is set.
      */
+    @java.lang.Override
     public boolean hasExtentEnd() {
       return ((bitField0_ & 0x00000100) != 0);
     }
@@ -51267,6 +52116,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 extentEnd = 3;</code>
      * @return The extentEnd.
      */
+    @java.lang.Override
     public int getExtentEnd() {
       return extentEnd_;
     }
@@ -51277,6 +52127,7 @@ public final class CoreNLPProtos {
      * <code>optional string type = 4;</code>
      * @return Whether the type field is set.
      */
+    @java.lang.Override
     public boolean hasType() {
       return ((bitField0_ & 0x00000200) != 0);
     }
@@ -51284,6 +52135,7 @@ public final class CoreNLPProtos {
      * <code>optional string type = 4;</code>
      * @return The type.
      */
+    @java.lang.Override
     public java.lang.String getType() {
       java.lang.Object ref = type_;
       if (ref instanceof java.lang.String) {
@@ -51302,6 +52154,7 @@ public final class CoreNLPProtos {
      * <code>optional string type = 4;</code>
      * @return The bytes for type.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTypeBytes() {
       java.lang.Object ref = type_;
@@ -51327,6 +52180,7 @@ public final class CoreNLPProtos {
      * <code>optional string subtype = 5;</code>
      * @return Whether the subtype field is set.
      */
+    @java.lang.Override
     public boolean hasSubtype() {
       return ((bitField0_ & 0x00000400) != 0);
     }
@@ -51339,6 +52193,7 @@ public final class CoreNLPProtos {
      * <code>optional string subtype = 5;</code>
      * @return The subtype.
      */
+    @java.lang.Override
     public java.lang.String getSubtype() {
       java.lang.Object ref = subtype_;
       if (ref instanceof java.lang.String) {
@@ -51362,6 +52217,7 @@ public final class CoreNLPProtos {
      * <code>optional string subtype = 5;</code>
      * @return The bytes for subtype.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSubtypeBytes() {
       java.lang.Object ref = subtype_;
@@ -51957,6 +52813,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 headStart = 6;</code>
        * @return Whether the headStart field is set.
        */
+      @java.lang.Override
       public boolean hasHeadStart() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -51964,6 +52821,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 headStart = 6;</code>
        * @return The headStart.
        */
+      @java.lang.Override
       public int getHeadStart() {
         return headStart_;
       }
@@ -51994,6 +52852,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 headEnd = 7;</code>
        * @return Whether the headEnd field is set.
        */
+      @java.lang.Override
       public boolean hasHeadEnd() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -52001,6 +52860,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 headEnd = 7;</code>
        * @return The headEnd.
        */
+      @java.lang.Override
       public int getHeadEnd() {
         return headEnd_;
       }
@@ -52199,6 +53059,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 headTokenIndex = 10;</code>
        * @return Whether the headTokenIndex field is set.
        */
+      @java.lang.Override
       public boolean hasHeadTokenIndex() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -52206,6 +53067,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 headTokenIndex = 10;</code>
        * @return The headTokenIndex.
        */
+      @java.lang.Override
       public int getHeadTokenIndex() {
         return headTokenIndex_;
       }
@@ -52428,6 +53290,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 extentStart = 2;</code>
        * @return Whether the extentStart field is set.
        */
+      @java.lang.Override
       public boolean hasExtentStart() {
         return ((bitField0_ & 0x00000080) != 0);
       }
@@ -52435,6 +53298,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 extentStart = 2;</code>
        * @return The extentStart.
        */
+      @java.lang.Override
       public int getExtentStart() {
         return extentStart_;
       }
@@ -52465,6 +53329,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 extentEnd = 3;</code>
        * @return Whether the extentEnd field is set.
        */
+      @java.lang.Override
       public boolean hasExtentEnd() {
         return ((bitField0_ & 0x00000100) != 0);
       }
@@ -52472,6 +53337,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 extentEnd = 3;</code>
        * @return The extentEnd.
        */
+      @java.lang.Override
       public int getExtentEnd() {
         return extentEnd_;
       }
@@ -52924,7 +53790,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.Relation}
    */
-  public  static final class Relation extends
+  public static final class Relation extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Relation)
       RelationOrBuilder {
@@ -53104,12 +53970,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Entity arg = 7;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity> getArgList() {
       return arg_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Entity arg = 7;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.EntityOrBuilder> 
         getArgOrBuilderList() {
       return arg_;
@@ -53117,18 +53985,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Entity arg = 7;</code>
      */
+    @java.lang.Override
     public int getArgCount() {
       return arg_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Entity arg = 7;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Entity getArg(int index) {
       return arg_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Entity arg = 7;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.EntityOrBuilder getArgOrBuilder(
         int index) {
       return arg_.get(index);
@@ -53140,6 +54011,7 @@ public final class CoreNLPProtos {
      * <code>optional string signature = 8;</code>
      * @return Whether the signature field is set.
      */
+    @java.lang.Override
     public boolean hasSignature() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -53147,6 +54019,7 @@ public final class CoreNLPProtos {
      * <code>optional string signature = 8;</code>
      * @return The signature.
      */
+    @java.lang.Override
     public java.lang.String getSignature() {
       java.lang.Object ref = signature_;
       if (ref instanceof java.lang.String) {
@@ -53165,6 +54038,7 @@ public final class CoreNLPProtos {
      * <code>optional string signature = 8;</code>
      * @return The bytes for signature.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSignatureBytes() {
       java.lang.Object ref = signature_;
@@ -53189,6 +54063,7 @@ public final class CoreNLPProtos {
      * <code>optional string objectID = 1;</code>
      * @return Whether the objectID field is set.
      */
+    @java.lang.Override
     public boolean hasObjectID() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -53200,6 +54075,7 @@ public final class CoreNLPProtos {
      * <code>optional string objectID = 1;</code>
      * @return The objectID.
      */
+    @java.lang.Override
     public java.lang.String getObjectID() {
       java.lang.Object ref = objectID_;
       if (ref instanceof java.lang.String) {
@@ -53222,6 +54098,7 @@ public final class CoreNLPProtos {
      * <code>optional string objectID = 1;</code>
      * @return The bytes for objectID.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getObjectIDBytes() {
       java.lang.Object ref = objectID_;
@@ -53242,6 +54119,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 extentStart = 2;</code>
      * @return Whether the extentStart field is set.
      */
+    @java.lang.Override
     public boolean hasExtentStart() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -53249,6 +54127,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 extentStart = 2;</code>
      * @return The extentStart.
      */
+    @java.lang.Override
     public int getExtentStart() {
       return extentStart_;
     }
@@ -53259,6 +54138,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 extentEnd = 3;</code>
      * @return Whether the extentEnd field is set.
      */
+    @java.lang.Override
     public boolean hasExtentEnd() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -53266,6 +54146,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 extentEnd = 3;</code>
      * @return The extentEnd.
      */
+    @java.lang.Override
     public int getExtentEnd() {
       return extentEnd_;
     }
@@ -53276,6 +54157,7 @@ public final class CoreNLPProtos {
      * <code>optional string type = 4;</code>
      * @return Whether the type field is set.
      */
+    @java.lang.Override
     public boolean hasType() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -53283,6 +54165,7 @@ public final class CoreNLPProtos {
      * <code>optional string type = 4;</code>
      * @return The type.
      */
+    @java.lang.Override
     public java.lang.String getType() {
       java.lang.Object ref = type_;
       if (ref instanceof java.lang.String) {
@@ -53301,6 +54184,7 @@ public final class CoreNLPProtos {
      * <code>optional string type = 4;</code>
      * @return The bytes for type.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTypeBytes() {
       java.lang.Object ref = type_;
@@ -53326,6 +54210,7 @@ public final class CoreNLPProtos {
      * <code>optional string subtype = 5;</code>
      * @return Whether the subtype field is set.
      */
+    @java.lang.Override
     public boolean hasSubtype() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -53338,6 +54223,7 @@ public final class CoreNLPProtos {
      * <code>optional string subtype = 5;</code>
      * @return The subtype.
      */
+    @java.lang.Override
     public java.lang.String getSubtype() {
       java.lang.Object ref = subtype_;
       if (ref instanceof java.lang.String) {
@@ -53361,6 +54247,7 @@ public final class CoreNLPProtos {
      * <code>optional string subtype = 5;</code>
      * @return The bytes for subtype.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSubtypeBytes() {
       java.lang.Object ref = subtype_;
@@ -54457,6 +55344,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 extentStart = 2;</code>
        * @return Whether the extentStart field is set.
        */
+      @java.lang.Override
       public boolean hasExtentStart() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -54464,6 +55352,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 extentStart = 2;</code>
        * @return The extentStart.
        */
+      @java.lang.Override
       public int getExtentStart() {
         return extentStart_;
       }
@@ -54494,6 +55383,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 extentEnd = 3;</code>
        * @return Whether the extentEnd field is set.
        */
+      @java.lang.Override
       public boolean hasExtentEnd() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -54501,6 +55391,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 extentEnd = 3;</code>
        * @return The extentEnd.
        */
+      @java.lang.Override
       public int getExtentEnd() {
         return extentEnd_;
       }
@@ -54870,7 +55761,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.Operator}
    */
-  public  static final class Operator extends
+  public static final class Operator extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Operator)
       OperatorOrBuilder {
@@ -54989,6 +55880,7 @@ public final class CoreNLPProtos {
      * <code>required string name = 1;</code>
      * @return Whether the name field is set.
      */
+    @java.lang.Override
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -54996,6 +55888,7 @@ public final class CoreNLPProtos {
      * <code>required string name = 1;</code>
      * @return The name.
      */
+    @java.lang.Override
     public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
@@ -55014,6 +55907,7 @@ public final class CoreNLPProtos {
      * <code>required string name = 1;</code>
      * @return The bytes for name.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
@@ -55034,6 +55928,7 @@ public final class CoreNLPProtos {
      * <code>required int32 quantifierSpanBegin = 2;</code>
      * @return Whether the quantifierSpanBegin field is set.
      */
+    @java.lang.Override
     public boolean hasQuantifierSpanBegin() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -55041,6 +55936,7 @@ public final class CoreNLPProtos {
      * <code>required int32 quantifierSpanBegin = 2;</code>
      * @return The quantifierSpanBegin.
      */
+    @java.lang.Override
     public int getQuantifierSpanBegin() {
       return quantifierSpanBegin_;
     }
@@ -55051,6 +55947,7 @@ public final class CoreNLPProtos {
      * <code>required int32 quantifierSpanEnd = 3;</code>
      * @return Whether the quantifierSpanEnd field is set.
      */
+    @java.lang.Override
     public boolean hasQuantifierSpanEnd() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -55058,6 +55955,7 @@ public final class CoreNLPProtos {
      * <code>required int32 quantifierSpanEnd = 3;</code>
      * @return The quantifierSpanEnd.
      */
+    @java.lang.Override
     public int getQuantifierSpanEnd() {
       return quantifierSpanEnd_;
     }
@@ -55068,6 +55966,7 @@ public final class CoreNLPProtos {
      * <code>required int32 subjectSpanBegin = 4;</code>
      * @return Whether the subjectSpanBegin field is set.
      */
+    @java.lang.Override
     public boolean hasSubjectSpanBegin() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -55075,6 +55974,7 @@ public final class CoreNLPProtos {
      * <code>required int32 subjectSpanBegin = 4;</code>
      * @return The subjectSpanBegin.
      */
+    @java.lang.Override
     public int getSubjectSpanBegin() {
       return subjectSpanBegin_;
     }
@@ -55085,6 +55985,7 @@ public final class CoreNLPProtos {
      * <code>required int32 subjectSpanEnd = 5;</code>
      * @return Whether the subjectSpanEnd field is set.
      */
+    @java.lang.Override
     public boolean hasSubjectSpanEnd() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -55092,6 +55993,7 @@ public final class CoreNLPProtos {
      * <code>required int32 subjectSpanEnd = 5;</code>
      * @return The subjectSpanEnd.
      */
+    @java.lang.Override
     public int getSubjectSpanEnd() {
       return subjectSpanEnd_;
     }
@@ -55102,6 +56004,7 @@ public final class CoreNLPProtos {
      * <code>required int32 objectSpanBegin = 6;</code>
      * @return Whether the objectSpanBegin field is set.
      */
+    @java.lang.Override
     public boolean hasObjectSpanBegin() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -55109,6 +56012,7 @@ public final class CoreNLPProtos {
      * <code>required int32 objectSpanBegin = 6;</code>
      * @return The objectSpanBegin.
      */
+    @java.lang.Override
     public int getObjectSpanBegin() {
       return objectSpanBegin_;
     }
@@ -55119,6 +56023,7 @@ public final class CoreNLPProtos {
      * <code>required int32 objectSpanEnd = 7;</code>
      * @return Whether the objectSpanEnd field is set.
      */
+    @java.lang.Override
     public boolean hasObjectSpanEnd() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -55126,6 +56031,7 @@ public final class CoreNLPProtos {
      * <code>required int32 objectSpanEnd = 7;</code>
      * @return The objectSpanEnd.
      */
+    @java.lang.Override
     public int getObjectSpanEnd() {
       return objectSpanEnd_;
     }
@@ -55737,6 +56643,7 @@ public final class CoreNLPProtos {
        * <code>required int32 quantifierSpanBegin = 2;</code>
        * @return Whether the quantifierSpanBegin field is set.
        */
+      @java.lang.Override
       public boolean hasQuantifierSpanBegin() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -55744,6 +56651,7 @@ public final class CoreNLPProtos {
        * <code>required int32 quantifierSpanBegin = 2;</code>
        * @return The quantifierSpanBegin.
        */
+      @java.lang.Override
       public int getQuantifierSpanBegin() {
         return quantifierSpanBegin_;
       }
@@ -55774,6 +56682,7 @@ public final class CoreNLPProtos {
        * <code>required int32 quantifierSpanEnd = 3;</code>
        * @return Whether the quantifierSpanEnd field is set.
        */
+      @java.lang.Override
       public boolean hasQuantifierSpanEnd() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -55781,6 +56690,7 @@ public final class CoreNLPProtos {
        * <code>required int32 quantifierSpanEnd = 3;</code>
        * @return The quantifierSpanEnd.
        */
+      @java.lang.Override
       public int getQuantifierSpanEnd() {
         return quantifierSpanEnd_;
       }
@@ -55811,6 +56721,7 @@ public final class CoreNLPProtos {
        * <code>required int32 subjectSpanBegin = 4;</code>
        * @return Whether the subjectSpanBegin field is set.
        */
+      @java.lang.Override
       public boolean hasSubjectSpanBegin() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -55818,6 +56729,7 @@ public final class CoreNLPProtos {
        * <code>required int32 subjectSpanBegin = 4;</code>
        * @return The subjectSpanBegin.
        */
+      @java.lang.Override
       public int getSubjectSpanBegin() {
         return subjectSpanBegin_;
       }
@@ -55848,6 +56760,7 @@ public final class CoreNLPProtos {
        * <code>required int32 subjectSpanEnd = 5;</code>
        * @return Whether the subjectSpanEnd field is set.
        */
+      @java.lang.Override
       public boolean hasSubjectSpanEnd() {
         return ((bitField0_ & 0x00000010) != 0);
       }
@@ -55855,6 +56768,7 @@ public final class CoreNLPProtos {
        * <code>required int32 subjectSpanEnd = 5;</code>
        * @return The subjectSpanEnd.
        */
+      @java.lang.Override
       public int getSubjectSpanEnd() {
         return subjectSpanEnd_;
       }
@@ -55885,6 +56799,7 @@ public final class CoreNLPProtos {
        * <code>required int32 objectSpanBegin = 6;</code>
        * @return Whether the objectSpanBegin field is set.
        */
+      @java.lang.Override
       public boolean hasObjectSpanBegin() {
         return ((bitField0_ & 0x00000020) != 0);
       }
@@ -55892,6 +56807,7 @@ public final class CoreNLPProtos {
        * <code>required int32 objectSpanBegin = 6;</code>
        * @return The objectSpanBegin.
        */
+      @java.lang.Override
       public int getObjectSpanBegin() {
         return objectSpanBegin_;
       }
@@ -55922,6 +56838,7 @@ public final class CoreNLPProtos {
        * <code>required int32 objectSpanEnd = 7;</code>
        * @return Whether the objectSpanEnd field is set.
        */
+      @java.lang.Override
       public boolean hasObjectSpanEnd() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -55929,6 +56846,7 @@ public final class CoreNLPProtos {
        * <code>required int32 objectSpanEnd = 7;</code>
        * @return The objectSpanEnd.
        */
+      @java.lang.Override
       public int getObjectSpanEnd() {
         return objectSpanEnd_;
       }
@@ -56094,7 +57012,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.Polarity}
    */
-  public  static final class Polarity extends
+  public static final class Polarity extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Polarity)
       PolarityOrBuilder {
@@ -56267,14 +57185,14 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
      * @return Whether the projectEquivalence field is set.
      */
-    public boolean hasProjectEquivalence() {
+    @java.lang.Override public boolean hasProjectEquivalence() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
      * @return The projectEquivalence.
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectEquivalence() {
+    @java.lang.Override public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectEquivalence() {
       @SuppressWarnings("deprecation")
       edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectEquivalence_);
       return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.EQUIVALENCE : result;
@@ -56286,14 +57204,14 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
      * @return Whether the projectForwardEntailment field is set.
      */
-    public boolean hasProjectForwardEntailment() {
+    @java.lang.Override public boolean hasProjectForwardEntailment() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
      * @return The projectForwardEntailment.
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectForwardEntailment() {
+    @java.lang.Override public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectForwardEntailment() {
       @SuppressWarnings("deprecation")
       edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectForwardEntailment_);
       return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.EQUIVALENCE : result;
@@ -56305,14 +57223,14 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
      * @return Whether the projectReverseEntailment field is set.
      */
-    public boolean hasProjectReverseEntailment() {
+    @java.lang.Override public boolean hasProjectReverseEntailment() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
      * @return The projectReverseEntailment.
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectReverseEntailment() {
+    @java.lang.Override public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectReverseEntailment() {
       @SuppressWarnings("deprecation")
       edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectReverseEntailment_);
       return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.EQUIVALENCE : result;
@@ -56324,14 +57242,14 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
      * @return Whether the projectNegation field is set.
      */
-    public boolean hasProjectNegation() {
+    @java.lang.Override public boolean hasProjectNegation() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
      * @return The projectNegation.
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectNegation() {
+    @java.lang.Override public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectNegation() {
       @SuppressWarnings("deprecation")
       edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectNegation_);
       return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.EQUIVALENCE : result;
@@ -56343,14 +57261,14 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
      * @return Whether the projectAlternation field is set.
      */
-    public boolean hasProjectAlternation() {
+    @java.lang.Override public boolean hasProjectAlternation() {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
      * @return The projectAlternation.
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectAlternation() {
+    @java.lang.Override public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectAlternation() {
       @SuppressWarnings("deprecation")
       edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectAlternation_);
       return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.EQUIVALENCE : result;
@@ -56362,14 +57280,14 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
      * @return Whether the projectCover field is set.
      */
-    public boolean hasProjectCover() {
+    @java.lang.Override public boolean hasProjectCover() {
       return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
      * @return The projectCover.
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectCover() {
+    @java.lang.Override public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectCover() {
       @SuppressWarnings("deprecation")
       edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectCover_);
       return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.EQUIVALENCE : result;
@@ -56381,14 +57299,14 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
      * @return Whether the projectIndependence field is set.
      */
-    public boolean hasProjectIndependence() {
+    @java.lang.Override public boolean hasProjectIndependence() {
       return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
      * @return The projectIndependence.
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectIndependence() {
+    @java.lang.Override public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectIndependence() {
       @SuppressWarnings("deprecation")
       edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectIndependence_);
       return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.EQUIVALENCE : result;
@@ -56909,13 +57827,14 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
        * @return Whether the projectEquivalence field is set.
        */
-      public boolean hasProjectEquivalence() {
+      @java.lang.Override public boolean hasProjectEquivalence() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectEquivalence = 1;</code>
        * @return The projectEquivalence.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectEquivalence() {
         @SuppressWarnings("deprecation")
         edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectEquivalence_);
@@ -56951,13 +57870,14 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
        * @return Whether the projectForwardEntailment field is set.
        */
-      public boolean hasProjectForwardEntailment() {
+      @java.lang.Override public boolean hasProjectForwardEntailment() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectForwardEntailment = 2;</code>
        * @return The projectForwardEntailment.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectForwardEntailment() {
         @SuppressWarnings("deprecation")
         edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectForwardEntailment_);
@@ -56993,13 +57913,14 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
        * @return Whether the projectReverseEntailment field is set.
        */
-      public boolean hasProjectReverseEntailment() {
+      @java.lang.Override public boolean hasProjectReverseEntailment() {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectReverseEntailment = 3;</code>
        * @return The projectReverseEntailment.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectReverseEntailment() {
         @SuppressWarnings("deprecation")
         edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectReverseEntailment_);
@@ -57035,13 +57956,14 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
        * @return Whether the projectNegation field is set.
        */
-      public boolean hasProjectNegation() {
+      @java.lang.Override public boolean hasProjectNegation() {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectNegation = 4;</code>
        * @return The projectNegation.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectNegation() {
         @SuppressWarnings("deprecation")
         edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectNegation_);
@@ -57077,13 +57999,14 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
        * @return Whether the projectAlternation field is set.
        */
-      public boolean hasProjectAlternation() {
+      @java.lang.Override public boolean hasProjectAlternation() {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectAlternation = 5;</code>
        * @return The projectAlternation.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectAlternation() {
         @SuppressWarnings("deprecation")
         edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectAlternation_);
@@ -57119,13 +58042,14 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
        * @return Whether the projectCover field is set.
        */
-      public boolean hasProjectCover() {
+      @java.lang.Override public boolean hasProjectCover() {
         return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectCover = 6;</code>
        * @return The projectCover.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectCover() {
         @SuppressWarnings("deprecation")
         edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectCover_);
@@ -57161,13 +58085,14 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
        * @return Whether the projectIndependence field is set.
        */
-      public boolean hasProjectIndependence() {
+      @java.lang.Override public boolean hasProjectIndependence() {
         return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.NaturalLogicRelation projectIndependence = 7;</code>
        * @return The projectIndependence.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation getProjectIndependence() {
         @SuppressWarnings("deprecation")
         edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation result = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(projectIndependence_);
@@ -57433,7 +58358,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.NERMention}
    */
-  public  static final class NERMention extends
+  public static final class NERMention extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.NERMention)
       NERMentionOrBuilder {
@@ -57595,6 +58520,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sentenceIndex = 1;</code>
      * @return Whether the sentenceIndex field is set.
      */
+    @java.lang.Override
     public boolean hasSentenceIndex() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -57602,6 +58528,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sentenceIndex = 1;</code>
      * @return The sentenceIndex.
      */
+    @java.lang.Override
     public int getSentenceIndex() {
       return sentenceIndex_;
     }
@@ -57612,6 +58539,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
      * @return Whether the tokenStartInSentenceInclusive field is set.
      */
+    @java.lang.Override
     public boolean hasTokenStartInSentenceInclusive() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -57619,6 +58547,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
      * @return The tokenStartInSentenceInclusive.
      */
+    @java.lang.Override
     public int getTokenStartInSentenceInclusive() {
       return tokenStartInSentenceInclusive_;
     }
@@ -57629,6 +58558,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
      * @return Whether the tokenEndInSentenceExclusive field is set.
      */
+    @java.lang.Override
     public boolean hasTokenEndInSentenceExclusive() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -57636,6 +58566,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
      * @return The tokenEndInSentenceExclusive.
      */
+    @java.lang.Override
     public int getTokenEndInSentenceExclusive() {
       return tokenEndInSentenceExclusive_;
     }
@@ -57646,6 +58577,7 @@ public final class CoreNLPProtos {
      * <code>required string ner = 4;</code>
      * @return Whether the ner field is set.
      */
+    @java.lang.Override
     public boolean hasNer() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -57653,6 +58585,7 @@ public final class CoreNLPProtos {
      * <code>required string ner = 4;</code>
      * @return The ner.
      */
+    @java.lang.Override
     public java.lang.String getNer() {
       java.lang.Object ref = ner_;
       if (ref instanceof java.lang.String) {
@@ -57671,6 +58604,7 @@ public final class CoreNLPProtos {
      * <code>required string ner = 4;</code>
      * @return The bytes for ner.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNerBytes() {
       java.lang.Object ref = ner_;
@@ -57691,6 +58625,7 @@ public final class CoreNLPProtos {
      * <code>optional string normalizedNER = 5;</code>
      * @return Whether the normalizedNER field is set.
      */
+    @java.lang.Override
     public boolean hasNormalizedNER() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -57698,6 +58633,7 @@ public final class CoreNLPProtos {
      * <code>optional string normalizedNER = 5;</code>
      * @return The normalizedNER.
      */
+    @java.lang.Override
     public java.lang.String getNormalizedNER() {
       java.lang.Object ref = normalizedNER_;
       if (ref instanceof java.lang.String) {
@@ -57716,6 +58652,7 @@ public final class CoreNLPProtos {
      * <code>optional string normalizedNER = 5;</code>
      * @return The bytes for normalizedNER.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNormalizedNERBytes() {
       java.lang.Object ref = normalizedNER_;
@@ -57736,6 +58673,7 @@ public final class CoreNLPProtos {
      * <code>optional string entityType = 6;</code>
      * @return Whether the entityType field is set.
      */
+    @java.lang.Override
     public boolean hasEntityType() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -57743,6 +58681,7 @@ public final class CoreNLPProtos {
      * <code>optional string entityType = 6;</code>
      * @return The entityType.
      */
+    @java.lang.Override
     public java.lang.String getEntityType() {
       java.lang.Object ref = entityType_;
       if (ref instanceof java.lang.String) {
@@ -57761,6 +58700,7 @@ public final class CoreNLPProtos {
      * <code>optional string entityType = 6;</code>
      * @return The bytes for entityType.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEntityTypeBytes() {
       java.lang.Object ref = entityType_;
@@ -57781,6 +58721,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Timex timex = 7;</code>
      * @return Whether the timex field is set.
      */
+    @java.lang.Override
     public boolean hasTimex() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -57788,12 +58729,14 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.Timex timex = 7;</code>
      * @return The timex.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Timex getTimex() {
       return timex_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.getDefaultInstance() : timex_;
     }
     /**
      * <code>optional .edu.stanford.nlp.pipeline.Timex timex = 7;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TimexOrBuilder getTimexOrBuilder() {
       return timex_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.getDefaultInstance() : timex_;
     }
@@ -57804,6 +58747,7 @@ public final class CoreNLPProtos {
      * <code>optional string wikipediaEntity = 8;</code>
      * @return Whether the wikipediaEntity field is set.
      */
+    @java.lang.Override
     public boolean hasWikipediaEntity() {
       return ((bitField0_ & 0x00000080) != 0);
     }
@@ -57811,6 +58755,7 @@ public final class CoreNLPProtos {
      * <code>optional string wikipediaEntity = 8;</code>
      * @return The wikipediaEntity.
      */
+    @java.lang.Override
     public java.lang.String getWikipediaEntity() {
       java.lang.Object ref = wikipediaEntity_;
       if (ref instanceof java.lang.String) {
@@ -57829,6 +58774,7 @@ public final class CoreNLPProtos {
      * <code>optional string wikipediaEntity = 8;</code>
      * @return The bytes for wikipediaEntity.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getWikipediaEntityBytes() {
       java.lang.Object ref = wikipediaEntity_;
@@ -57849,6 +58795,7 @@ public final class CoreNLPProtos {
      * <code>optional string gender = 9;</code>
      * @return Whether the gender field is set.
      */
+    @java.lang.Override
     public boolean hasGender() {
       return ((bitField0_ & 0x00000100) != 0);
     }
@@ -57856,6 +58803,7 @@ public final class CoreNLPProtos {
      * <code>optional string gender = 9;</code>
      * @return The gender.
      */
+    @java.lang.Override
     public java.lang.String getGender() {
       java.lang.Object ref = gender_;
       if (ref instanceof java.lang.String) {
@@ -57874,6 +58822,7 @@ public final class CoreNLPProtos {
      * <code>optional string gender = 9;</code>
      * @return The bytes for gender.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getGenderBytes() {
       java.lang.Object ref = gender_;
@@ -57894,6 +58843,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 entityMentionIndex = 10;</code>
      * @return Whether the entityMentionIndex field is set.
      */
+    @java.lang.Override
     public boolean hasEntityMentionIndex() {
       return ((bitField0_ & 0x00000200) != 0);
     }
@@ -57901,6 +58851,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 entityMentionIndex = 10;</code>
      * @return The entityMentionIndex.
      */
+    @java.lang.Override
     public int getEntityMentionIndex() {
       return entityMentionIndex_;
     }
@@ -57911,6 +58862,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
      * @return Whether the canonicalEntityMentionIndex field is set.
      */
+    @java.lang.Override
     public boolean hasCanonicalEntityMentionIndex() {
       return ((bitField0_ & 0x00000400) != 0);
     }
@@ -57918,6 +58870,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
      * @return The canonicalEntityMentionIndex.
      */
+    @java.lang.Override
     public int getCanonicalEntityMentionIndex() {
       return canonicalEntityMentionIndex_;
     }
@@ -57928,6 +58881,7 @@ public final class CoreNLPProtos {
      * <code>optional string entityMentionText = 12;</code>
      * @return Whether the entityMentionText field is set.
      */
+    @java.lang.Override
     public boolean hasEntityMentionText() {
       return ((bitField0_ & 0x00000800) != 0);
     }
@@ -57935,6 +58889,7 @@ public final class CoreNLPProtos {
      * <code>optional string entityMentionText = 12;</code>
      * @return The entityMentionText.
      */
+    @java.lang.Override
     public java.lang.String getEntityMentionText() {
       java.lang.Object ref = entityMentionText_;
       if (ref instanceof java.lang.String) {
@@ -57953,6 +58908,7 @@ public final class CoreNLPProtos {
      * <code>optional string entityMentionText = 12;</code>
      * @return The bytes for entityMentionText.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEntityMentionTextBytes() {
       java.lang.Object ref = entityMentionText_;
@@ -58601,6 +59557,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceIndex = 1;</code>
        * @return Whether the sentenceIndex field is set.
        */
+      @java.lang.Override
       public boolean hasSentenceIndex() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -58608,6 +59565,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceIndex = 1;</code>
        * @return The sentenceIndex.
        */
+      @java.lang.Override
       public int getSentenceIndex() {
         return sentenceIndex_;
       }
@@ -58638,6 +59596,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
        * @return Whether the tokenStartInSentenceInclusive field is set.
        */
+      @java.lang.Override
       public boolean hasTokenStartInSentenceInclusive() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -58645,6 +59604,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 tokenStartInSentenceInclusive = 2;</code>
        * @return The tokenStartInSentenceInclusive.
        */
+      @java.lang.Override
       public int getTokenStartInSentenceInclusive() {
         return tokenStartInSentenceInclusive_;
       }
@@ -58675,6 +59635,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
        * @return Whether the tokenEndInSentenceExclusive field is set.
        */
+      @java.lang.Override
       public boolean hasTokenEndInSentenceExclusive() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -58682,6 +59643,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 tokenEndInSentenceExclusive = 3;</code>
        * @return The tokenEndInSentenceExclusive.
        */
+      @java.lang.Override
       public int getTokenEndInSentenceExclusive() {
         return tokenEndInSentenceExclusive_;
       }
@@ -59252,6 +60214,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 entityMentionIndex = 10;</code>
        * @return Whether the entityMentionIndex field is set.
        */
+      @java.lang.Override
       public boolean hasEntityMentionIndex() {
         return ((bitField0_ & 0x00000200) != 0);
       }
@@ -59259,6 +60222,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 entityMentionIndex = 10;</code>
        * @return The entityMentionIndex.
        */
+      @java.lang.Override
       public int getEntityMentionIndex() {
         return entityMentionIndex_;
       }
@@ -59289,6 +60253,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
        * @return Whether the canonicalEntityMentionIndex field is set.
        */
+      @java.lang.Override
       public boolean hasCanonicalEntityMentionIndex() {
         return ((bitField0_ & 0x00000400) != 0);
       }
@@ -59296,6 +60261,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 canonicalEntityMentionIndex = 11;</code>
        * @return The canonicalEntityMentionIndex.
        */
+      @java.lang.Override
       public int getCanonicalEntityMentionIndex() {
         return canonicalEntityMentionIndex_;
       }
@@ -59519,7 +60485,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.SentenceFragment}
    */
-  public  static final class SentenceFragment extends
+  public static final class SentenceFragment extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SentenceFragment)
       SentenceFragmentOrBuilder {
@@ -59641,6 +60607,7 @@ public final class CoreNLPProtos {
      * <code>repeated uint32 tokenIndex = 1;</code>
      * @return A list containing the tokenIndex.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getTokenIndexList() {
       return tokenIndex_;
@@ -59667,6 +60634,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 root = 2;</code>
      * @return Whether the root field is set.
      */
+    @java.lang.Override
     public boolean hasRoot() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -59674,6 +60642,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 root = 2;</code>
      * @return The root.
      */
+    @java.lang.Override
     public int getRoot() {
       return root_;
     }
@@ -59684,6 +60653,7 @@ public final class CoreNLPProtos {
      * <code>optional bool assumedTruth = 3;</code>
      * @return Whether the assumedTruth field is set.
      */
+    @java.lang.Override
     public boolean hasAssumedTruth() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -59691,6 +60661,7 @@ public final class CoreNLPProtos {
      * <code>optional bool assumedTruth = 3;</code>
      * @return The assumedTruth.
      */
+    @java.lang.Override
     public boolean getAssumedTruth() {
       return assumedTruth_;
     }
@@ -59701,6 +60672,7 @@ public final class CoreNLPProtos {
      * <code>optional double score = 4;</code>
      * @return Whether the score field is set.
      */
+    @java.lang.Override
     public boolean hasScore() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -59708,6 +60680,7 @@ public final class CoreNLPProtos {
      * <code>optional double score = 4;</code>
      * @return The score.
      */
+    @java.lang.Override
     public double getScore() {
       return score_;
     }
@@ -60203,6 +61176,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 root = 2;</code>
        * @return Whether the root field is set.
        */
+      @java.lang.Override
       public boolean hasRoot() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -60210,6 +61184,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 root = 2;</code>
        * @return The root.
        */
+      @java.lang.Override
       public int getRoot() {
         return root_;
       }
@@ -60240,6 +61215,7 @@ public final class CoreNLPProtos {
        * <code>optional bool assumedTruth = 3;</code>
        * @return Whether the assumedTruth field is set.
        */
+      @java.lang.Override
       public boolean hasAssumedTruth() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -60247,6 +61223,7 @@ public final class CoreNLPProtos {
        * <code>optional bool assumedTruth = 3;</code>
        * @return The assumedTruth.
        */
+      @java.lang.Override
       public boolean getAssumedTruth() {
         return assumedTruth_;
       }
@@ -60277,6 +61254,7 @@ public final class CoreNLPProtos {
        * <code>optional double score = 4;</code>
        * @return Whether the score field is set.
        */
+      @java.lang.Override
       public boolean hasScore() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -60284,6 +61262,7 @@ public final class CoreNLPProtos {
        * <code>optional double score = 4;</code>
        * @return The score.
        */
+      @java.lang.Override
       public double getScore() {
         return score_;
       }
@@ -60395,7 +61374,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.TokenLocation}
    */
-  public  static final class TokenLocation extends
+  public static final class TokenLocation extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TokenLocation)
       TokenLocationOrBuilder {
@@ -60487,6 +61466,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sentenceIndex = 1;</code>
      * @return Whether the sentenceIndex field is set.
      */
+    @java.lang.Override
     public boolean hasSentenceIndex() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -60494,6 +61474,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 sentenceIndex = 1;</code>
      * @return The sentenceIndex.
      */
+    @java.lang.Override
     public int getSentenceIndex() {
       return sentenceIndex_;
     }
@@ -60504,6 +61485,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 tokenIndex = 2;</code>
      * @return Whether the tokenIndex field is set.
      */
+    @java.lang.Override
     public boolean hasTokenIndex() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -60511,6 +61493,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 tokenIndex = 2;</code>
      * @return The tokenIndex.
      */
+    @java.lang.Override
     public int getTokenIndex() {
       return tokenIndex_;
     }
@@ -60864,6 +61847,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceIndex = 1;</code>
        * @return Whether the sentenceIndex field is set.
        */
+      @java.lang.Override
       public boolean hasSentenceIndex() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -60871,6 +61855,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 sentenceIndex = 1;</code>
        * @return The sentenceIndex.
        */
+      @java.lang.Override
       public int getSentenceIndex() {
         return sentenceIndex_;
       }
@@ -60901,6 +61886,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 tokenIndex = 2;</code>
        * @return Whether the tokenIndex field is set.
        */
+      @java.lang.Override
       public boolean hasTokenIndex() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -60908,6 +61894,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 tokenIndex = 2;</code>
        * @return The tokenIndex.
        */
+      @java.lang.Override
       public int getTokenIndex() {
         return tokenIndex_;
       }
@@ -61338,7 +62325,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.RelationTriple}
    */
-  public  static final class RelationTriple extends
+  public static final class RelationTriple extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.RelationTriple)
       RelationTripleOrBuilder {
@@ -61522,6 +62509,7 @@ public final class CoreNLPProtos {
      * <code>optional string subject = 1;</code>
      * @return Whether the subject field is set.
      */
+    @java.lang.Override
     public boolean hasSubject() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -61533,6 +62521,7 @@ public final class CoreNLPProtos {
      * <code>optional string subject = 1;</code>
      * @return The subject.
      */
+    @java.lang.Override
     public java.lang.String getSubject() {
       java.lang.Object ref = subject_;
       if (ref instanceof java.lang.String) {
@@ -61555,6 +62544,7 @@ public final class CoreNLPProtos {
      * <code>optional string subject = 1;</code>
      * @return The bytes for subject.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSubjectBytes() {
       java.lang.Object ref = subject_;
@@ -61579,6 +62569,7 @@ public final class CoreNLPProtos {
      * <code>optional string relation = 2;</code>
      * @return Whether the relation field is set.
      */
+    @java.lang.Override
     public boolean hasRelation() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -61590,6 +62581,7 @@ public final class CoreNLPProtos {
      * <code>optional string relation = 2;</code>
      * @return The relation.
      */
+    @java.lang.Override
     public java.lang.String getRelation() {
       java.lang.Object ref = relation_;
       if (ref instanceof java.lang.String) {
@@ -61612,6 +62604,7 @@ public final class CoreNLPProtos {
      * <code>optional string relation = 2;</code>
      * @return The bytes for relation.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRelationBytes() {
       java.lang.Object ref = relation_;
@@ -61636,6 +62629,7 @@ public final class CoreNLPProtos {
      * <code>optional string object = 3;</code>
      * @return Whether the object field is set.
      */
+    @java.lang.Override
     public boolean hasObject() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -61647,6 +62641,7 @@ public final class CoreNLPProtos {
      * <code>optional string object = 3;</code>
      * @return The object.
      */
+    @java.lang.Override
     public java.lang.String getObject() {
       java.lang.Object ref = object_;
       if (ref instanceof java.lang.String) {
@@ -61669,6 +62664,7 @@ public final class CoreNLPProtos {
      * <code>optional string object = 3;</code>
      * @return The bytes for object.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getObjectBytes() {
       java.lang.Object ref = object_;
@@ -61693,6 +62689,7 @@ public final class CoreNLPProtos {
      * <code>optional double confidence = 4;</code>
      * @return Whether the confidence field is set.
      */
+    @java.lang.Override
     public boolean hasConfidence() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -61704,6 +62701,7 @@ public final class CoreNLPProtos {
      * <code>optional double confidence = 4;</code>
      * @return The confidence.
      */
+    @java.lang.Override
     public double getConfidence() {
       return confidence_;
     }
@@ -61717,6 +62715,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> getSubjectTokensList() {
       return subjectTokens_;
     }
@@ -61727,6 +62726,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
         getSubjectTokensOrBuilderList() {
       return subjectTokens_;
@@ -61738,6 +62738,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
      */
+    @java.lang.Override
     public int getSubjectTokensCount() {
       return subjectTokens_.size();
     }
@@ -61748,6 +62749,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getSubjectTokens(int index) {
       return subjectTokens_.get(index);
     }
@@ -61758,6 +62760,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getSubjectTokensOrBuilder(
         int index) {
       return subjectTokens_.get(index);
@@ -61772,6 +62775,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> getRelationTokensList() {
       return relationTokens_;
     }
@@ -61782,6 +62786,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
         getRelationTokensOrBuilderList() {
       return relationTokens_;
@@ -61793,6 +62798,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
      */
+    @java.lang.Override
     public int getRelationTokensCount() {
       return relationTokens_.size();
     }
@@ -61803,6 +62809,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getRelationTokens(int index) {
       return relationTokens_.get(index);
     }
@@ -61813,6 +62820,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getRelationTokensOrBuilder(
         int index) {
       return relationTokens_.get(index);
@@ -61827,6 +62835,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> getObjectTokensList() {
       return objectTokens_;
     }
@@ -61837,6 +62846,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
         getObjectTokensOrBuilderList() {
       return objectTokens_;
@@ -61848,6 +62858,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
      */
+    @java.lang.Override
     public int getObjectTokensCount() {
       return objectTokens_.size();
     }
@@ -61858,6 +62869,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getObjectTokens(int index) {
       return objectTokens_.get(index);
     }
@@ -61868,6 +62880,7 @@ public final class CoreNLPProtos {
      *
      * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getObjectTokensOrBuilder(
         int index) {
       return objectTokens_.get(index);
@@ -61883,6 +62896,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph tree = 8;</code>
      * @return Whether the tree field is set.
      */
+    @java.lang.Override
     public boolean hasTree() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -61894,6 +62908,7 @@ public final class CoreNLPProtos {
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph tree = 8;</code>
      * @return The tree.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getTree() {
       return tree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : tree_;
     }
@@ -61904,6 +62919,7 @@ public final class CoreNLPProtos {
      *
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph tree = 8;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getTreeOrBuilder() {
       return tree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : tree_;
     }
@@ -61918,6 +62934,7 @@ public final class CoreNLPProtos {
      * <code>optional bool istmod = 9;</code>
      * @return Whether the istmod field is set.
      */
+    @java.lang.Override
     public boolean hasIstmod() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -61929,6 +62946,7 @@ public final class CoreNLPProtos {
      * <code>optional bool istmod = 9;</code>
      * @return The istmod.
      */
+    @java.lang.Override
     public boolean getIstmod() {
       return istmod_;
     }
@@ -61943,6 +62961,7 @@ public final class CoreNLPProtos {
      * <code>optional bool prefixBe = 10;</code>
      * @return Whether the prefixBe field is set.
      */
+    @java.lang.Override
     public boolean hasPrefixBe() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -61954,6 +62973,7 @@ public final class CoreNLPProtos {
      * <code>optional bool prefixBe = 10;</code>
      * @return The prefixBe.
      */
+    @java.lang.Override
     public boolean getPrefixBe() {
       return prefixBe_;
     }
@@ -61968,6 +62988,7 @@ public final class CoreNLPProtos {
      * <code>optional bool suffixBe = 11;</code>
      * @return Whether the suffixBe field is set.
      */
+    @java.lang.Override
     public boolean hasSuffixBe() {
       return ((bitField0_ & 0x00000080) != 0);
     }
@@ -61979,6 +63000,7 @@ public final class CoreNLPProtos {
      * <code>optional bool suffixBe = 11;</code>
      * @return The suffixBe.
      */
+    @java.lang.Override
     public boolean getSuffixBe() {
       return suffixBe_;
     }
@@ -61993,6 +63015,7 @@ public final class CoreNLPProtos {
      * <code>optional bool suffixOf = 12;</code>
      * @return Whether the suffixOf field is set.
      */
+    @java.lang.Override
     public boolean hasSuffixOf() {
       return ((bitField0_ & 0x00000100) != 0);
     }
@@ -62004,6 +63027,7 @@ public final class CoreNLPProtos {
      * <code>optional bool suffixOf = 12;</code>
      * @return The suffixOf.
      */
+    @java.lang.Override
     public boolean getSuffixOf() {
       return suffixOf_;
     }
@@ -63054,6 +64078,7 @@ public final class CoreNLPProtos {
        * <code>optional double confidence = 4;</code>
        * @return Whether the confidence field is set.
        */
+      @java.lang.Override
       public boolean hasConfidence() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -63065,6 +64090,7 @@ public final class CoreNLPProtos {
        * <code>optional double confidence = 4;</code>
        * @return The confidence.
        */
+      @java.lang.Override
       public double getConfidence() {
         return confidence_;
       }
@@ -64199,6 +65225,7 @@ public final class CoreNLPProtos {
        * <code>optional bool istmod = 9;</code>
        * @return Whether the istmod field is set.
        */
+      @java.lang.Override
       public boolean hasIstmod() {
         return ((bitField0_ & 0x00000100) != 0);
       }
@@ -64210,6 +65237,7 @@ public final class CoreNLPProtos {
        * <code>optional bool istmod = 9;</code>
        * @return The istmod.
        */
+      @java.lang.Override
       public boolean getIstmod() {
         return istmod_;
       }
@@ -64252,6 +65280,7 @@ public final class CoreNLPProtos {
        * <code>optional bool prefixBe = 10;</code>
        * @return Whether the prefixBe field is set.
        */
+      @java.lang.Override
       public boolean hasPrefixBe() {
         return ((bitField0_ & 0x00000200) != 0);
       }
@@ -64263,6 +65292,7 @@ public final class CoreNLPProtos {
        * <code>optional bool prefixBe = 10;</code>
        * @return The prefixBe.
        */
+      @java.lang.Override
       public boolean getPrefixBe() {
         return prefixBe_;
       }
@@ -64305,6 +65335,7 @@ public final class CoreNLPProtos {
        * <code>optional bool suffixBe = 11;</code>
        * @return Whether the suffixBe field is set.
        */
+      @java.lang.Override
       public boolean hasSuffixBe() {
         return ((bitField0_ & 0x00000400) != 0);
       }
@@ -64316,6 +65347,7 @@ public final class CoreNLPProtos {
        * <code>optional bool suffixBe = 11;</code>
        * @return The suffixBe.
        */
+      @java.lang.Override
       public boolean getSuffixBe() {
         return suffixBe_;
       }
@@ -64358,6 +65390,7 @@ public final class CoreNLPProtos {
        * <code>optional bool suffixOf = 12;</code>
        * @return Whether the suffixOf field is set.
        */
+      @java.lang.Override
       public boolean hasSuffixOf() {
         return ((bitField0_ & 0x00000800) != 0);
       }
@@ -64369,6 +65402,7 @@ public final class CoreNLPProtos {
        * <code>optional bool suffixOf = 12;</code>
        * @return The suffixOf.
        */
+      @java.lang.Override
       public boolean getSuffixOf() {
         return suffixOf_;
       }
@@ -64516,7 +65550,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.MapStringString}
    */
-  public  static final class MapStringString extends
+  public static final class MapStringString extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.MapStringString)
       MapStringStringOrBuilder {
@@ -65371,7 +66405,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.MapIntString}
    */
-  public  static final class MapIntString extends
+  public static final class MapIntString extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.MapIntString)
       MapIntStringOrBuilder {
@@ -65490,6 +66524,7 @@ public final class CoreNLPProtos {
      * <code>repeated uint32 key = 1;</code>
      * @return A list containing the key.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getKeyList() {
       return key_;
@@ -66287,7 +67322,7 @@ public final class CoreNLPProtos {
   /**
    * Protobuf type {@code edu.stanford.nlp.pipeline.Section}
    */
-  public  static final class Section extends
+  public static final class Section extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.Section)
       SectionOrBuilder {
@@ -66454,6 +67489,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 charBegin = 1;</code>
      * @return Whether the charBegin field is set.
      */
+    @java.lang.Override
     public boolean hasCharBegin() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -66461,6 +67497,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 charBegin = 1;</code>
      * @return The charBegin.
      */
+    @java.lang.Override
     public int getCharBegin() {
       return charBegin_;
     }
@@ -66471,6 +67508,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 charEnd = 2;</code>
      * @return Whether the charEnd field is set.
      */
+    @java.lang.Override
     public boolean hasCharEnd() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -66478,6 +67516,7 @@ public final class CoreNLPProtos {
      * <code>required uint32 charEnd = 2;</code>
      * @return The charEnd.
      */
+    @java.lang.Override
     public int getCharEnd() {
       return charEnd_;
     }
@@ -66488,6 +67527,7 @@ public final class CoreNLPProtos {
      * <code>optional string author = 3;</code>
      * @return Whether the author field is set.
      */
+    @java.lang.Override
     public boolean hasAuthor() {
       return ((bitField0_ & 0x00000004) != 0);
     }
@@ -66495,6 +67535,7 @@ public final class CoreNLPProtos {
      * <code>optional string author = 3;</code>
      * @return The author.
      */
+    @java.lang.Override
     public java.lang.String getAuthor() {
       java.lang.Object ref = author_;
       if (ref instanceof java.lang.String) {
@@ -66513,6 +67554,7 @@ public final class CoreNLPProtos {
      * <code>optional string author = 3;</code>
      * @return The bytes for author.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAuthorBytes() {
       java.lang.Object ref = author_;
@@ -66533,6 +67575,7 @@ public final class CoreNLPProtos {
      * <code>repeated uint32 sentenceIndexes = 4;</code>
      * @return A list containing the sentenceIndexes.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getSentenceIndexesList() {
       return sentenceIndexes_;
@@ -66559,6 +67602,7 @@ public final class CoreNLPProtos {
      * <code>optional string datetime = 5;</code>
      * @return Whether the datetime field is set.
      */
+    @java.lang.Override
     public boolean hasDatetime() {
       return ((bitField0_ & 0x00000008) != 0);
     }
@@ -66566,6 +67610,7 @@ public final class CoreNLPProtos {
      * <code>optional string datetime = 5;</code>
      * @return The datetime.
      */
+    @java.lang.Override
     public java.lang.String getDatetime() {
       java.lang.Object ref = datetime_;
       if (ref instanceof java.lang.String) {
@@ -66584,6 +67629,7 @@ public final class CoreNLPProtos {
      * <code>optional string datetime = 5;</code>
      * @return The bytes for datetime.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDatetimeBytes() {
       java.lang.Object ref = datetime_;
@@ -66603,12 +67649,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Quote quotes = 6;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Quote> getQuotesList() {
       return quotes_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Quote quotes = 6;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.QuoteOrBuilder> 
         getQuotesOrBuilderList() {
       return quotes_;
@@ -66616,18 +67664,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Quote quotes = 6;</code>
      */
+    @java.lang.Override
     public int getQuotesCount() {
       return quotes_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Quote quotes = 6;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Quote getQuotes(int index) {
       return quotes_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.Quote quotes = 6;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.QuoteOrBuilder getQuotesOrBuilder(
         int index) {
       return quotes_.get(index);
@@ -66639,6 +67690,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 authorCharBegin = 7;</code>
      * @return Whether the authorCharBegin field is set.
      */
+    @java.lang.Override
     public boolean hasAuthorCharBegin() {
       return ((bitField0_ & 0x00000010) != 0);
     }
@@ -66646,6 +67698,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 authorCharBegin = 7;</code>
      * @return The authorCharBegin.
      */
+    @java.lang.Override
     public int getAuthorCharBegin() {
       return authorCharBegin_;
     }
@@ -66656,6 +67709,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 authorCharEnd = 8;</code>
      * @return Whether the authorCharEnd field is set.
      */
+    @java.lang.Override
     public boolean hasAuthorCharEnd() {
       return ((bitField0_ & 0x00000020) != 0);
     }
@@ -66663,6 +67717,7 @@ public final class CoreNLPProtos {
      * <code>optional uint32 authorCharEnd = 8;</code>
      * @return The authorCharEnd.
      */
+    @java.lang.Override
     public int getAuthorCharEnd() {
       return authorCharEnd_;
     }
@@ -66673,6 +67728,7 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.Token xmlTag = 9;</code>
      * @return Whether the xmlTag field is set.
      */
+    @java.lang.Override
     public boolean hasXmlTag() {
       return ((bitField0_ & 0x00000040) != 0);
     }
@@ -66680,12 +67736,14 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.Token xmlTag = 9;</code>
      * @return The xmlTag.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Token getXmlTag() {
       return xmlTag_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Token.getDefaultInstance() : xmlTag_;
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.Token xmlTag = 9;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder getXmlTagOrBuilder() {
       return xmlTag_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Token.getDefaultInstance() : xmlTag_;
     }
@@ -67299,6 +68357,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 charBegin = 1;</code>
        * @return Whether the charBegin field is set.
        */
+      @java.lang.Override
       public boolean hasCharBegin() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -67306,6 +68365,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 charBegin = 1;</code>
        * @return The charBegin.
        */
+      @java.lang.Override
       public int getCharBegin() {
         return charBegin_;
       }
@@ -67336,6 +68396,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 charEnd = 2;</code>
        * @return Whether the charEnd field is set.
        */
+      @java.lang.Override
       public boolean hasCharEnd() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -67343,6 +68404,7 @@ public final class CoreNLPProtos {
        * <code>required uint32 charEnd = 2;</code>
        * @return The charEnd.
        */
+      @java.lang.Override
       public int getCharEnd() {
         return charEnd_;
       }
@@ -67860,6 +68922,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 authorCharBegin = 7;</code>
        * @return Whether the authorCharBegin field is set.
        */
+      @java.lang.Override
       public boolean hasAuthorCharBegin() {
         return ((bitField0_ & 0x00000040) != 0);
       }
@@ -67867,6 +68930,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 authorCharBegin = 7;</code>
        * @return The authorCharBegin.
        */
+      @java.lang.Override
       public int getAuthorCharBegin() {
         return authorCharBegin_;
       }
@@ -67897,6 +68961,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 authorCharEnd = 8;</code>
        * @return Whether the authorCharEnd field is set.
        */
+      @java.lang.Override
       public boolean hasAuthorCharEnd() {
         return ((bitField0_ & 0x00000080) != 0);
       }
@@ -67904,6 +68969,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 authorCharEnd = 8;</code>
        * @return The authorCharEnd.
        */
+      @java.lang.Override
       public int getAuthorCharEnd() {
         return authorCharEnd_;
       }
@@ -68166,7 +69232,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexRequest}
    */
-  public  static final class SemgrexRequest extends
+  public static final class SemgrexRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexRequest)
       SemgrexRequestOrBuilder {
@@ -68313,7 +69379,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexRequest.Dependencies}
      */
-    public  static final class Dependencies extends
+    public static final class Dependencies extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexRequest.Dependencies)
         DependenciesOrBuilder {
@@ -68420,12 +69486,14 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.Token token = 1;</code>
        */
+      @java.lang.Override
       public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token> getTokenList() {
         return token_;
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.Token token = 1;</code>
        */
+      @java.lang.Override
       public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
           getTokenOrBuilderList() {
         return token_;
@@ -68433,18 +69501,21 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.Token token = 1;</code>
        */
+      @java.lang.Override
       public int getTokenCount() {
         return token_.size();
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.Token token = 1;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Token getToken(int index) {
         return token_.get(index);
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.Token token = 1;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder getTokenOrBuilder(
           int index) {
         return token_.get(index);
@@ -68456,6 +69527,7 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
        * @return Whether the graph field is set.
        */
+      @java.lang.Override
       public boolean hasGraph() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -68463,12 +69535,14 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
        * @return The graph.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph() {
         return graph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder() {
         return graph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
       }
@@ -69328,12 +70402,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.SemgrexRequest.Dependencies query = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.Dependencies> getQueryList() {
       return query_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.SemgrexRequest.Dependencies query = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.DependenciesOrBuilder> 
         getQueryOrBuilderList() {
       return query_;
@@ -69341,18 +70417,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.SemgrexRequest.Dependencies query = 2;</code>
      */
+    @java.lang.Override
     public int getQueryCount() {
       return query_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.SemgrexRequest.Dependencies query = 2;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.Dependencies getQuery(int index) {
       return query_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.SemgrexRequest.Dependencies query = 2;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.DependenciesOrBuilder getQueryOrBuilder(
         int index) {
       return query_.get(index);
@@ -70193,7 +71272,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse}
    */
-  public  static final class SemgrexResponse extends
+  public static final class SemgrexResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse)
       SemgrexResponseOrBuilder {
@@ -70316,7 +71395,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.NamedNode}
      */
-    public  static final class NamedNode extends
+    public static final class NamedNode extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse.NamedNode)
         NamedNodeOrBuilder {
@@ -70410,6 +71489,7 @@ public final class CoreNLPProtos {
        * <code>required string name = 1;</code>
        * @return Whether the name field is set.
        */
+      @java.lang.Override
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -70417,6 +71497,7 @@ public final class CoreNLPProtos {
        * <code>required string name = 1;</code>
        * @return The name.
        */
+      @java.lang.Override
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (ref instanceof java.lang.String) {
@@ -70435,6 +71516,7 @@ public final class CoreNLPProtos {
        * <code>required string name = 1;</code>
        * @return The bytes for name.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getNameBytes() {
         java.lang.Object ref = name_;
@@ -70455,6 +71537,7 @@ public final class CoreNLPProtos {
        * <code>required int32 matchIndex = 2;</code>
        * @return Whether the matchIndex field is set.
        */
+      @java.lang.Override
       public boolean hasMatchIndex() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -70462,6 +71545,7 @@ public final class CoreNLPProtos {
        * <code>required int32 matchIndex = 2;</code>
        * @return The matchIndex.
        */
+      @java.lang.Override
       public int getMatchIndex() {
         return matchIndex_;
       }
@@ -70909,6 +71993,7 @@ public final class CoreNLPProtos {
          * <code>required int32 matchIndex = 2;</code>
          * @return Whether the matchIndex field is set.
          */
+        @java.lang.Override
         public boolean hasMatchIndex() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -70916,6 +72001,7 @@ public final class CoreNLPProtos {
          * <code>required int32 matchIndex = 2;</code>
          * @return The matchIndex.
          */
+        @java.lang.Override
         public int getMatchIndex() {
           return matchIndex_;
         }
@@ -71034,7 +72120,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.NamedRelation}
      */
-    public  static final class NamedRelation extends
+    public static final class NamedRelation extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse.NamedRelation)
         NamedRelationOrBuilder {
@@ -71130,6 +72216,7 @@ public final class CoreNLPProtos {
        * <code>required string name = 1;</code>
        * @return Whether the name field is set.
        */
+      @java.lang.Override
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -71137,6 +72224,7 @@ public final class CoreNLPProtos {
        * <code>required string name = 1;</code>
        * @return The name.
        */
+      @java.lang.Override
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (ref instanceof java.lang.String) {
@@ -71155,6 +72243,7 @@ public final class CoreNLPProtos {
        * <code>required string name = 1;</code>
        * @return The bytes for name.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getNameBytes() {
         java.lang.Object ref = name_;
@@ -71175,6 +72264,7 @@ public final class CoreNLPProtos {
        * <code>required string reln = 2;</code>
        * @return Whether the reln field is set.
        */
+      @java.lang.Override
       public boolean hasReln() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -71182,6 +72272,7 @@ public final class CoreNLPProtos {
        * <code>required string reln = 2;</code>
        * @return The reln.
        */
+      @java.lang.Override
       public java.lang.String getReln() {
         java.lang.Object ref = reln_;
         if (ref instanceof java.lang.String) {
@@ -71200,6 +72291,7 @@ public final class CoreNLPProtos {
        * <code>required string reln = 2;</code>
        * @return The bytes for reln.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getRelnBytes() {
         java.lang.Object ref = reln_;
@@ -71855,7 +72947,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.Match}
      */
-    public  static final class Match extends
+    public static final class Match extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse.Match)
         MatchOrBuilder {
@@ -71968,6 +73060,7 @@ public final class CoreNLPProtos {
        * <code>required int32 matchIndex = 1;</code>
        * @return Whether the matchIndex field is set.
        */
+      @java.lang.Override
       public boolean hasMatchIndex() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -71975,6 +73068,7 @@ public final class CoreNLPProtos {
        * <code>required int32 matchIndex = 1;</code>
        * @return The matchIndex.
        */
+      @java.lang.Override
       public int getMatchIndex() {
         return matchIndex_;
       }
@@ -71984,12 +73078,14 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedNode node = 2;</code>
        */
+      @java.lang.Override
       public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode> getNodeList() {
         return node_;
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedNode node = 2;</code>
        */
+      @java.lang.Override
       public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNodeOrBuilder> 
           getNodeOrBuilderList() {
         return node_;
@@ -71997,18 +73093,21 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedNode node = 2;</code>
        */
+      @java.lang.Override
       public int getNodeCount() {
         return node_.size();
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedNode node = 2;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode getNode(int index) {
         return node_.get(index);
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedNode node = 2;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNodeOrBuilder getNodeOrBuilder(
           int index) {
         return node_.get(index);
@@ -72019,12 +73118,14 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedRelation reln = 3;</code>
        */
+      @java.lang.Override
       public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation> getRelnList() {
         return reln_;
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedRelation reln = 3;</code>
        */
+      @java.lang.Override
       public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelationOrBuilder> 
           getRelnOrBuilderList() {
         return reln_;
@@ -72032,18 +73133,21 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedRelation reln = 3;</code>
        */
+      @java.lang.Override
       public int getRelnCount() {
         return reln_.size();
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedRelation reln = 3;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation getReln(int index) {
         return reln_.get(index);
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedRelation reln = 3;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelationOrBuilder getRelnOrBuilder(
           int index) {
         return reln_.get(index);
@@ -72507,6 +73611,7 @@ public final class CoreNLPProtos {
          * <code>required int32 matchIndex = 1;</code>
          * @return Whether the matchIndex field is set.
          */
+        @java.lang.Override
         public boolean hasMatchIndex() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -72514,6 +73619,7 @@ public final class CoreNLPProtos {
          * <code>required int32 matchIndex = 1;</code>
          * @return The matchIndex.
          */
+        @java.lang.Override
         public int getMatchIndex() {
           return matchIndex_;
         }
@@ -73102,7 +74208,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult}
      */
-    public  static final class SemgrexResult extends
+    public static final class SemgrexResult extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult)
         SemgrexResultOrBuilder {
@@ -73195,12 +74301,14 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.Match match = 1;</code>
        */
+      @java.lang.Override
       public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match> getMatchList() {
         return match_;
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.Match match = 1;</code>
        */
+      @java.lang.Override
       public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.MatchOrBuilder> 
           getMatchOrBuilderList() {
         return match_;
@@ -73208,18 +74316,21 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.Match match = 1;</code>
        */
+      @java.lang.Override
       public int getMatchCount() {
         return match_.size();
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.Match match = 1;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match getMatch(int index) {
         return match_.get(index);
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.Match match = 1;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.MatchOrBuilder getMatchOrBuilder(
           int index) {
         return match_.get(index);
@@ -73901,7 +75012,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult}
      */
-    public  static final class GraphResult extends
+    public static final class GraphResult extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult)
         GraphResultOrBuilder {
@@ -73994,12 +75105,14 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
        */
+      @java.lang.Override
       public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult> getResultList() {
         return result_;
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
        */
+      @java.lang.Override
       public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder> 
           getResultOrBuilderList() {
         return result_;
@@ -74007,18 +75120,21 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
        */
+      @java.lang.Override
       public int getResultCount() {
         return result_.size();
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult getResult(int index) {
         return result_.get(index);
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder getResultOrBuilder(
           int index) {
         return result_.get(index);
@@ -74674,12 +75790,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult> getResultList() {
       return result_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder> 
         getResultOrBuilderList() {
       return result_;
@@ -74687,18 +75805,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
      */
+    @java.lang.Override
     public int getResultCount() {
       return result_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult getResult(int index) {
       return result_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder getResultOrBuilder(
         int index) {
       return result_.get(index);
@@ -75408,7 +76529,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.TokensRegexRequest}
    */
-  public  static final class TokensRegexRequest extends
+  public static final class TokensRegexRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TokensRegexRequest)
       TokensRegexRequestOrBuilder {
@@ -75516,6 +76637,7 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.Document doc = 1;</code>
      * @return Whether the doc field is set.
      */
+    @java.lang.Override
     public boolean hasDoc() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -75523,12 +76645,14 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.Document doc = 1;</code>
      * @return The doc.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Document getDoc() {
       return doc_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Document.getDefaultInstance() : doc_;
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.Document doc = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DocumentOrBuilder getDocOrBuilder() {
       return doc_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Document.getDefaultInstance() : doc_;
     }
@@ -76263,7 +77387,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.TokensRegexResponse}
    */
-  public  static final class TokensRegexResponse extends
+  public static final class TokensRegexResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TokensRegexResponse)
       TokensRegexResponseOrBuilder {
@@ -76397,7 +77521,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.TokensRegexResponse.MatchLocation}
      */
-    public  static final class MatchLocation extends
+    public static final class MatchLocation extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TokensRegexResponse.MatchLocation)
         MatchLocationOrBuilder {
@@ -76496,6 +77620,7 @@ public final class CoreNLPProtos {
        * <code>optional string text = 1;</code>
        * @return Whether the text field is set.
        */
+      @java.lang.Override
       public boolean hasText() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -76503,6 +77628,7 @@ public final class CoreNLPProtos {
        * <code>optional string text = 1;</code>
        * @return The text.
        */
+      @java.lang.Override
       public java.lang.String getText() {
         java.lang.Object ref = text_;
         if (ref instanceof java.lang.String) {
@@ -76521,6 +77647,7 @@ public final class CoreNLPProtos {
        * <code>optional string text = 1;</code>
        * @return The bytes for text.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getTextBytes() {
         java.lang.Object ref = text_;
@@ -76541,6 +77668,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 begin = 2;</code>
        * @return Whether the begin field is set.
        */
+      @java.lang.Override
       public boolean hasBegin() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -76548,6 +77676,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 begin = 2;</code>
        * @return The begin.
        */
+      @java.lang.Override
       public int getBegin() {
         return begin_;
       }
@@ -76558,6 +77687,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 end = 3;</code>
        * @return Whether the end field is set.
        */
+      @java.lang.Override
       public boolean hasEnd() {
         return ((bitField0_ & 0x00000004) != 0);
       }
@@ -76565,6 +77695,7 @@ public final class CoreNLPProtos {
        * <code>optional int32 end = 3;</code>
        * @return The end.
        */
+      @java.lang.Override
       public int getEnd() {
         return end_;
       }
@@ -77023,6 +78154,7 @@ public final class CoreNLPProtos {
          * <code>optional int32 begin = 2;</code>
          * @return Whether the begin field is set.
          */
+        @java.lang.Override
         public boolean hasBegin() {
           return ((bitField0_ & 0x00000002) != 0);
         }
@@ -77030,6 +78162,7 @@ public final class CoreNLPProtos {
          * <code>optional int32 begin = 2;</code>
          * @return The begin.
          */
+        @java.lang.Override
         public int getBegin() {
           return begin_;
         }
@@ -77060,6 +78193,7 @@ public final class CoreNLPProtos {
          * <code>optional int32 end = 3;</code>
          * @return Whether the end field is set.
          */
+        @java.lang.Override
         public boolean hasEnd() {
           return ((bitField0_ & 0x00000004) != 0);
         }
@@ -77067,6 +78201,7 @@ public final class CoreNLPProtos {
          * <code>optional int32 end = 3;</code>
          * @return The end.
          */
+        @java.lang.Override
         public int getEnd() {
           return end_;
         }
@@ -77201,7 +78336,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.TokensRegexResponse.Match}
      */
-    public  static final class Match extends
+    public static final class Match extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TokensRegexResponse.Match)
         MatchOrBuilder {
@@ -77314,6 +78449,7 @@ public final class CoreNLPProtos {
        * <code>required int32 sentence = 1;</code>
        * @return Whether the sentence field is set.
        */
+      @java.lang.Override
       public boolean hasSentence() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -77321,6 +78457,7 @@ public final class CoreNLPProtos {
        * <code>required int32 sentence = 1;</code>
        * @return The sentence.
        */
+      @java.lang.Override
       public int getSentence() {
         return sentence_;
       }
@@ -77331,6 +78468,7 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.TokensRegexResponse.MatchLocation match = 2;</code>
        * @return Whether the match field is set.
        */
+      @java.lang.Override
       public boolean hasMatch() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -77338,12 +78476,14 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.TokensRegexResponse.MatchLocation match = 2;</code>
        * @return The match.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation getMatch() {
         return match_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation.getDefaultInstance() : match_;
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.TokensRegexResponse.MatchLocation match = 2;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocationOrBuilder getMatchOrBuilder() {
         return match_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation.getDefaultInstance() : match_;
       }
@@ -77353,12 +78493,14 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.MatchLocation group = 3;</code>
        */
+      @java.lang.Override
       public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation> getGroupList() {
         return group_;
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.MatchLocation group = 3;</code>
        */
+      @java.lang.Override
       public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocationOrBuilder> 
           getGroupOrBuilderList() {
         return group_;
@@ -77366,18 +78508,21 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.MatchLocation group = 3;</code>
        */
+      @java.lang.Override
       public int getGroupCount() {
         return group_.size();
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.MatchLocation group = 3;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation getGroup(int index) {
         return group_.get(index);
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.MatchLocation group = 3;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocationOrBuilder getGroupOrBuilder(
           int index) {
         return group_.get(index);
@@ -77805,6 +78950,7 @@ public final class CoreNLPProtos {
          * <code>required int32 sentence = 1;</code>
          * @return Whether the sentence field is set.
          */
+        @java.lang.Override
         public boolean hasSentence() {
           return ((bitField0_ & 0x00000001) != 0);
         }
@@ -77812,6 +78958,7 @@ public final class CoreNLPProtos {
          * <code>required int32 sentence = 1;</code>
          * @return The sentence.
          */
+        @java.lang.Override
         public int getSentence() {
           return sentence_;
         }
@@ -78280,7 +79427,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.TokensRegexResponse.PatternMatch}
      */
-    public  static final class PatternMatch extends
+    public static final class PatternMatch extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TokensRegexResponse.PatternMatch)
         PatternMatchOrBuilder {
@@ -78373,12 +79520,14 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.Match match = 1;</code>
        */
+      @java.lang.Override
       public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.Match> getMatchList() {
         return match_;
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.Match match = 1;</code>
        */
+      @java.lang.Override
       public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchOrBuilder> 
           getMatchOrBuilderList() {
         return match_;
@@ -78386,18 +79535,21 @@ public final class CoreNLPProtos {
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.Match match = 1;</code>
        */
+      @java.lang.Override
       public int getMatchCount() {
         return match_.size();
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.Match match = 1;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.Match getMatch(int index) {
         return match_.get(index);
       }
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.Match match = 1;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchOrBuilder getMatchOrBuilder(
           int index) {
         return match_.get(index);
@@ -79053,12 +80205,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.PatternMatch match = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatch> getMatchList() {
       return match_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.PatternMatch match = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatchOrBuilder> 
         getMatchOrBuilderList() {
       return match_;
@@ -79066,18 +80220,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.PatternMatch match = 1;</code>
      */
+    @java.lang.Override
     public int getMatchCount() {
       return match_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.PatternMatch match = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatch getMatch(int index) {
       return match_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.TokensRegexResponse.PatternMatch match = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatchOrBuilder getMatchOrBuilder(
         int index) {
       return match_.get(index);
@@ -79755,12 +80912,12 @@ public final class CoreNLPProtos {
     edu.stanford.nlp.pipeline.CoreNLPProtos.DocumentOrBuilder getDocumentOrBuilder();
 
     /**
-     * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+     * <code>.edu.stanford.nlp.pipeline.Language language = 2;</code>
      * @return Whether the language field is set.
      */
     boolean hasLanguage();
     /**
-     * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+     * <code>.edu.stanford.nlp.pipeline.Language language = 2;</code>
      * @return The language.
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage();
@@ -79770,7 +80927,7 @@ public final class CoreNLPProtos {
      * The expected value of this is a regex which matches relative pronouns
      * </pre>
      *
-     * <code>optional string relativePronouns = 3;</code>
+     * <code>string relativePronouns = 3;</code>
      * @return Whether the relativePronouns field is set.
      */
     boolean hasRelativePronouns();
@@ -79779,7 +80936,7 @@ public final class CoreNLPProtos {
      * The expected value of this is a regex which matches relative pronouns
      * </pre>
      *
-     * <code>optional string relativePronouns = 3;</code>
+     * <code>string relativePronouns = 3;</code>
      * @return The relativePronouns.
      */
     java.lang.String getRelativePronouns();
@@ -79788,7 +80945,7 @@ public final class CoreNLPProtos {
      * The expected value of this is a regex which matches relative pronouns
      * </pre>
      *
-     * <code>optional string relativePronouns = 3;</code>
+     * <code>string relativePronouns = 3;</code>
      * @return The bytes for relativePronouns.
      */
     com.google.protobuf.ByteString
@@ -79804,7 +80961,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyEnhancerRequest}
    */
-  public  static final class DependencyEnhancerRequest extends
+  public static final class DependencyEnhancerRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.DependencyEnhancerRequest)
       DependencyEnhancerRequestOrBuilder {
@@ -79958,6 +81115,7 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
      * @return Whether the document field is set.
      */
+    @java.lang.Override
     public boolean hasDocument() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -79965,26 +81123,28 @@ public final class CoreNLPProtos {
      * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
      * @return The document.
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Document getDocument() {
       return document_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Document.getDefaultInstance() : document_;
     }
     /**
      * <code>required .edu.stanford.nlp.pipeline.Document document = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.DocumentOrBuilder getDocumentOrBuilder() {
       return document_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.Document.getDefaultInstance() : document_;
     }
 
     public static final int LANGUAGE_FIELD_NUMBER = 2;
     /**
-     * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+     * <code>.edu.stanford.nlp.pipeline.Language language = 2;</code>
      * @return Whether the language field is set.
      */
     public boolean hasLanguage() {
       return refCase_ == 2;
     }
     /**
-     * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+     * <code>.edu.stanford.nlp.pipeline.Language language = 2;</code>
      * @return The language.
      */
     public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
@@ -80003,7 +81163,7 @@ public final class CoreNLPProtos {
      * The expected value of this is a regex which matches relative pronouns
      * </pre>
      *
-     * <code>optional string relativePronouns = 3;</code>
+     * <code>string relativePronouns = 3;</code>
      * @return Whether the relativePronouns field is set.
      */
     public boolean hasRelativePronouns() {
@@ -80014,7 +81174,7 @@ public final class CoreNLPProtos {
      * The expected value of this is a regex which matches relative pronouns
      * </pre>
      *
-     * <code>optional string relativePronouns = 3;</code>
+     * <code>string relativePronouns = 3;</code>
      * @return The relativePronouns.
      */
     public java.lang.String getRelativePronouns() {
@@ -80039,7 +81199,7 @@ public final class CoreNLPProtos {
      * The expected value of this is a regex which matches relative pronouns
      * </pre>
      *
-     * <code>optional string relativePronouns = 3;</code>
+     * <code>string relativePronouns = 3;</code>
      * @return The bytes for relativePronouns.
      */
     public com.google.protobuf.ByteString
@@ -80601,16 +81761,18 @@ public final class CoreNLPProtos {
       }
 
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+       * <code>.edu.stanford.nlp.pipeline.Language language = 2;</code>
        * @return Whether the language field is set.
        */
+      @java.lang.Override
       public boolean hasLanguage() {
         return refCase_ == 2;
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+       * <code>.edu.stanford.nlp.pipeline.Language language = 2;</code>
        * @return The language.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
         if (refCase_ == 2) {
           @SuppressWarnings("deprecation")
@@ -80621,7 +81783,7 @@ public final class CoreNLPProtos {
         return edu.stanford.nlp.pipeline.CoreNLPProtos.Language.Unknown;
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+       * <code>.edu.stanford.nlp.pipeline.Language language = 2;</code>
        * @param value The language to set.
        * @return This builder for chaining.
        */
@@ -80635,7 +81797,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>optional .edu.stanford.nlp.pipeline.Language language = 2;</code>
+       * <code>.edu.stanford.nlp.pipeline.Language language = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearLanguage() {
@@ -80652,9 +81814,10 @@ public final class CoreNLPProtos {
        * The expected value of this is a regex which matches relative pronouns
        * </pre>
        *
-       * <code>optional string relativePronouns = 3;</code>
+       * <code>string relativePronouns = 3;</code>
        * @return Whether the relativePronouns field is set.
        */
+      @java.lang.Override
       public boolean hasRelativePronouns() {
         return refCase_ == 3;
       }
@@ -80663,9 +81826,10 @@ public final class CoreNLPProtos {
        * The expected value of this is a regex which matches relative pronouns
        * </pre>
        *
-       * <code>optional string relativePronouns = 3;</code>
+       * <code>string relativePronouns = 3;</code>
        * @return The relativePronouns.
        */
+      @java.lang.Override
       public java.lang.String getRelativePronouns() {
         java.lang.Object ref = "";
         if (refCase_ == 3) {
@@ -80690,9 +81854,10 @@ public final class CoreNLPProtos {
        * The expected value of this is a regex which matches relative pronouns
        * </pre>
        *
-       * <code>optional string relativePronouns = 3;</code>
+       * <code>string relativePronouns = 3;</code>
        * @return The bytes for relativePronouns.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getRelativePronounsBytes() {
         java.lang.Object ref = "";
@@ -80716,7 +81881,7 @@ public final class CoreNLPProtos {
        * The expected value of this is a regex which matches relative pronouns
        * </pre>
        *
-       * <code>optional string relativePronouns = 3;</code>
+       * <code>string relativePronouns = 3;</code>
        * @param value The relativePronouns to set.
        * @return This builder for chaining.
        */
@@ -80735,7 +81900,7 @@ public final class CoreNLPProtos {
        * The expected value of this is a regex which matches relative pronouns
        * </pre>
        *
-       * <code>optional string relativePronouns = 3;</code>
+       * <code>string relativePronouns = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearRelativePronouns() {
@@ -80751,7 +81916,7 @@ public final class CoreNLPProtos {
        * The expected value of this is a regex which matches relative pronouns
        * </pre>
        *
-       * <code>optional string relativePronouns = 3;</code>
+       * <code>string relativePronouns = 3;</code>
        * @param value The bytes for relativePronouns to set.
        * @return This builder for chaining.
        */
@@ -80854,7 +82019,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.FlattenedParseTree}
    */
-  public  static final class FlattenedParseTree extends
+  public static final class FlattenedParseTree extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.FlattenedParseTree)
       FlattenedParseTreeOrBuilder {
@@ -80947,39 +82112,39 @@ public final class CoreNLPProtos {
         com.google.protobuf.MessageOrBuilder {
 
       /**
-       * <code>optional bool openNode = 1;</code>
+       * <code>bool openNode = 1;</code>
        * @return Whether the openNode field is set.
        */
       boolean hasOpenNode();
       /**
-       * <code>optional bool openNode = 1;</code>
+       * <code>bool openNode = 1;</code>
        * @return The openNode.
        */
       boolean getOpenNode();
 
       /**
-       * <code>optional bool closeNode = 2;</code>
+       * <code>bool closeNode = 2;</code>
        * @return Whether the closeNode field is set.
        */
       boolean hasCloseNode();
       /**
-       * <code>optional bool closeNode = 2;</code>
+       * <code>bool closeNode = 2;</code>
        * @return The closeNode.
        */
       boolean getCloseNode();
 
       /**
-       * <code>optional string value = 3;</code>
+       * <code>string value = 3;</code>
        * @return Whether the value field is set.
        */
       boolean hasValue();
       /**
-       * <code>optional string value = 3;</code>
+       * <code>string value = 3;</code>
        * @return The value.
        */
       java.lang.String getValue();
       /**
-       * <code>optional string value = 3;</code>
+       * <code>string value = 3;</code>
        * @return The bytes for value.
        */
       com.google.protobuf.ByteString
@@ -81001,7 +82166,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.FlattenedParseTree.Node}
      */
-    public  static final class Node extends
+    public static final class Node extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.FlattenedParseTree.Node)
         NodeOrBuilder {
@@ -81045,13 +82210,13 @@ public final class CoreNLPProtos {
                 done = true;
                 break;
               case 8: {
-                contentsCase_ = 1;
                 contents_ = input.readBool();
+                contentsCase_ = 1;
                 break;
               }
               case 16: {
-                contentsCase_ = 2;
                 contents_ = input.readBool();
+                contentsCase_ = 2;
                 break;
               }
               case 26: {
@@ -81143,16 +82308,18 @@ public final class CoreNLPProtos {
 
       public static final int OPENNODE_FIELD_NUMBER = 1;
       /**
-       * <code>optional bool openNode = 1;</code>
+       * <code>bool openNode = 1;</code>
        * @return Whether the openNode field is set.
        */
+      @java.lang.Override
       public boolean hasOpenNode() {
         return contentsCase_ == 1;
       }
       /**
-       * <code>optional bool openNode = 1;</code>
+       * <code>bool openNode = 1;</code>
        * @return The openNode.
        */
+      @java.lang.Override
       public boolean getOpenNode() {
         if (contentsCase_ == 1) {
           return (java.lang.Boolean) contents_;
@@ -81162,16 +82329,18 @@ public final class CoreNLPProtos {
 
       public static final int CLOSENODE_FIELD_NUMBER = 2;
       /**
-       * <code>optional bool closeNode = 2;</code>
+       * <code>bool closeNode = 2;</code>
        * @return Whether the closeNode field is set.
        */
+      @java.lang.Override
       public boolean hasCloseNode() {
         return contentsCase_ == 2;
       }
       /**
-       * <code>optional bool closeNode = 2;</code>
+       * <code>bool closeNode = 2;</code>
        * @return The closeNode.
        */
+      @java.lang.Override
       public boolean getCloseNode() {
         if (contentsCase_ == 2) {
           return (java.lang.Boolean) contents_;
@@ -81181,14 +82350,14 @@ public final class CoreNLPProtos {
 
       public static final int VALUE_FIELD_NUMBER = 3;
       /**
-       * <code>optional string value = 3;</code>
+       * <code>string value = 3;</code>
        * @return Whether the value field is set.
        */
       public boolean hasValue() {
         return contentsCase_ == 3;
       }
       /**
-       * <code>optional string value = 3;</code>
+       * <code>string value = 3;</code>
        * @return The value.
        */
       public java.lang.String getValue() {
@@ -81209,7 +82378,7 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>optional string value = 3;</code>
+       * <code>string value = 3;</code>
        * @return The bytes for value.
        */
       public com.google.protobuf.ByteString
@@ -81237,6 +82406,7 @@ public final class CoreNLPProtos {
        * <code>optional double score = 4;</code>
        * @return Whether the score field is set.
        */
+      @java.lang.Override
       public boolean hasScore() {
         return ((bitField0_ & 0x00000008) != 0);
       }
@@ -81244,6 +82414,7 @@ public final class CoreNLPProtos {
        * <code>optional double score = 4;</code>
        * @return The score.
        */
+      @java.lang.Override
       public double getScore() {
         return score_;
       }
@@ -81670,14 +82841,14 @@ public final class CoreNLPProtos {
         private int bitField0_;
 
         /**
-         * <code>optional bool openNode = 1;</code>
+         * <code>bool openNode = 1;</code>
          * @return Whether the openNode field is set.
          */
         public boolean hasOpenNode() {
           return contentsCase_ == 1;
         }
         /**
-         * <code>optional bool openNode = 1;</code>
+         * <code>bool openNode = 1;</code>
          * @return The openNode.
          */
         public boolean getOpenNode() {
@@ -81687,7 +82858,7 @@ public final class CoreNLPProtos {
           return false;
         }
         /**
-         * <code>optional bool openNode = 1;</code>
+         * <code>bool openNode = 1;</code>
          * @param value The openNode to set.
          * @return This builder for chaining.
          */
@@ -81698,7 +82869,7 @@ public final class CoreNLPProtos {
           return this;
         }
         /**
-         * <code>optional bool openNode = 1;</code>
+         * <code>bool openNode = 1;</code>
          * @return This builder for chaining.
          */
         public Builder clearOpenNode() {
@@ -81711,14 +82882,14 @@ public final class CoreNLPProtos {
         }
 
         /**
-         * <code>optional bool closeNode = 2;</code>
+         * <code>bool closeNode = 2;</code>
          * @return Whether the closeNode field is set.
          */
         public boolean hasCloseNode() {
           return contentsCase_ == 2;
         }
         /**
-         * <code>optional bool closeNode = 2;</code>
+         * <code>bool closeNode = 2;</code>
          * @return The closeNode.
          */
         public boolean getCloseNode() {
@@ -81728,7 +82899,7 @@ public final class CoreNLPProtos {
           return false;
         }
         /**
-         * <code>optional bool closeNode = 2;</code>
+         * <code>bool closeNode = 2;</code>
          * @param value The closeNode to set.
          * @return This builder for chaining.
          */
@@ -81739,7 +82910,7 @@ public final class CoreNLPProtos {
           return this;
         }
         /**
-         * <code>optional bool closeNode = 2;</code>
+         * <code>bool closeNode = 2;</code>
          * @return This builder for chaining.
          */
         public Builder clearCloseNode() {
@@ -81752,16 +82923,18 @@ public final class CoreNLPProtos {
         }
 
         /**
-         * <code>optional string value = 3;</code>
+         * <code>string value = 3;</code>
          * @return Whether the value field is set.
          */
+        @java.lang.Override
         public boolean hasValue() {
           return contentsCase_ == 3;
         }
         /**
-         * <code>optional string value = 3;</code>
+         * <code>string value = 3;</code>
          * @return The value.
          */
+        @java.lang.Override
         public java.lang.String getValue() {
           java.lang.Object ref = "";
           if (contentsCase_ == 3) {
@@ -81782,9 +82955,10 @@ public final class CoreNLPProtos {
           }
         }
         /**
-         * <code>optional string value = 3;</code>
+         * <code>string value = 3;</code>
          * @return The bytes for value.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString
             getValueBytes() {
           java.lang.Object ref = "";
@@ -81804,7 +82978,7 @@ public final class CoreNLPProtos {
           }
         }
         /**
-         * <code>optional string value = 3;</code>
+         * <code>string value = 3;</code>
          * @param value The value to set.
          * @return This builder for chaining.
          */
@@ -81819,7 +82993,7 @@ public final class CoreNLPProtos {
           return this;
         }
         /**
-         * <code>optional string value = 3;</code>
+         * <code>string value = 3;</code>
          * @return This builder for chaining.
          */
         public Builder clearValue() {
@@ -81831,7 +83005,7 @@ public final class CoreNLPProtos {
           return this;
         }
         /**
-         * <code>optional string value = 3;</code>
+         * <code>string value = 3;</code>
          * @param value The bytes for value to set.
          * @return This builder for chaining.
          */
@@ -81851,6 +83025,7 @@ public final class CoreNLPProtos {
          * <code>optional double score = 4;</code>
          * @return Whether the score field is set.
          */
+        @java.lang.Override
         public boolean hasScore() {
           return ((bitField0_ & 0x00000008) != 0);
         }
@@ -81858,6 +83033,7 @@ public final class CoreNLPProtos {
          * <code>optional double score = 4;</code>
          * @return The score.
          */
+        @java.lang.Override
         public double getScore() {
           return score_;
         }
@@ -81940,12 +83116,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node> getNodesList() {
       return nodes_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder> 
         getNodesOrBuilderList() {
       return nodes_;
@@ -81953,18 +83131,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
      */
+    @java.lang.Override
     public int getNodesCount() {
       return nodes_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node getNodes(int index) {
       return nodes_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree.Node nodes = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.NodeOrBuilder getNodesOrBuilder(
         int index) {
       return nodes_.get(index);
@@ -82644,7 +83825,7 @@ public final class CoreNLPProtos {
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserRequest}
    */
-  public  static final class EvaluateParserRequest extends
+  public static final class EvaluateParserRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.EvaluateParserRequest)
       EvaluateParserRequestOrBuilder {
@@ -82803,7 +83984,7 @@ public final class CoreNLPProtos {
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult}
      */
-    public  static final class ParseResult extends
+    public static final class ParseResult extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult)
         ParseResultOrBuilder {
@@ -82911,6 +84092,7 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
        * @return Whether the gold field is set.
        */
+      @java.lang.Override
       public boolean hasGold() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -82918,12 +84100,14 @@ public final class CoreNLPProtos {
        * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
        * @return The gold.
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getGold() {
         return gold_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance() : gold_;
       }
       /**
        * <code>required .edu.stanford.nlp.pipeline.FlattenedParseTree gold = 1;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getGoldOrBuilder() {
         return gold_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance() : gold_;
       }
@@ -82938,6 +84122,7 @@ public final class CoreNLPProtos {
        *
        * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
        */
+      @java.lang.Override
       public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getPredictedList() {
         return predicted_;
       }
@@ -82949,6 +84134,7 @@ public final class CoreNLPProtos {
        *
        * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
        */
+      @java.lang.Override
       public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
           getPredictedOrBuilderList() {
         return predicted_;
@@ -82961,6 +84147,7 @@ public final class CoreNLPProtos {
        *
        * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
        */
+      @java.lang.Override
       public int getPredictedCount() {
         return predicted_.size();
       }
@@ -82972,6 +84159,7 @@ public final class CoreNLPProtos {
        *
        * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getPredicted(int index) {
         return predicted_.get(index);
       }
@@ -82983,6 +84171,7 @@ public final class CoreNLPProtos {
        *
        * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree predicted = 2;</code>
        */
+      @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getPredictedOrBuilder(
           int index) {
         return predicted_.get(index);
@@ -83880,12 +85069,14 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult> getTreebankList() {
       return treebank_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder> 
         getTreebankOrBuilderList() {
       return treebank_;
@@ -83893,18 +85084,21 @@ public final class CoreNLPProtos {
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
      */
+    @java.lang.Override
     public int getTreebankCount() {
       return treebank_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult getTreebank(int index) {
       return treebank_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.pipeline.EvaluateParserRequest.ParseResult treebank = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder getTreebankOrBuilder(
         int index) {
       return treebank_.get(index);
@@ -84588,7 +85782,7 @@ public final class CoreNLPProtos {
   /**
    * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserResponse}
    */
-  public  static final class EvaluateParserResponse extends
+  public static final class EvaluateParserResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.EvaluateParserResponse)
       EvaluateParserResponseOrBuilder {
@@ -84680,6 +85874,7 @@ public final class CoreNLPProtos {
      * <code>required double f1 = 1;</code>
      * @return Whether the f1 field is set.
      */
+    @java.lang.Override
     public boolean hasF1() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -84687,6 +85882,7 @@ public final class CoreNLPProtos {
      * <code>required double f1 = 1;</code>
      * @return The f1.
      */
+    @java.lang.Override
     public double getF1() {
       return f1_;
     }
@@ -84697,6 +85893,7 @@ public final class CoreNLPProtos {
      * <code>optional double kbestF1 = 2;</code>
      * @return Whether the kbestF1 field is set.
      */
+    @java.lang.Override
     public boolean hasKbestF1() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -84704,6 +85901,7 @@ public final class CoreNLPProtos {
      * <code>optional double kbestF1 = 2;</code>
      * @return The kbestF1.
      */
+    @java.lang.Override
     public double getKbestF1() {
       return kbestF1_;
     }
@@ -85063,6 +86261,7 @@ public final class CoreNLPProtos {
        * <code>required double f1 = 1;</code>
        * @return Whether the f1 field is set.
        */
+      @java.lang.Override
       public boolean hasF1() {
         return ((bitField0_ & 0x00000001) != 0);
       }
@@ -85070,6 +86269,7 @@ public final class CoreNLPProtos {
        * <code>required double f1 = 1;</code>
        * @return The f1.
        */
+      @java.lang.Override
       public double getF1() {
         return f1_;
       }
@@ -85100,6 +86300,7 @@ public final class CoreNLPProtos {
        * <code>optional double kbestF1 = 2;</code>
        * @return Whether the kbestF1 field is set.
        */
+      @java.lang.Override
       public boolean hasKbestF1() {
         return ((bitField0_ & 0x00000002) != 0);
       }
@@ -85107,6 +86308,7 @@ public final class CoreNLPProtos {
        * <code>optional double kbestF1 = 2;</code>
        * @return The kbestF1.
        */
+      @java.lang.Override
       public double getKbestF1() {
         return kbestF1_;
       }
@@ -85179,6 +86381,2820 @@ public final class CoreNLPProtos {
 
     @java.lang.Override
     public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface TsurgeonRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TsurgeonRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation> 
+        getOperationsList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation getOperations(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+     */
+    int getOperationsCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.OperationOrBuilder> 
+        getOperationsOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.OperationOrBuilder getOperationsOrBuilder(
+        int index);
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> 
+        getTreesList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    int getTreesCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+        getTreesOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * A protobuf for running Tsurgeon operations on constituency trees
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.TsurgeonRequest}
+   */
+  public static final class TsurgeonRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TsurgeonRequest)
+      TsurgeonRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TsurgeonRequest.newBuilder() to construct.
+    private TsurgeonRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TsurgeonRequest() {
+      operations_ = java.util.Collections.emptyList();
+      trees_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new TsurgeonRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TsurgeonRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                operations_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              operations_.add(
+                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.PARSER, extensionRegistry));
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                trees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              trees_.add(
+                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER, extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          operations_ = java.util.Collections.unmodifiableList(operations_);
+        }
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
+          trees_ = java.util.Collections.unmodifiableList(trees_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Builder.class);
+    }
+
+    public interface OperationOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TsurgeonRequest.Operation)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string tregex = 1;</code>
+       * @return Whether the tregex field is set.
+       */
+      boolean hasTregex();
+      /**
+       * <code>required string tregex = 1;</code>
+       * @return The tregex.
+       */
+      java.lang.String getTregex();
+      /**
+       * <code>required string tregex = 1;</code>
+       * @return The bytes for tregex.
+       */
+      com.google.protobuf.ByteString
+          getTregexBytes();
+
+      /**
+       * <code>repeated string tsurgeon = 2;</code>
+       * @return A list containing the tsurgeon.
+       */
+      java.util.List<java.lang.String>
+          getTsurgeonList();
+      /**
+       * <code>repeated string tsurgeon = 2;</code>
+       * @return The count of tsurgeon.
+       */
+      int getTsurgeonCount();
+      /**
+       * <code>repeated string tsurgeon = 2;</code>
+       * @param index The index of the element to return.
+       * @return The tsurgeon at the given index.
+       */
+      java.lang.String getTsurgeon(int index);
+      /**
+       * <code>repeated string tsurgeon = 2;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the tsurgeon at the given index.
+       */
+      com.google.protobuf.ByteString
+          getTsurgeonBytes(int index);
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.TsurgeonRequest.Operation}
+     */
+    public static final class Operation extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TsurgeonRequest.Operation)
+        OperationOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use Operation.newBuilder() to construct.
+      private Operation(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private Operation() {
+        tregex_ = "";
+        tsurgeon_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new Operation();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Operation(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                tregex_ = bs;
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                  tsurgeon_ = new com.google.protobuf.LazyStringArrayList();
+                  mutable_bitField0_ |= 0x00000002;
+                }
+                tsurgeon_.add(bs);
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          if (((mutable_bitField0_ & 0x00000002) != 0)) {
+            tsurgeon_ = tsurgeon_.getUnmodifiableView();
+          }
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int TREGEX_FIELD_NUMBER = 1;
+      private volatile java.lang.Object tregex_;
+      /**
+       * <code>required string tregex = 1;</code>
+       * @return Whether the tregex field is set.
+       */
+      @java.lang.Override
+      public boolean hasTregex() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required string tregex = 1;</code>
+       * @return The tregex.
+       */
+      @java.lang.Override
+      public java.lang.String getTregex() {
+        java.lang.Object ref = tregex_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            tregex_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string tregex = 1;</code>
+       * @return The bytes for tregex.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getTregexBytes() {
+        java.lang.Object ref = tregex_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          tregex_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int TSURGEON_FIELD_NUMBER = 2;
+      private com.google.protobuf.LazyStringList tsurgeon_;
+      /**
+       * <code>repeated string tsurgeon = 2;</code>
+       * @return A list containing the tsurgeon.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getTsurgeonList() {
+        return tsurgeon_;
+      }
+      /**
+       * <code>repeated string tsurgeon = 2;</code>
+       * @return The count of tsurgeon.
+       */
+      public int getTsurgeonCount() {
+        return tsurgeon_.size();
+      }
+      /**
+       * <code>repeated string tsurgeon = 2;</code>
+       * @param index The index of the element to return.
+       * @return The tsurgeon at the given index.
+       */
+      public java.lang.String getTsurgeon(int index) {
+        return tsurgeon_.get(index);
+      }
+      /**
+       * <code>repeated string tsurgeon = 2;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the tsurgeon at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getTsurgeonBytes(int index) {
+        return tsurgeon_.getByteString(index);
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasTregex()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, tregex_);
+        }
+        for (int i = 0; i < tsurgeon_.size(); i++) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 2, tsurgeon_.getRaw(i));
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, tregex_);
+        }
+        {
+          int dataSize = 0;
+          for (int i = 0; i < tsurgeon_.size(); i++) {
+            dataSize += computeStringSizeNoTag(tsurgeon_.getRaw(i));
+          }
+          size += dataSize;
+          size += 1 * getTsurgeonList().size();
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation other = (edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation) obj;
+
+        if (hasTregex() != other.hasTregex()) return false;
+        if (hasTregex()) {
+          if (!getTregex()
+              .equals(other.getTregex())) return false;
+        }
+        if (!getTsurgeonList()
+            .equals(other.getTsurgeonList())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasTregex()) {
+          hash = (37 * hash) + TREGEX_FIELD_NUMBER;
+          hash = (53 * hash) + getTregex().hashCode();
+        }
+        if (getTsurgeonCount() > 0) {
+          hash = (37 * hash) + TSURGEON_FIELD_NUMBER;
+          hash = (53 * hash) + getTsurgeonList().hashCode();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.TsurgeonRequest.Operation}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TsurgeonRequest.Operation)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.OperationOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          tregex_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          tsurgeon_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.tregex_ = tregex_;
+          if (((bitField0_ & 0x00000002) != 0)) {
+            tsurgeon_ = tsurgeon_.getUnmodifiableView();
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.tsurgeon_ = tsurgeon_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.getDefaultInstance()) return this;
+          if (other.hasTregex()) {
+            bitField0_ |= 0x00000001;
+            tregex_ = other.tregex_;
+            onChanged();
+          }
+          if (!other.tsurgeon_.isEmpty()) {
+            if (tsurgeon_.isEmpty()) {
+              tsurgeon_ = other.tsurgeon_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureTsurgeonIsMutable();
+              tsurgeon_.addAll(other.tsurgeon_);
+            }
+            onChanged();
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          if (!hasTregex()) {
+            return false;
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object tregex_ = "";
+        /**
+         * <code>required string tregex = 1;</code>
+         * @return Whether the tregex field is set.
+         */
+        public boolean hasTregex() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>required string tregex = 1;</code>
+         * @return The tregex.
+         */
+        public java.lang.String getTregex() {
+          java.lang.Object ref = tregex_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              tregex_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string tregex = 1;</code>
+         * @return The bytes for tregex.
+         */
+        public com.google.protobuf.ByteString
+            getTregexBytes() {
+          java.lang.Object ref = tregex_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            tregex_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string tregex = 1;</code>
+         * @param value The tregex to set.
+         * @return This builder for chaining.
+         */
+        public Builder setTregex(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          tregex_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string tregex = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearTregex() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          tregex_ = getDefaultInstance().getTregex();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string tregex = 1;</code>
+         * @param value The bytes for tregex to set.
+         * @return This builder for chaining.
+         */
+        public Builder setTregexBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          tregex_ = value;
+          onChanged();
+          return this;
+        }
+
+        private com.google.protobuf.LazyStringList tsurgeon_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        private void ensureTsurgeonIsMutable() {
+          if (!((bitField0_ & 0x00000002) != 0)) {
+            tsurgeon_ = new com.google.protobuf.LazyStringArrayList(tsurgeon_);
+            bitField0_ |= 0x00000002;
+           }
+        }
+        /**
+         * <code>repeated string tsurgeon = 2;</code>
+         * @return A list containing the tsurgeon.
+         */
+        public com.google.protobuf.ProtocolStringList
+            getTsurgeonList() {
+          return tsurgeon_.getUnmodifiableView();
+        }
+        /**
+         * <code>repeated string tsurgeon = 2;</code>
+         * @return The count of tsurgeon.
+         */
+        public int getTsurgeonCount() {
+          return tsurgeon_.size();
+        }
+        /**
+         * <code>repeated string tsurgeon = 2;</code>
+         * @param index The index of the element to return.
+         * @return The tsurgeon at the given index.
+         */
+        public java.lang.String getTsurgeon(int index) {
+          return tsurgeon_.get(index);
+        }
+        /**
+         * <code>repeated string tsurgeon = 2;</code>
+         * @param index The index of the value to return.
+         * @return The bytes of the tsurgeon at the given index.
+         */
+        public com.google.protobuf.ByteString
+            getTsurgeonBytes(int index) {
+          return tsurgeon_.getByteString(index);
+        }
+        /**
+         * <code>repeated string tsurgeon = 2;</code>
+         * @param index The index to set the value at.
+         * @param value The tsurgeon to set.
+         * @return This builder for chaining.
+         */
+        public Builder setTsurgeon(
+            int index, java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTsurgeonIsMutable();
+          tsurgeon_.set(index, value);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string tsurgeon = 2;</code>
+         * @param value The tsurgeon to add.
+         * @return This builder for chaining.
+         */
+        public Builder addTsurgeon(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTsurgeonIsMutable();
+          tsurgeon_.add(value);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string tsurgeon = 2;</code>
+         * @param values The tsurgeon to add.
+         * @return This builder for chaining.
+         */
+        public Builder addAllTsurgeon(
+            java.lang.Iterable<java.lang.String> values) {
+          ensureTsurgeonIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, tsurgeon_);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string tsurgeon = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearTsurgeon() {
+          tsurgeon_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string tsurgeon = 2;</code>
+         * @param value The bytes of the tsurgeon to add.
+         * @return This builder for chaining.
+         */
+        public Builder addTsurgeonBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTsurgeonIsMutable();
+          tsurgeon_.add(value);
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TsurgeonRequest.Operation)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TsurgeonRequest.Operation)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<Operation>
+          PARSER = new com.google.protobuf.AbstractParser<Operation>() {
+        @java.lang.Override
+        public Operation parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Operation(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<Operation> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Operation> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public static final int OPERATIONS_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation> operations_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation> getOperationsList() {
+      return operations_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.OperationOrBuilder> 
+        getOperationsOrBuilderList() {
+      return operations_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+     */
+    @java.lang.Override
+    public int getOperationsCount() {
+      return operations_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation getOperations(int index) {
+      return operations_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.OperationOrBuilder getOperationsOrBuilder(
+        int index) {
+      return operations_.get(index);
+    }
+
+    public static final int TREES_FIELD_NUMBER = 2;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> trees_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getTreesList() {
+      return trees_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+        getTreesOrBuilderList() {
+      return trees_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    @java.lang.Override
+    public int getTreesCount() {
+      return trees_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index) {
+      return trees_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+        int index) {
+      return trees_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      for (int i = 0; i < getOperationsCount(); i++) {
+        if (!getOperations(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < operations_.size(); i++) {
+        output.writeMessage(1, operations_.get(i));
+      }
+      for (int i = 0; i < trees_.size(); i++) {
+        output.writeMessage(2, trees_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < operations_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, operations_.get(i));
+      }
+      for (int i = 0; i < trees_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, trees_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest other = (edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest) obj;
+
+      if (!getOperationsList()
+          .equals(other.getOperationsList())) return false;
+      if (!getTreesList()
+          .equals(other.getTreesList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getOperationsCount() > 0) {
+        hash = (37 * hash) + OPERATIONS_FIELD_NUMBER;
+        hash = (53 * hash) + getOperationsList().hashCode();
+      }
+      if (getTreesCount() > 0) {
+        hash = (37 * hash) + TREES_FIELD_NUMBER;
+        hash = (53 * hash) + getTreesList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * A protobuf for running Tsurgeon operations on constituency trees
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.TsurgeonRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TsurgeonRequest)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getOperationsFieldBuilder();
+          getTreesFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (operationsBuilder_ == null) {
+          operations_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          operationsBuilder_.clear();
+        }
+        if (treesBuilder_ == null) {
+          trees_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          treesBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest(this);
+        int from_bitField0_ = bitField0_;
+        if (operationsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            operations_ = java.util.Collections.unmodifiableList(operations_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.operations_ = operations_;
+        } else {
+          result.operations_ = operationsBuilder_.build();
+        }
+        if (treesBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0)) {
+            trees_ = java.util.Collections.unmodifiableList(trees_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.trees_ = trees_;
+        } else {
+          result.trees_ = treesBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.getDefaultInstance()) return this;
+        if (operationsBuilder_ == null) {
+          if (!other.operations_.isEmpty()) {
+            if (operations_.isEmpty()) {
+              operations_ = other.operations_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureOperationsIsMutable();
+              operations_.addAll(other.operations_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.operations_.isEmpty()) {
+            if (operationsBuilder_.isEmpty()) {
+              operationsBuilder_.dispose();
+              operationsBuilder_ = null;
+              operations_ = other.operations_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              operationsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getOperationsFieldBuilder() : null;
+            } else {
+              operationsBuilder_.addAllMessages(other.operations_);
+            }
+          }
+        }
+        if (treesBuilder_ == null) {
+          if (!other.trees_.isEmpty()) {
+            if (trees_.isEmpty()) {
+              trees_ = other.trees_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureTreesIsMutable();
+              trees_.addAll(other.trees_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.trees_.isEmpty()) {
+            if (treesBuilder_.isEmpty()) {
+              treesBuilder_.dispose();
+              treesBuilder_ = null;
+              trees_ = other.trees_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              treesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getTreesFieldBuilder() : null;
+            } else {
+              treesBuilder_.addAllMessages(other.trees_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        for (int i = 0; i < getOperationsCount(); i++) {
+          if (!getOperations(i).isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation> operations_ =
+        java.util.Collections.emptyList();
+      private void ensureOperationsIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          operations_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation>(operations_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.OperationOrBuilder> operationsBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation> getOperationsList() {
+        if (operationsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(operations_);
+        } else {
+          return operationsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public int getOperationsCount() {
+        if (operationsBuilder_ == null) {
+          return operations_.size();
+        } else {
+          return operationsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation getOperations(int index) {
+        if (operationsBuilder_ == null) {
+          return operations_.get(index);
+        } else {
+          return operationsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public Builder setOperations(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation value) {
+        if (operationsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureOperationsIsMutable();
+          operations_.set(index, value);
+          onChanged();
+        } else {
+          operationsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public Builder setOperations(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder builderForValue) {
+        if (operationsBuilder_ == null) {
+          ensureOperationsIsMutable();
+          operations_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          operationsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public Builder addOperations(edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation value) {
+        if (operationsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureOperationsIsMutable();
+          operations_.add(value);
+          onChanged();
+        } else {
+          operationsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public Builder addOperations(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation value) {
+        if (operationsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureOperationsIsMutable();
+          operations_.add(index, value);
+          onChanged();
+        } else {
+          operationsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public Builder addOperations(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder builderForValue) {
+        if (operationsBuilder_ == null) {
+          ensureOperationsIsMutable();
+          operations_.add(builderForValue.build());
+          onChanged();
+        } else {
+          operationsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public Builder addOperations(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder builderForValue) {
+        if (operationsBuilder_ == null) {
+          ensureOperationsIsMutable();
+          operations_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          operationsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public Builder addAllOperations(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation> values) {
+        if (operationsBuilder_ == null) {
+          ensureOperationsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, operations_);
+          onChanged();
+        } else {
+          operationsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public Builder clearOperations() {
+        if (operationsBuilder_ == null) {
+          operations_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          operationsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public Builder removeOperations(int index) {
+        if (operationsBuilder_ == null) {
+          ensureOperationsIsMutable();
+          operations_.remove(index);
+          onChanged();
+        } else {
+          operationsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder getOperationsBuilder(
+          int index) {
+        return getOperationsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.OperationOrBuilder getOperationsOrBuilder(
+          int index) {
+        if (operationsBuilder_ == null) {
+          return operations_.get(index);  } else {
+          return operationsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.OperationOrBuilder> 
+           getOperationsOrBuilderList() {
+        if (operationsBuilder_ != null) {
+          return operationsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(operations_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder addOperationsBuilder() {
+        return getOperationsFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder addOperationsBuilder(
+          int index) {
+        return getOperationsFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TsurgeonRequest.Operation operations = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder> 
+           getOperationsBuilderList() {
+        return getOperationsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.OperationOrBuilder> 
+          getOperationsFieldBuilder() {
+        if (operationsBuilder_ == null) {
+          operationsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.OperationOrBuilder>(
+                  operations_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          operations_ = null;
+        }
+        return operationsBuilder_;
+      }
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> trees_ =
+        java.util.Collections.emptyList();
+      private void ensureTreesIsMutable() {
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          trees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>(trees_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> treesBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getTreesList() {
+        if (treesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(trees_);
+        } else {
+          return treesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public int getTreesCount() {
+        if (treesBuilder_ == null) {
+          return trees_.size();
+        } else {
+          return treesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index) {
+        if (treesBuilder_ == null) {
+          return trees_.get(index);
+        } else {
+          return treesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder setTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.set(index, value);
+          onChanged();
+        } else {
+          treesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder setTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder addTrees(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.add(value);
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder addTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.add(index, value);
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder addTrees(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.add(builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder addTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder addAllTrees(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> values) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, trees_);
+          onChanged();
+        } else {
+          treesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder clearTrees() {
+        if (treesBuilder_ == null) {
+          trees_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          treesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder removeTrees(int index) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.remove(index);
+          onChanged();
+        } else {
+          treesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder getTreesBuilder(
+          int index) {
+        return getTreesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+          int index) {
+        if (treesBuilder_ == null) {
+          return trees_.get(index);  } else {
+          return treesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+           getTreesOrBuilderList() {
+        if (treesBuilder_ != null) {
+          return treesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(trees_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder addTreesBuilder() {
+        return getTreesFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder addTreesBuilder(
+          int index) {
+        return getTreesFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder> 
+           getTreesBuilderList() {
+        return getTreesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+          getTreesFieldBuilder() {
+        if (treesBuilder_ == null) {
+          treesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder>(
+                  trees_,
+                  ((bitField0_ & 0x00000002) != 0),
+                  getParentForChildren(),
+                  isClean());
+          trees_ = null;
+        }
+        return treesBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TsurgeonRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TsurgeonRequest)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<TsurgeonRequest>
+        PARSER = new com.google.protobuf.AbstractParser<TsurgeonRequest>() {
+      @java.lang.Override
+      public TsurgeonRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TsurgeonRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<TsurgeonRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TsurgeonRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface TsurgeonResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TsurgeonResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> 
+        getTreesList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    int getTreesCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+        getTreesOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * The results of the Tsurgeon operation
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.TsurgeonResponse}
+   */
+  public static final class TsurgeonResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TsurgeonResponse)
+      TsurgeonResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TsurgeonResponse.newBuilder() to construct.
+    private TsurgeonResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TsurgeonResponse() {
+      trees_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new TsurgeonResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TsurgeonResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                trees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              trees_.add(
+                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER, extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          trees_ = java.util.Collections.unmodifiableList(trees_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse.Builder.class);
+    }
+
+    public static final int TREES_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> trees_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getTreesList() {
+      return trees_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+        getTreesOrBuilderList() {
+      return trees_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    @java.lang.Override
+    public int getTreesCount() {
+      return trees_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index) {
+      return trees_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+        int index) {
+      return trees_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < trees_.size(); i++) {
+        output.writeMessage(1, trees_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < trees_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, trees_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse other = (edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse) obj;
+
+      if (!getTreesList()
+          .equals(other.getTreesList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getTreesCount() > 0) {
+        hash = (37 * hash) + TREES_FIELD_NUMBER;
+        hash = (53 * hash) + getTreesList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The results of the Tsurgeon operation
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.TsurgeonResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TsurgeonResponse)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getTreesFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (treesBuilder_ == null) {
+          trees_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          treesBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse(this);
+        int from_bitField0_ = bitField0_;
+        if (treesBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            trees_ = java.util.Collections.unmodifiableList(trees_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.trees_ = trees_;
+        } else {
+          result.trees_ = treesBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse.getDefaultInstance()) return this;
+        if (treesBuilder_ == null) {
+          if (!other.trees_.isEmpty()) {
+            if (trees_.isEmpty()) {
+              trees_ = other.trees_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureTreesIsMutable();
+              trees_.addAll(other.trees_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.trees_.isEmpty()) {
+            if (treesBuilder_.isEmpty()) {
+              treesBuilder_.dispose();
+              treesBuilder_ = null;
+              trees_ = other.trees_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              treesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getTreesFieldBuilder() : null;
+            } else {
+              treesBuilder_.addAllMessages(other.trees_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> trees_ =
+        java.util.Collections.emptyList();
+      private void ensureTreesIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          trees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>(trees_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> treesBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getTreesList() {
+        if (treesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(trees_);
+        } else {
+          return treesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public int getTreesCount() {
+        if (treesBuilder_ == null) {
+          return trees_.size();
+        } else {
+          return treesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index) {
+        if (treesBuilder_ == null) {
+          return trees_.get(index);
+        } else {
+          return treesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder setTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.set(index, value);
+          onChanged();
+        } else {
+          treesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder setTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder addTrees(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.add(value);
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder addTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.add(index, value);
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder addTrees(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.add(builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder addTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder addAllTrees(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> values) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, trees_);
+          onChanged();
+        } else {
+          treesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder clearTrees() {
+        if (treesBuilder_ == null) {
+          trees_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          treesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder removeTrees(int index) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.remove(index);
+          onChanged();
+        } else {
+          treesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder getTreesBuilder(
+          int index) {
+        return getTreesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+          int index) {
+        if (treesBuilder_ == null) {
+          return trees_.get(index);  } else {
+          return treesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+           getTreesOrBuilderList() {
+        if (treesBuilder_ != null) {
+          return treesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(trees_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder addTreesBuilder() {
+        return getTreesFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder addTreesBuilder(
+          int index) {
+        return getTreesFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder> 
+           getTreesBuilderList() {
+        return getTreesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+          getTreesFieldBuilder() {
+        if (treesBuilder_ == null) {
+          treesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder>(
+                  trees_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          trees_ = null;
+        }
+        return treesBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TsurgeonResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TsurgeonResponse)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<TsurgeonResponse>
+        PARSER = new com.google.protobuf.AbstractParser<TsurgeonResponse>() {
+      @java.lang.Override
+      public TsurgeonResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TsurgeonResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<TsurgeonResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TsurgeonResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -85409,6 +89425,21 @@ public final class CoreNLPProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -85708,19 +89739,26 @@ public final class CoreNLPProtos {
       ".nlp.pipeline.FlattenedParseTree\022@\n\tpred" +
       "icted\030\002 \003(\0132-.edu.stanford.nlp.pipeline." +
       "FlattenedParseTree\"5\n\026EvaluateParserResp" +
-      "onse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001*\243\001\n\010La" +
-      "nguage\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002" +
-      "\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n" +
-      "\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020U" +
-      "niversalEnglish\020\t\022\024\n\020UniversalChinese\020\n*" +
-      "h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEA" +
-      "K_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITI" +
-      "VE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024NaturalLog" +
-      "icRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_E" +
-      "NTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010N" +
-      "EGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n" +
-      "\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp.pipe" +
-      "lineB\rCoreNLPProtos"
+      "onse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001\n\017Ts" +
+      "urgeonRequest\022H\n\noperations\030\001 \003(\01324.edu." +
+      "stanford.nlp.pipeline.TsurgeonRequest.Op" +
+      "eration\022<\n\005trees\030\002 \003(\0132-.edu.stanford.nl" +
+      "p.pipeline.FlattenedParseTree\032-\n\tOperati" +
+      "on\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P\n\020" +
+      "TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.edu.st" +
+      "anford.nlp.pipeline.FlattenedParseTree*\243" +
+      "\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Ara" +
+      "bic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006Germa" +
+      "n\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010" +
+      "\022\024\n\020UniversalEnglish\020\t\022\024\n\020UniversalChine" +
+      "se\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021" +
+      "\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_P" +
+      "OSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Natur" +
+      "alLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORW" +
+      "ARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002" +
+      "\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER" +
+      "\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp" +
+      ".pipelineB\rCoreNLPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -85996,6 +90034,24 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor,
         new java.lang.String[] { "F1", "KbestF1", });
+    internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor =
+      getDescriptor().getMessageTypes().get(31);
+    internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor,
+        new java.lang.String[] { "Operations", "Trees", });
+    internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor.getNestedTypes().get(0);
+    internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_descriptor,
+        new java.lang.String[] { "Tregex", "Tsurgeon", });
+    internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor =
+      getDescriptor().getMessageTypes().get(32);
+    internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor,
+        new java.lang.String[] { "Trees", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
