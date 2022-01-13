@@ -29,6 +29,14 @@ python train.py -l universal -d /path/to/data --train_file it-train.conllu --dev
 
 The data files should be `*.conllu` format.
 
+Note that the above command will automatically tag the input data with the CoreNLP tagger.
+Thus you need to have CoreNLP and the Italian models (for this example) in your CLASSPATH,
+and you need the latest version of Stanza installed.
+
+Why is this done? When CoreNLP runs a dependency parser, it relies on part of speech tags,
+so the training and development data used during training need to have the predicted tags
+CoreNLP will use for optimal performance.
+
 After the model is trained, it can be converted to a format usable by CoreNLP:
 
 ```bash
