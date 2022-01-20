@@ -197,6 +197,9 @@ public abstract class TregexMatcher {
     return namesToNodes.get(name);
   }
 
+  /**
+   * Returns a set of the names of the nodes currently matched
+   */
   public Set<String> getNodeNames() {
     return namesToNodes.keySet();
   }
@@ -234,4 +237,10 @@ public abstract class TregexMatcher {
     return variableStrings.getString(var);
   }
 
+  /**
+   * Return a set of the variable names.  Is not a view to the real data
+   */
+  public Set<String> getVariableNames() {
+    return variableStrings.keySet();
+  }
 }

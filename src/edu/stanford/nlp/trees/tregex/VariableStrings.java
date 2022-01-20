@@ -6,6 +6,7 @@ import edu.stanford.nlp.util.MapFactory;
 import edu.stanford.nlp.util.MutableInteger;
 
 import java.util.Map;
+import java.util.Set;
 
 /** A class that takes care of the stuff necessary for variable strings.
  *
@@ -46,6 +47,10 @@ class VariableStrings {
 
   public String getString(String var) {
     return varsToStrings.get(var);
+  }
+
+  public Set<String> keySet() {
+    return numVarsSet.keysAbove(1);
   }
 
   @Override

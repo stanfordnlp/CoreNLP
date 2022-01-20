@@ -1230,6 +1230,27 @@ public class TregexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  /**
+   * Test the results of the getVariableNames() call on a TregexMatcher
+   */
+  public void testVariableNames() {
+    String treeString = "(albatross (foo 1) (bar 2))";
+    Tree tree = treeFromString(treeString);
+
+    TregexPattern pattern = TregexPattern.compile("/(.*)/#1%name < /foo(.*)/#1%blah");
+    TregexMatcher matcher = pattern.matcher(tree);
+    assertTrue(matcher.find());
+    assertEquals(treeString, matcher.getMatch().toString());
+    assertEquals("albatross", matcher.getVariableString("name"));
+    assertEquals("", matcher.getVariableString("blah"));
+    // sneak in a test of the getVariableNames() method
+    assertEquals(2, matcher.getVariableNames().size());
+    assertEquals(null, matcher.getVariableString("unban"));
+    assertTrue(matcher.getVariableNames().contains("blah"));
+    assertFalse(matcher.getVariableNames().contains("opal"));
+    assertFalse(matcher.find());
+  }
+
   public void testVariableGroups() {
     String treeString = "(albatross (foo 1) (bar 2))";
     Tree tree = treeFromString(treeString);
