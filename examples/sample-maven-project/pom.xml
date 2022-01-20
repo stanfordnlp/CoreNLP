@@ -9,8 +9,10 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <stanford.corenlp.version>4.3.2</stanford.corenlp.version>
-        <junit.version>4.13.2</junit.version>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <stanford.corenlp.version>4.2.2</stanford.corenlp.version>
+        <junit.version>4.13.1</junit.version>
     </properties>
 
     <dependencies>
@@ -74,10 +76,11 @@
             <version>${stanford.corenlp.version}</version>
             <classifier>models-french</classifier>
         </dependency>
+        <!--  german is currently no version : 4.2.2 -->
         <dependency>
             <groupId>edu.stanford.nlp</groupId>
             <artifactId>stanford-corenlp</artifactId>
-            <version>${stanford.corenlp.version}</version>
+            <version>4.2.1</version>
             <classifier>models-german</classifier>
         </dependency>
         <dependency>
