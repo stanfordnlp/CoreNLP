@@ -245,6 +245,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         logger.info("preTokenized option set: Changing annotators tokenize,ssplit,mwt to tokenize,ssplit");
       } else if (oldAnnotators != null && oldAnnotators.startsWith("tokenize,ssplit")) {
         logger.info("preTokenized option set: Annotators list starts with tokenize,ssplit, no change needed.");
+      } else if (oldAnnotators != null && !oldAnnotators.contains("tokenize") && !oldAnnotators.contains("mwt")
+                 && !oldAnnotators.contains("ssplit") && !oldAnnotators.contains("cdc_tokenize")) {
+        logger.info("preTokenized option set: Adding tokenize,ssplit to beginning.");
+        newAnnotators = "tokenize,ssplit," + oldAnnotators;
       } else {
         logger.warn("preTokenized option set: Non-standard annotators list, preTokenized may not work in this case."); 
       }
