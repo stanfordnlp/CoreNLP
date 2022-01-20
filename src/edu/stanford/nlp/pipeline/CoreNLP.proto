@@ -732,6 +732,49 @@ message EvaluateParserResponse {
   optional double              kbestF1        = 2;
 }
 
+message TregexRequest {
+  repeated string                  tregex         = 1;
+  repeated FlattenedParseTree      trees          = 2;
+}
+
+// The nesting here is quite deep because we want one result
+// per tree, per tregex
+// Obviously a shallower query structure would also work,
+// but the nested structure allows for parsing the same
+// tregex and same tree once per query
+message TregexResponse {
+  message VarString {
+    required     string            name           = 1;
+    required     string            value          = 2;
+  }
+
+  message MatchNode {
+    required     string            name           = 1;
+    required     int32             position       = 2;
+  }
+
+  message Match {
+    required     int32             position       = 1;
+    repeated     VarString         variables      = 2;
+    repeated     MatchNode         nodes          = 3;
+  }
+
+  // Each tree will have a "repeated" of this for each tregex
+  message TreeMatches {
+    repeated     Match             matches        = 1;
+  }
+
+  // Stores all of a tree's matches
+  // One entry per item in the tregex field of the request
+  // in the event of a non-matching expression, matches will
+  // be an empty array for that tregex
+  message TreeTregexMatches {
+    repeated     TreeMatches       matches        = 1;
+  }
+
+  // One entry per item in the trees field of the request
+  repeated       TreeTregexMatches matches        = 1;
+}
 
 // A protobuf for running Tsurgeon operations on constituency trees
 message TsurgeonRequest {

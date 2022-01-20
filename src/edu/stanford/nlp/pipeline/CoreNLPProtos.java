@@ -86386,6 +86386,6394 @@ public final class CoreNLPProtos {
 
   }
 
+  public interface TregexRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TregexRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated string tregex = 1;</code>
+     * @return A list containing the tregex.
+     */
+    java.util.List<java.lang.String>
+        getTregexList();
+    /**
+     * <code>repeated string tregex = 1;</code>
+     * @return The count of tregex.
+     */
+    int getTregexCount();
+    /**
+     * <code>repeated string tregex = 1;</code>
+     * @param index The index of the element to return.
+     * @return The tregex at the given index.
+     */
+    java.lang.String getTregex(int index);
+    /**
+     * <code>repeated string tregex = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the tregex at the given index.
+     */
+    com.google.protobuf.ByteString
+        getTregexBytes(int index);
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> 
+        getTreesList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    int getTreesCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+        getTreesOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code edu.stanford.nlp.pipeline.TregexRequest}
+   */
+  public static final class TregexRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TregexRequest)
+      TregexRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TregexRequest.newBuilder() to construct.
+    private TregexRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TregexRequest() {
+      tregex_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      trees_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new TregexRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TregexRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                tregex_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              tregex_.add(bs);
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                trees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              trees_.add(
+                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER, extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          tregex_ = tregex_.getUnmodifiableView();
+        }
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
+          trees_ = java.util.Collections.unmodifiableList(trees_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest.Builder.class);
+    }
+
+    public static final int TREGEX_FIELD_NUMBER = 1;
+    private com.google.protobuf.LazyStringList tregex_;
+    /**
+     * <code>repeated string tregex = 1;</code>
+     * @return A list containing the tregex.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getTregexList() {
+      return tregex_;
+    }
+    /**
+     * <code>repeated string tregex = 1;</code>
+     * @return The count of tregex.
+     */
+    public int getTregexCount() {
+      return tregex_.size();
+    }
+    /**
+     * <code>repeated string tregex = 1;</code>
+     * @param index The index of the element to return.
+     * @return The tregex at the given index.
+     */
+    public java.lang.String getTregex(int index) {
+      return tregex_.get(index);
+    }
+    /**
+     * <code>repeated string tregex = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the tregex at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getTregexBytes(int index) {
+      return tregex_.getByteString(index);
+    }
+
+    public static final int TREES_FIELD_NUMBER = 2;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> trees_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getTreesList() {
+      return trees_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+        getTreesOrBuilderList() {
+      return trees_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    @java.lang.Override
+    public int getTreesCount() {
+      return trees_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index) {
+      return trees_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+        int index) {
+      return trees_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < tregex_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, tregex_.getRaw(i));
+      }
+      for (int i = 0; i < trees_.size(); i++) {
+        output.writeMessage(2, trees_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < tregex_.size(); i++) {
+          dataSize += computeStringSizeNoTag(tregex_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getTregexList().size();
+      }
+      for (int i = 0; i < trees_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, trees_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest other = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest) obj;
+
+      if (!getTregexList()
+          .equals(other.getTregexList())) return false;
+      if (!getTreesList()
+          .equals(other.getTreesList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getTregexCount() > 0) {
+        hash = (37 * hash) + TREGEX_FIELD_NUMBER;
+        hash = (53 * hash) + getTregexList().hashCode();
+      }
+      if (getTreesCount() > 0) {
+        hash = (37 * hash) + TREES_FIELD_NUMBER;
+        hash = (53 * hash) + getTreesList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.TregexRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TregexRequest)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getTreesFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        tregex_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        if (treesBuilder_ == null) {
+          trees_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          treesBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest(this);
+        int from_bitField0_ = bitField0_;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          tregex_ = tregex_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.tregex_ = tregex_;
+        if (treesBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0)) {
+            trees_ = java.util.Collections.unmodifiableList(trees_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.trees_ = trees_;
+        } else {
+          result.trees_ = treesBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest.getDefaultInstance()) return this;
+        if (!other.tregex_.isEmpty()) {
+          if (tregex_.isEmpty()) {
+            tregex_ = other.tregex_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureTregexIsMutable();
+            tregex_.addAll(other.tregex_);
+          }
+          onChanged();
+        }
+        if (treesBuilder_ == null) {
+          if (!other.trees_.isEmpty()) {
+            if (trees_.isEmpty()) {
+              trees_ = other.trees_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureTreesIsMutable();
+              trees_.addAll(other.trees_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.trees_.isEmpty()) {
+            if (treesBuilder_.isEmpty()) {
+              treesBuilder_.dispose();
+              treesBuilder_ = null;
+              trees_ = other.trees_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              treesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getTreesFieldBuilder() : null;
+            } else {
+              treesBuilder_.addAllMessages(other.trees_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.LazyStringList tregex_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureTregexIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          tregex_ = new com.google.protobuf.LazyStringArrayList(tregex_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <code>repeated string tregex = 1;</code>
+       * @return A list containing the tregex.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getTregexList() {
+        return tregex_.getUnmodifiableView();
+      }
+      /**
+       * <code>repeated string tregex = 1;</code>
+       * @return The count of tregex.
+       */
+      public int getTregexCount() {
+        return tregex_.size();
+      }
+      /**
+       * <code>repeated string tregex = 1;</code>
+       * @param index The index of the element to return.
+       * @return The tregex at the given index.
+       */
+      public java.lang.String getTregex(int index) {
+        return tregex_.get(index);
+      }
+      /**
+       * <code>repeated string tregex = 1;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the tregex at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getTregexBytes(int index) {
+        return tregex_.getByteString(index);
+      }
+      /**
+       * <code>repeated string tregex = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The tregex to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTregex(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTregexIsMutable();
+        tregex_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string tregex = 1;</code>
+       * @param value The tregex to add.
+       * @return This builder for chaining.
+       */
+      public Builder addTregex(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTregexIsMutable();
+        tregex_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string tregex = 1;</code>
+       * @param values The tregex to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllTregex(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureTregexIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, tregex_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string tregex = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTregex() {
+        tregex_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string tregex = 1;</code>
+       * @param value The bytes of the tregex to add.
+       * @return This builder for chaining.
+       */
+      public Builder addTregexBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureTregexIsMutable();
+        tregex_.add(value);
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> trees_ =
+        java.util.Collections.emptyList();
+      private void ensureTreesIsMutable() {
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          trees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>(trees_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> treesBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getTreesList() {
+        if (treesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(trees_);
+        } else {
+          return treesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public int getTreesCount() {
+        if (treesBuilder_ == null) {
+          return trees_.size();
+        } else {
+          return treesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index) {
+        if (treesBuilder_ == null) {
+          return trees_.get(index);
+        } else {
+          return treesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder setTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.set(index, value);
+          onChanged();
+        } else {
+          treesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder setTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder addTrees(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.add(value);
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder addTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.add(index, value);
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder addTrees(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.add(builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder addTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder addAllTrees(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> values) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, trees_);
+          onChanged();
+        } else {
+          treesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder clearTrees() {
+        if (treesBuilder_ == null) {
+          trees_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          treesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public Builder removeTrees(int index) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.remove(index);
+          onChanged();
+        } else {
+          treesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder getTreesBuilder(
+          int index) {
+        return getTreesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+          int index) {
+        if (treesBuilder_ == null) {
+          return trees_.get(index);  } else {
+          return treesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+           getTreesOrBuilderList() {
+        if (treesBuilder_ != null) {
+          return treesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(trees_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder addTreesBuilder() {
+        return getTreesFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder addTreesBuilder(
+          int index) {
+        return getTreesFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 2;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder> 
+           getTreesBuilderList() {
+        return getTreesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+          getTreesFieldBuilder() {
+        if (treesBuilder_ == null) {
+          treesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder>(
+                  trees_,
+                  ((bitField0_ & 0x00000002) != 0),
+                  getParentForChildren(),
+                  isClean());
+          trees_ = null;
+        }
+        return treesBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TregexRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TregexRequest)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<TregexRequest>
+        PARSER = new com.google.protobuf.AbstractParser<TregexRequest>() {
+      @java.lang.Override
+      public TregexRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TregexRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<TregexRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TregexRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface TregexResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TregexResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * One entry per item in the trees field of the request
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches> 
+        getMatchesList();
+    /**
+     * <pre>
+     * One entry per item in the trees field of the request
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches getMatches(int index);
+    /**
+     * <pre>
+     * One entry per item in the trees field of the request
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+     */
+    int getMatchesCount();
+    /**
+     * <pre>
+     * One entry per item in the trees field of the request
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatchesOrBuilder> 
+        getMatchesOrBuilderList();
+    /**
+     * <pre>
+     * One entry per item in the trees field of the request
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatchesOrBuilder getMatchesOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * The nesting here is quite deep because we want one result
+   * per tree, per tregex
+   * Obviously a shallower query structure would also work,
+   * but the nested structure allows for parsing the same
+   * tregex and same tree once per query
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse}
+   */
+  public static final class TregexResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TregexResponse)
+      TregexResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TregexResponse.newBuilder() to construct.
+    private TregexResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TregexResponse() {
+      matches_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new TregexResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TregexResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                matches_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              matches_.add(
+                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.PARSER, extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          matches_ = java.util.Collections.unmodifiableList(matches_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Builder.class);
+    }
+
+    public interface VarStringOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TregexResponse.VarString)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string name = 1;</code>
+       * @return Whether the name field is set.
+       */
+      boolean hasName();
+      /**
+       * <code>required string name = 1;</code>
+       * @return The name.
+       */
+      java.lang.String getName();
+      /**
+       * <code>required string name = 1;</code>
+       * @return The bytes for name.
+       */
+      com.google.protobuf.ByteString
+          getNameBytes();
+
+      /**
+       * <code>required string value = 2;</code>
+       * @return Whether the value field is set.
+       */
+      boolean hasValue();
+      /**
+       * <code>required string value = 2;</code>
+       * @return The value.
+       */
+      java.lang.String getValue();
+      /**
+       * <code>required string value = 2;</code>
+       * @return The bytes for value.
+       */
+      com.google.protobuf.ByteString
+          getValueBytes();
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse.VarString}
+     */
+    public static final class VarString extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TregexResponse.VarString)
+        VarStringOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use VarString.newBuilder() to construct.
+      private VarString(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private VarString() {
+        name_ = "";
+        value_ = "";
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new VarString();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private VarString(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                name_ = bs;
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                value_ = bs;
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_VarString_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_VarString_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int NAME_FIELD_NUMBER = 1;
+      private volatile java.lang.Object name_;
+      /**
+       * <code>required string name = 1;</code>
+       * @return Whether the name field is set.
+       */
+      @java.lang.Override
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required string name = 1;</code>
+       * @return The name.
+       */
+      @java.lang.Override
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            name_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string name = 1;</code>
+       * @return The bytes for name.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int VALUE_FIELD_NUMBER = 2;
+      private volatile java.lang.Object value_;
+      /**
+       * <code>required string value = 2;</code>
+       * @return Whether the value field is set.
+       */
+      @java.lang.Override
+      public boolean hasValue() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>required string value = 2;</code>
+       * @return The value.
+       */
+      @java.lang.Override
+      public java.lang.String getValue() {
+        java.lang.Object ref = value_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            value_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string value = 2;</code>
+       * @return The bytes for value.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getValueBytes() {
+        java.lang.Object ref = value_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          value_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasName()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasValue()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_);
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, value_);
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString other = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString) obj;
+
+        if (hasName() != other.hasName()) return false;
+        if (hasName()) {
+          if (!getName()
+              .equals(other.getName())) return false;
+        }
+        if (hasValue() != other.hasValue()) return false;
+        if (hasValue()) {
+          if (!getValue()
+              .equals(other.getValue())) return false;
+        }
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasName()) {
+          hash = (37 * hash) + NAME_FIELD_NUMBER;
+          hash = (53 * hash) + getName().hashCode();
+        }
+        if (hasValue()) {
+          hash = (37 * hash) + VALUE_FIELD_NUMBER;
+          hash = (53 * hash) + getValue().hashCode();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse.VarString}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TregexResponse.VarString)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarStringOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_VarString_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_VarString_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          name_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          value_ = "";
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_VarString_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.name_ = name_;
+          if (((from_bitField0_ & 0x00000002) != 0)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.value_ = value_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.getDefaultInstance()) return this;
+          if (other.hasName()) {
+            bitField0_ |= 0x00000001;
+            name_ = other.name_;
+            onChanged();
+          }
+          if (other.hasValue()) {
+            bitField0_ |= 0x00000002;
+            value_ = other.value_;
+            onChanged();
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          if (!hasName()) {
+            return false;
+          }
+          if (!hasValue()) {
+            return false;
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object name_ = "";
+        /**
+         * <code>required string name = 1;</code>
+         * @return Whether the name field is set.
+         */
+        public boolean hasName() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @return The name.
+         */
+        public java.lang.String getName() {
+          java.lang.Object ref = name_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              name_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @return The bytes for name.
+         */
+        public com.google.protobuf.ByteString
+            getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @param value The name to set.
+         * @return This builder for chaining.
+         */
+        public Builder setName(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          name_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearName() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          name_ = getDefaultInstance().getName();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @param value The bytes for name to set.
+         * @return This builder for chaining.
+         */
+        public Builder setNameBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          name_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object value_ = "";
+        /**
+         * <code>required string value = 2;</code>
+         * @return Whether the value field is set.
+         */
+        public boolean hasValue() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <code>required string value = 2;</code>
+         * @return The value.
+         */
+        public java.lang.String getValue() {
+          java.lang.Object ref = value_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              value_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string value = 2;</code>
+         * @return The bytes for value.
+         */
+        public com.google.protobuf.ByteString
+            getValueBytes() {
+          java.lang.Object ref = value_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            value_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string value = 2;</code>
+         * @param value The value to set.
+         * @return This builder for chaining.
+         */
+        public Builder setValue(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          value_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string value = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearValue() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          value_ = getDefaultInstance().getValue();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string value = 2;</code>
+         * @param value The bytes for value to set.
+         * @return This builder for chaining.
+         */
+        public Builder setValueBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          value_ = value;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TregexResponse.VarString)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TregexResponse.VarString)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<VarString>
+          PARSER = new com.google.protobuf.AbstractParser<VarString>() {
+        @java.lang.Override
+        public VarString parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new VarString(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<VarString> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<VarString> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public interface MatchNodeOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TregexResponse.MatchNode)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string name = 1;</code>
+       * @return Whether the name field is set.
+       */
+      boolean hasName();
+      /**
+       * <code>required string name = 1;</code>
+       * @return The name.
+       */
+      java.lang.String getName();
+      /**
+       * <code>required string name = 1;</code>
+       * @return The bytes for name.
+       */
+      com.google.protobuf.ByteString
+          getNameBytes();
+
+      /**
+       * <code>required int32 position = 2;</code>
+       * @return Whether the position field is set.
+       */
+      boolean hasPosition();
+      /**
+       * <code>required int32 position = 2;</code>
+       * @return The position.
+       */
+      int getPosition();
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse.MatchNode}
+     */
+    public static final class MatchNode extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TregexResponse.MatchNode)
+        MatchNodeOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use MatchNode.newBuilder() to construct.
+      private MatchNode(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private MatchNode() {
+        name_ = "";
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new MatchNode();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private MatchNode(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                name_ = bs;
+                break;
+              }
+              case 16: {
+                bitField0_ |= 0x00000002;
+                position_ = input.readInt32();
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_MatchNode_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_MatchNode_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int NAME_FIELD_NUMBER = 1;
+      private volatile java.lang.Object name_;
+      /**
+       * <code>required string name = 1;</code>
+       * @return Whether the name field is set.
+       */
+      @java.lang.Override
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required string name = 1;</code>
+       * @return The name.
+       */
+      @java.lang.Override
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            name_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string name = 1;</code>
+       * @return The bytes for name.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int POSITION_FIELD_NUMBER = 2;
+      private int position_;
+      /**
+       * <code>required int32 position = 2;</code>
+       * @return Whether the position field is set.
+       */
+      @java.lang.Override
+      public boolean hasPosition() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>required int32 position = 2;</code>
+       * @return The position.
+       */
+      @java.lang.Override
+      public int getPosition() {
+        return position_;
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasName()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasPosition()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          output.writeInt32(2, position_);
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(2, position_);
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode other = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode) obj;
+
+        if (hasName() != other.hasName()) return false;
+        if (hasName()) {
+          if (!getName()
+              .equals(other.getName())) return false;
+        }
+        if (hasPosition() != other.hasPosition()) return false;
+        if (hasPosition()) {
+          if (getPosition()
+              != other.getPosition()) return false;
+        }
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasName()) {
+          hash = (37 * hash) + NAME_FIELD_NUMBER;
+          hash = (53 * hash) + getName().hashCode();
+        }
+        if (hasPosition()) {
+          hash = (37 * hash) + POSITION_FIELD_NUMBER;
+          hash = (53 * hash) + getPosition();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse.MatchNode}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TregexResponse.MatchNode)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNodeOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_MatchNode_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_MatchNode_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          name_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          position_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_MatchNode_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.name_ = name_;
+          if (((from_bitField0_ & 0x00000002) != 0)) {
+            result.position_ = position_;
+            to_bitField0_ |= 0x00000002;
+          }
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.getDefaultInstance()) return this;
+          if (other.hasName()) {
+            bitField0_ |= 0x00000001;
+            name_ = other.name_;
+            onChanged();
+          }
+          if (other.hasPosition()) {
+            setPosition(other.getPosition());
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          if (!hasName()) {
+            return false;
+          }
+          if (!hasPosition()) {
+            return false;
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object name_ = "";
+        /**
+         * <code>required string name = 1;</code>
+         * @return Whether the name field is set.
+         */
+        public boolean hasName() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @return The name.
+         */
+        public java.lang.String getName() {
+          java.lang.Object ref = name_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              name_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @return The bytes for name.
+         */
+        public com.google.protobuf.ByteString
+            getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @param value The name to set.
+         * @return This builder for chaining.
+         */
+        public Builder setName(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          name_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearName() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          name_ = getDefaultInstance().getName();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @param value The bytes for name to set.
+         * @return This builder for chaining.
+         */
+        public Builder setNameBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          name_ = value;
+          onChanged();
+          return this;
+        }
+
+        private int position_ ;
+        /**
+         * <code>required int32 position = 2;</code>
+         * @return Whether the position field is set.
+         */
+        @java.lang.Override
+        public boolean hasPosition() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <code>required int32 position = 2;</code>
+         * @return The position.
+         */
+        @java.lang.Override
+        public int getPosition() {
+          return position_;
+        }
+        /**
+         * <code>required int32 position = 2;</code>
+         * @param value The position to set.
+         * @return This builder for chaining.
+         */
+        public Builder setPosition(int value) {
+          bitField0_ |= 0x00000002;
+          position_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 position = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearPosition() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          position_ = 0;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TregexResponse.MatchNode)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TregexResponse.MatchNode)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<MatchNode>
+          PARSER = new com.google.protobuf.AbstractParser<MatchNode>() {
+        @java.lang.Override
+        public MatchNode parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new MatchNode(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<MatchNode> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<MatchNode> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public interface MatchOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TregexResponse.Match)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required int32 position = 1;</code>
+       * @return Whether the position field is set.
+       */
+      boolean hasPosition();
+      /**
+       * <code>required int32 position = 1;</code>
+       * @return The position.
+       */
+      int getPosition();
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+       */
+      java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString> 
+          getVariablesList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString getVariables(int index);
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+       */
+      int getVariablesCount();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+       */
+      java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarStringOrBuilder> 
+          getVariablesOrBuilderList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarStringOrBuilder getVariablesOrBuilder(
+          int index);
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+       */
+      java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode> 
+          getNodesList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode getNodes(int index);
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+       */
+      int getNodesCount();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+       */
+      java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNodeOrBuilder> 
+          getNodesOrBuilderList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNodeOrBuilder getNodesOrBuilder(
+          int index);
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse.Match}
+     */
+    public static final class Match extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TregexResponse.Match)
+        MatchOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use Match.newBuilder() to construct.
+      private Match(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private Match() {
+        variables_ = java.util.Collections.emptyList();
+        nodes_ = java.util.Collections.emptyList();
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new Match();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Match(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                bitField0_ |= 0x00000001;
+                position_ = input.readInt32();
+                break;
+              }
+              case 18: {
+                if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                  variables_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString>();
+                  mutable_bitField0_ |= 0x00000002;
+                }
+                variables_.add(
+                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.PARSER, extensionRegistry));
+                break;
+              }
+              case 26: {
+                if (!((mutable_bitField0_ & 0x00000004) != 0)) {
+                  nodes_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode>();
+                  mutable_bitField0_ |= 0x00000004;
+                }
+                nodes_.add(
+                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.PARSER, extensionRegistry));
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          if (((mutable_bitField0_ & 0x00000002) != 0)) {
+            variables_ = java.util.Collections.unmodifiableList(variables_);
+          }
+          if (((mutable_bitField0_ & 0x00000004) != 0)) {
+            nodes_ = java.util.Collections.unmodifiableList(nodes_);
+          }
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_Match_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_Match_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int POSITION_FIELD_NUMBER = 1;
+      private int position_;
+      /**
+       * <code>required int32 position = 1;</code>
+       * @return Whether the position field is set.
+       */
+      @java.lang.Override
+      public boolean hasPosition() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required int32 position = 1;</code>
+       * @return The position.
+       */
+      @java.lang.Override
+      public int getPosition() {
+        return position_;
+      }
+
+      public static final int VARIABLES_FIELD_NUMBER = 2;
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString> variables_;
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+       */
+      @java.lang.Override
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString> getVariablesList() {
+        return variables_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+       */
+      @java.lang.Override
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarStringOrBuilder> 
+          getVariablesOrBuilderList() {
+        return variables_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+       */
+      @java.lang.Override
+      public int getVariablesCount() {
+        return variables_.size();
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString getVariables(int index) {
+        return variables_.get(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarStringOrBuilder getVariablesOrBuilder(
+          int index) {
+        return variables_.get(index);
+      }
+
+      public static final int NODES_FIELD_NUMBER = 3;
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode> nodes_;
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+       */
+      @java.lang.Override
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode> getNodesList() {
+        return nodes_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+       */
+      @java.lang.Override
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNodeOrBuilder> 
+          getNodesOrBuilderList() {
+        return nodes_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+       */
+      @java.lang.Override
+      public int getNodesCount() {
+        return nodes_.size();
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode getNodes(int index) {
+        return nodes_.get(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNodeOrBuilder getNodesOrBuilder(
+          int index) {
+        return nodes_.get(index);
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasPosition()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        for (int i = 0; i < getVariablesCount(); i++) {
+          if (!getVariables(i).isInitialized()) {
+            memoizedIsInitialized = 0;
+            return false;
+          }
+        }
+        for (int i = 0; i < getNodesCount(); i++) {
+          if (!getNodes(i).isInitialized()) {
+            memoizedIsInitialized = 0;
+            return false;
+          }
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          output.writeInt32(1, position_);
+        }
+        for (int i = 0; i < variables_.size(); i++) {
+          output.writeMessage(2, variables_.get(i));
+        }
+        for (int i = 0; i < nodes_.size(); i++) {
+          output.writeMessage(3, nodes_.get(i));
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(1, position_);
+        }
+        for (int i = 0; i < variables_.size(); i++) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(2, variables_.get(i));
+        }
+        for (int i = 0; i < nodes_.size(); i++) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(3, nodes_.get(i));
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match other = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match) obj;
+
+        if (hasPosition() != other.hasPosition()) return false;
+        if (hasPosition()) {
+          if (getPosition()
+              != other.getPosition()) return false;
+        }
+        if (!getVariablesList()
+            .equals(other.getVariablesList())) return false;
+        if (!getNodesList()
+            .equals(other.getNodesList())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasPosition()) {
+          hash = (37 * hash) + POSITION_FIELD_NUMBER;
+          hash = (53 * hash) + getPosition();
+        }
+        if (getVariablesCount() > 0) {
+          hash = (37 * hash) + VARIABLES_FIELD_NUMBER;
+          hash = (53 * hash) + getVariablesList().hashCode();
+        }
+        if (getNodesCount() > 0) {
+          hash = (37 * hash) + NODES_FIELD_NUMBER;
+          hash = (53 * hash) + getNodesList().hashCode();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse.Match}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TregexResponse.Match)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_Match_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_Match_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+            getVariablesFieldBuilder();
+            getNodesFieldBuilder();
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          position_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000001);
+          if (variablesBuilder_ == null) {
+            variables_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            variablesBuilder_.clear();
+          }
+          if (nodesBuilder_ == null) {
+            nodes_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            nodesBuilder_.clear();
+          }
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_Match_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            result.position_ = position_;
+            to_bitField0_ |= 0x00000001;
+          }
+          if (variablesBuilder_ == null) {
+            if (((bitField0_ & 0x00000002) != 0)) {
+              variables_ = java.util.Collections.unmodifiableList(variables_);
+              bitField0_ = (bitField0_ & ~0x00000002);
+            }
+            result.variables_ = variables_;
+          } else {
+            result.variables_ = variablesBuilder_.build();
+          }
+          if (nodesBuilder_ == null) {
+            if (((bitField0_ & 0x00000004) != 0)) {
+              nodes_ = java.util.Collections.unmodifiableList(nodes_);
+              bitField0_ = (bitField0_ & ~0x00000004);
+            }
+            result.nodes_ = nodes_;
+          } else {
+            result.nodes_ = nodesBuilder_.build();
+          }
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.getDefaultInstance()) return this;
+          if (other.hasPosition()) {
+            setPosition(other.getPosition());
+          }
+          if (variablesBuilder_ == null) {
+            if (!other.variables_.isEmpty()) {
+              if (variables_.isEmpty()) {
+                variables_ = other.variables_;
+                bitField0_ = (bitField0_ & ~0x00000002);
+              } else {
+                ensureVariablesIsMutable();
+                variables_.addAll(other.variables_);
+              }
+              onChanged();
+            }
+          } else {
+            if (!other.variables_.isEmpty()) {
+              if (variablesBuilder_.isEmpty()) {
+                variablesBuilder_.dispose();
+                variablesBuilder_ = null;
+                variables_ = other.variables_;
+                bitField0_ = (bitField0_ & ~0x00000002);
+                variablesBuilder_ = 
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                     getVariablesFieldBuilder() : null;
+              } else {
+                variablesBuilder_.addAllMessages(other.variables_);
+              }
+            }
+          }
+          if (nodesBuilder_ == null) {
+            if (!other.nodes_.isEmpty()) {
+              if (nodes_.isEmpty()) {
+                nodes_ = other.nodes_;
+                bitField0_ = (bitField0_ & ~0x00000004);
+              } else {
+                ensureNodesIsMutable();
+                nodes_.addAll(other.nodes_);
+              }
+              onChanged();
+            }
+          } else {
+            if (!other.nodes_.isEmpty()) {
+              if (nodesBuilder_.isEmpty()) {
+                nodesBuilder_.dispose();
+                nodesBuilder_ = null;
+                nodes_ = other.nodes_;
+                bitField0_ = (bitField0_ & ~0x00000004);
+                nodesBuilder_ = 
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                     getNodesFieldBuilder() : null;
+              } else {
+                nodesBuilder_.addAllMessages(other.nodes_);
+              }
+            }
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          if (!hasPosition()) {
+            return false;
+          }
+          for (int i = 0; i < getVariablesCount(); i++) {
+            if (!getVariables(i).isInitialized()) {
+              return false;
+            }
+          }
+          for (int i = 0; i < getNodesCount(); i++) {
+            if (!getNodes(i).isInitialized()) {
+              return false;
+            }
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private int position_ ;
+        /**
+         * <code>required int32 position = 1;</code>
+         * @return Whether the position field is set.
+         */
+        @java.lang.Override
+        public boolean hasPosition() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>required int32 position = 1;</code>
+         * @return The position.
+         */
+        @java.lang.Override
+        public int getPosition() {
+          return position_;
+        }
+        /**
+         * <code>required int32 position = 1;</code>
+         * @param value The position to set.
+         * @return This builder for chaining.
+         */
+        public Builder setPosition(int value) {
+          bitField0_ |= 0x00000001;
+          position_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 position = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearPosition() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          position_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString> variables_ =
+          java.util.Collections.emptyList();
+        private void ensureVariablesIsMutable() {
+          if (!((bitField0_ & 0x00000002) != 0)) {
+            variables_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString>(variables_);
+            bitField0_ |= 0x00000002;
+           }
+        }
+
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarStringOrBuilder> variablesBuilder_;
+
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString> getVariablesList() {
+          if (variablesBuilder_ == null) {
+            return java.util.Collections.unmodifiableList(variables_);
+          } else {
+            return variablesBuilder_.getMessageList();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public int getVariablesCount() {
+          if (variablesBuilder_ == null) {
+            return variables_.size();
+          } else {
+            return variablesBuilder_.getCount();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString getVariables(int index) {
+          if (variablesBuilder_ == null) {
+            return variables_.get(index);
+          } else {
+            return variablesBuilder_.getMessage(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public Builder setVariables(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString value) {
+          if (variablesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureVariablesIsMutable();
+            variables_.set(index, value);
+            onChanged();
+          } else {
+            variablesBuilder_.setMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public Builder setVariables(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder builderForValue) {
+          if (variablesBuilder_ == null) {
+            ensureVariablesIsMutable();
+            variables_.set(index, builderForValue.build());
+            onChanged();
+          } else {
+            variablesBuilder_.setMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public Builder addVariables(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString value) {
+          if (variablesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureVariablesIsMutable();
+            variables_.add(value);
+            onChanged();
+          } else {
+            variablesBuilder_.addMessage(value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public Builder addVariables(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString value) {
+          if (variablesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureVariablesIsMutable();
+            variables_.add(index, value);
+            onChanged();
+          } else {
+            variablesBuilder_.addMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public Builder addVariables(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder builderForValue) {
+          if (variablesBuilder_ == null) {
+            ensureVariablesIsMutable();
+            variables_.add(builderForValue.build());
+            onChanged();
+          } else {
+            variablesBuilder_.addMessage(builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public Builder addVariables(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder builderForValue) {
+          if (variablesBuilder_ == null) {
+            ensureVariablesIsMutable();
+            variables_.add(index, builderForValue.build());
+            onChanged();
+          } else {
+            variablesBuilder_.addMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public Builder addAllVariables(
+            java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString> values) {
+          if (variablesBuilder_ == null) {
+            ensureVariablesIsMutable();
+            com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                values, variables_);
+            onChanged();
+          } else {
+            variablesBuilder_.addAllMessages(values);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public Builder clearVariables() {
+          if (variablesBuilder_ == null) {
+            variables_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000002);
+            onChanged();
+          } else {
+            variablesBuilder_.clear();
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public Builder removeVariables(int index) {
+          if (variablesBuilder_ == null) {
+            ensureVariablesIsMutable();
+            variables_.remove(index);
+            onChanged();
+          } else {
+            variablesBuilder_.remove(index);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder getVariablesBuilder(
+            int index) {
+          return getVariablesFieldBuilder().getBuilder(index);
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarStringOrBuilder getVariablesOrBuilder(
+            int index) {
+          if (variablesBuilder_ == null) {
+            return variables_.get(index);  } else {
+            return variablesBuilder_.getMessageOrBuilder(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarStringOrBuilder> 
+             getVariablesOrBuilderList() {
+          if (variablesBuilder_ != null) {
+            return variablesBuilder_.getMessageOrBuilderList();
+          } else {
+            return java.util.Collections.unmodifiableList(variables_);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder addVariablesBuilder() {
+          return getVariablesFieldBuilder().addBuilder(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder addVariablesBuilder(
+            int index) {
+          return getVariablesFieldBuilder().addBuilder(
+              index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.VarString variables = 2;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder> 
+             getVariablesBuilderList() {
+          return getVariablesFieldBuilder().getBuilderList();
+        }
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarStringOrBuilder> 
+            getVariablesFieldBuilder() {
+          if (variablesBuilder_ == null) {
+            variablesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.VarStringOrBuilder>(
+                    variables_,
+                    ((bitField0_ & 0x00000002) != 0),
+                    getParentForChildren(),
+                    isClean());
+            variables_ = null;
+          }
+          return variablesBuilder_;
+        }
+
+        private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode> nodes_ =
+          java.util.Collections.emptyList();
+        private void ensureNodesIsMutable() {
+          if (!((bitField0_ & 0x00000004) != 0)) {
+            nodes_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode>(nodes_);
+            bitField0_ |= 0x00000004;
+           }
+        }
+
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNodeOrBuilder> nodesBuilder_;
+
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode> getNodesList() {
+          if (nodesBuilder_ == null) {
+            return java.util.Collections.unmodifiableList(nodes_);
+          } else {
+            return nodesBuilder_.getMessageList();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public int getNodesCount() {
+          if (nodesBuilder_ == null) {
+            return nodes_.size();
+          } else {
+            return nodesBuilder_.getCount();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode getNodes(int index) {
+          if (nodesBuilder_ == null) {
+            return nodes_.get(index);
+          } else {
+            return nodesBuilder_.getMessage(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public Builder setNodes(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode value) {
+          if (nodesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureNodesIsMutable();
+            nodes_.set(index, value);
+            onChanged();
+          } else {
+            nodesBuilder_.setMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public Builder setNodes(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder builderForValue) {
+          if (nodesBuilder_ == null) {
+            ensureNodesIsMutable();
+            nodes_.set(index, builderForValue.build());
+            onChanged();
+          } else {
+            nodesBuilder_.setMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public Builder addNodes(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode value) {
+          if (nodesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureNodesIsMutable();
+            nodes_.add(value);
+            onChanged();
+          } else {
+            nodesBuilder_.addMessage(value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public Builder addNodes(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode value) {
+          if (nodesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureNodesIsMutable();
+            nodes_.add(index, value);
+            onChanged();
+          } else {
+            nodesBuilder_.addMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public Builder addNodes(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder builderForValue) {
+          if (nodesBuilder_ == null) {
+            ensureNodesIsMutable();
+            nodes_.add(builderForValue.build());
+            onChanged();
+          } else {
+            nodesBuilder_.addMessage(builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public Builder addNodes(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder builderForValue) {
+          if (nodesBuilder_ == null) {
+            ensureNodesIsMutable();
+            nodes_.add(index, builderForValue.build());
+            onChanged();
+          } else {
+            nodesBuilder_.addMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public Builder addAllNodes(
+            java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode> values) {
+          if (nodesBuilder_ == null) {
+            ensureNodesIsMutable();
+            com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                values, nodes_);
+            onChanged();
+          } else {
+            nodesBuilder_.addAllMessages(values);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public Builder clearNodes() {
+          if (nodesBuilder_ == null) {
+            nodes_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000004);
+            onChanged();
+          } else {
+            nodesBuilder_.clear();
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public Builder removeNodes(int index) {
+          if (nodesBuilder_ == null) {
+            ensureNodesIsMutable();
+            nodes_.remove(index);
+            onChanged();
+          } else {
+            nodesBuilder_.remove(index);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder getNodesBuilder(
+            int index) {
+          return getNodesFieldBuilder().getBuilder(index);
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNodeOrBuilder getNodesOrBuilder(
+            int index) {
+          if (nodesBuilder_ == null) {
+            return nodes_.get(index);  } else {
+            return nodesBuilder_.getMessageOrBuilder(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNodeOrBuilder> 
+             getNodesOrBuilderList() {
+          if (nodesBuilder_ != null) {
+            return nodesBuilder_.getMessageOrBuilderList();
+          } else {
+            return java.util.Collections.unmodifiableList(nodes_);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder addNodesBuilder() {
+          return getNodesFieldBuilder().addBuilder(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder addNodesBuilder(
+            int index) {
+          return getNodesFieldBuilder().addBuilder(
+              index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.MatchNode nodes = 3;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder> 
+             getNodesBuilderList() {
+          return getNodesFieldBuilder().getBuilderList();
+        }
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNodeOrBuilder> 
+            getNodesFieldBuilder() {
+          if (nodesBuilder_ == null) {
+            nodesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNode.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchNodeOrBuilder>(
+                    nodes_,
+                    ((bitField0_ & 0x00000004) != 0),
+                    getParentForChildren(),
+                    isClean());
+            nodes_ = null;
+          }
+          return nodesBuilder_;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TregexResponse.Match)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TregexResponse.Match)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<Match>
+          PARSER = new com.google.protobuf.AbstractParser<Match>() {
+        @java.lang.Override
+        public Match parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Match(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<Match> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Match> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public interface TreeMatchesOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TregexResponse.TreeMatches)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+       */
+      java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match> 
+          getMatchesList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match getMatches(int index);
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+       */
+      int getMatchesCount();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+       */
+      java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchOrBuilder> 
+          getMatchesOrBuilderList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchOrBuilder getMatchesOrBuilder(
+          int index);
+    }
+    /**
+     * <pre>
+     * Each tree will have a "repeated" of this for each tregex
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse.TreeMatches}
+     */
+    public static final class TreeMatches extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TregexResponse.TreeMatches)
+        TreeMatchesOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use TreeMatches.newBuilder() to construct.
+      private TreeMatches(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private TreeMatches() {
+        matches_ = java.util.Collections.emptyList();
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new TreeMatches();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private TreeMatches(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                  matches_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match>();
+                  mutable_bitField0_ |= 0x00000001;
+                }
+                matches_.add(
+                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.PARSER, extensionRegistry));
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          if (((mutable_bitField0_ & 0x00000001) != 0)) {
+            matches_ = java.util.Collections.unmodifiableList(matches_);
+          }
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeMatches_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeMatches_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder.class);
+      }
+
+      public static final int MATCHES_FIELD_NUMBER = 1;
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match> matches_;
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+       */
+      @java.lang.Override
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match> getMatchesList() {
+        return matches_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+       */
+      @java.lang.Override
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchOrBuilder> 
+          getMatchesOrBuilderList() {
+        return matches_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+       */
+      @java.lang.Override
+      public int getMatchesCount() {
+        return matches_.size();
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match getMatches(int index) {
+        return matches_.get(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchOrBuilder getMatchesOrBuilder(
+          int index) {
+        return matches_.get(index);
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        for (int i = 0; i < getMatchesCount(); i++) {
+          if (!getMatches(i).isInitialized()) {
+            memoizedIsInitialized = 0;
+            return false;
+          }
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        for (int i = 0; i < matches_.size(); i++) {
+          output.writeMessage(1, matches_.get(i));
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        for (int i = 0; i < matches_.size(); i++) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, matches_.get(i));
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches other = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches) obj;
+
+        if (!getMatchesList()
+            .equals(other.getMatchesList())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (getMatchesCount() > 0) {
+          hash = (37 * hash) + MATCHES_FIELD_NUMBER;
+          hash = (53 * hash) + getMatchesList().hashCode();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * <pre>
+       * Each tree will have a "repeated" of this for each tregex
+       * </pre>
+       *
+       * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse.TreeMatches}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TregexResponse.TreeMatches)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatchesOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeMatches_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeMatches_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+            getMatchesFieldBuilder();
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          if (matchesBuilder_ == null) {
+            matches_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            matchesBuilder_.clear();
+          }
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeMatches_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches(this);
+          int from_bitField0_ = bitField0_;
+          if (matchesBuilder_ == null) {
+            if (((bitField0_ & 0x00000001) != 0)) {
+              matches_ = java.util.Collections.unmodifiableList(matches_);
+              bitField0_ = (bitField0_ & ~0x00000001);
+            }
+            result.matches_ = matches_;
+          } else {
+            result.matches_ = matchesBuilder_.build();
+          }
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.getDefaultInstance()) return this;
+          if (matchesBuilder_ == null) {
+            if (!other.matches_.isEmpty()) {
+              if (matches_.isEmpty()) {
+                matches_ = other.matches_;
+                bitField0_ = (bitField0_ & ~0x00000001);
+              } else {
+                ensureMatchesIsMutable();
+                matches_.addAll(other.matches_);
+              }
+              onChanged();
+            }
+          } else {
+            if (!other.matches_.isEmpty()) {
+              if (matchesBuilder_.isEmpty()) {
+                matchesBuilder_.dispose();
+                matchesBuilder_ = null;
+                matches_ = other.matches_;
+                bitField0_ = (bitField0_ & ~0x00000001);
+                matchesBuilder_ = 
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                     getMatchesFieldBuilder() : null;
+              } else {
+                matchesBuilder_.addAllMessages(other.matches_);
+              }
+            }
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          for (int i = 0; i < getMatchesCount(); i++) {
+            if (!getMatches(i).isInitialized()) {
+              return false;
+            }
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match> matches_ =
+          java.util.Collections.emptyList();
+        private void ensureMatchesIsMutable() {
+          if (!((bitField0_ & 0x00000001) != 0)) {
+            matches_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match>(matches_);
+            bitField0_ |= 0x00000001;
+           }
+        }
+
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchOrBuilder> matchesBuilder_;
+
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match> getMatchesList() {
+          if (matchesBuilder_ == null) {
+            return java.util.Collections.unmodifiableList(matches_);
+          } else {
+            return matchesBuilder_.getMessageList();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public int getMatchesCount() {
+          if (matchesBuilder_ == null) {
+            return matches_.size();
+          } else {
+            return matchesBuilder_.getCount();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match getMatches(int index) {
+          if (matchesBuilder_ == null) {
+            return matches_.get(index);
+          } else {
+            return matchesBuilder_.getMessage(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public Builder setMatches(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match value) {
+          if (matchesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureMatchesIsMutable();
+            matches_.set(index, value);
+            onChanged();
+          } else {
+            matchesBuilder_.setMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public Builder setMatches(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder builderForValue) {
+          if (matchesBuilder_ == null) {
+            ensureMatchesIsMutable();
+            matches_.set(index, builderForValue.build());
+            onChanged();
+          } else {
+            matchesBuilder_.setMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public Builder addMatches(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match value) {
+          if (matchesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureMatchesIsMutable();
+            matches_.add(value);
+            onChanged();
+          } else {
+            matchesBuilder_.addMessage(value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public Builder addMatches(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match value) {
+          if (matchesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureMatchesIsMutable();
+            matches_.add(index, value);
+            onChanged();
+          } else {
+            matchesBuilder_.addMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public Builder addMatches(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder builderForValue) {
+          if (matchesBuilder_ == null) {
+            ensureMatchesIsMutable();
+            matches_.add(builderForValue.build());
+            onChanged();
+          } else {
+            matchesBuilder_.addMessage(builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public Builder addMatches(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder builderForValue) {
+          if (matchesBuilder_ == null) {
+            ensureMatchesIsMutable();
+            matches_.add(index, builderForValue.build());
+            onChanged();
+          } else {
+            matchesBuilder_.addMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public Builder addAllMatches(
+            java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match> values) {
+          if (matchesBuilder_ == null) {
+            ensureMatchesIsMutable();
+            com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                values, matches_);
+            onChanged();
+          } else {
+            matchesBuilder_.addAllMessages(values);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public Builder clearMatches() {
+          if (matchesBuilder_ == null) {
+            matches_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000001);
+            onChanged();
+          } else {
+            matchesBuilder_.clear();
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public Builder removeMatches(int index) {
+          if (matchesBuilder_ == null) {
+            ensureMatchesIsMutable();
+            matches_.remove(index);
+            onChanged();
+          } else {
+            matchesBuilder_.remove(index);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder getMatchesBuilder(
+            int index) {
+          return getMatchesFieldBuilder().getBuilder(index);
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchOrBuilder getMatchesOrBuilder(
+            int index) {
+          if (matchesBuilder_ == null) {
+            return matches_.get(index);  } else {
+            return matchesBuilder_.getMessageOrBuilder(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchOrBuilder> 
+             getMatchesOrBuilderList() {
+          if (matchesBuilder_ != null) {
+            return matchesBuilder_.getMessageOrBuilderList();
+          } else {
+            return java.util.Collections.unmodifiableList(matches_);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder addMatchesBuilder() {
+          return getMatchesFieldBuilder().addBuilder(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder addMatchesBuilder(
+            int index) {
+          return getMatchesFieldBuilder().addBuilder(
+              index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.Match matches = 1;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder> 
+             getMatchesBuilderList() {
+          return getMatchesFieldBuilder().getBuilderList();
+        }
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchOrBuilder> 
+            getMatchesFieldBuilder() {
+          if (matchesBuilder_ == null) {
+            matchesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Match.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.MatchOrBuilder>(
+                    matches_,
+                    ((bitField0_ & 0x00000001) != 0),
+                    getParentForChildren(),
+                    isClean());
+            matches_ = null;
+          }
+          return matchesBuilder_;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TregexResponse.TreeMatches)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TregexResponse.TreeMatches)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<TreeMatches>
+          PARSER = new com.google.protobuf.AbstractParser<TreeMatches>() {
+        @java.lang.Override
+        public TreeMatches parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new TreeMatches(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<TreeMatches> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<TreeMatches> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public interface TreeTregexMatchesOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+       */
+      java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches> 
+          getMatchesList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches getMatches(int index);
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+       */
+      int getMatchesCount();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+       */
+      java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatchesOrBuilder> 
+          getMatchesOrBuilderList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatchesOrBuilder getMatchesOrBuilder(
+          int index);
+    }
+    /**
+     * <pre>
+     * Stores all of a tree's matches
+     * One entry per item in the tregex field of the request
+     * in the event of a non-matching expression, matches will
+     * be an empty array for that tregex
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches}
+     */
+    public static final class TreeTregexMatches extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches)
+        TreeTregexMatchesOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use TreeTregexMatches.newBuilder() to construct.
+      private TreeTregexMatches(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private TreeTregexMatches() {
+        matches_ = java.util.Collections.emptyList();
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new TreeTregexMatches();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private TreeTregexMatches(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                  matches_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches>();
+                  mutable_bitField0_ |= 0x00000001;
+                }
+                matches_.add(
+                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.PARSER, extensionRegistry));
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          if (((mutable_bitField0_ & 0x00000001) != 0)) {
+            matches_ = java.util.Collections.unmodifiableList(matches_);
+          }
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeTregexMatches_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeTregexMatches_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder.class);
+      }
+
+      public static final int MATCHES_FIELD_NUMBER = 1;
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches> matches_;
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+       */
+      @java.lang.Override
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches> getMatchesList() {
+        return matches_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+       */
+      @java.lang.Override
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatchesOrBuilder> 
+          getMatchesOrBuilderList() {
+        return matches_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+       */
+      @java.lang.Override
+      public int getMatchesCount() {
+        return matches_.size();
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches getMatches(int index) {
+        return matches_.get(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatchesOrBuilder getMatchesOrBuilder(
+          int index) {
+        return matches_.get(index);
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        for (int i = 0; i < getMatchesCount(); i++) {
+          if (!getMatches(i).isInitialized()) {
+            memoizedIsInitialized = 0;
+            return false;
+          }
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        for (int i = 0; i < matches_.size(); i++) {
+          output.writeMessage(1, matches_.get(i));
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        for (int i = 0; i < matches_.size(); i++) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, matches_.get(i));
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches other = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches) obj;
+
+        if (!getMatchesList()
+            .equals(other.getMatchesList())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (getMatchesCount() > 0) {
+          hash = (37 * hash) + MATCHES_FIELD_NUMBER;
+          hash = (53 * hash) + getMatchesList().hashCode();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * <pre>
+       * Stores all of a tree's matches
+       * One entry per item in the tregex field of the request
+       * in the event of a non-matching expression, matches will
+       * be an empty array for that tregex
+       * </pre>
+       *
+       * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatchesOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeTregexMatches_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeTregexMatches_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+            getMatchesFieldBuilder();
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          if (matchesBuilder_ == null) {
+            matches_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            matchesBuilder_.clear();
+          }
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeTregexMatches_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches(this);
+          int from_bitField0_ = bitField0_;
+          if (matchesBuilder_ == null) {
+            if (((bitField0_ & 0x00000001) != 0)) {
+              matches_ = java.util.Collections.unmodifiableList(matches_);
+              bitField0_ = (bitField0_ & ~0x00000001);
+            }
+            result.matches_ = matches_;
+          } else {
+            result.matches_ = matchesBuilder_.build();
+          }
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.getDefaultInstance()) return this;
+          if (matchesBuilder_ == null) {
+            if (!other.matches_.isEmpty()) {
+              if (matches_.isEmpty()) {
+                matches_ = other.matches_;
+                bitField0_ = (bitField0_ & ~0x00000001);
+              } else {
+                ensureMatchesIsMutable();
+                matches_.addAll(other.matches_);
+              }
+              onChanged();
+            }
+          } else {
+            if (!other.matches_.isEmpty()) {
+              if (matchesBuilder_.isEmpty()) {
+                matchesBuilder_.dispose();
+                matchesBuilder_ = null;
+                matches_ = other.matches_;
+                bitField0_ = (bitField0_ & ~0x00000001);
+                matchesBuilder_ = 
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                     getMatchesFieldBuilder() : null;
+              } else {
+                matchesBuilder_.addAllMessages(other.matches_);
+              }
+            }
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          for (int i = 0; i < getMatchesCount(); i++) {
+            if (!getMatches(i).isInitialized()) {
+              return false;
+            }
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches> matches_ =
+          java.util.Collections.emptyList();
+        private void ensureMatchesIsMutable() {
+          if (!((bitField0_ & 0x00000001) != 0)) {
+            matches_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches>(matches_);
+            bitField0_ |= 0x00000001;
+           }
+        }
+
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatchesOrBuilder> matchesBuilder_;
+
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches> getMatchesList() {
+          if (matchesBuilder_ == null) {
+            return java.util.Collections.unmodifiableList(matches_);
+          } else {
+            return matchesBuilder_.getMessageList();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public int getMatchesCount() {
+          if (matchesBuilder_ == null) {
+            return matches_.size();
+          } else {
+            return matchesBuilder_.getCount();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches getMatches(int index) {
+          if (matchesBuilder_ == null) {
+            return matches_.get(index);
+          } else {
+            return matchesBuilder_.getMessage(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public Builder setMatches(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches value) {
+          if (matchesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureMatchesIsMutable();
+            matches_.set(index, value);
+            onChanged();
+          } else {
+            matchesBuilder_.setMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public Builder setMatches(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder builderForValue) {
+          if (matchesBuilder_ == null) {
+            ensureMatchesIsMutable();
+            matches_.set(index, builderForValue.build());
+            onChanged();
+          } else {
+            matchesBuilder_.setMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public Builder addMatches(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches value) {
+          if (matchesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureMatchesIsMutable();
+            matches_.add(value);
+            onChanged();
+          } else {
+            matchesBuilder_.addMessage(value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public Builder addMatches(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches value) {
+          if (matchesBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureMatchesIsMutable();
+            matches_.add(index, value);
+            onChanged();
+          } else {
+            matchesBuilder_.addMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public Builder addMatches(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder builderForValue) {
+          if (matchesBuilder_ == null) {
+            ensureMatchesIsMutable();
+            matches_.add(builderForValue.build());
+            onChanged();
+          } else {
+            matchesBuilder_.addMessage(builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public Builder addMatches(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder builderForValue) {
+          if (matchesBuilder_ == null) {
+            ensureMatchesIsMutable();
+            matches_.add(index, builderForValue.build());
+            onChanged();
+          } else {
+            matchesBuilder_.addMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public Builder addAllMatches(
+            java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches> values) {
+          if (matchesBuilder_ == null) {
+            ensureMatchesIsMutable();
+            com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                values, matches_);
+            onChanged();
+          } else {
+            matchesBuilder_.addAllMessages(values);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public Builder clearMatches() {
+          if (matchesBuilder_ == null) {
+            matches_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000001);
+            onChanged();
+          } else {
+            matchesBuilder_.clear();
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public Builder removeMatches(int index) {
+          if (matchesBuilder_ == null) {
+            ensureMatchesIsMutable();
+            matches_.remove(index);
+            onChanged();
+          } else {
+            matchesBuilder_.remove(index);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder getMatchesBuilder(
+            int index) {
+          return getMatchesFieldBuilder().getBuilder(index);
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatchesOrBuilder getMatchesOrBuilder(
+            int index) {
+          if (matchesBuilder_ == null) {
+            return matches_.get(index);  } else {
+            return matchesBuilder_.getMessageOrBuilder(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatchesOrBuilder> 
+             getMatchesOrBuilderList() {
+          if (matchesBuilder_ != null) {
+            return matchesBuilder_.getMessageOrBuilderList();
+          } else {
+            return java.util.Collections.unmodifiableList(matches_);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder addMatchesBuilder() {
+          return getMatchesFieldBuilder().addBuilder(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder addMatchesBuilder(
+            int index) {
+          return getMatchesFieldBuilder().addBuilder(
+              index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeMatches matches = 1;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder> 
+             getMatchesBuilderList() {
+          return getMatchesFieldBuilder().getBuilderList();
+        }
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatchesOrBuilder> 
+            getMatchesFieldBuilder() {
+          if (matchesBuilder_ == null) {
+            matchesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatches.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeMatchesOrBuilder>(
+                    matches_,
+                    ((bitField0_ & 0x00000001) != 0),
+                    getParentForChildren(),
+                    isClean());
+            matches_ = null;
+          }
+          return matchesBuilder_;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<TreeTregexMatches>
+          PARSER = new com.google.protobuf.AbstractParser<TreeTregexMatches>() {
+        @java.lang.Override
+        public TreeTregexMatches parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new TreeTregexMatches(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<TreeTregexMatches> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<TreeTregexMatches> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public static final int MATCHES_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches> matches_;
+    /**
+     * <pre>
+     * One entry per item in the trees field of the request
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches> getMatchesList() {
+      return matches_;
+    }
+    /**
+     * <pre>
+     * One entry per item in the trees field of the request
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatchesOrBuilder> 
+        getMatchesOrBuilderList() {
+      return matches_;
+    }
+    /**
+     * <pre>
+     * One entry per item in the trees field of the request
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+     */
+    @java.lang.Override
+    public int getMatchesCount() {
+      return matches_.size();
+    }
+    /**
+     * <pre>
+     * One entry per item in the trees field of the request
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches getMatches(int index) {
+      return matches_.get(index);
+    }
+    /**
+     * <pre>
+     * One entry per item in the trees field of the request
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatchesOrBuilder getMatchesOrBuilder(
+        int index) {
+      return matches_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      for (int i = 0; i < getMatchesCount(); i++) {
+        if (!getMatches(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < matches_.size(); i++) {
+        output.writeMessage(1, matches_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < matches_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, matches_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse other = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse) obj;
+
+      if (!getMatchesList()
+          .equals(other.getMatchesList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getMatchesCount() > 0) {
+        hash = (37 * hash) + MATCHES_FIELD_NUMBER;
+        hash = (53 * hash) + getMatchesList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The nesting here is quite deep because we want one result
+     * per tree, per tregex
+     * Obviously a shallower query structure would also work,
+     * but the nested structure allows for parsing the same
+     * tregex and same tree once per query
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.TregexResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TregexResponse)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getMatchesFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (matchesBuilder_ == null) {
+          matches_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          matchesBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse(this);
+        int from_bitField0_ = bitField0_;
+        if (matchesBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            matches_ = java.util.Collections.unmodifiableList(matches_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.matches_ = matches_;
+        } else {
+          result.matches_ = matchesBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.getDefaultInstance()) return this;
+        if (matchesBuilder_ == null) {
+          if (!other.matches_.isEmpty()) {
+            if (matches_.isEmpty()) {
+              matches_ = other.matches_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureMatchesIsMutable();
+              matches_.addAll(other.matches_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.matches_.isEmpty()) {
+            if (matchesBuilder_.isEmpty()) {
+              matchesBuilder_.dispose();
+              matchesBuilder_ = null;
+              matches_ = other.matches_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              matchesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getMatchesFieldBuilder() : null;
+            } else {
+              matchesBuilder_.addAllMessages(other.matches_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        for (int i = 0; i < getMatchesCount(); i++) {
+          if (!getMatches(i).isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches> matches_ =
+        java.util.Collections.emptyList();
+      private void ensureMatchesIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          matches_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches>(matches_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatchesOrBuilder> matchesBuilder_;
+
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches> getMatchesList() {
+        if (matchesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(matches_);
+        } else {
+          return matchesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public int getMatchesCount() {
+        if (matchesBuilder_ == null) {
+          return matches_.size();
+        } else {
+          return matchesBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches getMatches(int index) {
+        if (matchesBuilder_ == null) {
+          return matches_.get(index);
+        } else {
+          return matchesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public Builder setMatches(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches value) {
+        if (matchesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMatchesIsMutable();
+          matches_.set(index, value);
+          onChanged();
+        } else {
+          matchesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public Builder setMatches(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder builderForValue) {
+        if (matchesBuilder_ == null) {
+          ensureMatchesIsMutable();
+          matches_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          matchesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public Builder addMatches(edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches value) {
+        if (matchesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMatchesIsMutable();
+          matches_.add(value);
+          onChanged();
+        } else {
+          matchesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public Builder addMatches(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches value) {
+        if (matchesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMatchesIsMutable();
+          matches_.add(index, value);
+          onChanged();
+        } else {
+          matchesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public Builder addMatches(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder builderForValue) {
+        if (matchesBuilder_ == null) {
+          ensureMatchesIsMutable();
+          matches_.add(builderForValue.build());
+          onChanged();
+        } else {
+          matchesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public Builder addMatches(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder builderForValue) {
+        if (matchesBuilder_ == null) {
+          ensureMatchesIsMutable();
+          matches_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          matchesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public Builder addAllMatches(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches> values) {
+        if (matchesBuilder_ == null) {
+          ensureMatchesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, matches_);
+          onChanged();
+        } else {
+          matchesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public Builder clearMatches() {
+        if (matchesBuilder_ == null) {
+          matches_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          matchesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public Builder removeMatches(int index) {
+        if (matchesBuilder_ == null) {
+          ensureMatchesIsMutable();
+          matches_.remove(index);
+          onChanged();
+        } else {
+          matchesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder getMatchesBuilder(
+          int index) {
+        return getMatchesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatchesOrBuilder getMatchesOrBuilder(
+          int index) {
+        if (matchesBuilder_ == null) {
+          return matches_.get(index);  } else {
+          return matchesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatchesOrBuilder> 
+           getMatchesOrBuilderList() {
+        if (matchesBuilder_ != null) {
+          return matchesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(matches_);
+        }
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder addMatchesBuilder() {
+        return getMatchesFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder addMatchesBuilder(
+          int index) {
+        return getMatchesFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * One entry per item in the trees field of the request
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.TregexResponse.TreeTregexMatches matches = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder> 
+           getMatchesBuilderList() {
+        return getMatchesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatchesOrBuilder> 
+          getMatchesFieldBuilder() {
+        if (matchesBuilder_ == null) {
+          matchesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatches.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse.TreeTregexMatchesOrBuilder>(
+                  matches_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          matches_ = null;
+        }
+        return matchesBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TregexResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TregexResponse)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<TregexResponse>
+        PARSER = new com.google.protobuf.AbstractParser<TregexResponse>() {
+      @java.lang.Override
+      public TregexResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TregexResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<TregexResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TregexResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.TregexResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface TsurgeonRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TsurgeonRequest)
       com.google.protobuf.MessageOrBuilder {
@@ -89426,6 +95814,41 @@ public final class CoreNLPProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_TregexRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_TregexRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_VarString_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_VarString_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_MatchNode_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_MatchNode_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_Match_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_Match_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeMatches_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeMatches_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeTregexMatches_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeTregexMatches_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -89739,26 +96162,42 @@ public final class CoreNLPProtos {
       ".nlp.pipeline.FlattenedParseTree\022@\n\tpred" +
       "icted\030\002 \003(\0132-.edu.stanford.nlp.pipeline." +
       "FlattenedParseTree\"5\n\026EvaluateParserResp" +
-      "onse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001\n\017Ts" +
-      "urgeonRequest\022H\n\noperations\030\001 \003(\01324.edu." +
-      "stanford.nlp.pipeline.TsurgeonRequest.Op" +
-      "eration\022<\n\005trees\030\002 \003(\0132-.edu.stanford.nl" +
-      "p.pipeline.FlattenedParseTree\032-\n\tOperati" +
-      "on\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P\n\020" +
-      "TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.edu.st" +
-      "anford.nlp.pipeline.FlattenedParseTree*\243" +
-      "\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Ara" +
-      "bic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006Germa" +
-      "n\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010" +
-      "\022\024\n\020UniversalEnglish\020\t\022\024\n\020UniversalChine" +
-      "se\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021" +
-      "\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_P" +
-      "OSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Natur" +
-      "alLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORW" +
-      "ARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002" +
-      "\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER" +
-      "\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp" +
-      ".pipelineB\rCoreNLPProtos"
+      "onse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\"]\n\rTre" +
+      "gexRequest\022\016\n\006tregex\030\001 \003(\t\022<\n\005trees\030\002 \003(" +
+      "\0132-.edu.stanford.nlp.pipeline.FlattenedP" +
+      "arseTree\"\213\004\n\016TregexResponse\022L\n\007matches\030\001" +
+      " \003(\0132;.edu.stanford.nlp.pipeline.TregexR" +
+      "esponse.TreeTregexMatches\032(\n\tVarString\022\014" +
+      "\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\032+\n\tMatchNode" +
+      "\022\014\n\004name\030\001 \002(\t\022\020\n\010position\030\002 \002(\005\032\245\001\n\005Mat" +
+      "ch\022\020\n\010position\030\001 \002(\005\022F\n\tvariables\030\002 \003(\0132" +
+      "3.edu.stanford.nlp.pipeline.TregexRespon" +
+      "se.VarString\022B\n\005nodes\030\003 \003(\01323.edu.stanfo" +
+      "rd.nlp.pipeline.TregexResponse.MatchNode" +
+      "\032O\n\013TreeMatches\022@\n\007matches\030\001 \003(\0132/.edu.s" +
+      "tanford.nlp.pipeline.TregexResponse.Matc" +
+      "h\032[\n\021TreeTregexMatches\022F\n\007matches\030\001 \003(\0132" +
+      "5.edu.stanford.nlp.pipeline.TregexRespon" +
+      "se.TreeMatches\"\310\001\n\017TsurgeonRequest\022H\n\nop" +
+      "erations\030\001 \003(\01324.edu.stanford.nlp.pipeli" +
+      "ne.TsurgeonRequest.Operation\022<\n\005trees\030\002 " +
+      "\003(\0132-.edu.stanford.nlp.pipeline.Flattene" +
+      "dParseTree\032-\n\tOperation\022\016\n\006tregex\030\001 \002(\t\022" +
+      "\020\n\010tsurgeon\030\002 \003(\t\"P\n\020TsurgeonResponse\022<\n" +
+      "\005trees\030\001 \003(\0132-.edu.stanford.nlp.pipeline" +
+      ".FlattenedParseTree*\243\001\n\010Language\022\013\n\007Unkn" +
+      "own\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022" +
+      "\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006" +
+      "Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglis" +
+      "h\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentiment\022\023" +
+      "\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013" +
+      "\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG" +
+      "_POSITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013" +
+      "EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n" +
+      "\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013A" +
+      "LTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020" +
+      "\006B*\n\031edu.stanford.nlp.pipelineB\rCoreNLPP" +
+      "rotos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -90034,8 +96473,50 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor,
         new java.lang.String[] { "F1", "KbestF1", });
-    internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor =
+    internal_static_edu_stanford_nlp_pipeline_TregexRequest_descriptor =
       getDescriptor().getMessageTypes().get(31);
+    internal_static_edu_stanford_nlp_pipeline_TregexRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_TregexRequest_descriptor,
+        new java.lang.String[] { "Tregex", "Trees", });
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor =
+      getDescriptor().getMessageTypes().get(32);
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor,
+        new java.lang.String[] { "Matches", });
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_VarString_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor.getNestedTypes().get(0);
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_VarString_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_TregexResponse_VarString_descriptor,
+        new java.lang.String[] { "Name", "Value", });
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_MatchNode_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor.getNestedTypes().get(1);
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_MatchNode_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_TregexResponse_MatchNode_descriptor,
+        new java.lang.String[] { "Name", "Position", });
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_Match_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor.getNestedTypes().get(2);
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_Match_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_TregexResponse_Match_descriptor,
+        new java.lang.String[] { "Position", "Variables", "Nodes", });
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeMatches_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor.getNestedTypes().get(3);
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeMatches_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeMatches_descriptor,
+        new java.lang.String[] { "Matches", });
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeTregexMatches_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_TregexResponse_descriptor.getNestedTypes().get(4);
+    internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeTregexMatches_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_TregexResponse_TreeTregexMatches_descriptor,
+        new java.lang.String[] { "Matches", });
+    internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor =
+      getDescriptor().getMessageTypes().get(33);
     internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor,
@@ -90047,7 +96528,7 @@ public final class CoreNLPProtos {
         internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_descriptor,
         new java.lang.String[] { "Tregex", "Tsurgeon", });
     internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor =
-      getDescriptor().getMessageTypes().get(32);
+      getDescriptor().getMessageTypes().get(34);
     internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor,

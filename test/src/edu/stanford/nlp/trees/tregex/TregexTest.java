@@ -1231,6 +1231,38 @@ public class TregexTest extends TestCase {
   }
 
   /**
+   * Test that a single query with multiple results matches multiple times
+   */
+  public void testMultipleMatches() {
+    String treeString = "(albatross (foo 1) (bar 2))";
+    Tree tree = treeFromString(treeString);
+
+    TregexPattern pattern = TregexPattern.compile("/(.*)/#1%name < /foo(.*)/#1%blah");
+    TregexMatcher matcher = pattern.matcher(tree);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    treeString = "(albatross (foo 1) (foo 2))";
+    tree = treeFromString(treeString);
+
+    pattern = TregexPattern.compile("/(.*)/#1%name < /foo(.*)/#1%blah=zzz");
+    matcher = pattern.matcher(tree);
+    assertTrue(matcher.find());
+    assertEquals(Tree.valueOf("(foo 1)"), matcher.getNode("zzz"));
+    assertTrue(matcher.find());
+    assertEquals(Tree.valueOf("(foo 2)"), matcher.getNode("zzz"));
+    assertFalse(matcher.find());
+
+    treeString = "(A (B w) (B x))";
+    tree = treeFromString(treeString);
+    pattern = TregexPattern.compile("(A < B=foo)");
+    matcher = pattern.matcher(tree);
+    assertTrue(matcher.find());
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+  }
+
+  /**
    * Test the results of the getVariableNames() call on a TregexMatcher
    */
   public void testVariableNames() {
