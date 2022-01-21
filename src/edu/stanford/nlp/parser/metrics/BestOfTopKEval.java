@@ -52,4 +52,8 @@ public class BestOfTopKEval {
   public void display(boolean verbose, PrintWriter pw) {
     countingEval.display(verbose, pw);
   }
+
+  public double getEvalbF1() {
+    return countingEval.getEvalbF1();
+  }
 }

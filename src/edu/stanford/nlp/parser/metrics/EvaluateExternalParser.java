@@ -94,32 +94,35 @@ public class EvaluateExternalParser extends ProcessProtobufRequest {
   }
 
 
-  public CoreNLPProtos.EvaluateParserResponse buildResponse(double f1)  {
+  public CoreNLPProtos.EvaluateParserResponse buildResponse(double f1, Double kbestF1)  {
     CoreNLPProtos.EvaluateParserResponse.Builder responseBuilder = CoreNLPProtos.EvaluateParserResponse.newBuilder();
     responseBuilder.setF1(f1);
+    if (kbestF1 != null) {
+      responseBuilder.setKbestF1(kbestF1);
+    }
     CoreNLPProtos.EvaluateParserResponse response = responseBuilder.build();
     return response;
   }
 
   /**
    * Puts the list of gold trees and a list of list of results into EvaluateTreebank
-   *
-   * TODO: instead pass in the trees to EvaluateTreebank as dependency injection?
-   * That way we can process them in an exact order
    */
-  public double scoreDataset(List<Tree> goldTrees, List<List<Tree>> results) {
+  public CoreNLPProtos.EvaluateParserResponse scoreDataset(List<Tree> goldTrees, List<List<Tree>> results) {
     List<Pair<ParserQuery, Tree>> treebank = convertDataset(goldTrees, results);
 
     EvaluateTreebank evaluator = new EvaluateTreebank(op, null, null, null, null, null);
     double f1 = evaluator.testOnTreebank(treebank);
-    return f1;
+    Double kbestF1 = null;
+    if (evaluator.hasPCFGTopKF1()) {
+      kbestF1 = evaluator.getPCFGTopKF1();
+    }
+    return buildResponse(f1, kbestF1);
   }
 
   public CoreNLPProtos.EvaluateParserResponse processRequest(CoreNLPProtos.EvaluateParserRequest parses) throws IOException {
     List<Tree> goldTrees = getGoldTrees(parses);
     List<List<Tree>> results = getResults(parses);
-    double f1 = scoreDataset(goldTrees, results);
-    return buildResponse(f1);
+    return scoreDataset(goldTrees, results);
   }
 
   /**

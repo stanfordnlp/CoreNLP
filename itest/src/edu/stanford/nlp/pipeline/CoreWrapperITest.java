@@ -96,7 +96,7 @@ public class CoreWrapperITest {
     assertEquals(expectedDependencyParse, firstSentence.dependencyParse().toString());
     // coref info
     String expectedCoref =
-            "{17=CHAIN17-[\"us\" in sentence 3, \"our\" in sentence 3], 19=CHAIN19-[\"Barack Obama\" in sentence 1, " +
+            "{19=CHAIN19-[\"us\" in sentence 3, \"our\" in sentence 3], 21=CHAIN21-[\"Barack Obama\" in sentence 1, " +
                     "\"He\" in sentence 2, \"Obama\" in sentence 3, \"My\" in sentence 3, \"I\" in sentence 3, \"his\" " +
                     "in sentence 3]}";
     assertEquals(expectedCoref, exampleDocument.corefChains().toString());

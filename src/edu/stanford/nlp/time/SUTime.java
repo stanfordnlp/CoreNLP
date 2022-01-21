@@ -272,19 +272,19 @@ public class SUTime  {
       builder.append("Temporal expressions:");
       int index = 0;
       for (TimeExpression exp : temporalExprIndex) {
-        builder.append("\n  " + index++ + ": " + exp);
+        builder.append("\n  ").append(index++).append(": ").append(exp);
       }
 
       builder.append("\nTemporals:");
       index = 0;
       for (Temporal exp : temporalIndex) {
-        builder.append("\n  " + index++ + ": " + exp);
+        builder.append("\n  ").append(index++).append(": ").append(exp);
       }
 
       builder.append("\nTemporal functions:");
       index = 0;
       for (Temporal exp : temporalFuncIndex) {
-        builder.append("\n  " + index++ + ": " + exp);
+        builder.append("\n  ").append(index++).append(": ").append(exp);
       }
       return builder.toString();
     }
@@ -791,6 +791,8 @@ public class SUTime  {
       .hourOfDay(), 17)))));
   public static final Time DINNERTIME = createTemporal(StandardTemporalType.TIME_OF_DAY, "EV", new InexactTime(new Range(new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 18)), new InexactTime(new Partial(DateTimeFieldType
       .hourOfDay(), 20)))));
+  public static final Time WORKDAY = createTemporal(StandardTemporalType.TIME_OF_DAY, "WH", new InexactTime(new Range(new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 9)),
+          new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 17)))));
 
   public static final Time MORNING_TWILIGHT = createTemporal(StandardTemporalType.TIME_OF_DAY, "MO", new InexactTime(new Range(DAWN, SUNRISE)));
   public static final Time EVENING_TWILIGHT = createTemporal(StandardTemporalType.TIME_OF_DAY, "EV", new InexactTime(new Range(SUNSET, DUSK)));
@@ -809,7 +811,7 @@ public class SUTime  {
     YEAR(SUTime.YEAR), DECADE(SUTime.DECADE), CENTURY(SUTime.CENTURY), MILLENNIUM(SUTime.MILLENNIUM),
     UNKNOWN(SUTime.DURATION_UNKNOWN);
 
-    protected Duration duration;
+    private final Duration duration;
 
     TimeUnit(Duration d) {
       this.duration = d;
@@ -1163,7 +1165,7 @@ public class SUTime  {
         }
         if (arg1 instanceof Time) {
           // TODO: flags?
-          return arg2.intersect((Time) arg1);
+          return arg2.intersect(arg1);
         } else {
           throw new UnsupportedOperationException("IN not implemented for arg1=" + arg1.getClass() + ", arg2=" + arg2.getClass());
         }
@@ -1792,17 +1794,19 @@ public class SUTime  {
       }
 
       Duration bd = (base != null) ? Duration.getDuration(JodaTimeUtils.getJodaTimePeriod(base)) : null;
-      if (tod != null) {
-        Duration d = tod.getDuration();
-        return (bd.compareTo(d) < 0) ? bd : d;
-      }
-      if (dow != null) {
-        Duration d = dow.getDuration();
-        return (bd.compareTo(d) < 0) ? bd : d;
-      }
-      if (poy != null) {
-        Duration d = poy.getDuration();
-        return (bd.compareTo(d) < 0) ? bd : d;
+      if (bd != null) {
+        if (tod != null) {
+          Duration d = tod.getDuration();
+          return (bd.compareTo(d) < 0) ? bd : d;
+        }
+        if (dow != null) {
+          Duration d = dow.getDuration();
+          return (bd.compareTo(d) < 0) ? bd : d;
+        }
+        if (poy != null) {
+          Duration d = poy.getDuration();
+          return (bd.compareTo(d) < 0) ? bd : d;
+        }
       }
       return bd;
     }
@@ -1830,17 +1834,19 @@ public class SUTime  {
         }
       }
 
-      if (poy != null) {
-        Duration d = poy.getPeriod();
-        return (bd.compareTo(d) > 0) ? bd : d;
-      }
-      if (dow != null) {
-        Duration d = dow.getPeriod();
-        return (bd.compareTo(d) > 0) ? bd : d;
-      }
-      if (tod != null) {
-        Duration d = tod.getPeriod();
-        return (bd.compareTo(d) > 0) ? bd : d;
+      if (bd != null) {
+        if (poy != null) {
+          Duration d = poy.getPeriod();
+          return (bd.compareTo(d) > 0) ? bd : d;
+        }
+        if (dow != null) {
+          Duration d = dow.getPeriod();
+          return (bd.compareTo(d) > 0) ? bd : d;
+        }
+        if (tod != null) {
+          Duration d = tod.getPeriod();
+          return (bd.compareTo(d) > 0) ? bd : d;
+        }
       }
       return bd;
     }
@@ -3625,7 +3631,6 @@ public class SUTime  {
    *
    * @return An instant corresponding to the value, if it could be parsed.
    */
-  @SuppressWarnings("LoopStatementThatDoesntLoop")
   public static Optional<java.time.Instant> parseInstant(String value, Optional<ZoneId> timezone) {
     for (java.time.format.DateTimeFormatter formatter : DATE_TIME_FORMATS) {
       try {
@@ -4359,7 +4364,7 @@ public class SUTime  {
       if (d instanceof DurationWithMillis) {
         return new DurationWithMillis(this, base.toDuration().plus(((DurationWithMillis) d).base));
       } else if (d instanceof DurationWithFields) {
-        return ((DurationWithFields) d).add(this);
+        return d.add(this);
       } else {
         throw new UnsupportedOperationException("Unknown duration type in add: " + d.getClass());
       }

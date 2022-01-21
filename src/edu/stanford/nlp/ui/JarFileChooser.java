@@ -63,7 +63,7 @@ public class JarFileChooser {
     //frame.setLocation(location);
     final JDialog dialog = new JDialog(frame, "Jar File Chooser", true);
     dialog.setLocation(location);
-    final JList fileList = new JList(new Vector<>(files));
+    final JList<String> fileList = new JList<>(new Vector<>(files));
     fileList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     MouseListener mouseListener = new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
@@ -126,16 +126,17 @@ public class JarFileChooser {
     //System.out.println("Looking at " + jarFile);
     List<String> files = new ArrayList<>();
 
-    ZipFile zin = new ZipFile(jarFile);
-    Enumeration<? extends ZipEntry> entries = zin.entries();
-    while (entries.hasMoreElements()) {
-      ZipEntry entry = entries.nextElement();
-      String name = entry.getName();
-      if (name.matches(pattern)) {
-        files.add(name);
+    try (ZipFile zin = new ZipFile(jarFile)) {
+      Enumeration<? extends ZipEntry> entries = zin.entries();
+      while (entries.hasMoreElements()) {
+        ZipEntry entry = entries.nextElement();
+        String name = entry.getName();
+        if (name.matches(pattern)) {
+          files.add(name);
+        }
       }
+      Collections.sort(files);
     }
-    Collections.sort(files);
     return files;
   }
 }

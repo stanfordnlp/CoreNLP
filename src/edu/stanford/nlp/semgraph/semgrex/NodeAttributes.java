@@ -1,6 +1,6 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -23,7 +23,7 @@ public class NodeAttributes {
   public NodeAttributes() {
     root = false;
     empty = false;
-    attributes = new HashMap<>();
+    attributes = new LinkedHashMap<>();
   }
 
   public void setRoot(boolean root) {

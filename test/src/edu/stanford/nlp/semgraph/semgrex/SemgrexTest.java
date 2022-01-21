@@ -115,6 +115,29 @@ public class SemgrexTest extends TestCase {
             "ate", "ate", "muffins");
   }
 
+  public void testMultipleAttributes() {
+    runTest("{} >> {word:Bill}",
+            "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]",
+            "ate");
+    runTest("{} >> {tag:NNP}",
+            "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]",
+            "ate");
+    runTest("{} >> {word:Bill;tag:NNP}",
+            "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]",
+            "ate");
+    runTest("{} >> {word:Bill;tag:NNZ}",
+            "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]");
+    runTest("{} >> {word:Ragavaniskillinglegacy;tag:NNP}",
+            "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]");
+    runTest("{} >> {tag:NNP;word:Bill}",
+            "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]",
+            "ate");
+    runTest("{} >> {tag:NNZ;word:Bill}",
+            "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]");
+    runTest("{} >> {tag:NNP;word:UnbanMoxOpal}",
+            "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]");
+  }
+
   public void testNamedDependency() {
     runTest("{} << {word:ate}",
             "[ate subj>Bill obj>[muffins compound>blueberry]]",

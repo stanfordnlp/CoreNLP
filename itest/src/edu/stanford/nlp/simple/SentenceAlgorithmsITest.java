@@ -204,8 +204,6 @@ public class SentenceAlgorithmsITest {
       add("Geledi");
       add("<-nmod:of-");
       add("Sultanate");
-      add("<-conj:and-");
-      add("commander");
       add("<-acl:relcl-");
       add("Sultanate");
       add("<-appos-");

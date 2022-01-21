@@ -2285,12 +2285,12 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
                "nmod:in(failures-7, politics-9)\n" +
                "case(economy-13, in-11)\n" +
                "det(economy-13, the-12)\n" +
-               "nmod:in(failures-7'', economy-13)\n" +
-               "cc(failures-7', or-14)\n" +
+               "nmod:in(failures-7', economy-13)\n" +
+               "cc(failures-7'', or-14)\n" +
                "case(front-18, on-15)\n" +
                "det(front-18, the-16)\n" +
                "amod(front-18, military-17)\n" +
-               "nmod:on(failures-7', front-18)\n" +
+               "nmod:on(failures-7'', front-18)\n" +
                "cc(chalked-22, and-20)\n" +
                "aux(chalked-22, has-21)\n" +
                "conj:and(produced-4, chalked-22)\n" +
@@ -2382,18 +2382,18 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
                "obl:out(walked-2, door-5)\n" +
                "case(road-9, over-7)\n" +
                "det(road-9, the-8)\n" +
-               "obl:over(walked-2''', road-9)\n" +
+               "obl:over(walked-2', road-9)\n" +
                "case(block-14, across-11)\n" +
                "det(block-14, the-12)\n" +
                "amod(block-14, deserted-13)\n" +
-               "obl:across(walked-2'''', block-14)\n" +
+               "obl:across(walked-2'', block-14)\n" +
                "case(corner-18, around-16)\n" +
                "det(corner-18, the-17)\n" +
-               "obl:around(walked-2', corner-18)\n" +
-               "cc(walked-2'', and-20)\n" +
+               "obl:around(walked-2''', corner-18)\n" +
+               "cc(walked-2'''', and-20)\n" +
                "case(park-23, through-21)\n" +
                "det(park-23, the-22)\n" +
-               "obl:through(walked-2'', park-23)\n"},
+               "obl:through(walked-2'''', park-23)\n"},
              {TestType.CC_PROCESSED,
               "(ROOT (S (NP (NNP John)) (VP (VP (VBD noticed) (NP (DT a) (NN cockroach))) (CC and) (VP (VBD departed))) (. .)))",
               "nsubj(noticed-2, John-1)\n" +

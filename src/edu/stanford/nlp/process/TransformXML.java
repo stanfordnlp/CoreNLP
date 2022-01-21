@@ -5,6 +5,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 import java.io.*;
 import java.util.*;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -195,7 +196,9 @@ public class TransformXML<T>  {
 
   public TransformXML() {
     try {
-      saxParser = SAXParserFactory.newInstance().newSAXParser();
+      SAXParserFactory spf = SAXParserFactory.newInstance();
+      spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+      saxParser = spf.newSAXParser();
     } catch (Exception e) {
       log.info("Error configuring XML parser: " + e);
       throw new RuntimeException(e);

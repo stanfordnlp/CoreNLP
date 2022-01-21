@@ -41,6 +41,9 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2022-01-20    4.4.0     Fix issue with Italian depparse, tsurgeon CLI, 
+                        fix security issues, bug fixes 
+
 2021-10-14    4.3.1     Minor bugfixes to German umlaut tokenization,
                         CDC tokenizer offset, Hungarian model package
 

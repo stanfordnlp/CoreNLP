@@ -280,6 +280,10 @@ public class QuestionToStatementTranslatorITest {
     check(
         "what/WP awards/NNS has/VBZ louis/NNP sacher/NNP won/VB ?",
         "louis sacher has won awards");
+    // below one doesn't yet work -- still gives "win". Fix this someday.
+    // check(
+    //         "what/WP awards/NNS did/VBD Louis/NNP Sacher/NNP win/VB ?",
+    //         "Louis Sacher won awards");
     check(
         "what/WP movies/NNS has/VBZ taylor/NNP lautner/NNP been/VBD in/IN 2011/CD ?",
         "taylor lautner has been in movies in 2011");
