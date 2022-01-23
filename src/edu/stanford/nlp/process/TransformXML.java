@@ -1,9 +1,8 @@
 package edu.stanford.nlp.process; 
-import edu.stanford.nlp.util.logging.Redwood;
-
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
@@ -14,9 +13,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.util.function.Function;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.XMLUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -33,7 +32,7 @@ import edu.stanford.nlp.util.XMLUtils;
 public class TransformXML<T>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TransformXML.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TransformXML.class);
 
   private final SAXParser saxParser;
 
@@ -246,8 +245,8 @@ public class TransformXML<T>  {
    * @param tags an array of <code>String</code>s, each an XML tag
    *             within which the transformation should be applied
    * @param fn   the {@link Function <code>Function</code>} to apply
-   * @param in   the <code>File</code> to read from
-   * @param out  the <code>File</code> to write to
+   * @param in   the {@code File} to read from
+   * @param out  the {@code File} to write to
    */
   public void transformXML(String[] tags, Function<String,T> fn, File in, File out) {
     InputStream ins = null;
