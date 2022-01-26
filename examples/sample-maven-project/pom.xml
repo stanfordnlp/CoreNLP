@@ -2,19 +2,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.stanford.nlp</groupId>
-    <artifactId>sample-maven-project</artifactId>
+    <artifactId>stanford-corenlp-test-app</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>sample-maven-project</name>
     <url>http://maven.apache.org</url>
-
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <stanford.corenlp.version>4.4.0</stanford.corenlp.version>
         <junit.version>4.13.1</junit.version>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -22,7 +20,6 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- stanford core nlp dependency -->
         <dependency>
             <groupId>edu.stanford.nlp</groupId>
             <artifactId>stanford-corenlp</artifactId>
