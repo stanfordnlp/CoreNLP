@@ -12,6 +12,7 @@ public class StanfordCoreNLPChineseTestApp {
 
     public static void main(String[] args) {
         Properties properties = new Properties();
+        properties.setProperty("annotators", "StanfordCoreNLP-chinese.properties");
         properties.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,coref,kbp,entitylink");
 
         StanfordCoreNLP pipeline = new StanfordCoreNLP(properties);

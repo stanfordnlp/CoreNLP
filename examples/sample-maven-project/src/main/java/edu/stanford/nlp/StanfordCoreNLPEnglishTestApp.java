@@ -8,7 +8,6 @@ import edu.stanford.nlp.pipeline.*;
 /**
  * Application to test whether the new version of Stanford works properly
  */
-
 public class StanfordCoreNLPEnglishTestApp {
 
     public static void main(String[] args) {

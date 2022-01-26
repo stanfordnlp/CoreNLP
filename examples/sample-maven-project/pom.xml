@@ -5,13 +5,13 @@
     <artifactId>sample-maven-project</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>stanford-corenlp-test-app</name>
+    <name>sample-maven-project</name>
     <url>http://maven.apache.org</url>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <stanford.corenlp.version>4.2.2</stanford.corenlp.version>
+        <stanford.corenlp.version>4.4.0</stanford.corenlp.version>
         <junit.version>4.13.1</junit.version>
     </properties>
 
@@ -76,11 +76,10 @@
             <version>${stanford.corenlp.version}</version>
             <classifier>models-french</classifier>
         </dependency>
-        <!--  german is currently no version : 4.2.2 -->
         <dependency>
             <groupId>edu.stanford.nlp</groupId>
             <artifactId>stanford-corenlp</artifactId>
-            <version>4.2.1</version>
+            <version>${stanford.corenlp.version}</version>
             <classifier>models-german</classifier>
         </dependency>
         <dependency>
