@@ -1,6 +1,5 @@
 package edu.stanford.nlp;
 
-import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.ling.CoreLabel;
@@ -9,11 +8,11 @@ import edu.stanford.nlp.pipeline.*;
 /**
  * Application to test whether the new version of Stanford works properly
  */
-
 public class StanfordCoreNLPSpanishTestApp {
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) {
         Properties properties = new Properties();
+        properties.setProperty("annotators", "StanfordCoreNLP-spanish.properties");
         properties.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,kbp");
 
         StanfordCoreNLP pipeline = new StanfordCoreNLP(properties);
