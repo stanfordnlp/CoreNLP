@@ -9,7 +9,8 @@ import java.io.Reader;
  * This class implements a <code>TreeReaderFactory</code> that produces
  * labeled, scored array-based Trees, which have been cleaned up to
  * delete empties, etc.   This seems to be a common case (for English).
- * By default, the labels are of type CategoryWordTag,
+ * <br>
+ * By default, the labels are of type CoreLabel,
  * but a different Label type can be specified by the user.
  *
  * @author Christopher Manning
@@ -47,7 +48,7 @@ public class LabeledScoredTreeReaderFactory implements TreeReaderFactory {
    * It creates a <code>TreeReader</code> which normalizes trees using
    * the <code>BobChrisTreeNormalizer</code>, and makes
    * <code>LabeledScoredTree</code> objects with
-   * <code>CategoryWordTag</code> labels (unless otherwise specified on
+   * <code>CoreLabel</code> labels (unless otherwise specified on
    * construction).
    */
   public TreeReader newTreeReader(Reader in) {

@@ -110,6 +110,7 @@ public class TSVSentenceIteratorITest {
 
   @Test
   public void testParseTrees() {
+    // NOTE: this is not a legal basic dependency tree, as "curling" is the dependent of two relations
     List<List<String>> entries = Collections.singletonList(
             Arrays.asList(
                     "3424",

@@ -302,6 +302,7 @@ public class XMLUtils  {
       DocumentBuilderFactory dbf = safeDocumentBuilderFactory();
 
       SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       Schema schema = factory.newSchema(schemaFile);
       dbf.setSchema(schema);
 

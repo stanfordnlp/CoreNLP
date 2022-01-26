@@ -13,15 +13,15 @@ public class CoordinationPattern extends SemgrexPattern  {
   private static Redwood.RedwoodChannels log = Redwood.channels(CoordinationPattern.class);
 
   private static final long serialVersionUID = -3122330899634961002L;
-  private boolean isConj;
-  private boolean isNodeCoord;
+  private final boolean isConj;
+  private final boolean isNodeCoord;
   /**
    * Represents whether this is the root coordination.  If so, the
    * children have a higher operation priority, as the : operator is
    * the lowest precedence possible.
    */
-  private boolean isRoot;
-  private List<SemgrexPattern> children;
+  private final boolean isRoot;
+  private final List<SemgrexPattern> children;
 
   /* if isConj is true, then it is an "AND" ; if it is false, it is an "OR".*/
   /* if isNodeCoord is true, then it is a node coordination conj; if it is false, then
@@ -30,7 +30,7 @@ public class CoordinationPattern extends SemgrexPattern  {
     if (children.size() < 2) {
       throw new RuntimeException("Coordination node must have at least 2 children.");
     }
-    this.children = children;
+    this.children = Collections.unmodifiableList(children);
     this.isConj = isConj;
     this.isNodeCoord = isNodeCoord;
     this.isRoot = isRoot;

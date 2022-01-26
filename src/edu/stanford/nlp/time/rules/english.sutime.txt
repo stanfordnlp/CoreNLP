@@ -22,7 +22,11 @@
   $hasTemporal = "( { temporal::EXISTS } & {{ temporal.value != NON_TEMPORAL }} & !{{ tags[\"TIMEZONE\"] }} )"
 
   # Decades
+  # We might want to add "teens" but would need to change grammar to insist on "the" before it, but even then maybe too ambiguous?
+  #     "teens": "1X",
   DECADES_MAP = {
+    "oughts": "0X",
+    "noughts": "0X",
     "twenties": "2X",
     "thirties": "3X",
     "forties": "4X",
@@ -124,7 +128,7 @@
   }
   $BasicOrdTerm = CreateRegex(Keys(BASIC_ORDINAL_MAP))
 
-  # Finanical Quarters
+  # Financial Quarters
   FISCAL_YEAR_QUARTER_MAP = {
     "Q1": FYQ1,
     "Q2": FYQ2,
@@ -265,7 +269,7 @@
   { (/suppertimes?/) => SUPPERTIME }
   { (/daylights?|days?|daytimes?/) => DAYTIME }
   { (/nighttimes?|nights?|overnights?/) => NIGHT }
-  { (/workday|work day|business hours/) => WORKDAY }
+  { (/workday|work(ing)? day|business hours/) => WORKDAY }
 
   # Seasons
   { (/summers?/) => SUMMER }
@@ -296,7 +300,7 @@
   { (/suns?/) => SUNDAY }
 
   { (/weekends?/) => WEEKEND }
-  { (/weekdays?/) => WEEKDAY }
+  { (/weekdays?|workweek/) => WEEKDAY }
 
   # Month
   { (/januarys?/) => JANUARY }
@@ -402,7 +406,7 @@
   { ( [ { tag:NNP } ]+ [ { tag:POS } ] /birthday/ ) => SimpleTime($0) }
 
   # Generic decade
-  { ( /the/? ( /\w+teen/ /$Decades/ ) )
+  { ( /the/? ( /\w+teen|twenty/ /$Decades/ ) )
        => IsoDate( Concat( Format("%02d", $0[0].numcompvalue), DECADES_MAP[Lowercase($0[1].word)]), NIL, NIL)
   }
   { ( /the/? ( /$Decades/ ) )
@@ -481,6 +485,10 @@
   { text: /\b(\d{4})\s*(?:-)\s*(\d{4})\b/ =>
           TimeRange( IsoDate($1, NIL, NIL), IsoDate($2, NIL, NIL) ) }
   { ( /the/ /weekend/ ) => WEEKEND }
+  { ( /work(ing)?/ /day/ ) => WORKDAY }
+  { ( /business/ /hours/ ) => WORKDAY }
+  { ( /work(ing)?/ /week/ ) => WEEKDAY }
+  { ( /week|business/ /days?/ ) => WEEKDAY }
 
   # Now a few time expressions
   { ( (/\d\d\d\d/) /hours?/? (/universal|zulu/ | /[a-z]+/ /standard|daylight/) /time/ ) => IsoTime($1[0].word, NIL, NIL) }

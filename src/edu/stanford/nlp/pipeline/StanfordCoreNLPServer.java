@@ -327,7 +327,11 @@ public class StanfordCoreNLPServer implements Runnable {
 
         String text = IOUtils.slurpReader(IOUtils.encodedInputStreamReader(httpExchange.getRequestBody(), encoding));
         if (contentType.equals(URL_ENCODED)) {
-          text = URLDecoder.decode(text, encoding);
+          try {
+            text = URLDecoder.decode(text, encoding);
+          } catch (IllegalArgumentException e) {
+            // ignore decoding errors so that libraries which don't specify a content type might not fail
+          }
         }
         // We use to trim. But now we don't. It seems like doing that is illegitimate. text = text.trim();
 

@@ -143,6 +143,29 @@ public class Util {
   }
 
   /**
+   * Verify that when removing edges from the graph, the graph is not disconnected after the removal.
+   *<br>
+   * The edge specified in toKeep will be kept.
+   */
+  public static boolean verifyRemoval(SemanticGraph tree, Collection<SemanticGraphEdge> removeEdges, SemanticGraphEdge toKeep, IndexedWord dependent) {
+    SemanticGraph copy = tree.makeSoftCopy();
+    IndexedWord root = copy.getFirstRoot();
+
+    for (SemanticGraphEdge remove : removeEdges) {
+      if (remove == toKeep) {
+        continue;
+      }
+      boolean removed = copy.removeEdge(remove);
+      assert removed;
+    }
+    if (copy.getShortestDirectedPathNodes(root, dependent) == null) {
+      return false;
+    }
+    return true;
+  }
+
+
+  /**
    * Fix some bizarre peculiarities with certain trees.
    * So far, these include:
    * <ul>
@@ -152,8 +175,8 @@ public class Util {
    * @param tree The tree to clean (in place!).
    * @return A list of extra edges, which are valid but were removed.
    */
-  public static List<SemanticGraphEdge> cleanTree(SemanticGraph tree) {
-//    assert !isCyclic(tree);
+  public static List<SemanticGraphEdge> cleanTree(SemanticGraph tree, SemanticGraph originalTree) {
+    //    assert !isCyclic(tree);
 
     // Clean nodes
     List<IndexedWord> toDelete = new ArrayList<>();
@@ -202,37 +225,69 @@ public class Util {
     toDelete.forEach(tree::removeVertex);
     for (Triple<IndexedWord, IndexedWord, SemanticGraphEdge> edge : toAdd) {
       tree.addEdge(edge.first, edge.second,
-          edge.third.getRelation(), edge.third.getWeight(), edge.third.isExtra());
+                   edge.third.getRelation(), edge.third.getWeight(), edge.third.isExtra());
     }
 
     // Handle extra edges.
     // Two cases:
     // (1) the extra edge is a subj/obj edge and the main edge is a conj:.*
     //     in this case, keep the extra
-    // (2) otherwise, delete the extra
+    //     exception: the case when removing the conj is removing the
+    //     path from the root to this node
+    // (2) otherwise, delete the extra(s)
     List<SemanticGraphEdge> extraEdges = new ArrayList<>();
-    for (SemanticGraphEdge edge : tree.edgeIterable()) {
-      if (edge.isExtra()) {
-        List<SemanticGraphEdge> incomingEdges = tree.incomingEdgeList(edge.getDependent());
-        SemanticGraphEdge toKeep = null;
-        for (SemanticGraphEdge candidate : incomingEdges) {
-          if (toKeep == null) {
-            toKeep = candidate;
-          } else if (toKeep.getRelation().toString().startsWith("conj") && candidate.getRelation().toString().matches(".subj.*|.obj.*")) {
-            toKeep = candidate;
-          } else if (!candidate.isExtra() &&
-                     !(candidate.getRelation().toString().startsWith("conj") && toKeep.getRelation().toString().matches(".subj.*|.obj.*"))) {
-            toKeep = candidate;
+    for (IndexedWord vertex : tree.vertexSet()) {
+      // can't prune any edges if there is only one incoming edge.
+      // that would ruin the graph
+      // conversely, if there is more than one edge, at least one of
+      // them should be extra
+      if (tree.inDegree(vertex) <= 1) {
+        continue;
+      }
+
+      List<SemanticGraphEdge> incomingEdges = tree.incomingEdgeList(vertex);
+      SemanticGraphEdge toKeep = null;
+      SemanticGraphEdge original = null;
+      for (SemanticGraphEdge candidate : incomingEdges) {
+        if (!candidate.isExtra()) {
+          if (original != null) {
+            // TODO(horatio): This would be an ideal place to throw an
+            // error, but unfortunately even the basic graph can have
+            // errors with multiple incoming edges as currently constructed.
+            //throw new IllegalArgumentException("Somehow, the original edge returned\n  Original graph:\n" + originalTree +
+            //                                   "\n  Current graph:\n" + tree +
+            //                                   "\n  First edge found: " + original +
+            //                                   "\n  Next edge found: " + candidate);
+          } else {
+            // either or both could be wrong, so we don't try to
+            // figure out which to keep
+            original = candidate;
           }
         }
-        for (SemanticGraphEdge candidate : incomingEdges) {
-          if (candidate != toKeep) {
-            extraEdges.add(candidate);
-          }
+        if (toKeep == null) {
+          toKeep = candidate;
+        } else if (toKeep.getRelation().toString().startsWith("conj") && candidate.getRelation().toString().matches(".subj.*|.obj.*")) {
+          toKeep = candidate;
+        } else if (!candidate.isExtra() &&
+                   !(candidate.getRelation().toString().startsWith("conj") && toKeep.getRelation().toString().matches(".subj.*|.obj.*"))) {
+          toKeep = candidate;
         }
       }
+      if (!verifyRemoval(tree, incomingEdges, toKeep, toKeep.getDependent())) {
+        if (original == null) {
+          throw new RuntimeException("Could not find a valid edge to remove");
+        }
+        toKeep = original;
+      }
+      List<SemanticGraphEdge> removeEdges = new ArrayList<>();
+      for (SemanticGraphEdge candidate : incomingEdges) {
+        if (candidate != toKeep) {
+          removeEdges.add(candidate);
+        }
+      }
+      removeEdges.forEach(tree::removeEdge);
+      extraEdges.addAll(removeEdges);
     }
-    extraEdges.forEach(tree::removeEdge);
 
     // Add apposition edges (simple coref)
     for (SemanticGraphEdge extraEdge : new ArrayList<>(extraEdges)) {  // note[gabor] prevent concurrent modification exception
@@ -321,7 +376,9 @@ public class Util {
     }
 
     // Return
-    assert isTree(tree);
+    if (!isTree(tree)) {
+      throw new NotTreeException(tree, originalTree);
+    }
     return extraEdges;
   }
 
@@ -331,7 +388,7 @@ public class Util {
    * This replicates the behavior of the old Stanford dependencies on universal dependencies.
    * @param tree The tree to modify in place.
    */
-  public static void stripPrepCases(SemanticGraph tree) {
+  public static void stripPrepCases(SemanticGraph tree, SemanticGraph originalTree) {
     // Find incoming case edges that have an 'nmod' incoming edge
     List<SemanticGraphEdge> toClean = new ArrayList<>();
     for (SemanticGraphEdge edge : tree.edgeIterable()) {
@@ -353,7 +410,9 @@ public class Util {
     for (SemanticGraphEdge edge : toClean) {
       tree.removeEdge(edge);
       tree.removeVertex(edge.getDependent());
-      assert isTree(tree);
+    }
+    if (!isTree(tree)) {
+      throw new NotTreeException(tree, originalTree);
     }
   }
 

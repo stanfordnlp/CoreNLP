@@ -2,6 +2,7 @@ package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.io.StringOutputStream;
 import static edu.stanford.nlp.util.XMLUtils.safeDocumentBuilderFactory;
+
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -9,6 +10,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -16,17 +18,16 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * XML Utility functions for use with dealing with Timex expressions
+ * XML Utility functions for use with dealing with Timex expressions.
  *
  * @author Angel Chang
  */
 public class XMLUtils {
 
   private static final Document document = createDocument();
-  private static final TransformerFactory tFactory = TransformerFactory.newInstance();
-  // todo: revert: According to the docs, neither TransformerFactory nor DocumentBuilderFactory is guaranteed threadsafe.
-  // todo: A good application might make one of these per thread, but maybe easier just to revert to creating one each time, sigh.
 
+  // Modern implementations of TransformerFactory (from JDK 7) are threadsafe, while a Transformer should be per thread.
+  private static final TransformerFactory tFactory = TransformerFactory.newInstance();
 
   private XMLUtils() {} // static class
 
@@ -46,7 +47,7 @@ public class XMLUtils {
     try {
       Transformer serializer = tFactory.newTransformer();
       if (prettyPrint) {
-        //Setup indenting to "pretty print"
+        //Set up indenting to "pretty print"
         serializer.setOutputProperty(OutputKeys.INDENT, "yes");
         serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
       }
@@ -66,8 +67,7 @@ public class XMLUtils {
     try {
       DocumentBuilderFactory dbFactory = safeDocumentBuilderFactory();
       DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
-      Document doc = docBuilder.newDocument();
-      return doc;
+      return docBuilder.newDocument();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -105,6 +105,7 @@ public class XMLUtils {
       e.removeChild(n);
     }
   }
+
   private static void getMatchingNodes(Node node, Pattern[] nodePath, int cur, List<Node> res) {
     if (cur < 0 || cur >= nodePath.length) return;
     boolean last = (cur == nodePath.length-1);
@@ -122,6 +123,7 @@ public class XMLUtils {
     }
   }
 
+  /** @return A maybe empty but never null Node List for nodes matching the pattern. */
   public static List<Node> getNodes(Node node, Pattern... nodePath) {
     List<Node> res = new ArrayList<>();
     getMatchingNodes(node, nodePath, 0, res);
@@ -130,7 +132,7 @@ public class XMLUtils {
 
   public static String getNodeText(Node node, Pattern... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
-    if (nodes != null && nodes.size() > 0) {
+    if (nodes.size() > 0) {
       return nodes.get(0).getTextContent();
     } else {
       return null;
@@ -139,7 +141,7 @@ public class XMLUtils {
 
   public static Node getNode(Node node, Pattern... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
-    if (nodes != null && nodes.size() > 0) {
+    if (nodes.size() > 0) {
       return nodes.get(0);
     } else {
       return null;
@@ -173,20 +175,16 @@ public class XMLUtils {
 
   public static List<String> getNodeTexts(Node node, String... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
-    if (nodes != null) {
-      List<String> strs = new ArrayList<>(nodes.size());
-      for (Node n:nodes) {
-        strs.add(n.getTextContent());
-      }
-      return strs;
-    } else {
-      return null;
+    List<String> strings = new ArrayList<>(nodes.size());
+    for (Node n : nodes) {
+      strings.add(n.getTextContent());
     }
+    return strings;
   }
 
   public static String getNodeText(Node node, String... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
-    if (nodes != null && nodes.size() > 0) {
+    if (nodes.size() > 0) {
       return nodes.get(0).getTextContent();
     } else {
       return null;
@@ -195,7 +193,7 @@ public class XMLUtils {
 
   public static String getAttributeValue(Node node, String name) {
     Node attr = getAttribute(node, name);
-    return (attr != null)? attr.getNodeValue():null;
+    return (attr != null) ? attr.getNodeValue(): null;
   }
 
   public static Node getAttribute(Node node, String name) {
@@ -204,7 +202,7 @@ public class XMLUtils {
 
   public static Node getNode(Node node, String... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
-    if (nodes != null && nodes.size() > 0) {
+    if (nodes.size() > 0) {
       return nodes.get(0);
     } else {
       return null;

@@ -279,7 +279,8 @@ public class ClauseSplitterSearchProblem  {
       extraEdgesByGovernor.put(vertex, new ArrayList<>());
       extraEdgesByDependent.put(vertex, new ArrayList<>());
     }
-    List<SemanticGraphEdge> extraEdges = Util.cleanTree(this.tree);
+    SemanticGraph originalTree = new SemanticGraph(this.tree);
+    List<SemanticGraphEdge> extraEdges = Util.cleanTree(this.tree, originalTree);
     assert Util.isTree(this.tree);
     for (SemanticGraphEdge edge : extraEdges) {
       extraEdgesByGovernor.get(edge.getGovernor()).add(edge);
