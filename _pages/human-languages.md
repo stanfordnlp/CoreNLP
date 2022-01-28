@@ -14,12 +14,12 @@ Out-of-the-box, Stanford CoreNLP expects and processes English language text. Bu
 | Annotator | ar | zh | en | fr | de | hu | it | es |
 | --------------- |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | Tokenize / Segment | ✔ | ✔  | ✔ | ✔  |     | ✔ | ✔ | ✔ |
-| Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ | ✔ |  |
-| Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |  |  |
+| Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ |  | ✔ | ✔  |
+| Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ | ✔  | ✔ |
 | Lemma |   |   | ✔ |   |   |    |  |  |
-| Named Entities |   | ✔  | ✔ | ✔ | ✔ | ✔ |  |  |
-| Constituency Parsing | ✔ | ✔  | ✔ | ✔ | ✔ | ✔ |  |  |
-| Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     |  |  |
+| Named Entities |   | ✔  | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Constituency Parsing | ✔ | ✔  | ✔ | ✔ |  |  | ✔  |  |
+| Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     | ✔ | ✔  |
 | Sentiment Analysis |    |    | ✔ |  |  |     |  |  |
 | Mention Detection |    | ✔  | ✔ |  |  |     |  |  |
 | Coreference |    | ✔  | ✔ |  |  |     |  |  |
