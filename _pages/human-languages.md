@@ -11,19 +11,19 @@ parent: Usage
 
 Out-of-the-box, Stanford CoreNLP expects and processes English language text. But, Stanford CoreNLP was designed from the start to work with multiple human languages and it is careful about things like different character encodings. We have developed components for several major languages, and make language packs (jar files) available for some of them. The table below summarizes our current first party foreign language support. Other people have developed [models for other languages](#models-for-other-languages).
 
-| Annotator | ar | zh | en | fr | de | es |
-| --------------- |:---:|:---:|:---:|:---:|:---:|:---:|
-| Tokenize / Segment | ✔ | ✔  | ✔ | ✔  |     | ✔ |
-| Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |
-| Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |
-| Lemma |   |   | ✔ |   |   |    |
-| Named Entities |   | ✔  | ✔ | ✔ | ✔ | ✔ |
-| Constituency Parsing | ✔ | ✔  | ✔ | ✔ | ✔ | ✔ |
-| Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     |
-| Sentiment Analysis |    |    | ✔ |  |  |     |
-| Mention Detection |    | ✔  | ✔ |  |  |     |
-| Coreference |    | ✔  | ✔ |  |  |     |
-| Open IE |    |   | ✔ |  |  |     |
+| Annotator | ar | zh | en | fr | de | hu | es | it |
+| --------------- |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Tokenize / Segment | ✔ | ✔  | ✔ | ✔  |     | ✔ | ✔ | ✔ |
+| Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ | ✔ |  | ✔  |
+| Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |  |  |  |
+| Lemma |   |   | ✔ |   |   |    |  |  |  |
+| Named Entities |   | ✔  | ✔ | ✔ | ✔ | ✔ |  |  |  |
+| Constituency Parsing | ✔ | ✔  | ✔ | ✔ | ✔ | ✔ |  |  |  |
+| Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     |  |  |  |
+| Sentiment Analysis |    |    | ✔ |  |  |     |  |  |  |
+| Mention Detection |    | ✔  | ✔ |  |  |     |  |  |  |
+| Coreference |    | ✔  | ✔ |  |  |     |  |  |  |
+| Open IE |    |   | ✔ |  |  |     |  |  |  |
 
 #### Models
 
@@ -33,11 +33,13 @@ The jars for each language can be found here:
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-arabic.jar) | 4.2.2 |
-| Chinese | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-chinese.jar) | 4.2.2 |
-| French | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-french.jar) | 4.2.2 |
-| German | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-german.jar) | 4.2.2 |
-| Spanish | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.2.2-models-spanish.jar) | 4.2.2 |
+| Arabic  | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-arabic.jar) | 4.4.0 |
+| Chinese | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-chinese.jar) | 4.4.0 |
+| French | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-french.jar) | 4.4.0 |
+| German | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-german.jar) | 4.4.0 |
+| Hungarian | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-hungarian.jar) | 4.4.0 |
+| Italian | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-italian.jar) | 4.4.0 |
+| Spanish | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-spanish.jar) | 4.4.0 |
 
 #### Running pipelines
 
