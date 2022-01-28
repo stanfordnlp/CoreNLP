@@ -14,16 +14,16 @@ Out-of-the-box, Stanford CoreNLP expects and processes English language text. Bu
 | Annotator | ar | zh | en | fr | de | hu | es | it |
 | --------------- |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | Tokenize / Segment | ✔ | ✔  | ✔ | ✔  |     | ✔ | ✔ | ✔ |
-| Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ | ✔ |  | ✔  |
-| Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |  |  |  |
-| Lemma |   |   | ✔ |   |   |    |  |  |  |
-| Named Entities |   | ✔  | ✔ | ✔ | ✔ | ✔ |  |  |  |
-| Constituency Parsing | ✔ | ✔  | ✔ | ✔ | ✔ | ✔ |  |  |  |
-| Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     |  |  |  |
-| Sentiment Analysis |    |    | ✔ |  |  |     |  |  |  |
-| Mention Detection |    | ✔  | ✔ |  |  |     |  |  |  |
-| Coreference |    | ✔  | ✔ |  |  |     |  |  |  |
-| Open IE |    |   | ✔ |  |  |     |  |  |  |
+| Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ | ✔ |  |
+| Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |  |  |
+| Lemma |   |   | ✔ |   |   |    |  |  |
+| Named Entities |   | ✔  | ✔ | ✔ | ✔ | ✔ |  |  |
+| Constituency Parsing | ✔ | ✔  | ✔ | ✔ | ✔ | ✔ |  |  |
+| Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     |  |  |
+| Sentiment Analysis |    |    | ✔ |  |  |     |  |  |
+| Mention Detection |    | ✔  | ✔ |  |  |     |  |  |
+| Coreference |    | ✔  | ✔ |  |  |     |  |  |
+| Open IE |    |   | ✔ |  |  |     |  |  |
 
 #### Models
 
