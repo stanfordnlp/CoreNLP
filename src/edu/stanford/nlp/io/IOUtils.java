@@ -144,6 +144,27 @@ public class IOUtils  {
     }
   }
 
+  /**
+   * Duplicate an object using serialization
+   */
+  public static <T extends Serializable> T duplicateObject(T obj) {
+    try {
+      ByteArrayOutputStream bout = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(bout);
+      oos.writeObject(obj);
+      oos.flush();
+
+      byte[] bytes = bout.toByteArray();
+
+      ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
+      ObjectInputStream ois = new ObjectInputStream(bin);
+      T newObj = (T) ois.readObject();
+      return newObj;
+    } catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeIOException(e);
+    }
+  }
+
   private static OutputStream getBufferedOutputStream(String path) throws IOException {
     OutputStream os = new BufferedOutputStream(new FileOutputStream(path));
     if (path.endsWith(".gz")) {

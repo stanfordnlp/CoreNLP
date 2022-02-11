@@ -1,16 +1,18 @@
 package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
-
-import edu.stanford.nlp.trees.CompositeTreeTransformer;
-import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.trees.TreeTransformer;
-import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
+
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.trees.CompositeTreeTransformer;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.trees.TreeTransformer;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
+
 
 
 /**
@@ -35,6 +37,15 @@ public class Options implements Serializable  {
 
   public Options(TreebankLangParserParams tlpParams) {
     this.tlpParams = tlpParams;
+  }
+
+  /**
+   * not named clone since it doesn't follow the standard clone pattern
+   */
+  public Options duplicate() {
+    Options newOptions = IOUtils.duplicateObject(this);
+    newOptions.testOptions = IOUtils.duplicateObject(this.testOptions);
+    return newOptions;
   }
 
   /**
