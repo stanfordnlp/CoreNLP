@@ -83817,6 +83817,17 @@ public final class CoreNLPProtos {
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResultOrBuilder getTreebankOrBuilder(
         int index);
+
+    /**
+     * <code>optional int32 kBest = 2;</code>
+     * @return Whether the kBest field is set.
+     */
+    boolean hasKBest();
+    /**
+     * <code>optional int32 kBest = 2;</code>
+     * @return The kBest.
+     */
+    int getKBest();
   }
   /**
    * <pre>
@@ -83876,6 +83887,11 @@ public final class CoreNLPProtos {
               }
               treebank_.add(
                   input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.PARSER, extensionRegistry));
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000001;
+              kBest_ = input.readInt32();
               break;
             }
             default: {
@@ -85064,6 +85080,7 @@ public final class CoreNLPProtos {
 
     }
 
+    private int bitField0_;
     public static final int TREEBANK_FIELD_NUMBER = 1;
     private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult> treebank_;
     /**
@@ -85104,6 +85121,25 @@ public final class CoreNLPProtos {
       return treebank_.get(index);
     }
 
+    public static final int KBEST_FIELD_NUMBER = 2;
+    private int kBest_;
+    /**
+     * <code>optional int32 kBest = 2;</code>
+     * @return Whether the kBest field is set.
+     */
+    @java.lang.Override
+    public boolean hasKBest() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional int32 kBest = 2;</code>
+     * @return The kBest.
+     */
+    @java.lang.Override
+    public int getKBest() {
+      return kBest_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -85127,6 +85163,9 @@ public final class CoreNLPProtos {
       for (int i = 0; i < treebank_.size(); i++) {
         output.writeMessage(1, treebank_.get(i));
       }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeInt32(2, kBest_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -85139,6 +85178,10 @@ public final class CoreNLPProtos {
       for (int i = 0; i < treebank_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, treebank_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, kBest_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -85157,6 +85200,11 @@ public final class CoreNLPProtos {
 
       if (!getTreebankList()
           .equals(other.getTreebankList())) return false;
+      if (hasKBest() != other.hasKBest()) return false;
+      if (hasKBest()) {
+        if (getKBest()
+            != other.getKBest()) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -85171,6 +85219,10 @@ public final class CoreNLPProtos {
       if (getTreebankCount() > 0) {
         hash = (37 * hash) + TREEBANK_FIELD_NUMBER;
         hash = (53 * hash) + getTreebankList().hashCode();
+      }
+      if (hasKBest()) {
+        hash = (37 * hash) + KBEST_FIELD_NUMBER;
+        hash = (53 * hash) + getKBest();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -85316,6 +85368,8 @@ public final class CoreNLPProtos {
         } else {
           treebankBuilder_.clear();
         }
+        kBest_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -85343,6 +85397,7 @@ public final class CoreNLPProtos {
       public edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest buildPartial() {
         edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest result = new edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest(this);
         int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
         if (treebankBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             treebank_ = java.util.Collections.unmodifiableList(treebank_);
@@ -85352,6 +85407,11 @@ public final class CoreNLPProtos {
         } else {
           result.treebank_ = treebankBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.kBest_ = kBest_;
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -85425,6 +85485,9 @@ public final class CoreNLPProtos {
               treebankBuilder_.addAllMessages(other.treebank_);
             }
           }
+        }
+        if (other.hasKBest()) {
+          setKBest(other.getKBest());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -85699,6 +85762,45 @@ public final class CoreNLPProtos {
           treebank_ = null;
         }
         return treebankBuilder_;
+      }
+
+      private int kBest_ ;
+      /**
+       * <code>optional int32 kBest = 2;</code>
+       * @return Whether the kBest field is set.
+       */
+      @java.lang.Override
+      public boolean hasKBest() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional int32 kBest = 2;</code>
+       * @return The kBest.
+       */
+      @java.lang.Override
+      public int getKBest() {
+        return kBest_;
+      }
+      /**
+       * <code>optional int32 kBest = 2;</code>
+       * @param value The kBest to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKBest(int value) {
+        bitField0_ |= 0x00000002;
+        kBest_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 kBest = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKBest() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        kBest_ = 0;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -89732,33 +89834,33 @@ public final class CoreNLPProtos {
       "nlp.pipeline.FlattenedParseTree.Node\032[\n\004" +
       "Node\022\022\n\010openNode\030\001 \001(\010H\000\022\023\n\tcloseNode\030\002 " +
       "\001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B\n\n" +
-      "\010contents\"\366\001\n\025EvaluateParserRequest\022N\n\010t" +
+      "\010contents\"\205\002\n\025EvaluateParserRequest\022N\n\010t" +
       "reebank\030\001 \003(\0132<.edu.stanford.nlp.pipelin" +
-      "e.EvaluateParserRequest.ParseResult\032\214\001\n\013" +
-      "ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stanford" +
-      ".nlp.pipeline.FlattenedParseTree\022@\n\tpred" +
-      "icted\030\002 \003(\0132-.edu.stanford.nlp.pipeline." +
-      "FlattenedParseTree\"5\n\026EvaluateParserResp" +
-      "onse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001\n\017Ts" +
-      "urgeonRequest\022H\n\noperations\030\001 \003(\01324.edu." +
-      "stanford.nlp.pipeline.TsurgeonRequest.Op" +
-      "eration\022<\n\005trees\030\002 \003(\0132-.edu.stanford.nl" +
-      "p.pipeline.FlattenedParseTree\032-\n\tOperati" +
-      "on\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P\n\020" +
-      "TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.edu.st" +
-      "anford.nlp.pipeline.FlattenedParseTree*\243" +
-      "\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Ara" +
-      "bic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006Germa" +
-      "n\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010" +
-      "\022\024\n\020UniversalEnglish\020\t\022\024\n\020UniversalChine" +
-      "se\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021" +
-      "\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_P" +
-      "OSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Natur" +
-      "alLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORW" +
-      "ARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002" +
-      "\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER" +
-      "\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp" +
-      ".pipelineB\rCoreNLPProtos"
+      "e.EvaluateParserRequest.ParseResult\022\r\n\005k" +
+      "Best\030\002 \001(\005\032\214\001\n\013ParseResult\022;\n\004gold\030\001 \002(\013" +
+      "2-.edu.stanford.nlp.pipeline.FlattenedPa" +
+      "rseTree\022@\n\tpredicted\030\002 \003(\0132-.edu.stanfor" +
+      "d.nlp.pipeline.FlattenedParseTree\"5\n\026Eva" +
+      "luateParserResponse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbest" +
+      "F1\030\002 \001(\001\"\310\001\n\017TsurgeonRequest\022H\n\noperatio" +
+      "ns\030\001 \003(\01324.edu.stanford.nlp.pipeline.Tsu" +
+      "rgeonRequest.Operation\022<\n\005trees\030\002 \003(\0132-." +
+      "edu.stanford.nlp.pipeline.FlattenedParse" +
+      "Tree\032-\n\tOperation\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsu" +
+      "rgeon\030\002 \003(\t\"P\n\020TsurgeonResponse\022<\n\005trees" +
+      "\030\001 \003(\0132-.edu.stanford.nlp.pipeline.Flatt" +
+      "enedParseTree*\243\001\n\010Language\022\013\n\007Unknown\020\000\022" +
+      "\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007Eng" +
+      "lish\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew" +
+      "\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n" +
+      "\020UniversalChinese\020\n*h\n\tSentiment\022\023\n\017STRO" +
+      "NG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUT" +
+      "RAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_POSIT" +
+      "IVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013EQUIVA" +
+      "LENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REVER" +
+      "SE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNA" +
+      "TION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031e" +
+      "du.stanford.nlp.pipelineB\rCoreNLPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -90021,7 +90123,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor,
-        new java.lang.String[] { "Treebank", });
+        new java.lang.String[] { "Treebank", "KBest", });
     internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_descriptor =
       internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor.getNestedTypes().get(0);
     internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_fieldAccessorTable = new

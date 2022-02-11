@@ -725,6 +725,7 @@ message EvaluateParserRequest {
   }
 
   repeated ParseResult         treebank       = 1;
+  optional int32               kBest          = 2;
 }
 
 message EvaluateParserResponse {
