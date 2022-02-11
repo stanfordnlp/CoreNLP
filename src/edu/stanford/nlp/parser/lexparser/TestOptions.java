@@ -285,6 +285,15 @@ public class TestOptions implements Serializable  {
   public boolean quietEvaluation = false;
 
   /**
+   * Add additional evals without changing any of the other evals
+   */
+  public void addEvals(String... evals) {
+    for (String eval : evals) {
+      this.evals.setProperty(eval, "true");
+    }
+  }
+
+  /**
    * Determines method for print trees on output.
    *
    * @param tlpParams The treebank parser params

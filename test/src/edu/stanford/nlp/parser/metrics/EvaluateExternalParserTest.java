@@ -46,6 +46,15 @@ public class EvaluateExternalParserTest {
     return request.build();
   }  
 
+  public static CoreNLPProtos.EvaluateParserRequest buildFakeRequest(int kBest, CoreNLPProtos.EvaluateParserRequest.ParseResult ... results) {
+    CoreNLPProtos.EvaluateParserRequest.Builder request = CoreNLPProtos.EvaluateParserRequest.newBuilder();
+    for (CoreNLPProtos.EvaluateParserRequest.ParseResult parse : results) {
+      request.addTreebank(parse);
+    }
+    request.setKBest(kBest);
+    return request.build();
+  }
+
   public byte[] requestBytes(CoreNLPProtos.EvaluateParserRequest ... requests) throws IOException {
     return requestBytes(Arrays.asList(requests));
   }
@@ -181,6 +190,9 @@ public class EvaluateExternalParserTest {
     String t1 = "((VP (VB Unban) (NP (NNP Mox) (NNP Opal))))";
     String t2 = "(ROOT (S (NP (PRP$ My) (NN dog)) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))";
     String t2b = "(ROOT (S (NP (PRP$ My) (NN dog)) (VP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))";
+
+    // First, build an evaluator which expects up to 10 parses of a treebank
+    // If the right parse is 2nd, the kBest score should be 1.0
     CoreNLPProtos.EvaluateParserRequest request = buildFakeRequest(buildFakeParseResult(t1),
                                                                    buildFakeParseResult(t2, t2b, t2));
     EvaluateExternalParser evaluator = new EvaluateExternalParser("-evalPCFGkBest", "10", "-evals", "pcfgTopK");
@@ -189,8 +201,29 @@ public class EvaluateExternalParserTest {
     CoreNLPProtos.EvaluateParserResponse response = evaluator.scoreDataset(gold, predicted);
     Assert.assertEquals("Expected the k=2 kbest f1 to be 1.0", 1.0, response.getKbestF1(), 0.00001);
 
+    // Send a separate request to the same evaluator, looking for just 1 best
+    // Now the score should be the score of just the first tree
+    request = buildFakeRequest(1, buildFakeParseResult(t1), buildFakeParseResult(t2, t2b, t2));
+    response = evaluator.processRequest(request);
+    Assert.assertEquals("Expected the f1 to be roughly 88.888", 0.88888888, response.getF1(), 0.00001);
+    Assert.assertEquals("Expected the k=1 kbest f1 to be roughly 88.888", 0.88888888, response.getKbestF1(), 0.00001);
+
+    // Now try an evaluator which only expects 1 kbest
+    request = buildFakeRequest(buildFakeParseResult(t1), buildFakeParseResult(t2, t2b, t2));
     evaluator = new EvaluateExternalParser("-evalPCFGkBest", "1", "-evals", "pcfgTopK");
     response = evaluator.scoreDataset(gold, predicted);
+    Assert.assertEquals("Expected the f1 to be roughly 88.888", 0.88888888, response.getF1(), 0.00001);
+    Assert.assertEquals("Expected the k=1 kbest f1 to be roughly 88.888", 0.88888888, response.getKbestF1(), 0.00001);
+
+    // and send it a query for 2 treebanks
+    // again, score should be 1.0
+    request = buildFakeRequest(2, buildFakeParseResult(t1), buildFakeParseResult(t2, t2b, t2));
+    response = evaluator.processRequest(request);
+    Assert.assertEquals("Expected the k=2 kbest f1 to be 1.0", 1.0, response.getKbestF1(), 0.00001);
+
+    // not sending a kbest in the request should revert to the evaluator's default behavior
+    request = buildFakeRequest(buildFakeParseResult(t1), buildFakeParseResult(t2, t2b, t2));
+    response = evaluator.processRequest(request);
     Assert.assertEquals("Expected the f1 to be roughly 88.888", 0.88888888, response.getF1(), 0.00001);
     Assert.assertEquals("Expected the k=1 kbest f1 to be roughly 88.888", 0.88888888, response.getKbestF1(), 0.00001);
   }

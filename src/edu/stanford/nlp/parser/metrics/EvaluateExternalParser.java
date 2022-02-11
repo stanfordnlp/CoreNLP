@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -107,10 +108,10 @@ public class EvaluateExternalParser extends ProcessProtobufRequest {
   /**
    * Puts the list of gold trees and a list of list of results into EvaluateTreebank
    */
-  public CoreNLPProtos.EvaluateParserResponse scoreDataset(List<Tree> goldTrees, List<List<Tree>> results) {
+  public CoreNLPProtos.EvaluateParserResponse scoreDataset(List<Tree> goldTrees, List<List<Tree>> results, Options options) {
     List<Pair<ParserQuery, Tree>> treebank = convertDataset(goldTrees, results);
 
-    EvaluateTreebank evaluator = new EvaluateTreebank(op, null, null, null, null, null);
+    EvaluateTreebank evaluator = new EvaluateTreebank(options, null, null, null, null, null);
     double f1 = evaluator.testOnTreebank(treebank);
     Double kbestF1 = null;
     if (evaluator.hasPCFGTopKF1()) {
@@ -119,20 +120,38 @@ public class EvaluateExternalParser extends ProcessProtobufRequest {
     return buildResponse(f1, kbestF1);
   }
 
-  public CoreNLPProtos.EvaluateParserResponse processRequest(CoreNLPProtos.EvaluateParserRequest parses) throws IOException {
+  public CoreNLPProtos.EvaluateParserResponse scoreDataset(List<Tree> goldTrees, List<List<Tree>> results) {
+    return scoreDataset(goldTrees, results, op);
+  }
+
+  private Options updateOptions(CoreNLPProtos.EvaluateParserRequest parses) {
+    Options options = op.duplicate();
+    if (parses.hasKBest()) {
+      options.testOptions.addEvals("pcfgTopK");
+      options.setOptions("-evalPCFGkBest", Integer.toString(parses.getKBest()));
+    }
+    return options;
+  }
+
+  public CoreNLPProtos.EvaluateParserResponse processRequest(CoreNLPProtos.EvaluateParserRequest parses) {
     List<Tree> goldTrees = getGoldTrees(parses);
     List<List<Tree>> results = getResults(parses);
-    return scoreDataset(goldTrees, results);
+    Options options = updateOptions(parses);
+    return scoreDataset(goldTrees, results, options);
   }
 
   /**
    * Reads a single request from the InputStream, then writes back a single response.
    */
   @Override
-  public void processInputStream(InputStream in, OutputStream out) throws IOException {
-    CoreNLPProtos.EvaluateParserRequest request = CoreNLPProtos.EvaluateParserRequest.parseFrom(in);
-    CoreNLPProtos.EvaluateParserResponse response = processRequest(request);
-    response.writeTo(out);
+  public void processInputStream(InputStream in, OutputStream out) {
+    try {
+      CoreNLPProtos.EvaluateParserRequest request = CoreNLPProtos.EvaluateParserRequest.parseFrom(in);
+      CoreNLPProtos.EvaluateParserResponse response = processRequest(request);
+      response.writeTo(out);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
   }
 
   /**
