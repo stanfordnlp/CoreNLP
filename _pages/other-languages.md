@@ -50,7 +50,7 @@ And there are many others – it’s not so hard to build a dockerfile. Here are
 
 * [go-corenlp](https://github.com/hironobu-s/go-corenlp) is a Golang wrapper for CoreNLP by Hironobu Saito.
 
-* [coreNLP](https://github.com/genelet/coreNLP/) is another wrapper by Peter Bi written in 2022
+* [corenlp-golang](https://github.com/genelet/coreNLP/) is another wrapper by Peter Bi written in 2022
 
 ### Java
 
