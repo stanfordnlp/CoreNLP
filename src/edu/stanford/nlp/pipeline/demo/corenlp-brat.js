@@ -1220,10 +1220,12 @@ $(document).ready(function() {
     // Remove existing annotation
     $('#tokensregex').remove();
     // Make ajax call
+    // Previously this would escape the + and & in pattern before the
+    // call to encodeURIComponent, but the server doesn't double
+    // unescape the incoming patterns, so that was not working
     $.ajax({
       type: 'POST',
-      url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(
-        pattern.replace("&", "\\&").replace('+', '\\+')) +
+      url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(pattern) +
         '&properties=' + encodeURIComponent(
         '{"annotators": "' + annotators() + '", "date": "' + date() + '"}') +
         '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
@@ -1263,8 +1265,7 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(
-        pattern.replace("&", "\\&").replace('+', '\\+')) +
+      url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(pattern) +
         '&properties=' + encodeURIComponent(
         '{"annotators": "' + requiredAnnotators.join(',') + '", "date": "' + date() + '"}') +
         '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
@@ -1303,8 +1304,7 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + '/tregex?pattern=' + encodeURIComponent(
-        pattern.replace("&", "\\&").replace('+', '\\+')) +
+      url: serverAddress + '/tregex?pattern=' + encodeURIComponent(pattern) +
         '&properties=' + encodeURIComponent(
         '{"annotators": "' + requiredAnnotators.join(',') + '", "date": "' + date() + '"}') +
         '&pipelineLanguage=' + encodeURIComponent($('#language').val()),
