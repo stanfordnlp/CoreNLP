@@ -158,7 +158,6 @@ public class StatTokSentAnnotator implements Annotator{
                                        CoreAnnotations.ValueAnnotation.class,
                                        CoreAnnotations.SentenceIndexAnnotation.class,
                                        CoreAnnotations.SentencesAnnotation.class,
-                                       CoreAnnotations.DocIDAnnotation.class,
                                        CoreAnnotations.IsNewlineAnnotation.class
                                        ));
   }
