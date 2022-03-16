@@ -255,6 +255,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       this.properties.setProperty("annotators", newAnnotators);
     }
 
+    // if cleanxml is requested and tokenize is here,
+    // make it part of tokenize rather than its own annotator
+    unifyCleanXML(this.properties);
+
     // cdm [2017]: constructAnnotatorPool (PropertiesUtils.getSignature) requires non-null Properties, so after properties setup
     this.pool = annotatorPool != null ? annotatorPool : constructAnnotatorPool(props, getAnnotatorImplementations());
 
@@ -301,6 +305,36 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       System.setProperty(NEWLINE_SPLITTER_PROPERTY, "false");
     }
     this.pipelineSetupTime = tim.report();
+  }
+
+  /**
+   * The cleanxml annotator can now be invoked as part of the tokenize annotator.
+   *<br>
+   * To ensure backwards compatibility with previous usage of the pipeline,
+   * we allow annotators to be specified tokenize,cleanxml.
+   * In such a case, we remove the cleanxml from the annotators and set
+   * the tokenize.cleanxml option instead
+   */
+  static void unifyCleanXML(Properties properties) {
+    String annotators = properties.getProperty("annotators", "");
+    int tokenize = annotators.indexOf(STANFORD_TOKENIZE);
+    int clean = annotators.indexOf(STANFORD_CLEAN_XML);
+
+    if (clean >= 0 && tokenize >= 0) {
+      properties.setProperty(STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML, "true");
+      int comma = annotators.indexOf(",", clean);
+      if (comma >= 0) {
+        annotators = annotators.substring(0, clean) + annotators.substring(comma+1);
+      } else {
+        comma = annotators.lastIndexOf(",");
+        if (comma < 0) {
+          throw new IllegalArgumentException("Unable to process annotators " + annotators);
+        }
+        annotators = annotators.substring(0, comma);
+      }
+      logger.debug("cleanxml can now be triggered as an option to tokenize rather than a separate annotator via tokenize.cleanxml=true  Updating annotators from " + properties.getProperty("annotators") + " to " + annotators);
+      properties.setProperty("annotators", annotators);
+    }
   }
 
   //
