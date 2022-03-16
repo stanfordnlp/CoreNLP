@@ -205,19 +205,17 @@ public class TokenizerAnnotator implements Annotator  {
     // check if segmenting must be done (Chinese or Arabic and not tokenizing on whitespace)
     boolean whitespace = Boolean.parseBoolean(props.getProperty("tokenize.whitespace", "false"));
     if (props.getProperty("tokenize.language") != null &&
-            LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language"))
-        && !whitespace) {
+        LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language")) &&
+        !whitespace) {
       useSegmenter = true;
-      if (LanguageInfo.getLanguageFromString(
-              props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC)
+      if (LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC) {
         segmenterAnnotator = new ArabicSegmenterAnnotator("segment", props);
-      else if (LanguageInfo.getLanguageFromString(
-              props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.CHINESE)
+      } else if (LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.CHINESE) {
         segmenterAnnotator = new ChineseSegmenterAnnotator("segment", props);
-      else {
+      } else {
         segmenterAnnotator = null;
         throw new RuntimeException("No segmenter implemented for: "+
-                LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")));
+                                   LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")));
       }
     } else {
       useSegmenter = false;
