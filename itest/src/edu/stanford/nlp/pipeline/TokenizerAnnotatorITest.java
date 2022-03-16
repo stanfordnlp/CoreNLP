@@ -29,28 +29,38 @@ public class TokenizerAnnotatorITest extends TestCase {
     assertEquals("Damelo", ann.get(CoreAnnotations.TokensAnnotation.class).get(0).word());
   }
 
-  private static final String spanishText = "Me voy a Madrid (ES).\n\"Me gusta\", lo dice.";
-  private static List<String> spanishTokens = Arrays.asList(new String[] { "Me", "voy", "a", "Madrid", "(", "ES", ")", ".", "\"", "Me", "gusta", "\"", ",", "lo", "dice", "." });
-  private static List<String> spanishTokens2 = Arrays.asList(new String[] { "Me", "voy", "a", "Madrid", "(", "ES", ")", ".", AbstractTokenizer.NEWLINE_TOKEN, "\"", "Me", "gusta", "\"", ",", "lo", "dice", "." });
+  private static final String spanishText = "Me voy a Madrid (ES)\n\n\"Me gusta\", lo dice.";
+  private static final String[] spanishTokens = { "Me", "voy", "a", "Madrid", "(", "ES", ")", "\"", "Me", "gusta", "\"", ",", "lo", "dice", "." };
 
   public void testSpanishTokenizer() {
-    TokenizerAnnotator annotator = new TokenizerAnnotator(false, "es", null);
+    Properties props = new Properties();
+    props.setProperty("tokenize.language", "es");
+
+    TokenizerAnnotator annotator = new TokenizerAnnotator(false, props);
     Annotation annotation = new Annotation(spanishText);
     annotator.annotate(annotation);
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals(spanishTokens.size(), tokens.size());
+    assertEquals(spanishTokens.length, tokens.size());
     for (int i = 0; i < tokens.size(); ++i) {
-      assertEquals(spanishTokens.get(i), tokens.get(i).value());
+      assertEquals(spanishTokens[i], tokens.get(i).value());
     }
+    assertEquals(1, annotation.get(CoreAnnotations.SentencesAnnotation.class).size());
 
-    annotator = new TokenizerAnnotator(false, "es", "tokenizeNLs,");
+    // the difference here with NEWLINE_... = two, tokenizeNLs is on
+    // and there will be two sentences
+    // the sentence splitter inside the TokenizerAnnotator will see
+    // the *NL* and split a second sentence there
+    props.setProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, "two");
+
+    annotator = new TokenizerAnnotator(false, props);
     annotation = new Annotation(spanishText);
     annotator.annotate(annotation);
     tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals(spanishTokens2.size(), tokens.size());
+    assertEquals(spanishTokens.length, tokens.size());
     for (int i = 0; i < tokens.size(); ++i) {
-      assertEquals(spanishTokens2.get(i), tokens.get(i).value());
+      assertEquals(spanishTokens[i], tokens.get(i).value());
     }
+    assertEquals(2, annotation.get(CoreAnnotations.SentencesAnnotation.class).size());
   }
 
 }
