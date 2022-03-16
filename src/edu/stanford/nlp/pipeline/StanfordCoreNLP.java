@@ -257,7 +257,9 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
     // if cleanxml is requested and tokenize is here,
     // make it part of tokenize rather than its own annotator
-    unifyCleanXML(this.properties);
+    unifyTokenizeProperty(this.properties, STANFORD_CLEAN_XML, STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML);
+    // ssplit is always part of tokenize now
+    unifyTokenizeProperty(this.properties, STANFORD_SSPLIT, null);
 
     // cdm [2017]: constructAnnotatorPool (PropertiesUtils.getSignature) requires non-null Properties, so after properties setup
     this.pool = annotatorPool != null ? annotatorPool : constructAnnotatorPool(props, getAnnotatorImplementations());
@@ -315,16 +317,18 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * In such a case, we remove the cleanxml from the annotators and set
    * the tokenize.cleanxml option instead
    */
-  static void unifyCleanXML(Properties properties) {
+  static void unifyTokenizeProperty(Properties properties, String property, String option) {
     String annotators = properties.getProperty("annotators", "");
     int tokenize = annotators.indexOf(STANFORD_TOKENIZE);
-    int clean = annotators.indexOf(STANFORD_CLEAN_XML);
+    int unwanted = annotators.indexOf(property);
 
-    if (clean >= 0 && tokenize >= 0) {
-      properties.setProperty(STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML, "true");
-      int comma = annotators.indexOf(",", clean);
+    if (unwanted >= 0 && tokenize >= 0) {
+      if (option != null) {
+        properties.setProperty(option, "true");
+      }
+      int comma = annotators.indexOf(",", unwanted);
       if (comma >= 0) {
-        annotators = annotators.substring(0, clean) + annotators.substring(comma+1);
+        annotators = annotators.substring(0, unwanted) + annotators.substring(comma+1);
       } else {
         comma = annotators.lastIndexOf(",");
         if (comma < 0) {
@@ -332,7 +336,12 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         }
         annotators = annotators.substring(0, comma);
       }
-      logger.debug("cleanxml can now be triggered as an option to tokenize rather than a separate annotator via tokenize.cleanxml=true  Updating annotators from " + properties.getProperty("annotators") + " to " + annotators);
+      if (option != null) {
+        logger.debug(property + " can now be triggered as an option to tokenize rather than a separate annotator via " + option + "=true");
+      } else {
+        logger.debug(property + " is now included as part of the tokenize annotator by default");
+      }
+      logger.debug("Updating annotators from " + properties.getProperty("annotators") + " to " + annotators);
       properties.setProperty("annotators", annotators);
     }
   }

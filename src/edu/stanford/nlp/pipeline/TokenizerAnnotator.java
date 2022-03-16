@@ -134,6 +134,7 @@ public class TokenizerAnnotator implements Annotator  {
   private final boolean useSegmenter;
   private final Annotator segmenterAnnotator;
   private final CleanXmlAnnotator cleanxmlAnnotator;
+  private final WordsToSentencesAnnotator ssplitAnnotator;
 
   /** run a custom post processor after the lexer **/
   private final List<CoreLabelProcessor> postProcessors;
@@ -196,7 +197,7 @@ public class TokenizerAnnotator implements Annotator  {
   }
 
   public TokenizerAnnotator(boolean verbose, Properties props) {
-    this(verbose, props, null);
+    this(verbose, props, computeExtraOptions(props));
   }
 
   public TokenizerAnnotator(boolean verbose, Properties props, String options) {
@@ -250,6 +251,8 @@ public class TokenizerAnnotator implements Annotator  {
     } else {
       this.cleanxmlAnnotator = null;
     }
+
+    this.ssplitAnnotator = new WordsToSentencesAnnotator(props);
   }
 
   /**
@@ -429,6 +432,7 @@ public class TokenizerAnnotator implements Annotator  {
     if (this.cleanxmlAnnotator != null) {
       this.cleanxmlAnnotator.annotate(annotation);
     }
+    this.ssplitAnnotator.annotate(annotation);
   }
 
   @Override
@@ -451,7 +455,9 @@ public class TokenizerAnnotator implements Annotator  {
         CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.OriginalTextAnnotation.class,
         CoreAnnotations.ValueAnnotation.class,
-        CoreAnnotations.IsNewlineAnnotation.class
+        CoreAnnotations.IsNewlineAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.SentenceIndexAnnotation.class
     ));
   }
 

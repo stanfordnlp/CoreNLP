@@ -105,7 +105,7 @@ public class StanfordCoreNLPTest {
     for (int i = 0; i < inputs.length; ++i) {
       Properties props = new Properties();
       props.setProperty("annotators", inputs[i]);
-      StanfordCoreNLP.unifyCleanXML(props);
+      StanfordCoreNLP.unifyTokenizeProperty(props, "cleanxml", "tokenize.cleanxml");
       assertEquals(expected[i], props.getProperty("annotators"));
       assertEquals(option[i], PropertiesUtils.getBool(props, "tokenize.cleanxml", false));
     }
