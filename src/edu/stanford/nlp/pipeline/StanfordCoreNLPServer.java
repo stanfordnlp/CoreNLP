@@ -1348,6 +1348,9 @@ public class StanfordCoreNLPServer implements Runnable {
             docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
                 int sentIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
                 Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+                if (tree == null) {
+                  throw new IllegalStateException("Error: cannot process tregex operations with no constituency tree annotations.  Perhaps need to reinitialize the server with the parse annotator");
+                }
                 //sentWriter.set("tree", tree.pennString());
                 TregexMatcher matcher = p.matcher(tree);
 
