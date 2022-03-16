@@ -6,6 +6,8 @@ import java.util.Properties;
 
 import static org.junit.Assert.*;
 
+import edu.stanford.nlp.util.PropertiesUtils;
+
 /**
  * Test some of the utility functions in {@link StanfordCoreNLP}.
  *
@@ -73,4 +75,39 @@ public class StanfordCoreNLPTest {
     assertEquals("__empty__", props.getProperty("coref.md.type", "__empty__"));
   }
 
+  // Test a couple use cases of removing the cleanxml annotator from
+  // requested annotator lists
+  @Test
+  public void testUnifyTokenizer() {
+    String[] inputs =   {"tokenize,cleanxml",
+                         "tokenize",
+                         "tokenize,cleanxml,",
+                         "tokenize,cleanxml,pos",
+                         "tokenize,cleanxml  ,pos",
+                         "tokenize,   cleanxml  ,pos",
+                         "cleanxml,pos"};
+    String[] expected = {"tokenize",
+                         "tokenize",
+                         "tokenize,",
+                         "tokenize,pos",
+                         "tokenize,pos",
+                         "tokenize,   pos",
+                         "cleanxml,pos"};
+    boolean[] option =  {true,
+                         false,
+                         true,
+                         true,
+                         true,
+                         true,
+                         false};
+    assertEquals(inputs.length, expected.length);
+    assertEquals(inputs.length, option.length);
+    for (int i = 0; i < inputs.length; ++i) {
+      Properties props = new Properties();
+      props.setProperty("annotators", inputs[i]);
+      StanfordCoreNLP.unifyCleanXML(props);
+      assertEquals(expected[i], props.getProperty("annotators"));
+      assertEquals(option[i], PropertiesUtils.getBool(props, "tokenize.cleanxml", false));
+    }
+  }
 }

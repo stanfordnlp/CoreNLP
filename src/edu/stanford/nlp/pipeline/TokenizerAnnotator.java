@@ -133,6 +133,7 @@ public class TokenizerAnnotator implements Annotator  {
   /** new segmenter properties **/
   private final boolean useSegmenter;
   private final Annotator segmenterAnnotator;
+  private final CleanXmlAnnotator cleanxmlAnnotator;
 
   /** run a custom post processor after the lexer **/
   private final List<CoreLabelProcessor> postProcessors;
@@ -242,6 +243,12 @@ public class TokenizerAnnotator implements Annotator  {
     factory = initFactory(type, props, options);
     if (VERBOSE) {
       log.info("Initialized tokenizer factory: " + factory);
+    }
+
+    if (PropertiesUtils.getBool(props, STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML)) {
+      this.cleanxmlAnnotator = new CleanXmlAnnotator(props);
+    } else {
+      this.cleanxmlAnnotator = null;
     }
   }
 
@@ -378,10 +385,7 @@ public class TokenizerAnnotator implements Annotator  {
       // set indexes into document wide tokens list
       setTokenBeginTokenEnd(annotation.get(CoreAnnotations.TokensAnnotation.class));
       setNewlineStatus(annotation.get(CoreAnnotations.TokensAnnotation.class));
-      return;
-    }
-
-    if (annotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
+    } else if (annotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
       // TODO: This is a huge hack.  jflex does not have a lookahead operation which can match EOF
       // Because of this, the PTBTokenizer has a few productions which can't operate at EOF.
       // For example,
@@ -422,6 +426,9 @@ public class TokenizerAnnotator implements Annotator  {
       throw new RuntimeException("Tokenizer unable to find text in annotation: " + annotation);
     }
 
+    if (this.cleanxmlAnnotator != null) {
+      this.cleanxmlAnnotator.annotate(annotation);
+    }
   }
 
   @Override
