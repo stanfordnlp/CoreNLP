@@ -131,12 +131,13 @@ public class TokenizerAnnotator implements Annotator  {
   private final TokenizerFactory<CoreLabel> factory;
 
   /** new segmenter properties **/
-  private final boolean useSegmenter;
   private final Annotator segmenterAnnotator;
+  /** If not null, will use this instead of a lexer or segmenter */
+  private final StatTokSentAnnotator cdcAnnotator;
   private final CleanXmlAnnotator cleanxmlAnnotator;
   private final WordsToSentencesAnnotator ssplitAnnotator;
 
-  /** run a custom post processor after the lexer **/
+  /** run a custom post processor after the lexer.  DOES NOT apply to segmenters **/
   private final List<CoreLabelProcessor> postProcessors;
 
   // CONSTRUCTORS
@@ -209,7 +210,7 @@ public class TokenizerAnnotator implements Annotator  {
     if (props.getProperty("tokenize.language") != null &&
         LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language")) &&
         !whitespace) {
-      useSegmenter = true;
+      cdcAnnotator = null;
       if (LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC) {
         segmenterAnnotator = new ArabicSegmenterAnnotator("segment", props);
       } else if (LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.CHINESE) {
@@ -219,9 +220,12 @@ public class TokenizerAnnotator implements Annotator  {
         throw new RuntimeException("No segmenter implemented for: "+
                                    LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")));
       }
-    } else {
-      useSegmenter = false;
+    } else if (props.getProperty(STANFORD_CDC_TOKENIZE + ".model", null) != null) {
+      cdcAnnotator = new StatTokSentAnnotator(props);
       segmenterAnnotator = null;
+    } else {
+      segmenterAnnotator = null;
+      cdcAnnotator = null;
     }
 
     // load any custom token post processing
@@ -382,8 +386,17 @@ public class TokenizerAnnotator implements Annotator  {
       log.info("Beginning tokenization");
     }
 
+    if (cdcAnnotator != null) {
+      cdcAnnotator.annotate(annotation);
+      // the CDC annotator does tokenize, ssplit, and mwt (if we even
+      // integrate that into tokenize), so we just leave once it's
+      // done.  the unique internal workings of that tokenizer prevent
+      // cleanxml from working, at least for now
+      return;
+    }
+
     // for Arabic and Chinese use a segmenter instead
-    if (useSegmenter) {
+    if (segmenterAnnotator != null) {
       segmenterAnnotator.annotate(annotation);
       // set indexes into document wide tokens list
       setTokenBeginTokenEnd(annotation.get(CoreAnnotations.TokensAnnotation.class));
