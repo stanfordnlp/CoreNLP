@@ -260,6 +260,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     unifyTokenizeProperty(this.properties, STANFORD_CLEAN_XML, STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML);
     // ssplit is always part of tokenize now
     unifyTokenizeProperty(this.properties, STANFORD_SSPLIT, null);
+    // cdc_tokenize is also absorbed into tokenize
+    replaceAnnotator(this.properties, STANFORD_CDC_TOKENIZE, STANFORD_TOKENIZE);
 
     // cdm [2017]: constructAnnotatorPool (PropertiesUtils.getSignature) requires non-null Properties, so after properties setup
     this.pool = annotatorPool != null ? annotatorPool : constructAnnotatorPool(props, getAnnotatorImplementations());
@@ -307,6 +309,18 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       System.setProperty(NEWLINE_SPLITTER_PROPERTY, "false");
     }
     this.pipelineSetupTime = tim.report();
+  }
+
+  /**
+   * The cdc_tokenize annotator is now part of tokenize
+   */
+  static void replaceAnnotator(Properties properties, String oldAnnotator, String newAnnotator) {
+    String annotators = properties.getProperty("annotators", "");
+    String replaced = annotators.replace(oldAnnotator, newAnnotator);
+    if (!replaced.equals(annotators)) {
+      logger.debug("|" + oldAnnotator + "| is now part of |" + newAnnotator + "|.  Annotators updated to |" + replaced + "|");
+      properties.setProperty("annotators", replaced);
+    }
   }
 
   /**
