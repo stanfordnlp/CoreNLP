@@ -255,13 +255,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       this.properties.setProperty("annotators", newAnnotators);
     }
 
-    // if cleanxml is requested and tokenize is here,
-    // make it part of tokenize rather than its own annotator
-    unifyTokenizeProperty(this.properties, STANFORD_CLEAN_XML, STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML);
-    // ssplit is always part of tokenize now
-    unifyTokenizeProperty(this.properties, STANFORD_SSPLIT, null);
-    // cdc_tokenize is also absorbed into tokenize
-    replaceAnnotator(this.properties, STANFORD_CDC_TOKENIZE, STANFORD_TOKENIZE);
+    normalizeAnnotators(this.properties);
 
     // cdm [2017]: constructAnnotatorPool (PropertiesUtils.getSignature) requires non-null Properties, so after properties setup
     this.pool = annotatorPool != null ? annotatorPool : constructAnnotatorPool(props, getAnnotatorImplementations());
@@ -309,6 +303,19 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       System.setProperty(NEWLINE_SPLITTER_PROPERTY, "false");
     }
     this.pipelineSetupTime = tim.report();
+  }
+
+  /**
+   * update the annotators, hopefully in a backwards compatible manner
+   */
+  static void normalizeAnnotators(Properties properties) {
+    // if cleanxml is requested and tokenize is here,
+    // make it part of tokenize rather than its own annotator
+    unifyTokenizeProperty(properties, STANFORD_CLEAN_XML, STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML);
+    // ssplit is always part of tokenize now
+    unifyTokenizeProperty(properties, STANFORD_SSPLIT, null);
+    // cdc_tokenize is also absorbed into tokenize
+    replaceAnnotator(properties, STANFORD_CDC_TOKENIZE, STANFORD_TOKENIZE);
   }
 
   /**
