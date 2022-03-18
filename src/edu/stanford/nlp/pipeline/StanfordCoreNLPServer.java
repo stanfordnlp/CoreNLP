@@ -472,6 +472,7 @@ public class StanfordCoreNLPServer implements Runnable {
     urlProperties.forEach(props::setProperty);
 
     // Get the annotators
+    StanfordCoreNLP.normalizeAnnotators(props);
     String annotators = props.getProperty("annotators");
     // If the properties contains a custom annotator, then do not enforceRequirements.
     if (annotators != null && !PropertiesUtils.hasPropertyPrefix(props, CUSTOM_ANNOTATOR_PREFIX) && PropertiesUtils.getBool(props, "enforceRequirements", true)) {
