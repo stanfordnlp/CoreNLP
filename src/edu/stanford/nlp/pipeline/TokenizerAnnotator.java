@@ -131,10 +131,13 @@ public class TokenizerAnnotator implements Annotator  {
   private final TokenizerFactory<CoreLabel> factory;
 
   /** new segmenter properties **/
-  private final boolean useSegmenter;
   private final Annotator segmenterAnnotator;
+  /** If not null, will use this instead of a lexer or segmenter */
+  private final StatTokSentAnnotator cdcAnnotator;
+  private final CleanXmlAnnotator cleanxmlAnnotator;
+  private final WordsToSentencesAnnotator ssplitAnnotator;
 
-  /** run a custom post processor after the lexer **/
+  /** run a custom post processor after the lexer.  DOES NOT apply to segmenters **/
   private final List<CoreLabelProcessor> postProcessors;
 
   // CONSTRUCTORS
@@ -195,7 +198,7 @@ public class TokenizerAnnotator implements Annotator  {
   }
 
   public TokenizerAnnotator(boolean verbose, Properties props) {
-    this(verbose, props, null);
+    this(verbose, props, computeExtraOptions(props));
   }
 
   public TokenizerAnnotator(boolean verbose, Properties props, String options) {
@@ -205,23 +208,24 @@ public class TokenizerAnnotator implements Annotator  {
     // check if segmenting must be done (Chinese or Arabic and not tokenizing on whitespace)
     boolean whitespace = Boolean.parseBoolean(props.getProperty("tokenize.whitespace", "false"));
     if (props.getProperty("tokenize.language") != null &&
-            LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language"))
-        && !whitespace) {
-      useSegmenter = true;
-      if (LanguageInfo.getLanguageFromString(
-              props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC)
+        LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language")) &&
+        !whitespace) {
+      cdcAnnotator = null;
+      if (LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC) {
         segmenterAnnotator = new ArabicSegmenterAnnotator("segment", props);
-      else if (LanguageInfo.getLanguageFromString(
-              props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.CHINESE)
+      } else if (LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.CHINESE) {
         segmenterAnnotator = new ChineseSegmenterAnnotator("segment", props);
-      else {
+      } else {
         segmenterAnnotator = null;
         throw new RuntimeException("No segmenter implemented for: "+
-                LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")));
+                                   LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")));
       }
-    } else {
-      useSegmenter = false;
+    } else if (props.getProperty(STANFORD_CDC_TOKENIZE + ".model", null) != null) {
+      cdcAnnotator = new StatTokSentAnnotator(props);
       segmenterAnnotator = null;
+    } else {
+      segmenterAnnotator = null;
+      cdcAnnotator = null;
     }
 
     // load any custom token post processing
@@ -245,6 +249,14 @@ public class TokenizerAnnotator implements Annotator  {
     if (VERBOSE) {
       log.info("Initialized tokenizer factory: " + factory);
     }
+
+    if (PropertiesUtils.getBool(props, STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML)) {
+      this.cleanxmlAnnotator = new CleanXmlAnnotator(props);
+    } else {
+      this.cleanxmlAnnotator = null;
+    }
+
+    this.ssplitAnnotator = new WordsToSentencesAnnotator(props);
   }
 
   /**
@@ -374,16 +386,22 @@ public class TokenizerAnnotator implements Annotator  {
       log.info("Beginning tokenization");
     }
 
+    if (cdcAnnotator != null) {
+      cdcAnnotator.annotate(annotation);
+      // the CDC annotator does tokenize, ssplit, and mwt (if we even
+      // integrate that into tokenize), so we just leave once it's
+      // done.  the unique internal workings of that tokenizer prevent
+      // cleanxml from working, at least for now
+      return;
+    }
+
     // for Arabic and Chinese use a segmenter instead
-    if (useSegmenter) {
+    if (segmenterAnnotator != null) {
       segmenterAnnotator.annotate(annotation);
       // set indexes into document wide tokens list
       setTokenBeginTokenEnd(annotation.get(CoreAnnotations.TokensAnnotation.class));
       setNewlineStatus(annotation.get(CoreAnnotations.TokensAnnotation.class));
-      return;
-    }
-
-    if (annotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
+    } else if (annotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
       // TODO: This is a huge hack.  jflex does not have a lookahead operation which can match EOF
       // Because of this, the PTBTokenizer has a few productions which can't operate at EOF.
       // For example,
@@ -424,6 +442,10 @@ public class TokenizerAnnotator implements Annotator  {
       throw new RuntimeException("Tokenizer unable to find text in annotation: " + annotation);
     }
 
+    if (this.cleanxmlAnnotator != null) {
+      this.cleanxmlAnnotator.annotate(annotation);
+    }
+    this.ssplitAnnotator.annotate(annotation);
   }
 
   @Override
@@ -446,7 +468,9 @@ public class TokenizerAnnotator implements Annotator  {
         CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.OriginalTextAnnotation.class,
         CoreAnnotations.ValueAnnotation.class,
-        CoreAnnotations.IsNewlineAnnotation.class
+        CoreAnnotations.IsNewlineAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.SentenceIndexAnnotation.class
     ));
   }
 

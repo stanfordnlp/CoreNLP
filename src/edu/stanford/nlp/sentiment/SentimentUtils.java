@@ -83,7 +83,7 @@ public class SentimentUtils {
 
   public static String sentimentString(SentimentModel model, int sentiment) {
     String[] classNames = model.op.classNames;
-    if (sentiment < 0 || sentiment > classNames.length) {
+    if (sentiment < 0 || sentiment >= classNames.length) {
       return "Unknown sentiment label " + sentiment;
     }
     return classNames[sentiment];

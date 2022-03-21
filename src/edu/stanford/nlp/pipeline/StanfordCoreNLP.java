@@ -255,6 +255,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       this.properties.setProperty("annotators", newAnnotators);
     }
 
+    normalizeAnnotators(this.properties);
+
     // cdm [2017]: constructAnnotatorPool (PropertiesUtils.getSignature) requires non-null Properties, so after properties setup
     this.pool = annotatorPool != null ? annotatorPool : constructAnnotatorPool(props, getAnnotatorImplementations());
 
@@ -301,6 +303,68 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       System.setProperty(NEWLINE_SPLITTER_PROPERTY, "false");
     }
     this.pipelineSetupTime = tim.report();
+  }
+
+  /**
+   * update the annotators, hopefully in a backwards compatible manner
+   */
+  static void normalizeAnnotators(Properties properties) {
+    // if cleanxml is requested and tokenize is here,
+    // make it part of tokenize rather than its own annotator
+    unifyTokenizeProperty(properties, STANFORD_CLEAN_XML, STANFORD_TOKENIZE + "." + STANFORD_CLEAN_XML);
+    // ssplit is always part of tokenize now
+    unifyTokenizeProperty(properties, STANFORD_SSPLIT, null);
+    // cdc_tokenize is also absorbed into tokenize
+    replaceAnnotator(properties, STANFORD_CDC_TOKENIZE, STANFORD_TOKENIZE);
+  }
+
+  /**
+   * The cdc_tokenize annotator is now part of tokenize
+   */
+  static void replaceAnnotator(Properties properties, String oldAnnotator, String newAnnotator) {
+    String annotators = properties.getProperty("annotators", "");
+    String replaced = annotators.replace(oldAnnotator, newAnnotator);
+    if (!replaced.equals(annotators)) {
+      logger.debug("|" + oldAnnotator + "| is now part of |" + newAnnotator + "|.  Annotators updated to |" + replaced + "|");
+      properties.setProperty("annotators", replaced);
+    }
+  }
+
+  /**
+   * The cleanxml annotator can now be invoked as part of the tokenize annotator.
+   *<br>
+   * To ensure backwards compatibility with previous usage of the pipeline,
+   * we allow annotators to be specified tokenize,cleanxml.
+   * In such a case, we remove the cleanxml from the annotators and set
+   * the tokenize.cleanxml option instead
+   */
+  static void unifyTokenizeProperty(Properties properties, String property, String option) {
+    String annotators = properties.getProperty("annotators", "");
+    int tokenize = annotators.indexOf(STANFORD_TOKENIZE);
+    int unwanted = annotators.indexOf(property);
+
+    if (unwanted >= 0 && tokenize >= 0) {
+      if (option != null) {
+        properties.setProperty(option, "true");
+      }
+      int comma = annotators.indexOf(",", unwanted);
+      if (comma >= 0) {
+        annotators = annotators.substring(0, unwanted) + annotators.substring(comma+1);
+      } else {
+        comma = annotators.lastIndexOf(",");
+        if (comma < 0) {
+          throw new IllegalArgumentException("Unable to process annotators " + annotators);
+        }
+        annotators = annotators.substring(0, comma);
+      }
+      if (option != null) {
+        logger.debug(property + " can now be triggered as an option to tokenize rather than a separate annotator via " + option + "=true");
+      } else {
+        logger.debug(property + " is now included as part of the tokenize annotator by default");
+      }
+      logger.debug("Updating annotators from " + properties.getProperty("annotators") + " to " + annotators);
+      properties.setProperty("annotators", annotators);
+    }
   }
 
   //

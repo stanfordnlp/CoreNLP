@@ -88,7 +88,7 @@ public class NumberNormalizer {
   // Converts numbers in words to numeric form
   // works through trillions
   private static final Pattern digitsPattern = Pattern.compile("\\d+");
-  private static final Pattern digitsPatternExtended = Pattern.compile("(\\d+\\.?\\d*)(dozen|score|hundred|thousand|million|billion|trillion)?");  // this is really just second-guessing the tokenizer
+  private static final Pattern digitsPatternExtended = Pattern.compile("((?:\\d+\\.?\\d*)|(?:\\.\\d+))(dozen|score|hundred|thousand|million|billion|trillion)?");  // this is really just second-guessing the tokenizer
   private static final Pattern numPattern = Pattern.compile("[-+]?(?:\\d+(?:,\\d\\d\\d)*(?:\\.\\d*)?|\\.\\d+)");
   private static final Pattern numRangePattern = Pattern.compile("(" + numPattern.pattern() + ")-(" + numPattern.pattern() + ")");
   // private static final Pattern[] endUnitWordsPattern = new Pattern[endUnitWords.length];
@@ -372,7 +372,7 @@ public class NumberNormalizer {
           } else {
             throw new NumberFormatException("Bad number put into wordToNumber.  Word is: \"" + curPart + "\", originally part of \"" + originalString + "\", piece # " + curIndex);
           }
-        } else if (Character.isDigit(curPart.charAt(0))) {
+        } else if (Character.isDigit(curPart.charAt(0)) || curPart.charAt(0) == '.') {
           if (curPart.endsWith("th") || curPart.endsWith("rd") || curPart.endsWith("nd") || curPart.endsWith("st")) {
             curPart = curPart.substring(0, curPart.length()-2).trim();
           }

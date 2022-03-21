@@ -472,6 +472,7 @@ public class StanfordCoreNLPServer implements Runnable {
     urlProperties.forEach(props::setProperty);
 
     // Get the annotators
+    StanfordCoreNLP.normalizeAnnotators(props);
     String annotators = props.getProperty("annotators");
     // If the properties contains a custom annotator, then do not enforceRequirements.
     if (annotators != null && !PropertiesUtils.hasPropertyPrefix(props, CUSTOM_ANNOTATOR_PREFIX) && PropertiesUtils.getBool(props, "enforceRequirements", true)) {
@@ -1348,6 +1349,9 @@ public class StanfordCoreNLPServer implements Runnable {
             docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
                 int sentIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
                 Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+                if (tree == null) {
+                  throw new IllegalStateException("Error: cannot process tregex operations with no constituency tree annotations.  Perhaps need to reinitialize the server with the parse annotator");
+                }
                 //sentWriter.set("tree", tree.pennString());
                 TregexMatcher matcher = p.matcher(tree);
 
