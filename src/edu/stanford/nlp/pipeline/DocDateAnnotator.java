@@ -10,6 +10,15 @@ import java.util.*;
 import java.util.regex.*;
 
 
+/** Find and record a document (authoring) date for a document.
+ *  This document date can be used, for instance, in resolving time expressions like "next Thursday".
+ *  The document date can be today, passed in via a property, given by a filename to date mapping file,
+ *   or it may be extracted from a filename by regex.
+ *   The document date is stored as a YYYY-MM-DD String under the
+ *   CoreAnnotations.DocDateAnnotation key.
+ *
+ *  @author Sebastian Schuster
+ */
 public class DocDateAnnotator implements Annotator {
 
   /** A logger for this class */
