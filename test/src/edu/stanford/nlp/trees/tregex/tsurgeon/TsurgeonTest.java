@@ -587,6 +587,24 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(TOP (`` ``) (S foo))", "(TOP (S (`` ``) foo))");
   }
 
+  /** 
+   * Demonstrate why move/prune would be useful, then test that it does the thing
+   */
+  public void testMovePrune() {
+    TregexPattern tregex = TregexPattern.compile("__ !> __ <1 (A < B=bad) <2 C=good");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("[move bad >1 good]");
+    // the A is left by itself once the B is moved
+    runTest(tregex, tsurgeon, "(ROOT (A (B b)) (C c))", "(ROOT A (C (B b) c))");
+    // here it makes sense for the A to have a child still
+    runTest(tregex, tsurgeon, "(ROOT (A (B b) (D d)) (C c))", "(ROOT (A (D d)) (C (B b) c))");
+
+    tsurgeon = Tsurgeon.parseOperation("[moveprune bad >1 good]");
+    // the "prune" version should get rid of A
+    runTest(tregex, tsurgeon, "(ROOT (A (B b)) (C c))", "(ROOT (C (B b) c))");
+    // in this case, A isn't empty, so it shouldn't be pruned
+    runTest(tregex, tsurgeon, "(ROOT (A (B b) (D d)) (C c))", "(ROOT (A (D d)) (C (B b) c))");
+  }
+
   public void testExcise() {
     // TODO: needs more meat to this test
     TregexPattern tregex = TregexPattern.compile("__=repeat <: (~repeat < __)");
