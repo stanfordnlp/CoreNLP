@@ -225,6 +225,10 @@ public class Tsurgeon  {
    *      {@code >i <name>} the i_th daughter of the named node<br>
    *      {@code >-i <name>} the i_th daughter, counting from the right, of the named node.
    *
+   * <li>{@code moveprune <name> <position>} moves the named node into
+   * the specified position, then prunes the original position if it
+   * became a node with no children.
+   *
    * <li>{@code replace <name1> <name2>}
    *     deletes name1 and inserts a copy of name2 in its place.
    *

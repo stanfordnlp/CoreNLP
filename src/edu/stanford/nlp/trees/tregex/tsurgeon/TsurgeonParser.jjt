@@ -60,6 +60,7 @@ TOKEN:
 | < EXCISE: "excise" > : OPERATION
 | < INSERT: "insert" > : OPERATION
 | < MOVE: "move" > : OPERATION
+| < MOVE_PRUNE: "moveprune" > : OPERATION
 | < REPLACE: "replace" >  : OPERATION
 | < CREATE_SUBTREE: "createSubtree" > : OPERATION
 | < ADJOIN: "adjoin" > : OPERATION
@@ -157,8 +158,10 @@ TsurgeonPattern Operation() :
 | LOOKAHEAD(3)
   operator = <REPLACE> child1 = NodeSelection() treeList = TreeList(false)
     { return new ReplaceNode(child1,treeList); }
-|  operator = <MOVE> child1 = NodeSelection() loc = Location()
-    { return new MoveNode(child1, loc); }
+| operator = <MOVE> child1 = NodeSelection() loc = Location()
+    { return new MoveNode(child1, loc, false); }
+| operator = <MOVE_PRUNE> child1 = NodeSelection() loc = Location()
+    { return new MoveNode(child1, loc, true); }
 | LOOKAHEAD(3)
   operator = <INSERT> child1 = NodeSelection() loc = Location()
     { return new InsertNode(child1, loc); }

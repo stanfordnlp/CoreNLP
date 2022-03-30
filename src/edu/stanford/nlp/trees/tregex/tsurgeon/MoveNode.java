@@ -7,15 +7,18 @@ import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.util.Pair;
 
-/** Does a delete (NOT prune!) + insert operation
+/**
+ * Does a delete or prune + insert operation
  * @author Roger Levy (rog@stanford.edu)
  */
 class MoveNode extends TsurgeonPattern {
-  TreeLocation location;
+  final TreeLocation location;
+  final boolean prune;
 
-  public MoveNode(TsurgeonPattern child, TreeLocation l) {
+  public MoveNode(TsurgeonPattern child, TreeLocation l, boolean prune) {
     super("move", new TsurgeonPattern[] { child });
     this.location = l;
+    this.prune = prune;
   }
 
   @Override
@@ -44,6 +47,13 @@ class MoveNode extends TsurgeonPattern {
       oldParent.removeChild(Trees.objectEqualityIndexOf(oldParent,nodeToMove));
       Pair<Tree,Integer> position = locationMatcher.evaluate(tree, tregex);
       position.first().insertDtr(nodeToMove,position.second());
+
+      // if this is set to prune, march up the tree until the empty branch is pruned
+      while (prune && oldParent.children().length == 0 && oldParent != tree) {
+        Tree empty = oldParent;
+        oldParent = oldParent.parent(tree);
+        oldParent.removeChild(Trees.objectEqualityIndexOf(oldParent, empty));
+      }
       return tree;
     }
   }
