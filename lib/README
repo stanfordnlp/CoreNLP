@@ -1,29 +1,34 @@
-README for $JAVANLP_HOME/core/lib
+README for $CORENLP_HOME/lib
 
 Written by Bill MacCartney <wcmac@cs.stanford.edu> 23 January 2006
 Updated by Daniel Ramage 16 October 2006
+Variously updated thereafter.
 
 This directory is intended to contain only *current and necessary*
-.jar files used with JavaNLP-core.  
+.jar files used with CoreNLP.
+
+Each file here should have a name that includes a version number,
+such as lib/xom-1.3.7.jar and should have a corresponding sources
+archive such as libsrc/xom-1.3.7-src.{zip,jar}.
 
 Our original model was that each jar file in lib should be without
 its version number but include a corresponding source .zip/.jar file
 with a full version number in the libsrc folder.  For example, if
-there is a file  lib/ra.jar there should be a corresponding and
-up-to-date libsrc/ra-0.1.8-src.zip. That had some good properties
-but could also be a nuisance in the modern world, so it is also
-fine and more common recently for people to have in lib a
-lib/ra-0.1.8.jar corresponding to a libsrc/ra-0.1.8-src.{zip,jar}.
+there is a file  lib/xom.jar there should be a corresponding and
+up-to-date libsrc/xom-1.3.7-src.{zip,jar}. That model had some good
+properties but can also be a nuisance in the modern world, and so
+doing this is now deprecated but not quite yet eliminated.
 
-Outdated or redundant .jar files should NOT be kept here, but can
-be stored instead in /u/nlp/java/liball.  Files in that directory
-can have version numbers in the name.  Example: colt1.0.3.jar.
+Outdated or redundant .jar files should NOT be kept here.
+(Some old jar files at one point used by Stanford NLP can be found on
+Stanford NLP machines at /u/nlp/java/liball.)
 
 If you're adding a new .jar to the repository, please:
+ - think whether it really is good to add this additional dependency
  - make sure the jar isn't already somewhere in the repository.
    If it is, try to converge on one version and promote placement to
-   core if it is used in both core and research
- - add the jar itself to the lib directory (with or without version number)
+   CoreNLP if it is used in both core and research
+ - add the jar itself to the lib directory
  - add its source zip with version number to the libsrc directory
  - check to make sure that the jar file doesn't have other libraries
    embedded within it (use jar -tf). if the .jar file has other libraries
@@ -85,7 +90,7 @@ USED BY:
 the build.xml task that builds .jsps
 Not needed by CoreNLP distributions.
 
-LAST UPDATE: 2010/06/28
+LAST UPDATE: 2010/06/28 [no more recent version 2022/03/21]
 
 LAST UPDATE BY: John Bauer
 
@@ -191,16 +196,16 @@ USED BY: TregexGUI.java
 Not needed by CoreNLP distributions
 (Only used for fake compilation -- at runtime, either Mac supplies this or it doesn't.)
 
-LAST UPDATE: 9/18/2007
+LAST UPDATE: 2007/09/18
 
 LAST UPDATE BY: Anna Rafferty.
 
 -----------------------------------------------------------------------
-xom-1.3.2.jar
+xom-1.3.7.jar
 
-ORIGINAL JAR NAME: xom-1.3.2.jar
+ORIGINAL JAR NAME: xom-1.3.7.jar
 
-VERSION: 1.3.2
+VERSION: 1.3.7
 
 RELEASE DATE: 2019-03-31
 
