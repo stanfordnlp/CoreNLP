@@ -1058,6 +1058,18 @@ public class TregexTest extends TestCase {
     }
   }
 
+  public void testNumberedSister() {
+    // this shouldn't mean anything
+    try {
+      TregexPattern pattern = TregexPattern.compile("A $5 B");
+    } catch (TregexParseException e) {
+      // yay, passed
+    }
+
+    // this should be fine
+    TregexPattern pattern = TregexPattern.compile("A <5 B");
+  }
+
   public void testHeadOfPhrase() {
     runTest("NP <# NNS", "(NP (NN work) (NNS practices))", "(NP (NN work) (NNS practices))");
     runTest("NP <# NN", "(NP (NN work) (NNS practices))"); // should have no results
