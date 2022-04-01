@@ -18,7 +18,7 @@ public class DescriptionPattern extends TregexPattern  {
   private static Redwood.RedwoodChannels log = Redwood.channels(DescriptionPattern.class);
 
   enum DescriptionMode {
-    PATTERN, STRINGS, EXACT, ANYTHING
+    PATTERN, STRINGS, EXACT, ANYTHING, ROOT
   }
 
   private final Relation rel;
@@ -74,6 +74,11 @@ public class DescriptionPattern extends TregexPattern  {
       // TODO: factor out some of these blocks of code
       if (desc.equals("__") || desc.equals("/.*/") || desc.equals("/^.*$/")) {
         descriptionMode = DescriptionMode.ANYTHING;
+        descPattern = null;
+        exactMatch = null;
+        stringFilter = null;
+      } else if (desc.equals("_ROOT_")) {
+        descriptionMode = DescriptionMode.ROOT;
         descPattern = null;
         exactMatch = null;
         stringFilter = null;
@@ -402,6 +407,9 @@ public class DescriptionPattern extends TregexPattern  {
               break;
             case STRINGS:
               found = myNode.stringFilter.test(value);
+              break;
+            case ROOT:
+              found = (nextTreeNodeMatchCandidate == root);
               break;
             default:
               throw new IllegalArgumentException("Unexpected match mode");

@@ -156,7 +156,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * A disjunctive list of literal strings can be given separated by '|'.
  * The special string '__' (two underscores) can be used to match any
  * node.  (WARNING!!  Use of the '__' node description may seriously
- * slow down search.)  If a label description is preceded by '@', the
+ * slow down search.)
+ * The special string '_ROOT_' matches only at the root of a tree.
+ * If a label description is preceded by '@', the
  * label will match any node whose <em>basicCategory</em> matches the
  * description.  <b>NB: A single '@' thus scopes over a disjunction
  * specified by '|': @NP|VP means things with basic category NP or VP.

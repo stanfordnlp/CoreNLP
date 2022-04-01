@@ -1093,6 +1093,15 @@ public class TregexTest extends TestCase {
     runTest("A <<<-2 z", "(ROOT (A (B z) (C b)))", "(A (B z) (C b))");
   }
 
+  /** test the _ROOT_ node description */
+  public void testRootDescription() {
+    runTest("_ROOT_", "(ROOT (A apple))", "(ROOT (A apple))");
+    runTest("A > _ROOT_", "(ROOT (A apple))", "(A apple)");
+    runTest("A > _ROOT_", "(ROOT (A apple) (B (A aardvark)))", "(A apple)");
+    runTest("A !> _ROOT_", "(ROOT (A apple) (B (A aardvark)))", "(A aardvark)");
+    runTest("_ROOT_ <<<2 b", "(ROOT (A (B z) (C b)))", "(ROOT (A (B z) (C b)))");
+  }
+
   public void testHeadOfPhrase() {
     runTest("NP <# NNS", "(NP (NN work) (NNS practices))", "(NP (NN work) (NNS practices))");
     runTest("NP <# NN", "(NP (NN work) (NNS practices))"); // should have no results
