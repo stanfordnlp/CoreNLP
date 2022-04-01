@@ -81,7 +81,7 @@ abstract class Relation implements Serializable {
    * LEFTMOST_DESCENDANT_OF, RIGHTMOST_DESCENDANT_OF, SISTER_OF, LEFT_SISTER_OF,
    * RIGHT_SISTER_OF, IMMEDIATE_LEFT_SISTER_OF, IMMEDIATE_RIGHT_SISTER_OF,
    * HEADS, HEADED_BY, IMMEDIATELY_HEADS, IMMEDIATELY_HEADED_BY, ONLY_CHILD_OF,
-   * HAS_ONLY_CHILD, EQUALS
+   * HAS_ONLY_CHILD, EQUALS, ANCESTOR_OF_LEAF
    *
    * @param s The String representation of the relation
    * @return The singleton static relation of the specified type
@@ -314,6 +314,51 @@ abstract class Relation implements Serializable {
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return matcher.getRoot().iterator();
+    }
+  };
+
+  private static final Relation ANCESTOR_OF_LEAF = new Relation("<<<") {
+
+    private static final long serialVersionUID = -78542691313554L;
+
+    @Override
+    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
+      return t1 != t2 && t2.isLeaf() && t1.dominates(t2);
+    }
+
+    @Override
+    Iterator<Tree> searchNodeIterator(final Tree t,
+                                      final TregexMatcher matcher) {
+      return new SearchNodeIterator() {
+        Stack<Tree> searchStack;
+
+        @Override
+        public void initialize() {
+          searchStack = new Stack<>();
+          for (int i = t.numChildren() - 1; i >= 0; i--) {
+            searchStack.push(t.getChild(i));
+          }
+          if (!searchStack.isEmpty()) {
+            advance();
+          }
+        }
+
+        @Override
+        void advance() {
+          next = null;
+          while (next == null && !searchStack.isEmpty()) {
+            next = searchStack.pop();
+            for (int i = next.numChildren() - 1; i >= 0; i--) {
+              searchStack.push(next.getChild(i));
+            }
+            // we've added the next layer of children, but we're not
+            // at a leaf, so keep going if there are nodes left to search
+            if (!next.isLeaf()) {
+              next = null;
+            }
+          }
+        }
+      };
     }
   };
 
@@ -1150,7 +1195,7 @@ abstract class Relation implements Serializable {
       LEFT_SISTER_OF, RIGHT_SISTER_OF, IMMEDIATE_LEFT_SISTER_OF,
       IMMEDIATE_RIGHT_SISTER_OF, ONLY_CHILD_OF, HAS_ONLY_CHILD, EQUALS,
       PATTERN_SPLITTER,UNARY_PATH_ANCESTOR_OF, UNARY_PATH_DESCENDANT_OF,
-      PARENT_EQUALS };
+      PARENT_EQUALS, ANCESTOR_OF_LEAF };
 
   private static final Map<String, Relation> SIMPLE_RELATIONS_MAP = Generics.newHashMap();
 

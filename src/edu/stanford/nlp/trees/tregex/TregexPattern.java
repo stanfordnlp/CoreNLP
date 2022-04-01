@@ -94,6 +94,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td>A &gt;&gt; B <td>A is dominated by B
  * <tr><td>A &lt; B <td>A immediately dominates B
  * <tr><td>A &gt; B <td>A is immediately dominated by B
+ * <tr><td>A &lt;&lt;&lt; B <td>A dominates B and B is a leaf
  * <tr><td>A &#36; B <td>A is a sister of B (and not equal to B)
  * <tr><td>A .. B <td>A precedes B
  * <tr><td>A . B <td>A immediately precedes B
