@@ -30,8 +30,8 @@ import edu.stanford.nlp.util.Pair;
  * Thus == can be used instead of .equals.
  * <br>
  * If you want to add a new
- * relation, you just have to fill in the definition of satisfies and
- * searchNodeIterator. Also be careful to make the appropriate adjustments to
+ * relation, you just have to fill in the definition of searchNodeIterator.
+ * Also be careful to make the appropriate adjustments to
  * getRelation and SIMPLE_RELATIONS. Finally, if you are using the TregexParser,
  * you need to add the new relation symbol to the list of tokens.
  *
@@ -48,15 +48,6 @@ abstract class Relation implements Serializable {
   private static final long serialVersionUID = -1564793674551362909L;
 
   private final String symbol;
-
-  /** Whether this relationship is satisfied between two trees.
-   *
-   * @param t1 The tree that is the left operand.
-   * @param t2 The tree that is the right operand.
-   * @param root The common root of t1 and t2
-   * @return Whether this relationship is satisfied.
-   */
-  abstract boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher);
 
   /**
    * For a given node, returns an {@link Iterator} over the nodes
@@ -270,11 +261,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = -8311913236233762612L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return t1 == t2;
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -291,11 +277,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = 164629344977943816L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return t1 == t2;
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return Collections.singletonList(t).iterator();
@@ -309,11 +290,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = 3409941930361386114L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return true;
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return matcher.getRoot().iterator();
@@ -323,11 +299,6 @@ abstract class Relation implements Serializable {
   private static final Relation ANCESTOR_OF_LEAF = new Relation("<<<") {
 
     private static final long serialVersionUID = -78542691313554L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return t1 != t2 && t2.isLeaf() && t1.dominates(t2);
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -348,6 +319,8 @@ abstract class Relation implements Serializable {
 
         @Override
         void advance() {
+          // using getLeaves() would be simpler code,
+          // but this was easy enough
           next = null;
           while (next == null && !searchStack.isEmpty()) {
             next = searchStack.pop();
@@ -383,34 +356,14 @@ abstract class Relation implements Serializable {
     }
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (t1 == t2)
-        return false;
-      if (!t2.isLeaf())
-        return false;
-      // this is kind of lazy
-      // if it somehow became a performance limitation,
-      // a recursive search would be faster
-      List<Tree> leaves = t1.getLeaves();
-      if (leaves.size() < Math.abs(leafNum))
-        return false;
-
-      final int index;
-      if (leafNum > 0) {
-        index = leafNum - 1;
-      } else {
-        // eg, leafNum == -1 means we check leaves.size() - 1
-        index = leaves.size() + leafNum;
-      }
-      return leaves.get(index) == t2;
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
         @Override
         void initialize() {
+          // this is a little lazy in terms of coding
+          // would be a bit faster to actually recurse through the tree
+          // this is unlikely to ever be a performance limitation, though
           List<Tree> leaves = t.getLeaves();
           if (leaves.size() >= Math.abs(leafNum)) {
             final int index;
@@ -453,11 +406,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = -2580199434621268260L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return t1 != t2 && t1.dominates(t2);
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -494,11 +442,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = 6140614010121387690L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return DOMINATES.satisfies(t2, t1, root, matcher);
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -518,17 +461,6 @@ abstract class Relation implements Serializable {
   private static final Relation PARENT_OF = new Relation("<") {
 
     private static final long serialVersionUID = 9140193735607580808L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      Tree[] kids = t1.children();
-      for (Tree kid : kids) {
-        if (kid == t2) {
-          return true;
-        }
-      }
-      return false;
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -559,11 +491,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = 8919710375433372537L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return PARENT_OF.satisfies(t2, t1, root, matcher);
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -578,11 +505,6 @@ abstract class Relation implements Serializable {
   private static final Relation PRECEDES = new Relation("..") {
 
     private static final long serialVersionUID = -9065012389549976867L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return Trees.rightEdge(t1, root) <= Trees.leftEdge(t2, root);
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -623,11 +545,6 @@ abstract class Relation implements Serializable {
   private static final Relation IMMEDIATELY_PRECEDES = new Relation(".") {
 
     private static final long serialVersionUID = 3390147676937292768L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return Trees.leftEdge(t2, root) == Trees.rightEdge(t1, root);
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -671,11 +588,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = -5948063114149496983L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return Trees.rightEdge(t2, root) <= Trees.leftEdge(t1, root);
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -714,11 +626,6 @@ abstract class Relation implements Serializable {
   private static final Relation IMMEDIATELY_FOLLOWS = new Relation(",") {
 
     private static final long serialVersionUID = -2895075562891296830L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return Trees.leftEdge(t1, root) == Trees.rightEdge(t2, root);
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -762,15 +669,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = -7352081789429366726L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (t1.isLeaf()) {
-        return false;
-      } else {
-        return (t1.children()[0] == t2) || satisfies(t1.children()[0], t2, root, matcher);
-      }
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -795,16 +693,6 @@ abstract class Relation implements Serializable {
   private static final Relation HAS_RIGHTMOST_DESCENDANT = new Relation("<<-") {
 
     private static final long serialVersionUID = -1405509785337859888L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (t1.isLeaf()) {
-        return false;
-      } else {
-        Tree lastKid = t1.children()[t1.children().length - 1];
-        return (lastKid == t2) || satisfies(lastKid, t2, root, matcher);
-      }
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -833,11 +721,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = 3103412865783190437L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return HAS_LEFTMOST_DESCENDANT.satisfies(t2, t1, root, matcher);
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -864,11 +747,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = -2000255467314675477L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return HAS_RIGHTMOST_DESCENDANT.satisfies(t2, t1, root, matcher);
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -893,15 +771,6 @@ abstract class Relation implements Serializable {
   private static final Relation SISTER_OF = new Relation("$") {
 
     private static final long serialVersionUID = -3776688096782419004L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (t1 == t2 || t1 == root) {
-        return false;
-      }
-      Tree parent = t1.parent(root);
-      return PARENT_OF.satisfies(parent, t2, root, matcher);
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -940,24 +809,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = -4516161080140406862L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (t1 == t2 || t1 == root) {
-        return false;
-      }
-      Tree parent = t1.parent(root);
-      Tree[] kids = parent.children();
-      for (int i = kids.length - 1; i > 0; i--) {
-        if (kids[i] == t1) {
-          return false;
-        }
-        if (kids[i] == t2) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -988,11 +839,6 @@ abstract class Relation implements Serializable {
   private static final Relation RIGHT_SISTER_OF = new Relation("$--") {
 
     private static final long serialVersionUID = -5880626025192328694L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return LEFT_SISTER_OF.satisfies(t2, t1, root, matcher);
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -1027,23 +873,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = 7745237994722126917L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (t1 == t2 || t1 == root) {
-        return false;
-      }
-      Tree[] sisters = t1.parent(root).children();
-      for (int i = sisters.length - 1; i > 0; i--) {
-        if (sisters[i] == t1) {
-          return false;
-        }
-        if (sisters[i] == t2) {
-          return sisters[i - 1] == t1;
-        }
-      }
-      return false;
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -1067,11 +896,6 @@ abstract class Relation implements Serializable {
   private static final Relation IMMEDIATE_RIGHT_SISTER_OF = new Relation("$-") {
 
     private static final long serialVersionUID = -6555264189937531019L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return IMMEDIATE_LEFT_SISTER_OF.satisfies(t2, t1, root, matcher);
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -1099,11 +923,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = 1719812660770087879L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return t2.children().length == 1 && t2.firstChild() == t1;
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -1125,11 +944,6 @@ abstract class Relation implements Serializable {
     private static final long serialVersionUID = -8776487500849294279L;
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return t1.children().length == 1 && t1.firstChild() == t2;
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -1146,17 +960,6 @@ abstract class Relation implements Serializable {
   private static final Relation UNARY_PATH_ANCESTOR_OF = new Relation("<<:") {
 
     private static final long serialVersionUID = -742912038636163403L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (t1.isLeaf() || t1.children().length > 1)
-        return false;
-      Tree onlyDtr = t1.children()[0];
-      if (onlyDtr == t2)
-        return true;
-      else
-        return satisfies(onlyDtr, t2, root, matcher);
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -1191,17 +994,6 @@ abstract class Relation implements Serializable {
   private static final Relation UNARY_PATH_DESCENDANT_OF = new Relation(">>:") {
 
     private static final long serialVersionUID = 4364021807752979404L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (t2.isLeaf() || t2.children().length > 1)
-        return false;
-      Tree onlyDtr = t2.children()[0];
-      if (onlyDtr == t1)
-        return true;
-      else
-        return satisfies(t1, onlyDtr, root, matcher);
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -1239,14 +1031,6 @@ abstract class Relation implements Serializable {
 
   private static final Relation PARENT_EQUALS = new Relation("<=") {
     private static final long serialVersionUID = 98745298745198245L;
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (t1 == t2) {
-        return true;
-      }
-      return PARENT_OF.satisfies(t1, t2, root, matcher);
-    }
 
     @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
@@ -1331,24 +1115,6 @@ abstract class Relation implements Serializable {
     }
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (t2.isLeaf()) {
-        return false;
-      } else if (t2.isPreTerminal()) {
-        return (t2.firstChild() == t1);
-      } else {
-        HeadFinder headFinder = matcher.getHeadFinder();
-        if (headFinder == null) headFinder = this.hf;
-        Tree head = headFinder.determineHead(t2);
-        if (head == t1) {
-          return true;
-        } else {
-          return satisfies(t1, head, root, matcher);
-        }
-      }
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -1411,11 +1177,6 @@ abstract class Relation implements Serializable {
     HeadedBy(HeadFinder hf) {
       super("<<#");
       this.heads = Interner.globalIntern(new Heads(hf));
-    }
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return heads.satisfies(t2, t1, root, matcher);
     }
 
     @Override
@@ -1487,15 +1248,6 @@ abstract class Relation implements Serializable {
     }
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      if (matcher.getHeadFinder() != null) {
-        return matcher.getHeadFinder().determineHead(t2) == t1;
-      } else {
-        return hf.determineHead(t2) == t1;
-      }
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -1552,11 +1304,6 @@ abstract class Relation implements Serializable {
       super("<#");
       this.immediatelyHeads = Interner
           .globalIntern(new ImmediatelyHeads(hf));
-    }
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return immediatelyHeads.satisfies(t2, t1, root, matcher);
     }
 
     @Override
@@ -1626,21 +1373,6 @@ abstract class Relation implements Serializable {
     }
 
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      Tree[] kids = t2.children();
-      if (kids.length < Math.abs(childNum)) {
-        return false;
-      }
-      if (childNum > 0 && kids[childNum - 1] == t1) {
-        return true;
-      }
-      if (childNum < 0 && kids[kids.length + childNum] == t1) {
-        return true;
-      }
-      return false;
-    }
-
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -1697,11 +1429,6 @@ abstract class Relation implements Serializable {
     HasIthChild(int i) {
       super('<' + String.valueOf(i));
       ithChildOf = Interner.globalIntern(new IthChildOf(i));
-    }
-
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return ithChildOf.satisfies(t2, t1, root, matcher);
     }
 
     @Override
@@ -1793,21 +1520,6 @@ abstract class Relation implements Serializable {
       } else {
         pattern = Pattern.compile("^(?:" + arg + ")$");
       }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      for (Tree kid : t1.children()) {
-        if (kid == t2) {
-          return true;
-        } else {
-          if (pathMatchesNode(kid) && satisfies(kid, t2, root, matcher)) {
-            return true;
-          }
-        }
-      }
-      return false;
     }
 
     private boolean pathMatchesNode(Tree node) {
@@ -1906,12 +1618,6 @@ abstract class Relation implements Serializable {
 
     /** {@inheritDoc} */
     @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return unbrokenCategoryDominates.satisfies(t2, t1, root, matcher);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
@@ -1998,12 +1704,6 @@ abstract class Relation implements Serializable {
       } else {
         pattern = Pattern.compile("^(?:" + arg + ")$");
       }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return true; // shouldn't have to do anything here.
     }
 
     private boolean pathMatchesNode(Tree node) {
@@ -2124,12 +1824,6 @@ abstract class Relation implements Serializable {
       } else {
         pattern = Pattern.compile("^(?:" + arg + ")$");
       }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return true; // shouldn't have to do anything here.
     }
 
     private boolean pathMatchesNode(Tree node) {
