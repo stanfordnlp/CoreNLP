@@ -57,11 +57,11 @@ nodes.add(node);
       } else {
         break label_1;
       }
-      jj_consume_token(12);
+      jj_consume_token(13);
       node = SubNode(Relation.ROOT);
 nodes.add(node);
     }
-    jj_consume_token(13);
+    jj_consume_token(14);
 if (nodes.size() == 1) {
       {if ("" != null) return nodes.get(0);}
     } else {
@@ -74,19 +74,20 @@ if (nodes.size() == 1) {
 // pertains to this node gets passed all the way down to the Description node
   final public DescriptionPattern Node(Relation r) throws ParseException {DescriptionPattern node;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 14:{
-      jj_consume_token(14);
-      node = SubNode(r);
+    case 15:{
       jj_consume_token(15);
+      node = SubNode(r);
+      jj_consume_token(16);
       break;
       }
     case IDENTIFIER:
     case BLANK:
+    case ROOTNODE:
     case REGEX:
-    case 16:
     case 17:
-    case 20:
-    case 21:{
+    case 18:
+    case 21:
+    case 22:{
       node = ModDescription(r);
       break;
       }
@@ -102,18 +103,18 @@ if (nodes.size() == 1) {
   final public DescriptionPattern SubNode(Relation r) throws ParseException {DescriptionPattern result = null;
   TregexPattern child = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 14:{
-      jj_consume_token(14);
-      result = SubNode(r);
+    case 15:{
       jj_consume_token(15);
+      result = SubNode(r);
+      jj_consume_token(16);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case RELATION:
       case MULTI_RELATION:
       case REL_W_STR_ARG:
-      case 14:
-      case 16:
-      case 23:
-      case 24:{
+      case 15:
+      case 17:
+      case 24:
+      case 25:{
         child = ChildrenDisj();
         break;
         }
@@ -132,20 +133,21 @@ if(child != null) {
       }
     case IDENTIFIER:
     case BLANK:
+    case ROOTNODE:
     case REGEX:
-    case 16:
     case 17:
-    case 20:
-    case 21:{
+    case 18:
+    case 21:
+    case 22:{
       result = ModDescription(r);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case RELATION:
       case MULTI_RELATION:
       case REL_W_STR_ARG:
-      case 14:
-      case 16:
-      case 23:
-      case 24:{
+      case 15:
+      case 17:
+      case 24:
+      case 25:{
         child = ChildrenDisj();
         break;
         }
@@ -168,8 +170,8 @@ if (child != null) result.setChild(child);
   final public DescriptionPattern ModDescription(Relation r) throws ParseException {DescriptionPattern node;
   boolean neg = false, cat = false;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 16:{
-      jj_consume_token(16);
+    case 17:{
+      jj_consume_token(17);
 neg = true;
       break;
       }
@@ -178,8 +180,8 @@ neg = true;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 17:{
-      jj_consume_token(17);
+    case 18:{
+      jj_consume_token(18);
 cat = true;
       break;
       }
@@ -202,6 +204,7 @@ cat = true;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IDENTIFIER:
     case BLANK:
+    case ROOTNODE:
     case REGEX:{
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case IDENTIFIER:{
@@ -216,6 +219,10 @@ cat = true;
         desc = jj_consume_token(BLANK);
         break;
         }
+      case ROOTNODE:{
+        desc = jj_consume_token(ROOTNODE);
+        break;
+        }
       default:
         jj_la1[6] = jj_gen;
         jj_consume_token(-1);
@@ -224,7 +231,7 @@ cat = true;
       label_2:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case 18:{
+        case 19:{
           ;
           break;
           }
@@ -232,15 +239,15 @@ cat = true;
           jj_la1[7] = jj_gen;
           break label_2;
         }
-        jj_consume_token(18);
-        groupNum = jj_consume_token(NUMBER);
         jj_consume_token(19);
+        groupNum = jj_consume_token(NUMBER);
+        jj_consume_token(20);
         groupVar = jj_consume_token(IDENTIFIER);
 varGroups.add(new Pair<Integer,String>(Integer.parseInt(groupNum.image),groupVar.image));
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 20:{
-        jj_consume_token(20);
+      case 21:{
+        jj_consume_token(21);
         name = jj_consume_token(IDENTIFIER);
 if (knownVariables.contains(name.image)) {
             {if (true) throw new ParseException("Variable " + name.image + " has been declared twice, which makes no sense");}
@@ -257,12 +264,12 @@ if (knownVariables.contains(name.image)) {
       }
       break;
       }
-    case 21:{
-      jj_consume_token(21);
+    case 22:{
+      jj_consume_token(22);
       linkedName = jj_consume_token(IDENTIFIER);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 20:{
-        jj_consume_token(20);
+      case 21:{
+        jj_consume_token(21);
         name = jj_consume_token(IDENTIFIER);
         break;
         }
@@ -284,8 +291,8 @@ if (!knownVariables.contains(linkedName.image)) {
         link = true;
       break;
       }
-    case 20:{
-      jj_consume_token(20);
+    case 21:{
+      jj_consume_token(21);
       name = jj_consume_token(IDENTIFIER);
 if (!knownVariables.contains(name.image)) {
           {if (true) throw new ParseException("Variable " + name.image +
@@ -325,7 +332,7 @@ children.add(child);
         break label_3;
       }
 knownVariables = Generics.newHashSet(originalKnownVariables);
-      jj_consume_token(12);
+      jj_consume_token(13);
       child = ChildrenConj();
 children.add(child);
       allKnownVariables.addAll(knownVariables);
@@ -348,11 +355,11 @@ children.add(child);
       case RELATION:
       case MULTI_RELATION:
       case REL_W_STR_ARG:
-      case 14:
-      case 16:
-      case 22:
+      case 15:
+      case 17:
       case 23:
-      case 24:{
+      case 24:
+      case 25:{
         ;
         break;
         }
@@ -361,8 +368,8 @@ children.add(child);
         break label_4;
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case 22:{
-        jj_consume_token(22);
+      case 23:{
+        jj_consume_token(23);
         break;
         }
       default:
@@ -385,13 +392,13 @@ if (children.size() == 1)
     case RELATION:
     case MULTI_RELATION:
     case REL_W_STR_ARG:
-    case 14:
-    case 24:{
+    case 15:
+    case 25:{
       child = Child();
       break;
       }
-    case 16:{
-      jj_consume_token(16);
+    case 17:{
+      jj_consume_token(17);
 startUnderNeg = underNegation;
           underNegation = true;
       child = ModChild();
@@ -399,8 +406,8 @@ underNegation = startUnderNeg;
 child.negate();
       break;
       }
-    case 23:{
-      jj_consume_token(23);
+    case 24:{
+      jj_consume_token(24);
       child = Child();
 child.makeOptional();
       break;
@@ -416,16 +423,16 @@ child.makeOptional();
 
   final public TregexPattern Child() throws ParseException {TregexPattern child;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-    case 24:{
-      jj_consume_token(24);
-      child = ChildrenDisj();
+    case 25:{
       jj_consume_token(25);
+      child = ChildrenDisj();
+      jj_consume_token(26);
       break;
       }
-    case 14:{
-      jj_consume_token(14);
-      child = ChildrenDisj();
+    case 15:{
       jj_consume_token(15);
+      child = ChildrenDisj();
+      jj_consume_token(16);
       break;
       }
     case RELATION:
@@ -469,11 +476,11 @@ child.makeOptional();
       case REL_W_STR_ARG:{
         t = jj_consume_token(REL_W_STR_ARG);
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case 14:{
-          jj_consume_token(14);
+        case 15:{
+          jj_consume_token(15);
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case 16:{
-            negation = jj_consume_token(16);
+          case 17:{
+            negation = jj_consume_token(17);
             break;
             }
           default:
@@ -481,8 +488,8 @@ child.makeOptional();
             ;
           }
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case 17:{
-            cat = jj_consume_token(17);
+          case 18:{
+            cat = jj_consume_token(18);
             break;
             }
           default:
@@ -507,14 +514,14 @@ child.makeOptional();
             jj_consume_token(-1);
             throw new ParseException();
           }
-          jj_consume_token(15);
+          jj_consume_token(16);
           break;
           }
-        case 24:{
-          jj_consume_token(24);
+        case 25:{
+          jj_consume_token(25);
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case 16:{
-            negation = jj_consume_token(16);
+          case 17:{
+            negation = jj_consume_token(17);
             break;
             }
           default:
@@ -522,8 +529,8 @@ child.makeOptional();
             ;
           }
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case 17:{
-            cat = jj_consume_token(17);
+          case 18:{
+            cat = jj_consume_token(18);
             break;
             }
           default:
@@ -548,14 +555,14 @@ child.makeOptional();
             jj_consume_token(-1);
             throw new ParseException();
           }
-          jj_consume_token(25);
+          jj_consume_token(26);
           break;
           }
         case REGEX:
-        case 16:{
+        case 17:{
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case 16:{
-            negation = jj_consume_token(16);
+          case 17:{
+            negation = jj_consume_token(17);
             break;
             }
           default:
@@ -598,22 +605,23 @@ if (strArg != null) {
       }
     case MULTI_RELATION:{
       t = jj_consume_token(MULTI_RELATION);
-      jj_consume_token(26);
+      jj_consume_token(27);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case IDENTIFIER:
       case BLANK:
+      case ROOTNODE:
       case REGEX:
-      case 14:
-      case 16:
+      case 15:
       case 17:
-      case 20:
-      case 21:{
+      case 18:
+      case 21:
+      case 22:{
         child = Node(null);
 children.add(child);
         label_5:
         while (true) {
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case 27:{
+          case 28:{
             ;
             break;
             }
@@ -621,7 +629,7 @@ children.add(child);
             jj_la1[25] = jj_gen;
             break label_5;
           }
-          jj_consume_token(27);
+          jj_consume_token(28);
           child = Node(null);
 children.add(child);
         }
@@ -631,7 +639,7 @@ children.add(child);
         jj_la1[26] = jj_gen;
         ;
       }
-      jj_consume_token(28);
+      jj_consume_token(29);
 {if ("" != null) return Relation.constructMultiRelation(t.image, children, basicCatFunction, headFinder);}
       break;
       }
@@ -659,164 +667,167 @@ children.add(child);
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_Relation_277_3_25()
+  private boolean jj_3R_Relation_278_3_25()
  {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_Relation_277_5_26()) {
+    if (jj_3R_Relation_278_5_26()) {
     jj_scanpos = xsp;
-    if (jj_3R_Relation_305_3_27()) return true;
+    if (jj_3R_Relation_306_3_27()) return true;
     }
     return false;
   }
 
-  private boolean jj_3R_SubNode_128_5_9()
+  private boolean jj_3R_SubNode_129_5_9()
  {
-    if (jj_3R_ModDescription_142_3_11()) return true;
+    if (jj_3R_ModDescription_143_3_11()) return true;
     return false;
   }
 
-  private boolean jj_3R_Child_265_7_24()
+  private boolean jj_3R_Child_266_7_24()
  {
-    if (jj_3R_Relation_277_3_25()) return true;
+    if (jj_3R_Relation_278_3_25()) return true;
     return false;
   }
 
-  private boolean jj_3R_Child_264_7_23()
+  private boolean jj_3R_Child_265_7_23()
  {
-    if (jj_scan_token(14)) return true;
+    if (jj_scan_token(15)) return true;
     return false;
   }
 
-  private boolean jj_3R_Description_170_5_20()
+  private boolean jj_3R_Description_171_5_20()
  {
-    if (jj_scan_token(21)) return true;
+    if (jj_scan_token(22)) return true;
     return false;
   }
 
   private boolean jj_3_2()
  {
-    if (jj_scan_token(12)) return true;
-    if (jj_3R_ChildrenConj_233_3_7()) return true;
+    if (jj_scan_token(13)) return true;
+    if (jj_3R_ChildrenConj_234_3_7()) return true;
     return false;
   }
 
-  private boolean jj_3R_Child_263_5_22()
+  private boolean jj_3R_Child_264_5_22()
+ {
+    if (jj_scan_token(25)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_ModDescription_143_31_16()
+ {
+    if (jj_scan_token(18)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Child_264_3_18()
+ {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_Child_264_5_22()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Child_265_7_23()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Child_266_7_24()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_SubNode_120_3_8()
+ {
+    if (jj_scan_token(15)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_SubNode_120_3_6()
+ {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_SubNode_120_3_8()) {
+    jj_scanpos = xsp;
+    if (jj_3R_SubNode_129_5_9()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_ModChild_257_7_14()
  {
     if (jj_scan_token(24)) return true;
     return false;
   }
 
-  private boolean jj_3R_ModDescription_142_31_16()
- {
-    if (jj_scan_token(17)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Child_263_3_18()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_Child_263_5_22()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Child_264_7_23()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Child_265_7_24()) return true;
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_SubNode_119_3_8()
- {
-    if (jj_scan_token(14)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_SubNode_119_3_6()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_SubNode_119_3_8()) {
-    jj_scanpos = xsp;
-    if (jj_3R_SubNode_128_5_9()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_ModChild_256_7_14()
- {
-    if (jj_scan_token(23)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Relation_305_3_27()
+  private boolean jj_3R_Relation_306_3_27()
  {
     if (jj_scan_token(MULTI_RELATION)) return true;
     return false;
   }
 
-  private boolean jj_3R_Description_157_5_19()
+  private boolean jj_3R_Description_158_5_19()
  {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_scan_token(8)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(10)) {
+    if (jj_scan_token(11)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(9)) return true;
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_ModChild_249_7_13()
- {
-    if (jj_scan_token(16)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Description_157_3_17()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_Description_157_5_19()) {
+    if (jj_scan_token(9)) {
     jj_scanpos = xsp;
-    if (jj_3R_Description_170_5_20()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Description_184_5_21()) return true;
+    if (jj_scan_token(10)) return true;
+    }
     }
     }
     return false;
   }
 
-  private boolean jj_3R_ModChild_248_5_12()
+  private boolean jj_3R_ModChild_250_7_13()
  {
-    if (jj_3R_Child_263_3_18()) return true;
+    if (jj_scan_token(17)) return true;
     return false;
   }
 
-  private boolean jj_3R_ModChild_248_3_10()
+  private boolean jj_3R_Description_158_3_17()
  {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_ModChild_248_5_12()) {
+    if (jj_3R_Description_158_5_19()) {
     jj_scanpos = xsp;
-    if (jj_3R_ModChild_249_7_13()) {
+    if (jj_3R_Description_171_5_20()) {
     jj_scanpos = xsp;
-    if (jj_3R_ModChild_256_7_14()) return true;
+    if (jj_3R_Description_185_5_21()) return true;
     }
     }
     return false;
   }
 
-  private boolean jj_3R_ModDescription_142_6_15()
+  private boolean jj_3R_ModChild_249_5_12()
  {
-    if (jj_scan_token(16)) return true;
+    if (jj_3R_Child_264_3_18()) return true;
     return false;
   }
 
-  private boolean jj_3R_Relation_278_9_29()
+  private boolean jj_3R_ModChild_249_3_10()
+ {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_ModChild_249_5_12()) {
+    jj_scanpos = xsp;
+    if (jj_3R_ModChild_250_7_13()) {
+    jj_scanpos = xsp;
+    if (jj_3R_ModChild_257_7_14()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_ModDescription_143_6_15()
+ {
+    if (jj_scan_token(17)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Relation_279_9_29()
  {
     if (jj_scan_token(REL_W_STR_ARG)) return true;
     return false;
@@ -824,47 +835,47 @@ children.add(child);
 
   private boolean jj_3_1()
  {
-    if (jj_scan_token(12)) return true;
-    if (jj_3R_SubNode_119_3_6()) return true;
+    if (jj_scan_token(13)) return true;
+    if (jj_3R_SubNode_120_3_6()) return true;
     return false;
   }
 
-  private boolean jj_3R_Relation_277_9_28()
+  private boolean jj_3R_Relation_278_9_28()
  {
     if (jj_scan_token(RELATION)) return true;
     return false;
   }
 
-  private boolean jj_3R_ModDescription_142_3_11()
+  private boolean jj_3R_ModDescription_143_3_11()
  {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_ModDescription_142_6_15()) jj_scanpos = xsp;
+    if (jj_3R_ModDescription_143_6_15()) jj_scanpos = xsp;
     xsp = jj_scanpos;
-    if (jj_3R_ModDescription_142_31_16()) jj_scanpos = xsp;
-    if (jj_3R_Description_157_3_17()) return true;
+    if (jj_3R_ModDescription_143_31_16()) jj_scanpos = xsp;
+    if (jj_3R_Description_158_3_17()) return true;
     return false;
   }
 
-  private boolean jj_3R_Description_184_5_21()
+  private boolean jj_3R_Description_185_5_21()
  {
-    if (jj_scan_token(20)) return true;
+    if (jj_scan_token(21)) return true;
     return false;
   }
 
-  private boolean jj_3R_ChildrenConj_233_3_7()
+  private boolean jj_3R_ChildrenConj_234_3_7()
  {
-    if (jj_3R_ModChild_248_3_10()) return true;
+    if (jj_3R_ModChild_249_3_10()) return true;
     return false;
   }
 
-  private boolean jj_3R_Relation_277_5_26()
+  private boolean jj_3R_Relation_278_5_26()
  {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_Relation_277_9_28()) {
+    if (jj_3R_Relation_278_9_28()) {
     jj_scanpos = xsp;
-    if (jj_3R_Relation_278_9_29()) return true;
+    if (jj_3R_Relation_279_9_29()) return true;
     }
     return false;
   }
@@ -886,7 +897,7 @@ children.add(child);
 	   jj_la1_init_0();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x334700,0x1814070,0x1814070,0x334700,0x10000,0x20000,0x700,0x40000,0x100000,0x100000,0x300700,0x1c14070,0x400000,0x1814070,0x1004070,0x80,0x10000,0x20000,0x700,0x10000,0x20000,0x700,0x10000,0x1014400,0x50,0x8000000,0x334700,0x70,};
+	   jj_la1_0 = new int[] {0x668f00,0x3028070,0x3028070,0x668f00,0x20000,0x40000,0xf00,0x80000,0x200000,0x200000,0x600f00,0x3828070,0x800000,0x3028070,0x2008070,0x80,0x20000,0x40000,0xb00,0x20000,0x40000,0xb00,0x20000,0x2028800,0x50,0x10000000,0x668f00,0x70,};
 	}
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -1099,7 +1110,7 @@ children.add(child);
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[29];
+	 boolean[] la1tokens = new boolean[30];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
@@ -1113,7 +1124,7 @@ children.add(child);
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 29; i++) {
+	 for (int i = 0; i < 30; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;

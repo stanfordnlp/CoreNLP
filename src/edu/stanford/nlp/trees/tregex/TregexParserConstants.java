@@ -23,9 +23,11 @@ interface TregexParserConstants {
   /** RegularExpression Id. */
   int BLANK = 9;
   /** RegularExpression Id. */
-  int REGEX = 10;
+  int ROOTNODE = 10;
   /** RegularExpression Id. */
-  int VARNAME = 11;
+  int REGEX = 11;
+  /** RegularExpression Id. */
+  int VARNAME = 12;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -42,6 +44,7 @@ interface TregexParserConstants {
     "<NUMBER>",
     "<IDENTIFIER>",
     "\"__\"",
+    "\"_ROOT_\"",
     "<REGEX>",
     "<VARNAME>",
     "\"|\"",

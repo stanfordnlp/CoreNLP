@@ -65,6 +65,7 @@ TOKEN:
 | < NUMBER: ("-")? ( ["0"-"9"] )+ >
 | < IDENTIFIER: ~[" ","0"-"9","\n","\r","(","/","|","@","!","#","%","&",")","=","?","[","]",">","<","~","_",".",",","$",":","{","}",";"] ( ~[" ","\n","\r","(","/","@","!","#","%","&",")","=","?","[","]",">","<","~",".",",","$",":"] )* >
 | < BLANK: "__" >
+| < ROOTNODE: "_ROOT_" >
 | < REGEX: "/" ("\\/"|~["\n","\r","/"])* "/" >
 | < VARNAME: ( ["a"-"z","A"-"Z"] )+ >
 }
@@ -154,7 +155,7 @@ DescriptionPattern Description(Relation r, boolean negateDesc, boolean cat) : {
 } {
 // this is how we match tokens
 // the return value of tokens is a Token object
-  ( ( ( desc = <IDENTIFIER> | desc = <REGEX> | desc = <BLANK> )
+  ( ( ( desc = <IDENTIFIER> | desc = <REGEX> | desc = <BLANK> | desc = <ROOTNODE> )
     ( ( "#" groupNum = <NUMBER> "%" groupVar = <IDENTIFIER> ) {
         varGroups.add(new Pair<Integer,String>(Integer.parseInt(groupNum.image),groupVar.image));
       } )*
