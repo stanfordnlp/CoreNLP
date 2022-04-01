@@ -131,7 +131,7 @@ abstract class Relation implements Serializable {
   /**
    * Static factory method for relations requiring an argument, including
    * HAS_ITH_CHILD, ITH_CHILD_OF, UNBROKEN_CATEGORY_DOMINATES,
-   * UNBROKEN_CATEGORY_DOMINATED_BY.
+   * UNBROKEN_CATEGORY_DOMINATED_BY, ANCESTOR_OF_ITH_LEAF.
    *
    * @param s The String representation of the relation
    * @param arg The argument to the relation, as a string; could be a node
@@ -167,6 +167,9 @@ abstract class Relation implements Serializable {
         break;
       case ",+":
         r = new UnbrokenCategoryFollows(arg, basicCatFunction);
+        break;
+      case "<<<":
+        r = new AncestorOfIthLeaf(Integer.parseInt(arg));
         break;
       default:
         throw new ParseException("Unrecognized compound relation " + s + ' '
@@ -359,6 +362,89 @@ abstract class Relation implements Serializable {
           }
         }
       };
+    }
+  };
+
+  /**
+   * Looks for the ith leaf of the current node
+   */
+  private static class AncestorOfIthLeaf extends Relation {
+
+    private static final long serialVersionUID = -6495191354526L;
+
+    private final int leafNum;
+
+    AncestorOfIthLeaf(int i) {
+      super("<<<" + String.valueOf(i));
+      if (i == 0) {
+        throw new IllegalArgumentException("Error -- no such thing as zeroth leaf!");
+      }
+      leafNum = i;
+    }
+
+    @Override
+    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
+      if (t1 == t2)
+        return false;
+      if (!t2.isLeaf())
+        return false;
+      // this is kind of lazy
+      // if it somehow became a performance limitation,
+      // a recursive search would be faster
+      List<Tree> leaves = t1.getLeaves();
+      if (leaves.size() < Math.abs(leafNum))
+        return false;
+
+      final int index;
+      if (leafNum > 0) {
+        index = leafNum - 1;
+      } else {
+        // eg, leafNum == -1 means we check leaves.size() - 1
+        index = leaves.size() + leafNum;
+      }
+      return leaves.get(index) == t2;
+    }
+
+    @Override
+    Iterator<Tree> searchNodeIterator(final Tree t,
+                                      final TregexMatcher matcher) {
+      return new SearchNodeIterator() {
+        @Override
+        void initialize() {
+          List<Tree> leaves = t.getLeaves();
+          if (leaves.size() >= Math.abs(leafNum)) {
+            final int index;
+            if (leafNum > 0) {
+              index = leafNum - 1;
+            } else {
+              index = leafNum + leaves.size();
+            }
+            next = leaves.get(index);
+          }
+        }
+      };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof AncestorOfIthLeaf)) {
+        return false;
+      }
+
+      final AncestorOfIthLeaf other = (AncestorOfIthLeaf) o;
+      if (leafNum != other.leafNum) {
+        return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return leafNum + 20;
     }
   };
 

@@ -114,6 +114,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td>A &gt;i B <td>A is the ith child of B (i &gt; 0)
  * <tr><td>A &lt;-i B <td>B is the ith-to-last child of A (i &gt; 0)
  * <tr><td>A &gt;-i B <td>A is the ith-to-last child of B (i &gt; 0)
+ * <tr><td>A &lt;&lt;&lt;i B <td>B is the ith leaf of A
+ * <tr><td>A &lt;&lt;&lt;-i B <td>B is the ith-to-last leaf of A
  * <tr><td>A &lt;: B <td>B is the only child of A
  * <tr><td>A &gt;: B <td>A is the only child of B
  * <tr><td>A &lt;&lt;: B <td>A dominates B via an unbroken chain (length &gt; 0) of unary local trees.
