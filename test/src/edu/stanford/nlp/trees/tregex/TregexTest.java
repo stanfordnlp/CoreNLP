@@ -1070,6 +1070,17 @@ public class TregexTest extends TestCase {
     TregexPattern pattern = TregexPattern.compile("A <5 B");
   }
 
+  public void testAncestorOfLeaf() {
+    runTest("A <<< b", "(ROOT (A (B b)))", "(A (B b))");
+    runTest("A <<< b", "(ROOT (A (B c)))");
+    runTest("A <<< b", "(ROOT (A (B b) (C b)))", "(A (B b) (C b))", "(A (B b) (C b))");
+    runTest("A <<< b", "(ROOT (A (B z) (C b)))", "(A (B z) (C b))");
+    runTest("A <<< __", "(ROOT (A (B z) (C b)))", "(A (B z) (C b))", "(A (B z) (C b))");
+    runTest("A <<< __", "(ROOT (A (B b)) (A (C c)))", "(A (B b))", "(A (C c))");
+    runTest("A <<< __", "(ROOT (A (B b)) (B (C c)))", "(A (B b))");
+    runTest("A <<< (b . c=foo) <<< =foo", "(ROOT (A (B b) (C c)))", "(A (B b) (C c))");
+  }
+
   public void testHeadOfPhrase() {
     runTest("NP <# NNS", "(NP (NN work) (NNS practices))", "(NP (NN work) (NNS practices))");
     runTest("NP <# NN", "(NP (NN work) (NNS practices))"); // should have no results
