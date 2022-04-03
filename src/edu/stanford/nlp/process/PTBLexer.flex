@@ -760,7 +760,6 @@ ABBREVSN = So\.|No\.
 
 /* See also a couple of special cases for pty. and op./loc in the code below. */
 
-
 HYPHEN = [-\u058A\u2010\u2011\u2012]
 HYPHENS = {HYPHEN}+
 SSN = [0-9]{3}{HYPHEN}[0-9]{2}{HYPHEN}[0-9]{4}
