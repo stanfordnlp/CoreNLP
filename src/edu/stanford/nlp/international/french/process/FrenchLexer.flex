@@ -286,11 +286,9 @@ SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
 SPAMP = &amp;
 SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
 SPLET = &[aeiouAEIOU](acute|grave|uml);
-/* \u3000 is ideographic space */
-SPACE = [ \t\u00A0\u2000-\u200A\u3000]
-SPACES = {SPACE}+
-NEWLINE = \r|\r?\n|\u2028|\u2029|\u000B|\u000C|\u0085
-SPACENL = ({SPACE}|{NEWLINE})
+
+%include ../../../process/LexCommon.tokens
+
 SENTEND = {SPACENL}({SPACENL}|([A-Z]|{SGML}))
 HYPHEN = [-_\u058A\u2010\u2011]
 HYPHENS = \-+
@@ -452,6 +450,11 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
                             return getNext();
                           }
                         }
+
+/* TODO: not using LexCommon.productions because there are no PerLine settings */
+/* we might want to add those settings to the other tokenizers anyway */
+{FILENAME}/({SPACE}|[.?!,\"'<()])      { return getNext(); }
+
 {ORDINAL}/{SPACE}       { return getNext(); }
 {SPAMP}                 { return getNormalizedAmpNext(); }
 {SPPUNC} |
