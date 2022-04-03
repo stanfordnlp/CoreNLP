@@ -296,111 +296,6 @@ abstract class Relation implements Serializable {
     }
   };
 
-  private static final Relation ANCESTOR_OF_LEAF = new Relation("<<<") {
-
-    private static final long serialVersionUID = -78542691313554L;
-
-    @Override
-    Iterator<Tree> searchNodeIterator(final Tree t,
-                                      final TregexMatcher matcher) {
-      return new SearchNodeIterator() {
-        Stack<Tree> searchStack;
-
-        @Override
-        public void initialize() {
-          searchStack = new Stack<>();
-          for (int i = t.numChildren() - 1; i >= 0; i--) {
-            searchStack.push(t.getChild(i));
-          }
-          if (!searchStack.isEmpty()) {
-            advance();
-          }
-        }
-
-        @Override
-        void advance() {
-          // using getLeaves() would be simpler code,
-          // but this was easy enough
-          next = null;
-          while (next == null && !searchStack.isEmpty()) {
-            next = searchStack.pop();
-            for (int i = next.numChildren() - 1; i >= 0; i--) {
-              searchStack.push(next.getChild(i));
-            }
-            // we've added the next layer of children, but we're not
-            // at a leaf, so keep going if there are nodes left to search
-            if (!next.isLeaf()) {
-              next = null;
-            }
-          }
-        }
-      };
-    }
-  };
-
-  /**
-   * Looks for the ith leaf of the current node
-   */
-  private static class AncestorOfIthLeaf extends Relation {
-
-    private static final long serialVersionUID = -6495191354526L;
-
-    private final int leafNum;
-
-    AncestorOfIthLeaf(int i) {
-      super("<<<" + String.valueOf(i));
-      if (i == 0) {
-        throw new IllegalArgumentException("Error -- no such thing as zeroth leaf!");
-      }
-      leafNum = i;
-    }
-
-    @Override
-    Iterator<Tree> searchNodeIterator(final Tree t,
-                                      final TregexMatcher matcher) {
-      return new SearchNodeIterator() {
-        @Override
-        void initialize() {
-          // this is a little lazy in terms of coding
-          // would be a bit faster to actually recurse through the tree
-          // this is unlikely to ever be a performance limitation, though
-          List<Tree> leaves = t.getLeaves();
-          if (leaves.size() >= Math.abs(leafNum)) {
-            final int index;
-            if (leafNum > 0) {
-              index = leafNum - 1;
-            } else {
-              index = leafNum + leaves.size();
-            }
-            next = leaves.get(index);
-          }
-        }
-      };
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (!(o instanceof AncestorOfIthLeaf)) {
-        return false;
-      }
-
-      final AncestorOfIthLeaf other = (AncestorOfIthLeaf) o;
-      if (leafNum != other.leafNum) {
-        return false;
-      }
-
-      return true;
-    }
-
-    @Override
-    public int hashCode() {
-      return leafNum + 20;
-    }
-  };
-
   private static final Relation DOMINATES = new Relation("<<") {
 
     private static final long serialVersionUID = -2580199434621268260L;
@@ -1054,6 +949,111 @@ abstract class Relation implements Serializable {
           }
         }
       };
+    }
+  };
+
+  private static final Relation ANCESTOR_OF_LEAF = new Relation("<<<") {
+
+    private static final long serialVersionUID = -78542691313554L;
+
+    @Override
+    Iterator<Tree> searchNodeIterator(final Tree t,
+                                      final TregexMatcher matcher) {
+      return new SearchNodeIterator() {
+        Stack<Tree> searchStack;
+
+        @Override
+        public void initialize() {
+          searchStack = new Stack<>();
+          for (int i = t.numChildren() - 1; i >= 0; i--) {
+            searchStack.push(t.getChild(i));
+          }
+          if (!searchStack.isEmpty()) {
+            advance();
+          }
+        }
+
+        @Override
+        void advance() {
+          // using getLeaves() would be simpler code,
+          // but this was easy enough
+          next = null;
+          while (next == null && !searchStack.isEmpty()) {
+            next = searchStack.pop();
+            for (int i = next.numChildren() - 1; i >= 0; i--) {
+              searchStack.push(next.getChild(i));
+            }
+            // we've added the next layer of children, but we're not
+            // at a leaf, so keep going if there are nodes left to search
+            if (!next.isLeaf()) {
+              next = null;
+            }
+          }
+        }
+      };
+    }
+  };
+
+  /**
+   * Looks for the ith leaf of the current node
+   */
+  private static class AncestorOfIthLeaf extends Relation {
+
+    private static final long serialVersionUID = -6495191354526L;
+
+    private final int leafNum;
+
+    AncestorOfIthLeaf(int i) {
+      super("<<<" + String.valueOf(i));
+      if (i == 0) {
+        throw new IllegalArgumentException("Error -- no such thing as zeroth leaf!");
+      }
+      leafNum = i;
+    }
+
+    @Override
+    Iterator<Tree> searchNodeIterator(final Tree t,
+                                      final TregexMatcher matcher) {
+      return new SearchNodeIterator() {
+        @Override
+        void initialize() {
+          // this is a little lazy in terms of coding
+          // would be a bit faster to actually recurse through the tree
+          // this is unlikely to ever be a performance limitation, though
+          List<Tree> leaves = t.getLeaves();
+          if (leaves.size() >= Math.abs(leafNum)) {
+            final int index;
+            if (leafNum > 0) {
+              index = leafNum - 1;
+            } else {
+              index = leafNum + leaves.size();
+            }
+            next = leaves.get(index);
+          }
+        }
+      };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof AncestorOfIthLeaf)) {
+        return false;
+      }
+
+      final AncestorOfIthLeaf other = (AncestorOfIthLeaf) o;
+      if (leafNum != other.leafNum) {
+        return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return leafNum + 20;
     }
   };
 
