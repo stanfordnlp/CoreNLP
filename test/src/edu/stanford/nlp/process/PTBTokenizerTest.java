@@ -96,6 +96,8 @@ public class PTBTokenizerTest {
       "i got (89.2%) in my exams",
       "Dial 908-333-4444 to unban mox opal",
       "The jerk who banned mox opal has social security number 555-55-5555.",
+      "What do you suppose is in the file thicc_antennae.jpg?",
+      "What do you suppose is in the file thicc_antennae.asdf?",
   };
 
   private final String[][] ptbGold = {
@@ -188,6 +190,9 @@ public class PTBTokenizerTest {
       { "i", "got", "-LRB-", "89.2", "%", "-RRB-", "in", "my", "exams" },
       { "Dial", "908-333-4444", "to", "unban", "mox", "opal" },
       { "The", "jerk", "who", "banned", "mox", "opal", "has", "social", "security", "number", "555-55-5555", "." },
+      // test that filename extensions trigger something being a single word
+      { "What", "do", "you", "suppose", "is", "in", "the", "file", "thicc_antennae.jpg", "?" },
+      { "What", "do", "you", "suppose", "is", "in", "the", "file", "thicc_antennae", ".", "asdf", "?" },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -289,7 +294,8 @@ public class PTBTokenizerTest {
       { "i", "got", "(", "89.2", "%", ")", "in", "my", "exams" },
       { "Dial", "908-333-4444", "to", "unban", "mox", "opal" },
       { "The", "jerk", "who", "banned", "mox", "opal", "has", "social", "security", "number", "555-55-5555", "." },
-
+      { "What", "do", "you", "suppose", "is", "in", "the", "file", "thicc_antennae.jpg", "?" },
+      { "What", "do", "you", "suppose", "is", "in", "the", "file", "thicc_antennae", ".", "asdf", "?" },
   };
 
   @Test
