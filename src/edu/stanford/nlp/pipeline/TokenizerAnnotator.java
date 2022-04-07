@@ -256,7 +256,11 @@ public class TokenizerAnnotator implements Annotator  {
       this.cleanxmlAnnotator = null;
     }
 
-    this.ssplitAnnotator = new WordsToSentencesAnnotator(props);
+    if (PropertiesUtils.getBool(props, STANFORD_TOKENIZE + "." + STANFORD_SSPLIT, true)) {
+      this.ssplitAnnotator = new WordsToSentencesAnnotator(props);
+    } else {
+      this.ssplitAnnotator = null;
+    }
   }
 
   /**
@@ -445,7 +449,9 @@ public class TokenizerAnnotator implements Annotator  {
     if (this.cleanxmlAnnotator != null) {
       this.cleanxmlAnnotator.annotate(annotation);
     }
-    this.ssplitAnnotator.annotate(annotation);
+    if (this.ssplitAnnotator != null) {
+      this.ssplitAnnotator.annotate(annotation);
+    }
   }
 
   @Override
