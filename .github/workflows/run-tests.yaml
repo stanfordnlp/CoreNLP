@@ -17,6 +17,10 @@ jobs:
           pwd
           ant clean compile
           echo $CLASSPATH
+      - name: Run Basic Tests
+        if: always()
+        run: |
+          ant test
       - name: Run Basic ITests
         if: always()
         run: |
