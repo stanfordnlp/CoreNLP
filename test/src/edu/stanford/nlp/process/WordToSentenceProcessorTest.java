@@ -17,9 +17,11 @@ import junit.framework.TestCase;
 
 public class WordToSentenceProcessorTest extends TestCase {
 
-  private static final Annotator ud = new TokenizerAnnotator(false, "en");
-  private static final Annotator udNL = new TokenizerAnnotator(false, "en", "invertible,tokenizeNLs=true");
-  private static final Annotator wsNL =
+  private static final TokenizerAnnotator ud =
+    new TokenizerAnnotator(false, "en");
+  private static final TokenizerAnnotator udNL =
+    new TokenizerAnnotator(false, "en", "invertible,tokenizeNLs=true");
+  private static final TokenizerAnnotator wsNL =
     new TokenizerAnnotator(false, PropertiesUtils.asProperties("tokenize.whitespace", "true", "invertible", "true", "tokenizeNLs", "true"));
 
   private static final WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<>();
@@ -35,7 +37,7 @@ public class WordToSentenceProcessorTest extends TestCase {
   }
 
   private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
-                                  Annotator tokenizer,
+                                  TokenizerAnnotator tokenizer,
                                   String testSentence, String ... gold) {
     Annotation annotation = new Annotation(testSentence);
     udNL.annotate(annotation);
@@ -211,7 +213,9 @@ public class WordToSentenceProcessorTest extends TestCase {
   }
 
   public void testChinese() {
-    checkResult(cwts, wsNL,"巴拉特 说 ： 「 我们 未 再 获得 任何 结果 。 」 ＜ 金融时报 ？ ＞ 《 金融时报 》 周三",
+    checkResult(cwts,
+                wsNL,
+                "巴拉特 说 ： 「 我们 未 再 获得 任何 结果 。 」 ＜ 金融时报 ？ ＞ 《 金融时报 》 周三",
                 "巴拉特 说 ： 「 我们 未 再 获得 任何 结果 。 」",
                 "＜ 金融时报 ？ ＞",
                 "《 金融时报 》 周三");
