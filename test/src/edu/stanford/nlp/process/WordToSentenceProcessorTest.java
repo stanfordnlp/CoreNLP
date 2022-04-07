@@ -19,14 +19,14 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   private static final Annotator ud = new TokenizerAnnotator(false, "en");
   private static final Annotator udNL = new TokenizerAnnotator(false, "en", "invertible,tokenizeNLs=true");
-  private static final Annotator wsNL = new TokenizerAnnotator(false,
-          PropertiesUtils.asProperties("tokenize.whitespace", "true", "invertible", "true", "tokenizeNLs", "true"));
+  private static final Annotator wsNL =
+    new TokenizerAnnotator(false, PropertiesUtils.asProperties("tokenize.whitespace", "true", "invertible", "true", "tokenizeNLs", "true"));
 
   private static final WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<>();
   private static final WordToSentenceProcessor<CoreLabel> wtsNull =
-          new WordToSentenceProcessor<>(true); // treat input as one sentence
-  private static final WordToSentenceProcessor<CoreLabel> cwts = new WordToSentenceProcessor<>(
-          "[.。]|[!?！？]+", WordToSentenceProcessor.NewlineIsSentenceBreak.TWO_CONSECUTIVE, false);
+    new WordToSentenceProcessor<>(true); // treat input as one sentence
+  private static final WordToSentenceProcessor<CoreLabel> cwts =
+    new WordToSentenceProcessor<>("[.。]|[!?！？]+", WordToSentenceProcessor.NewlineIsSentenceBreak.TWO_CONSECUTIVE, false);
 
 
   private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
@@ -104,103 +104,103 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   public void testNullSplitter() {
     checkResult(wtsNull, "This should be one sentence.  There is no split.",
-            "This should be one sentence.  There is no split.");
+                "This should be one sentence.  There is no split.");
   }
 
   public void testParagraphStrategies() {
     final WordToSentenceProcessor<CoreLabel> wtsNever =
-            new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER);
+      new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER);
     final WordToSentenceProcessor<CoreLabel> wtsAlways =
-            new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
+      new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
     final WordToSentenceProcessor<CoreLabel> wtsTwo =
-            new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.TWO_CONSECUTIVE);
+      new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.TWO_CONSECUTIVE);
 
     String input1 = "Depending on the options,\nthis could be all sorts of things,\n\n as I like chocolate. And cookies.";
     String input2 = "Depending on the options,\nthis could be all sorts of things,\n as I like chocolate. And cookies.";
     checkResult(wtsNever, input1,
-            "Depending on the options,\nthis could be all sorts of things,\n\nas I like chocolate.",
-            "And cookies.");
+                "Depending on the options,\nthis could be all sorts of things,\n\nas I like chocolate.",
+                "And cookies.");
     checkResult(wtsAlways, input1,
-            "Depending on the options,",
-            "this could be all sorts of things,",
-            "as I like chocolate.",
-            "And cookies.");
+                "Depending on the options,",
+                "this could be all sorts of things,",
+                "as I like chocolate.",
+                "And cookies.");
     checkResult(wtsTwo, input1,
-            "Depending on the options, this could be all sorts of things,",
-            "as I like chocolate.",
-            "And cookies.");
+                "Depending on the options, this could be all sorts of things,",
+                "as I like chocolate.",
+                "And cookies.");
     checkResult(wtsNever, input2,
-            "Depending on the options,\nthis could be all sorts of things,\nas I like chocolate.",
-            "And cookies.");
+                "Depending on the options,\nthis could be all sorts of things,\nas I like chocolate.",
+                "And cookies.");
     checkResult(wtsAlways, input2,
-            "Depending on the options,",
-            "this could be all sorts of things,",
-            "as I like chocolate.",
-            "And cookies.");
+                "Depending on the options,",
+                "this could be all sorts of things,",
+                "as I like chocolate.",
+                "And cookies.");
     checkResult(wtsTwo, input2,
-            "Depending on the options,\nthis could be all sorts of things,\nas I like chocolate.",
-            "And cookies.");
+                "Depending on the options,\nthis could be all sorts of things,\nas I like chocolate.",
+                "And cookies.");
     String input3 = "Specific descriptions are absent.\n\n''Mossy Head Industrial Park'' it says.";
     checkResult(wtsTwo, input3,
-            "Specific descriptions are absent.",
-            "''Mossy Head Industrial Park'' it says.");
+                "Specific descriptions are absent.",
+                "''Mossy Head Industrial Park'' it says.");
   }
 
   public void testXmlElements() {
     final WordToSentenceProcessor<CoreLabel> wtsXml =
-            new WordToSentenceProcessor<>(null, null,null,
-                        Generics.newHashSet(Arrays.asList("p", "chapter")),
-                        WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER, null, null);
+      new WordToSentenceProcessor<>(null, null,null,
+                                    Generics.newHashSet(Arrays.asList("p", "chapter")),
+                                    WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER, null, null);
 
     String input1 = "<chapter>Chapter 1</chapter><p>This is text. So is this.</p> <p>One without end</p><p>Another</p><p>And another</p>";
     checkResult(wtsXml, input1,
-            "Chapter 1",
-            "This is text.",
-            "So is this.",
-            "One without end",
-            "Another",
-            "And another");
+                "Chapter 1",
+                "This is text.",
+                "So is this.",
+                "One without end",
+                "Another",
+                "And another");
   }
 
   public void testRegion() {
     final WordToSentenceProcessor<CoreLabel> wtsRegion =
-            new WordToSentenceProcessor<>(WordToSentenceProcessor.DEFAULT_BOUNDARY_REGEX,
-                    WordToSentenceProcessor.DEFAULT_BOUNDARY_FOLLOWERS_REGEX,
-                    WordToSentenceProcessor.DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD,
-                    Generics.newHashSet(Collections.singletonList("p")),
-                    "chapter|preface", WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER, null, null, false, false);
+      new WordToSentenceProcessor<>(WordToSentenceProcessor.DEFAULT_BOUNDARY_REGEX,
+                                    WordToSentenceProcessor.DEFAULT_BOUNDARY_FOLLOWERS_REGEX,
+                                    WordToSentenceProcessor.DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD,
+                                    Generics.newHashSet(Collections.singletonList("p")),
+                                    "chapter|preface", WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER, null, null, false, false);
     String input1 = "<title>Chris rules!</title><preface><p>Para one</p><p>Para two</p></preface>" +
-            "<chapter><p>Text we like. Two sentences \n\n in it.</p></chapter><coda>Some more text here</coda>";
+      "<chapter><p>Text we like. Two sentences \n\n in it.</p></chapter><coda>Some more text here</coda>";
     checkResult(wtsRegion, input1,
-            "Para one",
-            "Para two",
-            "Text we like.",
-            "Two sentences in it.");
+                "Para one",
+                "Para two",
+                "Text we like.",
+                "Two sentences in it.");
 
   }
 
   public void testBlankLines() {
     final WordToSentenceProcessor<CoreLabel> wtsLines =
-            new WordToSentenceProcessor<>(Generics.newHashSet(WordToSentenceProcessor.DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD));
+      new WordToSentenceProcessor<>(Generics.newHashSet(WordToSentenceProcessor.DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD));
     String input1 = "Depending on the options,\nthis could be all sorts of things,\n\n as I like chocolate. And cookies.";
     checkResult(wtsLines, input1,
-            "Depending on the options,",
-            "this could be all sorts of things,",
-            "",
-            "as I like chocolate. And cookies.");
+                "Depending on the options,",
+                "this could be all sorts of things,",
+                "",
+                "as I like chocolate. And cookies.");
     String input2 = "Depending on the options,\nthis could be all sorts of things,\n\n as I like chocolate. And cookies.\n";
     checkResult(wtsLines, input2,
-            "Depending on the options,",
-            "this could be all sorts of things,",
-            "",
-            "as I like chocolate. And cookies.");
+                "Depending on the options,",
+                "this could be all sorts of things,",
+                "",
+                "as I like chocolate. And cookies.");
     String input3 = "Depending on the options,\nthis could be all sorts of things,\n\n as I like chocolate. And cookies.\n\n";
     checkResult(wtsLines, input3,
-            "Depending on the options,",
-            "this could be all sorts of things,",
-            "",
-            "as I like chocolate. And cookies.",
-            "");
+                "Depending on the options,",
+                "this could be all sorts of things,",
+                "",
+                "as I like chocolate. And cookies.",
+                "");
   }
 
   public void testExclamationPoint() {
@@ -225,10 +225,10 @@ public class WordToSentenceProcessorTest extends TestCase {
    */
   public void testParagraphSeparator() {
     checkResult(wts, "Hello\u2029World.",
-        "Hello", "World.");
+                "Hello", "World.");
     checkResult(wts, "Hello.\u2029World.",
-        "Hello.", "World.");
+                "Hello.", "World.");
     checkResult(wts, "Hello  \u2029World.",
-        "Hello", "World.");
+                "Hello", "World.");
   }
 }

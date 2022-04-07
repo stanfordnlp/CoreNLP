@@ -53,8 +53,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
           // throw "\n" in just in case files use that instead of
           // the system separator
           // this constructor will keep empty lines as empty sentences
-          wts1 = new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{System.lineSeparator(), "\n",
-                  AbstractTokenizer.NEWLINE_TOKEN}));
+          wts1 = new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(new String[]{System.lineSeparator(), "\n", AbstractTokenizer.NEWLINE_TOKEN}));
         }
       } else {
         // this constructor will keep empty lines as empty sentences
