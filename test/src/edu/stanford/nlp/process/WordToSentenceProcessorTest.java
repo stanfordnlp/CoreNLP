@@ -30,33 +30,30 @@ public class WordToSentenceProcessorTest extends TestCase {
 
 
   private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
-                                 String testSentence, String... gold) {
+                                  String testSentence, String... gold) {
     checkResult(wts, ud, testSentence, gold);
   }
 
   private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
                                   Annotator tokenizer,
-                                 String testSentence, String ... gold) {
+                                  String testSentence, String ... gold) {
     Annotation annotation = new Annotation(testSentence);
     udNL.annotate(annotation);
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     List<List<CoreLabel>> sentences = wts.process(tokens);
 
-    assertEquals("Output number of sentences didn't match:\n" +
-            Arrays.toString(gold) + " vs. \n" + sentences + '\n',
-            gold.length, sentences.size());
+    assertEquals("Output number of sentences didn't match:\n" + Arrays.toString(gold) + " vs. \n" + sentences + '\n',
+                 gold.length, sentences.size());
 
     Annotation[] goldAnnotations = new Annotation[gold.length];
     for (int i = 0; i < gold.length; ++i) {
       goldAnnotations[i] = new Annotation(gold[i]);
       tokenizer.annotate(goldAnnotations[i]);
-      List<CoreLabel> goldTokens =
-        goldAnnotations[i].get(CoreAnnotations.TokensAnnotation.class);
+      List<CoreLabel> goldTokens = goldAnnotations[i].get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> testTokens = sentences.get(i);
       int goldTokensSize = goldTokens.size();
-      assertEquals("Sentence lengths didn't match:\n" +
-              goldTokens + " vs. \n" + testTokens + '\n',
-              goldTokensSize, testTokens.size());
+      assertEquals("Sentence lengths didn't match:\n" + goldTokens + " vs. \n" + testTokens + '\n',
+                   goldTokensSize, testTokens.size());
       for (int j = 0; j < goldTokensSize; ++j) {
         assertEquals(goldTokens.get(j).word(), testTokens.get(j).word());
       }
@@ -215,9 +212,9 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   public void testChinese() {
     checkResult(cwts, wsNL,"巴拉特 说 ： 「 我们 未 再 获得 任何 结果 。 」 ＜ 金融时报 ？ ＞ 《 金融时报 》 周三",
-            "巴拉特 说 ： 「 我们 未 再 获得 任何 结果 。 」",
-             "＜ 金融时报 ？ ＞",
-              "《 金融时报 》 周三");
+                "巴拉特 说 ： 「 我们 未 再 获得 任何 结果 。 」",
+                "＜ 金融时报 ？ ＞",
+                "《 金融时报 》 周三");
 
   }
 
