@@ -17,8 +17,8 @@ import junit.framework.TestCase;
 
 public class WordToSentenceProcessorTest extends TestCase {
 
-  private static final TokenizerAnnotator ud =
-    new TokenizerAnnotator(false, "en");
+  private static final TokenizerAnnotator onelineTokenizer =
+    new TokenizerAnnotator(false, PropertiesUtils.asProperties("tokenize.language", "en", "ssplit.isOneSentence", "true"), null);
   private static final TokenizerAnnotator udNL =
     new TokenizerAnnotator(false, "en", "invertible,tokenizeNLs=true");
   private static final TokenizerAnnotator wsNL =
@@ -33,7 +33,7 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
                                   String testSentence, String... gold) {
-    checkResult(wts, ud, testSentence, gold);
+    checkResult(wts, onelineTokenizer, testSentence, gold);
   }
 
   private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
@@ -207,9 +207,10 @@ public class WordToSentenceProcessorTest extends TestCase {
 
   public void testExclamationPoint() {
     Annotation annotation = new Annotation("Foo!!");
-    ud.annotate(annotation);
+    onelineTokenizer.annotate(annotation);
+    // the TokenizerAnnotator will add ids by default
     List<CoreLabel> list = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals("Wrong double bang", "[Foo, !!]", list.toString());
+    assertEquals("Wrong double bang", "[Foo-1, !!-2]", list.toString());
   }
 
   public void testChinese() {
