@@ -113,6 +113,12 @@ public class UniversalDependenciesConverter {
 
   private static Morphology MORPH = new Morphology();
 
+  private static void replaceAllLemmata(SemanticGraph sg) {
+    sg.vertexListSorted().forEach(w -> {
+        w.setLemma(MORPH.lemma(w.word(), w.tag()));
+    });
+  }
+
   private static void addLemmata(SemanticGraph sg) {
     sg.vertexListSorted().forEach(w -> {
       if(w.lemma() == null) {
@@ -208,6 +214,7 @@ public class UniversalDependenciesConverter {
     String conlluFileName = props.getProperty("conlluFile");
     String outputRepresentation = props.getProperty("outputRepresentation", "basic");
     boolean addFeatures = PropertiesUtils.getBool(props, "addFeatures", false);
+    boolean replaceLemmata = PropertiesUtils.getBool(props, "replaceLemmata", false);
 
     Iterator<Pair<SemanticGraph, SemanticGraph>> sgIterator; // = null;
 
@@ -227,7 +234,7 @@ public class UniversalDependenciesConverter {
       System.err.println("No input file specified!");
       System.err.println();
       System.err.printf("Usage: java %s [-treeFile trees.tree | -conlluFile deptrees.conllu]" +
-                        " [-addFeatures] [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
+                        " [-addFeatures] [-replaceLemmata] [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
                         UniversalDependenciesConverter.class.getCanonicalName());
       return;
     }
@@ -255,7 +262,11 @@ public class UniversalDependenciesConverter {
           featureAnnotator.addFeatures(sg, tree, false, false);
         }
       } else {
-        addLemmata(sg);
+        if (replaceLemmata) {
+          replaceAllLemmata(sg);
+        } else {
+          addLemmata(sg);
+        }
         if (USE_NAME) {
           addNERTags(sg);
         }
