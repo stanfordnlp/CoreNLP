@@ -658,9 +658,13 @@ public class SemgrexTest extends TestCase {
     }
     runTest("{lemma:ate}", graph, "ate");
     runTest("{lemma:Bill}", graph, "Bill");
+  }
 
+  /** tests a deprecated version - might as well check that it still functions, since it still exists */
+  public void testCCLemma() {
     Tree tree = Tree.valueOf("(ROOT (S (NP (PRP I)) (VP (VBP love) (NP (DT the) (NN display))) (. .)))");
-    graph = SemanticGraphFactory.generateCCProcessedDependencies(tree);
+    @SuppressWarnings("deprecation")
+    SemanticGraph graph = SemanticGraphFactory.generateCCProcessedDependencies(tree);
     for (IndexedWord word : graph.vertexSet()) {
       word.setLemma(word.word());
     }
