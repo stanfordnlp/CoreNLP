@@ -379,9 +379,9 @@ public class UniversalDependenciesFeatureAnnotator  {
     return false;
   }
 
-  public void addFeatures(SemanticGraph sg, Tree t, boolean addLemma, boolean addUPOS) {
+  public void addFeatures(SemanticGraph sg, Tree tree, boolean addLemma, boolean addUPOS) {
 
-    Set<Integer> imperatives = t != null ? getImperatives(t) : new HashSet<>();
+    Set<Integer> imperatives = tree != null ? getImperatives(tree) : new HashSet<>();
 
     for (IndexedWord word : sg.vertexListSorted()) {
       String posTag = word.get(CoreAnnotations.PartOfSpeechAnnotation.class);
@@ -426,9 +426,9 @@ public class UniversalDependenciesFeatureAnnotator  {
       }
     }
 
-    if (addUPOS && t != null) {
-      t = UniversalPOSMapper.mapTree(t);
-      List<Label> uPOSTags = t.preTerminalYield();
+    if (addUPOS && tree != null) {
+      tree = UniversalPOSMapper.mapTree(tree);
+      List<Label> uPOSTags = tree.preTerminalYield();
       List<IndexedWord> yield = sg.vertexListSorted();
       // int len = yield.size();
       for (IndexedWord word : yield) {
