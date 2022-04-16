@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -56,12 +57,12 @@ public class UniversalDependenciesFeatureAnnotator  {
   private final Morphology morphology = new Morphology();
 
 
-  public UniversalDependenciesFeatureAnnotator() throws IOException {
+  public UniversalDependenciesFeatureAnnotator() {
     loadFeatureMap();
   }
 
 
-  private void loadFeatureMap() throws IOException {
+  private void loadFeatureMap() {
     try (Reader r = IOUtils.readerFromString(FEATURE_MAP_FILE)) {
       BufferedReader br = new BufferedReader(r);
 
@@ -80,6 +81,8 @@ public class UniversalDependenciesFeatureAnnotator  {
           wordPosFeatureMap.put(parts[0] + '_' + parts[1], CoNLLUUtils.parseFeatures(parts[2]));
         }
       }
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 

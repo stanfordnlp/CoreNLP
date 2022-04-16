@@ -9,7 +9,6 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.ud.UniversalDependenciesFeatureAnnotator;
 import edu.stanford.nlp.util.CoreMap;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -24,11 +23,7 @@ public class UDFeatureAnnotator extends SentenceAnnotator {
 
 
   public UDFeatureAnnotator() {
-    try {
-      this.featureAnnotator = new UniversalDependenciesFeatureAnnotator();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    this.featureAnnotator = new UniversalDependenciesFeatureAnnotator();
   }
 
   @Override
