@@ -7,6 +7,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -206,6 +207,7 @@ public class UniversalDependenciesConverter {
     String treeFileName = props.getProperty("treeFile");
     String conlluFileName = props.getProperty("conlluFile");
     String outputRepresentation = props.getProperty("outputRepresentation", "basic");
+    boolean addFeatures = PropertiesUtils.getBool(props, "addFeatures", false);
 
     Iterator<Pair<SemanticGraph, SemanticGraph>> sgIterator; // = null;
 
@@ -224,11 +226,13 @@ public class UniversalDependenciesConverter {
     } else {
       System.err.println("No input file specified!");
       System.err.println();
-      System.err.printf("Usage: java %s [-treeFile trees.tree | -conlluFile deptrees.conllu]"
-                      + " [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
-              UniversalDependenciesConverter.class.getCanonicalName());
+      System.err.printf("Usage: java %s [-treeFile trees.tree | -conlluFile deptrees.conllu]" +
+                        " [-addFeatures] [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
+                        UniversalDependenciesConverter.class.getCanonicalName());
       return;
     }
+
+    UniversalDependenciesFeatureAnnotator featureAnnotator = (addFeatures) ? new UniversalDependenciesFeatureAnnotator() : null;
 
     CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
 
@@ -246,10 +250,18 @@ public class UniversalDependenciesConverter {
           String uposTag = uposLabels.get(idx).value();
           token.set(CoreAnnotations.CoarseTagAnnotation.class, uposTag);
         }
+
+        if (featureAnnotator != null) {
+          featureAnnotator.addFeatures(sg, tree, false, false);
+        }
       } else {
         addLemmata(sg);
         if (USE_NAME) {
           addNERTags(sg);
+        }
+
+        if (featureAnnotator != null) {
+          featureAnnotator.addFeatures(sg, null, false, false);
         }
       }
 
