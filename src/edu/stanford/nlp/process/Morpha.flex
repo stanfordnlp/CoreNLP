@@ -2074,6 +2074,8 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <scan>"us"/_P     { return(stem(2,"we","")); }
 <scan>"I"/_P      { return(proper_name_stem()); }
 <scan>"an"/_[AD]     { return(stem(1, "", "n")); }
+<scan>"those"/_DT     { return(stem(3, "at", "")); }
+<scan>"these"/_DT     { return(stem(3, "is", "")); }
 <scan>{G}+/_NN[^P] { yybegin(noun); yypushback(yylength()); return(next()); }
 <scan>{G}+/_NNP    { return(proper_name_stem()); }
 <scan>{G}+/_V     { yybegin(verb); yypushback(yylength()); return(next()); }
