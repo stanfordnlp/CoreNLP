@@ -46,7 +46,7 @@ public class CoNLLUOutputterITest {
             "5\tneat\tneat\tADJ\tJJ\tDegree=Pos\t0\troot\t0:root\t_\n" +
             "6\t.\t.\tPUNCT\t.\t_\t5\tpunct\t5:punct\t_\n" +
             "\n" +
-            "1\tBetter\tbetter\tADJ\tJJR\tDegree=Cmp\t0\troot\t0:root\t_\n" +
+            "1\tBetter\tgood\tADJ\tJJR\tDegree=Cmp\t0\troot\t0:root\t_\n" +
             "2\tthan\tthan\tADP\tIN\t_\t3\tcase\t3:case\t_\n" +
             "3\tXML\txml\tNOUN\tNN\tNumber=Sing\t1\tobl\t1:obl:than\t_\n" +
             "4\t.\t.\tPUNCT\t.\t_\t1\tpunct\t1:punct\t_\n\n";

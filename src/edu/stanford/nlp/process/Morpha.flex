@@ -463,6 +463,10 @@ G = [^ \t\r\n\u2028\u2029\u000B\u000C\u0085_]
 GM = [^ \t\r\n\u2028\u2029\u000B\u000C\u0085_-]
 SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 
+/* adjectives such as tame which become tamer, tamest */
+E_ADJS = "able"|"absolute"|"abstruse"|"acute"|"ample"|"austere"|"bare"|"base"|"blithe"|"blonde"|"blue"|"brave"|"brittle"|"brusque"|"capable"|"chaste"|"choice"|"close"|"coarse"|"complete"|"concise"|"crude"|"cute"|"demure"|"dense"|"dire"|"divine"|"doggone"|"eerie"|"extreme"|"false"|"feeble"|"fickle"|"fierce"|"fine"|"free"|"game"|"gauche"|"gentle"|"gladsome"|"grave"|"grewsome"|"gruesome"|"hale"|"handsome"|"hoarse"|"huge"|"humane"|"humble"|"idle"|"immense"|"inane"|"insane"|"intense"|"irate"|"kittle"|"lame"|"large"|"late"|"lithe"|"little"|"loose"|"mature"|"mere"|"mickle"|"minute"|"mute"|"naive"|"naïve"|"negative"|"nice"|"nimble"|"noble"|"nude"|"obscene"|"obscure"|"obtuse"|"opaque"|"pale"|"polite"|"positive"|"possible"|"precise"|"private"|"pure"|"purple"|"rare"|"rathe"|"remote"|"resolute"|"rife"|"ripe"|"rude"|"safe"|"sage"|"sane"|"savage"|"scarce"|"secure"|"sensible"|"serene"|"severe"|"simple"|"sincere"|"sore"|"spare"|"sparse"|"spruce"|"square"|"stable"|"stale"|"strange"|"suave"|"sublime"|"subtile"|"subtle"|"supple"|"supreme"|"sure"|"svelte"|"tame"|"tense"|"terse"|"trite"|"true"|"unique"|"unripe"|"unsafe"|"unstable"|"untrue"|"unwise"|"urbane"|"vague"|"vile"|"white"|"wholesome"|"wide"|"winsome"|"wise"|"yare"
+
+
 %%
 
  /* can and will not always modal so can be inflected */
@@ -2076,6 +2080,19 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <scan>"an"/_[AD]     { return(stem(1, "", "n")); }
 <scan>"those"/_DT     { return(stem(3, "at", "")); }
 <scan>"these"/_DT     { return(stem(3, "is", "")); }
+
+<scan>"worse"/_JJ     { return(stem(5, "bad", "")); }
+<scan>"worst"/_JJ     { return(stem(5, "bad", "")); }
+<scan>"worse"/_RB     { return(stem(5, "badly", "")); }
+<scan>"worst"/_RB     { return(stem(5, "badly", "")); }
+<scan>"better"/_JJ    { return(stem(6, "good", "")); }
+<scan>"best"/_JJ      { return(stem(4, "good", "")); }
+<scan>"better"/_RB    { return(stem(6, "well", "")); }
+<scan>"best"/_RB      { return(stem(4, "well", "")); }
+
+<scan>{E_ADJS}r/_JJ     { return(stem(1, "", "")); }
+<scan>{E_ADJS}st/_JJ    { return(stem(2, "", "")); }
+
 <scan>{G}+/_NN[^P] { yybegin(noun); yypushback(yylength()); return(next()); }
 <scan>{G}+/_NNP    { return(proper_name_stem()); }
 <scan>{G}+/_V     { yybegin(verb); yypushback(yylength()); return(next()); }
