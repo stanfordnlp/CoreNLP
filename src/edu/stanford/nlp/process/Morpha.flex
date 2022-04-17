@@ -2086,6 +2086,7 @@ EY_ADJS = "cag"|"cak"|"clay"|"cliqu"|"crep"|"dic"|"dop"|"glu"|"goo"|"grip"|"hok"
 <scan>"an"/_[AD]     { return(stem(1, "", "n")); }
 <scan>"those"/_DT     { return(stem(3, "at", "")); }
 <scan>"these"/_DT     { return(stem(3, "is", "")); }
+<scan>"dat"/_DT     { return(stem(3, "that", "")); }
 
 <scan>"worse"/_JJR    { return(stem(5, "bad", "")); }
 <scan>"worst"/_JJS    { return(stem(5, "bad", "")); }
