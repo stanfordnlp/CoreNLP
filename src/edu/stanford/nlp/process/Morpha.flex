@@ -469,6 +469,9 @@ E_ADJS = "able"|"absolute"|"abstruse"|"acute"|"ample"|"austere"|"bare"|"base"|"b
 /* adjectives such as hot which become hotter, hottest */
 XX_ADJS = "awfull"|"badd"|"bigg"|"bumm"|"carefull"|"cheerfull"|"cruell"|"dimm"|"dolefull"|"drabb"|"dunn"|"fatt"|"fearfull"|"fitt"|"flatt"|"flipp"|"fruitfull"|"full"|"gladd"|"glibb"|"glumm"|"gracefull"|"gratefull"|"grimm"|"grumm"|"hipp"|"hott"|"joyfull"|"levell"|"madd"|"mournfull"|"painfull"|"peacefull"|"pitifull"|"primm"|"redd"|"rumm"|"sadd"|"slimm"|"smugg"|"snugg"|"squatt"|"tann"|"thankfull"|"thinn"|"tranquill"|"trimm"|"wann"|"wett"|"woefull"|"wonderfull"
 
+/* adjectives such as gooey which become gooier, gooiest */
+EY_ADJS = "cag"|"cak"|"clay"|"cliqu"|"crep"|"dic"|"dop"|"glu"|"goo"|"grip"|"hok"|"hom"|"hors"|"jok"|"lak"|"mop"|"shal"
+
 
 %%
 
@@ -2097,6 +2100,8 @@ XX_ADJS = "awfull"|"badd"|"bigg"|"bumm"|"carefull"|"cheerfull"|"cruell"|"dimm"|"
 <scan>{E_ADJS}st/_JJ    { return(stem(2, "", "")); }
 <scan>{XX_ADJS}er/_JJ   { return(stem(3, "", "")); }
 <scan>{XX_ADJS}est/_JJ  { return(stem(4, "", "")); }
+<scan>{EY_ADJS}ier/_JJ  { return(stem(3, "ey", "")); }
+<scan>{EY_ADJS}iest/_JJ { return(stem(4, "ey", "")); }
 
 <scan>{G}+/_NN[^P] { yybegin(noun); yypushback(yylength()); return(next()); }
 <scan>{G}+/_NNP    { return(proper_name_stem()); }
