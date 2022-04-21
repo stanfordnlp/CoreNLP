@@ -472,6 +472,7 @@ XX_ADJS = "awfull"|"badd"|"bigg"|"bumm"|"carefull"|"cheerfull"|"cruell"|"dimm"|"
 /* adjectives such as gooey which become gooier, gooiest */
 EY_ADJS = "cag"|"cak"|"clay"|"cliqu"|"crep"|"dic"|"dop"|"glu"|"goo"|"grip"|"hok"|"hom"|"hors"|"jok"|"lak"|"mop"|"shal"
 
+COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 
 %%
 
@@ -2097,16 +2098,22 @@ EY_ADJS = "cag"|"cak"|"clay"|"cliqu"|"crep"|"dic"|"dop"|"glu"|"goo"|"grip"|"hok"
 <scan>"better"/_RBR   { return(stem(6, "well", "")); }
 <scan>"best"/_RBS     { return(stem(4, "well", "")); }
 
-<scan>{E_ADJS}r/_JJ[RS]     { return(stem(1, "", "")); }
-<scan>{E_ADJS}st/_JJ[RS]    { return(stem(2, "", "")); }
-<scan>{XX_ADJS}er/_JJ[RS]   { return(stem(3, "", "")); }
-<scan>{XX_ADJS}est/_JJ[RS]  { return(stem(4, "", "")); }
-<scan>{EY_ADJS}ier/_JJ[RS]  { return(stem(3, "ey", "")); }
-<scan>{EY_ADJS}iest/_JJ[RS] { return(stem(4, "ey", "")); }
-<scan>{G}+ier/_JJ[RS]       { return(stem(3, "y", "")); }
-<scan>{G}+iest/_JJ[RS]      { return(stem(4, "y", "")); }
-<scan>{G}+er/_JJ[RS]        { return(stem(2, "", "")); }
-<scan>{G}+est/_JJ[RS]       { return(stem(3, "", "")); }
+/* further_JJR discussion stays further in GUM */
+<scan>"further"/_JJR  { return(stem(0, "", "")); }
+/* further_RBR extend becomes far */
+<scan>"f"[au]"rther"/_RBR  { return(stem(6, "ar", "")); }
+<scan>"f"[au]"rthest"/_RBS { return(stem(7, "ar", "")); }
+
+<scan>{E_ADJS}r/_{COMP_SUP}     { return(stem(1, "", "")); }
+<scan>{E_ADJS}st/_{COMP_SUP}    { return(stem(2, "", "")); }
+<scan>{XX_ADJS}er/_{COMP_SUP}   { return(stem(3, "", "")); }
+<scan>{XX_ADJS}est/_{COMP_SUP}  { return(stem(4, "", "")); }
+<scan>{EY_ADJS}ier/_{COMP_SUP}  { return(stem(3, "ey", "")); }
+<scan>{EY_ADJS}iest/_{COMP_SUP} { return(stem(4, "ey", "")); }
+<scan>{G}+ier/_{COMP_SUP}       { return(stem(3, "y", "")); }
+<scan>{G}+iest/_{COMP_SUP}      { return(stem(4, "y", "")); }
+<scan>{G}+er/_{COMP_SUP}        { return(stem(2, "", "")); }
+<scan>{G}+est/_{COMP_SUP}       { return(stem(3, "", "")); }
 
 <scan>{G}+/_NN[^P] { yybegin(noun); yypushback(yylength()); return(next()); }
 <scan>{G}+/_NNP    { return(proper_name_stem()); }
