@@ -27,7 +27,7 @@ public class MorphologyTest extends TestCase {
                               "best", "gooiest", "glummest", "tamest", "sickest",
                               "better", "earlier", // should not change if JJ
                               "earlier", "earliest", "more", "less", "least", // RBR / RBS special cases
-                              "quicker", "slower", "longer",
+                              "quicker", "slower", "longer", "wider", "widest",
                               "easier", "easier", // JJR & RBR
   };
 
@@ -50,7 +50,7 @@ public class MorphologyTest extends TestCase {
                               "JJS", "JJS", "JJS", "JJS", "JJS",
                               "JJ", "JJ",
                               "RBR", "RBS", "RBR", "RBR", "RBS",
-                              "RBR", "RBR", "RBR",
+                              "RBR", "RBR", "RBR", "RBR", "RBS",
                               "JJR", "RBR",
   };
 
@@ -73,7 +73,7 @@ public class MorphologyTest extends TestCase {
                                 "good", "gooey", "glum", "tame", "sick",
                                 "better", "earlier",
                                 "early", "early", "more", "less", "least",
-                                "quick", "slow", "long",
+                                "quick", "slow", "long", "wide", "wide",
                                 "easy", "easy",
   };
 
