@@ -26,6 +26,9 @@ public class MorphologyTest extends TestCase {
                               "better", "gooier", "glummer", "tamer", "sicker",
                               "best", "gooiest", "glummest", "tamest", "sickest",
                               "better", "earlier", // should not change if JJ
+                              "earlier", "earliest", "more", "less", "least", // RBR / RBS special cases
+                              "quicker", "slower", "longer",
+                              "easier", "easier", // JJR & RBR
   };
 
   private String[] exTags = { "NNS", "NNS", "VBD", "NN",
@@ -46,6 +49,9 @@ public class MorphologyTest extends TestCase {
                               "JJR", "JJR", "JJR", "JJR", "JJR",
                               "JJS", "JJS", "JJS", "JJS", "JJS",
                               "JJ", "JJ",
+                              "RBR", "RBS", "RBR", "RBR", "RBS",
+                              "RBR", "RBR", "RBR",
+                              "JJR", "RBR",
   };
 
   private String[] exAnswers = {"brethren", "duck", "see", "saw",
@@ -66,6 +72,9 @@ public class MorphologyTest extends TestCase {
                                 "good", "gooey", "glum", "tame", "sick",
                                 "good", "gooey", "glum", "tame", "sick",
                                 "better", "earlier",
+                                "early", "early", "more", "less", "least",
+                                "quick", "slow", "long",
+                                "easy", "easy",
   };
 
   public void testMorph() {
