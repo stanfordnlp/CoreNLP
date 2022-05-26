@@ -14,6 +14,7 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Setup
         run: |
+          echo "demo 1"
           pwd
           ant clean compile
           echo $CLASSPATH
