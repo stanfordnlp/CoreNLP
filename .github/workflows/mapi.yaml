@@ -1,0 +1,22 @@
+name: Mayhem for API
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Start your API
+      run: ../../scripts/mapi/start_api.sh &
+      #           ^-------------- update this, but keep the '&' to run
+      #                           the API in the background.
+
+    - name: Run Mayhem for API to check for vulnerabilities
+      uses: ForAllSecure/mapi-action@v1
+      with:
+        mapi-token: ${{ secrets.MAPI_TOKEN }}
+        api-url: http://localhost:9000
+        api-spec: ../../scripts/mapi/openapi.yaml

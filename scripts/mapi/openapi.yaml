@@ -1,0 +1,31 @@
+openapi: "3.0.0"
+info:
+  title: Minimal API
+  version: "1.0.0"
+paths:
+  /:
+    post:
+      summary: Annotate with CoreNLP
+      parameters:
+      - name: properties
+        in: query
+        description: '{"annotators":"tokenize,ssplit,pos","outputFormat":"json"}'
+        required: true
+        schema:
+          type: object
+          properties:
+            annotators:
+              type: "string"
+            outputFormat:
+              type: "string"
+          example:
+            annotators: "tokenize,ssplit,pos"
+            outputFormat: "json"
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        200:
+          description: OK
