@@ -514,6 +514,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     while (yylength() > 0) {
       char last = yycharat(yylength()-1);
       if (last == ' ' || last == '\t' || (last >= '\n' && last <= '\r' || last == '\u0085')) {
+        if (DEBUG) { logger.info("fixJFlex4SpaceAfterTokenBug still needed for " + yytext() + "!"); }
         yypushback(1);
       } else {
         break;
@@ -534,12 +535,16 @@ import edu.stanford.nlp.util.logging.Redwood;
       s = yytext(); // return the word WITH the final period
       yypushback(1); // (reduplication:) also return a period for next time
     }
-    return getNext(s, yytext());
+    String txt = yytext();
+    if (DEBUG) { logger.info("Used {ABBREV2} to recognize " + txt + " as " + s); }
+    return getNext(s, txt);
   }
 
   private Object processAbbrev3() {
     fixJFlex4SpaceAfterTokenBug();
-    return getNext();
+    String txt = yytext();
+    if (DEBUG) { logger.info("Used {ABBREV3} to recognize " + txt); }
+    return getNext(txt, txt);
   }
 
   /** Assuming we're at an end of sentence (uppercase following), we usually put back a period to become end-of-sentence. */
@@ -552,7 +557,9 @@ import edu.stanford.nlp.util.logging.Redwood;
       s = yytext();
       yypushback(1); // return a period for next time
     }
-    return getNext(s, yytext());
+    String txt = yytext();
+    if (DEBUG) { logger.info("Used {ABBREV1} to recognize " + txt + " as " + s); }
+    return getNext(s, txt);
   }
 
 %}
@@ -1041,23 +1048,45 @@ RM/{NUM}        { String txt = yytext();
                   if (DEBUG) { logger.info("Used {SWEARING} to recognize " + txt + " as " + normTok); }
                   return getNext(normTok, txt);
                 }
-{BANGWORDS}     { return getNext(); }
-<YyNotTokenizePerLine>{BANGMAGAZINES}/{SPACENL}magazine   { return getNext(); }
-<YyTokenizePerLine>{BANGMAGAZINES}/{SPACE}magazine   { return getNext(); }
-{THING3}                { if (escapeForwardSlashAsterisk) {
-                            breakByHyphensSlashes(yytext());
-                            return getNext(LexerUtils.escapeChar(yytext(), '/'), yytext());
+{BANGWORDS}     { String txt = yytext();
+                  if (DEBUG) { logger.info("Used {BANGWORDS} to recognize "+ txt); }
+                  return getNext(txt, txt);
+                }
+<YyNotTokenizePerLine>{BANGMAGAZINES}/{SPACENL}magazine   {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {BANGMAGAZINES} to recognize "+ txt); }
+                          return getNext(txt, txt);
+                        }
+<YyTokenizePerLine>{BANGMAGAZINES}/{SPACE}magazine   {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {BANGMAGAZINES} to recognize "+ txt); }
+                          return getNext(txt, txt);
+                        }
+{THING3}                { breakByHyphensSlashes(yytext());
+                          if (escapeForwardSlashAsterisk) {
+                            String txt = yytext();
+                            String normTok = LexerUtils.escapeChar(txt, '/');
+                            if (DEBUG) { logger.info("Used {THING3} to recognize " + txt + " as " + normTok); }
+                            return getNext(normTok, txt);
                           } else {
-                            breakByHyphensSlashes(yytext());
-                            return getNext();
+                            String txt = yytext();
+                            if (DEBUG) { logger.info("Used {THING3} to recognize " + txt); }
+                            return getNext(txt, txt);
                           }
                         }
-{DOLSIGN}               { return getNext(); }
-{DOLSIGN2}              { if (normalizeCurrency) {
-                            return getNext(LexerUtils.normalizeCurrency(yytext()), yytext());
+{DOLSIGN}               { String txt = yytext();
+                          if (DEBUG) { logger.info("Used {DOLSIGN} to recognize " + txt); }
+                            return getNext(txt, txt);
+                        }
+{DOLSIGN2}              { String txt = yytext();
+                          String normTok;
+                          if (normalizeCurrency) {
+                            normTok = LexerUtils.normalizeCurrency(txt);
                           } else {
-                            return getNext(LexerUtils.minimallyNormalizeCurrency(yytext()), yytext());
+                            normTok = LexerUtils.minimallyNormalizeCurrency(txt);
                           }
+                          if (DEBUG) { logger.info("Used {DOLSIGN2} to recognize " + txt + " as " + normTok); }
+                          return getNext(normTok, txt);
                         }
 /* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!). A one letter acronym candidate like "Z." or "I." in this context usually isn't, and so we return the leter and pushback the period for next time. We can't have "To" in list, as often get adjacent in headlines: "U.S. To Ask ...." */
 <YyNotTokenizePerLine>{ABBREV2}/({SPACENLS})([A]|[A]bout|[A]ccording|[A]dditionally|[A]fter|[A]ll|[A]lso|[A]lthough|[A]n|[A]nother|[A]s|[A]t|[B]efore|[B]oth|[B]ut|[B]y|[D]id|[D]uring|[E]ach|[E]arlier|[F]ollowing|[F]or|[F]rom|[H]e|[H]er|[H]ere|[H]is|[H]ow|[H]owever|[I]f|[I]n|[I]t|[I]ts|[L]ast|[L]ater|[M]any|[M]ore|[M]ost|[M]rs?\.|[M]s\.|[N]ow|[O]n|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[T]wo|[U]nder|[U]pon|[W]e|[W]hen|[W]hile|[W]hat|[W]ho|[W]hy|[Y]et|[Y]ou|{SGML1})({SPACENL}|[?!]) {
