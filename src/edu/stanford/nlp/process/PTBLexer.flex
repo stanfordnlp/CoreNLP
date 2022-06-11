@@ -27,6 +27,7 @@ package edu.stanford.nlp.process;
 
 
 import java.io.Reader;
+import java.text.Normalizer;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -488,6 +489,7 @@ import edu.stanford.nlp.util.logging.Redwood;
    *  @param originalText The original String that got transformed into txt
    */
   private Object getNext(String txt, String originalText) {
+    txt = Normalizer.normalize(txt, Normalizer.Form.NFC);
     int begin = Math.toIntExact(yychar);
     if (invertible) {
       String str = prevWordAfter.toString();
@@ -584,11 +586,9 @@ SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
 SPAMP = &amp;
 SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
 SPLET = &[aeiouAEIOU](acute|grave|uml);
-/* \u3000 is ideographic space; \u205F is medium math space */
-SPACE = [ \t\u00A0\u2000-\u200A\u202F\u20F5\u3000]
-SPACES = {SPACE}+
-NEWLINE = \r|\r?\n|\u2028|\u2029|\u000B|\u000C|\u0085
-SPACENL = ({SPACE}|{NEWLINE})
+
+%include LexCommon.tokens
+
 SPACENLS = {SPACENL}+
 /* These next ones are useful to get a fixed length trailing context. */
 SPACENL_ONE_CHAR = [ \t\u00A0\u2000-\u200A\u202F\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
@@ -615,8 +615,6 @@ DOLSIGN = ([A-Z]*\$|#)
 DOLSIGN2 = [\u00A2-\u00A5\u0080\u20A0-\u20BF\u058F\u060B\u09F2\u09F3\u0AF1\u0BF9\u0E3F\u17DB\uFF04\uFFE0\uFFE1\uFFE5\uFFE6]
 /* not used DOLLAR      {DOLSIGN}[ \t]*{NUMBER}  */
 /* |\( ?{NUMBER} ?\))    # is for pound signs */
-FILENAME_EXT = 3gp|avi|bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|flv|gif|gz|h|hei[cf]|htm|html|jar|java|jpeg|jpg|mov|mp[34g]|mpeg|o|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|wm[va]
-FILENAME = [\p{Alpha}\p{Digit}]+([-~.!_/#][\p{Alpha}\p{Digit}]+)*\.{FILENAME_EXT}
 /* Curse of intelligent tokenization, here we come. To model what LDC does, we separate out some \p{Digit}+\p{Alpha}+ tokens as 2 words */
 /* Go with just the top 20 currencies. */
 SEP_CURRENCY = (USD|EUR|JPY|GBP|AUD|CAD|CHF|CNY|SEK|NZD|MXN|SGD|HKD|NOK|KRW|TRY|RUB|INR|BRL|ZAR)
@@ -770,7 +768,6 @@ ABBREV3 = (ca|chs?|figs?|prop|nos?|nrs?|vols?|sect?s?|arts?|paras?|bldg|prop|pp|
 ABBREVSN = So\.|No\.
 
 /* See also a couple of special cases for pty. and op./loc in the code below. */
-
 
 HYPHEN = [-\u058A\u2010\u2011\u2012]
 HYPHENS = {HYPHEN}+
@@ -1147,6 +1144,8 @@ RM/{NUM}        { String txt = yytext();
 {ISO8601DATETIME}       { return getNext(); }
 //{ISO8601DATE}           { return getNext(); }
 {DEGREES}               { return getNext(); }
+/* Ideally would factor this out for use in other tokenizers,
+ * but the other tokenizers don't have TokenizerPerLine options */
 <YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'<()])      { return getNext(); }
 <YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'<()])      { return getNext(); }
 {WORD}\./{INSENTP}      { String origTok = yytext();

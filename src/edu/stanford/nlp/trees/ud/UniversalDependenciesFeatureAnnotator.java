@@ -7,9 +7,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -28,6 +30,8 @@ import edu.stanford.nlp.trees.UniversalPOSMapper;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 
@@ -53,12 +57,12 @@ public class UniversalDependenciesFeatureAnnotator  {
   private final Morphology morphology = new Morphology();
 
 
-  public UniversalDependenciesFeatureAnnotator() throws IOException {
+  public UniversalDependenciesFeatureAnnotator() {
     loadFeatureMap();
   }
 
 
-  private void loadFeatureMap() throws IOException {
+  private void loadFeatureMap() {
     try (Reader r = IOUtils.readerFromString(FEATURE_MAP_FILE)) {
       BufferedReader br = new BufferedReader(r);
 
@@ -77,6 +81,8 @@ public class UniversalDependenciesFeatureAnnotator  {
           wordPosFeatureMap.put(parts[0] + '_' + parts[1], CoNLLUUtils.parseFeatures(parts[2]));
         }
       }
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 
@@ -376,9 +382,9 @@ public class UniversalDependenciesFeatureAnnotator  {
     return false;
   }
 
-  public void addFeatures(SemanticGraph sg, Tree t, boolean addLemma, boolean addUPOS) {
+  public void addFeatures(SemanticGraph sg, Tree tree, boolean addLemma, boolean addUPOS) {
 
-    Set<Integer> imperatives = t != null ? getImperatives(t) : new HashSet<>();
+    Set<Integer> imperatives = tree != null ? getImperatives(tree) : new HashSet<>();
 
     for (IndexedWord word : sg.vertexListSorted()) {
       String posTag = word.get(CoreAnnotations.PartOfSpeechAnnotation.class);
@@ -423,9 +429,9 @@ public class UniversalDependenciesFeatureAnnotator  {
       }
     }
 
-    if (addUPOS && t != null) {
-      t = UniversalPOSMapper.mapTree(t);
-      List<Label> uPOSTags = t.preTerminalYield();
+    if (addUPOS && tree != null) {
+      tree = UniversalPOSMapper.mapTree(tree);
+      List<Label> uPOSTags = tree.preTerminalYield();
       List<IndexedWord> yield = sg.vertexListSorted();
       // int len = yield.size();
       for (IndexedWord word : yield) {
@@ -435,29 +441,28 @@ public class UniversalDependenciesFeatureAnnotator  {
     }
   }
 
+  public static void help() {
+      log.info("Usage: ");
+      log.info("java " +
+               UniversalDependenciesFeatureAnnotator.class.getCanonicalName() +
+               " -treeFile tree_file -conlluFile conllu_file [-addUPOS -escapeParenthesis]");
+  }
 
   public static void main(String[] args) throws IOException {
 
     if (args.length < 2) {
-      log.info("Usage: ");
-      log.info("java ");
-      log.info(UniversalDependenciesFeatureAnnotator.class.getCanonicalName());
-      log.info(" CoNLL-U_file tree_file [-addUPOS -escapeParenthesis]");
       return;
     }
 
-    String coNLLUFile = args[0];
-    String treeFile = args[1];
+    Properties props = StringUtils.argsToProperties(args);
+    String treeFile = props.getProperty("treeFile");
+    String coNLLUFile = props.getProperty("conlluFile");
+    boolean addUPOS = PropertiesUtils.getBool(props, "addUPOS", false);
+    boolean escapeParens = PropertiesUtils.getBool(props, "escapeParenthesis", false);
 
-    boolean addUPOS = false;
-    boolean escapeParens = false;
-
-    for (int i = 2; i < args.length; i++) {
-      if (args[i].equals("-addUPOS")) {
-        addUPOS = true;
-      } else if (args[i].equals("-escapeParenthesis")) {
-        escapeParens = true;
-      }
+    if (treeFile == null || coNLLUFile == null) {
+      help();
+      return;
     }
 
     UniversalDependenciesFeatureAnnotator featureAnnotator = new UniversalDependenciesFeatureAnnotator();

@@ -463,6 +463,17 @@ G = [^ \t\r\n\u2028\u2029\u000B\u000C\u0085_]
 GM = [^ \t\r\n\u2028\u2029\u000B\u000C\u0085_-]
 SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 
+/* adjectives such as tame which become tamer, tamest */
+E_ADJS = "able"|"absolute"|"abstruse"|"acute"|"ample"|"austere"|"bare"|"base"|"blithe"|"blonde"|"blue"|"brave"|"brittle"|"brusque"|"capable"|"chaste"|"choice"|"close"|"coarse"|"complete"|"concise"|"crude"|"cute"|"demure"|"dense"|"dire"|"divine"|"doggone"|"eerie"|"extreme"|"false"|"feeble"|"fickle"|"fierce"|"fine"|"free"|"game"|"gauche"|"gentle"|"gladsome"|"grave"|"grewsome"|"gruesome"|"hale"|"handsome"|"hoarse"|"huge"|"humane"|"humble"|"idle"|"immense"|"inane"|"insane"|"intense"|"irate"|"kittle"|"lame"|"large"|"late"|"lithe"|"little"|"loose"|"mature"|"mere"|"mickle"|"minute"|"mute"|"naive"|"naïve"|"negative"|"nice"|"nimble"|"noble"|"nude"|"obscene"|"obscure"|"obtuse"|"opaque"|"pale"|"polite"|"positive"|"possible"|"precise"|"private"|"pure"|"purple"|"rare"|"rathe"|"remote"|"resolute"|"rife"|"ripe"|"rude"|"safe"|"sage"|"sane"|"savage"|"scarce"|"secure"|"sensible"|"serene"|"severe"|"simple"|"sincere"|"sore"|"spare"|"sparse"|"spruce"|"square"|"stable"|"stale"|"strange"|"suave"|"sublime"|"subtile"|"subtle"|"supple"|"supreme"|"sure"|"svelte"|"tame"|"tense"|"terse"|"trite"|"true"|"unique"|"unripe"|"unsafe"|"unstable"|"untrue"|"unwise"|"urbane"|"vague"|"vile"|"white"|"wholesome"|"wide"|"winsome"|"wise"|"yare"
+
+/* adjectives such as hot which become hotter, hottest */
+XX_ADJS = "awfull"|"badd"|"bigg"|"bumm"|"carefull"|"cheerfull"|"cruell"|"dimm"|"dolefull"|"drabb"|"dunn"|"fatt"|"fearfull"|"fitt"|"flatt"|"flipp"|"fruitfull"|"full"|"gladd"|"glibb"|"glumm"|"gracefull"|"gratefull"|"grimm"|"grumm"|"hipp"|"hott"|"joyfull"|"levell"|"madd"|"mournfull"|"painfull"|"peacefull"|"pitifull"|"primm"|"redd"|"rumm"|"sadd"|"slimm"|"smugg"|"snugg"|"squatt"|"tann"|"thankfull"|"thinn"|"tranquill"|"trimm"|"wann"|"wett"|"woefull"|"wonderfull"
+
+/* adjectives such as gooey which become gooier, gooiest */
+EY_ADJS = "cag"|"cak"|"clay"|"cliqu"|"crep"|"dic"|"dop"|"glu"|"goo"|"grip"|"hok"|"hom"|"hors"|"jok"|"lak"|"mop"|"shal"
+
+COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
+
 %%
 
  /* can and will not always modal so can be inflected */
@@ -2074,6 +2085,36 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <scan>"us"/_P     { return(stem(2,"we","")); }
 <scan>"I"/_P      { return(proper_name_stem()); }
 <scan>"an"/_[AD]     { return(stem(1, "", "n")); }
+<scan>"those"/_DT     { return(stem(3, "at", "")); }
+<scan>"these"/_DT     { return(stem(3, "is", "")); }
+<scan>"dat"/_DT     { return(stem(3, "that", "")); }
+
+<scan>"worse"/_JJR    { return(stem(5, "bad", "")); }
+<scan>"worst"/_JJS    { return(stem(5, "bad", "")); }
+<scan>"worse"/_RBR    { return(stem(5, "badly", "")); }
+<scan>"worst"/_RBS    { return(stem(5, "badly", "")); }
+<scan>"better"/_JJR   { return(stem(6, "good", "")); }
+<scan>"best"/_JJS     { return(stem(4, "good", "")); }
+<scan>"better"/_RBR   { return(stem(6, "well", "")); }
+<scan>"best"/_RBS     { return(stem(4, "well", "")); }
+
+/* further_JJR discussion stays further in GUM */
+<scan>"further"/_JJR  { return(stem(0, "", "")); }
+/* further_RBR extend becomes far */
+<scan>"f"[au]"rther"/_RBR  { return(stem(6, "ar", "")); }
+<scan>"f"[au]"rthest"/_RBS { return(stem(7, "ar", "")); }
+
+<scan>{E_ADJS}r/_{COMP_SUP}     { return(stem(1, "", "")); }
+<scan>{E_ADJS}st/_{COMP_SUP}    { return(stem(2, "", "")); }
+<scan>{XX_ADJS}er/_{COMP_SUP}   { return(stem(3, "", "")); }
+<scan>{XX_ADJS}est/_{COMP_SUP}  { return(stem(4, "", "")); }
+<scan>{EY_ADJS}ier/_{COMP_SUP}  { return(stem(3, "ey", "")); }
+<scan>{EY_ADJS}iest/_{COMP_SUP} { return(stem(4, "ey", "")); }
+<scan>{G}+ier/_{COMP_SUP}       { return(stem(3, "y", "")); }
+<scan>{G}+iest/_{COMP_SUP}      { return(stem(4, "y", "")); }
+<scan>{G}+er/_{COMP_SUP}        { return(stem(2, "", "")); }
+<scan>{G}+est/_{COMP_SUP}       { return(stem(3, "", "")); }
+
 <scan>{G}+/_NN[^P] { yybegin(noun); yypushback(yylength()); return(next()); }
 <scan>{G}+/_NNP    { return(proper_name_stem()); }
 <scan>{G}+/_V     { yybegin(verb); yypushback(yylength()); return(next()); }

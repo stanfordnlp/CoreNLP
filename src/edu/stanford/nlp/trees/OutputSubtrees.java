@@ -1,5 +1,7 @@
 package edu.stanford.nlp.trees;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.MemoryTreebank;
@@ -33,6 +36,9 @@ public class OutputSubtrees {
   @ArgumentParser.Option(name="input", gloss="The file to use as input.", required=true)
   private static String INPUT; // = null;
 
+  @ArgumentParser.Option(name="output", gloss="Where to write output.  Will write to stdout if not set.", required=false)
+  private static String OUTPUT; // = null;
+
   @ArgumentParser.Option(name="root_only", gloss="Output only the roots", required=false)
   private static boolean ROOT_ONLY = false;
 
@@ -45,7 +51,7 @@ public class OutputSubtrees {
   @ArgumentParser.Option(name="assert_binary", gloss="Barf on non-binary trees", required=false)
   private static boolean ASSERT_BINARY = false;  
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     // Parse the arguments
     Properties props = StringUtils.argsToProperties(args, new HashMap<String, Integer>() {{
           put("ignore_labels", 1);
@@ -71,6 +77,14 @@ public class OutputSubtrees {
 
     MemoryTreebank treebank = new MemoryTreebank("utf-8");
     treebank.loadPath(INPUT, null);
+
+    final Writer output;
+    if (OUTPUT == null) {
+      output = IOUtils.encodedOutputStreamWriter(System.out, "utf-8");
+    } else {
+      output = IOUtils.getPrintWriter(OUTPUT, "utf-8");
+    }
+
     int treeNum = 0;
     for (Tree tree : treebank) {
       ++treeNum;
@@ -95,9 +109,13 @@ public class OutputSubtrees {
           value = remap.get(value);
         }
 
-        System.out.println(value + "   " + text);
+        output.write(value + "   " + text + "\n");
       }
-      System.out.println();
+      output.write("\n");
+    }
+    output.flush();
+    if (OUTPUT != null) {
+      output.close();
     }
   }
 }

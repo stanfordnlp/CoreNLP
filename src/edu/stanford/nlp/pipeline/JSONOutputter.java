@@ -188,8 +188,8 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("characterOffsetEnd", token.endPosition());
               if (token.containsKey(CoreAnnotations.CodepointOffsetBeginAnnotation.class) &&
                   token.containsKey(CoreAnnotations.CodepointOffsetEndAnnotation.class)) {
-                l3.set("codepointOffsetBegin", token.beginPosition());
-                l3.set("codepointOffsetEnd", token.endPosition());
+                l3.set("codepointOffsetBegin", token.get(CoreAnnotations.CodepointOffsetBeginAnnotation.class));
+                l3.set("codepointOffsetEnd", token.get(CoreAnnotations.CodepointOffsetEndAnnotation.class));
               }
               l3.set("pos", token.tag());
               l3.set("ner", token.ner());
@@ -216,6 +216,11 @@ public class JSONOutputter extends AnnotationOutputter {
                 l2.set("originalText", token.originalText());
                 l2.set("characterOffsetBegin", token.beginPosition());
                 l2.set("characterOffsetEnd", token.endPosition());
+                if (token.containsKey(CoreAnnotations.CodepointOffsetBeginAnnotation.class) &&
+                    token.containsKey(CoreAnnotations.CodepointOffsetEndAnnotation.class)) {
+                  l2.set("codepointOffsetBegin", token.get(CoreAnnotations.CodepointOffsetBeginAnnotation.class));
+                  l2.set("codepointOffsetEnd", token.get(CoreAnnotations.CodepointOffsetEndAnnotation.class));
+                }
           }));
         }
       }

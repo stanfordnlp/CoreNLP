@@ -1,0 +1,8 @@
+/* \u3000 is ideographic space; \u205F is medium math space */
+SPACE = [ \t\u00A0\u2000-\u200A\u202F\u20F5\u3000]
+SPACES = {SPACE}+
+NEWLINE = \r|\r?\n|\u2028|\u2029|\u000B|\u000C|\u0085
+SPACENL = ({SPACE}|{NEWLINE})
+
+FILENAME_EXT = 3gp|avi|bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|flv|gif|gz|h|hei[cf]|htm|html|jar|java|jpeg|jpg|mov|mp[34g]|mpeg|o|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|wm[va]
+FILENAME = [\p{Alpha}\p{Digit}]+([-~.!_/#][\p{Alpha}\p{Digit}]+)*\.{FILENAME_EXT}

@@ -50,7 +50,7 @@ public class GermanTokenizerPostProcessorITest extends TestCase {
   }
 
   /**
-   * You probably can't tell in your editor, but the input has 4 characters for 
+   * You probably can't tell in your editor, but the input has 4 characters for
    * <pre>für</pre>
    * and the output has 3
    */

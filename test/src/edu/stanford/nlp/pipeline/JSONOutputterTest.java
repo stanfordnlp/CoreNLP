@@ -92,6 +92,7 @@ public class JSONOutputterTest {
   // BEGIN TESTS FOR ANNOTATION WRITING
   // -----
 
+
   @Test
   public void testSimpleDocument() throws IOException {
     Annotation ann = new Annotation("JSON is neat. Better than XML.");
@@ -178,6 +179,120 @@ public class JSONOutputterTest {
         "\t\t\t\t\t\"originalText\": \".\",\n" +
         "\t\t\t\t\t\"characterOffsetBegin\": 29,\n" +
         "\t\t\t\t\t\"characterOffsetEnd\": 30,\n" +
+        "\t\t\t\t\t\"before\": \"\",\n" +
+        "\t\t\t\t\t\"after\": \"\"\n" +
+        "\t\t\t\t}\n" +
+        "\t\t\t]\n" +
+        "\t\t}\n" +
+        "\t]\n" +
+        "}\n");
+
+    Assert.assertEquals(expected, actual);
+  }
+
+  /** Test with codepoints - could refactor, but meh */
+  @Test
+  public void testCodepointDocument() throws IOException {
+    Annotation ann = new Annotation("JSON is neat. Better than 😺.");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(PropertiesUtils.asProperties("annotators", "tokenize", "tokenize.codepoint", "true"));
+    pipeline.annotate(ann);
+    String actual = new JSONOutputter().print(ann);
+    String expected = indent(
+        "{\n" +
+        "\t\"sentences\": [\n" +
+        "\t\t{\n" +
+        "\t\t\t\"index\": 0,\n" +
+        "\t\t\t\"tokens\": [\n" +
+        "\t\t\t\t{\n" +
+        "\t\t\t\t\t\"index\": 1,\n" +
+        "\t\t\t\t\t\"word\": \"JSON\",\n" +
+        "\t\t\t\t\t\"originalText\": \"JSON\",\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 0,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 4,\n" +
+        "\t\t\t\t\t\"codepointOffsetBegin\": 0,\n" +
+        "\t\t\t\t\t\"codepointOffsetEnd\": 4,\n" +
+        "\t\t\t\t\t\"before\": \"\",\n" +
+        "\t\t\t\t\t\"after\": \" \"\n" +
+        "\t\t\t\t},\n" +
+        "\t\t\t\t{\n" +
+        "\t\t\t\t\t\"index\": 2,\n" +
+        "\t\t\t\t\t\"word\": \"is\",\n" +
+        "\t\t\t\t\t\"originalText\": \"is\",\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 5,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 7,\n" +
+        "\t\t\t\t\t\"codepointOffsetBegin\": 5,\n" +
+        "\t\t\t\t\t\"codepointOffsetEnd\": 7,\n" +
+        "\t\t\t\t\t\"before\": \" \",\n" +
+        "\t\t\t\t\t\"after\": \" \"\n" +
+        "\t\t\t\t},\n" +
+        "\t\t\t\t{\n" +
+        "\t\t\t\t\t\"index\": 3,\n" +
+        "\t\t\t\t\t\"word\": \"neat\",\n" +
+        "\t\t\t\t\t\"originalText\": \"neat\",\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 8,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 12,\n" +
+        "\t\t\t\t\t\"codepointOffsetBegin\": 8,\n" +
+        "\t\t\t\t\t\"codepointOffsetEnd\": 12,\n" +
+        "\t\t\t\t\t\"before\": \" \",\n" +
+        "\t\t\t\t\t\"after\": \"\"\n" +
+        "\t\t\t\t},\n" +
+        "\t\t\t\t{\n" +
+        "\t\t\t\t\t\"index\": 4,\n" +
+        "\t\t\t\t\t\"word\": \".\",\n" +
+        "\t\t\t\t\t\"originalText\": \".\",\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 12,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 13,\n" +
+        "\t\t\t\t\t\"codepointOffsetBegin\": 12,\n" +
+        "\t\t\t\t\t\"codepointOffsetEnd\": 13,\n" +
+        "\t\t\t\t\t\"before\": \"\",\n" +
+        "\t\t\t\t\t\"after\": \" \"\n" +
+        "\t\t\t\t}\n" +
+        "\t\t\t]\n" +
+        "\t\t},\n" +
+        "\t\t{\n" +
+        "\t\t\t\"index\": 1,\n" +
+        "\t\t\t\"tokens\": [\n" +
+        "\t\t\t\t{\n" +
+        "\t\t\t\t\t\"index\": 1,\n" +
+        "\t\t\t\t\t\"word\": \"Better\",\n" +
+        "\t\t\t\t\t\"originalText\": \"Better\",\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 14,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 20,\n" +
+        "\t\t\t\t\t\"codepointOffsetBegin\": 14,\n" +
+        "\t\t\t\t\t\"codepointOffsetEnd\": 20,\n" +
+        "\t\t\t\t\t\"before\": \" \",\n" +
+        "\t\t\t\t\t\"after\": \" \"\n" +
+        "\t\t\t\t},\n" +
+        "\t\t\t\t{\n" +
+        "\t\t\t\t\t\"index\": 2,\n" +
+        "\t\t\t\t\t\"word\": \"than\",\n" +
+        "\t\t\t\t\t\"originalText\": \"than\",\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 21,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 25,\n" +
+        "\t\t\t\t\t\"codepointOffsetBegin\": 21,\n" +
+        "\t\t\t\t\t\"codepointOffsetEnd\": 25,\n" +
+        "\t\t\t\t\t\"before\": \" \",\n" +
+        "\t\t\t\t\t\"after\": \" \"\n" +
+        "\t\t\t\t},\n" +
+        "\t\t\t\t{\n" +
+        "\t\t\t\t\t\"index\": 3,\n" +
+        "\t\t\t\t\t\"word\": \"😺\",\n" +
+        "\t\t\t\t\t\"originalText\": \"😺\",\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 26,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 28,\n" +
+        "\t\t\t\t\t\"codepointOffsetBegin\": 26,\n" +
+        "\t\t\t\t\t\"codepointOffsetEnd\": 27,\n" +
+        "\t\t\t\t\t\"before\": \" \",\n" +
+        "\t\t\t\t\t\"after\": \"\"\n" +
+        "\t\t\t\t},\n" +
+        "\t\t\t\t{\n" +
+        "\t\t\t\t\t\"index\": 4,\n" +
+        "\t\t\t\t\t\"word\": \".\",\n" +
+        "\t\t\t\t\t\"originalText\": \".\",\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 28,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 29,\n" +
+        "\t\t\t\t\t\"codepointOffsetBegin\": 27,\n" +
+        "\t\t\t\t\t\"codepointOffsetEnd\": 28,\n" +
         "\t\t\t\t\t\"before\": \"\",\n" +
         "\t\t\t\t\t\"after\": \"\"\n" +
         "\t\t\t\t}\n" +
