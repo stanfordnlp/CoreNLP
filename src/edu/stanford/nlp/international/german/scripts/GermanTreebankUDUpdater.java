@@ -5,19 +5,21 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.*;
 
+/** @author Jason Bolton */
 public class GermanTreebankUDUpdater {
 
-  public static LabeledScoredTreeFactory factory = new LabeledScoredTreeFactory();
+  private static final LabeledScoredTreeFactory factory = new LabeledScoredTreeFactory();
 
-  public static HashMap<String,String> wordToSplit = new HashMap<>();
+  private static final HashMap<String,String> wordToSplit = new HashMap<>();
 
-  public static String taggerPath = "edu/stanford/nlp/models/pos-tagger/german-ud.tagger";
+  private static final String taggerPath = "edu/stanford/nlp/models/pos-tagger/german-ud.tagger";
 
-  public static String hyphenatedWordPatternString = "[ÄÖÜäöüẞßA-Za-z]+\\-[ÄÖÜäöüẞßA-Za-z]+";
-  public static Pattern hyphenatedWordPattern = Pattern.compile(hyphenatedWordPatternString);
+  private static final String hyphenatedWordPatternString = "[ÄÖÜäöüẞßA-Za-z]+-[ÄÖÜäöüẞßA-Za-z]+";
+  private static final Pattern hyphenatedWordPattern = Pattern.compile(hyphenatedWordPatternString);
 
   static {
     wordToSplit.put("am", "an,dem");
@@ -70,18 +72,19 @@ public class GermanTreebankUDUpdater {
   public static Tree createTagAndWordNode(String tag, String word) {
     Tree wordNode = factory.newLeaf(word);
     wordNode.setValue(word);
-    Tree tagNode = factory.newTreeNode(tag, Arrays.asList(wordNode));
+    Tree tagNode = factory.newTreeNode(tag, Collections.singletonList(wordNode));
     tagNode.setValue(tag);
     return tagNode;
   }
 
   public static void main(String[] args) throws IOException {
-    Reader r = new BufferedReader(new InputStreamReader(new FileInputStream(args[0]), "UTF-8"));
-    TreeReader tr = new PennTreeReader(r, factory);
+    Reader r = new BufferedReader(new InputStreamReader(new FileInputStream(args[0]), StandardCharsets.UTF_8));
+
     TreebankTagUpdater tagUpdater = new TreebankTagUpdater(taggerPath);
-    /** iterate through trees **/
-    Tree fullTree = tr.readTree();
-    while (fullTree != null) {
+
+    /* iterate through trees */
+    TreeReader tr = new PennTreeReader(r, factory);
+    for (Tree fullTree; (fullTree = tr.readTree()) != null; ) {
       TregexPattern pattern;
       TregexMatcher matcher;
       // split hyphenated token
@@ -102,7 +105,7 @@ public class GermanTreebankUDUpdater {
         for (int i = 0 ; i < childrenList.size() ; i++) {
           if (childrenList.get(i).value().equals("APPRART-AC")) {
             String mwtWord = childrenList.get(i).getLeaves().get(0).value();
-            if (wordToSplit.keySet().contains(mwtWord)) {
+            if (wordToSplit.containsKey(mwtWord)) {
               matchTree.removeChild(i);
               Tree artNKNode = createTagAndWordNode("ART-NK", wordToSplit.get(mwtWord).split(",")[1]);
               matchTree.addChild(i,artNKNode);
@@ -116,9 +119,6 @@ public class GermanTreebankUDUpdater {
       // print updated tree
       tagUpdater.tagTree(fullTree);
       System.out.println(fullTree);
-
-      // update to next tree
-      fullTree = tr.readTree();
     }
   }
 
