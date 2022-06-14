@@ -18,12 +18,12 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
- * Morphology computes the base form of English words, by removing just
- * inflections (not derivational morphology).  That is, it only does noun
- * plurals, pronoun case, and verb endings, and not things like comparative adjectives
- * or derived nominals.  It is based on a finite-state
- * transducer implemented by John Carroll et al., written in flex and publicly
- * available.
+ * Morphology computes the base form of English words, by removing
+ * just inflections (not derivational morphology).  That is, it only
+ * does noun plurals, pronoun case, adverbs, adjectives, and verb
+ * endings, and not things like or derived nominals.  It is based on a
+ * finite-state transducer implemented by John Carroll et al., written
+ * in flex and publicly available.
  * See: http://www.informatics.susx.ac.uk/research/nlp/carroll/morph.html .
  * There are several ways of invoking Morphology. One is by calling the static
  * methods:
