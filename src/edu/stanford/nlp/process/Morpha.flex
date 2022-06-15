@@ -1418,6 +1418,7 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <noun,any>"godchildren"  { return(stem(3,"","s")); }
 <noun,any>"goings-over"  { return(stem(6,"-over","s")); }
 <noun,any>"grandchildren"  { return(stem(3,"","s")); }
+<noun,any>"graffiti"  { return(stem(1,"o","")); }         /* deal with it */
 <noun,any>"halves"  { return(stem(3,"f","s")); }
 <noun,any>"hangers-on"  { return(stem(4,"-on","s")); }
 <noun,any>"helices"  { return(stem(3,"x","s")); }
@@ -1835,7 +1836,7 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <verb,any>("backpedal"|"bankroll"|"bequeath"|"blackball"|"bottom"|"clang"|"debut"|"doctor"|"eyeball"|"factor"|"imperil"|"landfill"|"margin"|"multihull"|"occur"|"overbill"|"pilot"|"prong"|"pyramid"|"reinstall"|"relabel"|"remodel"|"snowball"|"socall"|"squirrel"|"stonewall"|"wrong"){EDING} { return(semi_reg_stem(0,"")); } /* disprefer */
 <noun,any>("beasti"|"browni"|"cach"|"cadr"|"calori"|"champagn"|"cologn"|"cooki"|"druggi"|"eateri"|"emigr"|"emigre"|"employe"|"freebi"|"genr"|"kiddi"|"massacr"|"mooni"|"neckti"|"nich"|"prairi"|"softi"|"toothpast"|"willi")"es" { return(stem(1,"","s")); }
 <noun,any>(({A}*"phobia")|"accompli"|"aegis"|"alias"|"anorexia"|"anti"|"artemisia"|"ataxia"|"beatlemania"|"blini"|"cafeteria"|"capita"|"cola"|"coli"|"deli"|"dementia"|"downstairs"|"upstairs"|"dyslexia"|"jakes"|"dystopia"|"encyclopedia"|"estancia"|"euphoria"|"euthanasia"|"fracas"|"fuss"|"gala"|"gorilla"|"GI"|"habeas"|"haemophilia"|"hemophilia"|"hoopla"|"hula"|"impatiens"|"informatics"|"intelligentsia"|"jacuzzi"|"kiwi"|"mafia"|"magnolia"|"malaria"|"maquila"|"marginalia"|"megalomania"|"mercedes"|"militia"|"mufti"|"muni"|"olympics"|"pancreas"|"paranoia"|"pastoris"|"pastrami"|"pepperoni"|"pepsi"|"pi"|"piroghi"|"pizzeria"|"pneumocystis"|"potpourri"|"proboscis"|"rabies"|"reggae"|"regimen"|"rigatoni"|"salmonella"|"sarsaparilla"|"semen"|"ski"|"sonata"|"spatula"|"stats"|"subtilis"|"sushi"|"tachyarrhythmia"|"tachycardia"|"tequila"|"tetris"|"thrips"|"timpani"|"tsunami"|"vaccinia"|"vanilla") { return(cnull_stem()); }
-<noun,any>("acrobatics"|"athletics"|"basics"|"betters"|"bifocals"|"bowels"|"briefs"|"checkers"|"cognoscenti"|"denims"|"doldrums"|"dramatics"|"dungarees"|"ergonomics"|"genetics"|"gravitas"|"gymnastics"|"hackles"|"haves"|"hubris"|"ides"|"incidentals"|"ironworks"|"jinks"|"leavings"|"leftovers"|"logistics"|"makings"|"microelectronics"|"miniseries"|"mips"|"mores"|"oodles"|"pajamas"|"pampas"|"panties"|"payola"|"pickings"|"plainclothes"|"pliers"|"ravings"|"reparations"|"rudiments"|"scads"|"splits"|"stays"|"subtitles"|"sunglasss"|"sweepstakes"|"tatters"|"toiletries"|"tongs"|"trivia"|"tweezers"|"vibes"|"waterworks"|"woolens") { return(xnull_stem()); }
+<noun,any>("acrobatics"|"athletics"|"basics"|"betters"|"bifocals"|"bowels"|"briefs"|"checkers"|"cognoscenti"|"denims"|"doldrums"|"dramatics"|"dungarees"|"ergonomics"|"genetics"|"gravitas"|"gymnastics"|"hackles"|"haves"|"hubris"|"ides"|"incidentals"|"ironworks"|"jinks"|"leavings"|"leftovers"|"logistics"|"makings"|"microelectronics"|"miniseries"|"mips"|"mores"|"oodles"|"pajamas"|"pampas"|"panties"|"payola"|"pickings"|"plainclothes"|"pliers"|"ravings"|"reparations"|"rudiments"|"scads"|"splits"|"stays"|"subtitles"|"sunglasss"|"sweepstakes"|"tatters"|"toiletries"|"tongs"|"trivia"|"tweezers"|"waterworks"|"woolens") { return(xnull_stem()); }
 <noun,any>("biggi"|"bourgeoisi"|"bri"|"camaraderi"|"chinoiseri"|"coteri"|"doggi"|"geni"|"hippi"|"junki"|"lingeri"|"moxi"|"preppi"|"rooki"|"yuppi")"es"  { return(stem(1,"","s")); }
 <verb,any>("chor"|"sepulchr"|"silhouett"|"telescop"){ESEDING}  { return(semi_reg_stem(0,"e")); }
 <verb,any>("subpena"|"suds"){EDING} { return(semi_reg_stem(0,"")); }
@@ -2092,6 +2093,10 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <scan>"gon"/_VBG    { return(stem(1, "", "")); }    /* luffa: always VBG? */
 <scan>"wan"/_VB     { return(stem(0, "t", "")); }   /* luffa: could be VB or VBP.  hopefully won't conflict with wane */
 <scan>"na"/_TO      { return(stem(2, "to", "")); }
+/* peoples_NNS and people_NN might be the collective form of people, not a single person or multiple persons
+   {A}* to capture salespeople, for example */
+<scan>{A}*"people"/_NNS      { return(stem(5, "erson", "")); }
+<scan>"ppl"/_NNS             { return(stem(3, "person", "")); }
 
 <scan>"worse"/_JJR    { return(stem(5, "bad", "")); }
 <scan>"worst"/_JJS    { return(stem(5, "bad", "")); }

@@ -23,7 +23,7 @@ public class MorphologyTest extends TestCase {
                               "<br>", "-0800", "an", "out-rode", "viii",
                               "b-", "s", "hath", "'ll", "d",
                               "re", "no", "r", "du",
-                              "feces", "rights", "papers", "goggles",
+                              "feces", "rights", "papers", "goggles", "vibes",
                               "K's", "K’s",
                               "'ve", "'m",
                               "ski'd",
@@ -35,6 +35,7 @@ public class MorphologyTest extends TestCase {
                               "earlier", "earliest", "more", "less", "least", // RBR / RBS special cases
                               "quicker", "slower", "longer", "wider", "widest",
                               "easier", "easier", // JJR & RBR
+                              "graffiti",
   };
 
   private String[] exTags = { "NNS", "NNS", "VBD", "NN",
@@ -52,7 +53,7 @@ public class MorphologyTest extends TestCase {
                               "SYM", "CD", "DT", "VBD", "FW",
                               "AFX", "VBZ", "VBP", "MD", "MD",
                               "VBP", "VBP", "VBP", "VBP",
-                              "NNS", "NNS", "NNS", "NNS",
+                              "NNS", "NNS", "NNS", "NNS", "NNS",
                               "NNS", "NNS",
                               "VBP", "VBP",
                               "VBD",
@@ -64,6 +65,7 @@ public class MorphologyTest extends TestCase {
                               "RBR", "RBS", "RBR", "RBR", "RBS",
                               "RBR", "RBR", "RBR", "RBR", "RBS",
                               "JJR", "RBR",
+                              "NNS",
   };
 
   private String[] exAnswers = {"brethren", "duck", "see", "saw",
@@ -81,7 +83,7 @@ public class MorphologyTest extends TestCase {
                                 "<br>", "-0800", "a", "out-ride", "viii",
                                 "b-", "be", "have", "will", "would",
                                 "be", "know", "be", "do",
-                                "feces", "right", "paper", "goggles",
+                                "feces", "right", "paper", "goggles", "vibe",
                                 "k", "k",
                                 "have", "be",
                                 "ski",
@@ -93,6 +95,7 @@ public class MorphologyTest extends TestCase {
                                 "early", "early", "more", "less", "least",
                                 "quick", "slow", "long", "wide", "wide",
                                 "easy", "easy",
+                                "graffito",
   };
 
   public void testMorph() {
