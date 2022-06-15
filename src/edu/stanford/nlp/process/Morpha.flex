@@ -474,7 +474,7 @@ EY_ADJS = "cag"|"cak"|"clay"|"cliqu"|"crep"|"dic"|"dop"|"glu"|"goo"|"grip"|"hok"
 
 COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 
-SINGULAR_DEMONYMS = "Bantu"|"Bengalese"|"Beninese"|"British"|"Boche"|"Burmese"|"Chinese"|"Congolese"|"Danish"|"English"|"Finnish"|"Flemish"|"Gabonese"|"Guyanese"|"Irish"|"Japanese"|"Javanese"|"Jewish"|"Lebanese"|"Maltese"|"Moorish"|"Nepalese"|"Nipponese"|"Polish"|"Portuguese"|"Rhenish"|"Romish"|"Scottish"|"Senegalese"|"Siamese"|"Singhalese"|"Sinhalese"|"Sioux"|"Spanish"|"Sudanese"|"Swedish"|"Swiss"|"Taiwanese"|"Togolese"|"Turkish"|"Vietnamese"|"Yiddish"
+SINGULAR_DEMONYMS = "Bantu"|"Bengalese"|"Beninese"|"British"|"Boche"|"Burmese"|"Chinese"|"Congolese"|"Danish"|"English"|"Finnish"|"Flemish"|"French"|"Gabonese"|"Guyanese"|"Irish"|"Japanese"|"Javanese"|"Jewish"|"Lebanese"|"Maltese"|"Moorish"|"Nepalese"|"Nipponese"|"Polish"|"Portuguese"|"Rhenish"|"Romish"|"Scottish"|"Senegalese"|"Siamese"|"Singhalese"|"Sinhalese"|"Sioux"|"Spanish"|"Sudanese"|"Swedish"|"Swiss"|"Taiwanese"|"Togolese"|"Turkish"|"Vietnamese"|"Welsh"|"Yiddish"
 
 %%
 
