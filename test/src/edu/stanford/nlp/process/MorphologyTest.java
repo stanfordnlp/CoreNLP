@@ -35,7 +35,8 @@ public class MorphologyTest extends TestCase {
                               "earlier", "earliest", "more", "less", "least", // RBR / RBS special cases
                               "quicker", "slower", "longer", "wider", "widest",
                               "easier", "easier", // JJR & RBR
-                              "graffiti",
+                              "graffiti", "ABCs", "Olympics", "Olympics",
+                              "Burmese", "Chinese", "Chinese",
   };
 
   private String[] exTags = { "NNS", "NNS", "VBD", "NN",
@@ -65,7 +66,8 @@ public class MorphologyTest extends TestCase {
                               "RBR", "RBS", "RBR", "RBR", "RBS",
                               "RBR", "RBR", "RBR", "RBR", "RBS",
                               "JJR", "RBR",
-                              "NNS",
+                              "NNS", "NNS", "NNS", "NNPS",
+                              "NNS", "NNS", "JJ",
   };
 
   private String[] exAnswers = {"brethren", "duck", "see", "saw",
@@ -95,7 +97,8 @@ public class MorphologyTest extends TestCase {
                                 "early", "early", "more", "less", "least",
                                 "quick", "slow", "long", "wide", "wide",
                                 "easy", "easy",
-                                "graffito",
+                                "graffito", "ABC", "Olympics", "Olympics",
+                                "Burmese", "Chinese", "Chinese",
   };
 
   public void testMorph() {
