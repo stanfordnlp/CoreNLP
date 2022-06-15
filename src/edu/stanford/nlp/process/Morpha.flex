@@ -448,7 +448,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 
 
-A = ['+a-zA-Z0-9]
+A = ['’+a-zA-Z0-9]
 V = [aeiouAEIOU]
 VY = [aeiouyAEIOUY]
 C = [bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]
@@ -501,12 +501,12 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <verb,any>"did"  { return(stem(3,"do","ed")); }
 <verb,any>"done"  { return(stem(4,"do","en")); }
 <verb,any>"didst"  { return(stem(5,"do","ed")); }         /* disprefer */
-<verb,any>"'ll"  { return(stem(3,"will","")); }
-<verb,any>"'m"  { return(stem(2,"be","")); }              /* disprefer */
+<verb,any>['’]"ll"  { return(stem(3,"will","")); }
+<verb,any>['’]"m"  { return(stem(2,"be","")); }              /* disprefer */
 <verb,any>"m"  { return(stem(1,"be","")); }              /* disprefer */
-<verb,any>"'re"  { return(stem(3,"be","")); }             /* disprefer */
+<verb,any>['’]"re"  { return(stem(3,"be","")); }             /* disprefer */
 <verb,any>"r"  { return(stem(1,"be","")); }             /* disprefer */
-<verb,any>"'ve"  { return(stem(3,"have","")); }
+<verb,any>['’]"ve"  { return(stem(3,"have","")); }
 <verb,any>"ve"  { return(stem(2,"have","")); }
 <verb,any>"v"  { return(stem(1,"have","")); }
 <verb,any>"no"  { return(stem(2,"know","")); }
@@ -971,7 +971,7 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <verb,any>"shrunken"  { return(stem(5,"ink","en")); }     /* disprefer */
 <verb,any>"sightsaw"  { return(stem(3,"see","ed")); }
 <verb,any>"sightseen"  { return(stem(3,"ee","en")); }
-<verb,any>"ski'd"  { return(stem(3,"i","ed")); }          /* en */
+<verb,any>"ski"['’]"d"  { return(stem(3,"i","ed")); }          /* en */
 <verb,any>"skydove"  { return(stem(3,"ive","ed")); }      /* en */
 <verb,any>"slain"  { return(stem(3,"ay","en")); }
 <verb,any>"slept"  { return(stem(3,"eep","ed")); }        /* en */
@@ -1160,7 +1160,7 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <noun,any>("Brahman"|"German"|"dragoman"|"ottoman"|"shaman"|"talisman"|"Norman"|"Pullman"|"Roman")"s"  { return(stem(1,"","s")); }
 <noun,any>("Czech"|"diptych"|"Sassenach"|"abdomen"|"alibi"|"aria"|"bandit"|"begonia"|"bikini"|"caryatid"|"colon"|"cornucopia"|"cromlech"|"cupola"|"dryad"|"eisteddfod"|"encyclopaedia"|"epoch"|"eunuch"|"flotilla"|"gardenia"|"gestalt"|"gondola"|"hierarch"|"hose"|"impediment"|"koala"|"loch"|"mania"|"manservant"|"martini"|"matriarch"|"monarch"|"oligarch"|"omen"|"parabola"|"pastorale"|"patriarch"|"pea"|"peninsula"|"pfennig"|"phantasmagoria"|"pibroch"|"poly"|"real"|"safari"|"sari"|"specimen"|"standby"|"stomach"|"swami"|"taxi"|"tech"|"toccata"|"triptych"|"villa"|"yogi"|"zloty")"s" { return(stem(1,"","s")); }
 <noun,any>("asyl"|"sanct"|"rect"|"pl"|"pendul"|"mausole"|"hoodl"|"for")"ums"  { return(stem(1,"","s")); }
-<noun,any>("Bantu"|"Bengalese"|"Beninese"|"Boche"|"Burmese"|"Chinese"|"Congolese"|"Gabonese"|"Guyanese"|"Japanese"|"Javanese"|"Lebanese"|"Maltese"|"Olympics"|"Portuguese"|"Senegalese"|"Siamese"|"Singhalese"|"Sinhalese"|"Sioux"|"Sudanese"|"Swiss"|"Taiwanese"|"Togolese"|"Vietnamese"|"aircraft"|"anopheles"|"apparatus"|"asparagus"|"barracks"|"bellows"|"bison"|"bluefish"|"bob"|"bourgeois"|"bream"|"brill"|"butterfingers"|"carp"|"catfish"|"chassis"|"chub"|"cod"|"codfish"|"coley"|"contretemps"|"corps"|"crawfish"|"crayfish"|"crossroads"|"cuttlefish"|"dace"|"dice"|"dogfish"|"doings"|"dory"|"downstairs"|"eldest"|"finnan"|"firstborn"|"fish"|"flatfish"|"flounder"|"fowl"|"fry"|"fries"|{A}+"-works"|"gasworks"|"glassworks"|"globefish"|"goldfish"|"grand"|"gudgeon"|"gulden"|"haddock"|"hake"|"halibut"|"headquarters"|"herring"|"hertz"|"horsepower"|"hovercraft"|"hundredweight"|"ironworks"|"jackanapes"|"kilohertz"|"kurus"|"kwacha"|"ling"|"lungfish"|"mackerel"|"means"|"megahertz"|"moorfowl"|"moorgame"|"mullet"|"offspring"|"pampas"|"parr"|"patois"|"pekinese"|"penn'orth"|"perch"|"pickerel"|"pike"|"pince-nez"|"plaice"|"precis"|"quid"|"rand"|"rendezvous"|"revers"|"roach"|"roux"|"salmon"|"samurai"|"series"|"shad"|"sheep"|"shellfish"|"smelt"|"spacecraft"|"species"|"starfish"|"stockfish"|"sunfish"|"superficies"|"sweepstakes"|"swordfish"|"tench"|"tope"|"triceps"|"trout"|"tuna"|"tunafish"|"tunny"|"turbot"|"undersigned"|"veg"|"waterfowl"|"waterworks"|"waxworks"|"whiting"|"wildfowl"|"woodworm"|"yen")  { return(xnull_stem()); }
+<noun,any>("Bantu"|"Bengalese"|"Beninese"|"Boche"|"Burmese"|"Chinese"|"Congolese"|"Gabonese"|"Guyanese"|"Japanese"|"Javanese"|"Lebanese"|"Maltese"|"Olympics"|"Portuguese"|"Senegalese"|"Siamese"|"Singhalese"|"Sinhalese"|"Sioux"|"Sudanese"|"Swiss"|"Taiwanese"|"Togolese"|"Vietnamese"|"aircraft"|"anopheles"|"apparatus"|"asparagus"|"barracks"|"bellows"|"bison"|"bluefish"|"bob"|"bourgeois"|"bream"|"brill"|"butterfingers"|"carp"|"catfish"|"chassis"|"chub"|"cod"|"codfish"|"coley"|"contretemps"|"corps"|"crawfish"|"crayfish"|"crossroads"|"cuttlefish"|"dace"|"dice"|"dogfish"|"doings"|"dory"|"downstairs"|"eldest"|"feces"|"finnan"|"firstborn"|"fish"|"flatfish"|"flounder"|"fowl"|"fry"|"fries"|{A}+"-works"|"gasworks"|"glassworks"|"globefish"|"goldfish"|"grand"|"gudgeon"|"gulden"|"haddock"|"hake"|"halibut"|"headquarters"|"herring"|"hertz"|"horsepower"|"hovercraft"|"hundredweight"|"ironworks"|"jackanapes"|"kilohertz"|"kurus"|"kwacha"|"ling"|"lungfish"|"mackerel"|"means"|"megahertz"|"moorfowl"|"moorgame"|"mullet"|"offspring"|"pampas"|"parr"|"patois"|"pekinese"|"penn'orth"|"perch"|"pickerel"|"pike"|"pince-nez"|"plaice"|"precis"|"quid"|"rand"|"rendezvous"|"revers"|"roach"|"roux"|"salmon"|"samurai"|"series"|"shad"|"sheep"|"shellfish"|"smelt"|"spacecraft"|"species"|"starfish"|"stockfish"|"sunfish"|"superficies"|"sweepstakes"|"swordfish"|"tench"|"tope"|"triceps"|"trout"|"tuna"|"tunafish"|"tunny"|"turbot"|"undersigned"|"veg"|"waterfowl"|"waterworks"|"waxworks"|"whiting"|"wildfowl"|"woodworm"|"yen")  { return(xnull_stem()); }
 <noun,any>"Aries" { return(stem(1,"s","s")); }
 <noun,any>"Pisces" { return(stem(1,"s","s")); }
 <noun,any>"Bengali" { return(stem(1,"i","s")); }
@@ -1250,7 +1250,7 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <noun,any>"clutches" { return(stem(2,"","s")); }
 <noun,any>"continua" { return(stem(1,"um","s")); }
 <noun,any>"diggings" { return(stem(1,"","s")); }
-<noun,any>"K's" { return(stem(2,"","s")); }
+<noun,any>"K"['’]"s" { return(stem(2,"","s")); }
 <noun,any>"seychellois" { return(stem(1,"s","s")); }
 <noun,any>"afterlives" { return(stem(3,"fe","s")); }
 <noun,any>"avens" { return(stem(1,"s","s")); }
@@ -1469,7 +1469,7 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <noun,any>"maxima"  { return(stem(2,"mum","s")); }
 <noun,any>"memoranda"  { return(stem(2,"dum","s")); }
 <noun,any>"men-at-arms"  { return(stem(10,"an-at-arms","s")); }
-<noun,any>"men-o'-war"  { return(stem(9,"an-of-war","s")); } /* disprefer */
+<noun,any>"men-o"['’]"-war"  { return(stem(9,"an-of-war","s")); } /* disprefer */
 <noun,any>"men-of-war"  { return(stem(9,"an-of-war","s")); }
 <noun,any>"menservants"  { return(stem(10,"anservant","s")); } /* disprefer */
 <noun,any>"mesdemoiselles"  { return(stem(13,"ademoiselle","s")); }
@@ -1874,11 +1874,11 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
   /* -o / -oe */
 
 <verb,any>("bastinado"|"bunco"|"bunko"|"carbonado"|"contango"|"crescendo"|"ditto"|"echo"|"embargo"|"fresco"|"hallo"|"halo"|"lasso"|"niello"|"radio"|"solo"|"stiletto"|"stucco"|"tally-ho"|"tango"|"torpedo"|"veto"|"zero")"ed"  { return(stem(2,"","ed")); }    /* en */
-<verb,any>"ko'd"  { return(stem(3,"o","ed")); }           /* en */
-<verb,any>"ko'ing"  { return(stem(4,"","ing")); }
-<verb,any>"ko's"  { return(stem(2,"","s")); }
-<verb,any>"tally-ho'd"  { return(stem(3,"","ed")); }     /* en */ /* disprefer */
-<noun,any>("co"|"do"|"ko"|"no")"'s"   { return(stem(2,"","s")); }
+<verb,any>"ko"['’]"d"  { return(stem(3,"o","ed")); }           /* en */
+<verb,any>"ko"['’]"ing"  { return(stem(4,"","ing")); }
+<verb,any>"ko"['’]"s"  { return(stem(2,"","s")); }
+<verb,any>"tally-ho"['’]"d"  { return(stem(3,"","ed")); }     /* en */ /* disprefer */
+<noun,any>("co"|"do"|"ko"|"no")['’]"s"   { return(stem(2,"","s")); }
 
 <noun,any>("aloe"|"archfoe"|"canoe"|"doe"|"felloe"|"floe"|"foe"|"hammertoe"|"hoe"|"icefloe"|"mistletoe"|"oboe"|"roe"|({A}*"shoe")|"sloe"|"throe"|"tiptoe"|"toe"|"voe"|"woe")"s"  { return(stem(1,"","s")); }
 <verb,any>("canoe"|"hoe"|"outwoe"|"rehoe"|({A}*"shoe")|"tiptoe"|"toe")"s"  { return(stem(1,"","s")); }
@@ -1919,7 +1919,7 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <noun,any>"m.p.s." { return(stem(6,"m.p.","s")); }
 <noun,any>("cons"|"miss"|"mrs"|"ms"|"n-s"|"pres"|"ss")"." { return(cnull_stem()); }
 <noun,any>({A}|".")+".s."                { return(cnull_stem()); }
-<noun,any>({A}|".")+".'s."               { return(stem(4,".","s")); } /* disprefer */
+<noun,any>({A}|".")+"."['’]"s."          { return(stem(4,".","s")); } /* disprefer */
 <noun,any>({A}|".")+"s."                 { return(stem(2,".","s")); }
 
 <noun,any>{A}*"men"                 { return(stem(2,"an","s")); }
@@ -2042,19 +2042,19 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <scan>"is"/_VBZ     { return(stem(2,"be","s")); }
 <scan>"du"/_VBP     { return(stem(2,"do","")); }    /* In dunno */
 <scan>"no"/_VB     { return(stem(2,"know","")); }    /* In dunno */
-<scan>"'d"/_VH      { return(stem(2,"have","ed")); }    /* disprefer */
-<scan>"'d"/_VBD      { return(stem(2,"have","ed")); }    /* disprefer */
-<scan>"'d"/_VM      { return(stem(2,"would","")); }
-<scan>"'d"/_MD      { return(stem(2,"would","")); }
+<scan>['’]"d"/_VH      { return(stem(2,"have","ed")); }    /* disprefer */
+<scan>['’]"d"/_VBD      { return(stem(2,"have","ed")); }    /* disprefer */
+<scan>['’]"d"/_VM      { return(stem(2,"would","")); }
+<scan>['’]"d"/_MD      { return(stem(2,"would","")); }
 <scan>"d"/_MD      { return(stem(1,"would","")); }
-<scan>"'s"/_VBZ     { return(stem(2,"be","s")); }       /* disprefer */ /* could really be have */
+<scan>['’]"s"/_VBZ     { return(stem(2,"be","s")); }       /* disprefer */ /* could really be have */
 <scan>"s"/_VBZ     { return(stem(1,"be","s")); }       /* disprefer */ /* could really be have */
-<scan>"'s"/_VDZ     { return(stem(2,"do","s")); }       /* disprefer */
-<scan>"'s"/_VHZ     { return(stem(2,"have","s")); }     /* disprefer */
-<scan>"'s"/_"$"     { return(stem(2,"'s","")); }
-<scan>"'s"/_POS     { return(stem(2,"'s","")); }
-<scan>"'s"/_CSA     { return(stem(2,"as","")); }
-<scan>"'s"/_CJS     { return(stem(2,"as","")); }
+<scan>['’]"s"/_VDZ     { return(stem(2,"do","s")); }       /* disprefer */
+<scan>['’]"s"/_VHZ     { return(stem(2,"have","s")); }     /* disprefer */
+<scan>['’]"s"/_"$"     { return(stem(2,"'s","")); }
+<scan>['’]"s"/_POS     { return(stem(2,"'s","")); }
+<scan>['’]"s"/_CSA     { return(stem(2,"as","")); }
+<scan>['’]"s"/_CJS     { return(stem(2,"as","")); }
 <scan>"not"/_XX     { return(stem(3,"not","")); }
 <scan>"ai"/_VB      { return(stem(2,"be","")); }        /* disprefer */
 <scan>"ai"/_VH      { return(stem(2,"have","")); }      /* disprefer */
@@ -2064,12 +2064,13 @@ COMP_SUP = "JJR"|"JJS"|"RBR"|"RBS"
 <scan>"sha"/_MD     { return(stem(3,"shall","")); }
 <scan>"wo"/_VM      { return(stem(2,"will","")); }      /* disprefer */
 <scan>"wo"/_MD      { return(stem(2,"will","")); }      /* disprefer */
-<scan>"'ll"/_MD      { return(stem(3,"will","")); }
+<scan>['’]"ll"/_MD      { return(stem(3,"will","")); }
 <scan>"ll"/_MD      { return(stem(2,"will","")); }
 <scan>"wilt"/_MD      { return(stem(4,"will","")); }
-<scan>"n't"/_XX     { return(stem(3,"not","")); }       /* disprefer */
-<scan>"n't"/_RB     { return(stem(3,"not","")); }      /* cdm add; disprefer */
-<scan>"n"/_RB     { return(stem(1,"not","")); }      /* cdm add; disprefer */
+<scan>"n"['’]"t"/_XX     { return(stem(3,"not","")); }       /* disprefer */
+<scan>"n"['’]"t"/_RB     { return(stem(3,"not","")); }      /* cdm add; disprefer */
+<scan>"nt"/_RB      { return(stem(2,"not","")); }      /* luffa add; disprefer? */
+<scan>"n"/_RB       { return(stem(1,"not","")); }      /* cdm add; disprefer */
 <scan>"him"/_P  { return(stem(3,"he","")); }
 <scan>"her"/_P  { return(stem(3,"she","")); }
 <scan>"them"/_P   { return(stem(1,"y","")); }
