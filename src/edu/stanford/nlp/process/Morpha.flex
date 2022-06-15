@@ -462,6 +462,7 @@ ESEDING = "es"|"ed"|"ing"
 G = [^ \t\r\n\u2028\u2029\u000B\u000C\u0085_]
 GM = [^ \t\r\n\u2028\u2029\u000B\u000C\u0085_-]
 SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
+DIGIT = [0-9]
 
 /* adjectives such as tame which become tamer, tamest */
 E_ADJS = "able"|"absolute"|"abstruse"|"acute"|"ample"|"austere"|"bare"|"base"|"blithe"|"blonde"|"blue"|"brave"|"brittle"|"brusque"|"capable"|"chaste"|"choice"|"close"|"coarse"|"complete"|"concise"|"crude"|"cute"|"demure"|"dense"|"dire"|"divine"|"doggone"|"eerie"|"extreme"|"false"|"feeble"|"fickle"|"fierce"|"fine"|"free"|"game"|"gauche"|"gentle"|"gladsome"|"grave"|"grewsome"|"gruesome"|"hale"|"handsome"|"hoarse"|"huge"|"humane"|"humble"|"idle"|"immense"|"inane"|"insane"|"intense"|"irate"|"kittle"|"lame"|"large"|"late"|"lithe"|"little"|"loose"|"mature"|"mere"|"mickle"|"minute"|"mute"|"naive"|"naïve"|"negative"|"nice"|"nimble"|"noble"|"nude"|"obscene"|"obscure"|"obtuse"|"opaque"|"pale"|"polite"|"positive"|"possible"|"precise"|"private"|"pure"|"purple"|"rare"|"rathe"|"remote"|"resolute"|"rife"|"ripe"|"rude"|"safe"|"sage"|"sane"|"savage"|"scarce"|"secure"|"sensible"|"serene"|"severe"|"simple"|"sincere"|"sore"|"spare"|"sparse"|"spruce"|"square"|"stable"|"stale"|"strange"|"suave"|"sublime"|"subtile"|"subtle"|"supple"|"supreme"|"sure"|"svelte"|"tame"|"tense"|"terse"|"trite"|"true"|"unique"|"unripe"|"unsafe"|"unstable"|"untrue"|"unwise"|"urbane"|"vague"|"vile"|"white"|"wholesome"|"wide"|"winsome"|"wise"|"yare"
@@ -2027,7 +2028,9 @@ S_ENDING_DEMONYMS = "Afghan"|"Afghani"|"African"|"Albanian"|"Alexandrine"|"Alger
 <verb,noun,any>{GM}*"-"   { // The first word isn't stemmed separately, but the second half can be
                             String stem = common_noun_stem();
                             String n = next();
-                            if (n == null) {
+                            if (n == null || n.startsWith("_")) {
+                              // TODO: would be nice to use the rest of the lemma rules
+                              // when the token just ends with "-"
                               return stem;
                             } else {
                               return stem.concat(n);
@@ -2106,6 +2109,9 @@ S_ENDING_DEMONYMS = "Afghan"|"Afghani"|"African"|"Albanian"|"Alexandrine"|"Alger
 <scan>{SINGULAR_DEMONYMS}/_(NN(P?)(S?)|JJ)      { return(capitalise(xnull_stem())); }
 <scan>{S_ENDING_DEMONYMS}/_(NN(P?)(S?)|JJ)      { return(capitalise(common_noun_stem())); }
 <scan>{S_ENDING_DEMONYMS}s/_(NN(P?)(S?)|JJ)     { return(capitalise(stem(1, "", "s"))); }
+
+/* remove commas from numbers, eg 5,000 -> 5000 */
+<scan>({DIGIT}|",")+([.]{DIGIT}+)?/_CD          { return(yytext().replaceAll(",", "")); }
 
 <scan>"worse"/_JJR    { return(stem(5, "bad", "")); }
 <scan>"worst"/_JJS    { return(stem(5, "bad", "")); }
