@@ -160,7 +160,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         // TODO: can double chars be whitespace / isocontrol?
         int codePoint = Character.codePointAt(line, index);
         CoreLabel wi = new CoreLabel();
-        if ( ! Character.isWhitespace(codePoint) && ! Character.isISOControl(codePoint)) {
+        if (!Character.isWhitespace(codePoint) && !Character.isISOControl(codePoint) && !Character.isSpaceChar(codePoint)) {
           boolean surrogate = Character.isSupplementaryCodePoint(codePoint);
           String wordString;
           if (surrogate) {
@@ -171,7 +171,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
           wi.set(CoreAnnotations.CharAnnotation.class, intern(wordString));
 
           // non-breaking space is skipped as well
-          while (Character.isWhitespace(origLine.charAt(origIndex)) || Character.isISOControl(origLine.charAt(origIndex)) || (origLine.charAt(origIndex) == '\u00A0')) {
+          while (Character.isWhitespace(origLine.charAt(origIndex)) || Character.isISOControl(origLine.charAt(origIndex)) || Character.isSpaceChar(origLine.charAt(origIndex))) {
             origIndex++;
           }
 
@@ -197,7 +197,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
             wi.set(CoreAnnotations.AnswerAnnotation.class, "1");
             wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "1");
             wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "1");
-          } else if (Character.isWhitespace(line.charAt(index - 1)) || Character.isISOControl(line.charAt(index - 1))) {
+          } else if (Character.isWhitespace(line.charAt(index - 1)) || Character.isISOControl(line.charAt(index - 1)) || Character.isSpaceChar(line.charAt(index - 1))) {
             wi.set(CoreAnnotations.AnswerAnnotation.class, "1");
             wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "1");
             wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "1");

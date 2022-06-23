@@ -689,6 +689,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     if (segmented.length() == 0) {
       return Collections.emptyList();
     } else {
+      // \\p{Zs} would catch more whitespace options than \\s,
+      // but hopefully the upstream segmentation handled
+      // unusual whitespace such as NBSP already
       return Arrays.asList(segmented.split("\\s"));
     }
   }
