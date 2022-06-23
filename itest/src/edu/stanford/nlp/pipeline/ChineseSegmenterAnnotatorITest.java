@@ -38,6 +38,18 @@ public class ChineseSegmenterAnnotatorITest {
         new int[]{0, 1, 3, 5, 7, 8},
         new int[]{1, 3, 5, 7, 8, 9});
 
+    // test that it does something reasonable with spaces
+    testOne("我在 加州 工作 ",
+            new String[]{"我", "在", "加州", "工作"},
+            new int[]{0, 1, 3, 6},
+            new int[]{1, 2, 5, 8});
+
+    // test that it does something reasonable with NBSP
+    testOne("我在 加州 工作 ",
+            new String[]{"我", "在", "加州", "工作"},
+            new int[]{0, 1, 3, 6},
+            new int[]{1, 2, 5, 8});
+
     // All of the tools should now produce () instead of -LRB- -RRB-
     testOne("你马上回来(北京)吗？",
             new String[]{"你", "马上", "回来", "(", "北京", ")", "吗", "？"},
