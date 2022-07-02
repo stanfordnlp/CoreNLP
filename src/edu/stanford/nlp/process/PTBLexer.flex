@@ -589,6 +589,7 @@ SPLET = &[aeiouAEIOU](acute|grave|uml);
 
 %include LexCommon.tokens
 
+/* SPACE, SPACENL, etc are in LexCommon.tokens */
 SPACENLS = {SPACENL}+
 /* These next ones are useful to get a fixed length trailing context. */
 SPACENL_ONE_CHAR = [ \t\u00A0\u2000-\u200A\u202F\u3000\r\n\u2028\u2029\u000B\u000C\u0085]

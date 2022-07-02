@@ -1,5 +1,6 @@
 /* \u3000 is ideographic space; \u205F is medium math space */
-SPACE = [ \t\u00A0\u2000-\u200A\u202F\u20F5\u3000]
+/* \u2063 is an invisible separator */
+SPACE = [ \t\u00A0\u2000-\u200A\u202F\u2063\u20F5\u3000]
 SPACES = {SPACE}+
 NEWLINE = \r|\r?\n|\u2028|\u2029|\u000B|\u000C|\u0085
 SPACENL = ({SPACE}|{NEWLINE})
