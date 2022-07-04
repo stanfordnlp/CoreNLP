@@ -838,6 +838,7 @@ public class PTBTokenizerTest {
           "stems reach a min. of 3.5 m",
           "Apple released the iPhone 11 Pro Max. The iPhone family expanded.",
           "C'mon, c’mon.",
+          "phone: 47-42-17-11; fax, 47-42-80-44 or 47-42-18-81;",
   };
 
   private final String[][] tweetGold = {
@@ -875,6 +876,7 @@ public class PTBTokenizerTest {
           { "stems", "reach", "a", "min.", "of", "3.5", "m" },
           { "Apple", "released", "the", "iPhone", "11", "Pro", "Max", ".", "The", "iPhone", "family", "expanded", "." },
           { "C'mon", ",", "c’mon", "." },
+          { "phone", ":", "47-42-17-11", ";", "fax", ",", "47-42-80-44", "or", "47-42-18-81", ";" },
   };
 
   @Test

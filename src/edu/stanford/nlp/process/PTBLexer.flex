@@ -769,7 +769,8 @@ HYPHEN = [-\u058A\u2010\u2011\u2012]
 HYPHENS = {HYPHEN}+
 SSN = [0-9]{3}{HYPHEN}[0-9]{2}{HYPHEN}[0-9]{4}
 /* phone numbers. keep multi dots pattern separate, so not confused with decimal numbers. And for new treebank tokenization 346-8792. 1st digit can't be 0 or 1 in NANP. */
-PHONE = (\([0-9]{2,3}\)[ \u00A0\u2007]?|(\+\+?)?([0-9]{1,4}[\- \u00A0\u2007\u2012])?[0-9]{2,4}[\- \u00A0\u2007\u2012/])[0-9]{3,4}[\- \u00A0\u2007\u2012]?[0-9]{3,5}|((\+\+?)?[0-9]{1,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}|[2-9][0-9]{2}[-\u2012][0-9]{4}
+/* 2022: Also allow hyphen between area code and number; allow French number like 47-42-17-11 */
+PHONE = (\([0-9]{2,3}\)[- \u00A0\u2007]?|(\+\+?)?([0-9]{1,4}[- \u00A0\u2007\u2012])?[0-9]{2,4}[- \u00A0\u2007\u2012/])[0-9]{3,4}[- \u00A0\u2007\u2012]?[0-9]{3,5}|((\+\+?)?[0-9]{1,4}\.)?[0-9]{2,4}\.[0-9]{2,4}\.[0-9]{2,5}|((\+\+?)?[0-9]{1,4}-)?[0-9]{2,4}-[0-9]{2,4}-[0-9]{2,5}|[2-9][0-9]{2}[-\u2012][0-9]{4}
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
 FAKEDUCKFEET = <<|>>
 LESSTHAN = <|&lt;
@@ -1356,8 +1357,8 @@ RM/{NUM}        { String txt = yytext();
                   if (escapeForwardSlashAsterisk) {
                     String normTok = LexerUtils.escapeChar(yytext(), '*');
                     if (DEBUG) { logger.info("Used {ASTS} to recognize " + txt + " as " + normTok); }
-                    return getNext(normTok, yytext()); }
-                  else {
+                    return getNext(normTok, txt);
+                  } else {
                     if (DEBUG) { logger.info("Used {ASTS} to recognize " + txt); }
                     return getNext(txt, txt);
                   }
@@ -1382,20 +1383,55 @@ RM/{NUM}        { String txt = yytext();
                   if (DEBUG) { logger.info("Used {=} to recognize " + txt); }
                   return getNext(txt, txt);
                 }
-\/              { if (escapeForwardSlashAsterisk) {
-                    return getNext(LexerUtils.escapeChar(yytext(), '/'), yytext()); }
-                  else {
-                    return getNext();
+\/              {
+                  String txt = yytext();
+                  if (escapeForwardSlashAsterisk) {
+                    String normTok = LexerUtils.escapeChar(yytext(), '/');
+                    if (DEBUG) { logger.info("Used {/} to recognize " + txt + " as " + normTok); }
+                    return getNext(normTok, txt);
+                  } else {
+                    if (DEBUG) { logger.info("Used {/} to recognize " + txt); }
+                    return getNext(txt, txt);
                   }
                 }
 /* {HTHING}/[^\p{Alpha}\p{Digit}.+]    { return getNext(LexerUtils.removeSoftHyphens(yytext()),
                                                yytext()); } */
-{HTHINGEXCEPTIONWHOLE}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONWHOLE}\./{INSENTP}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONPREFIXED}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONPREFIXED}\./{INSENTP}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONSUFFIXED}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONSUFFIXED}\./{INSENTP}  {return getNext(LexerUtils.removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONWHOLE}  {
+                      String tok = yytext();
+                      String norm = LexerUtils.removeSoftHyphens(tok);
+                      if (DEBUG) { logger.info("Used {HTHINGEXCEPTIONWHOLE} to recognize " + tok + " as " + norm); }
+                      return getNext(norm, tok);
+                    }
+{HTHINGEXCEPTIONWHOLE}\./{INSENTP}  {
+                      String tok = yytext();
+                      String norm = LexerUtils.removeSoftHyphens(tok);
+                      if (DEBUG) { logger.info("Used {HTHINGEXCEPTIONWHOLE} (2) to recognize " + tok + " as " + norm); }
+                      return getNext(norm, tok);
+                    }
+{HTHINGEXCEPTIONPREFIXED}  {
+                      String tok = yytext();
+                      String norm = LexerUtils.removeSoftHyphens(tok);
+                      if (DEBUG) { logger.info("Used {HTHINGEXCEPTIONPREFIXED} to recognize " + tok + " as " + norm); }
+                      return getNext(norm, tok);
+                    }
+{HTHINGEXCEPTIONPREFIXED}\./{INSENTP}  {
+                      String tok = yytext();
+                      String norm = LexerUtils.removeSoftHyphens(tok);
+                      if (DEBUG) { logger.info("Used {HTHINGEXCEPTIONPREFIXED} (2) to recognize " + tok + " as " + norm); }
+                      return getNext(norm, tok);
+                    }
+{HTHINGEXCEPTIONSUFFIXED}  {
+                      String tok = yytext();
+                      String norm = LexerUtils.removeSoftHyphens(tok);
+                      if (DEBUG) { logger.info("Used {HTHINGEXCEPTIONSUFFIXED} to recognize " + tok + " as " + norm); }
+                      return getNext(norm, tok);
+                    }
+{HTHINGEXCEPTIONSUFFIXED}\./{INSENTP}  {
+                      String tok = yytext();
+                      String norm = LexerUtils.removeSoftHyphens(tok);
+                      if (DEBUG) { logger.info("Used {HTHINGEXCEPTIONSUFFIXED} (2) to recognize " + tok + " as " + norm); }
+                      return getNext(norm, tok);
+                    }
 {HTHING}        { String tok = yytext();
                   breakByHyphensSlashes(tok);
                   tok = yytext();
@@ -1492,7 +1528,11 @@ RM/{NUM}        { String txt = yytext();
                   return getNext(norm, tok);
                 }
 
-{FAKEDUCKFEET}  { return getNext(); }
+{FAKEDUCKFEET}  {
+                  String tok = yytext();
+                  if (DEBUG) { logger.info("Used {FAKEDUCKFEET} to recognize " + tok); }
+                  return getNext(tok, tok);
+                }
 {MISCSYMBOL}    {
                   String tok = yytext();
                   if (DEBUG) { logger.info("Used {MISCSYMBOL} to recognize " + tok); }
