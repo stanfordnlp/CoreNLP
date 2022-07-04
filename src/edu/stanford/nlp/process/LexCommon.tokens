@@ -1,13 +1,14 @@
 /* \u3000 is ideographic space; \u205F is medium math space */
-SPACE = [ \t\u00A0\u2000-\u200A\u202F\u205F\u3000]
+/* \u2063 is an invisible separator */
+SPACE = [ \t\u00A0\u2000-\u200A\u202F\u205F\u2063\u3000]
 SPACES = {SPACE}+
 NEWLINE = \r|\r?\n|\u2028|\u2029|\u000B|\u000C|\u0085
 SPACENL = ({SPACE}|{NEWLINE})
 SPACENLS = {SPACENL}+
 
 /* These next ones are useful to get a fixed length trailing context. */
-SPACENL_ONE_CHAR = [ \t\u00A0\u2000-\u200A\u202F\u205F\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
-NOT_SPACENL_ONE_CHAR = [^ \t\u00A0\u2000-\u200A\u202F\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
+SPACENL_ONE_CHAR = [ \t\u00A0\u2000-\u200A\u202F\u205F\u2063\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
+NOT_SPACENL_ONE_CHAR = [^ \t\u00A0\u2000-\u200A\u202F\u205F\u2063\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
 
 FILENAME_EXT = 3gp|aac|aspx|avi|bat|bmp|bz2|c|class|cgi|cpp|csv|dll|doc|docx|exe|flv|gif|gz|h|hei[cf]|htm|html|jar|java|jpeg|jpg|m4a|m4v|mov|mp[34g]|mpeg|o|pdf|php|pl|png|ppt|pptx|ps|psd|py|rtf|sql|tar|tgz|tif|tiff|tmp|txt|wav|wm[va]|x|xls|xlsx|xml|zip
 FILENAME = [\p{Alpha}\p{Digit}]+([-~.!_/#][\p{Alpha}\p{Digit}]+)*\.{FILENAME_EXT}
