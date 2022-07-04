@@ -477,7 +477,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
   private Object getNext() {
-    final String txt = yytext();
+    String txt = yytext();
     return getNext(txt, txt);
   }
 
@@ -589,10 +589,6 @@ SPLET = &[aeiouAEIOU](acute|grave|uml);
 
 %include LexCommon.tokens
 
-SPACENLS = {SPACENL}+
-/* These next ones are useful to get a fixed length trailing context. */
-SPACENL_ONE_CHAR = [ \t\u00A0\u2000-\u200A\u202F\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
-NOT_SPACENL_ONE_CHAR = [^ \t\u00A0\u2000-\u200A\u202F\u3000\r\n\u2028\u2029\u000B\u000C\u0085]
 SENTEND1 = {SPACENL}({SPACENL}|[:uppercase:]|{SGML1})
 SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
 DIGIT = [:digit:]|[\u07C0-\u07C9]
@@ -672,7 +668,7 @@ SREDAUX = n{APOSETCETERA}t
 /* [yY]' is for Y'know, y'all and I for I.  So exclude from one letter first */
 /* Rest are for French borrowings.  n allows n'ts in "don'ts" */
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. 'Twixt for betwixt */
-APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[1-9]0s|[1-9]0{APOS}s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeioulA-Z][:letter:]*|{APOS}cause|cont'd\.?|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|ass't|'twixt|O{APOSETCETERA}o
+APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|(Dunkin|somethin|ol){APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[1-9]0s|[1-9]0{APOS}s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeioulA-Z][:letter:]*|{APOS}cause|cont{APOSETCETERA}d\.?|nor{APOSETCETERA}easter|c{APOSETCETERA}mon|e{APOSETCETERA}er|s{APOSETCETERA}mores|ev{APOSETCETERA}ry|li{APOSETCETERA}l|nat{APOSETCETERA}l|ass{APOSETCETERA}t|'twixt|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
 /* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
 FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?¡¿,·;:&`\"\'\*\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
@@ -963,13 +959,13 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {TWITTER} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
-{REDAUX}/[^\p{Alpha}'’]   { String tok = yytext();
+{REDAUX}/[^\p{Latin}'’]   { String tok = yytext();
                           String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {REDAUX} to recognize " + tok + " as " + norm +
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
-{SREDAUX}/[^\p{Alpha}'’]  { String tok = yytext();
+{SREDAUX}/[^\p{Latin}'’]  { String tok = yytext();
                           String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {SREDAUX} to recognize " + tok + " as " + norm +
                                                    "; probablyLeft=" + false); }
@@ -1073,7 +1069,7 @@ RM/{NUM}        { String txt = yytext();
                         }
 {DOLSIGN}               { String txt = yytext();
                           if (DEBUG) { logger.info("Used {DOLSIGN} to recognize " + txt); }
-                            return getNext(txt, txt);
+                          return getNext(txt, txt);
                         }
 {DOLSIGN2}              { String txt = yytext();
                           String normTok;
@@ -1100,26 +1096,49 @@ RM/{NUM}        { String txt = yytext();
 <YyTokenizePerLine>{ABBREV3}/{SPACENL}?[:digit:]   {
                           return processAbbrev3();
                         }
-<YyNotTokenizePerLine>{ABBREVSN}/{SPACENL}+(Africa|Korea|Cal) { return getNext(); }
-<YyTokenizePerLine>{ABBREVSN}/{SPACE}+(Africa|Korea|Cal) { return getNext(); }
+<YyNotTokenizePerLine>{ABBREVSN}/{SPACENL}+(Africa|Korea|Cal) {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {N/S Place} to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
+<YyTokenizePerLine>{ABBREVSN}/{SPACE}+(Africa|Korea|Cal) {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {N/S Place} (2) to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
 /* Special case to get pty. ltd. or pty limited. Also added "Co." since someone complained, but usually a comma after it. */
-(pty|pte|pvt|co)\./{SPACE}(ltd|lim|llc)  { return getNext(); }
+(pty|pte|pvt|co)\./{SPACE}(ltd|lim|llc)  {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {pty ltd} to recognize " + txt); }
+                          return getNext(txt, txt); }
 /* Special case to get op. cit.. or loc. cit. */
-(op|loc)\./{SPACE}cit\.  { return getNext(); }
+(op|loc)\./{SPACE}cit\.  {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {op/loc cit} to recognize " + txt); }
+                          return getNext(txt, txt); }
 <YyNotTokenizePerLine>{ABBREV1}/{SENTEND1}     {
                           return processAbbrev1();
                         }
 <YyTokenizePerLine>{ABBREV1}/{SENTEND2}     {
                           return processAbbrev1();
                         }
-<YyNotTokenizePerLine>{ABBREV1}s?/[^][^]        { return getNext(); }
-<YyTokenizePerLine>{ABBREV1}s?/[^\r\n][^\r\n]        { return getNext(); }
-{ABBREV1}s?             { // this one should only match if we're basically at the end of file
+<YyNotTokenizePerLine>{ABBREV1}s?/[^][^]    {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {ABBREV1 pl} to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
+<YyTokenizePerLine>{ABBREV1}s?/[^\r\n][^\r\n]   {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {ABBREV1 pl} (2) to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
+{ABBREV1}s?             {
+                          // this one should only match if we're basically at the end of file
                           // since the last one matches two things, even newlines (if not tokenize per line)
                           return processAbbrev1();
                         }
 {ABBREV2}s?             { String tok = yytext();
-                          if (DEBUG) { logger.info("Used {ABBREV2} to recognize " + tok); }
+                          if (DEBUG) { logger.info("Used {ABBREV2 pl} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
 /* Last millennium (in the WSJ) "Alex." is generally an abbreviation for Alex. Brown, brokers! Recognize just this case. */
@@ -1140,20 +1159,44 @@ RM/{NUM}        { String txt = yytext();
                           if (DEBUG) { logger.info("Used {ABBREV4} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
-{TBSPEC2}/{SPACENL}     { return getNext(); }
-{ISO8601DATETIME}       { return getNext(); }
+{TBSPEC2}/{SPACENL}     {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {TBSPEC2} to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
+{ISO8601DATETIME}       {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {ISO8601DATETIME} to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
 //{ISO8601DATE}           { return getNext(); }
-{DEGREES}               { return getNext(); }
+{DEGREES}               {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {DEGREES} to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
 /* Ideally would factor this out for use in other tokenizers,
  * but the other tokenizers don't have TokenizerPerLine options */
-<YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'<()])      { return getNext(); }
-<YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'<()])      { return getNext(); }
+<YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'<()]) {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {FILENAME} to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
+<YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'<()])      {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {FILENAME} (2) to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
 {WORD}\./{INSENTP}      { String origTok = yytext();
                           String norm = LexerUtils.removeSoftHyphens(origTok);
                           if (DEBUG) { logger.info("Used {WORD} (3) to recognize " + origTok + " as " + norm); }
                           return getNext(norm, origTok);
                         }
-{SSN}                   { return getNext(); }
+{SSN}                   {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {SSN} to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
 {PHONE}                 { String txt = yytext();
                           String norm = txt;
                           if (normalizeSpace) {
@@ -1184,48 +1227,81 @@ RM/{NUM}        { String txt = yytext();
 {ASIANSMILEY}   { String txt = yytext();
                   String origText = txt;
                   txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
+                  if (DEBUG) { logger.info("Used {ASIANSMILEY} to recognize " + origText + " as " + txt); }
                   return getNext(txt, origText);
                 }
 {EMOJI}         { String txt = yytext();
                   if (DEBUG) { logger.info("Used {EMOJI} to recognize " + txt); }
                   return getNext(txt, txt);
                 }
-{LESSTHAN}      { return getNext("<", yytext()); }
-{GREATERTHAN}   { return getNext(">", yytext()); }
-\{              { if (normalizeOtherBrackets) {
-                    return getNext(openbrace, yytext()); }
+{LESSTHAN}      {
+                  String txt = yytext();
+                  if (DEBUG) { logger.info("Used {LESSTHAN} to recognize " + txt + " as <"); }
+                  return getNext("<", yytext());
+                }
+{GREATERTHAN}   {
+                  String txt = yytext();
+                  if (DEBUG) { logger.info("Used {GREATERTHAN} to recognize " + txt + " as >"); }
+                 return getNext(">", yytext());
+                }
+\{              {
+                  String txt = yytext();
+                  if (normalizeOtherBrackets) {
+                    if (DEBUG) { logger.info("Used {{} to recognize " + txt + " as " + openbrace); }
+                    return getNext(openbrace, txt); }
                   else {
-                    return getNext();
+                    if (DEBUG) { logger.info("Used {{} to recognize " + txt); }
+                    return getNext(txt, txt);
                   }
                 }
-\}              { if (normalizeOtherBrackets) {
-                    return getNext(closebrace, yytext()); }
+\}              {
+                  String txt = yytext();
+                  if (normalizeOtherBrackets) {
+                    if (DEBUG) { logger.info("Used {}} to recognize " + txt + " as " + closebrace); }
+                    return getNext(closebrace, txt); }
                   else {
-                    return getNext();
+                    if (DEBUG) { logger.info("Used {}} to recognize " + txt); }
+                    return getNext(txt, txt);
                   }
                 }
-\[              { if (normalizeOtherBrackets) {
-                    return getNext("-LSB-", yytext()); }
+\[              {
+                  String txt = yytext();
+                  if (normalizeOtherBrackets) {
+                    if (DEBUG) { logger.info("Used {[} to recognize " + txt + " as " + "-LSB-"); }
+                    return getNext("-LSB-", txt); }
                   else {
-                    return getNext();
+                    if (DEBUG) { logger.info("Used {[} to recognize " + txt); }
+                    return getNext(txt, txt);
                   }
                 }
-\]              { if (normalizeOtherBrackets) {
-                    return getNext("-RSB-", yytext()); }
+\]              {
+                  String txt = yytext();
+                  if (normalizeOtherBrackets) {
+                    if (DEBUG) { logger.info("Used {]} to recognize " + txt + " as " + "-RSB-"); }
+                    return getNext("-RSB-", txt); }
                   else {
-                    return getNext();
+                    if (DEBUG) { logger.info("Used {]} to recognize " + txt); }
+                    return getNext(txt, txt);
                   }
                 }
-\(              { if (normalizeParentheses) {
-                    return getNext(openparen, yytext()); }
+\(              {
+                  String txt = yytext();
+                  if (normalizeParentheses) {
+                    if (DEBUG) { logger.info("Used {(} to recognize " + txt + " as " + openparen); }
+                    return getNext(openparen, txt); }
                   else {
-                    return getNext();
+                    if (DEBUG) { logger.info("Used {(} to recognize " + txt); }
+                    return getNext(txt, txt);
                   }
                 }
-\)              { if (normalizeParentheses) {
-                    return getNext(closeparen, yytext()); }
+\)              {
+                  String txt = yytext();
+                  if (normalizeParentheses) {
+                    if (DEBUG) { logger.info("Used {)} to recognize " + txt + " as " + closeparen); }
+                    return getNext(closeparen, txt); }
                   else {
-                    return getNext();
+                    if (DEBUG) { logger.info("Used {)} to recognize " + txt); }
+                    return getNext(txt, txt);
                   }
                 }
 {HYPHENS}       { final String origTxt = yytext();
@@ -1270,17 +1346,42 @@ RM/{NUM}        { String txt = yytext();
                            if (DEBUG) { logger.info("Used {LDOTS5} to recognize " + tok + " as " + norm); }
                            return getNext(norm, tok);
                          }
-{FNMARKS}       { return getNext(); }
-{ASTS}          { if (escapeForwardSlashAsterisk) {
-                    return getNext(LexerUtils.escapeChar(yytext(), '*'), yytext()); }
+{FNMARKS}       {
+                  String txt = yytext();
+                  if (DEBUG) { logger.info("Used {FNMARKS} to recognize " + txt); }
+                  return getNext(txt, txt);
+                }
+{ASTS}          {
+                  String txt = yytext();
+                  if (escapeForwardSlashAsterisk) {
+                    String normTok = LexerUtils.escapeChar(yytext(), '*');
+                    if (DEBUG) { logger.info("Used {ASTS} to recognize " + txt + " as " + normTok); }
+                    return getNext(normTok, yytext()); }
                   else {
-                    return getNext();
+                    if (DEBUG) { logger.info("Used {ASTS} to recognize " + txt); }
+                    return getNext(txt, txt);
                   }
                 }
-{INSENTP}       { return getNext(); }
-[?!]+|[\u2047\u2048]    { return getNext(); }
-[.¡¿\u037E\u0589\u061F\u06D4\u0700-\u0702\u07FA\u3002]  { return getNext(); }
-=+              { return getNext(); }
+{INSENTP}       {
+                  String txt = yytext();
+                  if (DEBUG) { logger.info("Used {INSENTP} to recognize " + txt); }
+                  return getNext(txt, txt);
+                }
+[?!]+|[\u2047\u2048]    {
+                  String txt = yytext();
+                  if (DEBUG) { logger.info("Used {[?!]+]} to recognize " + txt); }
+                  return getNext(txt, txt);
+                }
+[.¡¿\u037E\u0589\u061F\u06D4\u0700-\u0702\u07FA\u3002]  {
+                  String txt = yytext();
+                  if (DEBUG) { logger.info("Used {sent end punct} to recognize " + txt); }
+                  return getNext(txt, txt);
+                }
+=+              {
+                  String txt = yytext();
+                  if (DEBUG) { logger.info("Used {=} to recognize " + txt); }
+                  return getNext(txt, txt);
+                }
 \/              { if (escapeForwardSlashAsterisk) {
                     return getNext(LexerUtils.escapeChar(yytext(), '/'), yytext()); }
                   else {
@@ -1392,7 +1493,11 @@ RM/{NUM}        { String txt = yytext();
                 }
 
 {FAKEDUCKFEET}  { return getNext(); }
-{MISCSYMBOL}    { return getNext(); }
+{MISCSYMBOL}    {
+                  String tok = yytext();
+                  if (DEBUG) { logger.info("Used {MISCSYMBOL} to recognize " + tok); }
+                  return getNext(tok, tok);
+                }
 {CP1252_MISC_SYMBOL}  { String tok = yytext();
                         String norm = LexerUtils.processCp1252misc(tok);
                         if (DEBUG) { logger.info("Used {CP1252_MISC_SYMBOL} to recognize " + tok + " as " + norm); }
@@ -1453,9 +1558,9 @@ RM/{NUM}        { String txt = yytext();
 <<EOF>> { if (invertible) {
             // prevWordAfter.append(yytext());
             String str = prevWordAfter.toString();
-            if (DEBUG) { logger.info("At end of text making after: |" + str + "|"); }
+            // if (DEBUG) { logger.info("At end of text making after: |" + str + "|"); }
             prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
-            if (DEBUG) { logger.info("prevWord is |" + prevWord.get(CoreAnnotations.TextAnnotation.class) + "|, its after is " +
+            if (DEBUG) { logger.info("At end of text, prevWord is |" + prevWord.get(CoreAnnotations.TextAnnotation.class) + "|, its after set to " +
                                      "|" + prevWord.get(CoreAnnotations.AfterAnnotation.class) + "|"); }
             prevWordAfter.setLength(0);
           }
