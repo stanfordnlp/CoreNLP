@@ -476,11 +476,6 @@ import edu.stanford.nlp.util.logging.Redwood;
     return -1;
   }
 
-  private Object getNext() {
-    String txt = yytext();
-    return getNext(txt, txt);
-  }
-
   /** Make the next token.
    *  If the begin character offset exceeds what can be stored in 32 bits, it is
    *  entered as Integer.MAX_VALUE and an error is logged.
@@ -509,10 +504,12 @@ import edu.stanford.nlp.util.logging.Redwood;
     }
   }
 
+  /*
   private void fixJFlex4SpaceAfterTokenBug() {
     // try to work around an apparent jflex bug where it
     // gets a space at the token end by getting
     // wrong the length of the trailing context.
+    // cdm2022: This bug no longer seems to exist; tested on several megabytes of text
     while (yylength() > 0) {
       char last = yycharat(yylength()-1);
       if (last == ' ' || last == '\t' || (last >= '\n' && last <= '\r' || last == '\u0085')) {
@@ -523,9 +520,10 @@ import edu.stanford.nlp.util.logging.Redwood;
       }
     }
   }
+  */
 
   private Object processAcronym() {
-    fixJFlex4SpaceAfterTokenBug();
+    // fixJFlex4SpaceAfterTokenBug();
     String s;
     if (yylength() == 2) { // "I.", etc. Treat as "I" + "."
       yypushback(1); // return a period next time;
@@ -543,7 +541,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
   private Object processAbbrev3() {
-    fixJFlex4SpaceAfterTokenBug();
+    // fixJFlex4SpaceAfterTokenBug();
     String txt = yytext();
     if (DEBUG) { logger.info("Used {ABBREV3} to recognize " + txt); }
     return getNext(txt, txt);
@@ -595,6 +593,7 @@ DIGIT = [:digit:]|[\u07C0-\u07C9]
 DATE = {DIGIT}{1,2}[\-\u2012\/]{DIGIT}{1,2}[\-\u2012\/]{DIGIT}{2,4}|{DIGIT}{4}[\-\u2012\/]{DIGIT}{1,2}[\-\u2012\/]{DIGIT}{1,2}
 /* Note that NUM also includes times like 12:55. One can start with a . or , but not a : */
 NUM = {DIGIT}*([.,\u066B\u066C]{DIGIT}+)+|{DIGIT}+([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)*
+LEADING_NUM = {DIGIT}+([.,\u066B\u066C]{DIGIT}+)+
 /* Now don't allow bracketed negative numbers!  They have too many uses (e.g.,
    years or times in parentheses), and having them in tokens messes up
    treebank parsing.
@@ -623,10 +622,14 @@ SEP_SUFFIX = ({SEP_CURRENCY}|{SEP_UNITS}|{SEP_OTHER})
 LETTER = ([:letter:]|{SPLET}|[\u00AD\u200C\u200D\u2060\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
 /* Allow in the zero-width (non-)joiner characters. Allow in Modifier non-spacing (= separated accent chars) */
 WORD = {LETTER}({LETTER}|{DIGIT}|[\p{Mn}\p{Mc}])*([.!?]{LETTER}({LETTER}|{DIGIT}|[\p{Mn}\p{Mc}])*)*
+/* VARIANT THAT CAN'T END IN A NUMBER. Seemed needed for use with trailing number context, though unclear why */
+WORD_LETTER = {LETTER}|{LETTER}({LETTER}|{DIGIT}|[\p{Mn}\p{Mc}])*([.!?]{LETTER}({LETTER}|{DIGIT}|[\p{Mn}\p{Mc}])*)*{LETTER}
 /* THING: The $ was for things like New$;
    WAS: only keep hyphens with short one side like co-ed. But (old) treebank just allows hyphenated things as words!
    THING allows d'Avignon or NUMBER before HYPHEN and the same things after it. Only first number can be negative. */
 THING = ([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUMBER})({HYPHEN}([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUM}))*
+/* variant with final letter for trailing context bug */
+THING_LETTER = ([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUMBER})({HYPHEN}([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUM}))*\p{Alpha}
 THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}(\\?\/[\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}){1,2}
 APOS = ['\u0092\u2019´]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or reversed quote or HTML SGML escape */
@@ -916,6 +919,16 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {DIGIT}/{SEP_SUFFIX} to recognize " + txt); }
                           return getNext(txt, txt);
                         }
+/* for WORD in front of decimal number of dotted number sequence, leave the latter alone. */
+/* Sometimes this is for currencies like RM = Malaysian currency, DM = Deutschmark, SK = Swedish Kroner, etc. */
+{WORD_LETTER}/{LEADING_NUM}    { final String origTxt = yytext();
+                          String tok = LexerUtils.removeSoftHyphens(origTxt);
+                          if (americanize) {
+                            tok = Americanize.americanize(tok);
+                          }
+                          if (DEBUG) { logger.info("Used {WORD_LETTER} to recognize " + origTxt + " as " + tok); }
+                          return getNext(tok, origTxt);
+                        }
 {WORD}                  { final String origTxt = yytext();
                           String tok = LexerUtils.removeSoftHyphens(origTxt);
                           if (americanize) {
@@ -982,11 +995,6 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {DATE} to recognize " + origTxt + " as " + txt); }
                           return getNext(txt, origTxt);
                         }
-/* Malaysian currency */
-RM/{NUM}        { String txt = yytext();
-                  if (DEBUG) { logger.info("Used Malaysian currency to recognize " + txt); }
-                  return getNext(txt, txt);
-                }
 {NUMBER}        { String txt = yytext();
                   handleHyphenatedNumber(txt);
                   if (DEBUG) { logger.info("Used {NUMBER} to recognize " + yytext() + " as " + removeFromNumber(yytext())); }
@@ -1453,7 +1461,16 @@ RM/{NUM}        { String txt = yytext();
                                                          "; probablyLeft=" + false); }
                                 return getNext(norm, tok);
                               } */
-{THING}         { breakByHyphensSlashes(yytext()); // this was causing fail of attempted to pushback too much!
+{THING_LETTER}/{LEADING_NUM} {
+                  breakByHyphensSlashes(yytext()); // this was causing fail of attempt to pushback too much!
+                  String tok = yytext();
+                  /* A THING can contain quote like O'Malley */
+                  String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
+                  if (DEBUG) { logger.info("Used {THING_LETTER} to recognize " + tok + " as " + norm +
+                                           "; probablyLeft=" + false); }
+                  return getNext(norm, tok);
+                }
+{THING}         { breakByHyphensSlashes(yytext()); // this was causing fail of attempt to pushback too much!
                   String tok = yytext();
                   /* A THING can contain quote like O'Malley */
                   String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
@@ -1582,17 +1599,17 @@ RM/{NUM}        { String txt = yytext();
               this.seenUntokenizableCharacter = true;
               break;
             case NONE_KEEP:
-              return getNext();
+              return getNext(str, str);
             case FIRST_KEEP:
               if ( ! this.seenUntokenizableCharacter) {
                 logger.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
-              return getNext();
+              return getNext(str, str);
             case ALL_KEEP:
               logger.warning(msg);
               this.seenUntokenizableCharacter = true;
-              return getNext();
+              return getNext(str, str);
           }
         }
 <<EOF>> { if (invertible) {

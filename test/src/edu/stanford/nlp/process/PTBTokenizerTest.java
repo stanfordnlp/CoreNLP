@@ -532,7 +532,7 @@ public class PTBTokenizerTest {
             "&gt; No one said you did, runny.  What's got you so scared, anyway?-\u00A0" +
             "\">" },
     { "&lt;b...@canada.com&gt;", "funky@thedismalscience.net", "<myemail@where.com>" },
-    { "<DOC>", "<DOCID>", "nyt960102", ".0516", "</DOCID>", "<STORYID\u00A0cat=w\u00A0pri=u>", "A0264", "</STORYID>", "<SLUG\u00A0fv=ttj-z>" },
+    { "<DOC>", "<DOCID>", "nyt", "960102.0516", "</DOCID>", "<STORYID\u00A0cat=w\u00A0pri=u>", "A0264", "</STORYID>", "<SLUG\u00A0fv=ttj-z>" },
     { "<!--\u00A0copy\u00A0from\u00A0here\u00A0-->", "<a\u00A0href=\"http://strategis.gc.ca/epic/internet/inabc-eac.nsf/en/home\">",
             "<img\u00A0src=\"id-images/ad-220x80_01e.jpg\"\u00A0alt=\"Aboriginal\u00A0Business\u00A0Canada:\u00A0" +
             "Opening\u00A0New\u00A0Doors\u00A0for\u00A0Your\u00A0Business\"\u00A0width=\"220\"\u00A0height=\"80\"\u00A0border=\"0\">",
@@ -571,7 +571,7 @@ public class PTBTokenizerTest {
             ">", "No", "one", "said", "you", "did", ",", "runny", ".", "What", "'s", "got", "you", "so", "scared", ",", "anyway", "?", "-",
             "\"", ">" },
     { "&lt;b...@canada.com&gt;", "funky@thedismalscience.net", "<myemail@where.com>" },
-    { "<DOC>", "<DOCID>", "nyt960102", ".0516", "</DOCID>", "<STORYID\u00A0cat=w\u00A0pri=u>", "A0264", "</STORYID>", "<SLUG\u00A0fv=ttj-z>" },
+    { "<DOC>", "<DOCID>", "nyt", "960102.0516", "</DOCID>", "<STORYID\u00A0cat=w\u00A0pri=u>", "A0264", "</STORYID>", "<SLUG\u00A0fv=ttj-z>" },
     { "<!--\u00A0copy\u00A0from\u00A0here\u00A0-->", "<a\u00A0href=\"http://strategis.gc.ca/epic/internet/inabc-eac.nsf/en/home\">",
             "<", "img", "src", "=", "\"", "id-images/ad-220x80_01e.jpg", "\"", "alt", "=", "\"", "Aboriginal", "Business", "Canada", ":",
             "Opening", "New", "Doors", "for", "Your", "Business", "\"",
@@ -839,6 +839,7 @@ public class PTBTokenizerTest {
           "Apple released the iPhone 11 Pro Max. The iPhone family expanded.",
           "C'mon, c’mon.",
           "phone: 47-42-17-11; fax, 47-42-80-44 or 47-42-18-81;",
+          "I installed SPSS28.0.",
   };
 
   private final String[][] tweetGold = {
@@ -877,6 +878,7 @@ public class PTBTokenizerTest {
           { "Apple", "released", "the", "iPhone", "11", "Pro", "Max", ".", "The", "iPhone", "family", "expanded", "." },
           { "C'mon", ",", "c’mon", "." },
           { "phone", ":", "47-42-17-11", ";", "fax", ",", "47-42-80-44", "or", "47-42-18-81", ";" },
+          { "I", "installed", "SPSS", "28.0", "." },
   };
 
   @Test
