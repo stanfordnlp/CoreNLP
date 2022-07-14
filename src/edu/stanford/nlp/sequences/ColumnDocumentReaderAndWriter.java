@@ -13,8 +13,9 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.DelimitRegExIterator;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
-import java.util.function.Function;
+import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.StringUtils;
+import java.util.function.Function;
 
 
 /**
@@ -34,6 +35,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   //map can be something like "word=0,tag=1,answer=2"
   @SuppressWarnings("rawtypes")
   private Class[] map; // = null;
+  private int wordColumn = -1;
   private IteratorFromReaderFactory<List<CoreLabel>> factory;
 
 //  public void init(SeqClassifierFlags flags) {
@@ -51,6 +53,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public void init(String map) {
     // this.flags = null;
     this.map = CoreLabel.parseStringKeys(StringUtils.mapStringToArray(map));
+    this.wordColumn = ArrayUtils.indexOf(this.map, CoreAnnotations.TextAnnotation.class);
     factory = DelimitRegExIterator.getFactory("\n(?:\\s*\n)+", new ColumnDocParser());
   }
 
@@ -86,6 +89,13 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
         String[] info = line.split("\t");
         if (info.length == 1) {
           info = whitePattern.split(line);
+        }
+        // Trimming later rather than splitting on all whitespace
+        // gives us the possibility of tokens with whitespace in them
+        // although obviously not at the start or end...
+        // doesn't slow the classifier down too much
+        if (wordColumn >= 0) {
+          info[wordColumn] = info[wordColumn].trim();
         }
         CoreLabel wi;
         try {
