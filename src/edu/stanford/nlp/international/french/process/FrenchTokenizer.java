@@ -63,7 +63,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   private List<CoreLabel> compoundBuffer;
 
   // Produces the tokenization for parsing used by Green, de Marneffe, and Manning (2011)
-  public static final String FTB_OPTIONS = "ellipses=ptb3,normalizeParentheses=true,ptb3Dashes=false," +
+  public static final String FTB_OPTIONS = "ellipses=ascii,normalizeParentheses=true,dashes=not_cp1252," +
     SPLIT_CONTRACTIONS_OPTION + "=true," + SPLIT_COMPOUNDS_OPTION + "=true";
 
   // Official pipeline default settings for French
@@ -381,7 +381,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
       while (tokenizer.hasNext()) {
         ++nTokens;
         String word = tokenizer.next().word();
-        if (word.equals(FrenchLexer.NEWLINE_TOKEN)) {
+        if (word.equals(AbstractTokenizer.NEWLINE_TOKEN)) {
           ++nLines;
           printSpace = false;
           System.out.println();

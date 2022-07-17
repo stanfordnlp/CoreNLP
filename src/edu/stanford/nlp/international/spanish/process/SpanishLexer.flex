@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.LexedTokenFactory;
 import edu.stanford.nlp.process.LexerUtils;
@@ -32,287 +33,275 @@ import edu.stanford.nlp.util.logging.Redwood;
 %{
 
   /**
-   * Constructs a new SpanishLexer.  You specify the type of result tokens with a
-   * LexedTokenFactory, and can specify the treatment of tokens by boolean
-   * options given in a comma separated String
-   * (e.g., "invertible,normalizeParentheses=true").
-   * If the String is {@code null} or empty, you get the traditional
-   * PTB3 normalization behaviour (i.e., you get ptb3Escaping=false).  If you
-   * want no normalization, then you should pass in the String
-   * "ptb3Escaping=false".  The known option names are:
-   * <ol>
-   * <li>invertible: Store enough information about the original form of the
-   *     token and the whitespace around it that a list of tokens can be
-   *     faithfully converted back to the original String.  Valid only if the
-   *     LexedTokenFactory is an instance of CoreLabelTokenFactory.  The
-   *     keys used in it are TextAnnotation for the tokenized form,
-   *     OriginalTextAnnotation for the original string, BeforeAnnotation and
-   *     AfterAnnotation for the whitespace before and after a token, and
-   *     perhaps BeginPositionAnnotation and EndPositionAnnotation to record
-   *     token begin/after end offsets, if they were specified to be recorded
-   *     in TokenFactory construction.  (Like the String class, begin and end
-   *     are done so end - begin gives the token length.)
-   * <li>tokenizeNLs: Whether end-of-lines should become tokens (or just
-   *     be treated as part of whitespace)
-   * <li>ptb3Escaping: Enable all traditional PTB3 token transforms
-   *     (like -LRB-, -RRB-).  This is a macro flag that sets or clears all the
-   *     options below.
-   * <li>normalizeAmpersandEntity: Whether to map the XML &amp;amp; to an
-   *      ampersand
-   * <li>normalizeFractions: Whether to map certain common composed
-   *     fraction characters to spelled out letter forms like "1/2"
-   * <li>normalizeParentheses: Whether to map round parentheses to -LRB-,
-   *     -RRB-, as in the Penn Treebank
-   * <li>normalizeOtherBrackets: Whether to map other common bracket characters
-   *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank
-   * <li>ellipses: [From CoreNLP 4.0] Select a style for mapping ellipses (3 dots).  An enum with possible values
-   *     (case insensitive): unicode, ptb3, not_cp1252, original. "ptb3" maps ellipses to three dots (...), the
-   *     old PTB3 WSJ coding of an ellipsis. "unicode" maps three dot and optional space sequences to
-   *     U+2026, the Unicode ellipsis character. "not_cp1252" only remaps invalid cp1252 ellipses to unicode.
-   *     "original" uses all ellipses as they were. The default is ptb3. </li>
-   * <li>dashes: [From CoreNLP 4.0] Select a style for mapping dashes. An enum with possible values
-   *     (case insensitive): unicode, ptb3, not_cp1252, original. "ptb3" maps dashes to "--", the
-   *     most prevalent old PTB3 WSJ coding of a dash (though some are just "-" HYPHEN-MINUS).
-   *     "unicode" maps "-", "--", and "---" HYPHEN-MINUS sequences and CP1252 dashes to Unicode en and em dashes.
-   *     "not_cp1252" only remaps invalid cp1252 dashes to unicode.
-   *     "original" leaves all dashes as they were. The default is "not_cp1252". </li>
-   * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
-   *     of / and * as the old PTB3 WSJ does for some reason (something to do
-   *     with Lisp readers??).
-   * <li>untokenizable: What to do with untokenizable characters (ones not
-   *     known to the tokenizers).  Six options combining whether to log a
-   *     warning for none, the first, or all, and whether to delete them or
-   *     to include them as single character tokens in the output: noneDelete,
-   *     firstDelete, allDelete, noneKeep, firstKeep, allKeep.
-   *     The default is "firstDelete".
-   * <li>strictTreebank3: PTBTokenizer deliberately deviates from strict PTB3
-   *      WSJ tokenization in two cases.  Setting this improves compatibility
-   *      for those cases.  They are: (i) When an acronym is followed by a
-   *      sentence end, such as "Corp." at the end of a sentence, the PTB3
-   *      has tokens of "Corp" and ".", while by default PTBTokenizer duplicates
-   *      the period returning tokens of "Corp." and ".", and (ii) PTBTokenizer
-   *      will return numbers with a whole number and a fractional part like
-   *      "5 7/8" as a single token (with a non-breaking space in the middle),
-   *      while the PTB3 separates them into two tokens "5" and "7/8".
-   *      (Exception: for "U.S." the treebank does have the two tokens
-   *      "U.S." and "." like our default; strictTreebank3 now does that too.)
-   * </ol>
-   *
-   * @param r The Reader to tokenize text from
-   * @param tf The LexedTokenFactory that will be invoked to convert
-   *    each substring extracted by the lexer into some kind of Object
-   *    (such as a Word or CoreLabel).
-   * @param props Options to the tokenizer (see constructor Javadoc)
-   */
-  public SpanishLexer(Reader r, LexedTokenFactory<?> tf, Properties props) {
-    this(r);
-    this.tokenFactory = tf;
-    for (String key : props.stringPropertyNames()) {
-      String value = props.getProperty(key);
-      boolean val = Boolean.valueOf(value);
-      if ("".equals(key)) {
-        // allow an empty item
-      } else if ("noSGML".equals(key)) {
-        noSGML = val;
-      } else if ("invertible".equals(key)) {
-        invertible = val;
-      } else if ("tokenizeNLs".equals(key)) {
-        tokenizeNLs = val;
-      } else if ("ptb3Escaping".equals(key)) {
-        normalizeAmpersandEntity = val;
-        normalizeFractions = val;
-        normalizeParentheses = val;
-        normalizeOtherBrackets = val;
-        ellipsisStyle = val ? LexerUtils.EllipsesEnum.PTB3 : LexerUtils.EllipsesEnum.ORIGINAL;
-        dashesStyle = val ? LexerUtils.DashesEnum.PTB3 : LexerUtils.DashesEnum.ORIGINAL;
-        quoteStyle = val ? LexerUtils.QuotesEnum.ASCII : LexerUtils.QuotesEnum.ORIGINAL;
-      } else if ("quotes".equals(key)) {
-        quoteStyle = LexerUtils.QuotesEnum.valueOf(key.trim().toLowerCase(Locale.ROOT));
-      } else if ("normalizeAmpersandEntity".equals(key)) {
-        normalizeAmpersandEntity = val;
-      } else if ("normalizeFractions".equals(key)) {
-        normalizeFractions = val;
-      } else if ("normalizeParentheses".equals(key)) {
-        normalizeParentheses = val;
-      } else if ("normalizeOtherBrackets".equals(key)) {
-        normalizeOtherBrackets = val;
-      } else if ("ellipses".equals(key)) {
-        try {
-          ellipsisStyle = LexerUtils.EllipsesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException iae) {
-          throw new IllegalArgumentException ("Not a valid ellipses style: " + value);
+       * Constructs a new SpanishLexer.  You specify the type of result tokens with a
+       * LexedTokenFactory, and can specify the treatment of tokens by boolean
+       * options given in a comma separated String
+       * (e.g., "invertible,normalizeParentheses=true").
+       * If the String is {@code null} or empty, you get the traditional
+       * PTB3 normalization behaviour (i.e., you get ptb3Escaping=false).  If you
+       * want no normalization, then you should pass in the String
+       * "ptb3Escaping=false".  The known option names are:
+       * <ol>
+       * <li>invertible: Store enough information about the original form of the
+       *     token and the whitespace around it that a list of tokens can be
+       *     faithfully converted back to the original String.  Valid only if the
+       *     LexedTokenFactory is an instance of CoreLabelTokenFactory.  The
+       *     keys used in it are TextAnnotation for the tokenized form,
+       *     OriginalTextAnnotation for the original string, BeforeAnnotation and
+       *     AfterAnnotation for the whitespace before and after a token, and
+       *     perhaps BeginPositionAnnotation and EndPositionAnnotation to record
+       *     token begin/after end offsets, if they were specified to be recorded
+       *     in TokenFactory construction.  (Like the String class, begin and end
+       *     are done so end - begin gives the token length.)
+       * <li>tokenizeNLs: Whether end-of-lines should become tokens (or just
+       *     be treated as part of whitespace)
+       * <li>ptb3Escaping: Enable all traditional PTB3 token transforms
+       *     (like -LRB-, -RRB-).  This is a macro flag that sets or clears all the
+       *     options below.
+       * <li>normalizeAmpersandEntity: Whether to map the XML &amp;amp; to an
+       *      ampersand
+       * <li>normalizeFractions: Whether to map certain common composed
+       *     fraction characters to spelled out letter forms like "1/2"
+       * <li>normalizeParentheses: Whether to map round parentheses to -LRB-,
+       *     -RRB-, as in the Penn Treebank
+       * <li>normalizeOtherBrackets: Whether to map other common bracket characters
+       *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank
+       * <li>ellipses: [From CoreNLP 4.0] Select a style for mapping ellipses (3 dots).  An enum with possible values
+       *     (case insensitive): unicode, ascii, not_cp1252, original. "ascii" maps ellipses to three dots (...), the
+       *     old PTB3 WSJ coding of an ellipsis. "unicode" maps three dot and optional space sequences to
+       *     U+2026, the Unicode ellipsis character. "not_cp1252" only remaps invalid cp1252 ellipses to unicode.
+       *     "original" uses all ellipses as they were. The default is ascii. </li>
+       * <li>dashes: [From CoreNLP 4.0] Select a style for mapping dashes. An enum with possible values
+       *     (case insensitive): unicode, ascii, not_cp1252, original. "ascii" maps dashes to "--", the
+       *     most prevalent old PTB3 WSJ coding of a dash (though some are just "-" HYPHEN-MINUS).
+       *     "unicode" maps "-", "--", and "---" HYPHEN-MINUS sequences and CP1252 dashes to Unicode en and em dashes.
+       *     "not_cp1252" only remaps invalid cp1252 dashes to unicode.
+       *     "original" leaves all dashes as they were. The default is "not_cp1252". </li>
+       * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
+       *     of / and * as the old PTB3 WSJ does for some reason (something to do
+       *     with Lisp readers??).
+       * <li>untokenizable: What to do with untokenizable characters (ones not
+       *     known to the tokenizers).  Six options combining whether to log a
+       *     warning for none, the first, or all, and whether to delete them or
+       *     to include them as single character tokens in the output: noneDelete,
+       *     firstDelete, allDelete, noneKeep, firstKeep, allKeep.
+       *     The default is "firstDelete".
+       * <li>strictTreebank3: PTBTokenizer deliberately deviates from strict PTB3
+       *      WSJ tokenization in two cases.  Setting this improves compatibility
+       *      for those cases.  They are: (i) When an acronym is followed by a
+       *      sentence end, such as "Corp." at the end of a sentence, the PTB3
+       *      has tokens of "Corp" and ".", while by default PTBTokenizer duplicates
+       *      the period returning tokens of "Corp." and ".", and (ii) PTBTokenizer
+       *      will return numbers with a whole number and a fractional part like
+       *      "5 7/8" as a single token (with a non-breaking space in the middle),
+       *      while the PTB3 separates them into two tokens "5" and "7/8".
+       *      (Exception: for "U.S." the treebank does have the two tokens
+       *      "U.S." and "." like our default; strictTreebank3 now does that too.)
+       * </ol>
+       *
+       * @param r The Reader to tokenize text from
+       * @param tf The LexedTokenFactory that will be invoked to convert
+       *    each substring extracted by the lexer into some kind of Object
+       *    (such as a Word or CoreLabel).
+       * @param props Options to the tokenizer (see constructor Javadoc)
+       */
+      public SpanishLexer(Reader r, LexedTokenFactory<?> tf, Properties props) {
+        this(r);
+        this.tokenFactory = tf;
+        for (String key : props.stringPropertyNames()) {
+          String value = props.getProperty(key);
+          boolean val = Boolean.parseBoolean(value);
+          if ("".equals(key)) {
+            // allow an empty item
+          } else if ("noSGML".equals(key)) {
+            noSGML = val;
+          } else if ("invertible".equals(key)) {
+            invertible = val;
+          } else if ("tokenizeNLs".equals(key)) {
+            tokenizeNLs = val;
+          } else if ("ptb3Escaping".equals(key)) {
+            normalizeAmpersandEntity = val;
+            normalizeFractions = val;
+            normalizeParentheses = val;
+            normalizeOtherBrackets = val;
+            ellipsisStyle = val ? LexerUtils.EllipsesEnum.ASCII : LexerUtils.EllipsesEnum.ORIGINAL;
+            dashesStyle = val ? LexerUtils.DashesEnum.ASCII : LexerUtils.DashesEnum.ORIGINAL;
+            quoteStyle = val ? LexerUtils.QuotesEnum.ASCII : LexerUtils.QuotesEnum.ORIGINAL;
+          } else if ("quotes".equals(key)) {
+            quoteStyle = LexerUtils.QuotesEnum.valueOf(key.trim().toLowerCase(Locale.ROOT));
+          } else if ("normalizeAmpersandEntity".equals(key)) {
+            normalizeAmpersandEntity = val;
+          } else if ("normalizeFractions".equals(key)) {
+            normalizeFractions = val;
+          } else if ("normalizeParentheses".equals(key)) {
+            normalizeParentheses = val;
+          } else if ("normalizeOtherBrackets".equals(key)) {
+            normalizeOtherBrackets = val;
+          } else if ("ellipses".equals(key)) {
+            try {
+              ellipsisStyle = LexerUtils.EllipsesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException iae) {
+              throw new IllegalArgumentException ("Not a valid ellipses style: " + value);
+            }
+          } else if ("dashes".equals(key)) {
+            try {
+              dashesStyle = LexerUtils.DashesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException iae) {
+              throw new IllegalArgumentException ("Not a valid dashes style: " + value);
+            }
+          } else if ("escapeForwardSlashAsterisk".equals(key)) {
+            escapeForwardSlashAsterisk = val;
+          } else if ("untokenizable".equals(key)) {
+            switch (value) {
+              case "noneDelete":
+                untokenizable = UntokenizableOptions.NONE_DELETE;
+                break;
+              case "firstDelete":
+                untokenizable = UntokenizableOptions.FIRST_DELETE;
+                break;
+              case "allDelete":
+                untokenizable = UntokenizableOptions.ALL_DELETE;
+                break;
+              case "noneKeep":
+                untokenizable = UntokenizableOptions.NONE_KEEP;
+                break;
+              case "firstKeep":
+                untokenizable = UntokenizableOptions.FIRST_KEEP;
+                break;
+              case "allKeep":
+                untokenizable = UntokenizableOptions.ALL_KEEP;
+                break;
+              default:
+                throw new IllegalArgumentException("SpanishLexer: Invalid option value in constructor: " + key + ": " + value);
+            }
+          } else if ("strictTreebank3".equals(key)) {
+            strictTreebank3 = val;
+          } else {
+            throw new IllegalArgumentException(String.format("%s: Invalid options key in constructor: %s%n", this.getClass().getName(), key));
+          }
         }
-      } else if ("dashes".equals(key)) {
-        try {
-          dashesStyle = LexerUtils.DashesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException iae) {
-          throw new IllegalArgumentException ("Not a valid dashes style: " + value);
+        // this.seenUntokenizableCharacter = false; // unnecessary, it's default initialized
+        if (invertible) {
+          if ( ! (tf instanceof CoreLabelTokenFactory)) {
+            throw new IllegalArgumentException("SpanishLexer: the invertible option requires a CoreLabelTokenFactory");
+          }
+          prevWord = (CoreLabel) tf.makeToken("", 0, 0);
+          prevWordAfter = new StringBuilder();
         }
-      } else if ("escapeForwardSlashAsterisk".equals(key)) {
-        escapeForwardSlashAsterisk = val;
-      } else if ("untokenizable".equals(key)) {
-        switch (value) {
-          case "noneDelete":
-            untokenizable = UntokenizableOptions.NONE_DELETE;
-            break;
-          case "firstDelete":
-            untokenizable = UntokenizableOptions.FIRST_DELETE;
-            break;
-          case "allDelete":
-            untokenizable = UntokenizableOptions.ALL_DELETE;
-            break;
-          case "noneKeep":
-            untokenizable = UntokenizableOptions.NONE_KEEP;
-            break;
-          case "firstKeep":
-            untokenizable = UntokenizableOptions.FIRST_KEEP;
-            break;
-          case "allKeep":
-            untokenizable = UntokenizableOptions.ALL_KEEP;
-            break;
-          default:
-            throw new IllegalArgumentException("SpanishLexer: Invalid option value in constructor: " + key + ": " + value);
+      }
+
+
+      /** Turn on to find out how things were tokenized. */
+      private static final boolean DEBUG = false;
+
+      /** A logger for this class */
+      private static final Redwood.RedwoodChannels logger = Redwood.channels(SpanishLexer.class);
+
+      private LexedTokenFactory<?> tokenFactory;
+      private CoreLabel prevWord;
+      private StringBuilder prevWordAfter;
+      private boolean seenUntokenizableCharacter;
+      private enum UntokenizableOptions { NONE_DELETE, FIRST_DELETE, ALL_DELETE, NONE_KEEP, FIRST_KEEP, ALL_KEEP }
+      private UntokenizableOptions untokenizable = UntokenizableOptions.FIRST_DELETE;
+
+      /* Flags begin with historical ptb3Escaping behavior */
+      private boolean invertible;
+      private boolean tokenizeNLs;
+      private boolean noSGML;
+      private boolean normalizeAmpersandEntity = true;
+      private boolean normalizeFractions = true;
+      private boolean normalizeParentheses;
+      private boolean normalizeOtherBrackets;
+      private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.ASCII;
+      private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.ASCII;
+      private LexerUtils.DashesEnum dashesStyle = LexerUtils.DashesEnum.NOT_CP1252;
+      private boolean escapeForwardSlashAsterisk = false;
+      private boolean strictTreebank3;
+
+
+      /*
+       * This has now been extended to cover the main Windows CP1252 characters,
+       * at either their correct Unicode codepoints, or in their invalid
+       * positions as 8 bit chars inside the iso-8859 control region.
+       *
+       * ellipsis  	85  	0133  	2026  	8230
+       * single quote curly starting 	91 	0145 	2018 	8216
+       * single quote curly ending 	92 	0146 	2019 	8217
+       * double quote curly starting 	93 	0147 	201C 	8220
+       * double quote curly ending 	94 	0148 	201D 	8221
+       * en dash  	96  	0150  	2013  	8211
+       * em dash  	97  	0151  	2014  	8212
+       */
+
+      /* Using Ancora style brackets and parens */
+      public static final String openparen = "-LRB-";
+      public static final String closeparen = "-RRB-";
+      public static final String openbrace = "-LCB-";
+      public static final String closebrace = "-RCB-";
+
+      public static final String NEWLINE_TOKEN = "*NL*";
+      public static final String COMPOUND_ANNOTATION = "comp";
+      public static final String VB_PRON_ANNOTATION = "vb_pn_attached";
+      public static final String CONTR_ANNOTATION = "contraction";
+
+      private static final Pattern NO_BREAK_SPACE = Pattern.compile("\u00A0");
+
+
+      private static String convertToEl(String l) {
+        if (Character.isLowerCase(l.charAt(0))) {
+          return "e" + l;
+        } else {
+          return "E" + l;
         }
-      } else if ("strictTreebank3".equals(key)) {
-        strictTreebank3 = val;
-      } else {
-        throw new IllegalArgumentException(String.format("%s: Invalid options key in constructor: %s%n", this.getClass().getName(), key));
       }
-    }
-    // this.seenUntokenizableCharacter = false; // unnecessary, it's default initialized
-    if (invertible) {
-      if ( ! (tf instanceof CoreLabelTokenFactory)) {
-        throw new IllegalArgumentException("SpanishLexer: the invertible option requires a CoreLabelTokenFactory");
+
+      private Object getNext() {
+        final String txt = yytext();
+        return getNext(txt, txt);
       }
-      prevWord = (CoreLabel) tf.makeToken("", 0, 0);
-      prevWordAfter = new StringBuilder();
-    }
-  }
 
-
-  /** Turn on to find out how things were tokenized. */
-  private static final boolean DEBUG = false;
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels logger = Redwood.channels(SpanishLexer.class);
-
-  private LexedTokenFactory<?> tokenFactory;
-  private CoreLabel prevWord;
-  private StringBuilder prevWordAfter;
-  private boolean seenUntokenizableCharacter;
-  private enum UntokenizableOptions { NONE_DELETE, FIRST_DELETE, ALL_DELETE, NONE_KEEP, FIRST_KEEP, ALL_KEEP }
-  private UntokenizableOptions untokenizable = UntokenizableOptions.FIRST_DELETE;
-
-  /* Flags begin with historical ptb3Escaping behavior */
-  private boolean invertible;
-  private boolean tokenizeNLs;
-  private boolean noSGML;
-  private boolean normalizeAmpersandEntity = true;
-  private boolean normalizeFractions = true;
-  private boolean normalizeParentheses;
-  private boolean normalizeOtherBrackets;
-  private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.PTB3;
-  private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.ASCII;
-  private LexerUtils.DashesEnum dashesStyle = LexerUtils.DashesEnum.NOT_CP1252;
-  private boolean escapeForwardSlashAsterisk = false;
-  private boolean strictTreebank3;
-
-
-  /*
-   * This has now been extended to cover the main Windows CP1252 characters,
-   * at either their correct Unicode codepoints, or in their invalid
-   * positions as 8 bit chars inside the iso-8859 control region.
-   *
-   * ellipsis  	85  	0133  	2026  	8230
-   * single quote curly starting 	91 	0145 	2018 	8216
-   * single quote curly ending 	92 	0146 	2019 	8217
-   * double quote curly starting 	93 	0147 	201C 	8220
-   * double quote curly ending 	94 	0148 	201D 	8221
-   * en dash  	96  	0150  	2013  	8211
-   * em dash  	97  	0151  	2014  	8212
-   */
-
-  /* Using Ancora style brackets and parens */
-  public static final String openparen = "-LRB-";
-  public static final String closeparen = "-RRB-";
-  public static final String openbrace = "-LCB-";
-  public static final String closebrace = "-RCB-";
-
-  public static final String NEWLINE_TOKEN = "*NL*";
-  public static final String COMPOUND_ANNOTATION = "comp";
-  public static final String VB_PRON_ANNOTATION = "vb_pn_attached";
-  public static final String CONTR_ANNOTATION = "contraction";
-
-  private static final Pattern NO_BREAK_SPACE = Pattern.compile("\u00A0");
-
-
-  private static String convertToEl(String l) {
-    if (Character.isLowerCase(l.charAt(0))) {
-      return "e" + l;
-    } else {
-      return "E" + l;
-    }
-  }
-
-  private Object getNext() {
-    final String txt = yytext();
-    return getNext(txt, txt);
-  }
-
-  /** Make the next token.
-   *  @param txt What the token should be
-   *  @param originalText The original String that got transformed into txt
-   */
-  private Object getNext(String txt, String originalText) {
-    return getNext(txt, originalText, null);
-  }
-
-  private Object getNext(String txt, String originalText, String annotation) {
-    txt = LexerUtils.removeSoftHyphens(txt);
-    Label w = (Label) tokenFactory.makeToken(txt, Math.toIntExact(yychar), yylength());
-    if (invertible || annotation != null) {
-      CoreLabel word = (CoreLabel) w;
-      if (invertible) {
-        String str = prevWordAfter.toString();
-        prevWordAfter.setLength(0);
-        word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
-        word.set(CoreAnnotations.BeforeAnnotation.class, str);
-        prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
-        prevWord = word;
+      /** Make the next token.
+       *  @param txt What the token should be
+       *  @param originalText The original String that got transformed into txt
+       */
+      private Object getNext(String txt, String originalText) {
+        return getNext(txt, originalText, null);
       }
-      if (annotation != null) {
-        word.set(CoreAnnotations.ParentAnnotation.class, annotation);
-      }
-    }
-    return w;
-  }
 
-  private Object getNormalizedAmpNext() {
-    final String txt = yytext();
-    return normalizeAmpersandEntity ?
-      getNext(LexerUtils.normalizeAmp(txt), txt) : getNext();
-  }
+      private Object getNext(String txt, String originalText, String annotation) {
+        txt = LexerUtils.removeSoftHyphens(txt);
+        Label w = (Label) tokenFactory.makeToken(txt, Math.toIntExact(yychar), yylength());
+        if (invertible || annotation != null) {
+          CoreLabel word = (CoreLabel) w;
+          if (invertible) {
+            String str = prevWordAfter.toString();
+            prevWordAfter.setLength(0);
+            word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
+            word.set(CoreAnnotations.BeforeAnnotation.class, str);
+            prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
+            prevWord = word;
+          }
+          if (annotation != null) {
+            word.set(CoreAnnotations.ParentAnnotation.class, annotation);
+          }
+        }
+        return w;
+      }
+
+      private Object getNormalizedAmpNext() {
+        final String txt = yytext();
+        return normalizeAmpersandEntity ?
+          getNext(LexerUtils.normalizeAmp(txt), txt) : getNext();
+      }
 
 %}
 
-/* Don't allow SGML to cross lines, even though it can...
-   Really SGML shouldn't be here at all, it's kind of legacy. */
-SGML = <\/?[A-Za-z!?][^>\r\n]*>
-SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
-SPAMP = &amp;
-SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
-SPLET = &[aeiouAEIOU](acute|grave|uml);
-/* \u3000 is ideographic space */
-SPACE = [ \t\u00A0\u2000-\u200A\u3000]
-SPACES = {SPACE}+
-NEWLINE = \r|\r?\n|\u2028|\u2029|\u000B|\u000C|\u0085
-SPACENL = ({SPACE}|{NEWLINE})
-SENTEND = {SPACENL}({SPACENL}|([A-Z]|{SGML}))
+%include ../../../process/LexCommon.tokens
+
+SENTEND = {SPACENL}({SPACENL}|([:uppercase:]|{SGML2}))
 HYPHEN = [-_\u058A\u2010\u2011]
 HYPHENS = \-+
 
-/* Handles Nko numerals */
-DIGIT = [:digit:]|[\u07C0-\u07C9]
 DATE = {DIGIT}{1,2}[\-\/]{DIGIT}{1,2}[\-\/]{DIGIT}{2,4}
 
 /* Handles Arabic numerals & soft-hyphens */
@@ -448,10 +437,7 @@ ABBREV2 = {ABBREV4}\.
 
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
 
-/* phone numbers. keep multi dots pattern separate, so not confused with decimal numbers. */
-PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{2,4}[\- \u00A0])?[0-9]{2,4}[\- \u00A0])[0-9]{3,4}[\- \u00A0]?[0-9]{3,5}|((\+\+?)?[0-9]{2,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
-
 FAKEDUCKFEET = <<|>>
 LESSTHAN = <|&lt;
 GREATERTHAN = >|&gt;
@@ -472,27 +458,6 @@ DBLQUOT = \"|&quot;
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
 
-/* Slightly generous but generally reasonably good emoji parsing */
-/* These are emoji that can be followed by a zwj (U+200D) and then gender or similar things (as well as skin color). Mainly humans but certain others like bears, hearts */
-EMOJI_GENDERED = [\u26F9\u2764\u{01F3C3}-\u{01F3C4}\u{01F3CA}-\u{01F3CC}\u{01F408}\u{01F415}\u{01F43B}\u{01F466}-\u{01F469}\u{01F46E}-\u{01F477}\u{01F481}-\u{01F482}\u{01F486}-\u{01F487}\u{01F575}\u{01F62E}\u{1F635}\u{01F636}\u{01F645}-\u{01F647}\u{01F64B}\u{01F64D}-\u{01F64E}\u{01F6A3}\u{01F6B4}-\u{01F6B6}\u{01F926}\u{01F934}-\u{01F93E}\u{01F9B8}-\u{01F9B9}\u{01F9CD}-\u{01F9DF}\u{01FAF1}-\u{01FAF2}]
-/* Emoji follow is variation selector (emoji/non-emoji rendering) or Fitzpatrick skin tone */
-EMOJI_FOLLOW = [\uFE0E\uFE0F\u{01F3FB}-\u{01F3FF}]
-/* Just things followed by the keycap surrounding char - note that if not separated by space beforehand, may be mistokenized */
-EMOJI_KEYCAPS = [\u0023\u002A\u0030-\u0039]\uFE0F?\u20E3
-/* Flags (changed to use \U to avoid bug in IntelliJ JFlex plugin).
- * 1st disjunct: Two geographic characters as a flag
- * 2nd disjunct: Tag digits and small letters, currently used only for GB regions flags (Scotland, Wales, England)
- * 3rd disjunct: emoji tag sequence (ETS) support for certain additional flags: gay, transgender, pirate
- */
-EMOJI_FLAG = [\U01F1E6-\U01F1FF]{2,2}|\U01F3F4[\u{E0030}-\u{E0039}\u{E0061}-\u{E007A}]+\U0E007F
-/* Rainbow flag, transgender flag, etc. */
-EMOJI_MISC = [\u{01F3F3}\u{01F3F4}\u{01F441}][\uFE0E\uFE0F]?\u200D[\u2620\u26A7\u{01F308}\u{01F5E8}][\uFE0E\uFE0F]?|{EMOJI_KEYCAPS}
-/* Things that have an emoji presentation form. This is where the general single character emoji appear */
-EMOJI_PRESENTATION = [\u00A9\u00AE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9-\u21AA\u231A-\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA-\u25AB\u25B6\u25C0\u25FB-\u27BF\u2934-\u2935\u2B05-\u2B07\u2B1B-\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299\u{01F000}-\u{01FAFF}]
-/* Emoji modifier is something that appears after a zero-width joiner (zwj) U+200D */
-EMOJI_MODIFIER = [\u2640\u2642\u2695-\u2696\u2708\u2744\u2764\u2B1B\u{01F32B}\u{01F33E}\u{01F373}\u{01F37C}\u{01F384}\u{01F393}\u{01F3A4}\u{01F3A8}\u{01F3EB}\u{01F3ED}\u{01F466}-\u{01F469}\u{01F468}-\u{01F469}\u{01F48B}\u{01F4A8}\u{01F4AB}\u{01F4BB}-\u{01F4BC}\u{01F525}\u{01F527}\u{01F52C}\u{01F5E8}\u{01F680}\u{01F692}\u{01F91D}\u{01F9AF}\u{01F9B0}-\u{01F9B3}\u{01F9BA}-\u{01F9BD}\u{01F9D1}\u{01FA79}\u{01FAF2}]
-/* flag | emoji optionally with follower | precomposed gendered/family consisting of human followed by one or more of zero width joiner then another human/profession | Misc */
-EMOJI = {EMOJI_FLAG}|{EMOJI_PRESENTATION}{EMOJI_FOLLOW}?|{EMOJI_GENDERED}{EMOJI_FOLLOW}?(\u200D{EMOJI_MODIFIER}{EMOJI_FOLLOW}?){1,3}|{EMOJI_MISC}
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
 MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2023\u2030-\u2038\u203B\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3012\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
@@ -505,10 +470,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 
 %%
 
-{SGML}       { if (!noSGML) {
-                 return getNext();
-               }
-            }
+{SGML2}       { if (!noSGML) {
+                  return getNext();
+                }
+              }
 {SPMDASH}               { final String origTxt = yytext();
                           String tok = LexerUtils.handleDashes(origTxt, dashesStyle);
                           if (DEBUG) { logger.info("Used {SPMDASH} to recognize " + origTxt + " as " + tok); }
@@ -599,13 +564,18 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           }
 	                  return getNext(s, yytext()); }
 {ABBREV2}		{ return getNext(); }
-{ABBREV4}/{SPACE}	{ return getNext(); }
-{ACRO}/{SPACENL}	{ return getNext(); }
+{ABBREV4}/{SPACENL_ONE_CHAR}	{ return getNext(); }
+{ACRO}/{SPACENL_ONE_CHAR}	{ return getNext(); }
 {DBLQUOT} |
 {QUOTES}		{ final String origTxt = yytext();
                           return getNext(LexerUtils.handleQuotes(origTxt, false, quoteStyle), origTxt);
 			      }
 
+{FILENAME}/({SPACENL_ONE_CHAR}|[.?!,\"'<()]) {
+                          String txt = yytext();
+                          if (DEBUG) { logger.info("Used {FILENAME} to recognize " + txt); }
+                          return getNext(txt, txt);
+                        }
 {PHONE}         { String txt = yytext();
 		  String origTxt = txt;
 		  txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);

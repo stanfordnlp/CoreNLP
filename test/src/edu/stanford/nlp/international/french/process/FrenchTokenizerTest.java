@@ -3,7 +3,6 @@ package edu.stanford.nlp.international.french.process;
 import org.junit.Test;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.PTBTokenizerTest;
 import edu.stanford.nlp.process.TokenizerFactory;
 

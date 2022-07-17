@@ -322,7 +322,7 @@ public class PTBTokenizerTest {
           { "Sambucus", "nigra", "subsp.", "canadensis", "and", "Canis", "spp.", "missing" },
           { "Jim", "Jackon", "&", "Co.", "LLC", "replied", "." },
           { "Xanadu", "Pvt.", "Ltd.", "replied", "." },
-          { "--", "-", "___" },
+          { "-", "-", "___" },
           { "whenever", "one", "goes", "`", "tisk", "tisk", "'", "at", "something" },
           { "¯\\_-LRB-ツ-RRB-_/¯" },
           { "She", "hates", "Alex", "."},

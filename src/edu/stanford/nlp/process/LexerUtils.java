@@ -32,9 +32,9 @@ public class LexerUtils {
 
   public enum QuotesEnum { UNICODE, LATEX, ASCII, NOT_CP1252, ORIGINAL }
 
-  public enum EllipsesEnum { UNICODE, PTB3, NOT_CP1252, ORIGINAL }
+  public enum EllipsesEnum { UNICODE, ASCII, NOT_CP1252, ORIGINAL }
 
-  public enum DashesEnum { UNICODE, PTB3, NOT_CP1252, ORIGINAL }
+  public enum DashesEnum { UNICODE, ASCII, NOT_CP1252, ORIGINAL }
 
 
   /** Change precomposed fraction characters to spelled out letter forms.
@@ -241,7 +241,7 @@ public class LexerUtils {
     switch (ellipsesStyle) {
       case UNICODE:
         return unicodeEllipsisStr;
-      case PTB3:
+      case ASCII:
         return ptb3EllipsisStr;
       case NOT_CP1252:
         if (tok.equals("\u0085")) {
@@ -257,7 +257,7 @@ public class LexerUtils {
     }
   }
 
-  // Other things to consider handling: [_\u058A\u2010\u2011\u2012]
+
   public static String handleDashes(final String tok, DashesEnum dashesStyle) {
     switch (dashesStyle) {
       case UNICODE:
@@ -266,12 +266,16 @@ public class LexerUtils {
         } else {
           return "—"; // em dash
         }
-      case PTB3:
-        if ("-".equals(tok)) {
-          return "-"; // keep an ASCII hyphen-minus as hyphen-minus
-        } else {
-          return "--"; // two hyphen-minus ascii dashes
+      case ASCII:
+        // Map similar things to one or two ASCII hyphen-dash characters
+        // hyphen-dash, underscore, Armenian hyphen, hyphen, non-break hyphen, figure dash
+        String mid = tok.replaceAll("[-_\u058A\u2010\u2011\u2012]","-");
+        // cp1252 en dash, cp1252 em dash, en dash, em dash, horizontal bar
+        mid = mid.replaceAll("[\u0096\u0097\u2013\u2014\u2015]", "--");
+        if ("---".equals(mid)) {
+          mid = "--";
         }
+        return mid;
       case NOT_CP1252:
         if (tok.equals("\u0096")) {
           return "–"; // en dash

@@ -117,479 +117,460 @@ import edu.stanford.nlp.util.logging.Redwood;
 %{
 
   /**
-   * Constructs a new PTBLexer.  You specify the type of result tokens with a
-   * LexedTokenFactory, and can specify the treatment of tokens by
-   * options given in a comma separated String
-   * (e.g., "invertible,normalizeParentheses=true").
-   * If the String is {@code null} or empty, you get UD
-   * normalization behaviour (i.e., you get ud=true).  If you
-   * want no normalization, then you should pass in the String
-   * "ptb3Escaping=false".  See the documentation in the {@link PTBTokenizer}
-   * class for full discussion of all the available options.
-   *
-   * @param r The Reader to tokenize text from
-   * @param tf The LexedTokenFactory that will be invoked to convert
-   *    each substring extracted by the lexer into some kind of Object
-   *    (such as a Word or CoreLabel).
-   * @param options Options to the tokenizer (see {@link PTBTokenizer})
-   */
-  public PTBLexer(Reader r, LexedTokenFactory<?> tf, String options) {
-    this(r);
-    this.tokenFactory = tf;
-    if (options == null) {
-      options = "";
-    }
-    Properties prop = StringUtils.stringToProperties(options);
-    Set<Map.Entry<Object,Object>> props = prop.entrySet();
-    for (Map.Entry<Object,Object> item : props) {
-      String key = (String) item.getKey();
-      String value = (String) item.getValue();
-      boolean val = Boolean.valueOf(value);
-      if ("".equals(key)) {
-        // allow an empty item
-      } else if ("invertible".equals(key)) {
-        invertible = val;
-      } else if ("tokenizeNLs".equals(key)) {
-        tokenizeNLs = val;
-      } else if ("tokenizePerLine".equals(key)) {
-        tokenizePerLine = val;
-      } else if ("ptb3Escaping".equals(key)) {
-        normalizeSpace = val;
-        normalizeAmpersandEntity = val;
-        // normalizeCurrency = val; // [cdm 2018]: We no longer do this as a default ptb3escaping
-        normalizeFractions = val;
-        normalizeParentheses = val;
-        normalizeOtherBrackets = val;
-        quoteStyle = val ? LexerUtils.QuotesEnum.LATEX : LexerUtils.QuotesEnum.ORIGINAL;
-        ellipsisStyle = val ? LexerUtils.EllipsesEnum.PTB3 : LexerUtils.EllipsesEnum.ORIGINAL;
-        dashesStyle = val ? LexerUtils.DashesEnum.PTB3 : LexerUtils.DashesEnum.ORIGINAL;
-        splitHyphenated = ! val;
-        splitForwardSlash = ! val;
-      } else if ("ud".equals(key)) {
-        normalizeSpace = val;
-        normalizeAmpersandEntity = val;
-        normalizeFractions = val;
-        normalizeParentheses = ! val;
-        normalizeOtherBrackets = ! val;
-        quoteStyle = val ? LexerUtils.QuotesEnum.NOT_CP1252 : LexerUtils.QuotesEnum.ORIGINAL;
-        ellipsisStyle = val ? LexerUtils.EllipsesEnum.NOT_CP1252 : LexerUtils.EllipsesEnum.ORIGINAL;
-        dashesStyle = val ? LexerUtils.DashesEnum.NOT_CP1252: LexerUtils.DashesEnum.ORIGINAL;
-        splitHyphenated=val;
-        splitForwardSlash=val;
-      } else if ("americanize".equals(key)) {
-        americanize = val;
-      } else if ("normalizeSpace".equals(key)) {
-        normalizeSpace = val;
-      } else if ("normalizeAmpersandEntity".equals(key)) {
-        normalizeAmpersandEntity = val;
-      } else if ("normalizeCurrency".equals(key)) {
-        normalizeCurrency = val;
-      } else if ("normalizeFractions".equals(key)) {
-        normalizeFractions = val;
-      } else if ("normalizeParentheses".equals(key)) {
-        normalizeParentheses = val;
-      } else if ("normalizeOtherBrackets".equals(key)) {
-        normalizeOtherBrackets = val;
-      } else if ("quotes".equals(key)) {
-        try {
-          quoteStyle = LexerUtils.QuotesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException iae) {
-          throw new IllegalArgumentException ("Not a valid quotes style: " + value);
+       * Constructs a new PTBLexer.  You specify the type of result tokens with a
+       * LexedTokenFactory, and can specify the treatment of tokens by
+       * options given in a comma separated String
+       * (e.g., "invertible,normalizeParentheses=true").
+       * If the String is {@code null} or empty, you get UD
+       * normalization behaviour (i.e., you get ud=true).  If you
+       * want no normalization, then you should pass in the String
+       * "ptb3Escaping=false".  See the documentation in the {@link PTBTokenizer}
+       * class for full discussion of all the available options.
+       *
+       * @param r The Reader to tokenize text from
+       * @param tf The LexedTokenFactory that will be invoked to convert
+       *    each substring extracted by the lexer into some kind of Object
+       *    (such as a Word or CoreLabel).
+       * @param options Options to the tokenizer (see {@link PTBTokenizer})
+       */
+      public PTBLexer(Reader r, LexedTokenFactory<?> tf, String options) {
+        this(r);
+        this.tokenFactory = tf;
+        if (options == null) {
+          options = "";
         }
-      } else if ("splitAssimilations".equals(key)) {
-        splitAssimilations = val;
-      } else if ("splitHyphenated".equals(key)) {
-        splitHyphenated = val;
-      } else if ("splitForwardSlash".equals(key)) {
-        splitForwardSlash = val;
-      } else if ("ellipses".equals(key)) {
-        try {
-          ellipsisStyle = LexerUtils.EllipsesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException iae) {
-          throw new IllegalArgumentException ("Not a valid ellipses style: " + value);
-        }
-      } else if ("dashes".equals(key)) {
-        try {
-          dashesStyle = LexerUtils.DashesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException iae) {
-          throw new IllegalArgumentException ("Not a valid dashes style: " + value);
-        }
-      } else if ("escapeForwardSlashAsterisk".equals(key)) {
-        escapeForwardSlashAsterisk = val;
-      } else if ("untokenizable".equals(key)) {
-        switch (value) {
-          case "noneDelete":
-            untokenizable = UntokenizableOptions.NONE_DELETE;
-            break;
-          case "firstDelete":
-            untokenizable = UntokenizableOptions.FIRST_DELETE;
-            break;
-          case "allDelete":
-            untokenizable = UntokenizableOptions.ALL_DELETE;
-            break;
-          case "noneKeep":
-            untokenizable = UntokenizableOptions.NONE_KEEP;
-            break;
-          case "firstKeep":
-            untokenizable = UntokenizableOptions.FIRST_KEEP;
-            break;
-          case "allKeep":
-            untokenizable = UntokenizableOptions.ALL_KEEP;
-            break;
-          default:
-            throw new IllegalArgumentException("PTBLexer: Invalid option value in constructor: " + key + ": " + value);
-        }
-      } else if ("strictTreebank3".equals(key)) {
-        strictFraction = val;
-        strictAcronym = val;
-      } else if ("strictFraction".equals(key)) {
-        strictFraction = val;
-      } else if ("strictAcronym".equals(key)) {
-        strictAcronym = val;
-      } else {
-        throw new IllegalArgumentException("PTBLexer: Invalid options key in constructor: " + key);
-      }
-    }
-    if (invertible) {
-      if ( ! (tf instanceof CoreLabelTokenFactory)) {
-        throw new IllegalArgumentException("PTBLexer: the invertible option requires a CoreLabelTokenFactory");
-      }
-      prevWord = (CoreLabel) tf.makeToken("", 0, 0);
-      prevWordAfter = new StringBuilder();
-    }
-    if (tokenizePerLine) {
-      yybegin(YyTokenizePerLine);
-    } else {
-      yybegin(YyNotTokenizePerLine);
-    }
-  }
-
-
-  /** Turn on to find out how things were tokenized. */
-  private static final boolean DEBUG = false;
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels logger = Redwood.channels(PTBLexer.class);
-
-  private LexedTokenFactory<?> tokenFactory;
-  private CoreLabel prevWord;
-  private StringBuilder prevWordAfter;
-  private boolean seenUntokenizableCharacter; // = false;
-  private enum UntokenizableOptions { NONE_DELETE, FIRST_DELETE, ALL_DELETE, NONE_KEEP, FIRST_KEEP, ALL_KEEP }
-  private UntokenizableOptions untokenizable = UntokenizableOptions.FIRST_DELETE;
-
-  /* Flags used to begin with historical ptb3Escaping behavior, now got with option -tokenizerOptions ptb3Escaping.
-   * Starting with CoreNLP 4.0, flags begin as UD tokenization default.
-   * This is like "new LDC treebank" tokenization except that we do not escape parentheses except on
-   * s-expression tree input/output.
-   */
-  private boolean invertible = true;
-  private boolean tokenizeNLs;
-  private boolean tokenizePerLine;
-  private boolean americanize = false;
-  private boolean normalizeSpace = true;
-  private boolean normalizeAmpersandEntity = true;
-  private boolean normalizeCurrency = false; // only $ and # in Penn Treebank 3 data, but we now allow other currency
-  private boolean normalizeFractions = true;
-  private boolean normalizeParentheses = false;
-  private boolean normalizeOtherBrackets = false;
-  private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.NOT_CP1252;
-  private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.NOT_CP1252;
-  private LexerUtils.DashesEnum dashesStyle = LexerUtils.DashesEnum.NOT_CP1252;
-  private boolean escapeForwardSlashAsterisk = false; // this is true in Penn Treebank 3 but we don't do it now
-  // strictTreebank3 represents 2 separate modifications:
-  //   stricter handling of acronyms
-  //   stricter handling of fractions
-  private boolean strictAcronym = false;
-  private boolean strictFraction = false;
-  private boolean splitAssimilations = true;
-  private boolean splitHyphenated = true; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
-  private boolean splitForwardSlash = true; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
-
-  /* Bracket characters and forward slash and asterisk:
-   *
-   * Original Treebank 3 WSJ
-   * Uses -LRB- -RRB- as the representation for ( ) and -LCB- -RCB- as the representation for { }.
-   * There are no occurrences of [ ], though there is some mention of -LSB- -RSB- in early documents.
-   * There are no occurrences of < >.
-   * All brackets are tagged -LRB- -RRB-  [This stays constant.]
-   * Forward slash and asterisk are escaped by a preceding \ (as \/ and \*)
-   *
-   * Treebank 3 Brown corpus
-   * Has -LRB- -RRB-
-   * Has a few instances of unescaped [ ] in compounds (the token "A[fj]"
-   * Neither forward slash or asterisk appears.
-   *
-   * Ontonotes (r4)
-   * Uses -LRB- -RRB- -LCB- -RCB- -LSB- -RSB-.
-   * Has a very few uses of < and > in longer tokens, which are not escaped.
-   * Slash is not escaped. Asterisk is not escaped.
-   *
-   * LDC2012T13-eng_web_tbk (Google web treebank)
-   * Has -LRB- -RRB-
-   * Has { and } used unescaped, treated as brackets.
-   * Has < and > used unescaped, sometimes treated as brackets.  Sometimes << and >> are treated as brackets!
-   * Has [ and ] used unescaped, treated as brackets.
-   * Slash is not escaped. Asterisk is not escaped.
-   *
-   * Reasonable conclusions for now:
-   * - Never escape < >
-   * - Still by default escape [ ] { } but it can be turned off.  Use -LSB- -RSB- -LCB- -RCB-.
-   * - Move to not escaping slash and asterisk, and delete escaping in PennTreeReader.
-   */
-
-  public static final String openparen = "-LRB-";
-  public static final String closeparen = "-RRB-";
-  public static final String openbrace = "-LCB-";
-  public static final String closebrace = "-RCB-";
-
-  /* This pattern now also include newlines, since we sometimes allow them in SGML tokens.... */
-  private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("[ \r\n]");
-  private static final Pattern HYPHENS = Pattern.compile("[-\u2010-\u2012]");
-  private static final Pattern FORWARD_SLASH = Pattern.compile("/");
-  private static final Pattern HYPHENS_FORWARD_SLASH = Pattern.compile("[-\u2010-\u2012/]");
-  private static final Pattern HYPHENS_DASHES = Pattern.compile("[-\u2010-\u2015]");
-  private static final Pattern NUMBER = Pattern.compile("\\d+");
-
-
-  /** This is the method usually called to split up something hyphenated, returning material to buffer. */
-  private void breakByHyphensSlashes(String in) {
-    Pattern p = null;
-    if (splitHyphenated) {
-      if (splitForwardSlash) {
-        p = HYPHENS_FORWARD_SLASH;
-      } else {
-        p = HYPHENS;
-      }
-    } else if (splitForwardSlash) {
-      p = FORWARD_SLASH;
-    }
-    if (p != null) {
-      int firstHyphen = StringUtils.indexOfRegex(p, in);
-      if (firstHyphen > 0) {
-        yypushback(in.length() - firstHyphen);
-      }
-    }
-  }
-
-  /**
-   * Handle hyphenated things with numbers in them.
-   * If an apparent negative number is generated from inside a hyphenated word
-   * (e.g., for "11-20", we first tokenize "11" and then appear to have generated "-20"),
-   * then tokenize the hyphen separately as a hyphen or dash.
-   */
-  private void handleHyphenatedNumber(String in) {
-    // Strip dashes from hyphenated words
-    // System.err.println("prevWord: " + prevWord + " in: " + in + " last word: " + prevWord.originalText().toLowerCase(Locale.ROOT) +
-    //    " 0th dash: " + HYPHENS_DASHES.matcher(in).lookingAt() + " 1st dash: " + HYPHENS_DASHES.matcher(in.substring(1)).lookingAt() +
-    //    " last word number: " + NUMBER.matcher(prevWord.originalText().toLowerCase(Locale.ROOT)).matches() +
-    //    " last word after: |" + prevWordAfter + "|");
-    if (prevWord != null && in.length() >= 2 &&
-        HYPHENS_DASHES.matcher(in).lookingAt() && ! HYPHENS_DASHES.matcher(in.substring(1)).lookingAt()) {
-      String lastWord = prevWord.originalText().toLowerCase(Locale.ROOT);
-
-      if (lastWord.length() > 0 && prevWordAfter != null && prevWordAfter.length() == 0) {
-        // We're running under invertible = true and there was no space after previous thing, like for "TRS-80"
-        yypushback(in.length() - 1);
-      } else if (lastWord.length() > 0) {
-        // It's not invertible=true, and so we don't know if there is space before, but we guess not if number of common case
-        switch (lastWord) {
-          case "early":
-          case "mid":
-          case "late":
-          case "for":
-          case "top":
-          case "ak":
-          case "b":
-          case "c":
-          case "dc":
-          case "f":
-          case "m":
-            yypushback(in.length() - 1);
-            break;
-          default:
-            if (NUMBER.matcher(lastWord).matches() && prevWordAfter == null) {
-              // last word is a number as well; cases like scores "2-3"
-              // if no spacing info, if the prior context is number, we guess there was no space....
-              yypushback(in.length() - 1);
+        Properties prop = StringUtils.stringToProperties(options);
+        Set<Map.Entry<Object,Object>> props = prop.entrySet();
+        for (Map.Entry<Object,Object> item : props) {
+          String key = (String) item.getKey();
+          String value = (String) item.getValue();
+          boolean val = Boolean.parseBoolean(value);
+          if ("".equals(key)) {
+            // allow an empty item
+          } else if ("invertible".equals(key)) {
+            invertible = val;
+          } else if ("tokenizeNLs".equals(key)) {
+            tokenizeNLs = val;
+          } else if ("tokenizePerLine".equals(key)) {
+            tokenizePerLine = val;
+          } else if ("ptb3Escaping".equals(key)) {
+            normalizeSpace = val;
+            normalizeAmpersandEntity = val;
+            // normalizeCurrency = val; // [cdm 2018]: We no longer do this as a default ptb3escaping
+            normalizeFractions = val;
+            normalizeParentheses = val;
+            normalizeOtherBrackets = val;
+            quoteStyle = val ? LexerUtils.QuotesEnum.LATEX : LexerUtils.QuotesEnum.ORIGINAL;
+            ellipsisStyle = val ? LexerUtils.EllipsesEnum.ASCII : LexerUtils.EllipsesEnum.ORIGINAL;
+            dashesStyle = val ? LexerUtils.DashesEnum.ASCII : LexerUtils.DashesEnum.ORIGINAL;
+            splitHyphenated = ! val;
+            splitForwardSlash = ! val;
+          } else if ("ud".equals(key)) {
+            normalizeSpace = val;
+            normalizeAmpersandEntity = val;
+            normalizeFractions = val;
+            normalizeParentheses = ! val;
+            normalizeOtherBrackets = ! val;
+            quoteStyle = val ? LexerUtils.QuotesEnum.NOT_CP1252 : LexerUtils.QuotesEnum.ORIGINAL;
+            ellipsisStyle = val ? LexerUtils.EllipsesEnum.NOT_CP1252 : LexerUtils.EllipsesEnum.ORIGINAL;
+            dashesStyle = val ? LexerUtils.DashesEnum.NOT_CP1252: LexerUtils.DashesEnum.ORIGINAL;
+            splitHyphenated=val;
+            splitForwardSlash=val;
+          } else if ("americanize".equals(key)) {
+            americanize = val;
+          } else if ("normalizeSpace".equals(key)) {
+            normalizeSpace = val;
+          } else if ("normalizeAmpersandEntity".equals(key)) {
+            normalizeAmpersandEntity = val;
+          } else if ("normalizeCurrency".equals(key)) {
+            normalizeCurrency = val;
+          } else if ("normalizeFractions".equals(key)) {
+            normalizeFractions = val;
+          } else if ("normalizeParentheses".equals(key)) {
+            normalizeParentheses = val;
+          } else if ("normalizeOtherBrackets".equals(key)) {
+            normalizeOtherBrackets = val;
+          } else if ("quotes".equals(key)) {
+            try {
+              quoteStyle = LexerUtils.QuotesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException iae) {
+              throw new IllegalArgumentException ("Not a valid quotes style: " + value);
             }
+          } else if ("splitAssimilations".equals(key)) {
+            splitAssimilations = val;
+          } else if ("splitHyphenated".equals(key)) {
+            splitHyphenated = val;
+          } else if ("splitForwardSlash".equals(key)) {
+            splitForwardSlash = val;
+          } else if ("ellipses".equals(key)) {
+            try {
+              ellipsisStyle = LexerUtils.EllipsesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException iae) {
+              throw new IllegalArgumentException ("Not a valid ellipses style: " + value);
+            }
+          } else if ("dashes".equals(key)) {
+            try {
+              dashesStyle = LexerUtils.DashesEnum.valueOf(value.trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException iae) {
+              throw new IllegalArgumentException ("Not a valid dashes style: " + value);
+            }
+          } else if ("escapeForwardSlashAsterisk".equals(key)) {
+            escapeForwardSlashAsterisk = val;
+          } else if ("untokenizable".equals(key)) {
+            switch (value) {
+              case "noneDelete":
+                untokenizable = UntokenizableOptions.NONE_DELETE;
+                break;
+              case "firstDelete":
+                untokenizable = UntokenizableOptions.FIRST_DELETE;
+                break;
+              case "allDelete":
+                untokenizable = UntokenizableOptions.ALL_DELETE;
+                break;
+              case "noneKeep":
+                untokenizable = UntokenizableOptions.NONE_KEEP;
+                break;
+              case "firstKeep":
+                untokenizable = UntokenizableOptions.FIRST_KEEP;
+                break;
+              case "allKeep":
+                untokenizable = UntokenizableOptions.ALL_KEEP;
+                break;
+              default:
+                throw new IllegalArgumentException("PTBLexer: Invalid option value in constructor: " + key + ": " + value);
+            }
+          } else if ("strictTreebank3".equals(key)) {
+            strictFraction = val;
+            strictAcronym = val;
+          } else if ("strictFraction".equals(key)) {
+            strictFraction = val;
+          } else if ("strictAcronym".equals(key)) {
+            strictAcronym = val;
+          } else {
+            throw new IllegalArgumentException("PTBLexer: Invalid options key in constructor: " + key);
+          }
+        }
+        if (invertible) {
+          if ( ! (tf instanceof CoreLabelTokenFactory)) {
+            throw new IllegalArgumentException("PTBLexer: the invertible option requires a CoreLabelTokenFactory");
+          }
+          prevWord = (CoreLabel) tf.makeToken("", 0, 0);
+          prevWordAfter = new StringBuilder();
+        }
+        if (tokenizePerLine) {
+          yybegin(YyTokenizePerLine);
+        } else {
+          yybegin(YyNotTokenizePerLine);
         }
       }
-    }
-    // System.err.println("handleHyphenatedNumber made token " + in + " into " + yytext());
-  }
 
-  /** Remove soft hyphen characters and thousands separator characters from numbers. */
-  private static String removeFromNumber(String in) {
-    StringBuilder out = null;
-    if ("-".equals(in)) {
-      // Shortcut for if we split on hyphens
-      return in;
-    }
 
-    // \u00AD is the soft hyphen character, which we remove, regarding it as inserted only for line-breaking
-    // \u066C\u2009\u202F are thousands separator characters that it seems safe to remove.
-    int length = in.length();
-    for (int i = 0; i < length; i++) {
-      char ch = in.charAt(i);
-      if (ch == '\u00AD' || ch == '\u066C' || ch == '\u2009' || ch == '\u202F') {
+      /** Turn on to find out how things were tokenized. */
+      private static final boolean DEBUG = false;
+
+      /** A logger for this class */
+      private static final Redwood.RedwoodChannels logger = Redwood.channels(PTBLexer.class);
+
+      private LexedTokenFactory<?> tokenFactory;
+      private CoreLabel prevWord;
+      private StringBuilder prevWordAfter;
+      private boolean seenUntokenizableCharacter; // = false;
+      private enum UntokenizableOptions { NONE_DELETE, FIRST_DELETE, ALL_DELETE, NONE_KEEP, FIRST_KEEP, ALL_KEEP }
+      private UntokenizableOptions untokenizable = UntokenizableOptions.FIRST_DELETE;
+
+      /* Flags used to begin with historical ptb3Escaping behavior, now got with option -tokenizerOptions ptb3Escaping.
+       * Starting with CoreNLP 4.0, flags begin as UD tokenization default.
+       * This is like "new LDC treebank" tokenization except that we do not escape parentheses except on
+       * s-expression tree input/output.
+       */
+      private boolean invertible = true;
+      private boolean tokenizeNLs;
+      private boolean tokenizePerLine;
+      private boolean americanize = false;
+      private boolean normalizeSpace = true;
+      private boolean normalizeAmpersandEntity = true;
+      private boolean normalizeCurrency = false; // only $ and # in Penn Treebank 3 data, but we now allow other currency
+      private boolean normalizeFractions = true;
+      private boolean normalizeParentheses = false;
+      private boolean normalizeOtherBrackets = false;
+      private LexerUtils.QuotesEnum quoteStyle = LexerUtils.QuotesEnum.NOT_CP1252;
+      private LexerUtils.EllipsesEnum ellipsisStyle = LexerUtils.EllipsesEnum.NOT_CP1252;
+      private LexerUtils.DashesEnum dashesStyle = LexerUtils.DashesEnum.NOT_CP1252;
+      private boolean escapeForwardSlashAsterisk = false; // this is true in Penn Treebank 3 but we don't do it now
+      // strictTreebank3 represents 2 separate modifications:
+      //   stricter handling of acronyms
+      //   stricter handling of fractions
+      private boolean strictAcronym = false;
+      private boolean strictFraction = false;
+      private boolean splitAssimilations = true;
+      private boolean splitHyphenated = true; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
+      private boolean splitForwardSlash = true; // = false; // This is for "new" Penn Treebank tokenization (Ontonotes, etc.)
+
+      /* Bracket characters and forward slash and asterisk:
+       *
+       * Original Treebank 3 WSJ
+       * Uses -LRB- -RRB- as the representation for ( ) and -LCB- -RCB- as the representation for { }.
+       * There are no occurrences of [ ], though there is some mention of -LSB- -RSB- in early documents.
+       * There are no occurrences of < >.
+       * All brackets are tagged -LRB- -RRB-  [This stays constant.]
+       * Forward slash and asterisk are escaped by a preceding \ (as \/ and \*)
+       *
+       * Treebank 3 Brown corpus
+       * Has -LRB- -RRB-
+       * Has a few instances of unescaped [ ] in compounds (the token "A[fj]"
+       * Neither forward slash or asterisk appears.
+       *
+       * Ontonotes (r4)
+       * Uses -LRB- -RRB- -LCB- -RCB- -LSB- -RSB-.
+       * Has a very few uses of < and > in longer tokens, which are not escaped.
+       * Slash is not escaped. Asterisk is not escaped.
+       *
+       * LDC2012T13-eng_web_tbk (Google web treebank)
+       * Has -LRB- -RRB-
+       * Has { and } used unescaped, treated as brackets.
+       * Has < and > used unescaped, sometimes treated as brackets.  Sometimes << and >> are treated as brackets!
+       * Has [ and ] used unescaped, treated as brackets.
+       * Slash is not escaped. Asterisk is not escaped.
+       *
+       * Reasonable conclusions for now:
+       * - Never escape < >
+       * - Still by default escape [ ] { } but it can be turned off.  Use -LSB- -RSB- -LCB- -RCB-.
+       * - Move to not escaping slash and asterisk, and delete escaping in PennTreeReader.
+       */
+
+      public static final String openparen = "-LRB-";
+      public static final String closeparen = "-RRB-";
+      public static final String openbrace = "-LCB-";
+      public static final String closebrace = "-RCB-";
+
+      /* This pattern now also include newlines, since we sometimes allow them in SGML tokens.... */
+      private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("[ \r\n]");
+      private static final Pattern HYPHENS = Pattern.compile("[-\u2010-\u2012]");
+      private static final Pattern FORWARD_SLASH = Pattern.compile("/");
+      private static final Pattern HYPHENS_FORWARD_SLASH = Pattern.compile("[-\u2010-\u2012/]");
+      private static final Pattern HYPHENS_DASHES = Pattern.compile("[-\u2010-\u2015]");
+      private static final Pattern NUMBER = Pattern.compile("\\d+");
+
+
+      /** This is the method usually called to split up something hyphenated, returning material to buffer. */
+      private void breakByHyphensSlashes(String in) {
+        Pattern p = null;
+        if (splitHyphenated) {
+          if (splitForwardSlash) {
+            p = HYPHENS_FORWARD_SLASH;
+          } else {
+            p = HYPHENS;
+          }
+        } else if (splitForwardSlash) {
+          p = FORWARD_SLASH;
+        }
+        if (p != null) {
+          int firstHyphen = StringUtils.indexOfRegex(p, in);
+          if (firstHyphen > 0) {
+            yypushback(in.length() - firstHyphen);
+          }
+        }
+      }
+
+      /**
+       * Handle hyphenated things with numbers in them.
+       * If an apparent negative number is generated from inside a hyphenated word
+       * (e.g., for "11-20", we first tokenize "11" and then appear to have generated "-20"),
+       * then tokenize the hyphen separately as a hyphen or dash.
+       */
+      private void handleHyphenatedNumber(String in) {
+        // Strip dashes from hyphenated words
+        // System.err.println("prevWord: " + prevWord + " in: " + in + " last word: " + prevWord.originalText().toLowerCase(Locale.ROOT) +
+        //    " 0th dash: " + HYPHENS_DASHES.matcher(in).lookingAt() + " 1st dash: " + HYPHENS_DASHES.matcher(in.substring(1)).lookingAt() +
+        //    " last word number: " + NUMBER.matcher(prevWord.originalText().toLowerCase(Locale.ROOT)).matches() +
+        //    " last word after: |" + prevWordAfter + "|");
+        if (prevWord != null && in.length() >= 2 &&
+            HYPHENS_DASHES.matcher(in).lookingAt() && ! HYPHENS_DASHES.matcher(in.substring(1)).lookingAt()) {
+          String lastWord = prevWord.originalText().toLowerCase(Locale.ROOT);
+
+          if (lastWord.length() > 0 && prevWordAfter != null && prevWordAfter.length() == 0) {
+            // We're running under invertible = true and there was no space after previous thing, like for "TRS-80"
+            yypushback(in.length() - 1);
+          } else if (lastWord.length() > 0) {
+            // It's not invertible=true, and so we don't know if there is space before, but we guess not if number of common case
+            switch (lastWord) {
+              case "early":
+              case "mid":
+              case "late":
+              case "for":
+              case "top":
+              case "ak":
+              case "b":
+              case "c":
+              case "dc":
+              case "f":
+              case "m":
+                yypushback(in.length() - 1);
+                break;
+              default:
+                if (NUMBER.matcher(lastWord).matches() && prevWordAfter == null) {
+                  // last word is a number as well; cases like scores "2-3"
+                  // if no spacing info, if the prior context is number, we guess there was no space....
+                  yypushback(in.length() - 1);
+                }
+            }
+          }
+        }
+        // System.err.println("handleHyphenatedNumber made token " + in + " into " + yytext());
+      }
+
+      /** Remove soft hyphen characters and thousands separator characters from numbers. */
+      private static String removeFromNumber(String in) {
+        StringBuilder out = null;
+        if ("-".equals(in)) {
+          // Shortcut for if we split on hyphens
+          return in;
+        }
+
+        // \u00AD is the soft hyphen character, which we remove, regarding it as inserted only for line-breaking
+        // \u066C\u2009\u202F are thousands separator characters that it seems safe to remove.
+        int length = in.length();
+        for (int i = 0; i < length; i++) {
+          char ch = in.charAt(i);
+          if (ch == '\u00AD' || ch == '\u066C' || ch == '\u2009' || ch == '\u202F') {
+            if (out == null) {
+              out = new StringBuilder(length);
+              out.append(in.substring(0, i));
+            }
+          } else if (out != null) {
+            out.append(ch);
+          }
+        }
         if (out == null) {
-          out = new StringBuilder(length);
-          out.append(in.substring(0, i));
+          return in;
         }
-      } else if (out != null) {
-        out.append(ch);
+        return out.toString().trim();
       }
-    }
-    if (out == null) {
-      return in;
-    }
-    return out.toString().trim();
-  }
 
 
-  /*
-   * This class has now been extended to cover the main Windows CP1252 characters,
-   * at either their correct Unicode codepoints, or in their invalid
-   * positions as 8 bit chars inside the iso-8859 control region.
-   *
-   * ellipsis   85      0133    2026    8230   COMPLICATED!! Also a newline character for IBM 390; we let ellipsis win
-   * dagger     86    2020
-   * double dagger 87 2021
-   * single quote curly starting        91      0145    2018    8216
-   * single quote curly ending  92      0146    2019    8217
-   * double quote curly starting        93      0147    201C    8220
-   * double quote curly ending  94      0148    201D    8221
-   * bullet     95
-   * en dash    96      0150    2013    8211
-   * em dash    97      0151    2014    8212
-   */
+      /*
+       * This class has now been extended to cover the main Windows CP1252 characters,
+       * at either their correct Unicode codepoints, or in their invalid
+       * positions as 8 bit chars inside the iso-8859 control region.
+       *
+       * ellipsis   85      0133    2026    8230   COMPLICATED!! Also a newline character for IBM 390; we let ellipsis win
+       * dagger     86    2020
+       * double dagger 87 2021
+       * single quote curly starting        91      0145    2018    8216
+       * single quote curly ending  92      0146    2019    8217
+       * double quote curly starting        93      0147    201C    8220
+       * double quote curly ending  94      0148    201D    8221
+       * bullet     95
+       * en dash    96      0150    2013    8211
+       * em dash    97      0151    2014    8212
+       */
 
 
-  private int indexOfSpace(String txt) {
-    for (int i = 0, len = txt.length(); i < len; i++) {
-      char ch = txt.charAt(i);
-      if (ch == ' ' || ch == '\u00A0') {
-        return i;
+      private int indexOfSpace(String txt) {
+        for (int i = 0, len = txt.length(); i < len; i++) {
+          char ch = txt.charAt(i);
+          if (ch == ' ' || ch == '\u00A0') {
+            return i;
+          }
+        }
+        return -1;
       }
-    }
-    return -1;
-  }
 
-  /** Make the next token.
-   *  If the begin character offset exceeds what can be stored in 32 bits, it is
-   *  entered as Integer.MAX_VALUE and an error is logged.
-   *
-   *  @param txt What the token should be
-   *  @param originalText The original String that got transformed into txt
-   */
-  private Object getNext(String txt, String originalText) {
-    txt = Normalizer.normalize(txt, Normalizer.Form.NFC);
-    int begin = Math.toIntExact(yychar);
-    if (invertible) {
-      String str = prevWordAfter.toString();
-      prevWordAfter.setLength(0);
-      CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, begin, yylength());
-      word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
-      word.set(CoreAnnotations.BeforeAnnotation.class, str);
-      prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
-      prevWord = word;
-      return word;
-    } else {
-      Object word = tokenFactory.makeToken(txt, begin, yylength());
-      if (word instanceof CoreLabel) {
-        prevWord = (CoreLabel) word;
+      /** Make the next token.
+       *  If the begin character offset exceeds what can be stored in 32 bits, it is
+       *  entered as Integer.MAX_VALUE and an error is logged.
+       *
+       *  @param txt What the token should be
+       *  @param originalText The original String that got transformed into txt
+       */
+      private Object getNext(String txt, String originalText) {
+        txt = Normalizer.normalize(txt, Normalizer.Form.NFC);
+        int begin = Math.toIntExact(yychar);
+        if (invertible) {
+          String str = prevWordAfter.toString();
+          prevWordAfter.setLength(0);
+          CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, begin, yylength());
+          word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
+          word.set(CoreAnnotations.BeforeAnnotation.class, str);
+          prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
+          prevWord = word;
+          return word;
+        } else {
+          Object word = tokenFactory.makeToken(txt, begin, yylength());
+          if (word instanceof CoreLabel) {
+            prevWord = (CoreLabel) word;
+          }
+          return word;
+        }
       }
-      return word;
-    }
-  }
 
-  /*
-  private void fixJFlex4SpaceAfterTokenBug() {
-    // try to work around an apparent jflex bug where it
-    // gets a space at the token end by getting
-    // wrong the length of the trailing context.
-    // cdm2022: This bug no longer seems to exist; tested on several megabytes of text
-    while (yylength() > 0) {
-      char last = yycharat(yylength()-1);
-      if (last == ' ' || last == '\t' || (last >= '\n' && last <= '\r' || last == '\u0085')) {
-        if (DEBUG) { logger.info("fixJFlex4SpaceAfterTokenBug still needed for " + yytext() + "!"); }
-        yypushback(1);
-      } else {
-        break;
+      /*
+      private void fixJFlex4SpaceAfterTokenBug() {
+        // try to work around an apparent jflex bug where it
+        // gets a space at the token end by getting
+        // wrong the length of the trailing context.
+        // cdm2022: This bug no longer seems to exist; tested on several megabytes of text
+        while (yylength() > 0) {
+          char last = yycharat(yylength()-1);
+          if (last == ' ' || last == '\t' || (last >= '\n' && last <= '\r' || last == '\u0085')) {
+            if (DEBUG) { logger.info("fixJFlex4SpaceAfterTokenBug still needed for " + yytext() + "!"); }
+            yypushback(1);
+          } else {
+            break;
+          }
+        }
       }
-    }
-  }
-  */
+      */
 
-  private Object processAcronym() {
-    // fixJFlex4SpaceAfterTokenBug();
-    String s;
-    if (yylength() == 2) { // "I.", etc. Treat as "I" + "."
-      yypushback(1); // return a period next time;
-      s = yytext(); // return the word without the final period
-    } else if (strictAcronym && ! "U.S.".equals(yytext())) {
-      yypushback(1); // return a period for next time
-      s = yytext(); // return the word without the final period
-    } else {
-      s = yytext(); // return the word WITH the final period
-      yypushback(1); // (reduplication:) also return a period for next time
-    }
-    String txt = yytext();
-    if (DEBUG) { logger.info("Used {ABBREV2} to recognize " + txt + " as " + s); }
-    return getNext(s, txt);
-  }
+      private Object processAcronym() {
+        // fixJFlex4SpaceAfterTokenBug();
+        String s;
+        if (yylength() == 2) { // "I.", etc. Treat as "I" + "."
+          yypushback(1); // return a period next time;
+          s = yytext(); // return the word without the final period
+        } else if (strictAcronym && ! "U.S.".equals(yytext())) {
+          yypushback(1); // return a period for next time
+          s = yytext(); // return the word without the final period
+        } else {
+          s = yytext(); // return the word WITH the final period
+          yypushback(1); // (reduplication:) also return a period for next time
+        }
+        String txt = yytext();
+        if (DEBUG) { logger.info("Used {ABBREV2} to recognize " + txt + " as " + s); }
+        return getNext(s, txt);
+      }
 
-  private Object processAbbrev3() {
-    // fixJFlex4SpaceAfterTokenBug();
-    String txt = yytext();
-    if (DEBUG) { logger.info("Used {ABBREV3} to recognize " + txt); }
-    return getNext(txt, txt);
-  }
+      private Object processAbbrev3() {
+        // fixJFlex4SpaceAfterTokenBug();
+        String txt = yytext();
+        if (DEBUG) { logger.info("Used {ABBREV3} to recognize " + txt); }
+        return getNext(txt, txt);
+      }
 
-  /** Assuming we're at an end of sentence (uppercase following), we usually put back a period to become end-of-sentence. */
-  private Object processAbbrev1() {
-    String s;
-    if (strictAcronym && ! "U.S.".equals(yytext())) {
-      yypushback(1); // return a period for next time
-      s = yytext();
-    } else {
-      s = yytext();
-      yypushback(1); // return a period for next time
-    }
-    String txt = yytext();
-    if (DEBUG) { logger.info("Used {ABBREV1} to recognize " + txt + " as " + s); }
-    return getNext(s, txt);
-  }
+      /** Assuming we're at an end of sentence (uppercase following), we usually put back a period to become end-of-sentence. */
+      private Object processAbbrev1() {
+        String s;
+        if (strictAcronym && ! "U.S.".equals(yytext())) {
+          yypushback(1); // return a period for next time
+          s = yytext();
+        } else {
+          s = yytext();
+          yypushback(1); // return a period for next time
+        }
+        String txt = yytext();
+        if (DEBUG) { logger.info("Used {ABBREV1} to recognize " + txt + " as " + s); }
+        return getNext(s, txt);
+      }
 
 %}
 
 
-/* Todo: Really SGML shouldn't be here at all, it's kind of legacy. But we continue to tokenize
-   some simple standard forms of concrete SGML syntax, since it tends to give robustness.          */
-/* ---
-( +([A-Za-z][A-Za-z0-9:.-]*( *= *['\"][^\r\n'\"]*['\"])?|['\"][^\r\n'\"]*['\"]| *\/))*
-SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]*([ ]+([A-Za-z][A-Za-z0-9:.-]*([ ]*=[ ]*['\"][^\r\n'\"]*['\"])?|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)>
-( +[A-Za-z][A-Za-z0-9:.-]*)*
-FOO = ([ ]+[A-Za-z][A-Za-z0-9:.-]*)*
-SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]* *)>
-SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*['\"][^\r\n'\"]*['\"]|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)\>
-   --- */
-
-// <STORYID cat=w pri=u>
-// SGML1 allows attribute value match over newline; SGML2 does not.
-SGML1 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ \r\n]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ \r\n]*=[ \r\n]*('[^']*'|\"[^\"]*\"|[A-Za-z_][A-Za-z0-9_:\.\-]*)))*[ \r\n]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ \r\n]*\>
-SGML2 = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^'\r\n]*'|\"[^\"\r\n]*\"|[A-Za-z_][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
-SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
-SPAMP = &amp;
-SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
-SPLET = &[aeiouAEIOU](acute|grave|uml);
-
 %include LexCommon.tokens
 
+/* SENTED1 can look ahead to a following line, whereas SENTEND2 never does and so is safe for line-based processing. */
 SENTEND1 = {SPACENL}({SPACENL}|[:uppercase:]|{SGML1})
 SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
-DIGIT = [:digit:]|[\u07C0-\u07C9]
+
 DATE = {DIGIT}{1,2}[\-\u2012\/]{DIGIT}{1,2}[\-\u2012\/]{DIGIT}{2,4}|{DIGIT}{4}[\-\u2012\/]{DIGIT}{1,2}[\-\u2012\/]{DIGIT}{1,2}
 /* Note that NUM also includes times like 12:55. One can start with a . or , but not a : */
 NUM = {DIGIT}*([.,\u066B\u066C]{DIGIT}+)+|{DIGIT}+([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)*
@@ -636,7 +617,7 @@ APOS = ['\u0092\u2019´]|&apos;  /* ASCII straight quote, single right curly quo
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
 /* HTHING recognizes hyphenated words, including ones with various kinds of numbers in them. And with underscores. */
-HTHING = [\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD\u200C\u200D\u2060]*([-_]([\p{Alpha}\p{Digit}\u00AD\u200C\u200D\u2060]+(\.[:digit:]+)?|{ACRO2}\.))+
+HTHING = [\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD\u200C\u200D\u2060]*([-_]([\p{Alpha}\p{Digit}\u00AD\u200C\u200D\u2060]+(\.{DIGIT}+)?|{ACRO2}\.))+
 /* from the CLEAR (biomedical?) treebank documentation */
 /* we're going to split on most hyphens except a few */
 /* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */
@@ -671,7 +652,7 @@ SREDAUX = n{APOSETCETERA}t
 /* [yY]' is for Y'know, y'all and I for I.  So exclude from one letter first */
 /* Rest are for French borrowings.  n allows n'ts in "don'ts" */
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. 'Twixt for betwixt */
-APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|(Dunkin|somethin|ol){APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[1-9]0s|[1-9]0{APOS}s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeioulA-Z][:letter:]*|{APOS}cause|cont{APOSETCETERA}d\.?|nor{APOSETCETERA}easter|c{APOSETCETERA}mon|e{APOSETCETERA}er|s{APOSETCETERA}mores|ev{APOSETCETERA}ry|li{APOSETCETERA}l|nat{APOSETCETERA}l|ass{APOSETCETERA}t|'twixt|O{APOSETCETERA}o
+APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|(Dunkin|somethin|ol){APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[1-9]0s|[1-9]0{APOS}s|{APOS}till?|[:letter:][:letter:]*[aáeiouhlpyAEIOUY]{APOSETCETERA}[aeiíoulA-Z][:letter:]*|{APOS}cause|cont{APOSETCETERA}d\.?|nor{APOSETCETERA}easter|c{APOSETCETERA}mon|e{APOSETCETERA}er|s{APOSETCETERA}mores|ev{APOSETCETERA}ry|li{APOSETCETERA}l|nat{APOSETCETERA}l|ass{APOSETCETERA}t|'twixt|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
 /* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
 FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?¡¿,·;:&`\"\'\*\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
@@ -771,9 +752,7 @@ ABBREVSN = So\.|No\.
 HYPHEN = [-\u058A\u2010\u2011\u2012]
 HYPHENS = {HYPHEN}+
 SSN = [0-9]{3}{HYPHEN}[0-9]{2}{HYPHEN}[0-9]{4}
-/* phone numbers. keep multi dots pattern separate, so not confused with decimal numbers. And for new treebank tokenization 346-8792. 1st digit can't be 0 or 1 in NANP. */
-/* 2022: Also allow hyphen between area code and number; allow French number like 47-42-17-11 */
-PHONE = (\([0-9]{2,3}\)[- \u00A0\u2007]?|(\+\+?)?([0-9]{1,4}[- \u00A0\u2007\u2012])?[0-9]{2,4}[- \u00A0\u2007\u2012/])[0-9]{3,4}[- \u00A0\u2007\u2012]?[0-9]{3,5}|((\+\+?)?[0-9]{1,4}\.)?[0-9]{2,4}\.[0-9]{2,4}\.[0-9]{2,5}|((\+\+?)?[0-9]{1,4}-)?[0-9]{2,4}-[0-9]{2,4}-[0-9]{2,5}|[2-9][0-9]{2}[-\u2012][0-9]{4}
+
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
 FAKEDUCKFEET = <<|>>
 LESSTHAN = <|&lt;
@@ -800,27 +779,6 @@ BANGMAGAZINES = OK\!
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
 ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)|¯\\_\(ツ\)_\/¯
 
-/* Slightly generous but generally reasonably good emoji parsing */
-/* These are emoji that can be followed by a zwj (U+200D) and then gender or similar things (as well as skin color). Mainly humans but certain others like bears, hearts */
-EMOJI_GENDERED = [\u26F9\u2764\u{01F3C3}-\u{01F3C4}\u{01F3CA}-\u{01F3CC}\u{01F408}\u{01F415}\u{01F43B}\u{01F466}-\u{01F469}\u{01F46E}-\u{01F477}\u{01F481}-\u{01F482}\u{01F486}-\u{01F487}\u{01F575}\u{01F62E}\u{1F635}\u{01F636}\u{01F645}-\u{01F647}\u{01F64B}\u{01F64D}-\u{01F64E}\u{01F6A3}\u{01F6B4}-\u{01F6B6}\u{01F926}\u{01F934}-\u{01F93E}\u{01F9B8}-\u{01F9B9}\u{01F9CD}-\u{01F9DF}\u{01FAF1}-\u{01FAF2}]
-/* Emoji follow is variation selector (emoji/non-emoji rendering) or Fitzpatrick skin tone */
-EMOJI_FOLLOW = [\uFE0E\uFE0F\u{01F3FB}-\u{01F3FF}]
-/* Just things followed by the keycap surrounding char - note that if not separated by space beforehand, may be mistokenized */
-EMOJI_KEYCAPS = [\u0023\u002A\u0030-\u0039]\uFE0F?\u20E3
-/* Flags (changed to use \U to avoid bug in IntelliJ JFlex plugin).
- * 1st disjunct: Two geographic characters as a flag
- * 2nd disjunct: Tag digits and small letters, currently used only for GB regions flags (Scotland, Wales, England)
- * 3rd disjunct: emoji tag sequence (ETS) support for certain additional flags: gay, transgender, pirate
- */
-EMOJI_FLAG = [\U01F1E6-\U01F1FF]{2,2}|\U01F3F4[\u{E0030}-\u{E0039}\u{E0061}-\u{E007A}]+\U0E007F
-/* Rainbow flag, transgender flag, etc. */
-EMOJI_MISC = [\u{01F3F3}\u{01F3F4}\u{01F441}][\uFE0E\uFE0F]?\u200D[\u2620\u26A7\u{01F308}\u{01F5E8}][\uFE0E\uFE0F]?|{EMOJI_KEYCAPS}
-/* Things that have an emoji presentation form. This is where the general single character emoji appear */
-EMOJI_PRESENTATION = [\u00A9\u00AE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9-\u21AA\u231A-\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA-\u25AB\u25B6\u25C0\u25FB-\u27BF\u2934-\u2935\u2B05-\u2B07\u2B1B-\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299\u{01F000}-\u{01FAFF}]
-/* Emoji modifier is something that appears after a zero-width joiner (zwj) U+200D */
-EMOJI_MODIFIER = [\u2640\u2642\u2695-\u2696\u2708\u2744\u2764\u2B1B\u{01F32B}\u{01F33E}\u{01F373}\u{01F37C}\u{01F384}\u{01F393}\u{01F3A4}\u{01F3A8}\u{01F3EB}\u{01F3ED}\u{01F466}-\u{01F469}\u{01F468}-\u{01F469}\u{01F48B}\u{01F4A8}\u{01F4AB}\u{01F4BB}-\u{01F4BC}\u{01F525}\u{01F527}\u{01F52C}\u{01F5E8}\u{01F680}\u{01F692}\u{01F91D}\u{01F9AF}\u{01F9B0}-\u{01F9B3}\u{01F9BA}-\u{01F9BD}\u{01F9D1}\u{01FA79}\u{01FAF2}]
-/* flag | emoji optionally with follower | precomposed gendered/family consisting of human followed by one or more of zero width joiner then another human/profession | Misc */
-EMOJI = {EMOJI_FLAG}|{EMOJI_PRESENTATION}{EMOJI_FOLLOW}?|{EMOJI_GENDERED}{EMOJI_FOLLOW}?(\u200D{EMOJI_MODIFIER}{EMOJI_FOLLOW}?){1,3}|{EMOJI_MISC}
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
 /* \uFF65 is Halfwidth katakana middle dot; \u30FB is Katakana middle dot */
@@ -1099,10 +1057,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                         }
 
 /* Special case to get ca., fig. or Prop. before numbers */
-<YyNotTokenizePerLine>{ABBREV3}/{SPACENL}?[:digit:]   {
+<YyNotTokenizePerLine>{ABBREV3}/{SPACENL}?{DIGIT}   {
                           return processAbbrev3();
                         }
-<YyTokenizePerLine>{ABBREV3}/{SPACENL}?[:digit:]   {
+<YyTokenizePerLine>{ABBREV3}/{SPACE}?{DIGIT}   {
                           return processAbbrev3();
                         }
 <YyNotTokenizePerLine>{ABBREVSN}/{SPACENL}+(Africa|Korea|Cal) {
@@ -1160,7 +1118,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                                                 if (DEBUG) { logger.info("Used {ALEX} (2) to recognize " + tok); }
                                                 return getNext(tok, tok);
                                               }
-{ABBREV2PRE}/{SPACENL}    { String tok = yytext();
+{ABBREV2PRE}/{SPACENL_ONE_CHAR}    { String tok = yytext();
                           if (DEBUG) { logger.info("Used {ABBREV2PRE} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
@@ -1168,7 +1126,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {ABBREV4} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
-{TBSPEC2}/{SPACENL}     {
+{TBSPEC2}/{SPACENL_ONE_CHAR}     {
                           String txt = yytext();
                           if (DEBUG) { logger.info("Used {TBSPEC2} to recognize " + txt); }
                           return getNext(txt, txt);
@@ -1184,16 +1142,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {DEGREES} to recognize " + txt); }
                           return getNext(txt, txt);
                         }
-/* Ideally would factor this out for use in other tokenizers,
- * but the other tokenizers don't have TokenizerPerLine options */
-<YyNotTokenizePerLine>{FILENAME}/({SPACENL}|[.?!,\"'<()]) {
+
+{FILENAME}/({SPACENL_ONE_CHAR}|[.?!,\"'<()]) {
                           String txt = yytext();
                           if (DEBUG) { logger.info("Used {FILENAME} to recognize " + txt); }
-                          return getNext(txt, txt);
-                        }
-<YyTokenizePerLine>{FILENAME}/({SPACE}|[.?!,\"'<()])      {
-                          String txt = yytext();
-                          if (DEBUG) { logger.info("Used {FILENAME} (2) to recognize " + txt); }
                           return getNext(txt, txt);
                         }
 {WORD}\./{INSENTP}      { String origTok = yytext();
@@ -1318,7 +1270,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                   if (yylength() <= 4) {
                      tok = LexerUtils.handleDashes(origTxt, dashesStyle);
                   }
-                  if (DEBUG) { logger.info("Used {HYPHENS} to recognize " + origTxt + " as " + tok); }
+                  if (DEBUG) { logger.info("Used {HYPHENS} to recognize " + origTxt + " as " + tok + "; dashesStyle is " + dashesStyle); }
                   return getNext(tok, origTxt);
                 }
 
