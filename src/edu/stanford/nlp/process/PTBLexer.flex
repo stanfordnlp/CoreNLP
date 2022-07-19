@@ -266,7 +266,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 
       /** Turn on to find out how things were tokenized. */
-      private static final boolean DEBUG = false;
+      private static final boolean DEBUG = true;
 
       /** A logger for this class */
       private static final Redwood.RedwoodChannels logger = Redwood.channels(PTBLexer.class);
@@ -571,13 +571,13 @@ import edu.stanford.nlp.util.logging.Redwood;
 SENTEND1 = {SPACENL}({SPACENL}|[:uppercase:]|{SGML1})
 SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
 
+/* Note that JFlex doesn't support {2,} pattern form.  Only {j,k}. */
 DATE = {DIGIT}{1,2}[\-\u2012\/]{DIGIT}{1,2}[\-\u2012\/]{DIGIT}{2,4}|{DIGIT}{4}[\-\u2012\/]{DIGIT}{1,2}[\-\u2012\/]{DIGIT}{1,2}
 /* Note that NUM also includes times like 12:55. One can start with a . or , but not a : */
 NUM = {DIGIT}*([.,\u066B\u066C]{DIGIT}+)+|{DIGIT}+([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)*
 LEADING_NUM = {DIGIT}+([.,\u066B\u066C]{DIGIT}+)+
 /* Now don't allow bracketed negative numbers!  They have too many uses (e.g.,
-   years or times in parentheses), and having them in tokens messes up
-   treebank parsing.
+   years or times in parentheses), and having them in tokens messes up treebank parsing.
    NUMBER = [\-+]?{NUM}|\({NUM}\) */
 NUMBER = [\-\u2212+]?{NUM}
 SUBSUPNUM = [\u207A\u207B\u208A\u208B]?([\u2070\u00B9\u00B2\u00B3\u2074-\u2079]+|[\u2080-\u2089]+)
@@ -614,7 +614,7 @@ THING_LETTER = ([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}
 THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}(\\?\/[\p{Alpha}\p{Digit}]+(-[\p{Alpha}]+){0,2}){1,2}
 APOS = ['\u0092\u2019´]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or reversed quote or HTML SGML escape */
-/* Includes extra ones that may appear inside a word, rightly or wrongly */
+/* Includes extra ones that may appear inside a word, rightly or wrongly: ASCII backquote, CP1252 left curly quote, left curly quote, high upside down left curly quote */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
 /* HTHING recognizes hyphenated words, including ones with various kinds of numbers in them. And with underscores. */
 HTHING = [\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD\u200C\u200D\u2060]*([-_]([\p{Alpha}\p{Digit}\u00AD\u200C\u200D\u2060]+(\.{DIGIT}+)?|{ACRO2}\.))+
@@ -639,21 +639,24 @@ HTHINGEXCEPTIONPREFIXED = (e|a|u|x|agro|ante|anti|arch|be|bi|bio|co|counter|cros
 HTHINGEXCEPTIONSUFFIXED = ([\p{Alpha}\p{Digit}][\p{Alpha}\p{Digit}.,\u00AD]*)(-)(esque|ette|fest|fold|gate|itis|less|most|o-torium|rama|wise)(s|es|d|ed)?
 HTHINGEXCEPTIONWHOLE = (mm-hm|mm-mm|o-kay|uh-huh|uh-oh)(s|es|d|ed)?
 
-/* things like 'll and 'm */
-REDAUX = {APOSETCETERA}([msdMSD]|re|ve|ll)
+/* things like 'll and 'm and 'em for them */
+REDAUX = {APOSETCETERA}(m|s|d|re|ve|ll|em)
 /* For things that will have n't on the end. They can't end in 'n' */
 /* \u00AD is soft hyphen. \u2060 is word joiner */
-SWORD = [\p{Alpha}\u00AD\u200C\u200D\u2060]*[A-MO-Za-mo-z][\u00AD\u200C\u200D\u2060]*
-SREDAUX = n{APOSETCETERA}t
-/* Tokens you want but already okay: C'mon 'n' '[2-9]0s '[eE]m 'till?
-   [Yy]'all 'Cause Shi'ite B'Gosh o'clock.  Here now only need apostrophe
-   final words. */
-/* Note that Jflex doesn't support {2,} form.  Only {2,k}. */
-/* [yY]' is for Y'know, y'all and I for I.  So exclude from one letter first */
-/* Rest are for French borrowings.  n allows n'ts in "don'ts" */
-/* Arguably, c'mon should be split to "c'm" + "on", but not yet. 'Twixt for betwixt */
-APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|(Dunkin|somethin|ol){APOS}|{APOS}em|diff{APOSETCETERA}rent|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[1-9]0s|[1-9]0{APOS}s|{APOS}till?|[:letter:][:letter:]*[aáeiouhlpyAEIOUY]{APOSETCETERA}[aeiíoulA-Z][:letter:]*|{APOS}cause|cont{APOSETCETERA}d\.?|nor{APOSETCETERA}easter|c{APOSETCETERA}mon|e{APOSETCETERA}er|s{APOSETCETERA}mores|ev{APOSETCETERA}ry|li{APOSETCETERA}l|nat{APOSETCETERA}l|ass{APOSETCETERA}t|'twixt|O{APOSETCETERA}o
-APOWORD2 = y{APOS}
+WORD_NOT = [\p{Alpha}\u00AD\u200C\u200D\u2060]*[A-MO-Za-mo-z][\u00AD\u200C\u200D\u2060]*
+REDAUX_NOT = n{APOSETCETERA}ts?
+
+/* 2022 tokenizer change. We generally allow apostrophes (including curly ones) into words. This is much better for
+ * Hebrew, Arabic, Star Trek and some Black American names, etc. We only separate off word forms with apostrophes
+ * that are known common word shortenings or clitics.
+ */
+/* Tokens you want: 'n' '[2-9]0s '[eE]m 'till? 'Cause Shi'ite B'Gosh o'clock 'Twixt
+   Here now only need apostrophe initial or final words listed. */
+/* Single letters are for French borrowings. */
+/* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
+APOWORD = {WORD}({APOSETCETERA}{WORD})+|\p{Script=Latin}{APOSETCETERA}[A-Z]\.([A-Z]\.)+|{APOS}n{APOS}?|([lLdDjJ]|Dunkin|somethin|ol){APOS}|{APOS}(em|till?|cause|twixt|[1-9]0s)|[1-9]0{APOS}s
+/* APOWORD2 is things we will strip at beginning of word: th' shortening "the" (Th'enchanting) and y' shortening "you" (y'know, y'all) */
+APOWORD2 = (th|y){APOS}
 /* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
 FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?¡¿,·;:&`\"\'\*\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
 LIKELYURL = ((www\.([^ \t\n\f\r`<>|.!?,\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r`<>|.!?,:\/$\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r`<>|]+[^ \t\n\f\r`<>|.!?,;:&\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-])?
@@ -769,16 +772,19 @@ INSENTP = [,;:\u3001\u0F0D]
 QUOTES = {APOS}|[`\u2018-\u201F\u0082\u0084\u0091-\u0094\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;|[`'\u0091\u0092\u2018\u2019]'
 /* Cap'n for captain, c'est for french */
-TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
+TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls
 SWEARING = f[-*][-c*]k(in[g']?|e[dr])?|f[-*](in[g']?|e[dr])|(bull|dip)?s[h@][-\*#]t(ty|e|box|s)?|c[-*]nts?|p[-*]ss(e[sd]|ing)?|c[-*]ck|b[-*]tch|t[-*]ts|tw[-*]ts?|cr[-*]p|d[-*]cks?|b[-*][-*s]t[-*]rds?|pr[-*]ck|d[-*]mn|bl[-*]{2,2}dy
 TBSPEC2 = {APOS}[0-9][0-9]
 BANGWORDS = (E|Yahoo|Jeopardy)\!
 BANGMAGAZINES = OK\!
 
+/* Allows covid-19 variants and other similar things. Must filter out first p.500, No.17, etc. */
+CAP_NUM_REST = [0-9]+(\.[0-9]+)*[A-Za-z]*
+CAP_NUM = [A-Z]+\.(A-Z]+\.)?{CAP_NUM_REST}
+
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
 ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)|¯\\_\(ツ\)_\/¯
-
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
 /* \uFF65 is Halfwidth katakana middle dot; \u30FB is Katakana middle dot */
@@ -787,8 +793,13 @@ ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]
 MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u0F0B\u1FBD\u2016\u2017\u2020-\u2025\u2030-\u2038\u203B\u203C\u2043\u203E-\u2042\u2044\u2053\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3001-\u3006\u3008-\u3020\u30FB\u33A1\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
 
 PROG_LANGS = c[+][+]|(c|f)#
+
+ONECHAR_APOS = ['\u0092\u2019´`\u0091\u2018\u201B]
+/* Assimilations5 leave 5 chars behind after division */
+ASSIMILATIONS5 = {ONECHAR_APOS}tain{ONECHAR_APOS}t|t{ONECHAR_APOS}ain{ONECHAR_APOS}t
 /* Assimilations3 leave 3 chars behind after division */
 ASSIMILATIONS3 = cannot|'twas|dunno|['’]d['’]ve
+/* Assimilations2 leave 2 chars behind after division */
 /* "nno" is a remnant after pushing back from dunno in ASSIMILATIONS3 */
 /* Include splitting some apostrophe-less negations, but not ones like "wont" that are also words. */
 ASSIMILATIONS2 = {APOS}tis|gonna|gotta|lemme|gimme|wanna|nno|aint|dont|doesnt|didnt|theyre
@@ -804,6 +815,14 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 
 {PROG_LANGS}      { String tok = yytext();
                     if (DEBUG) { logger.info("Used {PROG_LANGS} to recognize " + tok); }
+                    return getNext(tok, tok);
+                  }
+{ASSIMILATIONS5}  { if (splitAssimilations) {
+                      yypushback(5);
+                    }
+                    String tok = yytext();
+                    if (DEBUG) { logger.info("Used {ASSIMILATIONS5} to recognize " + tok +
+                             "; splitAssimilations=" + splitAssimilations); }
                     return getNext(tok, tok);
                   }
 {ASSIMILATIONS3}  { if (splitAssimilations) {
@@ -860,6 +879,29 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {SPPUNC} to recognize " + tok); }
                           return getNext(tok, tok);
                         }
+
+/* Allow for two {REDAUX} like I'd've or they'd've */
+{WORD}/{REDAUX}{REDAUX} { final String origTxt = yytext();
+                          String tok = LexerUtils.removeSoftHyphens(origTxt);
+                          if (americanize) {
+                            tok = Americanize.americanize(tok);
+                          }
+                          if (DEBUG) { logger.info("Used {WORD} (4) to recognize " + origTxt + " as " + tok); }
+                          return getNext(tok, origTxt);
+                        }
+{APOWORD}/{REDAUX}{REDAUX}  { String tok = yytext();
+                              String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
+                              if (DEBUG) { logger.info("Used {APOWORD} (2) to recognize " + tok + " as " + norm +
+                                                       "; quoteStyle=" + quoteStyle + "; probablyLeft=" + false); }
+                              return getNext(norm, tok);
+                            }
+{WORD_NOT}/{REDAUX_NOT}{REDAUX} { final String origTxt = yytext();
+                                  String tok = LexerUtils.removeSoftHyphens(origTxt);
+                                  if (DEBUG) { logger.info("Used {WORD_NOT} (2) to recognize " + origTxt + " as " + tok); }
+                                  return getNext(tok, origTxt);
+                                }
+
+
 {WORD}/{REDAUX}         { final String origTxt = yytext();
                           String tok = LexerUtils.removeSoftHyphens(origTxt);
                           if (americanize) {
@@ -868,10 +910,20 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {WORD} to recognize " + origTxt + " as " + tok); }
                           return getNext(tok, origTxt);
                         }
-{SWORD}/{SREDAUX}       { final String origTxt = yytext();
+{WORD_NOT}/{REDAUX_NOT} { final String origTxt = yytext();
                           String tok = LexerUtils.removeSoftHyphens(origTxt);
-                          if (DEBUG) { logger.info("Used {SWORD} to recognize " + origTxt + " as " + tok); }
+                          if (DEBUG) { logger.info("Used {WORD_NOT} to recognize " + origTxt + " as " + tok); }
                           return getNext(tok, origTxt);
+                        }
+{APOWORD}/{REDAUX}      { String tok = yytext();
+                          String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
+                          if (DEBUG) { logger.info("Used {APOWORD} (2) to recognize " + tok + " as " + norm +
+                                                   "; quoteStyle=" + quoteStyle + "; probablyLeft=" + false); }
+                          return getNext(norm, tok);
+                        }
+{APOWORD2}/{WORD}       { String txt = yytext();
+                          if (DEBUG) { logger.info("Used {APOWORD2} to recognize " + txt); }
+                          return getNext(txt, txt);
                         }
 {DIGIT}+/{SEP_SUFFIX}   { String txt = yytext();
                           if (DEBUG) { logger.info("Used {DIGIT}/{SEP_SUFFIX} to recognize " + txt); }
@@ -897,13 +949,10 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                         }
 {APOWORD}               { String tok = yytext();
                           String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
+                          norm = LexerUtils.removeSoftHyphens(norm);
                           if (DEBUG) { logger.info("Used {APOWORD} to recognize " + tok + " as " + norm +
-                                                   "; probablyLeft=" + false); }
+                                                   "; quoteStyle=" + quoteStyle + "; probablyLeft=" + false); }
                           return getNext(norm, tok);
-                        }
-{APOWORD2}/[:letter:]   { String txt = yytext();
-                          if (DEBUG) { logger.info("Used {APOWORD2} to recognize " + txt); }
-                          return getNext(txt, txt);
                         }
 {FULLURL}               { String txt = yytext();
                           String norm = txt;
@@ -934,13 +983,13 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
 {REDAUX}/[^\p{Latin}'’]   { String tok = yytext();
                           String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           if (DEBUG) { logger.info("Used {REDAUX} to recognize " + tok + " as " + norm +
-                                                   "; probablyLeft=" + false); }
+                                                   "; quoteStyle=" + quoteStyle + "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
-{SREDAUX}/[^\p{Latin}'’]  { String tok = yytext();
+{REDAUX_NOT}/[^\p{Latin}'’]  { String tok = yytext();
                           String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
-                          if (DEBUG) { logger.info("Used {SREDAUX} to recognize " + tok + " as " + norm +
-                                                   "; probablyLeft=" + false); }
+                          if (DEBUG) { logger.info("Used {REDAUX_NOT} to recognize " + tok + " as " + norm +
+                                                   "; quoteStyle=" + quoteStyle); }
                           return getNext(norm, tok);
                         }
 {DATE}                  { String origTxt = yytext();
@@ -1175,7 +1224,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                                  }
 {DBLQUOT}               { String tok = yytext();
                           String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
-                          if (DEBUG) { logger.info("Used {SREDAUX} to recognize " + tok + " as " + norm +
+                          if (DEBUG) { logger.info("Used {DBLQUOT} to recognize " + tok + " as " + norm +
                                                    "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
@@ -1184,6 +1233,18 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                   txt = LexerUtils.pennNormalizeParens(txt, normalizeParentheses);
                   if (DEBUG) { logger.info("Used {SMILEY} to recognize " + origText + " as " + txt); }
                   return getNext(txt, origText);
+                }
+
+/* This rule doesn't seem to fire to block {CAP_NUM} when it could. I have no idea why. Ignoring for now as a rare case. */
+{ABBREV3}/{CAP_NUM_REST} {
+                           String txt = yytext();
+                           if (DEBUG) { logger.info("Used {ABBREV3} (2) to recognize " + txt); }
+                           return getNext(txt, txt);
+                         }
+{CAP_NUM}       {
+                  String txt = yytext();
+                  if (DEBUG) { logger.info("Used {CAP_NUM} to recognize " + txt); }
+                  return getNext(txt, txt);
                 }
 {ASIANSMILEY}   { String txt = yytext();
                   String origText = txt;
@@ -1457,7 +1518,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                                            "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
-/* This QUOTES must proceed (S)REDAUX (2) so it by preference matches straight quote before word.
+/* This QUOTES must proceed REDAUX (2) so it by preference matches straight quote before word.
    Trying to collapse the first two cases seemed to break things (?!?). */
 {QUOTES}/[:letter:]{NOT_SPACENL_ONE_CHAR}
                 { // Extra context is to not match on ones like 'd but you do want words like "a"
@@ -1485,17 +1546,12 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                                            "; probablyLeft=" + false); }
                   return getNext(norm, tok);
                 }
-/* These (S)REDAUX (2) cases are needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
+/* This REDAUX (2) case is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
 {REDAUX}        { String tok = yytext();
                   if (DEBUG) { logger.info("Used {REDAUX} (2) to recognize " + tok); }
                   return getNext(tok, tok);
                 }
-{SREDAUX}       { String tok = yytext();
-                  String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
-                  if (DEBUG) { logger.info("Used {SREDAUX} (2) to recognize " + tok + " as " + norm +
-                                           "; probablyLeft=" + false); }
-                  return getNext(norm, tok);
-                }
+/* Plain {REDAUX_NOT} is captured by {APOWORD} */
 
 {FAKEDUCKFEET}  {
                   String tok = yytext();

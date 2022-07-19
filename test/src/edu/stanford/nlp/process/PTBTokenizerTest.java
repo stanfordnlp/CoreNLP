@@ -907,7 +907,6 @@ public class PTBTokenizerTest {
           "Phone:86-0832-2115188. DIAL `M' FOR MANNERS.",
           "The athlete didnt see his son, Alex. In the Shu'la neighborhood.",
           "China is very high tech. Moose are wont to roam here.",
-          "I'd've thought that they'd've liked it.",
   };
 
   private final String[][] hyphenGold = {
@@ -930,14 +929,64 @@ public class PTBTokenizerTest {
           { "Phone", ":", "86-0832-2115188", ".", "DIAL", "`", "M", "'", "FOR", "MANNERS", "." },
           { "The", "athlete", "did", "nt", "see", "his", "son", ",", "Alex", ".", "In", "the", "Shu'la", "neighborhood", "." },
           { "China", "is", "very", "high", "tech", ".", "Moose", "are", "wont", "to", "roam", "here", "." },
-          { "I", "'d", "'ve", "thought", "that", "they", "'d", "'ve", "liked", "it", "." },
-  };
+   };
 
   @Test
   public void testHyphensQuoteAndBOM() {
     TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false,invertible,ptb3Escaping");
     runOnTwoArrays(tokFactory, hyphenInputs, hyphenGold);
     runAgainstOrig(tokFactory, hyphenInputs);
+  }
+
+
+  private final String[] apostropheInputs = {
+          "Th'enchanting tale",
+          "Mu'min and Yāghmūrasen know Mu'min‘s tribe, the Koumïa",
+          "The Qur’an's Allah",
+          "I'D'VE THOUGHT THAT THEY'D'VE LIKED IT.",
+          "I'd've thought that they'd've liked it.",
+          "J'aime les enfants",
+          "Y'know y'all want it",
+          "Wet'n'wild Las Vegas", // unclear this should really be one token, but seems only consistent treatment
+          "in \"Retour de L'U.R.S.S.\" in 1936",
+          "wedding do's and don'ts,",
+          "``'Tain't mine and 'tain't enough.''",
+          "``The only thing tainted about money is t'ain't mine, and t'ain't enough.''",
+          "I caught BA.2.12.1 and BA.5 while reading about X.500",
+          "IT IS ON P.72",
+          "ʻAbdu'l-Bahá, born ʻAbbás, was the eldest son of Baháʼu'lláh and served as head of the Baháʼí Faith from 1892 until 1921.",
+          "Let's shoot'em up",
+
+  };
+
+  private final String[][] apostropheGold = {
+          { "Th'", "enchanting", "tale" },
+          { "Mu'min", "and", "Yāghmūrasen", "know", "Mu'min", "`s", "tribe", ",", "the", "Koumïa" },
+          { "The", "Qur'an", "'s", "Allah" },
+          { "I", "'D", "'VE", "THOUGHT", "THAT", "THEY", "'D", "'VE", "LIKED", "IT", "." },
+          { "I", "'d", "'ve", "thought", "that", "they", "'d", "'ve", "liked", "it", "." },
+          { "J'aime", "les", "enfants" },
+          { "Y'", "know", "y'", "all", "want", "it" },
+          { "Wet'n'wild", "Las", "Vegas" },
+          { "in", "``", "Retour", "de", "L'U.R.S.S.", "''", "in", "1936" },
+          { "wedding", "do", "'s", "and", "do", "n'ts", "," },
+          { "``", "'T", "ai", "n't", "mine", "and", "'t", "ai", "n't", "enough", ".", "''" },
+          { "``", "The", "only", "thing", "tainted", "about", "money", "is", "t'", "ai", "n't", "mine", ",", "and", "t'", "ai", "n't", "enough", ".", "''" },
+          { "I", "caught", "BA.2.12.1", "and", "BA.5", "while", "reading", "about", "X.500" },
+          { "IT", "IS", "ON", "P.72" }, // really this should be split, but it currently isn't 🤷
+          { "ʻAbdu'l", "-", "Bahá", ",", "born", "ʻAbbás", ",", "was", "the", "eldest", "son", "of", "Baháʼu'lláh", "and",
+                  "served", "as", "head", "of", "the", "Baháʼí", "Faith", "from", "1892", "until", "1921", "."
+          },
+          { "Let", "'s", "shoot", "'em", "up" },
+
+  };
+
+  @Test
+  public void testApostrophes() {
+    // Note that this is running with "latex" normalization of quotes!
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false,invertible,ptb3Escaping");
+    runOnTwoArrays(tokFactory, apostropheInputs, apostropheGold);
+    runAgainstOrig(tokFactory, apostropheInputs);
   }
 
 }
