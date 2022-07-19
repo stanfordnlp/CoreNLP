@@ -266,7 +266,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 
       /** Turn on to find out how things were tokenized. */
-      private static final boolean DEBUG = true;
+      private static final boolean DEBUG = false;
 
       /** A logger for this class */
       private static final Redwood.RedwoodChannels logger = Redwood.channels(PTBLexer.class);

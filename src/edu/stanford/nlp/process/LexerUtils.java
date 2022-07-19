@@ -271,7 +271,7 @@ public class LexerUtils {
         // hyphen-dash, underscore, Armenian hyphen, hyphen, non-break hyphen, figure dash
         String mid = tok.replaceAll("[-_\u058A\u2010\u2011\u2012]","-");
         // cp1252 en dash, cp1252 em dash, en dash, em dash, horizontal bar
-        mid = mid.replaceAll("[\u0096\u0097\u2013\u2014\u2015]", "--");
+        mid = mid.replaceAll("[\u0096\u0097\u2013\u2014\u2015]|&MD;|&[mn]dash;", "--");
         if ("---".equals(mid)) {
           mid = "--";
         }

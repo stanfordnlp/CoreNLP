@@ -1,5 +1,6 @@
 package edu.stanford.nlp.examples;
 
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
 
@@ -12,12 +13,9 @@ public class TokensRegexExample {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,tokensregex");
     // The .../ling/tokensregex/demo directory has a larger example
-    File rules = new File("projects/core/src/edu/stanford/nlp/ling/tokensregex/demo/rules/colors.rules.txt");
-    if (!rules.isFile()) {
-      rules = new File("src/edu/stanford/nlp/ling/tokensregex/demo/rules/colors.rules.txt");
-    }
-    if (!rules.isFile()) {
-      throw new RuntimeException("Unable to find colors.rules.txt");
+    File rules = new File("src/edu/stanford/nlp/ling/tokensregex/demo/rules/colors.rules.txt");
+    if ( ! rules.isFile()) {
+      throw new RuntimeIOException("Unable to find colors.rules.txt");
     }
     props.setProperty("tokensregex.rules", rules.getPath());
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
@@ -27,4 +25,5 @@ public class TokensRegexExample {
       System.out.println(token.word() + " " + token.ner());
     }
   }
+
 }

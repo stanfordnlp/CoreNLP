@@ -74,7 +74,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * For other flags, see individual comments for each flag.
  *
  * To use a properties file, see
- * projects/core/data/edu/stanford/nlp/patterns/surface/example.properties or patterns/example.properties (depends on which codebase you are using)
+ * data/edu/stanford/nlp/patterns/surface/example.properties or patterns/example.properties (depends on which codebase you are using)
  * as an example for the flags and their brief descriptions. Run the code as:
  * {@code java -mx1000m -cp classpath edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass -props dir-as-above/example.properties}
  *

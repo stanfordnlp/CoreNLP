@@ -79,7 +79,7 @@ public class ColumnDataClassifierAnnotator implements Annotator {
   //test - run from your top javanlp directory to get the files etc.
   public static void main(String[] args) {
 
-    Properties props = StringUtils.propFileToProperties("projects/core/src/edu/stanford/nlp/classify/mood.prop");
+    Properties props = StringUtils.propFileToProperties("src/edu/stanford/nlp/classify/mood.prop");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
     Annotation happyAnnotation = new Annotation("I am so glad this is awesome");
