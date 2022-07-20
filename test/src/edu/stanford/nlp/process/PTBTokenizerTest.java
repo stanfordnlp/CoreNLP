@@ -956,6 +956,8 @@ public class PTBTokenizerTest {
           "IT IS ON P.72",
           "ʻAbdu'l-Bahá, born ʻAbbás, was the eldest son of Baháʼu'lláh and served as head of the Baháʼí Faith from 1892 until 1921.",
           "Let's shoot'em up",
+          "In Louis L'Amour's 1985 historical novel",
+          "Grace O'Malley's Castle.",
 
   };
 
@@ -978,6 +980,8 @@ public class PTBTokenizerTest {
                   "served", "as", "head", "of", "the", "Baháʼí", "Faith", "from", "1892", "until", "1921", "."
           },
           { "Let", "'s", "shoot", "'em", "up" },
+          { "In", "Louis", "L'Amour", "'s", "1985", "historical", "novel" },
+          { "Grace", "O'Malley", "'s", "Castle", "." },
 
   };
 
