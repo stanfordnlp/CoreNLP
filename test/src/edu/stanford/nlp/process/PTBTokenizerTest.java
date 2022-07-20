@@ -958,6 +958,10 @@ public class PTBTokenizerTest {
           "Let's shoot'em up",
           "In Louis L'Amour's 1985 historical novel",
           "Grace O'Malley's Castle.",
+          "The Z-R relationship was Z = 408R9.20",
+          "I use SPSS28.0 to measure Lee’s指数 as 其IC50约为4.814μmol / L",
+          "Some people write BA2.12.1. Tests were DM899.00.",
+          "@Insanomania They do... Their mentality doesn't :(\n",
 
   };
 
@@ -982,13 +986,18 @@ public class PTBTokenizerTest {
           { "Let", "'s", "shoot", "'em", "up" },
           { "In", "Louis", "L'Amour", "'s", "1985", "historical", "novel" },
           { "Grace", "O'Malley", "'s", "Castle", "." },
+          { "The", "Z-R", "relationship", "was", "Z", "=", "408R", "9.20" },
+          { "I", "use", "SPSS", "28.0", "to", "measure", "Lee's指数", "as", "其IC50约为", "4.814", "μmol", "/", "L" }, // could use \p{Latin} more in patterns?
+          { "Some", "people", "write", "BA", "2.12.1", ".","Tests", "were", "DM", "899.00", "." },
+          { "@Insanomania", "They", "do", "...", "Their", "mentality", "does", "n't", ":(" },
 
   };
 
   @Test
   public void testApostrophes() {
     // Note that this is running with "latex" normalization of quotes!
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("normalizeCurrency=false,invertible,ptb3Escaping");
+    TokenizerFactory<CoreLabel> tokFactory =
+            PTBTokenizer.coreLabelFactory("invertible,ptb3Escaping,normalizeCurrency=false,normalizeParentheses=false");
     runOnTwoArrays(tokFactory, apostropheInputs, apostropheGold);
     runAgainstOrig(tokFactory, apostropheInputs);
   }
