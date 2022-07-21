@@ -87,7 +87,7 @@ result {
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
     Assert.assertEquals("Expected exactly 1 reply", 1, response.getResultList().size());
-    checkResult(response.getResultList().get(0), 1);
+    checkResult(response, 1, 0);
   }
 
   @Test
@@ -96,12 +96,15 @@ result {
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
     Assert.assertEquals("Expected exactly 1 reply", 1, response.getResultList().size());
-    checkResult(response.getResultList().get(0), 2);
+    checkResult(response, 2, 0);
   }
 
-  public static void checkResult(CoreNLPProtos.SemgrexResponse.GraphResult result, int numSemgrex) {
+  public static void checkResult(CoreNLPProtos.SemgrexResponse response, int numSemgrex, int graphIdx) {
+    CoreNLPProtos.SemgrexResponse.GraphResult result = response.getResultList().get(graphIdx);
+
     Assert.assertEquals("Expected exactly " + numSemgrex + " semgrex result(s)", numSemgrex, result.getResultList().size());
 
+    int semgrexIdx = 0;
     for (CoreNLPProtos.SemgrexResponse.SemgrexResult semgrexResult : result.getResultList()) {
       Assert.assertEquals("Expected exactly 1 match", 1, semgrexResult.getMatchList().size());
       CoreNLPProtos.SemgrexResponse.Match match = semgrexResult.getMatchList().get(0);
@@ -117,6 +120,10 @@ result {
 
       Assert.assertEquals("Reln dobj should be named zzz", "zzz", match.getRelnList().get(0).getName());
       Assert.assertEquals("Reln dobj should be named zzz", "dobj", match.getRelnList().get(0).getReln());
+
+      Assert.assertEquals("Graph count was off", graphIdx, match.getGraphIndex());
+      Assert.assertEquals("Semgrex pattern count was off", semgrexIdx, match.getSemgrexIndex());
+      ++semgrexIdx;
     }
   }
 
@@ -134,8 +141,8 @@ result {
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
     Assert.assertEquals("Expected exactly 2 replies", 2, response.getResultList().size());
-    checkResult(response.getResultList().get(0), 1);
-    checkResult(response.getResultList().get(1), 1);
+    checkResult(response, 1, 0);
+    checkResult(response, 1, 1);
   }
 
   public byte[] buildRepeatedRequest(int count, boolean closingLength) throws IOException {
@@ -166,7 +173,7 @@ result {
       byte[] responseBytes = new byte[len];
       din.read(responseBytes, 0, len);
       CoreNLPProtos.SemgrexResponse response = CoreNLPProtos.SemgrexResponse.parseFrom(responseBytes);
-      checkResult(response.getResultList().get(0), 1);
+      checkResult(response, 1, 0);
     }
     int len = din.readInt();
     Assert.assertEquals("Repeated results should be over", 0, len);
