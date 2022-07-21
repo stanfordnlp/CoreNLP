@@ -25,12 +25,14 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
   /**
    * Builds a single inner SemgrexResult structure from the pair of a SemgrexPattern and a SemanticGraph
    */
-  public static CoreNLPProtos.SemgrexResponse.SemgrexResult matchSentence(SemgrexPattern pattern, SemanticGraph graph) {
+  public static CoreNLPProtos.SemgrexResponse.SemgrexResult matchSentence(SemgrexPattern pattern, SemanticGraph graph, int patternIdx, int graphIdx) {
     CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder semgrexResultBuilder = CoreNLPProtos.SemgrexResponse.SemgrexResult.newBuilder();
     SemgrexMatcher matcher = pattern.matcher(graph);
     while (matcher.find()) {
       CoreNLPProtos.SemgrexResponse.Match.Builder matchBuilder = CoreNLPProtos.SemgrexResponse.Match.newBuilder();
       matchBuilder.setMatchIndex(matcher.getMatch().index());
+      matchBuilder.setSemgrexIndex(patternIdx);
+      matchBuilder.setGraphIndex(graphIdx);
 
       for (String nodeName : matcher.getNodeNames()) {
         CoreNLPProtos.SemgrexResponse.NamedNode.Builder nodeBuilder = CoreNLPProtos.SemgrexResponse.NamedNode.newBuilder();
@@ -61,16 +63,20 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
     CoreNLPProtos.SemgrexResponse.Builder responseBuilder = CoreNLPProtos.SemgrexResponse.newBuilder();
 
     List<SemgrexPattern> patterns = request.getSemgrexList().stream().map(SemgrexPattern::compile).collect(Collectors.toList());
+    int graphIdx = 0;
     for (CoreNLPProtos.SemgrexRequest.Dependencies sentence : request.getQueryList()) {
       CoreNLPProtos.SemgrexResponse.GraphResult.Builder graphResultBuilder = CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder();
 
       List<CoreLabel> tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
       SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, "semgrex");
+      int patternIdx = 0;
       for (SemgrexPattern pattern : patterns) {
-        graphResultBuilder.addResult(matchSentence(pattern, graph));
+        graphResultBuilder.addResult(matchSentence(pattern, graph, patternIdx, graphIdx));
+        ++patternIdx;
       }
 
       responseBuilder.addResult(graphResultBuilder.build());
+      ++graphIdx;
     }
     return responseBuilder.build();
   }
