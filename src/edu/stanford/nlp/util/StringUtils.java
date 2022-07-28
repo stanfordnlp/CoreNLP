@@ -1137,6 +1137,35 @@ public class StringUtils  {
   }
 
   /**
+   * This method updates a LinkedHashMap based on
+   * a comma-separated String (with whitespace
+   * optionally allowed after the comma) representing properties
+   * to a Properties object.  Each property is "property=value".  The value
+   * for properties without an explicitly given value is set to "true".
+   *
+   * TODO: remove the stringToProperties version
+   */
+  public static LinkedHashMap<String, String> stringToPropertiesMap(String str) {
+    LinkedHashMap<String, String> props = new LinkedHashMap<>();
+
+    String[] propsStr = str.trim().split(",\\s*");
+    for (String term : propsStr) {
+      int divLoc = term.indexOf('=');
+      String key;
+      String value;
+      if (divLoc >= 0) {
+        key = term.substring(0, divLoc).trim();
+        value = term.substring(divLoc + 1).trim();
+      } else {
+        key = term.trim();
+        value = "true";
+      }
+      props.put(key, value);
+    }
+    return props;
+  }
+
+  /**
    * If any of the given list of properties are not found, returns the
    * name of that property.  Otherwise, returns null.
    */
