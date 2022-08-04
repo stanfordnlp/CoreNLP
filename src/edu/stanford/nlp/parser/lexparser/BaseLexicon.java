@@ -63,6 +63,11 @@ public class BaseLexicon implements Lexicon  {
   protected static final IntTaggedWord NULL_ITW = new IntTaggedWord(nullWord, nullTag);
 
   protected final TrainOptions trainOptions;
+  // TODO: remove this link
+  // the only reason it is needed is because testOptions has an item,
+  // unseenSmooth, which belongs in trainOptions
+  // the problem is moving that and/or removing this link will invalidate
+  // all existing serialized models
   protected final TestOptions testOptions;
 
   protected final Options op;
