@@ -5,11 +5,11 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
+import java.util.LinkedHashMap;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.Maps;
 import edu.stanford.nlp.util.StringUtils;
 
 /** A tokenizer that works by calling a WordSegmenter.
@@ -82,16 +82,16 @@ public class WordSegmentingTokenizer extends AbstractTokenizer<HasWord> {
     public Tokenizer<HasWord> getTokenizer(Reader r, String extraOptions) {
       boolean tokenizeNewlines = this.tokenizeNLs;
       if (extraOptions != null) {
-        Properties prop = StringUtils.stringToProperties(extraOptions);
-        tokenizeNewlines = PropertiesUtils.getBool(prop, "tokenizeNLs", this.tokenizeNLs);
+        LinkedHashMap<String, String> prop = StringUtils.stringToPropertiesMap(extraOptions);
+        tokenizeNewlines = Maps.getBool(prop, "tokenizeNLs", this.tokenizeNLs);
       }
 
       return new WordSegmentingTokenizer(segmenter, WhitespaceTokenizer.newCoreLabelWhitespaceTokenizer(r, tokenizeNewlines));
     }
 
     public void setOptions(String options) {
-      Properties prop = StringUtils.stringToProperties(options);
-      tokenizeNLs = PropertiesUtils.getBool(prop, "tokenizeNLs", tokenizeNLs);
+      LinkedHashMap<String, String> prop = StringUtils.stringToPropertiesMap(options);
+      tokenizeNLs = Maps.getBool(prop, "tokenizeNLs", tokenizeNLs);
     }
   }
 }

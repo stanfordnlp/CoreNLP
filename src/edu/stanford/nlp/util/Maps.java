@@ -165,6 +165,26 @@ public class Maps {
   }
 
   /**
+   * Load a boolean property from a Map.  If the key is not present, returns false.
+   */
+  public static boolean getBool(Map<String, String> props, String key) {
+    return getBool(props, key, false);
+  }
+
+  /**
+   * Load a boolean property from a Map.  If the key is not present, returns defaultValue.
+   */
+  public static boolean getBool(Map<String, String> props, String key,
+                                boolean defaultValue) {
+    String value = props.get(key);
+    if (value != null) {
+      return Boolean.parseBoolean(value);
+    } else {
+      return defaultValue;
+    }
+  }
+
+  /**
    * Pretty print a Counter. This one has more flexibility in formatting, and
    * doesn't sort the keys.
    */

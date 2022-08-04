@@ -51,8 +51,8 @@ public class TreePrint  {
     "conll2007"
   };
 
-  private final Properties formats;
-  private final Properties options;
+  private final LinkedHashMap<String, String> formats;
+  private final LinkedHashMap<String, String> options;
 
   private final boolean markHeadNodes; // = false;
   private final boolean lexicalize; // = false;
@@ -143,11 +143,10 @@ public class TreePrint  {
    * @param hf      The HeadFinder used in printing output
    */
   public TreePrint(String formatString, String optionsString, TreebankLanguagePack tlp, HeadFinder hf, HeadFinder typedDependencyHF) {
-    formats = StringUtils.stringToProperties(formatString);
-    options = StringUtils.stringToProperties(optionsString);
+    formats = StringUtils.stringToPropertiesMap(formatString);
+    options = StringUtils.stringToPropertiesMap(optionsString);
     List<String> okOutputs = Arrays.asList(outputTreeFormats);
-    for (Object formObj : formats.keySet()) {
-      String format = (String) formObj;
+    for (String format : formats.keySet()) {
       if ( ! okOutputs.contains(format)) {
         throw new RuntimeException("Error: output tree format " + format + " not supported. Known formats are: " + okOutputs);
       }
@@ -208,8 +207,8 @@ public class TreePrint  {
   }
 
 
-  private static boolean propertyToBoolean(Properties prop, String key) {
-    return Boolean.parseBoolean(prop.getProperty(key));
+  private static boolean propertyToBoolean(LinkedHashMap<String, String> prop, String key) {
+    return Boolean.parseBoolean(prop.get(key));
   }
 
   /**

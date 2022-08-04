@@ -7,12 +7,12 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Iterator;
-import java.util.Properties;
+import java.util.LinkedHashMap;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.Maps;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -76,8 +76,8 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
     public WhitespaceTokenizerFactory(LexedTokenFactory<T> factory,
                                       String options) {
       this.factory = factory;
-      Properties prop = StringUtils.stringToProperties(options);
-      this.tokenizeNLs = PropertiesUtils.getBool(prop, "tokenizeNLs", false);
+      LinkedHashMap<String, String> prop = StringUtils.stringToPropertiesMap(options);
+      this.tokenizeNLs = Maps.getBool(prop, "tokenizeNLs", false);
     }
 
     public WhitespaceTokenizerFactory(LexedTokenFactory<T> factory,
@@ -98,16 +98,16 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
 
     @Override
     public Tokenizer<T> getTokenizer(Reader r, String extraOptions) {
-      Properties prop = StringUtils.stringToProperties(extraOptions);
-      boolean tokenizeNewlines = PropertiesUtils.getBool(prop, "tokenizeNLs", this.tokenizeNLs);
+      LinkedHashMap<String, String> prop = StringUtils.stringToPropertiesMap(extraOptions);
+      boolean tokenizeNewlines = Maps.getBool(prop, "tokenizeNLs", this.tokenizeNLs);
 
       return new WhitespaceTokenizer<>(factory, r, tokenizeNewlines);
     }
 
     @Override
     public void setOptions(String options) {
-      Properties prop = StringUtils.stringToProperties(options);
-      tokenizeNLs = PropertiesUtils.getBool(prop, "tokenizeNLs", tokenizeNLs);
+      LinkedHashMap<String, String> prop = StringUtils.stringToPropertiesMap(options);
+      tokenizeNLs = Maps.getBool(prop, "tokenizeNLs", tokenizeNLs);
     }
 
   } // end class WhitespaceTokenizerFactory
