@@ -18,7 +18,7 @@ Out-of-the-box, Stanford CoreNLP expects and processes English language text. Bu
 | Part of Speech       | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
 | Lemma                |    |    | ✔  |    |    |    |    |    |
 | Named Entities       |    | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
-| Constituency Parsing | ✔  | ✔  | ✔  | ✔  |    |    | ✔  |    |
+| Constituency Parsing | ✔  | ✔  | ✔  | ✔  |    | ✔  | ✔  |    |
 | Dependency Parsing   |    | ✔  | ✔  | ✔  | ✔  |    | ✔  | ✔  |
 | Sentiment Analysis   |    |    | ✔  |    |    |    |    |    |
 | Mention Detection    |    | ✔  | ✔  |    |    |    |    |    |
