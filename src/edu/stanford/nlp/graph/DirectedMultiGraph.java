@@ -613,7 +613,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
    * Topological sorting only works if the graph is acyclic.
    *
    * @return A sorted list of the vertices
-   * @throws IllegalStateException if this graph is not a DAG
+   * @throws CyclicGraphException (a subtype of IllegalStateException) if this graph is not a DAG
    */
   public List<V> topologicalSort() {
     List<V> result = Generics.newArrayList();
@@ -637,7 +637,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
           continue;
         }
         if (temporary.contains(neighbor)) {
-          throw new IllegalStateException("This graph has cycles. Topological sort not possible: " + this.toString());
+          throw new CyclicGraphException("This graph has cycles. Topological sort not possible", this);
         }
         topologicalSortHelper(neighbor, temporary, permanent, result);
       }
