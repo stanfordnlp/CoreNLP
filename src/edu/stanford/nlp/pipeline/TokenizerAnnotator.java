@@ -446,6 +446,10 @@ public class TokenizerAnnotator implements Annotator  {
       throw new RuntimeException("Tokenizer unable to find text in annotation: " + annotation);
     }
 
+    // If the annotation was already processed before and already has
+    // a SentenceAnnotation.class, recreating the tokenization
+    // invalidates any existing sentence annotation
+    annotation.remove(CoreAnnotations.SentencesAnnotation.class);
     if (this.cleanxmlAnnotator != null) {
       this.cleanxmlAnnotator.annotate(annotation);
     }

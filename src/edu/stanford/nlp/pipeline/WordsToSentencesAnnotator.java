@@ -35,6 +35,8 @@ public class WordsToSentencesAnnotator implements Annotator  {
 
   private final boolean countLineNumbers;
 
+  private boolean loggedExtraSplit = false;
+
   public WordsToSentencesAnnotator() {
     this(false);
   }
@@ -177,8 +179,16 @@ public class WordsToSentencesAnnotator implements Annotator  {
     if (VERBOSE) {
       log.info("Sentence splitting ... " + annotation);
     }
-    if ( ! annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
+    if (!annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       throw new IllegalArgumentException("WordsToSentencesAnnotator: unable to find words/tokens in: " + annotation);
+    }
+
+    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+      if (!loggedExtraSplit) {
+        log.error("Multiple WordsToSentencesAnnotator or other sentence splitters are operating on this document!");
+        loggedExtraSplit = true;
+      }
+      return;
     }
 
     // get text and tokens from the document

@@ -119,27 +119,27 @@ public class RequirementsCorrectSlowITest {
 
   @Test
   public void testDefaultPipeline() {
-    testAnnotatorSequence(Arrays.asList("tokenize", "ssplit", "pos", "lemma", "ner", "gender", "parse", "coref"));
+    testAnnotatorSequence(Arrays.asList("tokenize", "pos", "lemma", "ner", "gender", "parse", "coref"));
   }
 
   @Test
   public void testDepparsePipeline() {
-    testAnnotatorSequence(Arrays.asList("tokenize", "ssplit", "pos", "depparse"));
+    testAnnotatorSequence(Arrays.asList("tokenize", "pos", "depparse"));
   }
 
   @Test
   public void testQuotePipeline() {
-    testAnnotatorSequence(Arrays.asList("tokenize","ssplit","pos","lemma","ner","depparse","coref","quote"));
+    testAnnotatorSequence(Arrays.asList("tokenize","pos","lemma","ner","depparse","coref","quote"));
   }
 
-   @Test
-   public void testTrueCasePipeline() {
-     testAnnotatorSequence(Arrays.asList("tokenize","ssplit","pos","lemma","truecase"));
+  @Test
+  public void testTrueCasePipeline() {
+    testAnnotatorSequence(Arrays.asList("tokenize","pos","lemma","truecase"));
    }
 
   @Test
   public void testOpenIEPipeline() {
-    testAnnotatorSequence(Arrays.asList("tokenize","ssplit","pos","lemma","depparse","natlog","openie"));
+    testAnnotatorSequence(Arrays.asList("tokenize","pos","lemma","depparse","natlog","openie"));
   }
 
   @Test
