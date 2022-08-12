@@ -356,8 +356,15 @@ public class TokenizerAnnotator implements Annotator  {
    */
   private static void setNewlineStatus(List<CoreLabel> tokensList) {
     // label newlines
+    // TODO: could look to see if the original text was exactly *NL*,
+    // in which case we don't want to do this.  Could even check that
+    // length == 4 as an optimization.  This will involve checking
+    // the sentence splitter to make sure all comparisons to
+    // NEWLINE_TOKEN respect isNewlineAnnotation
+    // What didn't work was checking if length was 1, since that
+    // runs afoul of two character Windows newlines...
     for (CoreLabel token : tokensList) {
-      if (token.word().equals(AbstractTokenizer.NEWLINE_TOKEN) && (token.endPosition() - token.beginPosition() == 1))
+      if (token.word().equals(AbstractTokenizer.NEWLINE_TOKEN))
         token.set(CoreAnnotations.IsNewlineAnnotation.class, true);
       else
         token.set(CoreAnnotations.IsNewlineAnnotation.class, false);
