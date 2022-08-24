@@ -377,6 +377,8 @@ import edu.stanford.nlp.util.logging.Redwood;
        * If an apparent negative number is generated from inside a hyphenated word
        * (e.g., for "11-20", we first tokenize "11" and then appear to have generated "-20"),
        * then tokenize the hyphen separately as a hyphen or dash.
+       * <p>
+       * Note that this method has side effects: it may push back characters.
        */
       private void handleHyphenatedNumber(String in) {
         // Strip dashes from hyphenated words
@@ -573,9 +575,9 @@ SENTEND2 = {SPACE}({SPACE}|[:uppercase:]|{SGML2})
 
 /* Note that JFlex doesn't support {2,} pattern form.  Only {j,k}. */
 DATE = {DIGIT}{1,2}[\-\u2012\/]{DIGIT}{1,2}[\-\u2012\/]{DIGIT}{2,4}|{DIGIT}{4}[\-\u2012\/]{DIGIT}{1,2}[\-\u2012\/]{DIGIT}{1,2}
-/* Note that NUM also includes times like 12:55. One can start with a . or , but not a : */
-NUM = {DIGIT}*([.,\u066B\u066C]{DIGIT}+)+|{DIGIT}+([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)*
-LEADING_NUM = {DIGIT}+([.,\u066B\u066C]{DIGIT}+)+
+/* Note that NUM also includes times like 12:55. One can start with a . or but not a : or , */
+NUM = {DIGIT}*([.\u066B]{DIGIT}+)+|{DIGIT}+([.:,\u00AD\u066B\u066C\u2009\u202F]{DIGIT}+)*
+LEADING_NUM = {DIGIT}+([.:,\u066B\u066C]{DIGIT}+)+
 /* Now don't allow bracketed negative numbers!  They have too many uses (e.g.,
    years or times in parentheses), and having them in tokens messes up treebank parsing.
    NUMBER = [\-+]?{NUM}|\({NUM}\) */
@@ -1002,10 +1004,11 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           if (DEBUG) { logger.info("Used {DATE} to recognize " + origTxt + " as " + txt); }
                           return getNext(txt, origTxt);
                         }
-{NUMBER}        { String txt = yytext();
-                  handleHyphenatedNumber(txt);
-                  if (DEBUG) { logger.info("Used {NUMBER} to recognize " + yytext() + " as " + removeFromNumber(yytext())); }
-                  return getNext(removeFromNumber(yytext()), yytext());
+{NUMBER}        { handleHyphenatedNumber(yytext());
+                  String origTxt = yytext();
+                  String txt = removeFromNumber(origTxt);
+                  if (DEBUG) { logger.info("Used {NUMBER} to recognize " + origTxt + " as " + txt); }
+                  return getNext(txt, origTxt);
                 }
 {SUBSUPNUM}     { String txt = yytext();
                   if (DEBUG) { logger.info("Used {SUBSUPNUM} to recognize " + txt); }
