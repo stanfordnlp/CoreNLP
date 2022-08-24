@@ -584,10 +584,10 @@ LEADING_NUM = {DIGIT}+([.:,\u066B\u066C]{DIGIT}+)+
 NUMBER = [\-\u2212+]?{NUM}
 SUBSUPNUM = [\u207A\u207B\u208A\u208B]?([\u2070\u00B9\u00B2\u00B3\u2074-\u2079]+|[\u2080-\u2089]+)
 /* Constrain fraction to only match likely fractions. Full one allows hyphen, space, or non-breaking space between integer and fraction part, but strictFraction allows only hyphen. */
-FRAC = ({DIGIT}{1,4}[- \u00A0])?{DIGIT}{1,4}(\\?\/|\u2044){DIGIT}{1,4}
-FRAC2 = [\u00BC\u00BD\u00BE\u2153-\u215E]
-/* # is here for historical reasons -- old UK ASCII-equivalent used # for pound mark. Bit ugly now. */
-DOLSIGN = ([A-Z]*\$|#)
+FRAC = ({DIGIT}{1,4}[- \u00A0])?{DIGIT}{1,4}(\\?\/|\u2044){DIGIT}{1,3}(,{DIGIT}{3}|{DIGIT})?
+FRAC2 = [\u00BC\u00BD\u00BE\u2150-\u215E\u2189]
+/* # is here for historical reasons -- old UK ASCII-equivalent used # for pound mark. Bit ugly now. Allow $$$ */
+DOLSIGN = ([A-Z]*\$|#|\$\$\$)
 /* Currency: These are cent, pound, currency, yen; CP1252 euro; ECU and many other currency simples including Euro;
    armenian dram, afghani, bengali rupee, thai bhat; full-wdith dollar, cent pound, yen, won */
 DOLSIGN2 = [\u00A2-\u00A5\u0080\u20A0-\u20BF\u058F\u060B\u09F2\u09F3\u0AF1\u0BF9\u0E3F\u17DB\uFF04\uFFE0\uFFE1\uFFE5\uFFE6]
@@ -607,7 +607,7 @@ LETTER = ([:letter:]|{SPLET}|[\u00AD\u200C\u200D\u2060\u0237-\u024F\u02C2-\u02C5
 WORD = {LETTER}({LETTER}|{DIGIT}|[\p{Mn}\p{Mc}])*([.!?]{LETTER}({LETTER}|{DIGIT}|[\p{Mn}\p{Mc}])*)*
 /* VARIANT THAT CAN'T END IN A NUMBER. Seemed needed for use with trailing number context, though unclear why */
 WORD_LETTER = {LETTER}|{LETTER}({LETTER}|{DIGIT}|[\p{Mn}\p{Mc}])*([.!?]{LETTER}({LETTER}|{DIGIT}|[\p{Mn}\p{Mc}])*)*{LETTER}
-/* THING: The $ was for things like New$;
+/* THING: A $ was here for things like New$ or million$; we could consider re-adding it.
    WAS: only keep hyphens with short one side like co-ed. But (old) treebank just allows hyphenated things as words!
    THING allows d'Avignon or NUMBER before HYPHEN and the same things after it. Only first number can be negative. */
 THING = ([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUMBER})({HYPHEN}([dDoOlL]{APOSETCETERA}[\p{Alpha}\p{Digit}])?([\p{Alpha}\p{Digit}]+|{NUM}))*
