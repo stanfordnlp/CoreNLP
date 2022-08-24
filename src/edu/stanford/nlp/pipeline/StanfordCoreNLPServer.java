@@ -1219,11 +1219,13 @@ public class StanfordCoreNLPServer implements Runnable {
             }
 
             CoreNLPProtos.SemgrexResponse.Builder responseBuilder = CoreNLPProtos.SemgrexResponse.newBuilder();
+            int sentenceIdx = 0;
             for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
               SemanticGraph graph = sentence.get(dependenciesType.annotation());
               CoreNLPProtos.SemgrexResponse.GraphResult.Builder graphResultBuilder = CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder();
-              graphResultBuilder.addResult(ProcessSemgrexRequest.matchSentence(regex, graph));
+              graphResultBuilder.addResult(ProcessSemgrexRequest.matchSentence(regex, graph, 0, sentenceIdx));
               responseBuilder.addResult(graphResultBuilder.build());
+              ++sentenceIdx;
             }
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();

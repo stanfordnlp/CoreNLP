@@ -71268,6 +71268,9 @@ public final class CoreNLPProtos {
    * If you pass in M semgrex expressions and N dependency graphs,
    * this returns MxN nested results.  Each SemgrexResult can match
    * multiple times in one graph
+   * You may want to send multiple semgrexes per query because
+   * translating large numbers of dependency graphs to protobufs
+   * will be expensive, so doing several queries at once will save time
    * </pre>
    *
    * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse}
@@ -72943,6 +72946,50 @@ public final class CoreNLPProtos {
        */
       edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelationOrBuilder getRelnOrBuilder(
           int index);
+
+      /**
+       * <pre>
+       * when processing multiple dependency graphs at once,
+       * which dependency graph this applies to
+       * indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 graphIndex = 4;</code>
+       * @return Whether the graphIndex field is set.
+       */
+      boolean hasGraphIndex();
+      /**
+       * <pre>
+       * when processing multiple dependency graphs at once,
+       * which dependency graph this applies to
+       * indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 graphIndex = 4;</code>
+       * @return The graphIndex.
+       */
+      int getGraphIndex();
+
+      /**
+       * <pre>
+       * index of the semgrex expression this match applies to
+       * indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 semgrexIndex = 5;</code>
+       * @return Whether the semgrexIndex field is set.
+       */
+      boolean hasSemgrexIndex();
+      /**
+       * <pre>
+       * index of the semgrex expression this match applies to
+       * indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 semgrexIndex = 5;</code>
+       * @return The semgrexIndex.
+       */
+      int getSemgrexIndex();
     }
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.Match}
@@ -73013,6 +73060,16 @@ public final class CoreNLPProtos {
                 }
                 reln_.add(
                     input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation.PARSER, extensionRegistry));
+                break;
+              }
+              case 32: {
+                bitField0_ |= 0x00000002;
+                graphIndex_ = input.readInt32();
+                break;
+              }
+              case 40: {
+                bitField0_ |= 0x00000004;
+                semgrexIndex_ = input.readInt32();
                 break;
               }
               default: {
@@ -73153,6 +73210,66 @@ public final class CoreNLPProtos {
         return reln_.get(index);
       }
 
+      public static final int GRAPHINDEX_FIELD_NUMBER = 4;
+      private int graphIndex_;
+      /**
+       * <pre>
+       * when processing multiple dependency graphs at once,
+       * which dependency graph this applies to
+       * indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 graphIndex = 4;</code>
+       * @return Whether the graphIndex field is set.
+       */
+      @java.lang.Override
+      public boolean hasGraphIndex() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <pre>
+       * when processing multiple dependency graphs at once,
+       * which dependency graph this applies to
+       * indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 graphIndex = 4;</code>
+       * @return The graphIndex.
+       */
+      @java.lang.Override
+      public int getGraphIndex() {
+        return graphIndex_;
+      }
+
+      public static final int SEMGREXINDEX_FIELD_NUMBER = 5;
+      private int semgrexIndex_;
+      /**
+       * <pre>
+       * index of the semgrex expression this match applies to
+       * indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 semgrexIndex = 5;</code>
+       * @return Whether the semgrexIndex field is set.
+       */
+      @java.lang.Override
+      public boolean hasSemgrexIndex() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <pre>
+       * index of the semgrex expression this match applies to
+       * indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 semgrexIndex = 5;</code>
+       * @return The semgrexIndex.
+       */
+      @java.lang.Override
+      public int getSemgrexIndex() {
+        return semgrexIndex_;
+      }
+
       private byte memoizedIsInitialized = -1;
       @java.lang.Override
       public final boolean isInitialized() {
@@ -73192,6 +73309,12 @@ public final class CoreNLPProtos {
         for (int i = 0; i < reln_.size(); i++) {
           output.writeMessage(3, reln_.get(i));
         }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          output.writeInt32(4, graphIndex_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          output.writeInt32(5, semgrexIndex_);
+        }
         unknownFields.writeTo(output);
       }
 
@@ -73212,6 +73335,14 @@ public final class CoreNLPProtos {
         for (int i = 0; i < reln_.size(); i++) {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(3, reln_.get(i));
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(4, graphIndex_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(5, semgrexIndex_);
         }
         size += unknownFields.getSerializedSize();
         memoizedSize = size;
@@ -73237,6 +73368,16 @@ public final class CoreNLPProtos {
             .equals(other.getNodeList())) return false;
         if (!getRelnList()
             .equals(other.getRelnList())) return false;
+        if (hasGraphIndex() != other.hasGraphIndex()) return false;
+        if (hasGraphIndex()) {
+          if (getGraphIndex()
+              != other.getGraphIndex()) return false;
+        }
+        if (hasSemgrexIndex() != other.hasSemgrexIndex()) return false;
+        if (hasSemgrexIndex()) {
+          if (getSemgrexIndex()
+              != other.getSemgrexIndex()) return false;
+        }
         if (!unknownFields.equals(other.unknownFields)) return false;
         return true;
       }
@@ -73259,6 +73400,14 @@ public final class CoreNLPProtos {
         if (getRelnCount() > 0) {
           hash = (37 * hash) + RELN_FIELD_NUMBER;
           hash = (53 * hash) + getRelnList().hashCode();
+        }
+        if (hasGraphIndex()) {
+          hash = (37 * hash) + GRAPHINDEX_FIELD_NUMBER;
+          hash = (53 * hash) + getGraphIndex();
+        }
+        if (hasSemgrexIndex()) {
+          hash = (37 * hash) + SEMGREXINDEX_FIELD_NUMBER;
+          hash = (53 * hash) + getSemgrexIndex();
         }
         hash = (29 * hash) + unknownFields.hashCode();
         memoizedHashCode = hash;
@@ -73409,6 +73558,10 @@ public final class CoreNLPProtos {
           } else {
             relnBuilder_.clear();
           }
+          graphIndex_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000008);
+          semgrexIndex_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000010);
           return this;
         }
 
@@ -73458,6 +73611,14 @@ public final class CoreNLPProtos {
             result.reln_ = reln_;
           } else {
             result.reln_ = relnBuilder_.build();
+          }
+          if (((from_bitField0_ & 0x00000008) != 0)) {
+            result.graphIndex_ = graphIndex_;
+            to_bitField0_ |= 0x00000002;
+          }
+          if (((from_bitField0_ & 0x00000010) != 0)) {
+            result.semgrexIndex_ = semgrexIndex_;
+            to_bitField0_ |= 0x00000004;
           }
           result.bitField0_ = to_bitField0_;
           onBuilt();
@@ -73562,6 +73723,12 @@ public final class CoreNLPProtos {
                 relnBuilder_.addAllMessages(other.reln_);
               }
             }
+          }
+          if (other.hasGraphIndex()) {
+            setGraphIndex(other.getGraphIndex());
+          }
+          if (other.hasSemgrexIndex()) {
+            setSemgrexIndex(other.getSemgrexIndex());
           }
           this.mergeUnknownFields(other.unknownFields);
           onChanged();
@@ -74123,6 +74290,128 @@ public final class CoreNLPProtos {
             reln_ = null;
           }
           return relnBuilder_;
+        }
+
+        private int graphIndex_ ;
+        /**
+         * <pre>
+         * when processing multiple dependency graphs at once,
+         * which dependency graph this applies to
+         * indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 graphIndex = 4;</code>
+         * @return Whether the graphIndex field is set.
+         */
+        @java.lang.Override
+        public boolean hasGraphIndex() {
+          return ((bitField0_ & 0x00000008) != 0);
+        }
+        /**
+         * <pre>
+         * when processing multiple dependency graphs at once,
+         * which dependency graph this applies to
+         * indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 graphIndex = 4;</code>
+         * @return The graphIndex.
+         */
+        @java.lang.Override
+        public int getGraphIndex() {
+          return graphIndex_;
+        }
+        /**
+         * <pre>
+         * when processing multiple dependency graphs at once,
+         * which dependency graph this applies to
+         * indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 graphIndex = 4;</code>
+         * @param value The graphIndex to set.
+         * @return This builder for chaining.
+         */
+        public Builder setGraphIndex(int value) {
+          bitField0_ |= 0x00000008;
+          graphIndex_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * when processing multiple dependency graphs at once,
+         * which dependency graph this applies to
+         * indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 graphIndex = 4;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearGraphIndex() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          graphIndex_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private int semgrexIndex_ ;
+        /**
+         * <pre>
+         * index of the semgrex expression this match applies to
+         * indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 semgrexIndex = 5;</code>
+         * @return Whether the semgrexIndex field is set.
+         */
+        @java.lang.Override
+        public boolean hasSemgrexIndex() {
+          return ((bitField0_ & 0x00000010) != 0);
+        }
+        /**
+         * <pre>
+         * index of the semgrex expression this match applies to
+         * indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 semgrexIndex = 5;</code>
+         * @return The semgrexIndex.
+         */
+        @java.lang.Override
+        public int getSemgrexIndex() {
+          return semgrexIndex_;
+        }
+        /**
+         * <pre>
+         * index of the semgrex expression this match applies to
+         * indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 semgrexIndex = 5;</code>
+         * @param value The semgrexIndex to set.
+         * @return This builder for chaining.
+         */
+        public Builder setSemgrexIndex(int value) {
+          bitField0_ |= 0x00000010;
+          semgrexIndex_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * index of the semgrex expression this match applies to
+         * indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 semgrexIndex = 5;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearSemgrexIndex() {
+          bitField0_ = (bitField0_ & ~0x00000010);
+          semgrexIndex_ = 0;
+          onChanged();
+          return this;
         }
         @java.lang.Override
         public final Builder setUnknownFields(
@@ -75994,6 +76283,9 @@ public final class CoreNLPProtos {
      * If you pass in M semgrex expressions and N dependency graphs,
      * this returns MxN nested results.  Each SemgrexResult can match
      * multiple times in one graph
+     * You may want to send multiple semgrexes per query because
+     * translating large numbers of dependency graphs to protobufs
+     * will be expensive, so doing several queries at once will save time
      * </pre>
      *
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse}
@@ -89697,68 +89989,69 @@ public final class CoreNLPProtos {
       "ncies\032z\n\014Dependencies\022/\n\005token\030\001 \003(\0132 .e" +
       "du.stanford.nlp.pipeline.Token\0229\n\005graph\030" +
       "\002 \002(\0132*.edu.stanford.nlp.pipeline.Depend" +
-      "encyGraph\"\212\004\n\017SemgrexResponse\022F\n\006result\030" +
+      "encyGraph\"\264\004\n\017SemgrexResponse\022F\n\006result\030" +
       "\001 \003(\01326.edu.stanford.nlp.pipeline.Semgre" +
       "xResponse.GraphResult\032-\n\tNamedNode\022\014\n\004na" +
       "me\030\001 \002(\t\022\022\n\nmatchIndex\030\002 \002(\005\032+\n\rNamedRel" +
-      "ation\022\014\n\004name\030\001 \002(\t\022\014\n\004reln\030\002 \002(\t\032\247\001\n\005Ma" +
+      "ation\022\014\n\004name\030\001 \002(\t\022\014\n\004reln\030\002 \002(\t\032\321\001\n\005Ma" +
       "tch\022\022\n\nmatchIndex\030\001 \002(\005\022B\n\004node\030\002 \003(\01324." +
       "edu.stanford.nlp.pipeline.SemgrexRespons" +
       "e.NamedNode\022F\n\004reln\030\003 \003(\01328.edu.stanford" +
       ".nlp.pipeline.SemgrexResponse.NamedRelat" +
-      "ion\032P\n\rSemgrexResult\022?\n\005match\030\001 \003(\01320.ed" +
-      "u.stanford.nlp.pipeline.SemgrexResponse." +
-      "Match\032W\n\013GraphResult\022H\n\006result\030\001 \003(\01328.e" +
-      "du.stanford.nlp.pipeline.SemgrexResponse" +
-      ".SemgrexResult\"W\n\022TokensRegexRequest\0220\n\003" +
-      "doc\030\001 \002(\0132#.edu.stanford.nlp.pipeline.Do" +
-      "cument\022\017\n\007pattern\030\002 \003(\t\"\247\003\n\023TokensRegexR" +
-      "esponse\022J\n\005match\030\001 \003(\0132;.edu.stanford.nl" +
-      "p.pipeline.TokensRegexResponse.PatternMa" +
-      "tch\0329\n\rMatchLocation\022\014\n\004text\030\001 \001(\t\022\r\n\005be" +
-      "gin\030\002 \001(\005\022\013\n\003end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010sent" +
-      "ence\030\001 \002(\005\022K\n\005match\030\002 \002(\0132<.edu.stanford" +
-      ".nlp.pipeline.TokensRegexResponse.MatchL" +
-      "ocation\022K\n\005group\030\003 \003(\0132<.edu.stanford.nl" +
-      "p.pipeline.TokensRegexResponse.MatchLoca" +
-      "tion\032S\n\014PatternMatch\022C\n\005match\030\001 \003(\01324.ed" +
-      "u.stanford.nlp.pipeline.TokensRegexRespo" +
-      "nse.Match\"\256\001\n\031DependencyEnhancerRequest\022" +
-      "5\n\010document\030\001 \002(\0132#.edu.stanford.nlp.pip" +
-      "eline.Document\0227\n\010language\030\002 \001(\0162#.edu.s" +
-      "tanford.nlp.pipeline.LanguageH\000\022\032\n\020relat" +
-      "ivePronouns\030\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022Flattened" +
-      "ParseTree\022A\n\005nodes\030\001 \003(\01322.edu.stanford." +
-      "nlp.pipeline.FlattenedParseTree.Node\032[\n\004" +
-      "Node\022\022\n\010openNode\030\001 \001(\010H\000\022\023\n\tcloseNode\030\002 " +
-      "\001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B\n\n" +
-      "\010contents\"\366\001\n\025EvaluateParserRequest\022N\n\010t" +
-      "reebank\030\001 \003(\0132<.edu.stanford.nlp.pipelin" +
-      "e.EvaluateParserRequest.ParseResult\032\214\001\n\013" +
-      "ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stanford" +
-      ".nlp.pipeline.FlattenedParseTree\022@\n\tpred" +
-      "icted\030\002 \003(\0132-.edu.stanford.nlp.pipeline." +
-      "FlattenedParseTree\"5\n\026EvaluateParserResp" +
-      "onse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001\n\017Ts" +
-      "urgeonRequest\022H\n\noperations\030\001 \003(\01324.edu." +
-      "stanford.nlp.pipeline.TsurgeonRequest.Op" +
-      "eration\022<\n\005trees\030\002 \003(\0132-.edu.stanford.nl" +
-      "p.pipeline.FlattenedParseTree\032-\n\tOperati" +
-      "on\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P\n\020" +
-      "TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.edu.st" +
-      "anford.nlp.pipeline.FlattenedParseTree*\243" +
-      "\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Ara" +
-      "bic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006Germa" +
-      "n\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010" +
-      "\022\024\n\020UniversalEnglish\020\t\022\024\n\020UniversalChine" +
-      "se\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021" +
-      "\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_P" +
-      "OSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Natur" +
-      "alLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORW" +
-      "ARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002" +
-      "\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER" +
-      "\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp" +
-      ".pipelineB\rCoreNLPProtos"
+      "ion\022\022\n\ngraphIndex\030\004 \001(\005\022\024\n\014semgrexIndex\030" +
+      "\005 \001(\005\032P\n\rSemgrexResult\022?\n\005match\030\001 \003(\01320." +
+      "edu.stanford.nlp.pipeline.SemgrexRespons" +
+      "e.Match\032W\n\013GraphResult\022H\n\006result\030\001 \003(\01328" +
+      ".edu.stanford.nlp.pipeline.SemgrexRespon" +
+      "se.SemgrexResult\"W\n\022TokensRegexRequest\0220" +
+      "\n\003doc\030\001 \002(\0132#.edu.stanford.nlp.pipeline." +
+      "Document\022\017\n\007pattern\030\002 \003(\t\"\247\003\n\023TokensRege" +
+      "xResponse\022J\n\005match\030\001 \003(\0132;.edu.stanford." +
+      "nlp.pipeline.TokensRegexResponse.Pattern" +
+      "Match\0329\n\rMatchLocation\022\014\n\004text\030\001 \001(\t\022\r\n\005" +
+      "begin\030\002 \001(\005\022\013\n\003end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010se" +
+      "ntence\030\001 \002(\005\022K\n\005match\030\002 \002(\0132<.edu.stanfo" +
+      "rd.nlp.pipeline.TokensRegexResponse.Matc" +
+      "hLocation\022K\n\005group\030\003 \003(\0132<.edu.stanford." +
+      "nlp.pipeline.TokensRegexResponse.MatchLo" +
+      "cation\032S\n\014PatternMatch\022C\n\005match\030\001 \003(\01324." +
+      "edu.stanford.nlp.pipeline.TokensRegexRes" +
+      "ponse.Match\"\256\001\n\031DependencyEnhancerReques" +
+      "t\0225\n\010document\030\001 \002(\0132#.edu.stanford.nlp.p" +
+      "ipeline.Document\0227\n\010language\030\002 \001(\0162#.edu" +
+      ".stanford.nlp.pipeline.LanguageH\000\022\032\n\020rel" +
+      "ativePronouns\030\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022Flatten" +
+      "edParseTree\022A\n\005nodes\030\001 \003(\01322.edu.stanfor" +
+      "d.nlp.pipeline.FlattenedParseTree.Node\032[" +
+      "\n\004Node\022\022\n\010openNode\030\001 \001(\010H\000\022\023\n\tcloseNode\030" +
+      "\002 \001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B" +
+      "\n\n\010contents\"\366\001\n\025EvaluateParserRequest\022N\n" +
+      "\010treebank\030\001 \003(\0132<.edu.stanford.nlp.pipel" +
+      "ine.EvaluateParserRequest.ParseResult\032\214\001" +
+      "\n\013ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stanfo" +
+      "rd.nlp.pipeline.FlattenedParseTree\022@\n\tpr" +
+      "edicted\030\002 \003(\0132-.edu.stanford.nlp.pipelin" +
+      "e.FlattenedParseTree\"5\n\026EvaluateParserRe" +
+      "sponse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001\n\017" +
+      "TsurgeonRequest\022H\n\noperations\030\001 \003(\01324.ed" +
+      "u.stanford.nlp.pipeline.TsurgeonRequest." +
+      "Operation\022<\n\005trees\030\002 \003(\0132-.edu.stanford." +
+      "nlp.pipeline.FlattenedParseTree\032-\n\tOpera" +
+      "tion\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P" +
+      "\n\020TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.edu." +
+      "stanford.nlp.pipeline.FlattenedParseTree" +
+      "*\243\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006A" +
+      "rabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006Ger" +
+      "man\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish" +
+      "\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n\020UniversalChi" +
+      "nese\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000" +
+      "\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK" +
+      "_POSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Nat" +
+      "uralLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FO" +
+      "RWARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT" +
+      "\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COV" +
+      "ER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.n" +
+      "lp.pipelineB\rCoreNLPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -89955,7 +90248,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_descriptor,
-        new java.lang.String[] { "MatchIndex", "Node", "Reln", });
+        new java.lang.String[] { "MatchIndex", "Node", "Reln", "GraphIndex", "SemgrexIndex", });
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_descriptor =
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(3);
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_fieldAccessorTable = new

@@ -12,6 +12,10 @@ public class UnknownVertexException extends IllegalArgumentException {
   }
 
   public String toString() {
-    return super.toString() + ": Operation attempted on unknown vertex " + vertex + " in graph " + graph;
+    if (vertex == null) {
+      return super.toString() + ": Operation attempted on unknown vertex " + vertex + " in graph " + graph;
+    } else {
+      return super.toString() + ": Operation attempted on unknown vertex " + vertex + " (index " + vertex.index() + " sentIndex " + vertex.sentIndex() + ") in graph " + graph;
+    }
   }
 }

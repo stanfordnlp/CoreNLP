@@ -28,9 +28,9 @@ package edu.stanford.nlp.process;
 
 import java.io.Reader;
 import java.text.Normalizer;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -139,11 +139,11 @@ import edu.stanford.nlp.util.logging.Redwood;
         if (options == null) {
           options = "";
         }
-        Properties prop = StringUtils.stringToProperties(options);
-        Set<Map.Entry<Object,Object>> props = prop.entrySet();
-        for (Map.Entry<Object,Object> item : props) {
-          String key = (String) item.getKey();
-          String value = (String) item.getValue();
+        LinkedHashMap<String, String> prop = StringUtils.stringToPropertiesMap(options);
+        Set<Map.Entry<String, String>> props = prop.entrySet();
+        for (Map.Entry<String, String> item : props) {
+          String key = item.getKey();
+          String value = item.getValue();
           boolean val = Boolean.parseBoolean(value);
           if ("".equals(key)) {
             // allow an empty item

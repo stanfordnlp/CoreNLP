@@ -41,6 +41,9 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2022-07-21    4.5.0     Tokenizer and lemmatizer upgrades, along with
+                        a new tsurgeon operation and some bugfixes
+
 2022-01-20    4.4.0     Fix issue with Italian depparse, tsurgeon CLI, 
                         fix security issues, bug fixes 
 

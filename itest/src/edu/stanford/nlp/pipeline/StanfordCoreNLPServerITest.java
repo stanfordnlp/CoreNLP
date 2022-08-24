@@ -143,7 +143,7 @@ public class StanfordCoreNLPServerITest {
 
   @Test
   public void testSemgrexAnnotation() throws IOException {
-    String expected = "result { result { match { matchIndex: 3 node { name: \"verb\" matchIndex: 3 } node { name: \"obj\" matchIndex: 5 } } }}".replaceAll(" ", "");
+    String expected = "result { result { match { matchIndex: 3 node { name: \"verb\" matchIndex: 3 } node { name: \"obj\" matchIndex: 5 } graphIndex:0 semgrexIndex:0 } }}".replaceAll(" ", "");
     String query = "The dog ate a fish";
     byte[] message = query.getBytes("utf-8");
     Properties props = new Properties();

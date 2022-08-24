@@ -37,14 +37,21 @@ public class CleanXmlAnnotatorTest {
   @Before
   public void setUp() throws Exception {
     synchronized(CleanXmlAnnotatorTest.class) {
+      // we create the TokenizerAnnotator without the ssplit so we can
+      // manually control the pieces
+      // another alternative would be to create TokenizerAnnotators
+      // with the CleanXML as part of it
       if (ptbInvertible == null) {
-        ptbInvertible =
-          new TokenizerAnnotator(false, "en", "invertible,ptb3Escaping=true");
+        Properties props = new Properties();
+        props.setProperty("tokenize.language", "en");
+        props.setProperty("tokenize.ssplit", "false");
+        ptbInvertible = new TokenizerAnnotator(false, props, "invertible,ptb3Escaping=true");
       }
       if (ptbNotInvertible == null) {
-        ptbNotInvertible =
-          new TokenizerAnnotator(false, "en",
-                                    "invertible=false,ptb3Escaping=true");
+        Properties props = new Properties();
+        props.setProperty("tokenize.language", "en");
+        props.setProperty("tokenize.ssplit", "false");
+        ptbNotInvertible = new TokenizerAnnotator(false, props, "invertible=false,ptb3Escaping=true");
       }
       if (cleanXmlAllTags == null) {
         cleanXmlAllTags = new CleanXmlAnnotator(".*", "", "", false);

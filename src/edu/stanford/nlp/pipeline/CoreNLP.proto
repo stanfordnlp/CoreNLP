@@ -627,6 +627,10 @@ message SemgrexRequest {
 // If you pass in M semgrex expressions and N dependency graphs,
 // this returns MxN nested results.  Each SemgrexResult can match
 // multiple times in one graph
+//
+// You may want to send multiple semgrexes per query because
+// translating large numbers of dependency graphs to protobufs
+// will be expensive, so doing several queries at once will save time
 message SemgrexResponse {
   message NamedNode {
     required string          name        = 1;
@@ -639,9 +643,16 @@ message SemgrexResponse {
   }
 
   message Match {
-    required int32           matchIndex  = 1;
-    repeated NamedNode       node        = 2;
-    repeated NamedRelation   reln        = 3;
+    required int32           matchIndex   = 1;
+    repeated NamedNode       node         = 2;
+    repeated NamedRelation   reln         = 3;
+    // when processing multiple dependency graphs at once,
+    // which dependency graph this applies to
+    // indexed from 0
+    optional int32           graphIndex   = 4;
+    // index of the semgrex expression this match applies to
+    // indexed from 0
+    optional int32           semgrexIndex = 5;
   }
 
   message SemgrexResult {
