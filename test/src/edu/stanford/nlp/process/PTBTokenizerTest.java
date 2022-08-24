@@ -104,6 +104,7 @@ public class PTBTokenizerTest {
       // the space is because some weirdness happens having an
       // unmatched surrogate at the end of a text
       "half codepoint:" + ((char) 55296) + " ",
+      "There are ,2 days left",
   };
 
   private final String[][] ptbGold = {
@@ -201,6 +202,7 @@ public class PTBTokenizerTest {
       { "What", "do", "you", "suppose", "is", "in", "the", "file", "thicc_antennae", ".", "asdf", "?" },
       { "two", "character", "codepoint", ":", "😸" },
       { "half", "codepoint", ":", },
+      { "There", "are", ",", "2", "days", "left", },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -306,6 +308,7 @@ public class PTBTokenizerTest {
       { "What", "do", "you", "suppose", "is", "in", "the", "file", "thicc_antennae", ".", "asdf", "?" },
       { "two", "character", "codepoint", ":", "😸" },
       { "half", "codepoint", ":", },
+      { "There", "are", ",", "2", "days", "left", },
   };
 
   @Test
