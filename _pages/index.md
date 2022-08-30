@@ -21,7 +21,7 @@ homepage: true
 
 {: .no_toc }
 
-> [**What's new:** The v4.5.1 improves the English tokenizer and lemmatizer.](https://stanfordnlp.github.io/CoreNLP/history.html)
+> [**What's new:** The v4.5.1 fixes a tokenizer regression and some (old) crashing bugs.](https://stanfordnlp.github.io/CoreNLP/history.html)
 
 ## About
 
