@@ -21,7 +21,7 @@ See the [TrueCaseAnnotator](truecase.html) for how to do this.
 An example command for using regular annotators following truecasing
 is:
 ```
-java -Xmx3g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,truecase,pos,lemma,ner,depparse -truecase.overwriteText true -file caseless.txt -outputFormat json
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,truecase,pos,lemma,ner,depparse -truecase.overwriteText true -file caseless.txt -outputFormat json
 ```
 
 The other strategy is to use models more suited to ill-capitalized text.
@@ -60,7 +60,7 @@ Here is an example text:
 With the default English models, no entities (and no proper nouns) are
 found:
 
-    % java edu.stanford.nlp.pipeline.StanfordCoreNLP -file lakers.txt -outputFormat conll -annotators tokenize,ssplit,pos,lemma,ner
+    % java edu.stanford.nlp.pipeline.StanfordCoreNLP -file lakers.txt -outputFormat conll -annotators tokenize,pos,lemma,ner
     % cat lakers.txt.conll 
     1	lonzo	lonzo	NN	O	_	_
     2	ball	ball	NN	O	_	_
@@ -81,7 +81,7 @@ two person names are recognized. However, the team name is still
 missed. Correct named entity recognition is just harder for caseless
 English than for well-edited English!
 
-    % java edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat conll -annotators tokenize,ssplit,pos,lemma,ner -file lakers.txt -pos.model edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger -ner.model edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.conll.4class.caseless.distsim.crf.ser.gz
+    % java edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat conll -annotators tokenize,pos,lemma,ner -file lakers.txt -pos.model edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger -ner.model edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.conll.4class.caseless.distsim.crf.ser.gz
     % cat lakers.txt.conll 
     1	lonzo	lonzo	NNP	PERSON	_	_
     2	ball	ball	NNP	PERSON	_	_

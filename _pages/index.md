@@ -109,7 +109,7 @@ export CLASSPATH=$CLASSPATH:/path/to/stanford-corenlp-4.5.1/*:
 The output will be available in a file called `input.txt.out`.
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -file input.txt
 ```
 ## Programming languages and operating systems
 

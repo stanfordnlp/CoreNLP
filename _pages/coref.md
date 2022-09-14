@@ -42,13 +42,13 @@ The following table gives an overview of the system performances.
 There are example properties files for using the coreference systems in [edu/stanford/nlp/coref/properties](https://github.com/stanfordnlp/CoreNLP/tree/master/src/edu/stanford/nlp/coref/properties). The properties are named `[system]-[language].properties`. For example, to run the deterministic system on Chinese:
 
 ```bash
-java -Xmx5g -cp stanford-corenlp-4.0.0.jar:stanford-chinese-corenlp-models-4.0.0.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -props edu/stanford/nlp/coref/properties/deterministic-chinese.properties -file example_file.txt
+java -cp stanford-corenlp-4.0.0.jar:stanford-chinese-corenlp-models-4.0.0.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -props edu/stanford/nlp/coref/properties/deterministic-chinese.properties -file example_file.txt
 ```
 
 Alternatively, the properties can be set manually. For example, to run the neural system on English:
 
 ```bash
-java -Xmx5g -cp stanford-corenlp-4.0.0.jar:stanford-corenlp-4.0.0-models.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,coref -coref.algorithm neural -file example_file.txt
+java -cp stanford-corenlp-4.0.0.jar:stanford-corenlp-4.0.0-models.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner,parse,coref -coref.algorithm neural -file example_file.txt
 ```
 
 See [below](#more-details) for further options.
@@ -72,7 +72,7 @@ public class CorefExample {
   public static void main(String[] args) throws Exception {
     Annotation document = new Annotation("Barack Obama was born in Hawaii.  He is the president. Obama was elected in 2008.");
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,coref");
+    props.setProperty("annotators", "tokenize,pos,lemma,ner,parse,coref");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(document);
     System.out.println("---");
@@ -126,7 +126,7 @@ If you'd like to benchmark our deterministic system of the CoNLL 2011/2012 share
 To use the English deterministic system, you need to use the `dcoref` annotator.
 
 ```
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file example.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner,parse,dcoref -file example.txt
 ```
 
 ### Statistical and Neural Systems
@@ -138,7 +138,7 @@ If you would like to run our statistical or neural systems on the CoNLL 2012 eva
 3. Run the CorefSystem main method. For example, for the English neural system:
 
 ```bash
-java -Xmx6g -cp stanford-corenlp-4.0.0.jar:stanford-corenlp-4.0.0-models.jar:* edu.stanford.nlp.coref.CorefSystem -props edu/stanford/nlp/coref/properties/neural-english-conll.properties -coref.data <path-to-conll-data> -coref.conllOutputPath <where-to-save-system-output> -coref.scorer <path-to-scoring-script>
+java -cp stanford-corenlp-4.0.0.jar:stanford-corenlp-4.0.0-models.jar:* edu.stanford.nlp.coref.CorefSystem -props edu/stanford/nlp/coref/properties/neural-english-conll.properties -coref.data <path-to-conll-data> -coref.conllOutputPath <where-to-save-system-output> -coref.scorer <path-to-scoring-script>
 ```
 
 The CoNLL 2012 coreference data differs from the normal coreference use case in a few ways:
@@ -162,7 +162,7 @@ As a rule-based system, there is nothing to train, but there are various data fi
 Training a statistical model on the CoNLL data can be done with the following command:
 
 ```bash
-java -Xmx60g -cp stanford-corenlp-4.0.0.jar:stanford-corenlp-4.0.0-models.jar:* edu.stanford.nlp.coref.statistical.StatisticalCorefTrainer -props <properties-file>
+java -cp stanford-corenlp-4.0.0.jar:stanford-corenlp-4.0.0-models.jar:* edu.stanford.nlp.coref.statistical.StatisticalCorefTrainer -props <properties-file>
 ```
 
 See [here](https://github.com/stanfordnlp/CoreNLP/blob/master/src/edu/stanford/nlp/coref/statistical/properties/english-conll-training.properties) for an example properties file. Training over the full CoNLL 2012 training set requires a large amount of memory. To reduce the memory footprint and runtime of training, the following options can be added to the properties file:

@@ -45,7 +45,7 @@ The "*" (which must be enclosed in quotes) says to add all JAR files in the give
 You can also individually specify the needed jar files. Use the following sort of command line, adjusting the JAR file date extensions `VV` to your downloaded release.
 
 ```sh
-java -cp stanford-corenlp-VV.jar:stanford-corenlp-VV-models.jar:xom.jar:joda-time.jar:jollyday.jar:ejml-VV.jar -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -file inputFile
+java -cp stanford-corenlp-VV.jar:stanford-corenlp-VV-models.jar:xom.jar:joda-time.jar:jollyday.jar:ejml-VV.jar edu.stanford.nlp.pipeline.StanfordCoreNLP -file inputFile
 ```
 
 The command above works for Mac OS X or Linux. For Windows, the colons (:) separating the jar files need to be semi-colons (;). If you are not sitting in the distribution directory, you'll also need to include a path to the files before each.
@@ -59,7 +59,7 @@ Before using Stanford CoreNLP, it is usual to create a configuration file (a Jav
 To use the properties in the properties file [sampleProps.properties](files/sampleProps.properties), you give a command as follows:
 
 ```sh
-java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -props sampleProps.properties
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props sampleProps.properties
 ```
 
 This results in the output file [input.txt.output](files/input.txt.output) given the same input file `input.txt`.
@@ -67,7 +67,7 @@ This results in the output file [input.txt.output](files/input.txt.output) given
 However, if you just want to specify a few properties, you can instead place them on the command line. For example, we can specify annotators and the output format with:
 
 ```sh
-java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -file input.txt -outputFormat conll -output.columns word
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize -file input.txt -outputFormat conll -output.columns word
 ```
 
 The `-props` parameter is optional. By default, Stanford CoreNLP will search for StanfordCoreNLP.properties in your classpath and use the defaults included in the distribution.
@@ -77,13 +77,13 @@ The `-annotators` argument is also optional. If you leave it out, the code uses 
 If you have a lot of text but all you want to do is to, say, get part-of-speech (POS) tags, then you should **definitely** specify an annotators list, as above, since you can then omit later annotators which invoke much more expensive processing that you don't need. For example, you might give the command:
 
 ```sh
-java -cp "*" -Xmx500m edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos -file wikipedia.txt -outputFormat conll
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos -file wikipedia.txt -outputFormat conll
 ```
 
 We provide a small shell script `corenlp.sh`. On Linux or OS X, this may be useful in allowing you to type shorter command lines to invoke CoreNLP. For example, you can instead say:
 
 ```sh
-./corenlp.sh -annotators tokenize,ssplit,pos -file wikipedia.txt -outputFormat conll
+./corenlp.sh -annotators tokenize,pos -file wikipedia.txt -outputFormat conll
 ```
 
 
@@ -104,13 +104,13 @@ the models file on [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%
 Our examples assume that you are in the root directory of CoreNLP and that these extra jar files are also available there. Each language jar contains a default properties file for the appropriate language. Working with text in another language is then as easy as specifying this properties file. For example, for Chinese:
 
 ```sh
-java -mx3g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-chinese.properties -file chinese.txt -outputFormat text
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-chinese.properties -file chinese.txt -outputFormat text
 ```
 
 You can as usual specify details on the annotators and properties:
 
 ```sh
-java -mx1g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-french.properties -annotators tokenize,ssplit,pos,depparse -file french.txt -outputFormat conllu
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-french.properties -annotators tokenize,pos,depparse -file french.txt -outputFormat conllu
 ```
 
 ## Input
@@ -118,7 +118,7 @@ java -mx1g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCore
 To process one file, use the `-file` option followed by a filename.  To process a list of files, use the `-fileList` parameter:
 
 ```sh
-java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP [ -props myprops.props ] -fileList filelist.txt
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP [ -props myprops.props ] -fileList filelist.txt
 ```
 
 where the `-fileList` parameter points to a file which lists all files to be processed (one per line).

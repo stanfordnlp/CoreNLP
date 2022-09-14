@@ -48,7 +48,7 @@ There are sets of default properties that can be used to run pipelines for every
 For instance, to run a Spanish pipeline, one could execute this command from the command line:
 
 ```sh
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -props spanish -file example.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -props spanish -file example.txt
 ```
 
 Or build and run a pipeline in Java in this manner:
@@ -111,7 +111,7 @@ The pattern is the same for the other supported languages.
 
 #### UD supported languages
 
-Currently French (UD 2.2), German (UD 2.2), and Spanish (AnCora UD 2.0) work off of the UD 2.0 tokenization standard. This means among other things that words are split into multiword tokens. For instance the French word `"des"` will be tokenized in some circumstances as `"de" "les"`. All tagging, parsing, and named entity recognition models rely on that tokenization standard, so it is necessary to use the `mwt` annotator which performs the multiword tokenization. For instance, in Spanish, the annotators required to run dependency parsing would be `tokenize,ssplit,mwt,pos,lemma,depparse`. The part of speech tags and dependency labels are from the UD 2.0 sets for each language.
+Currently French (UD 2.2), German (UD 2.2), and Spanish (AnCora UD 2.0) work off of the UD 2.0 tokenization standard. This means among other things that words are split into multiword tokens. For instance the French word `"des"` will be tokenized in some circumstances as `"de" "les"`. All tagging, parsing, and named entity recognition models rely on that tokenization standard, so it is necessary to use the `mwt` annotator which performs the multiword tokenization. For instance, in Spanish, the annotators required to run dependency parsing would be `tokenize,mwt,pos,lemma,depparse`. The part of speech tags and dependency labels are from the UD 2.0 sets for each language.
 
 #### Models for other languages
 

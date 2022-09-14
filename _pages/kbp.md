@@ -32,7 +32,7 @@ The annotator will find the following `("subject", "relation", "object")` triple
 ### Command Line
 
 ```
-java -Xmx16g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,coref,kbp -coref.md.type RULE -file example.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner,parse,coref,kbp -coref.md.type RULE -file example.txt
 ```
 
 ## List Of Relations

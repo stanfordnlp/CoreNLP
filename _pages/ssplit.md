@@ -12,6 +12,11 @@ parent: Pipeline
 Sentence splitting is the process of dividing text into sentences. For instance the document `Hello world. Hello world again.` would be split into the sentences
 `Hello world.` and `Hello world again.` CoreNLP splits documents into sentences via a set of rules.
 
+As of 4.5.0, the `ssplit` annotator is automatically included as part
+of the `tokenize` annotator.  It is no longer necessary to specify
+`ssplit` as part of the annotators list.  If using an older version,
+it would still be necessary to incude `ssplit` in the annotators list.
+
 | Name | Annotator class name | Requirement | Generated Annotation | Description |
 | --- | --- | --- | --- | --- |
 | ssplit | WordToSentencesAnnotator | TokensAnnotation | SentencesAnnotation | Splits text into sentences. |
@@ -35,7 +40,7 @@ Sentence splitting is the process of dividing text into sentences. For instance 
 This command will take in the text of the file `input.txt` and produce a human readable output of the sentences:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize -file input.txt
 ```
 
 Other output formats include `conllu`, `conll`, `json`, and `serialized`.
@@ -44,7 +49,7 @@ The following command shows an example of customizing sentence splitting. Here w
 is one sentence per line:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -ssplit.eolonly -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize -ssplit.eolonly -file input.txt
 ```
 
 ## Sentence Splitting From Java
@@ -64,7 +69,7 @@ public class SentenceSplittingExample {
     // set up pipeline properties
     Properties props = new Properties();
     // set the list of annotators to run
-    props.setProperty("annotators", "tokenize,ssplit");
+    props.setProperty("annotators", "tokenize");
     // build pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     // create a document object

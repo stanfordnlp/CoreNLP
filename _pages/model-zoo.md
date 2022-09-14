@@ -24,7 +24,7 @@ cd /path/to/model_zoo
 # download file
 wget https://nlp.stanford.edu/software/model_zoo/corenlp-swedish-1.0.0.jar
 # run swedish pos tagger
-java -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos -pos.model edu/stanford/nlp/models/zoo/corenlp-swedish/swedish.tagger -file example-swedish-sentence.txt -outputFormat text
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos -pos.model edu/stanford/nlp/models/zoo/corenlp-swedish/swedish.tagger -file example-swedish-sentence.txt -outputFormat text
 ```
 
 If you would like to contribute to the Model Zoo,

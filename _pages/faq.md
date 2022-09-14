@@ -114,8 +114,10 @@ entire document.  Unless things are size-limited, as either sentence
 length or document size increases, processing time
 and space increase without bound.  
 
-Running from the command line, you need to supply a flag like
-`-Xmx2g`.  
+On recent versions of Java, it should not be necessary to specify a
+memory flag.  On older versions, when Java running from the command
+line, you need to supply a flag like `-Xmx2g`.
+
 If running CoreNLP from within Eclipse, follow 
 [these instructions](http://stackoverflow.com/questions/4175188/setting-memory-of-java-programs-that-runs-from-eclipse)
 to increase the memory given to a program being run from inside
@@ -133,7 +135,7 @@ such an event, but it matches the
 
 Other than English, we currently provide trained CoreNLP models for Chinese. To run CoreNLP on Chinese text, you first have to download the models, which can be found in our [release history](doc_history.html).
 Include this .jar in your classpath, and use the StanfordCoreNLP-chinese.properties file it contains to process Chinese. For example, if you put the .jar in your distribution directory, you could run (adjusting the .jar version file extensions to your current release):
-`java -cp stanford-corenlp-VV.jar:stanford-chinese-corenlp-VV-models.jar -Xmx3g edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-chinese.properties -file your-chinese-file.txt`
+`java -cp stanford-corenlp-VV.jar:stanford-chinese-corenlp-VV-models.jar edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-chinese.properties -file your-chinese-file.txt`
 
 ## How do I fix CoreNLP giving a NoSuchMethodError or NoSuchFieldError?
 

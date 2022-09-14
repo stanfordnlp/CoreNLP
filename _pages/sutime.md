@@ -78,7 +78,7 @@ public class SUTimeBasicExample {
         // set up pipeline properties
         Properties props = new Properties();
         // general properties
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+        props.setProperty("annotators", "tokenize,pos,lemma,ner");
         props.setProperty("ner.docdate.usePresent", "true");
         props.setProperty("sutime.includeRange", "true");
         props.setProperty("sutime.markTimeRanges", "true");

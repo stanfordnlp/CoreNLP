@@ -68,7 +68,7 @@ your custom annotator:
 ```bash
 customAnnotatorClass.custom.lemma = edu.stanford.nlp.examples.CustomLemmaAnnotator
 
-annotators = tokenize,ssplit,pos,custom.lemma
+annotators = tokenize,pos,custom.lemma
 
 custom.lemma.lemmaFile = custom-lemmas.txt
 ```
@@ -76,5 +76,5 @@ custom.lemma.lemmaFile = custom-lemmas.txt
 Finally you can run this example with this command:
 
 ```bash
-java -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -props custom-lemmas-example.properties -file example.txt -outputFormat text
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -props custom-lemmas-example.properties -file example.txt -outputFormat text
 ```

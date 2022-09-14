@@ -14,7 +14,7 @@ parent: Pipeline
 | [tokenize](tokenize.html) | TokenizerAnnotator | TokensAnnotation (list of tokens); CharacterOffsetBeginAnnotation, CharacterOffsetEndAnnotation, TextAnnotation (for each token) | Tokenizes the text. This splits the text into roughly "words", using rules or methods suitable for the language being processed. Sometimes the tokens split up surface words in ways suitable for further NLP-processing, for example "isn't" becomes "is" and "n't". The tokenizer saves the beginning and end character offsets of each token in the input text. |
 | [cleanxml](cleanxml.html) | CleanXmlAnnotator | XmlContextAnnotation | Remove xml tokens from the document. May use them to mark sentence ends or to extract metadata. |
 | [docdate](docdate.html) | DocDateAnnotator | DocDateAnnotation | Allows user to specify dates for documents. |
-| [ssplit](ssplit.html) | WordsToSentencesAnnotator | SentencesAnnotation | Splits a sequence of tokens into sentences. |
+| [ssplit](ssplit.html) | WordsToSentencesAnnotator | SentencesAnnotation | Splits a sequence of tokens into sentences. Part of tokenize by default. |
 | [pos](pos.html) | POSTaggerAnnotator | PartOfSpeechAnnotation | Labels tokens with their POS tag. For more details see [this page](http://nlp.stanford.edu/software/tagger.html). |
 | [lemma](lemma.html) | MorphaAnnotator | LemmaAnnotation | Generates the word lemmas for all tokens in the corpus. |
 | [ner](ner.html) | NERCombinerAnnotator | NamedEntityTagAnnotation and NormalizedNamedEntityTagAnnotation | Recognizes named (PERSON, LOCATION, ORGANIZATION, MISC), numerical (MONEY, NUMBER, ORDINAL, PERCENT), and temporal (DATE, TIME, DURATION, SET) entities. Named entities are recognized using a combination of three CRF sequence taggers trained on various corpora, such as ACE and MUC. Numerical entities are recognized using a rule-based system. Numerical entities that require normalization, e.g., dates, are normalized to NormalizedNamedEntityTagAnnotation. For more details on the CRF tagger see [this page](http://nlp.stanford.edu/software/CRF-NER.html).  **Sub-annotators:** `docdate`, `regexner`, `tokensregex`, `entitymentions`, and `sutime` |
@@ -44,25 +44,25 @@ parent: Pipeline
 | [cleanxml](cleanxml.html) | CleanXmlAnnotator | `tokenize` |
 | [ssplit](ssplit.html) | WordsToSentenceAnnotator | `tokenize` |
 | [docdate](docdate.html) | DocDateAnnotator | None |
-| [pos](pos.html) | POSTaggerAnnotator | `tokenize, ssplit` |
-| [lemma](lemma.html) | MorphaAnnotator | `tokenize, ssplit, pos` |
-| [ner](ner.html) | NERClassifierCombiner | `tokenize, ssplit, pos, lemma`  |
-| [regexner](regexner.html) | RegexNERAnnotator | `tokenize, ssplit, pos` |
-| [sentiment](sentiment.html) | SentimentAnnotator | `tokenize, ssplit, pos, parse` |
-| [parse](parse.html) | ParserAnnotator | `tokenize, ssplit, parse` |
-| [depparse](depparse.html) | DependencyParseAnnotator | `tokenize, ssplit, pos` |
-| [dcoref](coref.html) | DeterministicCorefAnnotator | `tokenize, ssplit, pos, lemma, ner, parse` |
-| [coref](coref.html) | CorefAnnotator | `tokenize, ssplit, pos, lemma, ner, parse` (Can also use `depparse`) |
-| [relation](relation.html) | RelationExtractorAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse` |
-| [natlog](natlog.html) | NaturalLogicAnnotator | `tokenize, ssplit, pos, lemma, depparse` (Can also use `parse`) |
-| [entitylink](entitylink.html) | WikiDictAnnotator | `tokenize, ssplit, ner` |
-| [kbp](kbp.html) | KBPAnnotator | `tokenize, ssplit, pos, lemma, parse, ner, coref` (Can also use `depparse` ; `coref` optional) |
-| [quote](quote.html) | QuoteAnnotator | `tokenize, ssplit, pos, lemma, ner, depparse, coref` |
+| [pos](pos.html) | POSTaggerAnnotator | `tokenize` |
+| [lemma](lemma.html) | MorphaAnnotator | `tokenize, pos` |
+| [ner](ner.html) | NERClassifierCombiner | `tokenize, pos, lemma`  |
+| [regexner](regexner.html) | RegexNERAnnotator | `tokenize, pos` |
+| [sentiment](sentiment.html) | SentimentAnnotator | `tokenize, pos, parse` |
+| [parse](parse.html) | ParserAnnotator | `tokenize, parse` |
+| [depparse](depparse.html) | DependencyParseAnnotator | `tokenize, pos` |
+| [dcoref](coref.html) | DeterministicCorefAnnotator | `tokenize, pos, lemma, ner, parse` |
+| [coref](coref.html) | CorefAnnotator | `tokenize, pos, lemma, ner, parse` (Can also use `depparse`) |
+| [relation](relation.html) | RelationExtractorAnnotator | `tokenize, pos, lemma, ner, depparse` |
+| [natlog](natlog.html) | NaturalLogicAnnotator | `tokenize, pos, lemma, depparse` (Can also use `parse`) |
+| [entitylink](entitylink.html) | WikiDictAnnotator | `tokenize, ner` |
+| [kbp](kbp.html) | KBPAnnotator | `tokenize, pos, lemma, parse, ner, coref` (Can also use `depparse` ; `coref` optional) |
+| [quote](quote.html) | QuoteAnnotator | `tokenize, pos, lemma, ner, depparse, coref` |
 
 ## Sub-Annotators
 
 While every annotator can technically be run as a top-level component, in some cases it makes sense for one annotator to run
-another as a sub-annotator.  For instance the `coref` annotator runs the `coref.mention` annotator (which identifies coref mentions) as a sub-annotator by default.  So instead of supplying an annotator list of `tokenize,ssplit,parse,coref.mention,coref` the list can just be `tokenize,ssplit,parse,coref`. Another example is the `ner` annotator running the `entitymentions` annotator to detect full entities.  Below is a table summarizing the annotator/sub-annotator relationships that currently exist in the pipeline.  By default annotators will generally run their sub-annotators.
+another as a sub-annotator.  For instance the `coref` annotator runs the `coref.mention` annotator (which identifies coref mentions) as a sub-annotator by default.  So instead of supplying an annotator list of `tokenize,parse,coref.mention,coref` the list can just be `tokenize,parse,coref`. Another example is the `ner` annotator running the `entitymentions` annotator to detect full entities.  Below is a table summarizing the annotator/sub-annotator relationships that currently exist in the pipeline.  By default annotators will generally run their sub-annotators.
 
 | Annotator | Sub-Annotators |
 | --- | --- |
