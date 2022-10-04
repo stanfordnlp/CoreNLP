@@ -587,7 +587,7 @@ SUBSUPNUM = [\u207A\u207B\u208A\u208B]?([\u2070\u00B9\u00B2\u00B3\u2074-\u2079]+
 FRAC = ({DIGIT}{1,4}[- \u00A0])?{DIGIT}{1,4}(\\?\/|\u2044){DIGIT}{1,3}(,{DIGIT}{3}|{DIGIT})?
 FRAC2 = [\u00BC\u00BD\u00BE\u2150-\u215E\u2189]
 /* # is here for historical reasons -- old UK ASCII-equivalent used # for pound mark. Bit ugly now. Allow $$$ */
-DOLSIGN = ([A-Z]*\$|#|\$\$\$)
+DOLSIGN = ([A-Z]*\$|#|\$\$+)
 /* Currency: These are cent, pound, currency, yen; CP1252 euro; ECU and many other currency simples including Euro;
    armenian dram, afghani, bengali rupee, thai bhat; full-wdith dollar, cent pound, yen, won */
 DOLSIGN2 = [\u00A2-\u00A5\u0080\u20A0-\u20BF\u058F\u060B\u09F2\u09F3\u0AF1\u0BF9\u0E3F\u17DB\uFF04\uFFE0\uFFE1\uFFE5\uFFE6]
@@ -804,7 +804,7 @@ ASSIMILATIONS3 = cannot|'twas|dunno|['’]d['’]ve
 /* Assimilations2 leave 2 chars behind after division */
 /* "nno" is a remnant after pushing back from dunno in ASSIMILATIONS3 */
 /* Include splitting some apostrophe-less negations, but not ones like "wont" that are also words. */
-ASSIMILATIONS2 = {APOS}tis|gonna|gotta|lemme|gimme|wanna|nno|aint|dont|doesnt|didnt|theyre
+ASSIMILATIONS2 = {APOS}tis|gonna|gotta|lemme|gimme|wanna|nno|aint|dont|doesnt|didnt|theyre|c{APOS}mon
 
 /* CP1252: dagger, double dagger, per mille, bullet, small tilde, trademark */
 CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
