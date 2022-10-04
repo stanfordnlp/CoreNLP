@@ -888,7 +888,7 @@ public class PTBTokenizerTest {
           { "for", "min.", "14", "days" },
           { "stems", "reach", "a", "min.", "of", "3.5", "m" },
           { "Apple", "released", "the", "iPhone", "11", "Pro", "Max", ".", "The", "iPhone", "family", "expanded", "." },
-          { "C'mon", ",", "c’mon", "." },
+          { "C'm", "on", ",", "c’m", "on", "." },
           { "phone", ":", "47-42-17-11", ";", "fax", ",", "47-42-80-44", "or", "47-42-18-81", ";" },
           { "I", "installed", "SPSS", "28.0", "." },
   };
@@ -974,6 +974,7 @@ public class PTBTokenizerTest {
           "I use SPSS28.0 to measure Lee’s指数 as 其IC50约为4.814μmol / L",
           "Some people write BA2.12.1. Tests were DM899.00.",
           "@Insanomania They do... Their mentality doesn't :(\n",
+          "Hey, c'mon, I need some $$$$.",
 
   };
 
@@ -1002,6 +1003,7 @@ public class PTBTokenizerTest {
           { "I", "use", "SPSS", "28.0", "to", "measure", "Lee's指数", "as", "其IC50约为", "4.814", "μmol", "/", "L" }, // could use \p{Latin} more in patterns?
           { "Some", "people", "write", "BA", "2.12.1", ".","Tests", "were", "DM", "899.00", "." },
           { "@Insanomania", "They", "do", "...", "Their", "mentality", "does", "n't", ":(" },
+          { "Hey", ",", "c'm", "on", ",", "I", "need", "some", "$$$$", "." },
 
   };
 
