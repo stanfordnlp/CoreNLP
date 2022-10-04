@@ -1,5 +1,6 @@
 package edu.stanford.nlp.semgraph.semgrex; 
 
+import edu.stanford.nlp.graph.CyclicGraphException;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -117,67 +118,36 @@ public abstract class SemgrexMatcher  {
 
 
   /**
-   * Topological sorting actually takes a rather large amount of time, if you call multiple
-   * patterns on the same tree.
-   * This is a weak cache that stores all the trees sorted since the garbage collector last kicked in.
-   * The key on this map is the identity hash code (i.e., memory address) of the semantic graph; the
-   * value is the sorted list of vertices.
-   * <p>
-   * Note that this optimization will cause strange things to happen if you mutate a semantic graph between
-   * calls to Semgrex.
-   */
-  private static final WeakHashMap<Integer, List<IndexedWord>> topologicalSortCache = new WeakHashMap<>();
-
-  private void setupFindIterator() {
-    try {
-      if (hyp) {
-        synchronized (topologicalSortCache) {
-          List<IndexedWord> topoSort = topologicalSortCache.get(System.identityHashCode(sg));
-          if (topoSort == null || topoSort.size() != sg.size()) {  // size check to mitigate a stale cache
-            topoSort = sg.topologicalSort();
-            topologicalSortCache.put(System.identityHashCode(sg), topoSort);
-          }
-          findIterator = topoSort.iterator();
-        }
-      } else if (sg_aligned == null) {
-        return;
-      } else {
-        synchronized (topologicalSortCache) {
-          List<IndexedWord> topoSort = topologicalSortCache.get(System.identityHashCode(sg_aligned));
-          if (topoSort == null || topoSort.size() != sg_aligned.size()) {  // size check to mitigate a stale cache
-            topoSort = sg_aligned.topologicalSort();
-            topologicalSortCache.put(System.identityHashCode(sg_aligned), topoSort);
-          }
-          findIterator = topoSort.iterator();
-        }
-      }
-    } catch (Exception ex) {
-      if (hyp) {
-        findIterator = sg.vertexSet().iterator();
-      } else if (sg_aligned == null) {
-        return;
-      } else {
-        findIterator = sg_aligned.vertexSet().iterator();
-      }
-    }
-  }
-
-  /**
    * Find the next match of the pattern in the graph.
    *
    * @return whether there is a match somewhere in the graph
    */
   public boolean find() {
     // log.info("hyp: " + hyp);
+    // there was a cache of the topological sorts to reuse across
+    // SemgrexPatterns which used IdentityHashMap to remember
+    // SemanticGraphs, but it was apparently the cause of various
+    // thread safety bugs when the results were used for an old
+    // SemanticGraph
     if (findIterator == null) {
-      setupFindIterator();
+      if (hyp) {
+        try {
+          findIterator = sg.topologicalSort().iterator();
+        } catch (CyclicGraphException e) {
+          findIterator = sg.vertexSet().iterator();
+        }
+      } else if (sg_aligned == null) {
+        return false;
+      } else {
+        try {
+          findIterator = sg_aligned.topologicalSort().iterator();
+        } catch (CyclicGraphException e) {
+          findIterator = sg_aligned.vertexSet().iterator();
+        }
+      }
     }
-    if (findIterator == null) {
-      return false;
-    }
-    //  System.out.println("first");
+
     if (findCurrent != null && matches()) {
-    //		log.info("find first: " + findCurrent.word());
       return true;
     }
     //log.info("here");

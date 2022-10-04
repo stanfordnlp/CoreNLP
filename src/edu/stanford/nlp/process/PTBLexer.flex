@@ -1583,7 +1583,8 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                     prevWordAfter.append(yytext());
                   }
                 }
-.       { String str = yytext();
+. | [^] { String str = yytext();
+          if (DEBUG) { logger.info("Fallthrough character rule: |" + str + "|"); }
           int first = str.codePointAt(0);
           String msg = String.format("Untokenizable: %s (U+%s, decimal: %s)",
                           yytext(), Integer.toHexString(first).toUpperCase(), Integer.toString(first));

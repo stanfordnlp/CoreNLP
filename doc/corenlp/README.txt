@@ -41,6 +41,8 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2022-08-29    4.5.1     Bugfixes to tokenizer and semgrex 
+
 2022-07-21    4.5.0     Tokenizer and lemmatizer upgrades, along with
                         a new tsurgeon operation and some bugfixes
 

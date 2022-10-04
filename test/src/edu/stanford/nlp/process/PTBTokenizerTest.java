@@ -98,6 +98,13 @@ public class PTBTokenizerTest {
       "The jerk who banned mox opal has social security number 555-55-5555.",
       "What do you suppose is in the file thicc_antennae.jpg?",
       "What do you suppose is in the file thicc_antennae.asdf?",
+      // the second half of this is half of a two character codepoint
+      // it used to crash the tokenizer for being unhandled text
+      "two character codepoint: 😸" + ((char) 55296) + " ",
+      // the space is because some weirdness happens having an
+      // unmatched surrogate at the end of a text
+      "half codepoint:" + ((char) 55296) + " ",
+      "There are ,2 days left",
   };
 
   private final String[][] ptbGold = {
@@ -193,6 +200,9 @@ public class PTBTokenizerTest {
       // test that filename extensions trigger something being a single word
       { "What", "do", "you", "suppose", "is", "in", "the", "file", "thicc_antennae.jpg", "?" },
       { "What", "do", "you", "suppose", "is", "in", "the", "file", "thicc_antennae", ".", "asdf", "?" },
+      { "two", "character", "codepoint", ":", "😸" },
+      { "half", "codepoint", ":", },
+      { "There", "are", ",", "2", "days", "left", },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -296,6 +306,9 @@ public class PTBTokenizerTest {
       { "The", "jerk", "who", "banned", "mox", "opal", "has", "social", "security", "number", "555-55-5555", "." },
       { "What", "do", "you", "suppose", "is", "in", "the", "file", "thicc_antennae.jpg", "?" },
       { "What", "do", "you", "suppose", "is", "in", "the", "file", "thicc_antennae", ".", "asdf", "?" },
+      { "two", "character", "codepoint", ":", "😸" },
+      { "half", "codepoint", ":", },
+      { "There", "are", ",", "2", "days", "left", },
   };
 
   @Test
@@ -547,7 +560,6 @@ public class PTBTokenizerTest {
     runOnTwoArrays(tokFactory, sgmlInputs, sgmlGold);
     runAgainstOrig(tokFactory, sgmlInputs);
   }
-
 
   private final String[][] sgmlPerLineGold = {
     { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium", "/", "olodaterol",

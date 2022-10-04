@@ -899,7 +899,7 @@ public class SemanticGraph implements Serializable  {
   /**
    *
    * @return A sorted list of the vertices
-   * @throws IllegalStateException if this graph is not a DAG
+   * @throws CyclicGraphException (a subtype of IllegalStateException) if this graph is not a DAG
    */
   public List<IndexedWord> topologicalSort() {
     return graph.topologicalSort();
