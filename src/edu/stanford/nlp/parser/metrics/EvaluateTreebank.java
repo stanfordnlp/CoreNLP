@@ -681,8 +681,10 @@ public class EvaluateTreebank  {
   }
 
   public double testOnTreebank(EvaluationDataset testTreebank) {
-    log.info("Testing on treebank");
-    Timing treebankTotalTimer = new Timing();
+    if (summary || !op.testOptions.quietEvaluation) {
+      log.info("Testing on treebank");
+    }
+    Timing treebankTotalTimer = (summary || !op.testOptions.quietEvaluation) ? new Timing() : null;
     TreePrint treePrint = op.testOptions.treePrint(op.tlpParams);
     TreebankLangParserParams tlpParams = op.tlpParams;
     TreebankLanguagePack tlp = op.langpack();
@@ -729,7 +731,9 @@ public class EvaluateTreebank  {
     }
 
     //Done parsing...print the results of the evaluations
-    treebankTotalTimer.done("Testing on treebank");
+    if (treebankTotalTimer != null) {
+      treebankTotalTimer.done("Testing on treebank");
+    }
     if (op.testOptions.quietEvaluation) {
       pwErr = tlpParams.pw(System.err);
     }
