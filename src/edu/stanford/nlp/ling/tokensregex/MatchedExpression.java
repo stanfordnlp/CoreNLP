@@ -56,7 +56,7 @@ public class MatchedExpression {
     public String name;
     public double priority;      // Priority/Order in which this rule should be applied with respect to others
     public double weight;        // Weight given to the rule (how likely is this rule to fire)
-//    public Class annotationField;  // Annotation field to apply rule over: text or tokens or numerizedtokens
+    //    public Class annotationField;  // Annotation field to apply rule over: text or tokens or numerizedtokens
     public Class tokensAnnotationField = CoreAnnotations.TokensAnnotation.class;  // Tokens or numerizedtokens
     public List<Class> tokensResultAnnotationField;
     public List<Class> resultAnnotationField;  // Annotation field to put new annotation
@@ -231,7 +231,7 @@ public class MatchedExpression {
     charOffsets = Interval.toInterval(annotation.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
             annotation.get(CoreAnnotations.CharacterOffsetEndAnnotation.class), Interval.INTERVAL_OPEN_END);
     tokenOffsets = Interval.toInterval(annotation.get(CoreAnnotations.TokenBeginAnnotation.class),
-              annotation.get(CoreAnnotations.TokenEndAnnotation.class), Interval.INTERVAL_OPEN_END);
+            annotation.get(CoreAnnotations.TokenEndAnnotation.class), Interval.INTERVAL_OPEN_END);
     text = annotation.get(CoreAnnotations.TextAnnotation.class);
     extractFunc.annotate(this, source.subList(chunkOffsets.getBegin(), chunkOffsets.getEnd()));
     return true;
@@ -277,6 +277,10 @@ public class MatchedExpression {
     return text;
   }
 
+  public String getName() {
+    return this.extractFunc.name;
+  }
+
   public CoreMap getAnnotation() {
     return annotation;
   }
@@ -312,7 +316,7 @@ public class MatchedExpression {
   }
 
   public static List<? extends CoreMap> replaceMergedUsingTokenOffsets(List<? extends CoreMap> list,
-                                                      List<? extends MatchedExpression> matchedExprs) {
+                                                                       List<? extends MatchedExpression> matchedExprs) {
     if (matchedExprs == null) return list;
     Map<Integer, Integer> tokenBeginToListIndexMap = new HashMap<>();//Generics.newHashMap();
     Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<>();//Generics.newHashMap();
@@ -401,39 +405,39 @@ public class MatchedExpression {
 
   @SuppressWarnings("unused")
   public static final Function<CoreMap, Interval<Integer>> COREMAP_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
-      in -> Interval.toInterval(
-            in.get(CoreAnnotations.TokenBeginAnnotation.class),
-            in.get(CoreAnnotations.TokenEndAnnotation.class));
+          in -> Interval.toInterval(
+                  in.get(CoreAnnotations.TokenBeginAnnotation.class),
+                  in.get(CoreAnnotations.TokenEndAnnotation.class));
 
   public static final Function<CoreMap, Interval<Integer>> COREMAP_TO_CHAR_OFFSETS_INTERVAL_FUNC =
-      in -> Interval.toInterval(
-              in.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-              in.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+          in -> Interval.toInterval(
+                  in.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
+                  in.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
 
   public static final Function<MatchedExpression, Interval<Integer>> EXPR_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
           in -> in.tokenOffsets;
 
   public static final Comparator<MatchedExpression> EXPR_PRIORITY_COMPARATOR =
-      (e1, e2) -> {
-        double s1 = e1.getPriority();
-        double s2 = e2.getPriority();
-        if (s1 == s2) {
-          return 0;
-        } else {
-          return (s1 > s2)? -1:1;
-        }
-      };
+          (e1, e2) -> {
+            double s1 = e1.getPriority();
+            double s2 = e2.getPriority();
+            if (s1 == s2) {
+              return 0;
+            } else {
+              return (s1 > s2)? -1:1;
+            }
+          };
 
   public static final Comparator<MatchedExpression> EXPR_ORDER_COMPARATOR =
-      (e1, e2) -> {
-        int s1 = e1.getOrder();
-        int s2 = e2.getOrder();
-        if (s1 == s2) {
-          return 0;
-        } else {
-          return (s1 < s2)? -1:1;
-        }
-      };
+          (e1, e2) -> {
+            int s1 = e1.getOrder();
+            int s2 = e2.getOrder();
+            if (s1 == s2) {
+              return 0;
+            } else {
+              return (s1 < s2)? -1:1;
+            }
+          };
 
   // Compares two matched expressions.
   // Use to order matched expressions by:
@@ -476,7 +480,7 @@ public class MatchedExpression {
 
   // Compares two matched expressions.
   // Use to order matched expressions by:
-   //   score
+  //   score
   //    length (longest first), then whether it has value or not (has value first),
   //    original order
   //    and then beginning token offset (smaller offset first)
