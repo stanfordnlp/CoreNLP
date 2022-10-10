@@ -90,7 +90,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
       } else {
         r = new SequenceMatchRules.ListExtractRule<>();
         if (origRule != null)
-          r.addRules(origRule);
+        r.addRules(origRule);
       }
       r.addRules(rule);
       return r;
@@ -440,11 +440,10 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
         annotateExpressions(merged, newExprs);
         newExprs = MatchedExpression.removeNullValues(newExprs);
         if ( ! newExprs.isEmpty()) {
-
           newExprs = this.keepNestedMatches ? newExprs : MatchedExpression.removeNested(newExprs);
           newExprs = this.keepOverlappingMatches ? newExprs : MatchedExpression.removeOverlapping(newExprs);
           merged = MatchedExpression.replaceMerged(merged, newExprs);
-//           Favor newly matched expressions over older ones
+          // Favor newly matched expressions over older ones
           newExprs.addAll(matchedExpressions);
           matchedExpressions = this.keepNestedMatches ? newExprs : MatchedExpression.removeNested(newExprs);
           matchedExpressions = this.keepOverlappingMatches ? matchedExpressions : MatchedExpression.removeOverlapping(matchedExpressions);
