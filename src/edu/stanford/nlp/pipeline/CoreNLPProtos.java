@@ -89492,6 +89492,3409 @@ public final class CoreNLPProtos {
 
   }
 
+  public interface MorphologyRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.MorphologyRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord> 
+        getWordsList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord getWords(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+     */
+    int getWordsCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWordOrBuilder> 
+        getWordsOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWordOrBuilder getWordsOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * Sent in Morphology requests - a stream of sentences with tagged words
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.MorphologyRequest}
+   */
+  public static final class MorphologyRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.MorphologyRequest)
+      MorphologyRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use MorphologyRequest.newBuilder() to construct.
+    private MorphologyRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private MorphologyRequest() {
+      words_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new MorphologyRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private MorphologyRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                words_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              words_.add(
+                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.PARSER, extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          words_ = java.util.Collections.unmodifiableList(words_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.Builder.class);
+    }
+
+    public interface TaggedWordOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string word = 1;</code>
+       * @return Whether the word field is set.
+       */
+      boolean hasWord();
+      /**
+       * <code>required string word = 1;</code>
+       * @return The word.
+       */
+      java.lang.String getWord();
+      /**
+       * <code>required string word = 1;</code>
+       * @return The bytes for word.
+       */
+      com.google.protobuf.ByteString
+          getWordBytes();
+
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return Whether the xpos field is set.
+       */
+      boolean hasXpos();
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return The xpos.
+       */
+      java.lang.String getXpos();
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return The bytes for xpos.
+       */
+      com.google.protobuf.ByteString
+          getXposBytes();
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord}
+     */
+    public static final class TaggedWord extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord)
+        TaggedWordOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use TaggedWord.newBuilder() to construct.
+      private TaggedWord(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private TaggedWord() {
+        word_ = "";
+        xpos_ = "";
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new TaggedWord();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private TaggedWord(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                word_ = bs;
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                xpos_ = bs;
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.class, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int WORD_FIELD_NUMBER = 1;
+      private volatile java.lang.Object word_;
+      /**
+       * <code>required string word = 1;</code>
+       * @return Whether the word field is set.
+       */
+      @java.lang.Override
+      public boolean hasWord() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required string word = 1;</code>
+       * @return The word.
+       */
+      @java.lang.Override
+      public java.lang.String getWord() {
+        java.lang.Object ref = word_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            word_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string word = 1;</code>
+       * @return The bytes for word.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getWordBytes() {
+        java.lang.Object ref = word_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          word_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int XPOS_FIELD_NUMBER = 2;
+      private volatile java.lang.Object xpos_;
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return Whether the xpos field is set.
+       */
+      @java.lang.Override
+      public boolean hasXpos() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return The xpos.
+       */
+      @java.lang.Override
+      public java.lang.String getXpos() {
+        java.lang.Object ref = xpos_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            xpos_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return The bytes for xpos.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getXposBytes() {
+        java.lang.Object ref = xpos_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          xpos_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasWord()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, word_);
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 2, xpos_);
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, word_);
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, xpos_);
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord other = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord) obj;
+
+        if (hasWord() != other.hasWord()) return false;
+        if (hasWord()) {
+          if (!getWord()
+              .equals(other.getWord())) return false;
+        }
+        if (hasXpos() != other.hasXpos()) return false;
+        if (hasXpos()) {
+          if (!getXpos()
+              .equals(other.getXpos())) return false;
+        }
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasWord()) {
+          hash = (37 * hash) + WORD_FIELD_NUMBER;
+          hash = (53 * hash) + getWord().hashCode();
+        }
+        if (hasXpos()) {
+          hash = (37 * hash) + XPOS_FIELD_NUMBER;
+          hash = (53 * hash) + getXpos().hashCode();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWordOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.class, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          word_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          xpos_ = "";
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord result = new edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.word_ = word_;
+          if (((from_bitField0_ & 0x00000002) != 0)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.xpos_ = xpos_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.getDefaultInstance()) return this;
+          if (other.hasWord()) {
+            bitField0_ |= 0x00000001;
+            word_ = other.word_;
+            onChanged();
+          }
+          if (other.hasXpos()) {
+            bitField0_ |= 0x00000002;
+            xpos_ = other.xpos_;
+            onChanged();
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          if (!hasWord()) {
+            return false;
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object word_ = "";
+        /**
+         * <code>required string word = 1;</code>
+         * @return Whether the word field is set.
+         */
+        public boolean hasWord() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>required string word = 1;</code>
+         * @return The word.
+         */
+        public java.lang.String getWord() {
+          java.lang.Object ref = word_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              word_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string word = 1;</code>
+         * @return The bytes for word.
+         */
+        public com.google.protobuf.ByteString
+            getWordBytes() {
+          java.lang.Object ref = word_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            word_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string word = 1;</code>
+         * @param value The word to set.
+         * @return This builder for chaining.
+         */
+        public Builder setWord(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          word_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string word = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearWord() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          word_ = getDefaultInstance().getWord();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string word = 1;</code>
+         * @param value The bytes for word to set.
+         * @return This builder for chaining.
+         */
+        public Builder setWordBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          word_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object xpos_ = "";
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @return Whether the xpos field is set.
+         */
+        public boolean hasXpos() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @return The xpos.
+         */
+        public java.lang.String getXpos() {
+          java.lang.Object ref = xpos_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              xpos_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @return The bytes for xpos.
+         */
+        public com.google.protobuf.ByteString
+            getXposBytes() {
+          java.lang.Object ref = xpos_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            xpos_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @param value The xpos to set.
+         * @return This builder for chaining.
+         */
+        public Builder setXpos(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          xpos_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearXpos() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          xpos_ = getDefaultInstance().getXpos();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @param value The bytes for xpos to set.
+         * @return This builder for chaining.
+         */
+        public Builder setXposBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          xpos_ = value;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<TaggedWord>
+          PARSER = new com.google.protobuf.AbstractParser<TaggedWord>() {
+        @java.lang.Override
+        public TaggedWord parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new TaggedWord(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<TaggedWord> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<TaggedWord> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public static final int WORDS_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord> words_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord> getWordsList() {
+      return words_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWordOrBuilder> 
+        getWordsOrBuilderList() {
+      return words_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+     */
+    @java.lang.Override
+    public int getWordsCount() {
+      return words_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord getWords(int index) {
+      return words_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWordOrBuilder getWordsOrBuilder(
+        int index) {
+      return words_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      for (int i = 0; i < getWordsCount(); i++) {
+        if (!getWords(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < words_.size(); i++) {
+        output.writeMessage(1, words_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < words_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, words_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest other = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest) obj;
+
+      if (!getWordsList()
+          .equals(other.getWordsList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getWordsCount() > 0) {
+        hash = (37 * hash) + WORDS_FIELD_NUMBER;
+        hash = (53 * hash) + getWordsList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Sent in Morphology requests - a stream of sentences with tagged words
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.MorphologyRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.MorphologyRequest)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getWordsFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (wordsBuilder_ == null) {
+          words_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          wordsBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest result = new edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest(this);
+        int from_bitField0_ = bitField0_;
+        if (wordsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            words_ = java.util.Collections.unmodifiableList(words_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.words_ = words_;
+        } else {
+          result.words_ = wordsBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.getDefaultInstance()) return this;
+        if (wordsBuilder_ == null) {
+          if (!other.words_.isEmpty()) {
+            if (words_.isEmpty()) {
+              words_ = other.words_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureWordsIsMutable();
+              words_.addAll(other.words_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.words_.isEmpty()) {
+            if (wordsBuilder_.isEmpty()) {
+              wordsBuilder_.dispose();
+              wordsBuilder_ = null;
+              words_ = other.words_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              wordsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getWordsFieldBuilder() : null;
+            } else {
+              wordsBuilder_.addAllMessages(other.words_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        for (int i = 0; i < getWordsCount(); i++) {
+          if (!getWords(i).isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord> words_ =
+        java.util.Collections.emptyList();
+      private void ensureWordsIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          words_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord>(words_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWordOrBuilder> wordsBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord> getWordsList() {
+        if (wordsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(words_);
+        } else {
+          return wordsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public int getWordsCount() {
+        if (wordsBuilder_ == null) {
+          return words_.size();
+        } else {
+          return wordsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord getWords(int index) {
+        if (wordsBuilder_ == null) {
+          return words_.get(index);
+        } else {
+          return wordsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public Builder setWords(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord value) {
+        if (wordsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureWordsIsMutable();
+          words_.set(index, value);
+          onChanged();
+        } else {
+          wordsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public Builder setWords(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder builderForValue) {
+        if (wordsBuilder_ == null) {
+          ensureWordsIsMutable();
+          words_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          wordsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public Builder addWords(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord value) {
+        if (wordsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureWordsIsMutable();
+          words_.add(value);
+          onChanged();
+        } else {
+          wordsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public Builder addWords(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord value) {
+        if (wordsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureWordsIsMutable();
+          words_.add(index, value);
+          onChanged();
+        } else {
+          wordsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public Builder addWords(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder builderForValue) {
+        if (wordsBuilder_ == null) {
+          ensureWordsIsMutable();
+          words_.add(builderForValue.build());
+          onChanged();
+        } else {
+          wordsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public Builder addWords(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder builderForValue) {
+        if (wordsBuilder_ == null) {
+          ensureWordsIsMutable();
+          words_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          wordsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public Builder addAllWords(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord> values) {
+        if (wordsBuilder_ == null) {
+          ensureWordsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, words_);
+          onChanged();
+        } else {
+          wordsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public Builder clearWords() {
+        if (wordsBuilder_ == null) {
+          words_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          wordsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public Builder removeWords(int index) {
+        if (wordsBuilder_ == null) {
+          ensureWordsIsMutable();
+          words_.remove(index);
+          onChanged();
+        } else {
+          wordsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder getWordsBuilder(
+          int index) {
+        return getWordsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWordOrBuilder getWordsOrBuilder(
+          int index) {
+        if (wordsBuilder_ == null) {
+          return words_.get(index);  } else {
+          return wordsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWordOrBuilder> 
+           getWordsOrBuilderList() {
+        if (wordsBuilder_ != null) {
+          return wordsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(words_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder addWordsBuilder() {
+        return getWordsFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder addWordsBuilder(
+          int index) {
+        return getWordsFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyRequest.TaggedWord words = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder> 
+           getWordsBuilderList() {
+        return getWordsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWordOrBuilder> 
+          getWordsFieldBuilder() {
+        if (wordsBuilder_ == null) {
+          wordsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWordOrBuilder>(
+                  words_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          words_ = null;
+        }
+        return wordsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.MorphologyRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.MorphologyRequest)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<MorphologyRequest>
+        PARSER = new com.google.protobuf.AbstractParser<MorphologyRequest>() {
+      @java.lang.Override
+      public MorphologyRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new MorphologyRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<MorphologyRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<MorphologyRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface MorphologyResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.MorphologyResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma> 
+        getWordsList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma getWords(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+     */
+    int getWordsCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemmaOrBuilder> 
+        getWordsOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemmaOrBuilder getWordsOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * Sent back from the Morphology request - the words and their tags
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.MorphologyResponse}
+   */
+  public static final class MorphologyResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.MorphologyResponse)
+      MorphologyResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use MorphologyResponse.newBuilder() to construct.
+    private MorphologyResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private MorphologyResponse() {
+      words_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new MorphologyResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private MorphologyResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                words_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              words_.add(
+                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.PARSER, extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          words_ = java.util.Collections.unmodifiableList(words_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.Builder.class);
+    }
+
+    public interface WordTagLemmaOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string word = 1;</code>
+       * @return Whether the word field is set.
+       */
+      boolean hasWord();
+      /**
+       * <code>required string word = 1;</code>
+       * @return The word.
+       */
+      java.lang.String getWord();
+      /**
+       * <code>required string word = 1;</code>
+       * @return The bytes for word.
+       */
+      com.google.protobuf.ByteString
+          getWordBytes();
+
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return Whether the xpos field is set.
+       */
+      boolean hasXpos();
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return The xpos.
+       */
+      java.lang.String getXpos();
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return The bytes for xpos.
+       */
+      com.google.protobuf.ByteString
+          getXposBytes();
+
+      /**
+       * <code>required string lemma = 3;</code>
+       * @return Whether the lemma field is set.
+       */
+      boolean hasLemma();
+      /**
+       * <code>required string lemma = 3;</code>
+       * @return The lemma.
+       */
+      java.lang.String getLemma();
+      /**
+       * <code>required string lemma = 3;</code>
+       * @return The bytes for lemma.
+       */
+      com.google.protobuf.ByteString
+          getLemmaBytes();
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma}
+     */
+    public static final class WordTagLemma extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma)
+        WordTagLemmaOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use WordTagLemma.newBuilder() to construct.
+      private WordTagLemma(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private WordTagLemma() {
+        word_ = "";
+        xpos_ = "";
+        lemma_ = "";
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new WordTagLemma();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private WordTagLemma(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                word_ = bs;
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                xpos_ = bs;
+                break;
+              }
+              case 26: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000004;
+                lemma_ = bs;
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.class, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int WORD_FIELD_NUMBER = 1;
+      private volatile java.lang.Object word_;
+      /**
+       * <code>required string word = 1;</code>
+       * @return Whether the word field is set.
+       */
+      @java.lang.Override
+      public boolean hasWord() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required string word = 1;</code>
+       * @return The word.
+       */
+      @java.lang.Override
+      public java.lang.String getWord() {
+        java.lang.Object ref = word_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            word_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string word = 1;</code>
+       * @return The bytes for word.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getWordBytes() {
+        java.lang.Object ref = word_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          word_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int XPOS_FIELD_NUMBER = 2;
+      private volatile java.lang.Object xpos_;
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return Whether the xpos field is set.
+       */
+      @java.lang.Override
+      public boolean hasXpos() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return The xpos.
+       */
+      @java.lang.Override
+      public java.lang.String getXpos() {
+        java.lang.Object ref = xpos_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            xpos_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string xpos = 2;</code>
+       * @return The bytes for xpos.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getXposBytes() {
+        java.lang.Object ref = xpos_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          xpos_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int LEMMA_FIELD_NUMBER = 3;
+      private volatile java.lang.Object lemma_;
+      /**
+       * <code>required string lemma = 3;</code>
+       * @return Whether the lemma field is set.
+       */
+      @java.lang.Override
+      public boolean hasLemma() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>required string lemma = 3;</code>
+       * @return The lemma.
+       */
+      @java.lang.Override
+      public java.lang.String getLemma() {
+        java.lang.Object ref = lemma_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            lemma_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string lemma = 3;</code>
+       * @return The bytes for lemma.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getLemmaBytes() {
+        java.lang.Object ref = lemma_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          lemma_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasWord()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasLemma()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, word_);
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 2, xpos_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 3, lemma_);
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, word_);
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, xpos_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, lemma_);
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma other = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma) obj;
+
+        if (hasWord() != other.hasWord()) return false;
+        if (hasWord()) {
+          if (!getWord()
+              .equals(other.getWord())) return false;
+        }
+        if (hasXpos() != other.hasXpos()) return false;
+        if (hasXpos()) {
+          if (!getXpos()
+              .equals(other.getXpos())) return false;
+        }
+        if (hasLemma() != other.hasLemma()) return false;
+        if (hasLemma()) {
+          if (!getLemma()
+              .equals(other.getLemma())) return false;
+        }
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasWord()) {
+          hash = (37 * hash) + WORD_FIELD_NUMBER;
+          hash = (53 * hash) + getWord().hashCode();
+        }
+        if (hasXpos()) {
+          hash = (37 * hash) + XPOS_FIELD_NUMBER;
+          hash = (53 * hash) + getXpos().hashCode();
+        }
+        if (hasLemma()) {
+          hash = (37 * hash) + LEMMA_FIELD_NUMBER;
+          hash = (53 * hash) + getLemma().hashCode();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemmaOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.class, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          word_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          xpos_ = "";
+          bitField0_ = (bitField0_ & ~0x00000002);
+          lemma_ = "";
+          bitField0_ = (bitField0_ & ~0x00000004);
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma result = new edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.word_ = word_;
+          if (((from_bitField0_ & 0x00000002) != 0)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.xpos_ = xpos_;
+          if (((from_bitField0_ & 0x00000004) != 0)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.lemma_ = lemma_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.getDefaultInstance()) return this;
+          if (other.hasWord()) {
+            bitField0_ |= 0x00000001;
+            word_ = other.word_;
+            onChanged();
+          }
+          if (other.hasXpos()) {
+            bitField0_ |= 0x00000002;
+            xpos_ = other.xpos_;
+            onChanged();
+          }
+          if (other.hasLemma()) {
+            bitField0_ |= 0x00000004;
+            lemma_ = other.lemma_;
+            onChanged();
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          if (!hasWord()) {
+            return false;
+          }
+          if (!hasLemma()) {
+            return false;
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object word_ = "";
+        /**
+         * <code>required string word = 1;</code>
+         * @return Whether the word field is set.
+         */
+        public boolean hasWord() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>required string word = 1;</code>
+         * @return The word.
+         */
+        public java.lang.String getWord() {
+          java.lang.Object ref = word_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              word_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string word = 1;</code>
+         * @return The bytes for word.
+         */
+        public com.google.protobuf.ByteString
+            getWordBytes() {
+          java.lang.Object ref = word_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            word_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string word = 1;</code>
+         * @param value The word to set.
+         * @return This builder for chaining.
+         */
+        public Builder setWord(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          word_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string word = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearWord() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          word_ = getDefaultInstance().getWord();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string word = 1;</code>
+         * @param value The bytes for word to set.
+         * @return This builder for chaining.
+         */
+        public Builder setWordBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          word_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object xpos_ = "";
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @return Whether the xpos field is set.
+         */
+        public boolean hasXpos() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @return The xpos.
+         */
+        public java.lang.String getXpos() {
+          java.lang.Object ref = xpos_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              xpos_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @return The bytes for xpos.
+         */
+        public com.google.protobuf.ByteString
+            getXposBytes() {
+          java.lang.Object ref = xpos_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            xpos_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @param value The xpos to set.
+         * @return This builder for chaining.
+         */
+        public Builder setXpos(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          xpos_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearXpos() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          xpos_ = getDefaultInstance().getXpos();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string xpos = 2;</code>
+         * @param value The bytes for xpos to set.
+         * @return This builder for chaining.
+         */
+        public Builder setXposBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          xpos_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object lemma_ = "";
+        /**
+         * <code>required string lemma = 3;</code>
+         * @return Whether the lemma field is set.
+         */
+        public boolean hasLemma() {
+          return ((bitField0_ & 0x00000004) != 0);
+        }
+        /**
+         * <code>required string lemma = 3;</code>
+         * @return The lemma.
+         */
+        public java.lang.String getLemma() {
+          java.lang.Object ref = lemma_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              lemma_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string lemma = 3;</code>
+         * @return The bytes for lemma.
+         */
+        public com.google.protobuf.ByteString
+            getLemmaBytes() {
+          java.lang.Object ref = lemma_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            lemma_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string lemma = 3;</code>
+         * @param value The lemma to set.
+         * @return This builder for chaining.
+         */
+        public Builder setLemma(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+          lemma_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string lemma = 3;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearLemma() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          lemma_ = getDefaultInstance().getLemma();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string lemma = 3;</code>
+         * @param value The bytes for lemma to set.
+         * @return This builder for chaining.
+         */
+        public Builder setLemmaBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+          lemma_ = value;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<WordTagLemma>
+          PARSER = new com.google.protobuf.AbstractParser<WordTagLemma>() {
+        @java.lang.Override
+        public WordTagLemma parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new WordTagLemma(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<WordTagLemma> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<WordTagLemma> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public static final int WORDS_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma> words_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma> getWordsList() {
+      return words_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemmaOrBuilder> 
+        getWordsOrBuilderList() {
+      return words_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+     */
+    @java.lang.Override
+    public int getWordsCount() {
+      return words_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma getWords(int index) {
+      return words_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemmaOrBuilder getWordsOrBuilder(
+        int index) {
+      return words_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      for (int i = 0; i < getWordsCount(); i++) {
+        if (!getWords(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < words_.size(); i++) {
+        output.writeMessage(1, words_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < words_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, words_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse other = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse) obj;
+
+      if (!getWordsList()
+          .equals(other.getWordsList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getWordsCount() > 0) {
+        hash = (37 * hash) + WORDS_FIELD_NUMBER;
+        hash = (53 * hash) + getWordsList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Sent back from the Morphology request - the words and their tags
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.MorphologyResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.MorphologyResponse)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getWordsFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (wordsBuilder_ == null) {
+          words_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          wordsBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse result = new edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse(this);
+        int from_bitField0_ = bitField0_;
+        if (wordsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            words_ = java.util.Collections.unmodifiableList(words_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.words_ = words_;
+        } else {
+          result.words_ = wordsBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.getDefaultInstance()) return this;
+        if (wordsBuilder_ == null) {
+          if (!other.words_.isEmpty()) {
+            if (words_.isEmpty()) {
+              words_ = other.words_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureWordsIsMutable();
+              words_.addAll(other.words_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.words_.isEmpty()) {
+            if (wordsBuilder_.isEmpty()) {
+              wordsBuilder_.dispose();
+              wordsBuilder_ = null;
+              words_ = other.words_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              wordsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getWordsFieldBuilder() : null;
+            } else {
+              wordsBuilder_.addAllMessages(other.words_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        for (int i = 0; i < getWordsCount(); i++) {
+          if (!getWords(i).isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma> words_ =
+        java.util.Collections.emptyList();
+      private void ensureWordsIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          words_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma>(words_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemmaOrBuilder> wordsBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma> getWordsList() {
+        if (wordsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(words_);
+        } else {
+          return wordsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public int getWordsCount() {
+        if (wordsBuilder_ == null) {
+          return words_.size();
+        } else {
+          return wordsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma getWords(int index) {
+        if (wordsBuilder_ == null) {
+          return words_.get(index);
+        } else {
+          return wordsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public Builder setWords(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma value) {
+        if (wordsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureWordsIsMutable();
+          words_.set(index, value);
+          onChanged();
+        } else {
+          wordsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public Builder setWords(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder builderForValue) {
+        if (wordsBuilder_ == null) {
+          ensureWordsIsMutable();
+          words_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          wordsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public Builder addWords(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma value) {
+        if (wordsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureWordsIsMutable();
+          words_.add(value);
+          onChanged();
+        } else {
+          wordsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public Builder addWords(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma value) {
+        if (wordsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureWordsIsMutable();
+          words_.add(index, value);
+          onChanged();
+        } else {
+          wordsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public Builder addWords(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder builderForValue) {
+        if (wordsBuilder_ == null) {
+          ensureWordsIsMutable();
+          words_.add(builderForValue.build());
+          onChanged();
+        } else {
+          wordsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public Builder addWords(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder builderForValue) {
+        if (wordsBuilder_ == null) {
+          ensureWordsIsMutable();
+          words_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          wordsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public Builder addAllWords(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma> values) {
+        if (wordsBuilder_ == null) {
+          ensureWordsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, words_);
+          onChanged();
+        } else {
+          wordsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public Builder clearWords() {
+        if (wordsBuilder_ == null) {
+          words_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          wordsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public Builder removeWords(int index) {
+        if (wordsBuilder_ == null) {
+          ensureWordsIsMutable();
+          words_.remove(index);
+          onChanged();
+        } else {
+          wordsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder getWordsBuilder(
+          int index) {
+        return getWordsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemmaOrBuilder getWordsOrBuilder(
+          int index) {
+        if (wordsBuilder_ == null) {
+          return words_.get(index);  } else {
+          return wordsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemmaOrBuilder> 
+           getWordsOrBuilderList() {
+        if (wordsBuilder_ != null) {
+          return wordsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(words_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder addWordsBuilder() {
+        return getWordsFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder addWordsBuilder(
+          int index) {
+        return getWordsFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.MorphologyResponse.WordTagLemma words = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder> 
+           getWordsBuilderList() {
+        return getWordsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemmaOrBuilder> 
+          getWordsFieldBuilder() {
+        if (wordsBuilder_ == null) {
+          wordsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemmaOrBuilder>(
+                  words_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          words_ = null;
+        }
+        return wordsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.MorphologyResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.MorphologyResponse)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<MorphologyResponse>
+        PARSER = new com.google.protobuf.AbstractParser<MorphologyResponse>() {
+      @java.lang.Override
+      public MorphologyResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new MorphologyResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<MorphologyResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<MorphologyResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_Document_descriptor;
   private static final 
@@ -89732,6 +93135,26 @@ public final class CoreNLPProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -90040,18 +93463,25 @@ public final class CoreNLPProtos {
       "tion\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P" +
       "\n\020TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.edu." +
       "stanford.nlp.pipeline.FlattenedParseTree" +
-      "*\243\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006A" +
-      "rabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006Ger" +
-      "man\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish" +
-      "\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n\020UniversalChi" +
-      "nese\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000" +
-      "\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK" +
-      "_POSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Nat" +
-      "uralLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FO" +
-      "RWARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT" +
-      "\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COV" +
-      "ER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.n" +
-      "lp.pipelineB\rCoreNLPProtos"
+      "\"\205\001\n\021MorphologyRequest\022F\n\005words\030\001 \003(\01327." +
+      "edu.stanford.nlp.pipeline.MorphologyRequ" +
+      "est.TaggedWord\032(\n\nTaggedWord\022\014\n\004word\030\001 \002" +
+      "(\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022MorphologyResponse\022" +
+      "I\n\005words\030\001 \003(\0132:.edu.stanford.nlp.pipeli" +
+      "ne.MorphologyResponse.WordTagLemma\0329\n\014Wo" +
+      "rdTagLemma\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\022\r" +
+      "\n\005lemma\030\003 \002(\t*\243\001\n\010Language\022\013\n\007Unknown\020\000\022" +
+      "\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007Eng" +
+      "lish\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew" +
+      "\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n" +
+      "\020UniversalChinese\020\n*h\n\tSentiment\022\023\n\017STRO" +
+      "NG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUT" +
+      "RAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_POSIT" +
+      "IVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013EQUIVA" +
+      "LENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REVER" +
+      "SE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNA" +
+      "TION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031e" +
+      "du.stanford.nlp.pipelineB\rCoreNLPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -90345,6 +93775,30 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor,
         new java.lang.String[] { "Trees", });
+    internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_descriptor =
+      getDescriptor().getMessageTypes().get(33);
+    internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_descriptor,
+        new java.lang.String[] { "Words", });
+    internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_descriptor.getNestedTypes().get(0);
+    internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_descriptor,
+        new java.lang.String[] { "Word", "Xpos", });
+    internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_descriptor =
+      getDescriptor().getMessageTypes().get(34);
+    internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_descriptor,
+        new java.lang.String[] { "Words", });
+    internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_descriptor.getNestedTypes().get(0);
+    internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_descriptor,
+        new java.lang.String[] { "Word", "Xpos", "Lemma", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
