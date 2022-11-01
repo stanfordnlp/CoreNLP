@@ -2106,7 +2106,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * <br>
    * For example, the following code excises all PP nodes from a Tree: <br>
    * <tt>
-   * Filter<Tree> f = new Filter<Tree> { <br>
+   * Filter&lt;Tree&gt; f = new Filter&lt;Tree&gt; { <br>
    * public boolean accept(Tree t) { <br>
    * return ! t.label().value().equals("PP"); <br>
    * } <br>

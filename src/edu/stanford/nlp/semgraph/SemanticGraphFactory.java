@@ -164,7 +164,7 @@ public class SemanticGraphFactory  {
   }
 
   /**
-   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate
+   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate)
    */
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
@@ -286,7 +286,7 @@ public class SemanticGraphFactory  {
 
 
   /**
-   * @see #makeFromTree(GrammaticalStructure, Mode, GrammaticalStructure.Extras, Predicate
+   * @see #makeFromTree(GrammaticalStructure, Mode, GrammaticalStructure.Extras, Predicate)
    */
   @Deprecated
   public static SemanticGraph makeFromTree(GrammaticalStructure tree,
@@ -298,7 +298,7 @@ public class SemanticGraphFactory  {
 
 
   /**
-   * @see #makeFromTree(GrammaticalStructure, Mode, GrammaticalStructure.Extras, Predicate
+   * @see #makeFromTree(GrammaticalStructure, Mode, GrammaticalStructure.Extras, Predicate)
    */
   public static SemanticGraph makeFromTree(GrammaticalStructure structure) {
     return makeFromTree(structure, Mode.BASIC, GrammaticalStructure.Extras.NONE, null);
@@ -306,7 +306,7 @@ public class SemanticGraphFactory  {
 
 
   /**
-   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate
+   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate)
    */
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
@@ -316,7 +316,7 @@ public class SemanticGraphFactory  {
   }
 
   /**
-   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate
+   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate)
    */
   @Deprecated
   public static SemanticGraph makeFromTree(Tree tree,
@@ -327,7 +327,7 @@ public class SemanticGraphFactory  {
   }
 
   /**
-   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate
+   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate)
    */
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,

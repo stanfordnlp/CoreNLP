@@ -246,7 +246,7 @@ public class SimpleGoodTuring {
    * This represents a collection in which 10 types occur once each, 6 types
    * occur twice each, 4 types occur 3 times each, 2 types occur 5 times each,
    * and one type occurs 10 times, for a total count of 52.  This input will
-   * produce the following output: </p>
+   * produce the following output: <br>
    *
    * <pre>
    *     r      n        p       p*
