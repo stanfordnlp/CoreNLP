@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.Triple;
  *
  * Takes a dependency parse, performs some enhancements using
  * {@link SemanticGraphEnhancer}, extracts objects and attributes using the
- * {@link EntityExtractor} and a {@Link EntityClassifier}
+ * {@link EntityExtractor} and a {@link EntityClassifier}
  * and predicts the relations between theese objects and attributes
  * to build a {@link SceneGraph}.
  *

@@ -333,12 +333,13 @@ public class ChineseGrammaticalRelations {
   /**
    * The "clausal subject" grammatical relation.  A clausal subject is
    * a subject which is a clause.
-   * <p /> Examples:
+   * <br>
+   * Examples:
    * <code>
    * <pre>
    * </pre>
    * </code>
-   * <p />
+   * <br>
    * Note: This one might not exist in Chinese, or very rare.
    */
   public static final GrammaticalRelation CLAUSAL_SUBJECT =

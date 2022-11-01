@@ -85,7 +85,6 @@ public class ChineseDocument extends Document {
 
 
   /**
-<<<<<<< HEAD
    * No lemma annotator for Chinese -- set the lemma to be the word.
    *
    * @see Document#runLemma(Properties)

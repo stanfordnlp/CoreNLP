@@ -795,12 +795,12 @@ public class SemanticGraphUtils  {
    * @param sg SemanticGraph to base this pattern on.
    */
   public static String semgrexFromGraph(SemanticGraph sg, boolean matchTag, boolean matchWord,
-      Map<IndexedWord, String> nodeNameMap) throws Exception {
+      Map<IndexedWord, String> nodeNameMap) {
     return semgrexFromGraph(sg, null, matchTag, matchWord, nodeNameMap);
   }
 
   public static String semgrexFromGraph(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
-                                        boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap) throws Exception {
+                                        boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap) {
     Function<IndexedWord, String> transformNode = o ->{
       String str = "";
       if(useWord)
@@ -822,7 +822,6 @@ public class SemanticGraphUtils  {
    * nodeValuesTranformation is a function that converts a vertex (IndexedWord) to the value.
    * For an example, see {@code semgrexFromGraph}
    * function implementations (if useWord and useTag is true, the value is "{word: vertex.word; tag: vertex.tag}").
-   * @throws Exception
    */
   public static String semgrexFromGraph(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
      Map<IndexedWord, String> nodeNameMap, Function<IndexedWord, String> wordTransformation) {
@@ -842,10 +841,9 @@ public class SemanticGraphUtils  {
   /**
    * Given a set of edges that form a rooted and connected graph, returns a Semgrex pattern
    * corresponding to it.
-   * @throws Exception
    */
   public static String semgrexFromGraph(Iterable<SemanticGraphEdge> edges, boolean matchTag,
-      boolean matchWord, Map<IndexedWord, String> nodeNameMap) throws Exception {
+      boolean matchWord, Map<IndexedWord, String> nodeNameMap) {
     SemanticGraph sg = SemanticGraphFactory.makeFromEdges(edges);
     return semgrexFromGraph(sg, matchTag, matchWord, nodeNameMap);
   }
