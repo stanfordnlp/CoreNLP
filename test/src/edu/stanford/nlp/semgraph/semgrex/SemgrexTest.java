@@ -227,6 +227,13 @@ public class SemgrexTest extends TestCase {
     // TODO: implement referencing regexes
   }
 
+  /**
+   * Make a fake graph with a bunch of random dependencies
+   *<br>
+   * All dependencies go from an earlier letter to a later letter except J to I.
+   * Having at least one dependency go the other way allows for testing
+   * of certain relationships involving direction
+   */
   public static SemanticGraph makeComplicatedGraph() {
     SemanticGraph graph = new SemanticGraph();
     String[] words = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"};
@@ -256,15 +263,15 @@ public class SemgrexTest extends TestCase {
                   UniversalEnglishGrammaticalRelations.ADJECTIVAL_MODIFIER, 1.0, false);
     graph.addEdge(nodes[4], nodes[6],
                   UniversalEnglishGrammaticalRelations.ADVERBIAL_MODIFIER, 1.0, false);
-    graph.addEdge(nodes[4], nodes[8],
+    graph.addEdge(nodes[4], nodes[9],
                   UniversalEnglishGrammaticalRelations.MODIFIER, 1.0, false);
     graph.addEdge(nodes[5], nodes[7],
                   UniversalEnglishGrammaticalRelations.POSSESSION_MODIFIER, 1.0, false);
     graph.addEdge(nodes[6], nodes[7],
                   UniversalEnglishGrammaticalRelations.CASE_MARKER, 1.0, false);
-    graph.addEdge(nodes[7], nodes[8],
+    graph.addEdge(nodes[7], nodes[9],
                   UniversalEnglishGrammaticalRelations.AGENT, 1.0, false);
-    graph.addEdge(nodes[8], nodes[9],
+    graph.addEdge(nodes[9], nodes[8],
                   UniversalEnglishGrammaticalRelations.DETERMINER, 1.0, false);
 
     return graph;
@@ -284,14 +291,14 @@ public class SemgrexTest extends TestCase {
     runTest("{} > {word:E}", graph,
             "B", "C", "D");
 
-    runTest("{} > {word:J}", graph,
-            "I");
+    runTest("{} > {word:I}", graph,
+            "J");
 
     runTest("{} < {word:E}", graph,
-            "F", "G", "I");
+            "F", "G", "J");
 
-    runTest("{} < {word:I}", graph,
-            "J");
+    runTest("{} < {word:J}", graph,
+            "I");
 
     runTest("{} << {word:A}", graph,
             "B", "C", "D", "E", "F", "G", "H", "I", "J");
@@ -317,10 +324,10 @@ public class SemgrexTest extends TestCase {
     runTest("{} << {word:H}", graph,
             "I", "J");
 
-    runTest("{} << {word:I}", graph,
-            "J");
+    runTest("{} << {word:J}", graph,
+            "I");
 
-    runTest("{} << {word:J}", graph);
+    runTest("{} << {word:I}", graph);
 
     runTest("{} << {word:K}", graph);
 
@@ -344,11 +351,11 @@ public class SemgrexTest extends TestCase {
     runTest("{} >> {word:H}", graph,
             "A", "B", "C", "D", "E", "F", "G");
 
-    runTest("{} >> {word:I}", graph,
+    runTest("{} >> {word:J}", graph,
             "A", "B", "C", "D", "E", "F", "G", "H");
 
-    runTest("{} >> {word:J}", graph,
-            "A", "B", "C", "D", "E", "F", "G", "H", "I");
+    runTest("{} >> {word:I}", graph,
+            "A", "B", "C", "D", "E", "F", "G", "H", "J");
 
     runTest("{} >> {word:K}", graph);
   }
@@ -359,15 +366,15 @@ public class SemgrexTest extends TestCase {
             "B", "E", "F", "G", "H", "I", "I", "J", "J");
 
     runTest("{} >>det {}", graph,
-            "A", "B", "C", "D", "E", "F", "G", "H", "I");
+            "A", "B", "C", "D", "E", "F", "G", "H", "J");
 
-    runTest("{} >>det {word:J}", graph,
-            "A", "B", "C", "D", "E", "F", "G", "H", "I");
+    runTest("{} >>det {word:I}", graph,
+            "A", "B", "C", "D", "E", "F", "G", "H", "J");
   }
 
   public void testExactDepthRelations() {
     SemanticGraph graph = makeComplicatedGraph();
-    runTest("{} 2,3<< {word:A}", graph, "E", "F", "G", "I");
+    runTest("{} 2,3<< {word:A}", graph, "E", "F", "G", "J");
 
     runTest("{} 2,2<< {word:A}", graph, "E");
 
@@ -378,22 +385,22 @@ public class SemgrexTest extends TestCase {
     runTest("{} 0,10<< {word:A}", graph,
             "B", "C", "D", "E", "F", "G", "H", "I", "J");
 
-    runTest("{} 0,10>> {word:J}", graph,
-            "A", "B", "C", "D", "E", "F", "G", "H", "I");
+    runTest("{} 0,10>> {word:I}", graph,
+            "A", "B", "C", "D", "E", "F", "G", "H", "J");
 
-    runTest("{} 2,3>> {word:J}", graph,
+    runTest("{} 2,3>> {word:I}", graph,
             "B", "C", "D", "E", "F", "G", "H");
 
-    runTest("{} 2,2>> {word:J}", graph,
+    runTest("{} 2,2>> {word:I}", graph,
             "E", "H");
 
     // use this method to avoid the toString() test, since we expect it
     // to use 2,2>> instead of 2>>
-    runTest(SemgrexPattern.compile("{} 2>> {word:J}"), graph,
+    runTest(SemgrexPattern.compile("{} 2>> {word:I}"), graph,
             "E", "H");
 
-    runTest("{} 1,2>> {word:J}", graph,
-            "E", "H", "I");
+    runTest("{} 1,2>> {word:I}", graph,
+            "E", "H", "J");
   }
 
   /**
@@ -401,10 +408,10 @@ public class SemgrexTest extends TestCase {
    */
   public void testMultipleDepths() {
     SemanticGraph graph = makeComplicatedGraph();
-    runTest("{} 3,3<< {word:A}", graph, "F", "G", "I");
-    runTest("{} 4,4<< {word:A}", graph, "H", "J");
-    runTest("{} 5,5<< {word:A}", graph, "I");
-    runTest("{} 6,6<< {word:A}", graph, "J");
+    runTest("{} 3,3<< {word:A}", graph, "F", "G", "J");
+    runTest("{} 4,4<< {word:A}", graph, "H", "I");
+    runTest("{} 5,5<< {word:A}", graph, "J");
+    runTest("{} 6,6<< {word:A}", graph, "I");
   }
 
   public void testNamedNode() {
