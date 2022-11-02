@@ -913,11 +913,11 @@ abstract class GraphRelation implements Serializable {
     }
   }
 
-  static private class ADJACENT_NODE extends GraphRelation {
+  static private class ADJACENT_RIGHT extends GraphRelation {
 
     private static final long serialVersionUID = 1L;
 
-    ADJACENT_NODE(String reln, String name) {
+    ADJACENT_RIGHT(String reln, String name) {
       super(".", reln, name);
     }
 
@@ -948,7 +948,156 @@ abstract class GraphRelation implements Serializable {
 
           while (iterator.hasNext()) {
             IndexedWord word = iterator.next();
+            // note that index might not be unique if there are copy nodes
             if (node.index() != (word.index() - 1)) {
+              continue;
+            }
+            this.next = word;
+            return;
+          }
+          this.next = null;
+        }
+      };
+    }
+
+  }
+
+
+  static private class ADJACENT_LEFT extends GraphRelation {
+
+    private static final long serialVersionUID = 1L;
+
+    ADJACENT_LEFT(String reln, String name) {
+      super("-", reln, name);
+    }
+
+
+    @Override
+    boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
+      if (l1.index() == (l2.index() + 1)) {
+        return true;
+      }
+      return false;
+    }
+
+    @Override
+    Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
+      return new SearchNodeIterator() {
+        Iterator<IndexedWord> iterator;
+
+        @Override
+        public void advance() {
+          if (node.equals(IndexedWord.NO_WORD)) {
+            next = null;
+            return;
+          }
+
+          if (iterator == null) {
+            iterator = sg.vertexSet().iterator();
+          }
+
+          while (iterator.hasNext()) {
+            IndexedWord word = iterator.next();
+            // note that index might not be unique if there are copy nodes
+            if (node.index() != (word.index() + 1)) {
+              continue;
+            }
+            this.next = word;
+            return;
+          }
+          this.next = null;
+        }
+      };
+    }
+
+  }
+
+
+  static private class RIGHT extends GraphRelation {
+
+    private static final long serialVersionUID = 1L;
+
+    RIGHT(String reln, String name) {
+      super("..", reln, name);
+    }
+
+
+    @Override
+    boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
+      if (l1.index() < l2.index()) {
+        return true;
+      }
+      return false;
+    }
+
+    @Override
+    Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
+      return new SearchNodeIterator() {
+        Iterator<IndexedWord> iterator;
+
+        @Override
+        public void advance() {
+          if (node.equals(IndexedWord.NO_WORD)) {
+            next = null;
+            return;
+          }
+
+          if (iterator == null) {
+            iterator = sg.vertexSet().iterator();
+          }
+
+          while (iterator.hasNext()) {
+            IndexedWord word = iterator.next();
+            if (node.index() >= word.index()) {
+              continue;
+            }
+            this.next = word;
+            return;
+          }
+          this.next = null;
+        }
+      };
+    }
+
+  }
+
+
+  static private class LEFT extends GraphRelation {
+
+    private static final long serialVersionUID = 1L;
+
+    LEFT(String reln, String name) {
+      super("--", reln, name);
+    }
+
+
+    @Override
+    boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
+      if (l1.index() > l2.index()) {
+        return true;
+      }
+      return false;
+    }
+
+    @Override
+    Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
+      return new SearchNodeIterator() {
+        Iterator<IndexedWord> iterator;
+
+        @Override
+        public void advance() {
+          if (node.equals(IndexedWord.NO_WORD)) {
+            next = null;
+            return;
+          }
+
+          if (iterator == null) {
+            iterator = sg.vertexSet().iterator();
+          }
+
+          while (iterator.hasNext()) {
+            IndexedWord word = iterator.next();
+            if (node.index() <= word.index()) {
               continue;
             }
             this.next = word;
@@ -970,7 +1119,8 @@ abstract class GraphRelation implements Serializable {
             reln.equals("@") || reln.equals("==") ||
             reln.equals("$+") || reln.equals("$++") ||
             reln.equals("$-") || reln.equals("$--") ||
-            reln.equals("."));
+            reln.equals(".") || reln.equals("..") ||
+            reln.equals("-") || reln.equals("--"));
   }
 
   public static GraphRelation getRelation(String reln,
@@ -1001,7 +1151,13 @@ abstract class GraphRelation implements Serializable {
       case "$--":
         return new LEFT_SIBLING(type, name);
       case ".":
-        return new ADJACENT_NODE(type, name);
+        return new ADJACENT_RIGHT(type, name);
+      case "..":
+        return new RIGHT(type, name);
+      case "-":
+        return new ADJACENT_LEFT(type, name);
+      case "--":
+        return new LEFT(type, name);
       case "@":
         return new ALIGNMENT();
       default:
