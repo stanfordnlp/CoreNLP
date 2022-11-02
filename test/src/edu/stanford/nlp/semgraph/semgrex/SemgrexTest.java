@@ -930,6 +930,24 @@ public class SemgrexTest extends TestCase {
     }
   }
 
+  public void testAdjacent() {
+    // test using a colon expression so that the targeted nodes
+    // are the nodes which show up
+    SemanticGraph graph = makeComplicatedGraph();
+    runTest("{}=foo : {word:A} . {}=foo", graph, "B");
+
+    runTest("{}=foo : {word:B} - {}=foo", graph, "A");
+  }
+
+  public void testRightLeft() {
+    // test using a colon expression so that the targeted nodes
+    // are the nodes which show up
+    SemanticGraph graph = makeComplicatedGraph();
+    runTest("{}=foo : {word:E} .. {}=foo", graph, "F", "G", "H", "I", "J");
+
+    runTest("{}=foo : {word:E} -- {}=foo", graph, "A", "B", "C", "D");
+  }
+
   /** Various bracketing tests: | and &amp; */
   public void testBrackets() {
     runTest("{word:ate} [ > {word:Bill} | > {word:muffins}]",
