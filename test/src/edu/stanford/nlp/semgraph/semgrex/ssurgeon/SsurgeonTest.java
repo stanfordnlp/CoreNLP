@@ -28,6 +28,31 @@ public class SsurgeonTest {
                              "</ssurgeon-pattern-list>");
     Ssurgeon inst = Ssurgeon.inst();
     List<SsurgeonPattern> pattern = inst.readFromString(doc);
+    assertEquals(pattern.size(), 1);
+  }
+
+  @Test
+  public void readXMLEdit() {
+    String newline = System.getProperty("line.separator");
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This is a simple test of addEdge</notes>",
+                             "    <semgrex>{}=a1 &gt; {}=a2</semgrex>",
+                             "    <edit-list>addEdge -gov a1 -dep a2 -reln dep -weight 0.5</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[A obj> B obj> C]");
+    Collection<SemanticGraph> newSgs = pattern.execute(sg);
+    // TODO: perhaps it would be better to have an execution scheme
+    // where one graph has all possible modifications applied
+    assertEquals(newSgs.size(), 2);
   }
 
   /**
