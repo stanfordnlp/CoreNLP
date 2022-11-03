@@ -2,6 +2,7 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.Ssurgeon;
+import edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonRuntimeException;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonWordlist;
 
 public class WordlistTest extends NodeTest {
@@ -23,10 +24,10 @@ public class WordlistTest extends NodeTest {
    * Checks to see if the given node's field matches the resource
    */
   @Override
-  protected boolean evaluate(IndexedWord node) throws Exception {
+  protected boolean evaluate(IndexedWord node) {
     SsurgeonWordlist wl = Ssurgeon.inst().getResource(resourceID);
     if (wl == null) {
-      throw new Exception("No wordlist resource with ID="+resourceID);
+      throw new SsurgeonRuntimeException("No wordlist resource with ID="+resourceID);
     }
     if (type == TYPE.lemma)
       return wl.contains(node.lemma().toLowerCase());
