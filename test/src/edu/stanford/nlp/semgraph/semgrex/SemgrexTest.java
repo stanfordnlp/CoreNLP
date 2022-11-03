@@ -948,6 +948,31 @@ public class SemgrexTest extends TestCase {
     runTest("{}=foo : {word:E} -- {}=foo", graph, "A", "B", "C", "D");
   }
 
+  public void testGovernor() {
+    SemanticGraph graph = makeComplicatedGraph();
+    runTest("{}=foo : {word:A} > {}=foo", graph, "B", "C", "D");
+    runTest("{}=foo : {word:I} > {}=foo", graph);
+
+    runTest("{}=foo : {word:J} > {}=foo", graph, "I");
+    runTest("{}=foo : {word:J} >-- {}=foo", graph, "I");
+    runTest("{}=foo : {word:J} >++ {}=foo", graph);
+
+    runTest("{}=foo : {word:A} >++ {}=foo", graph, "B", "C", "D");
+  }
+
+  public void testDependent() {
+    SemanticGraph graph = makeComplicatedGraph();
+    runTest("{}=foo < {word:A}", graph, "B", "C", "D");
+    runTest("{}=foo < {word:I}", graph);
+
+    runTest("{}=foo < {word:J}", graph, "I");
+    runTest("{}=foo <++ {word:J}", graph, "I");
+    runTest("{}=foo <-- {word:J}", graph);
+    runTest("{}=foo <++ {word:I}", graph);
+    runTest("{}=foo <++ {word:A}", graph);
+    runTest("{}=foo <-- {word:A}", graph, "B", "C", "D");
+  }
+
   /** Various bracketing tests: | and &amp; */
   public void testBrackets() {
     runTest("{word:ate} [ > {word:Bill} | > {word:muffins}]",
