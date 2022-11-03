@@ -40,6 +40,29 @@ import edu.stanford.nlp.util.logging.Redwood;
  * loaded can reference these resources.
  *<br>
  * An Ssurgeon can be built from an XML pattern or by assembling the pieces by hand.
+ *<br>
+ * The XML format is as follows:
+<pre>
+{@code
+<ssurgeon-pattern-list>
+  <ssurgeon-pattern>
+    <uid>...</uid>
+    <notes>...</notes>
+    <semgrex>...</semgrex>
+    <edit-list>...</edit-list>
+  </ssurgeon-pattern>
+</ssurgeon-pattern-list>
+}
+</pre>
+ * The {@code id} is the id of the Ssurgeon operation. <br>
+ * The {@code notes} are comments on the Ssurgeon. <br>
+ * The {@code semgrex} is a Semgrex pattern to use when matching for this operation. <br>
+ * The {@code edit-list} is the actual Ssurgeon operation to execute. <br>
+ *
+ * Available operations and their arguments include:
+ * <ul>
+ * <li> {@code addEdge -gov a1 -dep a2 -reln dep -weight 0.5}
+ * </ul>
  *
  * @author Eric Yeh
  */
@@ -242,7 +265,7 @@ public class Ssurgeon  {
     // below are string representations of the intended values
     public String nodeString = null;
 
-    public double weight = 1.0;
+    public double weight = 0.0;
 
     public String name = null;
   }
@@ -333,7 +356,7 @@ public class Ssurgeon  {
     } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
       retEdit = AddNode.createAddNode(argsBox.nodeString, argsBox.name);
     } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {
-      retEdit = AddEdge.createEngAddEdge(argsBox.govNodeName, argsBox.dep, argsBox.reln);
+      retEdit = AddEdge.createEngAddEdge(argsBox.govNodeName, argsBox.dep, argsBox.reln, argsBox.weight);
     } else if (command.equalsIgnoreCase(DeleteGraphFromNode.LABEL)) {
       retEdit = new DeleteGraphFromNode(argsBox.node);
     } else if (command.equalsIgnoreCase(RemoveEdge.LABEL)) {
