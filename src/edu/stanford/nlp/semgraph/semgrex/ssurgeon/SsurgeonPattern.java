@@ -118,7 +118,7 @@ public class SsurgeonPattern {
    * @param sg SemanticGraph to operate over (NOT destroyed/modified).
    * @return True if a match was found and executed, otherwise false.
    */
-  public Collection<SemanticGraph> execute(SemanticGraph sg) throws Exception {
+  public Collection<SemanticGraph> execute(SemanticGraph sg) {
     Collection<SemanticGraph> generated = new ArrayList<>();
     SemgrexMatcher matcher = semgrexPattern.matcher(sg);
     nextMatch:

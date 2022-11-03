@@ -15,13 +15,13 @@ public abstract class NodeTest implements SsurgPred {
 
   public NodeTest(String matchName) { this.matchName = matchName; }
 
-  public boolean test(SemgrexMatcher matcher) throws Exception { return evaluate(matcher.getNode(matchName)); }
+  public boolean test(SemgrexMatcher matcher) { return evaluate(matcher.getNode(matchName)); }
 
   // This is the custom routine to implement
-  protected abstract boolean evaluate(IndexedWord node) throws Exception;
+  protected abstract boolean evaluate(IndexedWord node);
 
   // Use this for debugging, and dual re-use of the code outside of Ssurgeon
-  public boolean test(IndexedWord node) throws Exception {
+  public boolean test(IndexedWord node) {
     return evaluate(node);
   }
 
