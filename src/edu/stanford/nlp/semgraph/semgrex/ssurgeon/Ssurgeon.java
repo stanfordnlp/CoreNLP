@@ -52,6 +52,7 @@ public class Ssurgeon  {
 
   private Ssurgeon() {}
 
+  // TODO: get rid of this if possible
   public static Ssurgeon inst() {
     synchronized(Ssurgeon.class) {
       if (instance == null)
@@ -287,35 +288,35 @@ public class Ssurgeon  {
       switch (argsArray[argIndex]) {
         case GOV_NODENAME_ARG:
           argsBox.govNodeName = argsArray[argIndex + 1];
-          argIndex += 2;
+          argIndex += 1;
           break;
         case DEP_NODENAME_ARG:
           argsBox.dep = argsArray[argIndex + 1];
-          argIndex += 2;
+          argIndex += 1;
           break;
         case EDGE_NAME_ARG:
           argsBox.edge = argsArray[argIndex + 1];
-          argIndex += 2;
+          argIndex += 1;
           break;
         case RELN_ARG:
           argsBox.reln = argsArray[argIndex + 1];
-          argIndex += 2;
+          argIndex += 1;
           break;
         case NODENAME_ARG:
           argsBox.node = argsArray[argIndex + 1];
-          argIndex += 2;
+          argIndex += 1;
           break;
         case NODE_PROTO_ARG:
           argsBox.nodeString = argsArray[argIndex + 1];
-          argIndex += 2;
+          argIndex += 1;
           break;
         case WEIGHT_ARG:
           argsBox.weight = Double.valueOf(argsArray[argIndex + 1]);
-          argIndex += 2;
+          argIndex += 1;
           break;
         case NAME_ARG:
           argsBox.name = argsArray[argIndex + 1];
-          argIndex += 2;
+          argIndex += 1;
           break;
         default:
           throw new SsurgeonParseException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
