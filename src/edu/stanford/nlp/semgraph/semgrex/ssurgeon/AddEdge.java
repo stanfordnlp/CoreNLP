@@ -24,20 +24,19 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
  */
 public class AddEdge extends SsurgeonEdit {
   public static final String LABEL = "addEdge";
-  protected String govName; // Name of governor of this reln, in match
-  protected String depName; // Name of the dependent in this reln, in match
-  protected GrammaticalRelation relation; // Type of relation to add between these edges 
-  protected double weight;
+  protected final String govName; // Name of governor of this reln, in match
+  protected final String depName; // Name of the dependent in this reln, in match
+  protected final GrammaticalRelation relation; // Type of relation to add between these edges
+  protected final double weight;
   
   public AddEdge(String govName, String depName, GrammaticalRelation relation) {
-    this.govName = govName;
-    this.depName = depName;
-    this.relation = relation;
-    this.weight = 0;
+    this(govName, depName, relation, 0.0);
   }
   
   public AddEdge(String govName, String depName, GrammaticalRelation relation, double weight) {
-    this(govName, depName, relation);
+    this.govName = govName;
+    this.depName = depName;
+    this.relation = relation;
     this.weight = weight;
   }
   
