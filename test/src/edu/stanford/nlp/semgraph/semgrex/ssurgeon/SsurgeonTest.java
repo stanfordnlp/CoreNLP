@@ -3,6 +3,7 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 import static org.junit.Assert.*;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -13,6 +14,21 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 
 public class SsurgeonTest {
+
+  @Test
+  public void readXMLEmptyPattern() {
+    String newline = System.getProperty("line.separator");
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>37</uid>",
+                             "    <notes>This is a simple test</notes>",
+                             "    <semgrex>{}=a1 &gt;appos=e1 {}=a2 &lt;nsubj=e2 {}=a3</semgrex>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> pattern = inst.readFromString(doc);
+  }
 
   /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
