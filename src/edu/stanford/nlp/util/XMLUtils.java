@@ -22,6 +22,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.logging.Redwood;
 
 
@@ -1221,14 +1222,19 @@ public class XMLUtils  {
     return new XMLTag(tagString);
   }
 
-  public static Document readDocumentFromFile(String filename) throws Exception {
-    InputSource in = new InputSource(new FileReader(filename));
-    DocumentBuilderFactory factory = safeDocumentBuilderFactory();
+  public static Document readDocumentFromFile(String filename) throws ParserConfigurationException, SAXException {
+    try {
+      InputSource in = new InputSource(new FileReader(filename));
+      DocumentBuilderFactory factory = safeDocumentBuilderFactory();
 
-    factory.setNamespaceAware(false);
-    DocumentBuilder db = factory.newDocumentBuilder();
-    db.setErrorHandler(new SAXErrorHandler());
-    return db.parse(in);
+      factory.setNamespaceAware(false);
+      DocumentBuilder db = factory.newDocumentBuilder();
+      db.setErrorHandler(new SAXErrorHandler());
+
+      return db.parse(in);
+    } catch(IOException e) {
+      throw new RuntimeIOException(e);
+    }
   }
 
   private static class SAXErrorHandler implements ErrorHandler {
@@ -1272,11 +1278,15 @@ public class XMLUtils  {
 
   } // end class SAXErrorHandler
 
-  public static Document readDocumentFromString(String s) throws Exception {
+  public static Document readDocumentFromString(String s) throws ParserConfigurationException, SAXException {
     InputSource in = new InputSource(new StringReader(s));
     DocumentBuilderFactory factory = safeDocumentBuilderFactory();
     factory.setNamespaceAware(false);
-    return factory.newDocumentBuilder().parse(in);
+    try {
+      return factory.newDocumentBuilder().parse(in);
+    } catch(IOException e) {
+      throw new RuntimeIOException(e);
+    }
   }
 
   /** Tests a few methods.

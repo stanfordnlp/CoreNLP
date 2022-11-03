@@ -8,11 +8,14 @@ import java.text.DateFormat;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
+import org.xml.sax.SAXException;
 
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
@@ -35,6 +38,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * This is the primary class for loading and saving out Ssurgeon patterns.
  * This is also the class that maintains the current list of resources loaded into Ssurgeon: any pattern
  * loaded can reference these resources.
+ *<br>
+ * An Ssurgeon can be built from an XML pattern or by assembling the pieces by hand.
  *
  * @author Eric Yeh
  */
@@ -260,7 +265,7 @@ public class Ssurgeon  {
         else
           retList.add(matched);
       }  else
-        throw new IllegalArgumentException("Unmatched quote in string to parse");
+        throw new SsurgeonParseException("Unmatched quote in string to parse");
     }
     return retList.toArray(StringUtils.EMPTY_STRING_ARRAY);
   }
@@ -272,7 +277,7 @@ public class Ssurgeon  {
     // Extract the operation name first
     String[] tuples1 = editLine.split("\\s+", 2);
     if (tuples1.length < 2) {
-      throw new IllegalArgumentException("Error in SsurgeonEdit.parseEditLine: invalid number of arguments");
+      throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: invalid number of arguments");
     }
     String command = tuples1[0];
     String[] argsArray = parseArgs(tuples1[1]);
@@ -313,7 +318,7 @@ public class Ssurgeon  {
           argIndex += 2;
           break;
         default:
-          throw new IllegalArgumentException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
+          throw new SsurgeonParseException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
       }
     }
 
@@ -343,7 +348,7 @@ public class Ssurgeon  {
     } else if (command.equalsIgnoreCase(KillAllIncomingEdges.LABEL)) {
       retEdit = new KillAllIncomingEdges(argsBox.node);
     } else {
-      throw new IllegalArgumentException("Error in SsurgeonEdit.parseEditLine: command '"+command+"' is not supported");
+      throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: command '"+command+"' is not supported");
     }
     return retEdit;
   }
@@ -443,20 +448,35 @@ public class Ssurgeon  {
     }
   }
 
+  public List<SsurgeonPattern> readFromString(String text) {
+    try {
+      Document doc = XMLUtils.readDocumentFromString(text);
+      return readFromDocument(doc);
+    } catch (ParserConfigurationException | SAXException e) {
+      throw new SsurgeonParseException("XML failure while reading string", e);
+    }
+  }
 
   /**
    * Given a path to a file containing a list of SsurgeonPatterns, returns
    *
    * TODO: deal with resources
-   * @throws Exception
    */
-  @SuppressWarnings("unchecked")
-  public List<SsurgeonPattern> readFromFile(File file) throws Exception {
-    List<SsurgeonPattern> retList = new ArrayList<>();
-    Document doc = XMLUtils.safeDocumentBuilderFactory().newDocumentBuilder().parse(file);
+  public List<SsurgeonPattern> readFromFile(File file) {
+    try {
+      Document doc = XMLUtils.readDocumentFromFile(file.getPath());
 
-    if (VERBOSE)
-      System.out.println("Reading ssurgeon file="+file.getAbsolutePath());
+      if (VERBOSE)
+        System.out.println("Reading ssurgeon file="+file.getAbsolutePath());
+
+      return readFromDocument(doc);
+    } catch (ParserConfigurationException | SAXException e) {
+      throw new SsurgeonParseException("XML failure while reading " + file, e);
+    }
+  }
+
+  public List<SsurgeonPattern> readFromDocument(Document doc) {
+    List<SsurgeonPattern> retList = new ArrayList<>();
 
     NodeList patternNodes = doc.getElementsByTagName(SsurgeonPattern.SSURGEON_ELEM_TAG);
     for (int i=0; i<patternNodes.getLength(); i++) {
@@ -507,7 +527,7 @@ public class Ssurgeon  {
    * @throws Exception
    */
   @SuppressWarnings("unchecked")
-  public static SsurgeonPattern ssurgeonPatternFromXML(Element elt) throws Exception {
+  public static SsurgeonPattern ssurgeonPatternFromXML(Element elt) {
     String uid = getTagText(elt, SsurgeonPattern.UID_ELEM_TAG);
     String notes = getTagText(elt, SsurgeonPattern.NOTES_ELEM_TAG);
     String semgrexString = getTagText(elt, SsurgeonPattern.SEMGREX_ELEM_TAG);
@@ -538,7 +558,7 @@ public class Ssurgeon  {
    * Constructs a {@code SsurgPred} structure from file, given the root element.
    * @throws Exception
    */
-  public static SsurgPred assemblePredFromXML(Element elt) throws Exception {
+  public static SsurgPred assemblePredFromXML(Element elt) {
     String eltName = elt.getTagName();
     switch (eltName) {
       case SsurgeonPattern.PREDICATE_AND_TAG:
@@ -564,16 +584,16 @@ public class Ssurgeon  {
         String matchName = getEltText(elt).trim(); // node name to match on
 
         if (matchName == null) {
-          throw new Exception("Could not find match name for " + elt);
+          throw new SsurgeonParseException("Could not find match name for " + elt);
         }
         if (id == null) {
-          throw new Exception("No ID attribute for element = " + elt);
+          throw new SsurgeonParseException("No ID attribute for element = " + elt);
         }
         return new WordlistTest(id, resourceID, typeStr, matchName);
     }
 
     // Not a valid node, error out!
-    throw new Exception("Invalid node encountered during Ssurgeon predicate processing, node name="+eltName);
+    throw new SsurgeonParseException("Invalid node encountered during Ssurgeon predicate processing, node name="+eltName);
   }
 
 
