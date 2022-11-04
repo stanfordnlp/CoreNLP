@@ -84,7 +84,7 @@ public final class GraphicalModelProto {
   /**
    * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.GraphicalModel}
    */
-  public  static final class GraphicalModel extends
+  public static final class GraphicalModel extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.loglinear.model.proto.GraphicalModel)
       GraphicalModelOrBuilder {
@@ -110,81 +110,6 @@ public final class GraphicalModelProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private GraphicalModel(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                factor_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              factor_.add(
-                  input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.PARSER, extensionRegistry));
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                variableMetaData_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              variableMetaData_.add(
-                  input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.PARSER, extensionRegistry));
-              break;
-            }
-            case 26: {
-              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) != 0)) {
-                subBuilder = metaData_.toBuilder();
-              }
-              metaData_ = input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(metaData_);
-                metaData_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000001;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          factor_ = java.util.Collections.unmodifiableList(factor_);
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          variableMetaData_ = java.util.Collections.unmodifiableList(variableMetaData_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_GraphicalModel_descriptor;
@@ -204,12 +129,14 @@ public final class GraphicalModelProto {
     /**
      * <code>repeated .edu.stanford.nlp.loglinear.model.proto.Factor factor = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor> getFactorList() {
       return factor_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.loglinear.model.proto.Factor factor = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.FactorOrBuilder> 
         getFactorOrBuilderList() {
       return factor_;
@@ -217,18 +144,21 @@ public final class GraphicalModelProto {
     /**
      * <code>repeated .edu.stanford.nlp.loglinear.model.proto.Factor factor = 1;</code>
      */
+    @java.lang.Override
     public int getFactorCount() {
       return factor_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.loglinear.model.proto.Factor factor = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor getFactor(int index) {
       return factor_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.loglinear.model.proto.Factor factor = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.FactorOrBuilder getFactorOrBuilder(
         int index) {
       return factor_.get(index);
@@ -239,12 +169,14 @@ public final class GraphicalModelProto {
     /**
      * <code>repeated .edu.stanford.nlp.loglinear.model.proto.MetaData variableMetaData = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData> getVariableMetaDataList() {
       return variableMetaData_;
     }
     /**
      * <code>repeated .edu.stanford.nlp.loglinear.model.proto.MetaData variableMetaData = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder> 
         getVariableMetaDataOrBuilderList() {
       return variableMetaData_;
@@ -252,18 +184,21 @@ public final class GraphicalModelProto {
     /**
      * <code>repeated .edu.stanford.nlp.loglinear.model.proto.MetaData variableMetaData = 2;</code>
      */
+    @java.lang.Override
     public int getVariableMetaDataCount() {
       return variableMetaData_.size();
     }
     /**
      * <code>repeated .edu.stanford.nlp.loglinear.model.proto.MetaData variableMetaData = 2;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getVariableMetaData(int index) {
       return variableMetaData_.get(index);
     }
     /**
      * <code>repeated .edu.stanford.nlp.loglinear.model.proto.MetaData variableMetaData = 2;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder getVariableMetaDataOrBuilder(
         int index) {
       return variableMetaData_.get(index);
@@ -275,6 +210,7 @@ public final class GraphicalModelProto {
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
      * @return Whether the metaData field is set.
      */
+    @java.lang.Override
     public boolean hasMetaData() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -282,12 +218,14 @@ public final class GraphicalModelProto {
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
      * @return The metaData.
      */
+    @java.lang.Override
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getMetaData() {
       return metaData_ == null ? edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
     }
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder getMetaDataOrBuilder() {
       return metaData_ == null ? edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
     }
@@ -321,7 +259,7 @@ public final class GraphicalModelProto {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeMessage(3, getMetaData());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -342,7 +280,7 @@ public final class GraphicalModelProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getMetaData());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -366,7 +304,7 @@ public final class GraphicalModelProto {
         if (!getMetaData()
             .equals(other.getMetaData())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -389,7 +327,7 @@ public final class GraphicalModelProto {
         hash = (37 * hash) + METADATA_FIELD_NUMBER;
         hash = (53 * hash) + getMetaData().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -527,16 +465,18 @@ public final class GraphicalModelProto {
         super.clear();
         if (factorBuilder_ == null) {
           factor_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          factor_ = null;
           factorBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (variableMetaDataBuilder_ == null) {
           variableMetaData_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
+          variableMetaData_ = null;
           variableMetaDataBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000002);
         if (metaDataBuilder_ == null) {
           metaData_ = null;
         } else {
@@ -701,7 +641,7 @@ public final class GraphicalModelProto {
         if (other.hasMetaData()) {
           mergeMetaData(other.getMetaData());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -721,17 +661,63 @@ public final class GraphicalModelProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor m =
+                    input.readMessage(
+                        edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.PARSER,
+                        extensionRegistry);
+                if (factorBuilder_ == null) {
+                  ensureFactorIsMutable();
+                  factor_.add(m);
+                } else {
+                  factorBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData m =
+                    input.readMessage(
+                        edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.PARSER,
+                        extensionRegistry);
+                if (variableMetaDataBuilder_ == null) {
+                  ensureVariableMetaDataIsMutable();
+                  variableMetaData_.add(m);
+                } else {
+                  variableMetaDataBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getMetaDataFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.GraphicalModel) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -1368,7 +1354,18 @@ public final class GraphicalModelProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GraphicalModel(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -1442,7 +1439,7 @@ public final class GraphicalModelProto {
   /**
    * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.Factor}
    */
-  public  static final class Factor extends
+  public static final class Factor extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.loglinear.model.proto.Factor)
       FactorOrBuilder {
@@ -1467,94 +1464,6 @@ public final class GraphicalModelProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private Factor(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) != 0)) {
-                subBuilder = featuresTable_.toBuilder();
-              }
-              featuresTable_ = input.readMessage(edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(featuresTable_);
-                featuresTable_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000001;
-              break;
-            }
-            case 16: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                neighbor_ = newIntList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              neighbor_.addInt(input.readInt32());
-              break;
-            }
-            case 18: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000002) != 0) && input.getBytesUntilLimit() > 0) {
-                neighbor_ = newIntList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                neighbor_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 26: {
-              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000002) != 0)) {
-                subBuilder = metaData_.toBuilder();
-              }
-              metaData_ = input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(metaData_);
-                metaData_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000002;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          neighbor_.makeImmutable(); // C
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.internal_static_edu_stanford_nlp_loglinear_model_proto_Factor_descriptor;
@@ -1575,6 +1484,7 @@ public final class GraphicalModelProto {
      * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
      * @return Whether the featuresTable field is set.
      */
+    @java.lang.Override
     public boolean hasFeaturesTable() {
       return ((bitField0_ & 0x00000001) != 0);
     }
@@ -1582,12 +1492,14 @@ public final class GraphicalModelProto {
      * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
      * @return The featuresTable.
      */
+    @java.lang.Override
     public edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable getFeaturesTable() {
       return featuresTable_ == null ? edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance() : featuresTable_;
     }
     /**
      * <code>required .edu.stanford.nlp.loglinear.model.proto.ConcatVectorTable featuresTable = 1;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTableOrBuilder getFeaturesTableOrBuilder() {
       return featuresTable_ == null ? edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance() : featuresTable_;
     }
@@ -1598,6 +1510,7 @@ public final class GraphicalModelProto {
      * <code>repeated int32 neighbor = 2;</code>
      * @return A list containing the neighbor.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
         getNeighborList() {
       return neighbor_;
@@ -1624,6 +1537,7 @@ public final class GraphicalModelProto {
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
      * @return Whether the metaData field is set.
      */
+    @java.lang.Override
     public boolean hasMetaData() {
       return ((bitField0_ & 0x00000002) != 0);
     }
@@ -1631,12 +1545,14 @@ public final class GraphicalModelProto {
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
      * @return The metaData.
      */
+    @java.lang.Override
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData getMetaData() {
       return metaData_ == null ? edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
     }
     /**
      * <code>optional .edu.stanford.nlp.loglinear.model.proto.MetaData metaData = 3;</code>
      */
+    @java.lang.Override
     public edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder getMetaDataOrBuilder() {
       return metaData_ == null ? edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.getDefaultInstance() : metaData_;
     }
@@ -1672,7 +1588,7 @@ public final class GraphicalModelProto {
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeMessage(3, getMetaData());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -1698,7 +1614,7 @@ public final class GraphicalModelProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getMetaData());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -1725,7 +1641,7 @@ public final class GraphicalModelProto {
         if (!getMetaData()
             .equals(other.getMetaData())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -1748,7 +1664,7 @@ public final class GraphicalModelProto {
         hash = (37 * hash) + METADATA_FIELD_NUMBER;
         hash = (53 * hash) + getMetaData().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -2011,7 +1927,7 @@ public final class GraphicalModelProto {
         if (other.hasMetaData()) {
           mergeMetaData(other.getMetaData());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -2032,17 +1948,60 @@ public final class GraphicalModelProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getFeaturesTableFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                int v = input.readInt32();
+                ensureNeighborIsMutable();
+                neighbor_.addInt(v);
+                break;
+              } // case 16
+              case 18: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureNeighborIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  neighbor_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getMetaDataFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -2398,7 +2357,18 @@ public final class GraphicalModelProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Factor(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2475,7 +2445,7 @@ public final class GraphicalModelProto {
   /**
    * Protobuf type {@code edu.stanford.nlp.loglinear.model.proto.MetaData}
    */
-  public  static final class MetaData extends
+  public static final class MetaData extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:edu.stanford.nlp.loglinear.model.proto.MetaData)
       MetaDataOrBuilder {
@@ -2500,68 +2470,6 @@ public final class GraphicalModelProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private MetaData(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                key_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              key_.add(bs);
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                value_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              value_.add(bs);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          key_ = key_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          value_ = value_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -2666,7 +2574,7 @@ public final class GraphicalModelProto {
       for (int i = 0; i < value_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_.getRaw(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -2691,7 +2599,7 @@ public final class GraphicalModelProto {
         size += dataSize;
         size += 1 * getValueList().size();
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -2710,7 +2618,7 @@ public final class GraphicalModelProto {
           .equals(other.getKeyList())) return false;
       if (!getValueList()
           .equals(other.getValueList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -2729,7 +2637,7 @@ public final class GraphicalModelProto {
         hash = (37 * hash) + VALUE_FIELD_NUMBER;
         hash = (53 * hash) + getValueList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -2846,18 +2754,13 @@ public final class GraphicalModelProto {
 
       // Construct using edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -2971,7 +2874,7 @@ public final class GraphicalModelProto {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -2986,17 +2889,42 @@ public final class GraphicalModelProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensureKeyIsMutable();
+                key_.add(bs);
+                break;
+              } // case 10
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensureValueIsMutable();
+                value_.add(bs);
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -3251,7 +3179,18 @@ public final class GraphicalModelProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new MetaData(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 

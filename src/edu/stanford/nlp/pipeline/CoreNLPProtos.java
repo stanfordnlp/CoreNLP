@@ -942,231 +942,6 @@ public final class CoreNLPProtos {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private Document(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              text_ = bs;
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                sentence_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              sentence_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.PARSER, extensionRegistry));
-              break;
-            }
-            case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                corefChain_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              corefChain_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.PARSER, extensionRegistry));
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
-              docID_ = bs;
-              break;
-            }
-            case 42: {
-              if (!((mutable_bitField0_ & 0x00000040) != 0)) {
-                sentencelessToken_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Token>();
-                mutable_bitField0_ |= 0x00000040;
-              }
-              sentencelessToken_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER, extensionRegistry));
-              break;
-            }
-            case 50: {
-              if (!((mutable_bitField0_ & 0x00000100) != 0)) {
-                quote_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Quote>();
-                mutable_bitField0_ |= 0x00000100;
-              }
-              quote_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Quote.PARSER, extensionRegistry));
-              break;
-            }
-            case 58: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              docDate_ = bs;
-              break;
-            }
-            case 64: {
-              bitField0_ |= 0x00000008;
-              calendar_ = input.readUInt64();
-              break;
-            }
-            case 74: {
-              if (!((mutable_bitField0_ & 0x00000200) != 0)) {
-                mentions_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention>();
-                mutable_bitField0_ |= 0x00000200;
-              }
-              mentions_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention.PARSER, extensionRegistry));
-              break;
-            }
-            case 82: {
-              if (!((mutable_bitField0_ & 0x00000080) != 0)) {
-                character_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Token>();
-                mutable_bitField0_ |= 0x00000080;
-              }
-              character_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER, extensionRegistry));
-              break;
-            }
-            case 88: {
-              bitField0_ |= 0x00000020;
-              xmlDoc_ = input.readBool();
-              break;
-            }
-            case 98: {
-              if (!((mutable_bitField0_ & 0x00001000) != 0)) {
-                sections_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Section>();
-                mutable_bitField0_ |= 0x00001000;
-              }
-              sections_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Section.PARSER, extensionRegistry));
-              break;
-            }
-            case 104: {
-              bitField0_ |= 0x00000010;
-              hasEntityMentionsAnnotation_ = input.readBool();
-              break;
-            }
-            case 114: {
-              if (!((mutable_bitField0_ & 0x00002000) != 0)) {
-                mentionsForCoref_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Mention>();
-                mutable_bitField0_ |= 0x00002000;
-              }
-              mentionsForCoref_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Mention.PARSER, extensionRegistry));
-              break;
-            }
-            case 120: {
-              bitField0_ |= 0x00000040;
-              hasCorefMentionAnnotation_ = input.readBool();
-              break;
-            }
-            case 128: {
-              bitField0_ |= 0x00000080;
-              hasCorefAnnotation_ = input.readBool();
-              break;
-            }
-            case 136: {
-              if (!((mutable_bitField0_ & 0x00010000) != 0)) {
-                corefMentionToEntityMentionMappings_ = newIntList();
-                mutable_bitField0_ |= 0x00010000;
-              }
-              corefMentionToEntityMentionMappings_.addInt(input.readInt32());
-              break;
-            }
-            case 138: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00010000) != 0) && input.getBytesUntilLimit() > 0) {
-                corefMentionToEntityMentionMappings_ = newIntList();
-                mutable_bitField0_ |= 0x00010000;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                corefMentionToEntityMentionMappings_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 144: {
-              if (!((mutable_bitField0_ & 0x00020000) != 0)) {
-                entityMentionToCorefMentionMappings_ = newIntList();
-                mutable_bitField0_ |= 0x00020000;
-              }
-              entityMentionToCorefMentionMappings_.addInt(input.readInt32());
-              break;
-            }
-            case 146: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00020000) != 0) && input.getBytesUntilLimit() > 0) {
-                entityMentionToCorefMentionMappings_ = newIntList();
-                mutable_bitField0_ |= 0x00020000;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                entityMentionToCorefMentionMappings_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          sentence_ = java.util.Collections.unmodifiableList(sentence_);
-        }
-        if (((mutable_bitField0_ & 0x00000004) != 0)) {
-          corefChain_ = java.util.Collections.unmodifiableList(corefChain_);
-        }
-        if (((mutable_bitField0_ & 0x00000040) != 0)) {
-          sentencelessToken_ = java.util.Collections.unmodifiableList(sentencelessToken_);
-        }
-        if (((mutable_bitField0_ & 0x00000100) != 0)) {
-          quote_ = java.util.Collections.unmodifiableList(quote_);
-        }
-        if (((mutable_bitField0_ & 0x00000200) != 0)) {
-          mentions_ = java.util.Collections.unmodifiableList(mentions_);
-        }
-        if (((mutable_bitField0_ & 0x00000080) != 0)) {
-          character_ = java.util.Collections.unmodifiableList(character_);
-        }
-        if (((mutable_bitField0_ & 0x00001000) != 0)) {
-          sections_ = java.util.Collections.unmodifiableList(sections_);
-        }
-        if (((mutable_bitField0_ & 0x00002000) != 0)) {
-          mentionsForCoref_ = java.util.Collections.unmodifiableList(mentionsForCoref_);
-        }
-        if (((mutable_bitField0_ & 0x00010000) != 0)) {
-          corefMentionToEntityMentionMappings_.makeImmutable(); // C
-        }
-        if (((mutable_bitField0_ & 0x00020000) != 0)) {
-          entityMentionToCorefMentionMappings_.makeImmutable(); // C
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_Document_descriptor;
@@ -2009,7 +1784,7 @@ public final class CoreNLPProtos {
         output.writeInt32(18, entityMentionToCorefMentionMappings_.getInt(i));
       }
       extensionWriter.writeUntil(256, output);
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -2098,7 +1873,7 @@ public final class CoreNLPProtos {
         size += 2 * getEntityMentionToCorefMentionMappingsList().size();
       }
       size += extensionsSerializedSize();
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -2173,7 +1948,7 @@ public final class CoreNLPProtos {
           .equals(other.getCorefMentionToEntityMentionMappingsList())) return false;
       if (!getEntityMentionToCorefMentionMappingsList()
           .equals(other.getEntityMentionToCorefMentionMappingsList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       if (!getExtensionFields().equals(other.getExtensionFields()))
         return false;
       return true;
@@ -2264,7 +2039,7 @@ public final class CoreNLPProtos {
         hash = (53 * hash) + getEntityMentionToCorefMentionMappingsList().hashCode();
       }
       hash = hashFields(hash, getExtensionFields());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -2386,26 +2161,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.Document.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getSentenceFieldBuilder();
-          getCorefChainFieldBuilder();
-          getSentencelessTokenFieldBuilder();
-          getCharacterFieldBuilder();
-          getQuoteFieldBuilder();
-          getMentionsFieldBuilder();
-          getSectionsFieldBuilder();
-          getMentionsForCorefFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -2414,16 +2176,18 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         if (sentenceBuilder_ == null) {
           sentence_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
+          sentence_ = null;
           sentenceBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000002);
         if (corefChainBuilder_ == null) {
           corefChain_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
         } else {
+          corefChain_ = null;
           corefChainBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000004);
         docID_ = "";
         bitField0_ = (bitField0_ & ~0x00000008);
         docDate_ = "";
@@ -2432,44 +2196,50 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000020);
         if (sentencelessTokenBuilder_ == null) {
           sentencelessToken_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000040);
         } else {
+          sentencelessToken_ = null;
           sentencelessTokenBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000040);
         if (characterBuilder_ == null) {
           character_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000080);
         } else {
+          character_ = null;
           characterBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000080);
         if (quoteBuilder_ == null) {
           quote_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000100);
         } else {
+          quote_ = null;
           quoteBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000100);
         if (mentionsBuilder_ == null) {
           mentions_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000200);
         } else {
+          mentions_ = null;
           mentionsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000200);
         hasEntityMentionsAnnotation_ = false;
         bitField0_ = (bitField0_ & ~0x00000400);
         xmlDoc_ = false;
         bitField0_ = (bitField0_ & ~0x00000800);
         if (sectionsBuilder_ == null) {
           sections_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00001000);
         } else {
+          sections_ = null;
           sectionsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00001000);
         if (mentionsForCorefBuilder_ == null) {
           mentionsForCoref_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00002000);
         } else {
+          mentionsForCoref_ = null;
           mentionsForCorefBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00002000);
         hasCorefMentionAnnotation_ = false;
         bitField0_ = (bitField0_ & ~0x00004000);
         hasCorefAnnotation_ = false;
@@ -2955,7 +2725,7 @@ public final class CoreNLPProtos {
           onChanged();
         }
         this.mergeExtensionFields(other);
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -3011,17 +2781,206 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Document parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                text_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.PARSER,
+                        extensionRegistry);
+                if (sentenceBuilder_ == null) {
+                  ensureSentenceIsMutable();
+                  sentence_.add(m);
+                } else {
+                  sentenceBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              case 26: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.PARSER,
+                        extensionRegistry);
+                if (corefChainBuilder_ == null) {
+                  ensureCorefChainIsMutable();
+                  corefChain_.add(m);
+                } else {
+                  corefChainBuilder_.addMessage(m);
+                }
+                break;
+              } // case 26
+              case 34: {
+                docID_ = input.readBytes();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Token m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER,
+                        extensionRegistry);
+                if (sentencelessTokenBuilder_ == null) {
+                  ensureSentencelessTokenIsMutable();
+                  sentencelessToken_.add(m);
+                } else {
+                  sentencelessTokenBuilder_.addMessage(m);
+                }
+                break;
+              } // case 42
+              case 50: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Quote m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Quote.PARSER,
+                        extensionRegistry);
+                if (quoteBuilder_ == null) {
+                  ensureQuoteIsMutable();
+                  quote_.add(m);
+                } else {
+                  quoteBuilder_.addMessage(m);
+                }
+                break;
+              } // case 50
+              case 58: {
+                docDate_ = input.readBytes();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 58
+              case 64: {
+                calendar_ = input.readUInt64();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 64
+              case 74: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention.PARSER,
+                        extensionRegistry);
+                if (mentionsBuilder_ == null) {
+                  ensureMentionsIsMutable();
+                  mentions_.add(m);
+                } else {
+                  mentionsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 74
+              case 82: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Token m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER,
+                        extensionRegistry);
+                if (characterBuilder_ == null) {
+                  ensureCharacterIsMutable();
+                  character_.add(m);
+                } else {
+                  characterBuilder_.addMessage(m);
+                }
+                break;
+              } // case 82
+              case 88: {
+                xmlDoc_ = input.readBool();
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 88
+              case 98: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Section m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Section.PARSER,
+                        extensionRegistry);
+                if (sectionsBuilder_ == null) {
+                  ensureSectionsIsMutable();
+                  sections_.add(m);
+                } else {
+                  sectionsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 98
+              case 104: {
+                hasEntityMentionsAnnotation_ = input.readBool();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 104
+              case 114: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Mention m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Mention.PARSER,
+                        extensionRegistry);
+                if (mentionsForCorefBuilder_ == null) {
+                  ensureMentionsForCorefIsMutable();
+                  mentionsForCoref_.add(m);
+                } else {
+                  mentionsForCorefBuilder_.addMessage(m);
+                }
+                break;
+              } // case 114
+              case 120: {
+                hasCorefMentionAnnotation_ = input.readBool();
+                bitField0_ |= 0x00004000;
+                break;
+              } // case 120
+              case 128: {
+                hasCorefAnnotation_ = input.readBool();
+                bitField0_ |= 0x00008000;
+                break;
+              } // case 128
+              case 136: {
+                int v = input.readInt32();
+                ensureCorefMentionToEntityMentionMappingsIsMutable();
+                corefMentionToEntityMentionMappings_.addInt(v);
+                break;
+              } // case 136
+              case 138: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureCorefMentionToEntityMentionMappingsIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  corefMentionToEntityMentionMappings_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 138
+              case 144: {
+                int v = input.readInt32();
+                ensureEntityMentionToCorefMentionMappingsIsMutable();
+                entityMentionToCorefMentionMappings_.addInt(v);
+                break;
+              } // case 144
+              case 146: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureEntityMentionToCorefMentionMappingsIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  entityMentionToCorefMentionMappings_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 146
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Document) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -5889,7 +5848,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Document(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -6963,446 +6933,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Sentence(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      int mutable_bitField1_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                token_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Token>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              token_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER, extensionRegistry));
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000001;
-              tokenOffsetBegin_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000002;
-              tokenOffsetEnd_ = input.readUInt32();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000004;
-              sentenceIndex_ = input.readUInt32();
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000008;
-              characterOffsetBegin_ = input.readUInt32();
-              break;
-            }
-            case 48: {
-              bitField0_ |= 0x00000010;
-              characterOffsetEnd_ = input.readUInt32();
-              break;
-            }
-            case 58: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000020) != 0)) {
-                subBuilder = parseTree_.toBuilder();
-              }
-              parseTree_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(parseTree_);
-                parseTree_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000020;
-              break;
-            }
-            case 66: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000200) != 0)) {
-                subBuilder = basicDependencies_.toBuilder();
-              }
-              basicDependencies_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(basicDependencies_);
-                basicDependencies_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000200;
-              break;
-            }
-            case 74: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000400) != 0)) {
-                subBuilder = collapsedDependencies_.toBuilder();
-              }
-              collapsedDependencies_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(collapsedDependencies_);
-                collapsedDependencies_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000400;
-              break;
-            }
-            case 82: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000800) != 0)) {
-                subBuilder = collapsedCCProcessedDependencies_.toBuilder();
-              }
-              collapsedCCProcessedDependencies_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(collapsedCCProcessedDependencies_);
-                collapsedCCProcessedDependencies_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000800;
-              break;
-            }
-            case 88: {
-              bitField0_ |= 0x00008000;
-              paragraph_ = input.readUInt32();
-              break;
-            }
-            case 98: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00010000;
-              text_ = bs;
-              break;
-            }
-            case 106: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder subBuilder = null;
-              if (((bitField0_ & 0x00001000) != 0)) {
-                subBuilder = alternativeDependencies_.toBuilder();
-              }
-              alternativeDependencies_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(alternativeDependencies_);
-                alternativeDependencies_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00001000;
-              break;
-            }
-            case 114: {
-              if (!((mutable_bitField0_ & 0x00008000) != 0)) {
-                openieTriple_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple>();
-                mutable_bitField0_ |= 0x00008000;
-              }
-              openieTriple_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.PARSER, extensionRegistry));
-              break;
-            }
-            case 122: {
-              if (!((mutable_bitField0_ & 0x00020000) != 0)) {
-                entailedSentence_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment>();
-                mutable_bitField0_ |= 0x00020000;
-              }
-              entailedSentence_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment.PARSER, extensionRegistry));
-              break;
-            }
-            case 130: {
-              if (!((mutable_bitField0_ & 0x00010000) != 0)) {
-                kbpTriple_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple>();
-                mutable_bitField0_ |= 0x00010000;
-              }
-              kbpTriple_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.PARSER, extensionRegistry));
-              break;
-            }
-            case 138: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder subBuilder = null;
-              if (((bitField0_ & 0x00002000) != 0)) {
-                subBuilder = enhancedDependencies_.toBuilder();
-              }
-              enhancedDependencies_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(enhancedDependencies_);
-                enhancedDependencies_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00002000;
-              break;
-            }
-            case 146: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder subBuilder = null;
-              if (((bitField0_ & 0x00004000) != 0)) {
-                subBuilder = enhancedPlusPlusDependencies_.toBuilder();
-              }
-              enhancedPlusPlusDependencies_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(enhancedPlusPlusDependencies_);
-                enhancedPlusPlusDependencies_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00004000;
-              break;
-            }
-            case 154: {
-              if (!((mutable_bitField0_ & 0x00200000) != 0)) {
-                character_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Token>();
-                mutable_bitField0_ |= 0x00200000;
-              }
-              character_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER, extensionRegistry));
-              break;
-            }
-            case 160: {
-              bitField0_ |= 0x00020000;
-              lineNumber_ = input.readUInt32();
-              break;
-            }
-            case 250: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000040) != 0)) {
-                subBuilder = binarizedParseTree_.toBuilder();
-              }
-              binarizedParseTree_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(binarizedParseTree_);
-                binarizedParseTree_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000040;
-              break;
-            }
-            case 258: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000080) != 0)) {
-                subBuilder = annotatedParseTree_.toBuilder();
-              }
-              annotatedParseTree_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(annotatedParseTree_);
-                annotatedParseTree_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000080;
-              break;
-            }
-            case 266: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000100;
-              sentiment_ = bs;
-              break;
-            }
-            case 274: {
-              if (!((mutable_bitField0_ & 0x00000400) != 0)) {
-                kBestParseTrees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree>();
-                mutable_bitField0_ |= 0x00000400;
-              }
-              kBestParseTrees_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.PARSER, extensionRegistry));
-              break;
-            }
-            case 282: {
-              if (!((mutable_bitField0_ & 0x00040000) != 0)) {
-                entailedClause_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment>();
-                mutable_bitField0_ |= 0x00040000;
-              }
-              entailedClause_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment.PARSER, extensionRegistry));
-              break;
-            }
-            case 408: {
-              bitField0_ |= 0x00040000;
-              hasRelationAnnotations_ = input.readBool();
-              break;
-            }
-            case 418: {
-              if (!((mutable_bitField0_ & 0x04000000) != 0)) {
-                entity_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity>();
-                mutable_bitField0_ |= 0x04000000;
-              }
-              entity_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.PARSER, extensionRegistry));
-              break;
-            }
-            case 426: {
-              if (!((mutable_bitField0_ & 0x08000000) != 0)) {
-                relation_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Relation>();
-                mutable_bitField0_ |= 0x08000000;
-              }
-              relation_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Relation.PARSER, extensionRegistry));
-              break;
-            }
-            case 432: {
-              bitField0_ |= 0x00080000;
-              hasNumerizedTokensAnnotation_ = input.readBool();
-              break;
-            }
-            case 442: {
-              if (!((mutable_bitField0_ & 0x20000000) != 0)) {
-                mentions_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention>();
-                mutable_bitField0_ |= 0x20000000;
-              }
-              mentions_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention.PARSER, extensionRegistry));
-              break;
-            }
-            case 450: {
-              if (!((mutable_bitField0_ & 0x40000000) != 0)) {
-                mentionsForCoref_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Mention>();
-                mutable_bitField0_ |= 0x40000000;
-              }
-              mentionsForCoref_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Mention.PARSER, extensionRegistry));
-              break;
-            }
-            case 456: {
-              bitField0_ |= 0x00100000;
-              hasCorefMentionsAnnotation_ = input.readBool();
-              break;
-            }
-            case 466: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00200000;
-              sentenceID_ = bs;
-              break;
-            }
-            case 474: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00400000;
-              sectionDate_ = bs;
-              break;
-            }
-            case 480: {
-              bitField0_ |= 0x00800000;
-              sectionIndex_ = input.readUInt32();
-              break;
-            }
-            case 490: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x01000000;
-              sectionName_ = bs;
-              break;
-            }
-            case 498: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x02000000;
-              sectionAuthor_ = bs;
-              break;
-            }
-            case 506: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x04000000;
-              docID_ = bs;
-              break;
-            }
-            case 512: {
-              bitField0_ |= 0x08000000;
-              sectionQuoted_ = input.readBool();
-              break;
-            }
-            case 520: {
-              bitField0_ |= 0x10000000;
-              hasEntityMentionsAnnotation_ = input.readBool();
-              break;
-            }
-            case 528: {
-              bitField0_ |= 0x80000000;
-              chapterIndex_ = input.readUInt32();
-              break;
-            }
-            case 536: {
-              bitField1_ |= 0x00000001;
-              paragraphIndex_ = input.readUInt32();
-              break;
-            }
-            case 544: {
-              bitField0_ |= 0x20000000;
-              hasKBPTriplesAnnotation_ = input.readBool();
-              break;
-            }
-            case 552: {
-              bitField0_ |= 0x40000000;
-              hasOpenieTriplesAnnotation_ = input.readBool();
-              break;
-            }
-            case 562: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder subBuilder = null;
-              if (((bitField1_ & 0x00000002) != 0)) {
-                subBuilder = enhancedSentence_.toBuilder();
-              }
-              enhancedSentence_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(enhancedSentence_);
-                enhancedSentence_ = subBuilder.buildPartial();
-              }
-              bitField1_ |= 0x00000002;
-              break;
-            }
-            case 570: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00000004;
-              speaker_ = bs;
-              break;
-            }
-            case 578: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00000008;
-              speakerType_ = bs;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          token_ = java.util.Collections.unmodifiableList(token_);
-        }
-        if (((mutable_bitField0_ & 0x00008000) != 0)) {
-          openieTriple_ = java.util.Collections.unmodifiableList(openieTriple_);
-        }
-        if (((mutable_bitField0_ & 0x00020000) != 0)) {
-          entailedSentence_ = java.util.Collections.unmodifiableList(entailedSentence_);
-        }
-        if (((mutable_bitField0_ & 0x00010000) != 0)) {
-          kbpTriple_ = java.util.Collections.unmodifiableList(kbpTriple_);
-        }
-        if (((mutable_bitField0_ & 0x00200000) != 0)) {
-          character_ = java.util.Collections.unmodifiableList(character_);
-        }
-        if (((mutable_bitField0_ & 0x00000400) != 0)) {
-          kBestParseTrees_ = java.util.Collections.unmodifiableList(kBestParseTrees_);
-        }
-        if (((mutable_bitField0_ & 0x00040000) != 0)) {
-          entailedClause_ = java.util.Collections.unmodifiableList(entailedClause_);
-        }
-        if (((mutable_bitField0_ & 0x04000000) != 0)) {
-          entity_ = java.util.Collections.unmodifiableList(entity_);
-        }
-        if (((mutable_bitField0_ & 0x08000000) != 0)) {
-          relation_ = java.util.Collections.unmodifiableList(relation_);
-        }
-        if (((mutable_bitField0_ & 0x20000000) != 0)) {
-          mentions_ = java.util.Collections.unmodifiableList(mentions_);
-        }
-        if (((mutable_bitField0_ & 0x40000000) != 0)) {
-          mentionsForCoref_ = java.util.Collections.unmodifiableList(mentionsForCoref_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -9361,7 +8891,7 @@ public final class CoreNLPProtos {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 72, speakerType_);
       }
       extensionWriter.writeUntil(256, output);
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -9550,7 +9080,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(72, speakerType_);
       }
       size += extensionsSerializedSize();
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -9767,7 +9297,7 @@ public final class CoreNLPProtos {
         if (!getSpeakerType()
             .equals(other.getSpeakerType())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       if (!getExtensionFields().equals(other.getExtensionFields()))
         return false;
       return true;
@@ -9976,7 +9506,7 @@ public final class CoreNLPProtos {
         hash = (53 * hash) + getSpeakerType().hashCode();
       }
       hash = hashFields(hash, getExtensionFields());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -10137,10 +9667,11 @@ public final class CoreNLPProtos {
         super.clear();
         if (tokenBuilder_ == null) {
           token_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          token_ = null;
           tokenBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         tokenOffsetBegin_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
         tokenOffsetEnd_ = 0;
@@ -10173,10 +9704,11 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000200);
         if (kBestParseTreesBuilder_ == null) {
           kBestParseTrees_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000400);
         } else {
+          kBestParseTrees_ = null;
           kBestParseTreesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000400);
         if (basicDependenciesBuilder_ == null) {
           basicDependencies_ = null;
         } else {
@@ -10203,28 +9735,32 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00004000);
         if (openieTripleBuilder_ == null) {
           openieTriple_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00008000);
         } else {
+          openieTriple_ = null;
           openieTripleBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00008000);
         if (kbpTripleBuilder_ == null) {
           kbpTriple_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00010000);
         } else {
+          kbpTriple_ = null;
           kbpTripleBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00010000);
         if (entailedSentenceBuilder_ == null) {
           entailedSentence_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00020000);
         } else {
+          entailedSentence_ = null;
           entailedSentenceBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00020000);
         if (entailedClauseBuilder_ == null) {
           entailedClause_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00040000);
         } else {
+          entailedClause_ = null;
           entailedClauseBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00040000);
         if (enhancedDependenciesBuilder_ == null) {
           enhancedDependencies_ = null;
         } else {
@@ -10239,10 +9775,11 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00100000);
         if (characterBuilder_ == null) {
           character_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00200000);
         } else {
+          character_ = null;
           characterBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00200000);
         paragraph_ = 0;
         bitField0_ = (bitField0_ & ~0x00400000);
         text_ = "";
@@ -10253,30 +9790,34 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x02000000);
         if (entityBuilder_ == null) {
           entity_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x04000000);
         } else {
+          entity_ = null;
           entityBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x04000000);
         if (relationBuilder_ == null) {
           relation_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x08000000);
         } else {
+          relation_ = null;
           relationBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x08000000);
         hasNumerizedTokensAnnotation_ = false;
         bitField0_ = (bitField0_ & ~0x10000000);
         if (mentionsBuilder_ == null) {
           mentions_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x20000000);
         } else {
+          mentions_ = null;
           mentionsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x20000000);
         if (mentionsForCorefBuilder_ == null) {
           mentionsForCoref_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x40000000);
         } else {
+          mentionsForCoref_ = null;
           mentionsForCorefBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x40000000);
         hasCorefMentionsAnnotation_ = false;
         bitField0_ = (bitField0_ & ~0x80000000);
         sentenceID_ = "";
@@ -11116,7 +10657,7 @@ public final class CoreNLPProtos {
           onChanged();
         }
         this.mergeExtensionFields(other);
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -11200,17 +10741,373 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Token m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER,
+                        extensionRegistry);
+                if (tokenBuilder_ == null) {
+                  ensureTokenIsMutable();
+                  token_.add(m);
+                } else {
+                  tokenBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 16: {
+                tokenOffsetBegin_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                tokenOffsetEnd_ = input.readUInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 32: {
+                sentenceIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              case 40: {
+                characterOffsetBegin_ = input.readUInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 48: {
+                characterOffsetEnd_ = input.readUInt32();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 48
+              case 58: {
+                input.readMessage(
+                    getParseTreeFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 58
+              case 66: {
+                input.readMessage(
+                    getBasicDependenciesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 66
+              case 74: {
+                input.readMessage(
+                    getCollapsedDependenciesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00001000;
+                break;
+              } // case 74
+              case 82: {
+                input.readMessage(
+                    getCollapsedCCProcessedDependenciesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00002000;
+                break;
+              } // case 82
+              case 88: {
+                paragraph_ = input.readUInt32();
+                bitField0_ |= 0x00400000;
+                break;
+              } // case 88
+              case 98: {
+                text_ = input.readBytes();
+                bitField0_ |= 0x00800000;
+                break;
+              } // case 98
+              case 106: {
+                input.readMessage(
+                    getAlternativeDependenciesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00004000;
+                break;
+              } // case 106
+              case 114: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.PARSER,
+                        extensionRegistry);
+                if (openieTripleBuilder_ == null) {
+                  ensureOpenieTripleIsMutable();
+                  openieTriple_.add(m);
+                } else {
+                  openieTripleBuilder_.addMessage(m);
+                }
+                break;
+              } // case 114
+              case 122: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment.PARSER,
+                        extensionRegistry);
+                if (entailedSentenceBuilder_ == null) {
+                  ensureEntailedSentenceIsMutable();
+                  entailedSentence_.add(m);
+                } else {
+                  entailedSentenceBuilder_.addMessage(m);
+                }
+                break;
+              } // case 122
+              case 130: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.PARSER,
+                        extensionRegistry);
+                if (kbpTripleBuilder_ == null) {
+                  ensureKbpTripleIsMutable();
+                  kbpTriple_.add(m);
+                } else {
+                  kbpTripleBuilder_.addMessage(m);
+                }
+                break;
+              } // case 130
+              case 138: {
+                input.readMessage(
+                    getEnhancedDependenciesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00080000;
+                break;
+              } // case 138
+              case 146: {
+                input.readMessage(
+                    getEnhancedPlusPlusDependenciesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00100000;
+                break;
+              } // case 146
+              case 154: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Token m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER,
+                        extensionRegistry);
+                if (characterBuilder_ == null) {
+                  ensureCharacterIsMutable();
+                  character_.add(m);
+                } else {
+                  characterBuilder_.addMessage(m);
+                }
+                break;
+              } // case 154
+              case 160: {
+                lineNumber_ = input.readUInt32();
+                bitField0_ |= 0x01000000;
+                break;
+              } // case 160
+              case 250: {
+                input.readMessage(
+                    getBinarizedParseTreeFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 250
+              case 258: {
+                input.readMessage(
+                    getAnnotatedParseTreeFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 258
+              case 266: {
+                sentiment_ = input.readBytes();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 266
+              case 274: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.PARSER,
+                        extensionRegistry);
+                if (kBestParseTreesBuilder_ == null) {
+                  ensureKBestParseTreesIsMutable();
+                  kBestParseTrees_.add(m);
+                } else {
+                  kBestParseTreesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 274
+              case 282: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment.PARSER,
+                        extensionRegistry);
+                if (entailedClauseBuilder_ == null) {
+                  ensureEntailedClauseIsMutable();
+                  entailedClause_.add(m);
+                } else {
+                  entailedClauseBuilder_.addMessage(m);
+                }
+                break;
+              } // case 282
+              case 408: {
+                hasRelationAnnotations_ = input.readBool();
+                bitField0_ |= 0x02000000;
+                break;
+              } // case 408
+              case 418: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Entity m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.PARSER,
+                        extensionRegistry);
+                if (entityBuilder_ == null) {
+                  ensureEntityIsMutable();
+                  entity_.add(m);
+                } else {
+                  entityBuilder_.addMessage(m);
+                }
+                break;
+              } // case 418
+              case 426: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Relation m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Relation.PARSER,
+                        extensionRegistry);
+                if (relationBuilder_ == null) {
+                  ensureRelationIsMutable();
+                  relation_.add(m);
+                } else {
+                  relationBuilder_.addMessage(m);
+                }
+                break;
+              } // case 426
+              case 432: {
+                hasNumerizedTokensAnnotation_ = input.readBool();
+                bitField0_ |= 0x10000000;
+                break;
+              } // case 432
+              case 442: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention.PARSER,
+                        extensionRegistry);
+                if (mentionsBuilder_ == null) {
+                  ensureMentionsIsMutable();
+                  mentions_.add(m);
+                } else {
+                  mentionsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 442
+              case 450: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Mention m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Mention.PARSER,
+                        extensionRegistry);
+                if (mentionsForCorefBuilder_ == null) {
+                  ensureMentionsForCorefIsMutable();
+                  mentionsForCoref_.add(m);
+                } else {
+                  mentionsForCorefBuilder_.addMessage(m);
+                }
+                break;
+              } // case 450
+              case 456: {
+                hasCorefMentionsAnnotation_ = input.readBool();
+                bitField0_ |= 0x80000000;
+                break;
+              } // case 456
+              case 466: {
+                sentenceID_ = input.readBytes();
+                bitField1_ |= 0x00000001;
+                break;
+              } // case 466
+              case 474: {
+                sectionDate_ = input.readBytes();
+                bitField1_ |= 0x00000002;
+                break;
+              } // case 474
+              case 480: {
+                sectionIndex_ = input.readUInt32();
+                bitField1_ |= 0x00000004;
+                break;
+              } // case 480
+              case 490: {
+                sectionName_ = input.readBytes();
+                bitField1_ |= 0x00000008;
+                break;
+              } // case 490
+              case 498: {
+                sectionAuthor_ = input.readBytes();
+                bitField1_ |= 0x00000010;
+                break;
+              } // case 498
+              case 506: {
+                docID_ = input.readBytes();
+                bitField1_ |= 0x00000020;
+                break;
+              } // case 506
+              case 512: {
+                sectionQuoted_ = input.readBool();
+                bitField1_ |= 0x00000040;
+                break;
+              } // case 512
+              case 520: {
+                hasEntityMentionsAnnotation_ = input.readBool();
+                bitField1_ |= 0x00000080;
+                break;
+              } // case 520
+              case 528: {
+                chapterIndex_ = input.readUInt32();
+                bitField1_ |= 0x00000400;
+                break;
+              } // case 528
+              case 536: {
+                paragraphIndex_ = input.readUInt32();
+                bitField1_ |= 0x00000800;
+                break;
+              } // case 536
+              case 544: {
+                hasKBPTriplesAnnotation_ = input.readBool();
+                bitField1_ |= 0x00000100;
+                break;
+              } // case 544
+              case 552: {
+                hasOpenieTriplesAnnotation_ = input.readBool();
+                bitField1_ |= 0x00000200;
+                break;
+              } // case 552
+              case 562: {
+                input.readMessage(
+                    getEnhancedSentenceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField1_ |= 0x00001000;
+                break;
+              } // case 562
+              case 570: {
+                speaker_ = input.readBytes();
+                bitField1_ |= 0x00002000;
+                break;
+              } // case 570
+              case 578: {
+                speakerType_ = input.readBytes();
+                bitField1_ |= 0x00004000;
+                break;
+              } // case 578
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -17135,7 +17032,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Sentence(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -18701,489 +18609,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Token(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      int mutable_bitField1_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              word_ = bs;
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
-              pos_ = bs;
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              value_ = bs;
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000008;
-              category_ = bs;
-              break;
-            }
-            case 42: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000010;
-              before_ = bs;
-              break;
-            }
-            case 50: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000020;
-              after_ = bs;
-              break;
-            }
-            case 58: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000040;
-              originalText_ = bs;
-              break;
-            }
-            case 66: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000080;
-              ner_ = bs;
-              break;
-            }
-            case 74: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000400;
-              normalizedNER_ = bs;
-              break;
-            }
-            case 82: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000800;
-              lemma_ = bs;
-              break;
-            }
-            case 88: {
-              bitField0_ |= 0x00001000;
-              beginChar_ = input.readUInt32();
-              break;
-            }
-            case 96: {
-              bitField0_ |= 0x00002000;
-              endChar_ = input.readUInt32();
-              break;
-            }
-            case 104: {
-              bitField0_ |= 0x00004000;
-              utterance_ = input.readUInt32();
-              break;
-            }
-            case 114: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00008000;
-              speaker_ = bs;
-              break;
-            }
-            case 120: {
-              bitField0_ |= 0x00020000;
-              beginIndex_ = input.readUInt32();
-              break;
-            }
-            case 128: {
-              bitField0_ |= 0x00040000;
-              endIndex_ = input.readUInt32();
-              break;
-            }
-            case 136: {
-              bitField0_ |= 0x00080000;
-              tokenBeginIndex_ = input.readUInt32();
-              break;
-            }
-            case 144: {
-              bitField0_ |= 0x00100000;
-              tokenEndIndex_ = input.readUInt32();
-              break;
-            }
-            case 154: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.Builder subBuilder = null;
-              if (((bitField0_ & 0x00200000) != 0)) {
-                subBuilder = timexValue_.toBuilder();
-              }
-              timexValue_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(timexValue_);
-                timexValue_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00200000;
-              break;
-            }
-            case 168: {
-              bitField0_ |= 0x00400000;
-              hasXmlContext_ = input.readBool();
-              break;
-            }
-            case 178: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x01000000) != 0)) {
-                xmlContext_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x01000000;
-              }
-              xmlContext_.add(bs);
-              break;
-            }
-            case 184: {
-              bitField0_ |= 0x00800000;
-              corefClusterID_ = input.readUInt32();
-              break;
-            }
-            case 194: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x01000000;
-              answer_ = bs;
-              break;
-            }
-            case 208: {
-              bitField0_ |= 0x02000000;
-              headWordIndex_ = input.readUInt32();
-              break;
-            }
-            case 218: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Operator.Builder subBuilder = null;
-              if (((bitField0_ & 0x04000000) != 0)) {
-                subBuilder = operator_.toBuilder();
-              }
-              operator_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Operator.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(operator_);
-                operator_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x04000000;
-              break;
-            }
-            case 226: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity.Builder subBuilder = null;
-              if (((bitField0_ & 0x08000000) != 0)) {
-                subBuilder = polarity_.toBuilder();
-              }
-              polarity_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(polarity_);
-                polarity_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x08000000;
-              break;
-            }
-            case 234: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Span.Builder subBuilder = null;
-              if (((bitField0_ & 0x20000000) != 0)) {
-                subBuilder = span_.toBuilder();
-              }
-              span_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Span.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(span_);
-                span_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x20000000;
-              break;
-            }
-            case 242: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x40000000;
-              sentiment_ = bs;
-              break;
-            }
-            case 248: {
-              bitField0_ |= 0x80000000;
-              quotationIndex_ = input.readInt32();
-              break;
-            }
-            case 258: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder subBuilder = null;
-              if (((bitField1_ & 0x00000001) != 0)) {
-                subBuilder = conllUFeatures_.toBuilder();
-              }
-              conllUFeatures_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(conllUFeatures_);
-                conllUFeatures_ = subBuilder.buildPartial();
-              }
-              bitField1_ |= 0x00000001;
-              break;
-            }
-            case 266: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00000002;
-              coarseTag_ = bs;
-              break;
-            }
-            case 274: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Span.Builder subBuilder = null;
-              if (((bitField1_ & 0x00000004) != 0)) {
-                subBuilder = conllUTokenSpan_.toBuilder();
-              }
-              conllUTokenSpan_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Span.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(conllUTokenSpan_);
-                conllUTokenSpan_ = subBuilder.buildPartial();
-              }
-              bitField1_ |= 0x00000004;
-              break;
-            }
-            case 282: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00000008;
-              conllUMisc_ = bs;
-              break;
-            }
-            case 290: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder subBuilder = null;
-              if (((bitField1_ & 0x00000010) != 0)) {
-                subBuilder = conllUSecondaryDeps_.toBuilder();
-              }
-              conllUSecondaryDeps_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(conllUSecondaryDeps_);
-                conllUSecondaryDeps_ = subBuilder.buildPartial();
-              }
-              bitField1_ |= 0x00000010;
-              break;
-            }
-            case 298: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00000020;
-              wikipediaEntity_ = bs;
-              break;
-            }
-            case 304: {
-              bitField1_ |= 0x00000040;
-              isNewline_ = input.readBool();
-              break;
-            }
-            case 314: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x10000000;
-              polarityDir_ = bs;
-              break;
-            }
-            case 410: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00000080;
-              gender_ = bs;
-              break;
-            }
-            case 418: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00000100;
-              trueCase_ = bs;
-              break;
-            }
-            case 426: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00000200;
-              trueCaseText_ = bs;
-              break;
-            }
-            case 434: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00000400;
-              chineseChar_ = bs;
-              break;
-            }
-            case 442: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00000800;
-              chineseSeg_ = bs;
-              break;
-            }
-            case 450: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00004000;
-              sectionName_ = bs;
-              break;
-            }
-            case 458: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00008000;
-              sectionAuthor_ = bs;
-              break;
-            }
-            case 466: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00010000;
-              sectionDate_ = bs;
-              break;
-            }
-            case 474: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00020000;
-              sectionEndLabel_ = bs;
-              break;
-            }
-            case 482: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00001000;
-              chineseXMLChar_ = bs;
-              break;
-            }
-            case 490: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00040000;
-              parent_ = bs;
-              break;
-            }
-            case 498: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000100;
-              coarseNER_ = bs;
-              break;
-            }
-            case 506: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000200;
-              fineGrainedNER_ = bs;
-              break;
-            }
-            case 512: {
-              if (!((mutable_bitField1_ & 0x00200000) != 0)) {
-                corefMentionIndex_ = newIntList();
-                mutable_bitField1_ |= 0x00200000;
-              }
-              corefMentionIndex_.addInt(input.readUInt32());
-              break;
-            }
-            case 514: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00200000) != 0) && input.getBytesUntilLimit() > 0) {
-                corefMentionIndex_ = newIntList();
-                mutable_bitField1_ |= 0x00200000;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                corefMentionIndex_.addInt(input.readUInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 520: {
-              bitField1_ |= 0x00080000;
-              entityMentionIndex_ = input.readUInt32();
-              break;
-            }
-            case 530: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000400) != 0)) {
-                nerLabelProbs_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000400;
-              }
-              nerLabelProbs_.add(bs);
-              break;
-            }
-            case 536: {
-              bitField1_ |= 0x00100000;
-              isMWT_ = input.readBool();
-              break;
-            }
-            case 544: {
-              bitField1_ |= 0x00200000;
-              isFirstMWT_ = input.readBool();
-              break;
-            }
-            case 554: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00400000;
-              mwtText_ = bs;
-              break;
-            }
-            case 560: {
-              bitField1_ |= 0x00800000;
-              numericValue_ = input.readUInt64();
-              break;
-            }
-            case 570: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x01000000;
-              numericType_ = bs;
-              break;
-            }
-            case 576: {
-              bitField1_ |= 0x02000000;
-              numericCompositeValue_ = input.readUInt64();
-              break;
-            }
-            case 586: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x04000000;
-              numericCompositeType_ = bs;
-              break;
-            }
-            case 592: {
-              bitField1_ |= 0x08000000;
-              codepointOffsetBegin_ = input.readUInt32();
-              break;
-            }
-            case 600: {
-              bitField1_ |= 0x10000000;
-              codepointOffsetEnd_ = input.readUInt32();
-              break;
-            }
-            case 610: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField1_ |= 0x00002000;
-              arabicSeg_ = bs;
-              break;
-            }
-            case 618: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00010000;
-              speakerType_ = bs;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x01000000) != 0)) {
-          xmlContext_ = xmlContext_.getUnmodifiableView();
-        }
-        if (((mutable_bitField1_ & 0x00200000) != 0)) {
-          corefMentionIndex_.makeImmutable(); // C
-        }
-        if (((mutable_bitField0_ & 0x00000400) != 0)) {
-          nerLabelProbs_ = nerLabelProbs_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -22254,7 +21679,7 @@ public final class CoreNLPProtos {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 77, speakerType_);
       }
       extensionWriter.writeUntil(256, output);
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -22498,7 +21923,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(77, speakerType_);
       }
       size += extensionsSerializedSize();
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -22824,7 +22249,7 @@ public final class CoreNLPProtos {
         if (getCodepointOffsetEnd()
             != other.getCodepointOffsetEnd()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       if (!getExtensionFields().equals(other.getExtensionFields()))
         return false;
       return true;
@@ -23100,7 +22525,7 @@ public final class CoreNLPProtos {
         hash = (53 * hash) + getCodepointOffsetEnd();
       }
       hash = hashFields(hash, getExtensionFields());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -24079,7 +23504,7 @@ public final class CoreNLPProtos {
           setCodepointOffsetEnd(other.getCodepointOffsetEnd());
         }
         this.mergeExtensionFields(other);
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -24117,17 +23542,377 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Token parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                word_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                pos_ = input.readBytes();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                value_ = input.readBytes();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                category_ = input.readBytes();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                before_ = input.readBytes();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                after_ = input.readBytes();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              case 58: {
+                originalText_ = input.readBytes();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 58
+              case 66: {
+                ner_ = input.readBytes();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 66
+              case 74: {
+                normalizedNER_ = input.readBytes();
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 74
+              case 82: {
+                lemma_ = input.readBytes();
+                bitField0_ |= 0x00001000;
+                break;
+              } // case 82
+              case 88: {
+                beginChar_ = input.readUInt32();
+                bitField0_ |= 0x00002000;
+                break;
+              } // case 88
+              case 96: {
+                endChar_ = input.readUInt32();
+                bitField0_ |= 0x00004000;
+                break;
+              } // case 96
+              case 104: {
+                utterance_ = input.readUInt32();
+                bitField0_ |= 0x00008000;
+                break;
+              } // case 104
+              case 114: {
+                speaker_ = input.readBytes();
+                bitField0_ |= 0x00010000;
+                break;
+              } // case 114
+              case 120: {
+                beginIndex_ = input.readUInt32();
+                bitField0_ |= 0x00040000;
+                break;
+              } // case 120
+              case 128: {
+                endIndex_ = input.readUInt32();
+                bitField0_ |= 0x00080000;
+                break;
+              } // case 128
+              case 136: {
+                tokenBeginIndex_ = input.readUInt32();
+                bitField0_ |= 0x00100000;
+                break;
+              } // case 136
+              case 144: {
+                tokenEndIndex_ = input.readUInt32();
+                bitField0_ |= 0x00200000;
+                break;
+              } // case 144
+              case 154: {
+                input.readMessage(
+                    getTimexValueFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00400000;
+                break;
+              } // case 154
+              case 168: {
+                hasXmlContext_ = input.readBool();
+                bitField0_ |= 0x00800000;
+                break;
+              } // case 168
+              case 178: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensureXmlContextIsMutable();
+                xmlContext_.add(bs);
+                break;
+              } // case 178
+              case 184: {
+                corefClusterID_ = input.readUInt32();
+                bitField0_ |= 0x02000000;
+                break;
+              } // case 184
+              case 194: {
+                answer_ = input.readBytes();
+                bitField0_ |= 0x04000000;
+                break;
+              } // case 194
+              case 208: {
+                headWordIndex_ = input.readUInt32();
+                bitField0_ |= 0x08000000;
+                break;
+              } // case 208
+              case 218: {
+                input.readMessage(
+                    getOperatorFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x10000000;
+                break;
+              } // case 218
+              case 226: {
+                input.readMessage(
+                    getPolarityFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x20000000;
+                break;
+              } // case 226
+              case 234: {
+                input.readMessage(
+                    getSpanFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x80000000;
+                break;
+              } // case 234
+              case 242: {
+                sentiment_ = input.readBytes();
+                bitField1_ |= 0x00000001;
+                break;
+              } // case 242
+              case 248: {
+                quotationIndex_ = input.readInt32();
+                bitField1_ |= 0x00000002;
+                break;
+              } // case 248
+              case 258: {
+                input.readMessage(
+                    getConllUFeaturesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField1_ |= 0x00000004;
+                break;
+              } // case 258
+              case 266: {
+                coarseTag_ = input.readBytes();
+                bitField1_ |= 0x00000008;
+                break;
+              } // case 266
+              case 274: {
+                input.readMessage(
+                    getConllUTokenSpanFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField1_ |= 0x00000010;
+                break;
+              } // case 274
+              case 282: {
+                conllUMisc_ = input.readBytes();
+                bitField1_ |= 0x00000020;
+                break;
+              } // case 282
+              case 290: {
+                input.readMessage(
+                    getConllUSecondaryDepsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField1_ |= 0x00000040;
+                break;
+              } // case 290
+              case 298: {
+                wikipediaEntity_ = input.readBytes();
+                bitField1_ |= 0x00000080;
+                break;
+              } // case 298
+              case 304: {
+                isNewline_ = input.readBool();
+                bitField1_ |= 0x00000100;
+                break;
+              } // case 304
+              case 314: {
+                polarityDir_ = input.readBytes();
+                bitField0_ |= 0x40000000;
+                break;
+              } // case 314
+              case 410: {
+                gender_ = input.readBytes();
+                bitField1_ |= 0x00000200;
+                break;
+              } // case 410
+              case 418: {
+                trueCase_ = input.readBytes();
+                bitField1_ |= 0x00000400;
+                break;
+              } // case 418
+              case 426: {
+                trueCaseText_ = input.readBytes();
+                bitField1_ |= 0x00000800;
+                break;
+              } // case 426
+              case 434: {
+                chineseChar_ = input.readBytes();
+                bitField1_ |= 0x00001000;
+                break;
+              } // case 434
+              case 442: {
+                chineseSeg_ = input.readBytes();
+                bitField1_ |= 0x00002000;
+                break;
+              } // case 442
+              case 450: {
+                sectionName_ = input.readBytes();
+                bitField1_ |= 0x00010000;
+                break;
+              } // case 450
+              case 458: {
+                sectionAuthor_ = input.readBytes();
+                bitField1_ |= 0x00020000;
+                break;
+              } // case 458
+              case 466: {
+                sectionDate_ = input.readBytes();
+                bitField1_ |= 0x00040000;
+                break;
+              } // case 466
+              case 474: {
+                sectionEndLabel_ = input.readBytes();
+                bitField1_ |= 0x00080000;
+                break;
+              } // case 474
+              case 482: {
+                chineseXMLChar_ = input.readBytes();
+                bitField1_ |= 0x00004000;
+                break;
+              } // case 482
+              case 490: {
+                parent_ = input.readBytes();
+                bitField1_ |= 0x00100000;
+                break;
+              } // case 490
+              case 498: {
+                coarseNER_ = input.readBytes();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 498
+              case 506: {
+                fineGrainedNER_ = input.readBytes();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 506
+              case 512: {
+                int v = input.readUInt32();
+                ensureCorefMentionIndexIsMutable();
+                corefMentionIndex_.addInt(v);
+                break;
+              } // case 512
+              case 514: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureCorefMentionIndexIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  corefMentionIndex_.addInt(input.readUInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 514
+              case 520: {
+                entityMentionIndex_ = input.readUInt32();
+                bitField1_ |= 0x00400000;
+                break;
+              } // case 520
+              case 530: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensureNerLabelProbsIsMutable();
+                nerLabelProbs_.add(bs);
+                break;
+              } // case 530
+              case 536: {
+                isMWT_ = input.readBool();
+                bitField1_ |= 0x00800000;
+                break;
+              } // case 536
+              case 544: {
+                isFirstMWT_ = input.readBool();
+                bitField1_ |= 0x01000000;
+                break;
+              } // case 544
+              case 554: {
+                mwtText_ = input.readBytes();
+                bitField1_ |= 0x02000000;
+                break;
+              } // case 554
+              case 560: {
+                numericValue_ = input.readUInt64();
+                bitField1_ |= 0x04000000;
+                break;
+              } // case 560
+              case 570: {
+                numericType_ = input.readBytes();
+                bitField1_ |= 0x08000000;
+                break;
+              } // case 570
+              case 576: {
+                numericCompositeValue_ = input.readUInt64();
+                bitField1_ |= 0x10000000;
+                break;
+              } // case 576
+              case 586: {
+                numericCompositeType_ = input.readBytes();
+                bitField1_ |= 0x20000000;
+                break;
+              } // case 586
+              case 592: {
+                codepointOffsetBegin_ = input.readUInt32();
+                bitField1_ |= 0x40000000;
+                break;
+              } // case 592
+              case 600: {
+                codepointOffsetEnd_ = input.readUInt32();
+                bitField1_ |= 0x80000000;
+                break;
+              } // case 600
+              case 610: {
+                arabicSeg_ = input.readBytes();
+                bitField1_ |= 0x00008000;
+                break;
+              } // case 610
+              case 618: {
+                speakerType_ = input.readBytes();
+                bitField0_ |= 0x00020000;
+                break;
+              } // case 618
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Token) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -30035,7 +29820,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Token(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -30387,166 +30183,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Quote(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              text_ = bs;
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              begin_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              end_ = input.readUInt32();
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000008;
-              sentenceBegin_ = input.readUInt32();
-              break;
-            }
-            case 48: {
-              bitField0_ |= 0x00000010;
-              sentenceEnd_ = input.readUInt32();
-              break;
-            }
-            case 56: {
-              bitField0_ |= 0x00000020;
-              tokenBegin_ = input.readUInt32();
-              break;
-            }
-            case 64: {
-              bitField0_ |= 0x00000040;
-              tokenEnd_ = input.readUInt32();
-              break;
-            }
-            case 74: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000080;
-              docid_ = bs;
-              break;
-            }
-            case 80: {
-              bitField0_ |= 0x00000100;
-              index_ = input.readUInt32();
-              break;
-            }
-            case 90: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000200;
-              author_ = bs;
-              break;
-            }
-            case 98: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000400;
-              mention_ = bs;
-              break;
-            }
-            case 104: {
-              bitField0_ |= 0x00000800;
-              mentionBegin_ = input.readUInt32();
-              break;
-            }
-            case 112: {
-              bitField0_ |= 0x00001000;
-              mentionEnd_ = input.readUInt32();
-              break;
-            }
-            case 122: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00002000;
-              mentionType_ = bs;
-              break;
-            }
-            case 130: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00004000;
-              mentionSieve_ = bs;
-              break;
-            }
-            case 138: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00008000;
-              speaker_ = bs;
-              break;
-            }
-            case 146: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00010000;
-              speakerSieve_ = bs;
-              break;
-            }
-            case 154: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00020000;
-              canonicalMention_ = bs;
-              break;
-            }
-            case 160: {
-              bitField0_ |= 0x00040000;
-              canonicalMentionBegin_ = input.readUInt32();
-              break;
-            }
-            case 168: {
-              bitField0_ |= 0x00080000;
-              canonicalMentionEnd_ = input.readUInt32();
-              break;
-            }
-            case 178: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder subBuilder = null;
-              if (((bitField0_ & 0x00100000) != 0)) {
-                subBuilder = attributionDependencyGraph_.toBuilder();
-              }
-              attributionDependencyGraph_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(attributionDependencyGraph_);
-                attributionDependencyGraph_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00100000;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -31312,7 +30948,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00100000) != 0)) {
         output.writeMessage(22, getAttributionDependencyGraph());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -31396,7 +31032,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(22, getAttributionDependencyGraph());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -31516,7 +31152,7 @@ public final class CoreNLPProtos {
         if (!getAttributionDependencyGraph()
             .equals(other.getAttributionDependencyGraph())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -31611,7 +31247,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + ATTRIBUTIONDEPENDENCYGRAPH_FIELD_NUMBER;
         hash = (53 * hash) + getAttributionDependencyGraph().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -32041,7 +31677,7 @@ public final class CoreNLPProtos {
         if (other.hasAttributionDependencyGraph()) {
           mergeAttributionDependencyGraph(other.getAttributionDependencyGraph());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -32061,17 +31697,137 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Quote parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                text_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                begin_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                end_ = input.readUInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 40: {
+                sentenceBegin_ = input.readUInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 40
+              case 48: {
+                sentenceEnd_ = input.readUInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 48
+              case 56: {
+                tokenBegin_ = input.readUInt32();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 56
+              case 64: {
+                tokenEnd_ = input.readUInt32();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 64
+              case 74: {
+                docid_ = input.readBytes();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 74
+              case 80: {
+                index_ = input.readUInt32();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 80
+              case 90: {
+                author_ = input.readBytes();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 90
+              case 98: {
+                mention_ = input.readBytes();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 98
+              case 104: {
+                mentionBegin_ = input.readUInt32();
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 104
+              case 112: {
+                mentionEnd_ = input.readUInt32();
+                bitField0_ |= 0x00001000;
+                break;
+              } // case 112
+              case 122: {
+                mentionType_ = input.readBytes();
+                bitField0_ |= 0x00002000;
+                break;
+              } // case 122
+              case 130: {
+                mentionSieve_ = input.readBytes();
+                bitField0_ |= 0x00004000;
+                break;
+              } // case 130
+              case 138: {
+                speaker_ = input.readBytes();
+                bitField0_ |= 0x00008000;
+                break;
+              } // case 138
+              case 146: {
+                speakerSieve_ = input.readBytes();
+                bitField0_ |= 0x00010000;
+                break;
+              } // case 146
+              case 154: {
+                canonicalMention_ = input.readBytes();
+                bitField0_ |= 0x00020000;
+                break;
+              } // case 154
+              case 160: {
+                canonicalMentionBegin_ = input.readUInt32();
+                bitField0_ |= 0x00040000;
+                break;
+              } // case 160
+              case 168: {
+                canonicalMentionEnd_ = input.readUInt32();
+                bitField0_ |= 0x00080000;
+                break;
+              } // case 168
+              case 178: {
+                input.readMessage(
+                    getAttributionDependencyGraphFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00100000;
+                break;
+              } // case 178
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Quote) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -33413,7 +33169,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Quote(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -33555,89 +33322,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ParseTree(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                child_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              child_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.PARSER, extensionRegistry));
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              value_ = bs;
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000002;
-              yieldBeginIndex_ = input.readUInt32();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000004;
-              yieldEndIndex_ = input.readUInt32();
-              break;
-            }
-            case 41: {
-              bitField0_ |= 0x00000008;
-              score_ = input.readDouble();
-              break;
-            }
-            case 48: {
-              int rawValue = input.readEnum();
-                @SuppressWarnings("deprecation")
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment value = edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(6, rawValue);
-              } else {
-                bitField0_ |= 0x00000010;
-                sentiment_ = rawValue;
-              }
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          child_ = java.util.Collections.unmodifiableList(child_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -33849,7 +33533,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000010) != 0)) {
         output.writeEnum(6, sentiment_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -33881,7 +33565,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(6, sentiment_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -33923,7 +33607,7 @@ public final class CoreNLPProtos {
       if (hasSentiment()) {
         if (sentiment_ != other.sentiment_) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -33959,7 +33643,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + SENTIMENT_FIELD_NUMBER;
         hash = (53 * hash) + sentiment_;
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -34080,29 +33764,24 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getChildFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (childBuilder_ == null) {
           child_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          child_ = null;
           childBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         value_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
         yieldBeginIndex_ = 0;
@@ -34262,7 +33941,7 @@ public final class CoreNLPProtos {
         if (other.hasSentiment()) {
           setSentiment(other.getSentiment());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -34277,17 +33956,75 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.PARSER,
+                        extensionRegistry);
+                if (childBuilder_ == null) {
+                  ensureChildIsMutable();
+                  child_.add(m);
+                } else {
+                  childBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                value_ = input.readBytes();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 24: {
+                yieldBeginIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 32: {
+                yieldEndIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              case 41: {
+                score_ = input.readDouble();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 41
+              case 48: {
+                int tmpRaw = input.readEnum();
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment tmpValue =
+                    edu.stanford.nlp.pipeline.CoreNLPProtos.Sentiment.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(6, tmpRaw);
+                } else {
+                  sentiment_ = tmpRaw;
+                  bitField0_ |= 0x00000020;
+                }
+                break;
+              } // case 48
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -34808,7 +34545,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ParseTree(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -34931,92 +34679,6 @@ public final class CoreNLPProtos {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DependencyGraph(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                node_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              node_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node.PARSER, extensionRegistry));
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                edge_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              edge_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge.PARSER, extensionRegistry));
-              break;
-            }
-            case 24: {
-              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                root_ = newIntList();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              root_.addInt(input.readUInt32());
-              break;
-            }
-            case 26: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000004) != 0) && input.getBytesUntilLimit() > 0) {
-                root_ = newIntList();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                root_.addInt(input.readUInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          node_ = java.util.Collections.unmodifiableList(node_);
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          edge_ = java.util.Collections.unmodifiableList(edge_);
-        }
-        if (((mutable_bitField0_ & 0x00000004) != 0)) {
-          root_.makeImmutable(); // C
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyGraph_descriptor;
@@ -35093,59 +34755,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private Node(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                bitField0_ |= 0x00000001;
-                sentenceIndex_ = input.readUInt32();
-                break;
-              }
-              case 16: {
-                bitField0_ |= 0x00000002;
-                index_ = input.readUInt32();
-                break;
-              }
-              case 24: {
-                bitField0_ |= 0x00000004;
-                copyAnnotation_ = input.readUInt32();
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -35249,7 +34858,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000004) != 0)) {
           output.writeUInt32(3, copyAnnotation_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -35270,7 +34879,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeUInt32Size(3, copyAnnotation_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -35300,7 +34909,7 @@ public final class CoreNLPProtos {
           if (getCopyAnnotation()
               != other.getCopyAnnotation()) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -35323,7 +34932,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + COPYANNOTATION_FIELD_NUMBER;
           hash = (53 * hash) + getCopyAnnotation();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -35440,18 +35049,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -35560,7 +35164,7 @@ public final class CoreNLPProtos {
           if (other.hasCopyAnnotation()) {
             setCopyAnnotation(other.getCopyAnnotation());
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -35581,17 +35185,45 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 8: {
+                  sentenceIndex_ = input.readUInt32();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 8
+                case 16: {
+                  index_ = input.readUInt32();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 16
+                case 24: {
+                  copyAnnotation_ = input.readUInt32();
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 24
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -35745,7 +35377,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Node(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -35880,87 +35523,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private Edge(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                bitField0_ |= 0x00000001;
-                source_ = input.readUInt32();
-                break;
-              }
-              case 16: {
-                bitField0_ |= 0x00000002;
-                target_ = input.readUInt32();
-                break;
-              }
-              case 26: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000004;
-                dep_ = bs;
-                break;
-              }
-              case 32: {
-                bitField0_ |= 0x00000008;
-                isExtra_ = input.readBool();
-                break;
-              }
-              case 40: {
-                bitField0_ |= 0x00000010;
-                sourceCopy_ = input.readUInt32();
-                break;
-              }
-              case 48: {
-                bitField0_ |= 0x00000020;
-                targetCopy_ = input.readUInt32();
-                break;
-              }
-              case 56: {
-                int rawValue = input.readEnum();
-                  @SuppressWarnings("deprecation")
-                edu.stanford.nlp.pipeline.CoreNLPProtos.Language value = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.valueOf(rawValue);
-                if (value == null) {
-                  unknownFields.mergeVarintField(7, rawValue);
-                } else {
-                  bitField0_ |= 0x00000040;
-                  language_ = rawValue;
-                }
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -36181,7 +35743,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000040) != 0)) {
           output.writeEnum(7, language_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -36217,7 +35779,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeEnumSize(7, language_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -36266,7 +35828,7 @@ public final class CoreNLPProtos {
         if (hasLanguage()) {
           if (language_ != other.language_) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -36306,7 +35868,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + LANGUAGE_FIELD_NUMBER;
           hash = (53 * hash) + language_;
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -36423,18 +35985,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -36581,7 +36138,7 @@ public final class CoreNLPProtos {
           if (other.hasLanguage()) {
             setLanguage(other.getLanguage());
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -36602,17 +36159,72 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 8: {
+                  source_ = input.readUInt32();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 8
+                case 16: {
+                  target_ = input.readUInt32();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 16
+                case 26: {
+                  dep_ = input.readBytes();
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 26
+                case 32: {
+                  isExtra_ = input.readBool();
+                  bitField0_ |= 0x00000008;
+                  break;
+                } // case 32
+                case 40: {
+                  sourceCopy_ = input.readUInt32();
+                  bitField0_ |= 0x00000010;
+                  break;
+                } // case 40
+                case 48: {
+                  targetCopy_ = input.readUInt32();
+                  bitField0_ |= 0x00000020;
+                  break;
+                } // case 48
+                case 56: {
+                  int tmpRaw = input.readEnum();
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.Language tmpValue =
+                      edu.stanford.nlp.pipeline.CoreNLPProtos.Language.forNumber(tmpRaw);
+                  if (tmpValue == null) {
+                    mergeUnknownVarintField(7, tmpRaw);
+                  } else {
+                    language_ = tmpRaw;
+                    bitField0_ |= 0x00000040;
+                  }
+                  break;
+                } // case 56
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -36971,7 +36583,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Edge(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -37139,7 +36762,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < root_.size(); i++) {
         output.writeUInt32NoTag(root_.getInt(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -37170,7 +36793,7 @@ public final class CoreNLPProtos {
         }
         rootMemoizedSerializedSize = dataSize;
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -37191,7 +36814,7 @@ public final class CoreNLPProtos {
           .equals(other.getEdgeList())) return false;
       if (!getRootList()
           .equals(other.getRootList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -37214,7 +36837,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + ROOT_FIELD_NUMBER;
         hash = (53 * hash) + getRootList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -37335,36 +36958,31 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getNodeFieldBuilder();
-          getEdgeFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (nodeBuilder_ == null) {
           node_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          node_ = null;
           nodeBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (edgeBuilder_ == null) {
           edge_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
+          edge_ = null;
           edgeBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000002);
         root_ = emptyIntList();
         bitField0_ = (bitField0_ & ~0x00000004);
         return this;
@@ -37527,7 +37145,7 @@ public final class CoreNLPProtos {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -37552,17 +37170,72 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node.PARSER,
+                        extensionRegistry);
+                if (nodeBuilder_ == null) {
+                  ensureNodeIsMutable();
+                  node_.add(m);
+                } else {
+                  nodeBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge.PARSER,
+                        extensionRegistry);
+                if (edgeBuilder_ == null) {
+                  ensureEdgeIsMutable();
+                  edge_.add(m);
+                } else {
+                  edgeBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              case 24: {
+                int v = input.readUInt32();
+                ensureRootIsMutable();
+                root_.addInt(v);
+                break;
+              } // case 24
+              case 26: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureRootIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  root_.addInt(input.readUInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -38158,7 +37831,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DependencyGraph(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -38260,66 +37944,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CorefChain(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              bitField0_ |= 0x00000001;
-              chainID_ = input.readInt32();
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                mention_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              mention_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention.PARSER, extensionRegistry));
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000002;
-              representative_ = input.readUInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          mention_ = java.util.Collections.unmodifiableList(mention_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -38510,98 +38134,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private CorefMention(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                bitField0_ |= 0x00000001;
-                mentionID_ = input.readInt32();
-                break;
-              }
-              case 18: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000002;
-                mentionType_ = bs;
-                break;
-              }
-              case 26: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000004;
-                number_ = bs;
-                break;
-              }
-              case 34: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000008;
-                gender_ = bs;
-                break;
-              }
-              case 42: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000010;
-                animacy_ = bs;
-                break;
-              }
-              case 48: {
-                bitField0_ |= 0x00000020;
-                beginIndex_ = input.readUInt32();
-                break;
-              }
-              case 56: {
-                bitField0_ |= 0x00000040;
-                endIndex_ = input.readUInt32();
-                break;
-              }
-              case 72: {
-                bitField0_ |= 0x00000080;
-                headIndex_ = input.readUInt32();
-                break;
-              }
-              case 80: {
-                bitField0_ |= 0x00000100;
-                sentenceIndex_ = input.readUInt32();
-                break;
-              }
-              case 88: {
-                bitField0_ |= 0x00000200;
-                position_ = input.readUInt32();
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -38975,7 +38507,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000200) != 0)) {
           output.writeUInt32(11, position_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -39020,7 +38552,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeUInt32Size(11, position_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -39085,7 +38617,7 @@ public final class CoreNLPProtos {
           if (getPosition()
               != other.getPosition()) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -39136,7 +38668,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + POSITION_FIELD_NUMBER;
           hash = (53 * hash) + getPosition();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -39253,18 +38785,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -39444,7 +38971,7 @@ public final class CoreNLPProtos {
           if (other.hasPosition()) {
             setPosition(other.getPosition());
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -39459,17 +38986,80 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 8: {
+                  mentionID_ = input.readInt32();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 8
+                case 18: {
+                  mentionType_ = input.readBytes();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 18
+                case 26: {
+                  number_ = input.readBytes();
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 26
+                case 34: {
+                  gender_ = input.readBytes();
+                  bitField0_ |= 0x00000008;
+                  break;
+                } // case 34
+                case 42: {
+                  animacy_ = input.readBytes();
+                  bitField0_ |= 0x00000010;
+                  break;
+                } // case 42
+                case 48: {
+                  beginIndex_ = input.readUInt32();
+                  bitField0_ |= 0x00000020;
+                  break;
+                } // case 48
+                case 56: {
+                  endIndex_ = input.readUInt32();
+                  bitField0_ |= 0x00000040;
+                  break;
+                } // case 56
+                case 72: {
+                  headIndex_ = input.readUInt32();
+                  bitField0_ |= 0x00000080;
+                  break;
+                } // case 72
+                case 80: {
+                  sentenceIndex_ = input.readUInt32();
+                  bitField0_ |= 0x00000100;
+                  break;
+                } // case 80
+                case 88: {
+                  position_ = input.readUInt32();
+                  bitField0_ |= 0x00000200;
+                  break;
+                } // case 88
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -40092,7 +39682,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new CorefMention(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -40222,7 +39823,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeUInt32(3, representative_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -40243,7 +39844,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(3, representative_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -40270,7 +39871,7 @@ public final class CoreNLPProtos {
         if (getRepresentative()
             != other.getRepresentative()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -40293,7 +39894,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + REPRESENTATIVE_FIELD_NUMBER;
         hash = (53 * hash) + getRepresentative();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -40415,19 +40016,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getMentionFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -40436,10 +40031,11 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         if (mentionBuilder_ == null) {
           mention_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
+          mention_ = null;
           mentionBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000002);
         representative_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
         return this;
@@ -40568,7 +40164,7 @@ public final class CoreNLPProtos {
         if (other.hasRepresentative()) {
           setRepresentative(other.getRepresentative());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -40589,17 +40185,53 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                chainID_ = input.readInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 18: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention.PARSER,
+                        extensionRegistry);
+                if (mentionBuilder_ == null) {
+                  ensureMentionIsMutable();
+                  mention_.add(m);
+                } else {
+                  mentionBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              case 24: {
+                representative_ = input.readUInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -40954,7 +40586,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CorefChain(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -41613,412 +41256,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Mention(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      int mutable_bitField1_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              bitField0_ |= 0x00000001;
-              mentionID_ = input.readInt32();
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
-              mentionType_ = bs;
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              number_ = bs;
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000008;
-              gender_ = bs;
-              break;
-            }
-            case 42: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000010;
-              animacy_ = bs;
-              break;
-            }
-            case 50: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000020;
-              person_ = bs;
-              break;
-            }
-            case 56: {
-              bitField0_ |= 0x00000040;
-              startIndex_ = input.readUInt32();
-              break;
-            }
-            case 72: {
-              bitField0_ |= 0x00000080;
-              endIndex_ = input.readUInt32();
-              break;
-            }
-            case 80: {
-              bitField0_ |= 0x00000100;
-              headIndex_ = input.readInt32();
-              break;
-            }
-            case 90: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000200;
-              headString_ = bs;
-              break;
-            }
-            case 98: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000400;
-              nerString_ = bs;
-              break;
-            }
-            case 104: {
-              bitField0_ |= 0x00000800;
-              originalRef_ = input.readInt32();
-              break;
-            }
-            case 112: {
-              bitField0_ |= 0x00001000;
-              goldCorefClusterID_ = input.readInt32();
-              break;
-            }
-            case 120: {
-              bitField0_ |= 0x00002000;
-              corefClusterID_ = input.readInt32();
-              break;
-            }
-            case 128: {
-              bitField0_ |= 0x00004000;
-              mentionNum_ = input.readInt32();
-              break;
-            }
-            case 136: {
-              bitField0_ |= 0x00008000;
-              sentNum_ = input.readInt32();
-              break;
-            }
-            case 144: {
-              bitField0_ |= 0x00010000;
-              utter_ = input.readInt32();
-              break;
-            }
-            case 152: {
-              bitField0_ |= 0x00020000;
-              paragraph_ = input.readInt32();
-              break;
-            }
-            case 160: {
-              bitField0_ |= 0x00040000;
-              isSubject_ = input.readBool();
-              break;
-            }
-            case 168: {
-              bitField0_ |= 0x00080000;
-              isDirectObject_ = input.readBool();
-              break;
-            }
-            case 176: {
-              bitField0_ |= 0x00100000;
-              isIndirectObject_ = input.readBool();
-              break;
-            }
-            case 184: {
-              bitField0_ |= 0x00200000;
-              isPrepositionObject_ = input.readBool();
-              break;
-            }
-            case 192: {
-              bitField0_ |= 0x00400000;
-              hasTwin_ = input.readBool();
-              break;
-            }
-            case 200: {
-              bitField0_ |= 0x00800000;
-              generic_ = input.readBool();
-              break;
-            }
-            case 208: {
-              bitField0_ |= 0x01000000;
-              isSingleton_ = input.readBool();
-              break;
-            }
-            case 216: {
-              bitField0_ |= 0x02000000;
-              hasBasicDependency_ = input.readBool();
-              break;
-            }
-            case 224: {
-              bitField0_ |= 0x04000000;
-              hasEnhancedDepenedncy_ = input.readBool();
-              break;
-            }
-            case 232: {
-              bitField0_ |= 0x08000000;
-              hasContextParseTree_ = input.readBool();
-              break;
-            }
-            case 242: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.Builder subBuilder = null;
-              if (((bitField0_ & 0x10000000) != 0)) {
-                subBuilder = headIndexedWord_.toBuilder();
-              }
-              headIndexedWord_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(headIndexedWord_);
-                headIndexedWord_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x10000000;
-              break;
-            }
-            case 250: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.Builder subBuilder = null;
-              if (((bitField0_ & 0x20000000) != 0)) {
-                subBuilder = dependingVerb_.toBuilder();
-              }
-              dependingVerb_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(dependingVerb_);
-                dependingVerb_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x20000000;
-              break;
-            }
-            case 258: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.Builder subBuilder = null;
-              if (((bitField0_ & 0x40000000) != 0)) {
-                subBuilder = headWord_.toBuilder();
-              }
-              headWord_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(headWord_);
-                headWord_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x40000000;
-              break;
-            }
-            case 266: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x80000000) != 0)) {
-                subBuilder = speakerInfo_.toBuilder();
-              }
-              speakerInfo_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(speakerInfo_);
-                speakerInfo_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x80000000;
-              break;
-            }
-            case 402: {
-              if (!((mutable_bitField1_ & 0x00000001) != 0)) {
-                sentenceWords_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord>();
-                mutable_bitField1_ |= 0x00000001;
-              }
-              sentenceWords_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.PARSER, extensionRegistry));
-              break;
-            }
-            case 410: {
-              if (!((mutable_bitField1_ & 0x00000002) != 0)) {
-                originalSpan_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord>();
-                mutable_bitField1_ |= 0x00000002;
-              }
-              originalSpan_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.PARSER, extensionRegistry));
-              break;
-            }
-            case 418: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField1_ & 0x00000004) != 0)) {
-                dependents_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField1_ |= 0x00000004;
-              }
-              dependents_.add(bs);
-              break;
-            }
-            case 426: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField1_ & 0x00000008) != 0)) {
-                preprocessedTerms_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField1_ |= 0x00000008;
-              }
-              preprocessedTerms_.add(bs);
-              break;
-            }
-            case 432: {
-              if (!((mutable_bitField1_ & 0x00000010) != 0)) {
-                appositions_ = newIntList();
-                mutable_bitField1_ |= 0x00000010;
-              }
-              appositions_.addInt(input.readInt32());
-              break;
-            }
-            case 434: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00000010) != 0) && input.getBytesUntilLimit() > 0) {
-                appositions_ = newIntList();
-                mutable_bitField1_ |= 0x00000010;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                appositions_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 440: {
-              if (!((mutable_bitField1_ & 0x00000020) != 0)) {
-                predicateNominatives_ = newIntList();
-                mutable_bitField1_ |= 0x00000020;
-              }
-              predicateNominatives_.addInt(input.readInt32());
-              break;
-            }
-            case 442: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00000020) != 0) && input.getBytesUntilLimit() > 0) {
-                predicateNominatives_ = newIntList();
-                mutable_bitField1_ |= 0x00000020;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                predicateNominatives_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 448: {
-              if (!((mutable_bitField1_ & 0x00000040) != 0)) {
-                relativePronouns_ = newIntList();
-                mutable_bitField1_ |= 0x00000040;
-              }
-              relativePronouns_.addInt(input.readInt32());
-              break;
-            }
-            case 450: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00000040) != 0) && input.getBytesUntilLimit() > 0) {
-                relativePronouns_ = newIntList();
-                mutable_bitField1_ |= 0x00000040;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                relativePronouns_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 456: {
-              if (!((mutable_bitField1_ & 0x00000080) != 0)) {
-                listMembers_ = newIntList();
-                mutable_bitField1_ |= 0x00000080;
-              }
-              listMembers_.addInt(input.readInt32());
-              break;
-            }
-            case 458: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00000080) != 0) && input.getBytesUntilLimit() > 0) {
-                listMembers_ = newIntList();
-                mutable_bitField1_ |= 0x00000080;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                listMembers_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 464: {
-              if (!((mutable_bitField1_ & 0x00000100) != 0)) {
-                belongToLists_ = newIntList();
-                mutable_bitField1_ |= 0x00000100;
-              }
-              belongToLists_.addInt(input.readInt32());
-              break;
-            }
-            case 466: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00000100) != 0) && input.getBytesUntilLimit() > 0) {
-                belongToLists_ = newIntList();
-                mutable_bitField1_ |= 0x00000100;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                belongToLists_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField1_ & 0x00000001) != 0)) {
-          sentenceWords_ = java.util.Collections.unmodifiableList(sentenceWords_);
-        }
-        if (((mutable_bitField1_ & 0x00000002) != 0)) {
-          originalSpan_ = java.util.Collections.unmodifiableList(originalSpan_);
-        }
-        if (((mutable_bitField1_ & 0x00000004) != 0)) {
-          dependents_ = dependents_.getUnmodifiableView();
-        }
-        if (((mutable_bitField1_ & 0x00000008) != 0)) {
-          preprocessedTerms_ = preprocessedTerms_.getUnmodifiableView();
-        }
-        if (((mutable_bitField1_ & 0x00000010) != 0)) {
-          appositions_.makeImmutable(); // C
-        }
-        if (((mutable_bitField1_ & 0x00000020) != 0)) {
-          predicateNominatives_.makeImmutable(); // C
-        }
-        if (((mutable_bitField1_ & 0x00000040) != 0)) {
-          relativePronouns_.makeImmutable(); // C
-        }
-        if (((mutable_bitField1_ & 0x00000080) != 0)) {
-          listMembers_.makeImmutable(); // C
-        }
-        if (((mutable_bitField1_ & 0x00000100) != 0)) {
-          belongToLists_.makeImmutable(); // C
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -43295,7 +42532,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < belongToLists_.size(); i++) {
         output.writeInt32(58, belongToLists_.getInt(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -43494,7 +42731,7 @@ public final class CoreNLPProtos {
         size += dataSize;
         size += 2 * getBelongToListsList().size();
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -43687,7 +42924,7 @@ public final class CoreNLPProtos {
           .equals(other.getListMembersList())) return false;
       if (!getBelongToListsList()
           .equals(other.getBelongToListsList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -43872,7 +43109,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + BELONGTOLISTS_FIELD_NUMBER;
         hash = (53 * hash) + getBelongToListsList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -44093,16 +43330,18 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x80000000);
         if (sentenceWordsBuilder_ == null) {
           sentenceWords_ = java.util.Collections.emptyList();
-          bitField1_ = (bitField1_ & ~0x00000001);
         } else {
+          sentenceWords_ = null;
           sentenceWordsBuilder_.clear();
         }
+        bitField1_ = (bitField1_ & ~0x00000001);
         if (originalSpanBuilder_ == null) {
           originalSpan_ = java.util.Collections.emptyList();
-          bitField1_ = (bitField1_ & ~0x00000002);
         } else {
+          originalSpan_ = null;
           originalSpanBuilder_.clear();
         }
+        bitField1_ = (bitField1_ & ~0x00000002);
         dependents_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField1_ = (bitField1_ & ~0x00000004);
         preprocessedTerms_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -44624,7 +43863,7 @@ public final class CoreNLPProtos {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -44639,17 +43878,316 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Mention parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                mentionID_ = input.readInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 18: {
+                mentionType_ = input.readBytes();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                number_ = input.readBytes();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                gender_ = input.readBytes();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                animacy_ = input.readBytes();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                person_ = input.readBytes();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              case 56: {
+                startIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
+              case 72: {
+                endIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 72
+              case 80: {
+                headIndex_ = input.readInt32();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 80
+              case 90: {
+                headString_ = input.readBytes();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 90
+              case 98: {
+                nerString_ = input.readBytes();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 98
+              case 104: {
+                originalRef_ = input.readInt32();
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 104
+              case 112: {
+                goldCorefClusterID_ = input.readInt32();
+                bitField0_ |= 0x00001000;
+                break;
+              } // case 112
+              case 120: {
+                corefClusterID_ = input.readInt32();
+                bitField0_ |= 0x00002000;
+                break;
+              } // case 120
+              case 128: {
+                mentionNum_ = input.readInt32();
+                bitField0_ |= 0x00004000;
+                break;
+              } // case 128
+              case 136: {
+                sentNum_ = input.readInt32();
+                bitField0_ |= 0x00008000;
+                break;
+              } // case 136
+              case 144: {
+                utter_ = input.readInt32();
+                bitField0_ |= 0x00010000;
+                break;
+              } // case 144
+              case 152: {
+                paragraph_ = input.readInt32();
+                bitField0_ |= 0x00020000;
+                break;
+              } // case 152
+              case 160: {
+                isSubject_ = input.readBool();
+                bitField0_ |= 0x00040000;
+                break;
+              } // case 160
+              case 168: {
+                isDirectObject_ = input.readBool();
+                bitField0_ |= 0x00080000;
+                break;
+              } // case 168
+              case 176: {
+                isIndirectObject_ = input.readBool();
+                bitField0_ |= 0x00100000;
+                break;
+              } // case 176
+              case 184: {
+                isPrepositionObject_ = input.readBool();
+                bitField0_ |= 0x00200000;
+                break;
+              } // case 184
+              case 192: {
+                hasTwin_ = input.readBool();
+                bitField0_ |= 0x00400000;
+                break;
+              } // case 192
+              case 200: {
+                generic_ = input.readBool();
+                bitField0_ |= 0x00800000;
+                break;
+              } // case 200
+              case 208: {
+                isSingleton_ = input.readBool();
+                bitField0_ |= 0x01000000;
+                break;
+              } // case 208
+              case 216: {
+                hasBasicDependency_ = input.readBool();
+                bitField0_ |= 0x02000000;
+                break;
+              } // case 216
+              case 224: {
+                hasEnhancedDepenedncy_ = input.readBool();
+                bitField0_ |= 0x04000000;
+                break;
+              } // case 224
+              case 232: {
+                hasContextParseTree_ = input.readBool();
+                bitField0_ |= 0x08000000;
+                break;
+              } // case 232
+              case 242: {
+                input.readMessage(
+                    getHeadIndexedWordFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x10000000;
+                break;
+              } // case 242
+              case 250: {
+                input.readMessage(
+                    getDependingVerbFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x20000000;
+                break;
+              } // case 250
+              case 258: {
+                input.readMessage(
+                    getHeadWordFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x40000000;
+                break;
+              } // case 258
+              case 266: {
+                input.readMessage(
+                    getSpeakerInfoFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x80000000;
+                break;
+              } // case 266
+              case 402: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.PARSER,
+                        extensionRegistry);
+                if (sentenceWordsBuilder_ == null) {
+                  ensureSentenceWordsIsMutable();
+                  sentenceWords_.add(m);
+                } else {
+                  sentenceWordsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 402
+              case 410: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.PARSER,
+                        extensionRegistry);
+                if (originalSpanBuilder_ == null) {
+                  ensureOriginalSpanIsMutable();
+                  originalSpan_.add(m);
+                } else {
+                  originalSpanBuilder_.addMessage(m);
+                }
+                break;
+              } // case 410
+              case 418: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensureDependentsIsMutable();
+                dependents_.add(bs);
+                break;
+              } // case 418
+              case 426: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensurePreprocessedTermsIsMutable();
+                preprocessedTerms_.add(bs);
+                break;
+              } // case 426
+              case 432: {
+                int v = input.readInt32();
+                ensureAppositionsIsMutable();
+                appositions_.addInt(v);
+                break;
+              } // case 432
+              case 434: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureAppositionsIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  appositions_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 434
+              case 440: {
+                int v = input.readInt32();
+                ensurePredicateNominativesIsMutable();
+                predicateNominatives_.addInt(v);
+                break;
+              } // case 440
+              case 442: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensurePredicateNominativesIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  predicateNominatives_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 442
+              case 448: {
+                int v = input.readInt32();
+                ensureRelativePronounsIsMutable();
+                relativePronouns_.addInt(v);
+                break;
+              } // case 448
+              case 450: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureRelativePronounsIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  relativePronouns_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 450
+              case 456: {
+                int v = input.readInt32();
+                ensureListMembersIsMutable();
+                listMembers_.addInt(v);
+                break;
+              } // case 456
+              case 458: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureListMembersIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  listMembers_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 458
+              case 464: {
+                int v = input.readInt32();
+                ensureBelongToListsIsMutable();
+                belongToLists_.addInt(v);
+                break;
+              } // case 464
+              case 466: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureBelongToListsIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  belongToLists_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 466
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Mention) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -47667,7 +47205,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Mention(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -47761,64 +47310,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private IndexedWord(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              bitField0_ |= 0x00000001;
-              sentenceNum_ = input.readInt32();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              tokenIndex_ = input.readInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              docID_ = input.readInt32();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              copyCount_ = input.readUInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -47936,7 +47427,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000008) != 0)) {
         output.writeUInt32(4, copyCount_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -47961,7 +47452,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(4, copyCount_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -47996,7 +47487,7 @@ public final class CoreNLPProtos {
         if (getCopyCount()
             != other.getCopyCount()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -48023,7 +47514,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + COPYCOUNT_FIELD_NUMBER;
         hash = (53 * hash) + getCopyCount();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -48140,18 +47631,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -48269,7 +47755,7 @@ public final class CoreNLPProtos {
         if (other.hasCopyCount()) {
           setCopyCount(other.getCopyCount());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -48284,17 +47770,50 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                sentenceNum_ = input.readInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                tokenIndex_ = input.readInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                docID_ = input.readInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 32: {
+                copyCount_ = input.readUInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -48487,7 +48006,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new IndexedWord(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -48573,74 +48103,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SpeakerInfo(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              speakerName_ = bs;
-              break;
-            }
-            case 16: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                mentions_ = newIntList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              mentions_.addInt(input.readInt32());
-              break;
-            }
-            case 18: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000002) != 0) && input.getBytesUntilLimit() > 0) {
-                mentions_ = newIntList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                mentions_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          mentions_.makeImmutable(); // C
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -48751,7 +48213,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < mentions_.size(); i++) {
         output.writeInt32(2, mentions_.getInt(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -48772,7 +48234,7 @@ public final class CoreNLPProtos {
         size += dataSize;
         size += 1 * getMentionsList().size();
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -48794,7 +48256,7 @@ public final class CoreNLPProtos {
       }
       if (!getMentionsList()
           .equals(other.getMentionsList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -48813,7 +48275,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + MENTIONS_FIELD_NUMBER;
         hash = (53 * hash) + getMentionsList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -48930,18 +48392,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -49051,7 +48508,7 @@ public final class CoreNLPProtos {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -49066,17 +48523,51 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                speakerName_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                int v = input.readInt32();
+                ensureMentionsIsMutable();
+                mentions_.addInt(v);
+                break;
+              } // case 16
+              case 18: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureMentionsIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  mentions_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -49276,7 +48767,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SpeakerInfo(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -49352,54 +48854,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Span(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              bitField0_ |= 0x00000001;
-              begin_ = input.readUInt32();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              end_ = input.readUInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -49481,7 +48935,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeUInt32(2, end_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -49498,7 +48952,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(2, end_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -49523,7 +48977,7 @@ public final class CoreNLPProtos {
         if (getEnd()
             != other.getEnd()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -49542,7 +48996,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + END_FIELD_NUMBER;
         hash = (53 * hash) + getEnd();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -49663,18 +49117,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.Span.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -49774,7 +49223,7 @@ public final class CoreNLPProtos {
         if (other.hasEnd()) {
           setEnd(other.getEnd());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -49795,17 +49244,40 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Span parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                begin_ = input.readUInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                end_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Span) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -49920,7 +49392,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Span(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -50087,84 +49570,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Timex(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              value_ = bs;
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
-              altValue_ = bs;
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              text_ = bs;
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000008;
-              type_ = bs;
-              break;
-            }
-            case 42: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000010;
-              tid_ = bs;
-              break;
-            }
-            case 48: {
-              bitField0_ |= 0x00000020;
-              beginPoint_ = input.readUInt32();
-              break;
-            }
-            case 56: {
-              bitField0_ |= 0x00000040;
-              endPoint_ = input.readUInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -50493,7 +49898,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000040) != 0)) {
         output.writeUInt32(7, endPoint_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -50525,7 +49930,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(7, endPoint_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -50575,7 +49980,7 @@ public final class CoreNLPProtos {
         if (getEndPoint()
             != other.getEndPoint()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -50614,7 +50019,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + ENDPOINT_FIELD_NUMBER;
         hash = (53 * hash) + getEndPoint();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -50736,18 +50141,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -50902,7 +50302,7 @@ public final class CoreNLPProtos {
         if (other.hasEndPoint()) {
           setEndPoint(other.getEndPoint());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -50917,17 +50317,65 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Timex parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                value_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                altValue_ = input.readBytes();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                text_ = input.readBytes();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                type_ = input.readBytes();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                tid_ = input.readBytes();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 48: {
+                beginPoint_ = input.readUInt32();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 48
+              case 56: {
+                endPoint_ = input.readUInt32();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Timex) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -51462,7 +50910,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Timex(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -51708,105 +51167,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Entity(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000040;
-              objectID_ = bs;
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000080;
-              extentStart_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000100;
-              extentEnd_ = input.readUInt32();
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000200;
-              type_ = bs;
-              break;
-            }
-            case 42: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000400;
-              subtype_ = bs;
-              break;
-            }
-            case 48: {
-              bitField0_ |= 0x00000001;
-              headStart_ = input.readUInt32();
-              break;
-            }
-            case 56: {
-              bitField0_ |= 0x00000002;
-              headEnd_ = input.readUInt32();
-              break;
-            }
-            case 66: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              mentionType_ = bs;
-              break;
-            }
-            case 74: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000008;
-              normalizedName_ = bs;
-              break;
-            }
-            case 80: {
-              bitField0_ |= 0x00000010;
-              headTokenIndex_ = input.readUInt32();
-              break;
-            }
-            case 90: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000020;
-              corefID_ = bs;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -52279,7 +51639,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000020) != 0)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 11, corefID_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -52326,7 +51686,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000020) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, corefID_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -52396,7 +51756,7 @@ public final class CoreNLPProtos {
         if (!getSubtype()
             .equals(other.getSubtype())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -52451,7 +51811,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + SUBTYPE_FIELD_NUMBER;
         hash = (53 * hash) + getSubtype().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -52574,18 +51934,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -52778,7 +52133,7 @@ public final class CoreNLPProtos {
           subtype_ = other.subtype_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -52793,17 +52148,85 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Entity parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                objectID_ = input.readBytes();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 10
+              case 16: {
+                extentStart_ = input.readUInt32();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 16
+              case 24: {
+                extentEnd_ = input.readUInt32();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 24
+              case 34: {
+                type_ = input.readBytes();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 34
+              case 42: {
+                subtype_ = input.readBytes();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 42
+              case 48: {
+                headStart_ = input.readUInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 48
+              case 56: {
+                headEnd_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 56
+              case 66: {
+                mentionType_ = input.readBytes();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 66
+              case 74: {
+                normalizedName_ = input.readBytes();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 74
+              case 80: {
+                headTokenIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 80
+              case 90: {
+                corefID_ = input.readBytes();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 90
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Entity) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -53593,7 +53016,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Entity(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -53819,102 +53253,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Relation(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
-              objectID_ = bs;
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000004;
-              extentStart_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000008;
-              extentEnd_ = input.readUInt32();
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000010;
-              type_ = bs;
-              break;
-            }
-            case 42: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000020;
-              subtype_ = bs;
-              break;
-            }
-            case 50: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                argName_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              argName_.add(bs);
-              break;
-            }
-            case 58: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                arg_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              arg_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.PARSER, extensionRegistry));
-              break;
-            }
-            case 66: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              signature_ = bs;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          argName_ = argName_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          arg_ = java.util.Collections.unmodifiableList(arg_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -54300,7 +53638,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000001) != 0)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, signature_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -54341,7 +53679,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, signature_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -54390,7 +53728,7 @@ public final class CoreNLPProtos {
         if (!getSubtype()
             .equals(other.getSubtype())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -54433,7 +53771,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + SUBTYPE_FIELD_NUMBER;
         hash = (53 * hash) + getSubtype().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -54554,19 +53892,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.Relation.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getArgFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -54575,10 +53907,11 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         if (argBuilder_ == null) {
           arg_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
+          arg_ = null;
           argBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000002);
         signature_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
         objectID_ = "";
@@ -54768,7 +54101,7 @@ public final class CoreNLPProtos {
           subtype_ = other.subtype_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -54783,17 +54116,79 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Relation parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                objectID_ = input.readBytes();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 10
+              case 16: {
+                extentStart_ = input.readUInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 16
+              case 24: {
+                extentEnd_ = input.readUInt32();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 24
+              case 34: {
+                type_ = input.readBytes();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 34
+              case 42: {
+                subtype_ = input.readBytes();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 42
+              case 50: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensureArgNameIsMutable();
+                argName_.add(bs);
+                break;
+              } // case 50
+              case 58: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Entity m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.PARSER,
+                        extensionRegistry);
+                if (argBuilder_ == null) {
+                  ensureArgIsMutable();
+                  arg_.add(m);
+                } else {
+                  argBuilder_.addMessage(m);
+                }
+                break;
+              } // case 58
+              case 66: {
+                signature_ = input.readBytes();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 66
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Relation) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -55647,7 +55042,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Relation(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -55785,80 +55191,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Operator(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              name_ = bs;
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              quantifierSpanBegin_ = input.readInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              quantifierSpanEnd_ = input.readInt32();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              subjectSpanBegin_ = input.readInt32();
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000010;
-              subjectSpanEnd_ = input.readInt32();
-              break;
-            }
-            case 48: {
-              bitField0_ |= 0x00000020;
-              objectSpanBegin_ = input.readInt32();
-              break;
-            }
-            case 56: {
-              bitField0_ |= 0x00000040;
-              objectSpanEnd_ = input.readInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -56099,7 +55431,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000040) != 0)) {
         output.writeInt32(7, objectSpanEnd_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -56135,7 +55467,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(7, objectSpanEnd_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -56185,7 +55517,7 @@ public final class CoreNLPProtos {
         if (getObjectSpanEnd()
             != other.getObjectSpanEnd()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -56224,7 +55556,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + OBJECTSPANEND_FIELD_NUMBER;
         hash = (53 * hash) + getObjectSpanEnd();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -56345,18 +55677,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.Operator.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -56503,7 +55830,7 @@ public final class CoreNLPProtos {
         if (other.hasObjectSpanEnd()) {
           setObjectSpanEnd(other.getObjectSpanEnd());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -56539,17 +55866,65 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Operator parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                quantifierSpanBegin_ = input.readInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                quantifierSpanEnd_ = input.readInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 32: {
+                subjectSpanBegin_ = input.readInt32();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              case 40: {
+                subjectSpanEnd_ = input.readInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 48: {
+                objectSpanBegin_ = input.readInt32();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 48
+              case 56: {
+                objectSpanEnd_ = input.readInt32();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Operator) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -56904,7 +56279,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Operator(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -57042,128 +56428,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Polarity(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              int rawValue = input.readEnum();
-                @SuppressWarnings("deprecation")
-              edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(1, rawValue);
-              } else {
-                bitField0_ |= 0x00000001;
-                projectEquivalence_ = rawValue;
-              }
-              break;
-            }
-            case 16: {
-              int rawValue = input.readEnum();
-                @SuppressWarnings("deprecation")
-              edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(2, rawValue);
-              } else {
-                bitField0_ |= 0x00000002;
-                projectForwardEntailment_ = rawValue;
-              }
-              break;
-            }
-            case 24: {
-              int rawValue = input.readEnum();
-                @SuppressWarnings("deprecation")
-              edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(3, rawValue);
-              } else {
-                bitField0_ |= 0x00000004;
-                projectReverseEntailment_ = rawValue;
-              }
-              break;
-            }
-            case 32: {
-              int rawValue = input.readEnum();
-                @SuppressWarnings("deprecation")
-              edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(4, rawValue);
-              } else {
-                bitField0_ |= 0x00000008;
-                projectNegation_ = rawValue;
-              }
-              break;
-            }
-            case 40: {
-              int rawValue = input.readEnum();
-                @SuppressWarnings("deprecation")
-              edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(5, rawValue);
-              } else {
-                bitField0_ |= 0x00000010;
-                projectAlternation_ = rawValue;
-              }
-              break;
-            }
-            case 48: {
-              int rawValue = input.readEnum();
-                @SuppressWarnings("deprecation")
-              edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(6, rawValue);
-              } else {
-                bitField0_ |= 0x00000020;
-                projectCover_ = rawValue;
-              }
-              break;
-            }
-            case 56: {
-              int rawValue = input.readEnum();
-                @SuppressWarnings("deprecation")
-              edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation value = edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(7, rawValue);
-              } else {
-                bitField0_ |= 0x00000040;
-                projectIndependence_ = rawValue;
-              }
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -57375,7 +56639,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000040) != 0)) {
         output.writeEnum(7, projectIndependence_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -57412,7 +56676,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(7, projectIndependence_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -57455,7 +56719,7 @@ public final class CoreNLPProtos {
       if (hasProjectIndependence()) {
         if (projectIndependence_ != other.projectIndependence_) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -57494,7 +56758,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + PROJECTINDEPENDENCE_FIELD_NUMBER;
         hash = (53 * hash) + projectIndependence_;
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -57615,18 +56879,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -57771,7 +57030,7 @@ public final class CoreNLPProtos {
         if (other.hasProjectIndependence()) {
           setProjectIndependence(other.getProjectIndependence());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -57807,17 +57066,114 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                int tmpRaw = input.readEnum();
+                edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation tmpValue =
+                    edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(1, tmpRaw);
+                } else {
+                  projectEquivalence_ = tmpRaw;
+                  bitField0_ |= 0x00000001;
+                }
+                break;
+              } // case 8
+              case 16: {
+                int tmpRaw = input.readEnum();
+                edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation tmpValue =
+                    edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(2, tmpRaw);
+                } else {
+                  projectForwardEntailment_ = tmpRaw;
+                  bitField0_ |= 0x00000002;
+                }
+                break;
+              } // case 16
+              case 24: {
+                int tmpRaw = input.readEnum();
+                edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation tmpValue =
+                    edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(3, tmpRaw);
+                } else {
+                  projectReverseEntailment_ = tmpRaw;
+                  bitField0_ |= 0x00000004;
+                }
+                break;
+              } // case 24
+              case 32: {
+                int tmpRaw = input.readEnum();
+                edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation tmpValue =
+                    edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(4, tmpRaw);
+                } else {
+                  projectNegation_ = tmpRaw;
+                  bitField0_ |= 0x00000008;
+                }
+                break;
+              } // case 32
+              case 40: {
+                int tmpRaw = input.readEnum();
+                edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation tmpValue =
+                    edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(5, tmpRaw);
+                } else {
+                  projectAlternation_ = tmpRaw;
+                  bitField0_ |= 0x00000010;
+                }
+                break;
+              } // case 40
+              case 48: {
+                int tmpRaw = input.readEnum();
+                edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation tmpValue =
+                    edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(6, tmpRaw);
+                } else {
+                  projectCover_ = tmpRaw;
+                  bitField0_ |= 0x00000020;
+                }
+                break;
+              } // case 48
+              case 56: {
+                int tmpRaw = input.readEnum();
+                edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation tmpValue =
+                    edu.stanford.nlp.pipeline.CoreNLPProtos.NaturalLogicRelation.forNumber(tmpRaw);
+                if (tmpValue == null) {
+                  mergeUnknownVarintField(7, tmpRaw);
+                } else {
+                  projectIndependence_ = tmpRaw;
+                  bitField0_ |= 0x00000040;
+                }
+                break;
+              } // case 56
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -58155,7 +57511,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Polarity(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -58387,118 +57754,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private NERMention(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              bitField0_ |= 0x00000001;
-              sentenceIndex_ = input.readUInt32();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              tokenStartInSentenceInclusive_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              tokenEndInSentenceExclusive_ = input.readUInt32();
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000008;
-              ner_ = bs;
-              break;
-            }
-            case 42: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000010;
-              normalizedNER_ = bs;
-              break;
-            }
-            case 50: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000020;
-              entityType_ = bs;
-              break;
-            }
-            case 58: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000040) != 0)) {
-                subBuilder = timex_.toBuilder();
-              }
-              timex_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(timex_);
-                timex_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000040;
-              break;
-            }
-            case 66: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000080;
-              wikipediaEntity_ = bs;
-              break;
-            }
-            case 74: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000100;
-              gender_ = bs;
-              break;
-            }
-            case 80: {
-              bitField0_ |= 0x00000200;
-              entityMentionIndex_ = input.readUInt32();
-              break;
-            }
-            case 88: {
-              bitField0_ |= 0x00000400;
-              canonicalEntityMentionIndex_ = input.readUInt32();
-              break;
-            }
-            case 98: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000800;
-              entityMentionText_ = bs;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -58985,7 +58240,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000800) != 0)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 12, entityMentionText_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -59036,7 +58291,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000800) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, entityMentionText_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -59111,7 +58366,7 @@ public final class CoreNLPProtos {
         if (!getEntityMentionText()
             .equals(other.getEntityMentionText())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -59170,7 +58425,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + ENTITYMENTIONTEXT_FIELD_NUMBER;
         hash = (53 * hash) + getEntityMentionText().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -59513,7 +58768,7 @@ public final class CoreNLPProtos {
           entityMentionText_ = other.entityMentionText_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -59537,17 +58792,92 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                sentenceIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                tokenStartInSentenceInclusive_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                tokenEndInSentenceExclusive_ = input.readUInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 34: {
+                ner_ = input.readBytes();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                normalizedNER_ = input.readBytes();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                entityType_ = input.readBytes();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              case 58: {
+                input.readMessage(
+                    getTimexFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 58
+              case 66: {
+                wikipediaEntity_ = input.readBytes();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 66
+              case 74: {
+                gender_ = input.readBytes();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 74
+              case 80: {
+                entityMentionIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 80
+              case 88: {
+                canonicalEntityMentionIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 88
+              case 98: {
+                entityMentionText_ = input.readBytes();
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 98
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -60403,7 +59733,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new NERMention(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -60509,83 +59850,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SentenceFragment(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                tokenIndex_ = newIntList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              tokenIndex_.addInt(input.readUInt32());
-              break;
-            }
-            case 10: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
-                tokenIndex_ = newIntList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                tokenIndex_.addInt(input.readUInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000001;
-              root_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000002;
-              assumedTruth_ = input.readBool();
-              break;
-            }
-            case 33: {
-              bitField0_ |= 0x00000004;
-              score_ = input.readDouble();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          tokenIndex_.makeImmutable(); // C
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -60711,7 +59975,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000004) != 0)) {
         output.writeDouble(4, score_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -60741,7 +60005,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, score_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -60774,7 +60038,7 @@ public final class CoreNLPProtos {
             != java.lang.Double.doubleToLongBits(
                 other.getScore())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -60803,7 +60067,7 @@ public final class CoreNLPProtos {
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getScore()));
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -60925,18 +60189,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -61062,7 +60321,7 @@ public final class CoreNLPProtos {
         if (other.hasScore()) {
           setScore(other.getScore());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -61077,17 +60336,61 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                int v = input.readUInt32();
+                ensureTokenIndexIsMutable();
+                tokenIndex_.addInt(v);
+                break;
+              } // case 8
+              case 10: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureTokenIndexIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  tokenIndex_.addInt(input.readUInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 10
+              case 16: {
+                root_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 24: {
+                assumedTruth_ = input.readBool();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 33: {
+                score_ = input.readDouble();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 33
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -61320,7 +60623,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SentenceFragment(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -61398,54 +60712,6 @@ public final class CoreNLPProtos {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private TokenLocation(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              bitField0_ |= 0x00000001;
-              sentenceIndex_ = input.readUInt32();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              tokenIndex_ = input.readUInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TokenLocation_descriptor;
@@ -61518,7 +60784,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeUInt32(2, tokenIndex_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -61535,7 +60801,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(2, tokenIndex_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -61560,7 +60826,7 @@ public final class CoreNLPProtos {
         if (getTokenIndex()
             != other.getTokenIndex()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -61579,7 +60845,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + TOKENINDEX_FIELD_NUMBER;
         hash = (53 * hash) + getTokenIndex();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -61701,18 +60967,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -61812,7 +61073,7 @@ public final class CoreNLPProtos {
         if (other.hasTokenIndex()) {
           setTokenIndex(other.getTokenIndex());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -61827,17 +61088,40 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                sentenceIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                tokenIndex_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -61952,7 +61236,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TokenLocation(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -62354,136 +61649,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RelationTriple(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              subject_ = bs;
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
-              relation_ = bs;
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              object_ = bs;
-              break;
-            }
-            case 33: {
-              bitField0_ |= 0x00000008;
-              confidence_ = input.readDouble();
-              break;
-            }
-            case 66: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000010) != 0)) {
-                subBuilder = tree_.toBuilder();
-              }
-              tree_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(tree_);
-                tree_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000010;
-              break;
-            }
-            case 72: {
-              bitField0_ |= 0x00000020;
-              istmod_ = input.readBool();
-              break;
-            }
-            case 80: {
-              bitField0_ |= 0x00000040;
-              prefixBe_ = input.readBool();
-              break;
-            }
-            case 88: {
-              bitField0_ |= 0x00000080;
-              suffixBe_ = input.readBool();
-              break;
-            }
-            case 96: {
-              bitField0_ |= 0x00000100;
-              suffixOf_ = input.readBool();
-              break;
-            }
-            case 106: {
-              if (!((mutable_bitField0_ & 0x00000010) != 0)) {
-                subjectTokens_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation>();
-                mutable_bitField0_ |= 0x00000010;
-              }
-              subjectTokens_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.PARSER, extensionRegistry));
-              break;
-            }
-            case 114: {
-              if (!((mutable_bitField0_ & 0x00000020) != 0)) {
-                relationTokens_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation>();
-                mutable_bitField0_ |= 0x00000020;
-              }
-              relationTokens_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.PARSER, extensionRegistry));
-              break;
-            }
-            case 122: {
-              if (!((mutable_bitField0_ & 0x00000040) != 0)) {
-                objectTokens_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation>();
-                mutable_bitField0_ |= 0x00000040;
-              }
-              objectTokens_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000010) != 0)) {
-          subjectTokens_ = java.util.Collections.unmodifiableList(subjectTokens_);
-        }
-        if (((mutable_bitField0_ & 0x00000020) != 0)) {
-          relationTokens_ = java.util.Collections.unmodifiableList(relationTokens_);
-        }
-        if (((mutable_bitField0_ & 0x00000040) != 0)) {
-          objectTokens_ = java.util.Collections.unmodifiableList(objectTokens_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -63088,7 +62253,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < objectTokens_.size(); i++) {
         output.writeMessage(15, objectTokens_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -63142,7 +62307,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(15, objectTokens_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -63209,7 +62374,7 @@ public final class CoreNLPProtos {
         if (getSuffixOf()
             != other.getSuffixOf()) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -63273,7 +62438,7 @@ public final class CoreNLPProtos {
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
             getSuffixOf());
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -63425,22 +62590,25 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000008);
         if (subjectTokensBuilder_ == null) {
           subjectTokens_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
         } else {
+          subjectTokens_ = null;
           subjectTokensBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000010);
         if (relationTokensBuilder_ == null) {
           relationTokens_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000020);
         } else {
+          relationTokens_ = null;
           relationTokensBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000020);
         if (objectTokensBuilder_ == null) {
           objectTokens_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000040);
         } else {
+          objectTokens_ = null;
           objectTokensBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000040);
         if (treeBuilder_ == null) {
           tree_ = null;
         } else {
@@ -63710,7 +62878,7 @@ public final class CoreNLPProtos {
         if (other.hasSuffixOf()) {
           setSuffixOf(other.getSuffixOf());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -63730,17 +62898,116 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                subject_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                relation_ = input.readBytes();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                object_ = input.readBytes();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 33: {
+                confidence_ = input.readDouble();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 33
+              case 66: {
+                input.readMessage(
+                    getTreeFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 66
+              case 72: {
+                istmod_ = input.readBool();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 72
+              case 80: {
+                prefixBe_ = input.readBool();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 80
+              case 88: {
+                suffixBe_ = input.readBool();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 88
+              case 96: {
+                suffixOf_ = input.readBool();
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 96
+              case 106: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.PARSER,
+                        extensionRegistry);
+                if (subjectTokensBuilder_ == null) {
+                  ensureSubjectTokensIsMutable();
+                  subjectTokens_.add(m);
+                } else {
+                  subjectTokensBuilder_.addMessage(m);
+                }
+                break;
+              } // case 106
+              case 114: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.PARSER,
+                        extensionRegistry);
+                if (relationTokensBuilder_ == null) {
+                  ensureRelationTokensIsMutable();
+                  relationTokens_.add(m);
+                } else {
+                  relationTokensBuilder_.addMessage(m);
+                }
+                break;
+              } // case 114
+              case 122: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.PARSER,
+                        extensionRegistry);
+                if (objectTokensBuilder_ == null) {
+                  ensureObjectTokensIsMutable();
+                  objectTokens_.add(m);
+                } else {
+                  objectTokensBuilder_.addMessage(m);
+                }
+                break;
+              } // case 122
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -65468,7 +64735,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RelationTriple(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -65576,68 +64854,6 @@ public final class CoreNLPProtos {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private MapStringString(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                key_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              key_.add(bs);
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                value_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              value_.add(bs);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          key_ = key_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          value_ = value_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MapStringString_descriptor;
@@ -65741,7 +64957,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < value_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_.getRaw(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -65766,7 +64982,7 @@ public final class CoreNLPProtos {
         size += dataSize;
         size += 1 * getValueList().size();
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -65785,7 +65001,7 @@ public final class CoreNLPProtos {
           .equals(other.getKeyList())) return false;
       if (!getValueList()
           .equals(other.getValueList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -65804,7 +65020,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + VALUE_FIELD_NUMBER;
         hash = (53 * hash) + getValueList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -65926,18 +65142,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -66051,7 +65262,7 @@ public final class CoreNLPProtos {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -66066,17 +65277,42 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensureKeyIsMutable();
+                key_.add(bs);
+                break;
+              } // case 10
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensureValueIsMutable();
+                value_.add(bs);
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -66331,7 +65567,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new MapStringString(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -66431,80 +65678,6 @@ public final class CoreNLPProtos {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private MapIntString(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                key_ = newIntList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              key_.addInt(input.readUInt32());
-              break;
-            }
-            case 10: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
-                key_ = newIntList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                key_.addInt(input.readUInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                value_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              value_.add(bs);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          key_.makeImmutable(); // C
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          value_ = value_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_MapIntString_descriptor;
@@ -66600,7 +65773,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < value_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_.getRaw(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -66626,7 +65799,7 @@ public final class CoreNLPProtos {
         size += dataSize;
         size += 1 * getValueList().size();
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -66645,7 +65818,7 @@ public final class CoreNLPProtos {
           .equals(other.getKeyList())) return false;
       if (!getValueList()
           .equals(other.getValueList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -66664,7 +65837,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + VALUE_FIELD_NUMBER;
         hash = (53 * hash) + getValueList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -66786,18 +65959,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -66911,7 +66079,7 @@ public final class CoreNLPProtos {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -66926,17 +66094,52 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                int v = input.readUInt32();
+                ensureKeyIsMutable();
+                key_.addInt(v);
+                break;
+              } // case 8
+              case 10: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureKeyIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  key_.addInt(input.readUInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 10
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensureValueIsMutable();
+                value_.add(bs);
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -67161,7 +66364,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new MapIntString(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -67349,125 +66563,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Section(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              bitField0_ |= 0x00000001;
-              charBegin_ = input.readUInt32();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              charEnd_ = input.readUInt32();
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              author_ = bs;
-              break;
-            }
-            case 32: {
-              if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-                sentenceIndexes_ = newIntList();
-                mutable_bitField0_ |= 0x00000008;
-              }
-              sentenceIndexes_.addInt(input.readUInt32());
-              break;
-            }
-            case 34: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000008) != 0) && input.getBytesUntilLimit() > 0) {
-                sentenceIndexes_ = newIntList();
-                mutable_bitField0_ |= 0x00000008;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                sentenceIndexes_.addInt(input.readUInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 42: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000008;
-              datetime_ = bs;
-              break;
-            }
-            case 50: {
-              if (!((mutable_bitField0_ & 0x00000020) != 0)) {
-                quotes_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Quote>();
-                mutable_bitField0_ |= 0x00000020;
-              }
-              quotes_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Quote.PARSER, extensionRegistry));
-              break;
-            }
-            case 56: {
-              bitField0_ |= 0x00000010;
-              authorCharBegin_ = input.readUInt32();
-              break;
-            }
-            case 64: {
-              bitField0_ |= 0x00000020;
-              authorCharEnd_ = input.readUInt32();
-              break;
-            }
-            case 74: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000040) != 0)) {
-                subBuilder = xmlTag_.toBuilder();
-              }
-              xmlTag_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(xmlTag_);
-                xmlTag_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000040;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000008) != 0)) {
-          sentenceIndexes_.makeImmutable(); // C
-        }
-        if (((mutable_bitField0_ & 0x00000020) != 0)) {
-          quotes_ = java.util.Collections.unmodifiableList(quotes_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -67811,7 +66906,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000040) != 0)) {
         output.writeMessage(9, getXmlTag());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -67859,7 +66954,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(9, getXmlTag());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -67913,7 +67008,7 @@ public final class CoreNLPProtos {
         if (!getXmlTag()
             .equals(other.getXmlTag())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -67960,7 +67055,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + XMLTAG_FIELD_NUMBER;
         hash = (53 * hash) + getXmlTag().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -68107,10 +67202,11 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000010);
         if (quotesBuilder_ == null) {
           quotes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000020);
         } else {
+          quotes_ = null;
           quotesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000020);
         authorCharBegin_ = 0;
         bitField0_ = (bitField0_ & ~0x00000040);
         authorCharEnd_ = 0;
@@ -68305,7 +67401,7 @@ public final class CoreNLPProtos {
         if (other.hasXmlTag()) {
           mergeXmlTag(other.getXmlTag());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -68337,17 +67433,96 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.Section parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                charBegin_ = input.readUInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                charEnd_ = input.readUInt32();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 26: {
+                author_ = input.readBytes();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 32: {
+                int v = input.readUInt32();
+                ensureSentenceIndexesIsMutable();
+                sentenceIndexes_.addInt(v);
+                break;
+              } // case 32
+              case 34: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureSentenceIndexesIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  sentenceIndexes_.addInt(input.readUInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 34
+              case 42: {
+                datetime_ = input.readBytes();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Quote m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Quote.PARSER,
+                        extensionRegistry);
+                if (quotesBuilder_ == null) {
+                  ensureQuotesIsMutable();
+                  quotes_.add(m);
+                } else {
+                  quotesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 50
+              case 56: {
+                authorCharBegin_ = input.readUInt32();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
+              case 64: {
+                authorCharEnd_ = input.readUInt32();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 64
+              case 74: {
+                input.readMessage(
+                    getXmlTagFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 74
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.Section) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -69147,7 +68322,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Section(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -69258,68 +68444,6 @@ public final class CoreNLPProtos {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private SemgrexRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                semgrex_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              semgrex_.add(bs);
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                query_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.Dependencies>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              query_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.Dependencies.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          semgrex_ = semgrex_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          query_ = java.util.Collections.unmodifiableList(query_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexRequest_descriptor;
@@ -69403,69 +68527,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private Dependencies(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                  token_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Token>();
-                  mutable_bitField0_ |= 0x00000001;
-                }
-                token_.add(
-                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER, extensionRegistry));
-                break;
-              }
-              case 18: {
-                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder subBuilder = null;
-                if (((bitField0_ & 0x00000001) != 0)) {
-                  subBuilder = graph_.toBuilder();
-                }
-                graph_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.PARSER, extensionRegistry);
-                if (subBuilder != null) {
-                  subBuilder.mergeFrom(graph_);
-                  graph_ = subBuilder.buildPartial();
-                }
-                bitField0_ |= 0x00000001;
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          if (((mutable_bitField0_ & 0x00000001) != 0)) {
-            token_ = java.util.Collections.unmodifiableList(token_);
-          }
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -69581,7 +68642,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000001) != 0)) {
           output.writeMessage(2, getGraph());
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -69598,7 +68659,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(2, getGraph());
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -69620,7 +68681,7 @@ public final class CoreNLPProtos {
           if (!getGraph()
               .equals(other.getGraph())) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -69639,7 +68700,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + GRAPH_FIELD_NUMBER;
           hash = (53 * hash) + getGraph().hashCode();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -69776,10 +68837,11 @@ public final class CoreNLPProtos {
           super.clear();
           if (tokenBuilder_ == null) {
             token_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
+            token_ = null;
             tokenBuilder_.clear();
           }
+          bitField0_ = (bitField0_ & ~0x00000001);
           if (graphBuilder_ == null) {
             graph_ = null;
           } else {
@@ -69909,7 +68971,7 @@ public final class CoreNLPProtos {
           if (other.hasGraph()) {
             mergeGraph(other.getGraph());
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -69935,17 +68997,50 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.Dependencies parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.Token m =
+                      input.readMessage(
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER,
+                          extensionRegistry);
+                  if (tokenBuilder_ == null) {
+                    ensureTokenIsMutable();
+                    token_.add(m);
+                  } else {
+                    tokenBuilder_.addMessage(m);
+                  }
+                  break;
+                } // case 10
+                case 18: {
+                  input.readMessage(
+                      getGraphFieldBuilder().getBuilder(),
+                      extensionRegistry);
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 18
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.Dependencies) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -70342,7 +69437,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Dependencies(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -70463,7 +69569,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < query_.size(); i++) {
         output.writeMessage(2, query_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -70484,7 +69590,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, query_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -70503,7 +69609,7 @@ public final class CoreNLPProtos {
           .equals(other.getSemgrexList())) return false;
       if (!getQueryList()
           .equals(other.getQueryList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -70522,7 +69628,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + QUERY_FIELD_NUMBER;
         hash = (53 * hash) + getQueryList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -70648,19 +69754,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getQueryFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -70669,10 +69769,11 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         if (queryBuilder_ == null) {
           query_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
+          query_ = null;
           queryBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -70798,7 +69899,7 @@ public final class CoreNLPProtos {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -70818,17 +69919,49 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensureSemgrexIsMutable();
+                semgrex_.add(bs);
+                break;
+              } // case 10
+              case 18: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.Dependencies m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.Dependencies.PARSER,
+                        extensionRegistry);
+                if (queryBuilder_ == null) {
+                  ensureQueryIsMutable();
+                  query_.add(m);
+                } else {
+                  queryBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -71214,7 +70347,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SemgrexRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -71300,56 +70444,6 @@ public final class CoreNLPProtos {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private SemgrexResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                result_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              result_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          result_ = java.util.Collections.unmodifiableList(result_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor;
@@ -71422,55 +70516,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private NamedNode(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000001;
-                name_ = bs;
-                break;
-              }
-              case 16: {
-                bitField0_ |= 0x00000002;
-                matchIndex_ = input.readInt32();
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -71581,7 +70626,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000002) != 0)) {
           output.writeInt32(2, matchIndex_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -71597,7 +70642,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeInt32Size(2, matchIndex_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -71622,7 +70667,7 @@ public final class CoreNLPProtos {
           if (getMatchIndex()
               != other.getMatchIndex()) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -71641,7 +70686,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + MATCHINDEX_FIELD_NUMBER;
           hash = (53 * hash) + getMatchIndex();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -71758,18 +70803,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -71871,7 +70911,7 @@ public final class CoreNLPProtos {
           if (other.hasMatchIndex()) {
             setMatchIndex(other.getMatchIndex());
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -71892,17 +70932,40 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  name_ = input.readBytes();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 16: {
+                  matchIndex_ = input.readInt32();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 16
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -72062,7 +71125,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new NamedNode(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -72148,56 +71222,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private NamedRelation(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000001;
-                name_ = bs;
-                break;
-              }
-              case 18: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000002;
-                reln_ = bs;
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -72337,7 +71361,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000002) != 0)) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 2, reln_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -72352,7 +71376,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000002) != 0)) {
           size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, reln_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -72377,7 +71401,7 @@ public final class CoreNLPProtos {
           if (!getReln()
               .equals(other.getReln())) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -72396,7 +71420,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + RELN_FIELD_NUMBER;
           hash = (53 * hash) + getReln().hashCode();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -72513,18 +71537,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -72628,7 +71647,7 @@ public final class CoreNLPProtos {
             reln_ = other.reln_;
             onChanged();
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -72649,17 +71668,40 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  name_ = input.readBytes();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 18: {
+                  reln_ = input.readBytes();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 18
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -72864,7 +71906,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new NamedRelation(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -73019,83 +72072,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private Match(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                bitField0_ |= 0x00000001;
-                matchIndex_ = input.readInt32();
-                break;
-              }
-              case 18: {
-                if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                  node_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode>();
-                  mutable_bitField0_ |= 0x00000002;
-                }
-                node_.add(
-                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode.PARSER, extensionRegistry));
-                break;
-              }
-              case 26: {
-                if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                  reln_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation>();
-                  mutable_bitField0_ |= 0x00000004;
-                }
-                reln_.add(
-                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation.PARSER, extensionRegistry));
-                break;
-              }
-              case 32: {
-                bitField0_ |= 0x00000002;
-                graphIndex_ = input.readInt32();
-                break;
-              }
-              case 40: {
-                bitField0_ |= 0x00000004;
-                semgrexIndex_ = input.readInt32();
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          if (((mutable_bitField0_ & 0x00000002) != 0)) {
-            node_ = java.util.Collections.unmodifiableList(node_);
-          }
-          if (((mutable_bitField0_ & 0x00000004) != 0)) {
-            reln_ = java.util.Collections.unmodifiableList(reln_);
-          }
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -73315,7 +72291,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000004) != 0)) {
           output.writeInt32(5, semgrexIndex_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -73344,7 +72320,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeInt32Size(5, semgrexIndex_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -73378,7 +72354,7 @@ public final class CoreNLPProtos {
           if (getSemgrexIndex()
               != other.getSemgrexIndex()) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -73409,7 +72385,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + SEMGREXINDEX_FIELD_NUMBER;
           hash = (53 * hash) + getSemgrexIndex();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -73526,20 +72502,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-            getNodeFieldBuilder();
-            getRelnFieldBuilder();
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -73548,16 +72517,18 @@ public final class CoreNLPProtos {
           bitField0_ = (bitField0_ & ~0x00000001);
           if (nodeBuilder_ == null) {
             node_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000002);
           } else {
+            node_ = null;
             nodeBuilder_.clear();
           }
+          bitField0_ = (bitField0_ & ~0x00000002);
           if (relnBuilder_ == null) {
             reln_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000004);
           } else {
+            reln_ = null;
             relnBuilder_.clear();
           }
+          bitField0_ = (bitField0_ & ~0x00000004);
           graphIndex_ = 0;
           bitField0_ = (bitField0_ & ~0x00000008);
           semgrexIndex_ = 0;
@@ -73730,7 +72701,7 @@ public final class CoreNLPProtos {
           if (other.hasSemgrexIndex()) {
             setSemgrexIndex(other.getSemgrexIndex());
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -73758,17 +72729,71 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 8: {
+                  matchIndex_ = input.readInt32();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 8
+                case 18: {
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode m =
+                      input.readMessage(
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode.PARSER,
+                          extensionRegistry);
+                  if (nodeBuilder_ == null) {
+                    ensureNodeIsMutable();
+                    node_.add(m);
+                  } else {
+                    nodeBuilder_.addMessage(m);
+                  }
+                  break;
+                } // case 18
+                case 26: {
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation m =
+                      input.readMessage(
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation.PARSER,
+                          extensionRegistry);
+                  if (relnBuilder_ == null) {
+                    ensureRelnIsMutable();
+                    reln_.add(m);
+                  } else {
+                    relnBuilder_.addMessage(m);
+                  }
+                  break;
+                } // case 26
+                case 32: {
+                  graphIndex_ = input.readInt32();
+                  bitField0_ |= 0x00000008;
+                  break;
+                } // case 32
+                case 40: {
+                  semgrexIndex_ = input.readInt32();
+                  bitField0_ |= 0x00000010;
+                  break;
+                } // case 40
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -74446,7 +73471,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Match(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -74521,56 +73557,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private SemgrexResult(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                  match_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match>();
-                  mutable_bitField0_ |= 0x00000001;
-                }
-                match_.add(
-                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match.PARSER, extensionRegistry));
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          if (((mutable_bitField0_ & 0x00000001) != 0)) {
-            match_ = java.util.Collections.unmodifiableList(match_);
-          }
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -74648,7 +73634,7 @@ public final class CoreNLPProtos {
         for (int i = 0; i < match_.size(); i++) {
           output.writeMessage(1, match_.get(i));
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -74661,7 +73647,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(1, match_.get(i));
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -74678,7 +73664,7 @@ public final class CoreNLPProtos {
 
         if (!getMatchList()
             .equals(other.getMatchList())) return false;
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -74693,7 +73679,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + MATCH_FIELD_NUMBER;
           hash = (53 * hash) + getMatchList().hashCode();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -74810,29 +73796,24 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-            getMatchFieldBuilder();
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
           super.clear();
           if (matchBuilder_ == null) {
             match_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
+            match_ = null;
             matchBuilder_.clear();
           }
+          bitField0_ = (bitField0_ & ~0x00000001);
           return this;
         }
 
@@ -74943,7 +73924,7 @@ public final class CoreNLPProtos {
               }
             }
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -74963,17 +73944,43 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match m =
+                      input.readMessage(
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match.PARSER,
+                          extensionRegistry);
+                  if (matchBuilder_ == null) {
+                    ensureMatchIsMutable();
+                    match_.add(m);
+                  } else {
+                    matchBuilder_.addMessage(m);
+                  }
+                  break;
+                } // case 10
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -75250,7 +74257,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new SemgrexResult(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -75325,56 +74343,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private GraphResult(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                  result_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult>();
-                  mutable_bitField0_ |= 0x00000001;
-                }
-                result_.add(
-                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.PARSER, extensionRegistry));
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          if (((mutable_bitField0_ & 0x00000001) != 0)) {
-            result_ = java.util.Collections.unmodifiableList(result_);
-          }
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -75452,7 +74420,7 @@ public final class CoreNLPProtos {
         for (int i = 0; i < result_.size(); i++) {
           output.writeMessage(1, result_.get(i));
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -75465,7 +74433,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(1, result_.get(i));
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -75482,7 +74450,7 @@ public final class CoreNLPProtos {
 
         if (!getResultList()
             .equals(other.getResultList())) return false;
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -75497,7 +74465,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + RESULT_FIELD_NUMBER;
           hash = (53 * hash) + getResultList().hashCode();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -75614,29 +74582,24 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-            getResultFieldBuilder();
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
           super.clear();
           if (resultBuilder_ == null) {
             result_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
+            result_ = null;
             resultBuilder_.clear();
           }
+          bitField0_ = (bitField0_ & ~0x00000001);
           return this;
         }
 
@@ -75747,7 +74710,7 @@ public final class CoreNLPProtos {
               }
             }
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -75767,17 +74730,43 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult m =
+                      input.readMessage(
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.PARSER,
+                          extensionRegistry);
+                  if (resultBuilder_ == null) {
+                    ensureResultIsMutable();
+                    result_.add(m);
+                  } else {
+                    resultBuilder_.addMessage(m);
+                  }
+                  break;
+                } // case 10
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -76054,7 +75043,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new GraphResult(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -76137,7 +75137,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < result_.size(); i++) {
         output.writeMessage(1, result_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -76150,7 +75150,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, result_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -76167,7 +75167,7 @@ public final class CoreNLPProtos {
 
       if (!getResultList()
           .equals(other.getResultList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -76182,7 +75182,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + RESULT_FIELD_NUMBER;
         hash = (53 * hash) + getResultList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -76309,29 +75309,24 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getResultFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (resultBuilder_ == null) {
           result_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          result_ = null;
           resultBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -76442,7 +75437,7 @@ public final class CoreNLPProtos {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -76462,17 +75457,43 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.PARSER,
+                        extensionRegistry);
+                if (resultBuilder_ == null) {
+                  ensureResultIsMutable();
+                  result_.add(m);
+                } else {
+                  resultBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -76749,7 +75770,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SemgrexResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -76845,69 +75877,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private TokensRegexRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Document.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) != 0)) {
-                subBuilder = doc_.toBuilder();
-              }
-              doc_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Document.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(doc_);
-                doc_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000001;
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                pattern_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              pattern_.add(bs);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          pattern_ = pattern_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -77012,7 +75981,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < pattern_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, pattern_.getRaw(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -77033,7 +76002,7 @@ public final class CoreNLPProtos {
         size += dataSize;
         size += 1 * getPatternList().size();
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -77055,7 +76024,7 @@ public final class CoreNLPProtos {
       }
       if (!getPatternList()
           .equals(other.getPatternList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -77074,7 +76043,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + PATTERN_FIELD_NUMBER;
         hash = (53 * hash) + getPatternList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -77324,7 +76293,7 @@ public final class CoreNLPProtos {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -77345,17 +76314,43 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getDocFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                ensurePatternIsMutable();
+                pattern_.add(bs);
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -77621,7 +76616,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TokensRegexRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -77703,56 +76709,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private TokensRegexResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                match_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatch>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              match_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatch.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          match_ = java.util.Collections.unmodifiableList(match_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -77837,60 +76793,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private MatchLocation(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000001;
-                text_ = bs;
-                break;
-              }
-              case 16: {
-                bitField0_ |= 0x00000002;
-                begin_ = input.readInt32();
-                break;
-              }
-              case 24: {
-                bitField0_ |= 0x00000004;
-                end_ = input.readInt32();
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -78015,7 +76917,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000004) != 0)) {
           output.writeInt32(3, end_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -78035,7 +76937,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeInt32Size(3, end_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -78065,7 +76967,7 @@ public final class CoreNLPProtos {
           if (getEnd()
               != other.getEnd()) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -78088,7 +76990,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + END_FIELD_NUMBER;
           hash = (53 * hash) + getEnd();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -78205,18 +77107,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -78327,7 +77224,7 @@ public final class CoreNLPProtos {
           if (other.hasEnd()) {
             setEnd(other.getEnd());
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -78342,17 +77239,45 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  text_ = input.readBytes();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 16: {
+                  begin_ = input.readInt32();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 16
+                case 24: {
+                  end_ = input.readInt32();
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 24
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -78551,7 +77476,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new MatchLocation(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -78652,74 +77588,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private Match(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                bitField0_ |= 0x00000001;
-                sentence_ = input.readInt32();
-                break;
-              }
-              case 18: {
-                edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation.Builder subBuilder = null;
-                if (((bitField0_ & 0x00000002) != 0)) {
-                  subBuilder = match_.toBuilder();
-                }
-                match_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation.PARSER, extensionRegistry);
-                if (subBuilder != null) {
-                  subBuilder.mergeFrom(match_);
-                  match_ = subBuilder.buildPartial();
-                }
-                bitField0_ |= 0x00000002;
-                break;
-              }
-              case 26: {
-                if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                  group_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation>();
-                  mutable_bitField0_ |= 0x00000004;
-                }
-                group_.add(
-                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation.PARSER, extensionRegistry));
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          if (((mutable_bitField0_ & 0x00000004) != 0)) {
-            group_ = java.util.Collections.unmodifiableList(group_);
-          }
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -78851,7 +77719,7 @@ public final class CoreNLPProtos {
         for (int i = 0; i < group_.size(); i++) {
           output.writeMessage(3, group_.get(i));
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -78872,7 +77740,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(3, group_.get(i));
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -78899,7 +77767,7 @@ public final class CoreNLPProtos {
         }
         if (!getGroupList()
             .equals(other.getGroupList())) return false;
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -78922,7 +77790,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + GROUP_FIELD_NUMBER;
           hash = (53 * hash) + getGroupList().hashCode();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -79067,10 +77935,11 @@ public final class CoreNLPProtos {
           bitField0_ = (bitField0_ & ~0x00000002);
           if (groupBuilder_ == null) {
             group_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000004);
           } else {
+            group_ = null;
             groupBuilder_.clear();
           }
+          bitField0_ = (bitField0_ & ~0x00000004);
           return this;
         }
 
@@ -79201,7 +78070,7 @@ public final class CoreNLPProtos {
               }
             }
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -79222,17 +78091,55 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.Match parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 8: {
+                  sentence_ = input.readInt32();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 8
+                case 18: {
+                  input.readMessage(
+                      getMatchFieldBuilder().getBuilder(),
+                      extensionRegistry);
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 18
+                case 26: {
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation m =
+                      input.readMessage(
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.MatchLocation.PARSER,
+                          extensionRegistry);
+                  if (groupBuilder_ == null) {
+                    ensureGroupIsMutable();
+                    group_.add(m);
+                  } else {
+                    groupBuilder_.addMessage(m);
+                  }
+                  break;
+                } // case 26
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.Match) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -79668,7 +78575,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Match(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -79743,56 +78661,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private PatternMatch(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                  match_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.Match>();
-                  mutable_bitField0_ |= 0x00000001;
-                }
-                match_.add(
-                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.Match.PARSER, extensionRegistry));
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          if (((mutable_bitField0_ & 0x00000001) != 0)) {
-            match_ = java.util.Collections.unmodifiableList(match_);
-          }
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -79870,7 +78738,7 @@ public final class CoreNLPProtos {
         for (int i = 0; i < match_.size(); i++) {
           output.writeMessage(1, match_.get(i));
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -79883,7 +78751,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(1, match_.get(i));
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -79900,7 +78768,7 @@ public final class CoreNLPProtos {
 
         if (!getMatchList()
             .equals(other.getMatchList())) return false;
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -79915,7 +78783,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + MATCH_FIELD_NUMBER;
           hash = (53 * hash) + getMatchList().hashCode();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -80032,29 +78900,24 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatch.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-            getMatchFieldBuilder();
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
           super.clear();
           if (matchBuilder_ == null) {
             match_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
+            match_ = null;
             matchBuilder_.clear();
           }
+          bitField0_ = (bitField0_ & ~0x00000001);
           return this;
         }
 
@@ -80165,7 +79028,7 @@ public final class CoreNLPProtos {
               }
             }
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -80185,17 +79048,43 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatch parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.Match m =
+                      input.readMessage(
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.Match.PARSER,
+                          extensionRegistry);
+                  if (matchBuilder_ == null) {
+                    ensureMatchIsMutable();
+                    match_.add(m);
+                  } else {
+                    matchBuilder_.addMessage(m);
+                  }
+                  break;
+                } // case 10
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatch) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -80472,7 +79361,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new PatternMatch(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -80555,7 +79455,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < match_.size(); i++) {
         output.writeMessage(1, match_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -80568,7 +79468,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, match_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -80585,7 +79485,7 @@ public final class CoreNLPProtos {
 
       if (!getMatchList()
           .equals(other.getMatchList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -80600,7 +79500,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + MATCH_FIELD_NUMBER;
         hash = (53 * hash) + getMatchList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -80724,29 +79624,24 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getMatchFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (matchBuilder_ == null) {
           match_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          match_ = null;
           matchBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -80857,7 +79752,7 @@ public final class CoreNLPProtos {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -80877,17 +79772,43 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatch m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse.PatternMatch.PARSER,
+                        extensionRegistry);
+                if (matchBuilder_ == null) {
+                  ensureMatchIsMutable();
+                  match_.add(m);
+                } else {
+                  matchBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TokensRegexResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -81164,7 +80085,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TokensRegexResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -81276,75 +80208,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DependencyEnhancerRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Document.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) != 0)) {
-                subBuilder = document_.toBuilder();
-              }
-              document_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Document.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(document_);
-                document_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000001;
-              break;
-            }
-            case 16: {
-              int rawValue = input.readEnum();
-              @SuppressWarnings("deprecation")
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Language value = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(2, rawValue);
-              } else {
-                refCase_ = 2;
-                ref_ = rawValue;
-              }
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              refCase_ = 3;
-              ref_ = bs;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -81544,7 +80407,7 @@ public final class CoreNLPProtos {
       if (refCase_ == 3) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, ref_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -81564,7 +80427,7 @@ public final class CoreNLPProtos {
       if (refCase_ == 3) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, ref_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -81597,7 +80460,7 @@ public final class CoreNLPProtos {
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -81624,7 +80487,7 @@ public final class CoreNLPProtos {
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -81881,7 +80744,7 @@ public final class CoreNLPProtos {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -81902,17 +80765,55 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getDocumentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                int rawValue = input.readEnum();
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Language value =
+                    edu.stanford.nlp.pipeline.CoreNLPProtos.Language.forNumber(rawValue);
+                if (value == null) {
+                  mergeUnknownVarintField(2, rawValue);
+                } else {
+                  refCase_ = 2;
+                  ref_ = rawValue;
+                }
+                break;
+              } // case 16
+              case 26: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                refCase_ = 3;
+                ref_ = bs;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyEnhancerRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int refCase_ = 0;
@@ -82255,7 +81156,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DependencyEnhancerRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -82335,56 +81247,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FlattenedParseTree(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                nodes_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              nodes_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          nodes_ = java.util.Collections.unmodifiableList(nodes_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -82481,65 +81343,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private Node(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                contents_ = input.readBool();
-                contentsCase_ = 1;
-                break;
-              }
-              case 16: {
-                contents_ = input.readBool();
-                contentsCase_ = 2;
-                break;
-              }
-              case 26: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                contentsCase_ = 3;
-                contents_ = bs;
-                break;
-              }
-              case 33: {
-                bitField0_ |= 0x00000008;
-                score_ = input.readDouble();
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -82739,7 +81542,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000008) != 0)) {
           output.writeDouble(4, score_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -82765,7 +81568,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeDoubleSize(4, score_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -82803,7 +81606,7 @@ public final class CoreNLPProtos {
           case 0:
           default:
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -82837,7 +81640,7 @@ public final class CoreNLPProtos {
           case 0:
           default:
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -82954,18 +81757,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -83087,7 +81885,7 @@ public final class CoreNLPProtos {
               break;
             }
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -83102,17 +81900,51 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 8: {
+                  contents_ = input.readBool();
+                  contentsCase_ = 1;
+                  break;
+                } // case 8
+                case 16: {
+                  contents_ = input.readBool();
+                  contentsCase_ = 2;
+                  break;
+                } // case 16
+                case 26: {
+                  com.google.protobuf.ByteString bs = input.readBytes();
+                  contentsCase_ = 3;
+                  contents_ = bs;
+                  break;
+                } // case 26
+                case 33: {
+                  score_ = input.readDouble();
+                  bitField0_ |= 0x00000008;
+                  break;
+                } // case 33
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int contentsCase_ = 0;
@@ -83383,7 +82215,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Node(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -83460,7 +82303,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < nodes_.size(); i++) {
         output.writeMessage(1, nodes_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -83473,7 +82316,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, nodes_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -83490,7 +82333,7 @@ public final class CoreNLPProtos {
 
       if (!getNodesList()
           .equals(other.getNodesList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -83505,7 +82348,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + NODES_FIELD_NUMBER;
         hash = (53 * hash) + getNodesList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -83627,29 +82470,24 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getNodesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (nodesBuilder_ == null) {
           nodes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          nodes_ = null;
           nodesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -83760,7 +82598,7 @@ public final class CoreNLPProtos {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -83775,17 +82613,43 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Node.PARSER,
+                        extensionRegistry);
+                if (nodesBuilder_ == null) {
+                  ensureNodesIsMutable();
+                  nodes_.add(m);
+                } else {
+                  nodesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -84062,7 +82926,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FlattenedParseTree(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -84141,56 +83016,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private EvaluateParserRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                treebank_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              treebank_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          treebank_ = java.util.Collections.unmodifiableList(treebank_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -84300,69 +83125,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private ParseResult(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder subBuilder = null;
-                if (((bitField0_ & 0x00000001) != 0)) {
-                  subBuilder = gold_.toBuilder();
-                }
-                gold_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER, extensionRegistry);
-                if (subBuilder != null) {
-                  subBuilder.mergeFrom(gold_);
-                  gold_ = subBuilder.buildPartial();
-                }
-                bitField0_ |= 0x00000001;
-                break;
-              }
-              case 18: {
-                if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                  predicted_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>();
-                  mutable_bitField0_ |= 0x00000002;
-                }
-                predicted_.add(
-                    input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER, extensionRegistry));
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          if (((mutable_bitField0_ & 0x00000002) != 0)) {
-            predicted_ = java.util.Collections.unmodifiableList(predicted_);
-          }
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -84493,7 +83255,7 @@ public final class CoreNLPProtos {
         for (int i = 0; i < predicted_.size(); i++) {
           output.writeMessage(2, predicted_.get(i));
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -84510,7 +83272,7 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(2, predicted_.get(i));
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -84532,7 +83294,7 @@ public final class CoreNLPProtos {
         }
         if (!getPredictedList()
             .equals(other.getPredictedList())) return false;
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -84551,7 +83313,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + PREDICTED_FIELD_NUMBER;
           hash = (53 * hash) + getPredictedList().hashCode();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -84694,10 +83456,11 @@ public final class CoreNLPProtos {
           bitField0_ = (bitField0_ & ~0x00000001);
           if (predictedBuilder_ == null) {
             predicted_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000002);
           } else {
+            predicted_ = null;
             predictedBuilder_.clear();
           }
+          bitField0_ = (bitField0_ & ~0x00000002);
           return this;
         }
 
@@ -84821,7 +83584,7 @@ public final class CoreNLPProtos {
               }
             }
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -84839,17 +83602,50 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  input.readMessage(
+                      getGoldFieldBuilder().getBuilder(),
+                      extensionRegistry);
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 18: {
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree m =
+                      input.readMessage(
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER,
+                          extensionRegistry);
+                  if (predictedBuilder_ == null) {
+                    ensurePredictedIsMutable();
+                    predicted_.add(m);
+                  } else {
+                    predictedBuilder_.addMessage(m);
+                  }
+                  break;
+                } // case 18
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -85336,7 +84132,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new ParseResult(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -85419,7 +84226,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < treebank_.size(); i++) {
         output.writeMessage(1, treebank_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -85432,7 +84239,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, treebank_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -85449,7 +84256,7 @@ public final class CoreNLPProtos {
 
       if (!getTreebankList()
           .equals(other.getTreebankList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -85464,7 +84271,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + TREEBANK_FIELD_NUMBER;
         hash = (53 * hash) + getTreebankList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -85585,29 +84392,24 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getTreebankFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (treebankBuilder_ == null) {
           treebank_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          treebank_ = null;
           treebankBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -85718,7 +84520,7 @@ public final class CoreNLPProtos {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -85738,17 +84540,43 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest.ParseResult.PARSER,
+                        extensionRegistry);
+                if (treebankBuilder_ == null) {
+                  ensureTreebankIsMutable();
+                  treebank_.add(m);
+                } else {
+                  treebankBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -86025,7 +84853,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new EvaluateParserRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -86097,54 +84936,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private EvaluateParserResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 9: {
-              bitField0_ |= 0x00000001;
-              f1_ = input.readDouble();
-              break;
-            }
-            case 17: {
-              bitField0_ |= 0x00000002;
-              kbestF1_ = input.readDouble();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -86222,7 +85013,7 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeDouble(2, kbestF1_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -86239,7 +85030,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, kbestF1_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -86266,7 +85057,7 @@ public final class CoreNLPProtos {
             != java.lang.Double.doubleToLongBits(
                 other.getKbestF1())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -86287,7 +85078,7 @@ public final class CoreNLPProtos {
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getKbestF1()));
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -86404,18 +85195,13 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -86515,7 +85301,7 @@ public final class CoreNLPProtos {
         if (other.hasKbestF1()) {
           setKbestF1(other.getKbestF1());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -86533,17 +85319,40 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 9: {
+                f1_ = input.readDouble();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 9
+              case 17: {
+                kbestF1_ = input.readDouble();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 17
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.EvaluateParserResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -86658,7 +85467,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new EvaluateParserResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -86763,68 +85583,6 @@ public final class CoreNLPProtos {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private TsurgeonRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                operations_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              operations_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.PARSER, extensionRegistry));
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                trees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              trees_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          operations_ = java.util.Collections.unmodifiableList(operations_);
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          trees_ = java.util.Collections.unmodifiableList(trees_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor;
@@ -86912,62 +85670,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private Operation(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000001;
-                tregex_ = bs;
-                break;
-              }
-              case 18: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                  tsurgeon_ = new com.google.protobuf.LazyStringArrayList();
-                  mutable_bitField0_ |= 0x00000002;
-                }
-                tsurgeon_.add(bs);
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          if (((mutable_bitField0_ & 0x00000002) != 0)) {
-            tsurgeon_ = tsurgeon_.getUnmodifiableView();
-          }
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -87090,7 +85792,7 @@ public final class CoreNLPProtos {
         for (int i = 0; i < tsurgeon_.size(); i++) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 2, tsurgeon_.getRaw(i));
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -87110,7 +85812,7 @@ public final class CoreNLPProtos {
           size += dataSize;
           size += 1 * getTsurgeonList().size();
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -87132,7 +85834,7 @@ public final class CoreNLPProtos {
         }
         if (!getTsurgeonList()
             .equals(other.getTsurgeonList())) return false;
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -87151,7 +85853,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + TSURGEON_FIELD_NUMBER;
           hash = (53 * hash) + getTsurgeonList().hashCode();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -87268,18 +85970,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -87389,7 +86086,7 @@ public final class CoreNLPProtos {
             }
             onChanged();
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -87407,17 +86104,41 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  tregex_ = input.readBytes();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 18: {
+                  com.google.protobuf.ByteString bs = input.readBytes();
+                  ensureTsurgeonIsMutable();
+                  tsurgeon_.add(bs);
+                  break;
+                } // case 18
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -87647,7 +86368,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new Operation(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -87773,7 +86505,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < trees_.size(); i++) {
         output.writeMessage(2, trees_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -87790,7 +86522,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, trees_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -87809,7 +86541,7 @@ public final class CoreNLPProtos {
           .equals(other.getOperationsList())) return false;
       if (!getTreesList()
           .equals(other.getTreesList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -87828,7 +86560,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + TREES_FIELD_NUMBER;
         hash = (53 * hash) + getTreesList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -87949,36 +86681,31 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getOperationsFieldBuilder();
-          getTreesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (operationsBuilder_ == null) {
           operations_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          operations_ = null;
           operationsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (treesBuilder_ == null) {
           trees_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
+          trees_ = null;
           treesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -88124,7 +86851,7 @@ public final class CoreNLPProtos {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -88144,17 +86871,56 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest.Operation.PARSER,
+                        extensionRegistry);
+                if (operationsBuilder_ == null) {
+                  ensureOperationsIsMutable();
+                  operations_.add(m);
+                } else {
+                  operationsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER,
+                        extensionRegistry);
+                if (treesBuilder_ == null) {
+                  ensureTreesIsMutable();
+                  trees_.add(m);
+                } else {
+                  treesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -88671,7 +87437,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TsurgeonRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -88751,56 +87528,6 @@ public final class CoreNLPProtos {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private TsurgeonResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                trees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              trees_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          trees_ = java.util.Collections.unmodifiableList(trees_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor;
@@ -88871,7 +87598,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < trees_.size(); i++) {
         output.writeMessage(1, trees_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -88884,7 +87611,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, trees_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -88901,7 +87628,7 @@ public final class CoreNLPProtos {
 
       if (!getTreesList()
           .equals(other.getTreesList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -88916,7 +87643,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + TREES_FIELD_NUMBER;
         hash = (53 * hash) + getTreesList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -89037,29 +87764,24 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getTreesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (treesBuilder_ == null) {
           trees_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          trees_ = null;
           treesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -89170,7 +87892,7 @@ public final class CoreNLPProtos {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -89185,17 +87907,43 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER,
+                        extensionRegistry);
+                if (treesBuilder_ == null) {
+                  ensureTreesIsMutable();
+                  trees_.add(m);
+                } else {
+                  treesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TsurgeonResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -89472,7 +88220,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TsurgeonResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -89551,56 +88310,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private MorphologyRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                words_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              words_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          words_ = java.util.Collections.unmodifiableList(words_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -89681,56 +88390,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private TaggedWord(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000001;
-                word_ = bs;
-                break;
-              }
-              case 18: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000002;
-                xpos_ = bs;
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -89866,7 +88525,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000002) != 0)) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 2, xpos_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -89881,7 +88540,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000002) != 0)) {
           size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, xpos_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -89906,7 +88565,7 @@ public final class CoreNLPProtos {
           if (!getXpos()
               .equals(other.getXpos())) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -89925,7 +88584,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + XPOS_FIELD_NUMBER;
           hash = (53 * hash) + getXpos().hashCode();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -90042,18 +88701,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -90157,7 +88811,7 @@ public final class CoreNLPProtos {
             xpos_ = other.xpos_;
             onChanged();
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -90175,17 +88829,40 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  word_ = input.readBytes();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 18: {
+                  xpos_ = input.readBytes();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 18
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -90390,7 +89067,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new TaggedWord(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -90473,7 +89161,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < words_.size(); i++) {
         output.writeMessage(1, words_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -90486,7 +89174,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, words_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -90503,7 +89191,7 @@ public final class CoreNLPProtos {
 
       if (!getWordsList()
           .equals(other.getWordsList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -90518,7 +89206,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + WORDS_FIELD_NUMBER;
         hash = (53 * hash) + getWordsList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -90639,29 +89327,24 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getWordsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (wordsBuilder_ == null) {
           words_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          words_ = null;
           wordsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -90772,7 +89455,7 @@ public final class CoreNLPProtos {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -90792,17 +89475,43 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest.TaggedWord.PARSER,
+                        extensionRegistry);
+                if (wordsBuilder_ == null) {
+                  ensureWordsIsMutable();
+                  words_.add(m);
+                } else {
+                  wordsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -91079,7 +89788,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new MorphologyRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -91158,56 +89878,6 @@ public final class CoreNLPProtos {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private MorphologyResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                words_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              words_.add(
-                  input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          words_ = java.util.Collections.unmodifiableList(words_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -91306,62 +89976,6 @@ public final class CoreNLPProtos {
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
-      }
-      private WordTagLemma(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000001;
-                word_ = bs;
-                break;
-              }
-              case 18: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000002;
-                xpos_ = bs;
-                break;
-              }
-              case 26: {
-                com.google.protobuf.ByteString bs = input.readBytes();
-                bitField0_ |= 0x00000004;
-                lemma_ = bs;
-                break;
-              }
-              default: {
-                if (!parseUnknownField(
-                    input, unknownFields, extensionRegistry, tag)) {
-                  done = true;
-                }
-                break;
-              }
-            }
-          }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(
-              e).setUnfinishedMessage(this);
-        } finally {
-          this.unknownFields = unknownFields.build();
-          makeExtensionsImmutable();
-        }
       }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -91552,7 +90166,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000004) != 0)) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 3, lemma_);
         }
-        unknownFields.writeTo(output);
+        getUnknownFields().writeTo(output);
       }
 
       @java.lang.Override
@@ -91570,7 +90184,7 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000004) != 0)) {
           size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, lemma_);
         }
-        size += unknownFields.getSerializedSize();
+        size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
       }
@@ -91600,7 +90214,7 @@ public final class CoreNLPProtos {
           if (!getLemma()
               .equals(other.getLemma())) return false;
         }
-        if (!unknownFields.equals(other.unknownFields)) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
 
@@ -91623,7 +90237,7 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + LEMMA_FIELD_NUMBER;
           hash = (53 * hash) + getLemma().hashCode();
         }
-        hash = (29 * hash) + unknownFields.hashCode();
+        hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
@@ -91740,18 +90354,13 @@ public final class CoreNLPProtos {
 
         // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.newBuilder()
         private Builder() {
-          maybeForceBuilderInitialization();
+
         }
 
         private Builder(
             com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
           super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessageV3
-                  .alwaysUseFieldBuilders) {
-          }
+
         }
         @java.lang.Override
         public Builder clear() {
@@ -91866,7 +90475,7 @@ public final class CoreNLPProtos {
             lemma_ = other.lemma_;
             onChanged();
           }
-          this.mergeUnknownFields(other.unknownFields);
+          this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
         }
@@ -91887,17 +90496,45 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma parsedMessage = null;
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
           try {
-            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  word_ = input.readBytes();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 18: {
+                  xpos_ = input.readBytes();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 18
+                case 26: {
+                  lemma_ = input.readBytes();
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 26
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
           } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma) e.getUnfinishedMessage();
             throw e.unwrapIOException();
           } finally {
-            if (parsedMessage != null) {
-              mergeFrom(parsedMessage);
-            }
-          }
+            onChanged();
+          } // finally
           return this;
         }
         private int bitField0_;
@@ -92186,7 +90823,18 @@ public final class CoreNLPProtos {
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
-          return new WordTagLemma(input, extensionRegistry);
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
         }
       };
 
@@ -92269,7 +90917,7 @@ public final class CoreNLPProtos {
       for (int i = 0; i < words_.size(); i++) {
         output.writeMessage(1, words_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -92282,7 +90930,7 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, words_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -92299,7 +90947,7 @@ public final class CoreNLPProtos {
 
       if (!getWordsList()
           .equals(other.getWordsList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -92314,7 +90962,7 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + WORDS_FIELD_NUMBER;
         hash = (53 * hash) + getWordsList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -92435,29 +91083,24 @@ public final class CoreNLPProtos {
 
       // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getWordsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (wordsBuilder_ == null) {
           words_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          words_ = null;
           wordsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -92568,7 +91211,7 @@ public final class CoreNLPProtos {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -92588,17 +91231,43 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse.WordTagLemma.PARSER,
+                        extensionRegistry);
+                if (wordsBuilder_ == null) {
+                  ensureWordsIsMutable();
+                  words_.add(m);
+                } else {
+                  wordsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.MorphologyResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -92875,7 +91544,18 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new MorphologyResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
