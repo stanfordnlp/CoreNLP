@@ -45,17 +45,27 @@ public class RemoveNamedEdge extends SsurgeonEdit {
     buf.write(depName);
     return buf.toString();
   }
-  
+
+  /**
+   * Removes the named edge from the graph, if it exists.
+   *<br>
+   * TODO: it should not be necessary to have node names for this to work.
+   * Any edge that gets matched by the edge matcher should just work
+   * This operation is not used anywhere, even in RTE, so we should be
+   * able to change its semantics to not include the node names
+   */
   @Override
-  public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {    
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     String relation = sm.getRelnString(edgeName);
     IndexedWord govNode = getNamedNode(govName, sm);
     IndexedWord depNode = getNamedNode(depName, sm);
     SemanticGraphEdge edge = sg.getEdge(govNode, depNode, GrammaticalRelation.valueOf(relation));
-    
+
     if (edge != null) {
       sg.removeEdge(edge);
+      return true;
     }
+    return false;
   }
 
   public String getDepName() {

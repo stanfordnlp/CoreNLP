@@ -12,8 +12,10 @@ public abstract class SsurgeonEdit {
   /**
    * Given a matching instance (via the SemgrexMatcher), performs an in-place
    * modification on the given SemanticGraph.
+   * <br>
+   * @return whether or not there was an edit
    */
-  public abstract void evaluate(SemanticGraph sg, SemgrexMatcher sm);
+  public abstract boolean evaluate(SemanticGraph sg, SemgrexMatcher sm);
 
   public abstract String toEditString(); // This should be a parseable String representing the edit
   @Override
