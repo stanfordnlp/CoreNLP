@@ -38,12 +38,18 @@ public class CollapseSubtree extends SsurgeonEdit {
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
-  public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     IndexedWord rootNode = this.getNamedNode(rootName, sm);
     Set<IndexedWord> subgraphNodeSet = sg.getSubgraphVertices(rootNode);
+    if (subgraphNodeSet.size() == 1) {
+      // our work here is done
+      return false;
+    }
 
-
+    // TODO: this doesn't do a full search for cycles.  Is that relevant?
+    // Why does this even matter?  Perhaps the only thing we care about
+    // is that the root of the whole graph isn't collapsed
+    // unless it stays the root
     if ( ! sg.isDag(rootNode)) {
       /* Check if there is a cycle going back to the root. */
       for (IndexedWord child : sg.getChildren(rootNode)) {
@@ -80,6 +86,7 @@ public class CollapseSubtree extends SsurgeonEdit {
       sg.removeVertex(node);
     }
 
+    return true;
   }
 
   @Override

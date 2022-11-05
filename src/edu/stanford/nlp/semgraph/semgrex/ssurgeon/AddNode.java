@@ -20,16 +20,23 @@ public class AddNode extends SsurgeonEdit {
     return new AddNode(nodeString, nodeName);
   }
   
-public static AddNode createAddNode(IndexedWord node, String nodeName) {
-  String nodeString = AddDep.cheapWordToString(node);
-  return new AddNode(nodeString, nodeName);
-}
+  public static AddNode createAddNode(IndexedWord node, String nodeName) {
+    String nodeString = AddDep.cheapWordToString(node);
+    return new AddNode(nodeString, nodeName);
+  }
 
+  // TODO: can this be bombproofed if the node is already added?
+  // otherwise, we can insist the user make sure the
+  // node doesn't already exist, similar to Tsurgeon
+  // Alternatively we could just not export this one and
+  // make AddDep a bit more configurable.
+  // This one is actually used in its current form in RTE
   @Override
-  public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     IndexedWord newNode = AddDep.fromCheapString(nodeString);
     sg.addVertex(newNode);
     addNamedNode(newNode, nodeName);
+    return true;
   }
 
   

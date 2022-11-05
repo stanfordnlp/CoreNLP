@@ -42,34 +42,51 @@ public class RemoveEdge extends SsurgeonEdit {
 
   public static final String WILDCARD_NODE = "**WILDNODE**";
 
+  /**
+   * Remove all edges from gov to dep that match the relation name.
+   *<br>
+   * Either gov or dep can be **WILDNODE**, representing that all
+   * edges to or from the other node of that type should be removed.
+   *<br>
+   * You cannot set both gov and dep to **WILDNODE**, though.
+   *<br>
+   * This will not update anything the second time executed on the
+   * same graph.
+   */
   @Override
-  public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     boolean govWild = govName.equals(WILDCARD_NODE);
     boolean depWild = depName.equals(WILDCARD_NODE);
     IndexedWord govNode = getNamedNode(govName, sm);
-    IndexedWord depNode =getNamedNode(depName, sm);
+    IndexedWord depNode = getNamedNode(depName, sm);
+    boolean success = false;
 
     if (govNode != null && depNode != null) {
       SemanticGraphEdge edge = sg.getEdge(govNode, depNode, relation);
-      if (edge != null) {
-        @SuppressWarnings("unused")
-        boolean successFlag = sg.removeEdge(edge);
+      while (edge != null) {
+        if (!sg.removeEdge(edge)) {
+          throw new IllegalStateException("Found an edge and tried to delete it, but somehow this didn't work!  " + edge);
+        }
+        edge = sg.getEdge(govNode, depNode, relation);
+        success = true;
       }
     } else if (depNode != null && govWild) {
       // dep known, wildcard gov
       for (SemanticGraphEdge edge : sg.incomingEdgeIterable(depNode)) {
         if (edge.getRelation().equals(relation) && sg.containsEdge(edge) ) {
-          sg.removeEdge(edge);
+          success = success || sg.removeEdge(edge);
         }
       }
     }  else if (govNode != null && depWild) {
       // gov known, wildcard dep
       for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(govNode)) {
         if (edge.getRelation().equals(relation) && sg.containsEdge(edge) ) {
-          sg.removeEdge(edge);
+          success = success || sg.removeEdge(edge);
         }
       }
     }
+    // will be true if at least one edge was removed
+    return success;
   }
 
 

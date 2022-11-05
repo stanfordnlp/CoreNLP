@@ -18,13 +18,20 @@ public class SetRoots extends SsurgeonEdit {
   public SetRoots(List<String> newRootNames) {
     this.newRootNames = newRootNames;
   }
-  
+
+  /**
+   * If executed twice on the same graph, the second time there
+   * will be no further updates
+   */
   @Override
-  public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    List<IndexedWord> newRoots = new ArrayList<>();
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    Set<IndexedWord> newRoots = new LinkedHashSet<>();
     for (String name : newRootNames)
       newRoots.add(getNamedNode(name, sm));
-    sg.setRoots(newRoots);    
+    if (newRoots.equals(sg.getRoots()))
+      return false;
+    sg.setRoots(newRoots);
+    return true;
   }
 
   @Override

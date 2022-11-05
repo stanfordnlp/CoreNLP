@@ -65,21 +65,26 @@ public class AddEdge extends SsurgeonEdit {
     return new AddEdge(govName, depName, reln, weight);
   }
 
-  
+
+  /**
+   * If the edge already exists in the graph,
+   * a new edge is not added.
+   */
   @Override
-  public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     IndexedWord govNode = getNamedNode(govName, sm);
     IndexedWord depNode =  getNamedNode(depName, sm);
     SemanticGraphEdge existingEdge = sg.getEdge(govNode, depNode, relation);
     if (existingEdge == null) {
       // When adding the edge, check to see if the gov/dep nodes are presently in the graph.
-      // 
       if (!sg.containsVertex(govNode)) 
         sg.addVertex(govNode);
       if (!sg.containsVertex(depNode)) 
         sg.addVertex(depNode);
       sg.addEdge(govNode, depNode, relation, weight,false );
+      return true;
     }
+    return false;
   }
 
 }

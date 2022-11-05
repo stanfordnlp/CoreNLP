@@ -80,9 +80,11 @@ public class AddDep extends SsurgeonEdit {
    * TODO: figure out how to specify where in the sentence this node goes.
    * TODO: determine if we should be copying an IndexedWord, or working just with a FeatureLabel.
    * TODO: bombproof if this gov, dep, and reln already exist.
+   * TODO: This is not used anywhere, even in the old RTE code, so we can redo it however we want.
+   *       Perhaps it could reorder the indices of the new nodes, for example
    */
   @Override
-  public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     IndexedWord govNode = sm.getNode(govNodeName);
     IndexedWord newNode = new IndexedWord(newNodePrototype);
     int newIndex = SemanticGraphUtils.leftMostChildVertice(govNode, sg).index(); // cheap En-specific hack for placing copula (beginning of governing phrase)
@@ -91,6 +93,7 @@ public class AddDep extends SsurgeonEdit {
     newNode.setSentIndex(govNode.sentIndex());
     sg.addVertex(newNode);
     sg.addEdge(govNode, newNode, relation, weight,false);
+    return true;
   }
 
   public static final String WORD_KEY = "word";
