@@ -20,12 +20,21 @@ public class KillAllIncomingEdges extends SsurgeonEdit {
     this.nodeName = nodeName;
   }
 
+  /**
+   * If executed twice on the same node, the second time there
+   * will be no further updates
+   */
   @Override
-  public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-   IndexedWord tgtNode = getNamedNode(nodeName, sm);
-   for (SemanticGraphEdge edge : sg.incomingEdgeIterable(tgtNode)) {
-     sg.removeEdge(edge);
-   }
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    IndexedWord tgtNode = getNamedNode(nodeName, sm);
+    if (tgtNode == null) {
+      return false;
+    }
+    boolean success = false;
+    for (SemanticGraphEdge edge : sg.incomingEdgeIterable(tgtNode)) {
+      success = success || sg.removeEdge(edge);
+    }
+    return success;
   }
 
   @Override

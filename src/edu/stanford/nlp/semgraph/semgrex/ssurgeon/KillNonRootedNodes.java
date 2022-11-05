@@ -16,16 +16,22 @@ import edu.stanford.nlp.semgraph.*;
  */
 public class KillNonRootedNodes extends SsurgeonEdit {
   public static final String LABEL = "killNonRooted"; 
-  
+
+  /**
+   * If executed twice on the same graph, the second time there
+   * will be no further updates
+   */
   @Override
-  public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    boolean changed = false;
     List<IndexedWord> nodes = new ArrayList<>(sg.vertexSet());
     for (IndexedWord node : nodes) {
       List<IndexedWord> rootPath = sg.getPathToRoot(node);
       if (rootPath == null) {
-        sg.removeVertex(node);
+        changed = changed || sg.removeVertex(node);
       }
     }
+    return changed;
   }
   
   @Override

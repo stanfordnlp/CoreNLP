@@ -64,18 +64,21 @@ public class DeleteGraphFromNode extends SsurgeonEdit {
 
 
   @Override
-  public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     IndexedWord seedNode = getNamedNode(destroyNodeName, sm);
-    // TODO: do not execute if seedNode if not in graph (or just error?)
-    if (sg.containsVertex(seedNode)) {
-      Set<IndexedWord> nodesToDestroy = crawl(seedNode, sg);
-      for (IndexedWord node : nodesToDestroy) {
-        sg.removeVertex(node);
-      }
-      // After destroy nodes, need to reset the roots, since it's possible a root node
-      // was destroyed.
-      sg.resetRoots();
+    if (seedNode == null || !sg.containsVertex(seedNode)) {
+      return false;
     }
+
+    Set<IndexedWord> nodesToDestroy = crawl(seedNode, sg);
+    for (IndexedWord node : nodesToDestroy) {
+      sg.removeVertex(node);
+    }
+    // After destroy nodes, need to reset the roots, since it's possible a root node
+    // was destroyed.
+    // TODO: better is to check first
+    sg.resetRoots();
+    return true;
   }
 
 }
