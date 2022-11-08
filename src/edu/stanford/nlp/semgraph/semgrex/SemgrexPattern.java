@@ -36,7 +36,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <p>
  * For example, {@code {lemma:slice;tag:/VB.*&#47;}} represents any verb nodes
  * with "slice" as their lemma.  Attributes are extracted using
- * {@code edu.stanford.nlp.ling.AnnotationLookup}.
+ * {@link edu.stanford.nlp.ling.AnnotationLookup}.
  * <p>
  * The root of the graph can be marked by the $ sign, that is {@code {$}}
  * represents the root node.
