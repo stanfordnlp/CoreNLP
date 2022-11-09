@@ -8,6 +8,7 @@
 
 package edu.stanford.nlp.util;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -35,7 +36,7 @@ public abstract class ProcessProtobufRequest {
    * https://developers.google.com/protocol-buffers/docs/techniques#streamimg
    */
   public void processMultipleInputs(InputStream in, OutputStream out) throws IOException {
-    DataInputStream din = new DataInputStream(in);
+    DataInputStream din = new DataInputStream(new BufferedInputStream(in));
     DataOutputStream dout = new DataOutputStream(out);
     int size = 0;
     do {
@@ -53,7 +54,15 @@ public abstract class ProcessProtobufRequest {
       }
 
       byte[] inputArray = new byte[size];
-      din.read(inputArray, 0, size);
+      int lenRead = 0;
+      while (lenRead < size) {
+        int chunk = din.read(inputArray, lenRead, size - lenRead);
+        if (chunk <= 0) {
+          // Oops, guess something went wrong on the other side
+          throw new IOException("Failed to read as much data as we were supposed to!");
+        }
+        lenRead += chunk;
+      }
       ByteArrayInputStream bin = new ByteArrayInputStream(inputArray);
       ByteArrayOutputStream result = new ByteArrayOutputStream();
       processInputStream(bin, result);
