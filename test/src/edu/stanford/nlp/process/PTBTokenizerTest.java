@@ -105,6 +105,7 @@ public class PTBTokenizerTest {
       // unmatched surrogate at the end of a text
       "half codepoint:" + ((char) 55296) + " ",
       "There are ,2 days left",
+      "I sent 'em an 'email'",
   };
 
   private final String[][] ptbGold = {
@@ -203,6 +204,7 @@ public class PTBTokenizerTest {
       { "two", "character", "codepoint", ":", "😸" },
       { "half", "codepoint", ":", },
       { "There", "are", ",", "2", "days", "left", },
+      { "I", "sent", "'em", "an", "'", "email", "'", },
   };
 
   private final String[][] ptbGoldSplitHyphenated = {
@@ -309,6 +311,7 @@ public class PTBTokenizerTest {
       { "two", "character", "codepoint", ":", "😸" },
       { "half", "codepoint", ":", },
       { "There", "are", ",", "2", "days", "left", },
+      { "I", "sent", "'em", "an", "'", "email", "'", },
   };
 
   @Test
