@@ -655,7 +655,7 @@ REDAUX_NOT = n{APOSETCETERA}ts?
 /* Tokens you want: 'n' '[2-9]0s '[eE]m 'till? 'Cause Shi'ite B'Gosh o'clock 'Twixt
    Here now only need apostrophe initial or final words listed. */
 /* Single letters are for French borrowings. */
-/* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
+/* Arguably, c'mon should be split to "c'm" + "on" - split later in ASSIMILATIONS2 */
 APOWORD = {WORD}({APOSETCETERA}{WORD})+|\p{Script=Latin}{APOSETCETERA}[A-Z]\.([A-Z]\.)+|{APOS}n{APOS}?|([lLdDjJ]|Dunkin|somethin|ol){APOS}|{APOS}(em|till?|cause|twixt|[1-9]0s)|[1-9]0{APOS}s
 /* APOWORD2 is things we will strip at beginning of word: th' shortening "the" (Th'enchanting) and y' shortening "you" (y'know, y'all) */
 APOWORD2 = (th|y){APOS}
