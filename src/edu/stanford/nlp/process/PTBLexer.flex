@@ -656,9 +656,13 @@ REDAUX_NOT = n{APOSETCETERA}ts?
    Here now only need apostrophe initial or final words listed. */
 /* Single letters are for French borrowings. */
 /* Arguably, c'mon should be split to "c'm" + "on" - split later in ASSIMILATIONS2 */
-APOWORD = {WORD}({APOSETCETERA}{WORD})+|\p{Script=Latin}{APOSETCETERA}[A-Z]\.([A-Z]\.)+|{APOS}n{APOS}?|([lLdDjJ]|Dunkin|somethin|ol){APOS}|{APOS}(em|till?|cause|twixt|[1-9]0s)|[1-9]0{APOS}s
+APOWORD = {WORD}({APOSETCETERA}{WORD})+|\p{Script=Latin}{APOSETCETERA}[A-Z]\.([A-Z]\.)+|{APOS}n{APOS}?|([lLdDjJ]|Dunkin|somethin|ol){APOS}|{APOS}[1-9]0s|[1-9]0{APOS}s
 /* APOWORD2 is things we will strip at beginning of word: th' shortening "the" (Th'enchanting) and y' shortening "you" (y'know, y'all) */
 APOWORD2 = (th|y){APOS}
+/* APOWORD3 is specifically words that might be a contraction, like "screw 'em", or might be part of a short quote, like 'email'
+   if this were part of APOWORD, then 'email' or 'tilling' etc would be chopped up unnecessarily */
+APOWORD3_TAIL = (em|till?|cause|twixt)
+APOWORD3 = {APOSETCETERA}{APOWORD3_TAIL}
 /* Some Wired URLs end in + or = so omit that too. Some quoting with '[' and ']' so disallow. */
 FULLURL = (ftp|svn|svn\+ssh|http|https|mailto):\/\/[^ \t\n\f\r<>|`\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+[^ \t\n\f\r<>|.!?¡¿,·;:&`\"\'\*\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-]
 LIKELYURL = ((www\.([^ \t\n\f\r`<>|.!?,\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r`<>|.!?,:\/$\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r`<>|]+[^ \t\n\f\r`<>|.!?,;:&\p{OpenPunctuation}\p{InitialPunctuation}\p{ClosePunctuation}\p{FinalPunctuation}-])?
@@ -953,6 +957,21 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                           String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
                           norm = LexerUtils.removeSoftHyphens(norm);
                           if (DEBUG) { logger.info("Used {APOWORD} to recognize " + tok + " as " + norm +
+                                                   "; quoteStyle=" + quoteStyle + "; probablyLeft=" + false); }
+                          return getNext(norm, tok);
+                        }
+/* Having this rule separate prevents improper tokenization of 'email' */
+{APOSETCETERA}/{APOWORD3_TAIL}{WORD}    {
+                          String tok = yytext();
+                          String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
+                          if (DEBUG) { logger.info("Used {APOSETCETERA}/{APOWORD3_TAIL}{WORD} to recognize " + tok + " as " + norm +
+                                                   "; quoteStyle=" + quoteStyle + "; probablyLeft=" + false); }
+                          return getNext(norm, tok);
+                        }
+{APOWORD3}              { String tok = yytext();
+                          String norm = LexerUtils.handleQuotes(tok, false, quoteStyle);
+                          norm = LexerUtils.removeSoftHyphens(norm);
+                          if (DEBUG) { logger.info("Used {APOWORD3} to recognize " + tok + " as " + norm +
                                                    "; quoteStyle=" + quoteStyle + "; probablyLeft=" + false); }
                           return getNext(norm, tok);
                         }
