@@ -114,7 +114,7 @@ java edu.stanford.nlp.pipeline.StanfordCoreNLP -file input.txt
 ## Programming languages and operating systems
 
 Stanford CoreNLP is written in **Java**; recent releases  require
-**Java 1.8+**. You need to have Java installed to run
+**Java 8+**. You need to have Java installed to run
 CoreNLP. However, you can interact with CoreNLP via the command-line
 or its web service;
 many people use CoreNLP while writing their own code in Javascript,
