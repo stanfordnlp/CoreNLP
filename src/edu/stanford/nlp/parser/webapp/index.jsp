@@ -451,7 +451,7 @@ if (pp == null) {
   <p>
     <em><a href="https://nlp.stanford.edu/software/lex-parser.html">Back to parser home</a></em>
     <br/>
-    <em>Last updated 2016-09-12</em>
+    <em>Last updated 2022-11-24</em>
   </p>
 
   <p style="text-align: right">
