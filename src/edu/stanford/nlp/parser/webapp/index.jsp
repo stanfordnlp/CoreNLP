@@ -82,10 +82,11 @@ private static ParserPack loadParserPack(String parser, ServletContext applicati
   if (parser.equals("Chinese")) {
     Properties props = new Properties();
     String dataDir = application.getRealPath("/WEB-INF/data/chinesesegmenter");
+    props.setProperty("serDictionary", dataDir + File.separator + "dict-chris6.ser.gz");
     CRFClassifier<CoreLabel> classifier = new CRFClassifier<>(props);
     BufferedInputStream bis = new BufferedInputStream(new GZIPInputStream(
-      new FileInputStream(dataDir + File.separator + "05202008-ctb6.processed-chris6.lex.gz")));
-    classifier.loadClassifier(bis,null);
+      new FileInputStream(dataDir + File.separator + "ctb9.small.ser.gz")));
+    classifier.loadClassifier(bis, props);
     bis.close();
 
     // configure segmenter

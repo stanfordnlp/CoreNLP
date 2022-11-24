@@ -599,9 +599,11 @@
         <zipfileset prefix="WEB-INF/data"
                     file="/u/nlp/data/lexparser/chineseFactored.ser.gz"/>
         <zipfileset prefix="WEB-INF/data/chinesesegmenter"
-                    file="/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz"/>
+                    file="/u/nlp/data/chinese/ctb9/seg/ctb9.small.ser.gz"/>
         <zipfileset prefix="WEB-INF/data/chinesesegmenter"
                     dir="/u/nlp/data/gale/segtool/stanford-seg/releasedata"/>
+        <zipfileset prefix="WEB-INF/data/chinesesegmenter"
+                    file="/u/nlp/data/gale/segtool/stanford-seg/classifiers/dict-chris6.ser.gz"/>
         <zipfileset prefix="WEB-INF/data"
                     file="/u/nlp/data/lexparser/spanishPCFG.ser.gz"/>
         <zipfileset file="${data.path}/webapps/favicon.ico"/>
