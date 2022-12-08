@@ -33,8 +33,10 @@ public class CoreDocument {
     if (this.annotationDocument.get(CoreAnnotations.SentencesAnnotation.class) != null) {
       wrapSentences();
       // if there are entity mentions, build a document wide list
-      if ( ! sentences.isEmpty() && sentences.get(0).entityMentions() != null) {
+      if (!sentences.isEmpty() && sentences.get(0).entityMentions() != null) {
         buildDocumentEntityMentionsList();
+      } else if (annotationDocument.get(CoreAnnotations.MentionsAnnotation.class) != null) {
+        entityMentions = Collections.emptyList();
       }
       // if there are quotes, build a document wide list
       if (QuoteAnnotator.gatherQuotes(this.annotationDocument) != null)
