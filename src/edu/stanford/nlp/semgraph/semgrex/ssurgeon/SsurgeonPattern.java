@@ -116,7 +116,7 @@ public class SsurgeonPattern {
    *  
    *  TODO: create variant that returns set of expansions while matcher.find() returns true
    * @param sg SemanticGraph to operate over (NOT destroyed/modified).
-   * @return True if a match was found and executed, otherwise false.
+   * @return List of the generated matches
    */
   public Collection<SemanticGraph> execute(SemanticGraph sg) {
     Collection<SemanticGraph> generated = new ArrayList<>();
