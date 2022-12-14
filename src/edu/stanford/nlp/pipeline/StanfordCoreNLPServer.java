@@ -1330,7 +1330,7 @@ public class StanfordCoreNLPServer implements Runnable {
         try {
           // Get the document
           Annotation doc = getDocument(props, httpExchange);
-          if ( ! doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+          if (!doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
             StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
             pipeline.annotate(doc);
           }
@@ -1341,10 +1341,10 @@ public class StanfordCoreNLPServer implements Runnable {
             respondBadInput("Missing required parameter 'pattern'", httpExchange);
             return Pair.makePair("", null);
           }
-          String pattern = params.get("pattern");
+          String rawPattern = params.get("pattern");
 
           // (create the matcher)
-          TregexPattern p = TregexPattern.compile(pattern);
+          TregexPattern pattern = TregexPattern.compile(rawPattern);
 
           // Run Tregex
           return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) ->
@@ -1355,7 +1355,7 @@ public class StanfordCoreNLPServer implements Runnable {
                   throw new IllegalStateException("Error: cannot process tregex operations with no constituency tree annotations.  Perhaps need to reinitialize the server with the parse annotator");
                 }
                 //sentWriter.set("tree", tree.pennString());
-                TregexMatcher matcher = p.matcher(tree);
+                TregexMatcher matcher = pattern.matcher(tree);
 
                 int i = 0;
                 while (matcher.find()) {
