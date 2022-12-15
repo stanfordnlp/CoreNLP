@@ -24,6 +24,7 @@ import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
@@ -1574,12 +1575,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasSentenceIndex()) { sentence.set(SentenceIndexAnnotation.class, proto.getSentenceIndex()); }
     if (proto.hasCharacterOffsetBegin()) { sentence.set(CharacterOffsetBeginAnnotation.class, proto.getCharacterOffsetBegin()); }
     if (proto.hasCharacterOffsetEnd()) { sentence.set(CharacterOffsetEndAnnotation.class, proto.getCharacterOffsetEnd()); }
-    if (proto.hasParseTree()) { sentence.set(TreeAnnotation.class, fromProto(proto.getParseTree())); }
-    if (proto.hasBinarizedParseTree()) { sentence.set(BinarizedTreeAnnotation.class, fromProto(proto.getBinarizedParseTree())); }
-    if (proto.getKBestParseTreesCount() > 0) {
-      List<Tree> trees = proto.getKBestParseTreesList().stream().map(ProtobufAnnotationSerializer::fromProto).collect(Collectors.toCollection(LinkedList::new));
-      sentence.set(KBestTreesAnnotation.class, trees);
-    }
     if (proto.hasAnnotatedParseTree()) { sentence.set(SentimentCoreAnnotations.SentimentAnnotatedTree.class, fromProto(proto.getAnnotatedParseTree())); }
     if (proto.hasSentiment()) { sentence.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     // Non-default fields
@@ -1629,6 +1624,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
   /** On a partially finished deserialized sentence, set some annotations which should reuse the same token objects as the parent sentence */
   protected void setSentenceTokenAnnotations(CoreMap sentence, CoreNLPProtos.Sentence protoSentence, List<CoreLabel> sentenceTokens, String docid) {
+    // build the tree annotations, attaching the expected CoreLabels to the leaves
+    if (protoSentence.hasParseTree()) { sentence.set(TreeAnnotation.class, fromProto(protoSentence.getParseTree(), sentenceTokens)); }
+    if (protoSentence.hasBinarizedParseTree()) { sentence.set(BinarizedTreeAnnotation.class, fromProto(protoSentence.getBinarizedParseTree(), sentenceTokens)); }
+    if (protoSentence.getKBestParseTreesCount() > 0) {
+      List<Tree> trees = protoSentence.getKBestParseTreesList().stream().map(x -> (fromProto(x, sentenceTokens))).collect(Collectors.toCollection(LinkedList::new));
+      sentence.set(KBestTreesAnnotation.class, trees);
+    }
+
     // Set dependency graphs
     if (protoSentence.hasBasicDependencies()) {
       sentence.set(BasicDependenciesAnnotation.class, fromProto(protoSentence.getBasicDependencies(), sentenceTokens, docid));
@@ -2209,6 +2212,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       throw new IllegalArgumentException("Tree never finished!  Offending proto: " + proto);
     }
     return finished;
+  }
+
+  /**
+   * Retrieve a Tree object and then attach the tokens passed in.
+   *
+   * Useful for keeping the tokens in the tree synchronized with the tokens in a sentence.
+   */
+  public static Tree fromProto(CoreNLPProtos.ParseTree proto, List<CoreLabel> tokens) {
+    Tree tree = fromProto(proto);
+    Trees.setLeafLabels(tree, tokens);
+    return tree;
   }
 
   /**
