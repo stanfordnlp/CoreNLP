@@ -252,9 +252,9 @@ public class Trees {
   /**
    * Replace the labels of the leaves with the given leaves.
    */
-  public static void setLeafLabels(Tree tree, List<Label> labels) {
+  public static void setLeafLabels(Tree tree, List<? extends Label> labels) {
     Iterator<Tree> leafIterator = tree.getLeaves().iterator();
-    Iterator<Label> labelIterator = labels.iterator();
+    Iterator<? extends Label> labelIterator = labels.iterator();
     while (leafIterator.hasNext() && labelIterator.hasNext()) {
       Tree leaf = leafIterator.next();
       Label label = labelIterator.next();
