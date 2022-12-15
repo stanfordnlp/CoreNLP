@@ -1505,25 +1505,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Add tokens -- missing by default as they're populated as sublists of the document tokens
     List<CoreLabel> tokens = proto.getTokenList().stream().map(this::fromProto).collect(Collectors.toList());
     lossySentence.set(TokensAnnotation.class, tokens);
-    // Add dependencies
-    if (proto.hasBasicDependencies()) {
-      lossySentence.set(BasicDependenciesAnnotation.class, fromProto(proto.getBasicDependencies(), tokens, null));
-    }
-    if (proto.hasCollapsedDependencies()) {
-      lossySentence.set(CollapsedDependenciesAnnotation.class, fromProto(proto.getCollapsedDependencies(), tokens, null));
-    }
-    if (proto.hasCollapsedCCProcessedDependencies()) {
-      lossySentence.set(CollapsedCCProcessedDependenciesAnnotation.class, fromProto(proto.getCollapsedCCProcessedDependencies(), tokens, null));
-    }
-    if (proto.hasAlternativeDependencies()) {
-      lossySentence.set(AlternativeDependenciesAnnotation.class, fromProto(proto.getAlternativeDependencies(), tokens, null));
-    }
-    if (proto.hasEnhancedDependencies()) {
-      lossySentence.set(EnhancedDependenciesAnnotation.class, fromProto(proto.getEnhancedDependencies(), tokens, null));
-    }
-    if (proto.hasEnhancedPlusPlusDependencies()) {
-      lossySentence.set(EnhancedPlusPlusDependenciesAnnotation.class, fromProto(proto.getEnhancedPlusPlusDependencies(), tokens, null));
-    }
+    setSentenceTokenAnnotations(lossySentence, proto, tokens, null);
     // Add entailed sentences
     if (proto.getEntailedSentenceCount() > 0) {
       List<SentenceFragment> entailedSentences = proto.getEntailedSentenceList().stream().map(frag -> fromProto(frag, lossySentence.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toList());
@@ -1645,6 +1627,28 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return sentence;
   }
 
+  /** On a partially finished deserialized sentence, set some annotations which should reuse the same token objects as the parent sentence */
+  protected void setSentenceTokenAnnotations(CoreMap sentence, CoreNLPProtos.Sentence protoSentence, List<CoreLabel> sentenceTokens, String docid) {
+    // Set dependency graphs
+    if (protoSentence.hasBasicDependencies()) {
+      sentence.set(BasicDependenciesAnnotation.class, fromProto(protoSentence.getBasicDependencies(), sentenceTokens, docid));
+    }
+    if (protoSentence.hasCollapsedDependencies()) {
+      sentence.set(CollapsedDependenciesAnnotation.class, fromProto(protoSentence.getCollapsedDependencies(), sentenceTokens, docid));
+    }
+    if (protoSentence.hasCollapsedCCProcessedDependencies()) {
+      sentence.set(CollapsedCCProcessedDependenciesAnnotation.class, fromProto(protoSentence.getCollapsedCCProcessedDependencies(), sentenceTokens, docid));
+    }
+    if (protoSentence.hasAlternativeDependencies()) {
+      sentence.set(AlternativeDependenciesAnnotation.class, fromProto(protoSentence.getAlternativeDependencies(), sentenceTokens, docid));
+    }
+    if (protoSentence.hasEnhancedDependencies()) {
+      sentence.set(EnhancedDependenciesAnnotation.class, fromProto(protoSentence.getEnhancedDependencies(), sentenceTokens, docid));
+    }
+    if (protoSentence.hasEnhancedPlusPlusDependencies()) {
+      sentence.set(EnhancedPlusPlusDependenciesAnnotation.class, fromProto(protoSentence.getEnhancedPlusPlusDependencies(), sentenceTokens, docid));
+    }
+  }
 
   protected void loadSentenceMentions(CoreNLPProtos.Sentence proto, CoreMap sentence) {
     // add all Mentions for this sentence
@@ -1890,25 +1894,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       CoreNLPProtos.Sentence sentence = proto.getSentenceList().get(sentenceIndex);
       CoreMap map = sentences.get(sentenceIndex);
       List<CoreLabel> sentenceTokens = map.get(TokensAnnotation.class);
-      // Set dependency graphs
-      if (sentence.hasBasicDependencies()) {
-        map.set(BasicDependenciesAnnotation.class, fromProto(sentence.getBasicDependencies(), sentenceTokens, docid));
-      }
-      if (sentence.hasCollapsedDependencies()) {
-        map.set(CollapsedDependenciesAnnotation.class, fromProto(sentence.getCollapsedDependencies(), sentenceTokens, docid));
-      }
-      if (sentence.hasCollapsedCCProcessedDependencies()) {
-        map.set(CollapsedCCProcessedDependenciesAnnotation.class, fromProto(sentence.getCollapsedCCProcessedDependencies(), sentenceTokens, docid));
-      }
-      if (sentence.hasAlternativeDependencies()) {
-        map.set(AlternativeDependenciesAnnotation.class, fromProto(sentence.getAlternativeDependencies(), sentenceTokens, docid));
-      }
-      if (sentence.hasEnhancedDependencies()) {
-        map.set(EnhancedDependenciesAnnotation.class, fromProto(sentence.getEnhancedDependencies(), sentenceTokens, docid));
-      }
-      if (sentence.hasEnhancedPlusPlusDependencies()) {
-        map.set(EnhancedPlusPlusDependenciesAnnotation.class, fromProto(sentence.getEnhancedPlusPlusDependencies(), sentenceTokens, docid));
-      }
+      setSentenceTokenAnnotations(map, sentence, sentenceTokens, docid);
       // Set entailed sentences
       if (sentence.getEntailedSentenceCount() > 0) {
         Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(EnhancedPlusPlusDependenciesAnnotation.class))).collect(Collectors.toSet());
