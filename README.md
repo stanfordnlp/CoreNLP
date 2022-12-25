@@ -98,6 +98,8 @@ If you want to analyse English, add following:
     implementation "edu.stanford.nlp:stanford-corenlp:4.5.1:models-english-kbp"
 ```
 
+If you use other version, replace "4.5.1" to a version you use.
+
 ### Useful resources
 
 You can find releases of Stanford CoreNLP on [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.5.1/jar).
