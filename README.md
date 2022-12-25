@@ -78,6 +78,26 @@ The jars can be directly downloaded from the links below or the Hugging Face Hub
 
 Thank you to [Hugging Face](https://huggingface.co/) for helping with our hosting!
 
+### Install by Gradle
+
+If you don't know Gradle itself, see official site: https://gradle.org
+
+Write the following in your build.gradle according to [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.5.1/jar):
+
+```Gradle
+dependencies {
+    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.1'
+}
+```
+
+If you want to analyse English, add following:
+
+```Gradle
+    implementation "edu.stanford.nlp:stanford-corenlp:4.5.1:models"
+    implementation "edu.stanford.nlp:stanford-corenlp:4.5.1:models-english"
+    implementation "edu.stanford.nlp:stanford-corenlp:4.5.1:models-english-kbp"
+```
+
 ### Useful resources
 
 You can find releases of Stanford CoreNLP on [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.5.1/jar).
