@@ -2414,8 +2414,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
   /**
    * Voodoo magic to convert a serialized dependency graph into a {@link SemanticGraph}.
-   * This method is intended to be called only from the {@link ProtobufAnnotationSerializer#fromProto(CoreNLPProtos.Document)}
-   * method.
+   * <br>
+   * This method needs the words from the sentence, such as we have
+   * when converting an entire document in the
+   * {@link ProtobufAnnotationSerializer#fromProto(CoreNLPProtos.Document)} method.
    *
    * @param proto The serialized representation of the graph. This relies heavily on indexing into the original document.
    * @param sentence The raw sentence that this graph was saved from must be provided, as it is not saved in the serialized
