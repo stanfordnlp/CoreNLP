@@ -91575,6 +91575,2413 @@ public final class CoreNLPProtos {
 
   }
 
+  public interface DependencyConverterRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.DependencyConverterRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> 
+        getTreesList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    int getTreesCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+        getTreesOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * A request for converting constituency trees to dependency graphs
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyConverterRequest}
+   */
+  public static final class DependencyConverterRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.DependencyConverterRequest)
+      DependencyConverterRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DependencyConverterRequest.newBuilder() to construct.
+    private DependencyConverterRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DependencyConverterRequest() {
+      trees_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DependencyConverterRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest.Builder.class);
+    }
+
+    public static final int TREES_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> trees_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getTreesList() {
+      return trees_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+        getTreesOrBuilderList() {
+      return trees_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    @java.lang.Override
+    public int getTreesCount() {
+      return trees_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index) {
+      return trees_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+        int index) {
+      return trees_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < trees_.size(); i++) {
+        output.writeMessage(1, trees_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < trees_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, trees_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest other = (edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest) obj;
+
+      if (!getTreesList()
+          .equals(other.getTreesList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getTreesCount() > 0) {
+        hash = (37 * hash) + TREES_FIELD_NUMBER;
+        hash = (53 * hash) + getTreesList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * A request for converting constituency trees to dependency graphs
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyConverterRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.DependencyConverterRequest)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (treesBuilder_ == null) {
+          trees_ = java.util.Collections.emptyList();
+        } else {
+          trees_ = null;
+          treesBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest result = new edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest(this);
+        int from_bitField0_ = bitField0_;
+        if (treesBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            trees_ = java.util.Collections.unmodifiableList(trees_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.trees_ = trees_;
+        } else {
+          result.trees_ = treesBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest.getDefaultInstance()) return this;
+        if (treesBuilder_ == null) {
+          if (!other.trees_.isEmpty()) {
+            if (trees_.isEmpty()) {
+              trees_ = other.trees_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureTreesIsMutable();
+              trees_.addAll(other.trees_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.trees_.isEmpty()) {
+            if (treesBuilder_.isEmpty()) {
+              treesBuilder_.dispose();
+              treesBuilder_ = null;
+              trees_ = other.trees_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              treesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getTreesFieldBuilder() : null;
+            } else {
+              treesBuilder_.addAllMessages(other.trees_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.PARSER,
+                        extensionRegistry);
+                if (treesBuilder_ == null) {
+                  ensureTreesIsMutable();
+                  trees_.add(m);
+                } else {
+                  treesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> trees_ =
+        java.util.Collections.emptyList();
+      private void ensureTreesIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          trees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree>(trees_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> treesBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> getTreesList() {
+        if (treesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(trees_);
+        } else {
+          return treesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public int getTreesCount() {
+        if (treesBuilder_ == null) {
+          return trees_.size();
+        } else {
+          return treesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTrees(int index) {
+        if (treesBuilder_ == null) {
+          return trees_.get(index);
+        } else {
+          return treesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder setTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.set(index, value);
+          onChanged();
+        } else {
+          treesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder setTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder addTrees(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.add(value);
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder addTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+        if (treesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTreesIsMutable();
+          trees_.add(index, value);
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder addTrees(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.add(builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder addTrees(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          treesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder addAllTrees(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree> values) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, trees_);
+          onChanged();
+        } else {
+          treesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder clearTrees() {
+        if (treesBuilder_ == null) {
+          trees_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          treesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public Builder removeTrees(int index) {
+        if (treesBuilder_ == null) {
+          ensureTreesIsMutable();
+          trees_.remove(index);
+          onChanged();
+        } else {
+          treesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder getTreesBuilder(
+          int index) {
+        return getTreesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreesOrBuilder(
+          int index) {
+        if (treesBuilder_ == null) {
+          return trees_.get(index);  } else {
+          return treesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+           getTreesOrBuilderList() {
+        if (treesBuilder_ != null) {
+          return treesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(trees_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder addTreesBuilder() {
+        return getTreesFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder addTreesBuilder(
+          int index) {
+        return getTreesFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.FlattenedParseTree trees = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder> 
+           getTreesBuilderList() {
+        return getTreesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+          getTreesFieldBuilder() {
+        if (treesBuilder_ == null) {
+          treesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder>(
+                  trees_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          trees_ = null;
+        }
+        return treesBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.DependencyConverterRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.DependencyConverterRequest)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<DependencyConverterRequest>
+        PARSER = new com.google.protobuf.AbstractParser<DependencyConverterRequest>() {
+      @java.lang.Override
+      public DependencyConverterRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DependencyConverterRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DependencyConverterRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DependencyConverterResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.DependencyConverterResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion> 
+        getConversionsList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion getConversions(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+     */
+    int getConversionsCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversionOrBuilder> 
+        getConversionsOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversionOrBuilder getConversionsOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * The result of using the CoreNLP dependency converter.
+   * One graph per tree
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyConverterResponse}
+   */
+  public static final class DependencyConverterResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.DependencyConverterResponse)
+      DependencyConverterResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DependencyConverterResponse.newBuilder() to construct.
+    private DependencyConverterResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DependencyConverterResponse() {
+      conversions_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DependencyConverterResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.Builder.class);
+    }
+
+    public interface DependencyConversionOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       * @return Whether the graph field is set.
+       */
+      boolean hasGraph();
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       * @return The graph.
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph();
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder();
+
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+       * @return Whether the tree field is set.
+       */
+      boolean hasTree();
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+       * @return The tree.
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTree();
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreeOrBuilder();
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion}
+     */
+    public static final class DependencyConversion extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion)
+        DependencyConversionOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use DependencyConversion.newBuilder() to construct.
+      private DependencyConversion(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private DependencyConversion() {
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new DependencyConversion();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_DependencyConversion_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_DependencyConversion_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.class, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int GRAPH_FIELD_NUMBER = 1;
+      private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph graph_;
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       * @return Whether the graph field is set.
+       */
+      @java.lang.Override
+      public boolean hasGraph() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       * @return The graph.
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph() {
+        return graph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
+      }
+      /**
+       * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder() {
+        return graph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
+      }
+
+      public static final int TREE_FIELD_NUMBER = 2;
+      private edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree tree_;
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+       * @return Whether the tree field is set.
+       */
+      @java.lang.Override
+      public boolean hasTree() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+       * @return The tree.
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTree() {
+        return tree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance() : tree_;
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreeOrBuilder() {
+        return tree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance() : tree_;
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasGraph()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!getGraph().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          output.writeMessage(1, getGraph());
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          output.writeMessage(2, getTree());
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, getGraph());
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(2, getTree());
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion other = (edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion) obj;
+
+        if (hasGraph() != other.hasGraph()) return false;
+        if (hasGraph()) {
+          if (!getGraph()
+              .equals(other.getGraph())) return false;
+        }
+        if (hasTree() != other.hasTree()) return false;
+        if (hasTree()) {
+          if (!getTree()
+              .equals(other.getTree())) return false;
+        }
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasGraph()) {
+          hash = (37 * hash) + GRAPH_FIELD_NUMBER;
+          hash = (53 * hash) + getGraph().hashCode();
+        }
+        if (hasTree()) {
+          hash = (37 * hash) + TREE_FIELD_NUMBER;
+          hash = (53 * hash) + getTree().hashCode();
+        }
+        hash = (29 * hash) + getUnknownFields().hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversionOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_DependencyConversion_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_DependencyConversion_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.class, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+            getGraphFieldBuilder();
+            getTreeFieldBuilder();
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          if (graphBuilder_ == null) {
+            graph_ = null;
+          } else {
+            graphBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000001);
+          if (treeBuilder_ == null) {
+            tree_ = null;
+          } else {
+            treeBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_DependencyConversion_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion result = new edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            if (graphBuilder_ == null) {
+              result.graph_ = graph_;
+            } else {
+              result.graph_ = graphBuilder_.build();
+            }
+            to_bitField0_ |= 0x00000001;
+          }
+          if (((from_bitField0_ & 0x00000002) != 0)) {
+            if (treeBuilder_ == null) {
+              result.tree_ = tree_;
+            } else {
+              result.tree_ = treeBuilder_.build();
+            }
+            to_bitField0_ |= 0x00000002;
+          }
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.getDefaultInstance()) return this;
+          if (other.hasGraph()) {
+            mergeGraph(other.getGraph());
+          }
+          if (other.hasTree()) {
+            mergeTree(other.getTree());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          if (!hasGraph()) {
+            return false;
+          }
+          if (!getGraph().isInitialized()) {
+            return false;
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  input.readMessage(
+                      getGraphFieldBuilder().getBuilder(),
+                      extensionRegistry);
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 18: {
+                  input.readMessage(
+                      getTreeFieldBuilder().getBuilder(),
+                      extensionRegistry);
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 18
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.unwrapIOException();
+          } finally {
+            onChanged();
+          } // finally
+          return this;
+        }
+        private int bitField0_;
+
+        private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph graph_;
+        private com.google.protobuf.SingleFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> graphBuilder_;
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         * @return Whether the graph field is set.
+         */
+        public boolean hasGraph() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         * @return The graph.
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph() {
+          if (graphBuilder_ == null) {
+            return graph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
+          } else {
+            return graphBuilder_.getMessage();
+          }
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public Builder setGraph(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
+          if (graphBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            graph_ = value;
+            onChanged();
+          } else {
+            graphBuilder_.setMessage(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public Builder setGraph(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder builderForValue) {
+          if (graphBuilder_ == null) {
+            graph_ = builderForValue.build();
+            onChanged();
+          } else {
+            graphBuilder_.setMessage(builderForValue.build());
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public Builder mergeGraph(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
+          if (graphBuilder_ == null) {
+            if (((bitField0_ & 0x00000001) != 0) &&
+                graph_ != null &&
+                graph_ != edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance()) {
+              graph_ =
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.newBuilder(graph_).mergeFrom(value).buildPartial();
+            } else {
+              graph_ = value;
+            }
+            onChanged();
+          } else {
+            graphBuilder_.mergeFrom(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public Builder clearGraph() {
+          if (graphBuilder_ == null) {
+            graph_ = null;
+            onChanged();
+          } else {
+            graphBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000001);
+          return this;
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder getGraphBuilder() {
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return getGraphFieldBuilder().getBuilder();
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder() {
+          if (graphBuilder_ != null) {
+            return graphBuilder_.getMessageOrBuilder();
+          } else {
+            return graph_ == null ?
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
+          }
+        }
+        /**
+         * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
+            getGraphFieldBuilder() {
+          if (graphBuilder_ == null) {
+            graphBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder>(
+                    getGraph(),
+                    getParentForChildren(),
+                    isClean());
+            graph_ = null;
+          }
+          return graphBuilder_;
+        }
+
+        private edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree tree_;
+        private com.google.protobuf.SingleFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> treeBuilder_;
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+         * @return Whether the tree field is set.
+         */
+        public boolean hasTree() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+         * @return The tree.
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree getTree() {
+          if (treeBuilder_ == null) {
+            return tree_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance() : tree_;
+          } else {
+            return treeBuilder_.getMessage();
+          }
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+         */
+        public Builder setTree(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+          if (treeBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            tree_ = value;
+            onChanged();
+          } else {
+            treeBuilder_.setMessage(value);
+          }
+          bitField0_ |= 0x00000002;
+          return this;
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+         */
+        public Builder setTree(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder builderForValue) {
+          if (treeBuilder_ == null) {
+            tree_ = builderForValue.build();
+            onChanged();
+          } else {
+            treeBuilder_.setMessage(builderForValue.build());
+          }
+          bitField0_ |= 0x00000002;
+          return this;
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+         */
+        public Builder mergeTree(edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree value) {
+          if (treeBuilder_ == null) {
+            if (((bitField0_ & 0x00000002) != 0) &&
+                tree_ != null &&
+                tree_ != edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance()) {
+              tree_ =
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.newBuilder(tree_).mergeFrom(value).buildPartial();
+            } else {
+              tree_ = value;
+            }
+            onChanged();
+          } else {
+            treeBuilder_.mergeFrom(value);
+          }
+          bitField0_ |= 0x00000002;
+          return this;
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+         */
+        public Builder clearTree() {
+          if (treeBuilder_ == null) {
+            tree_ = null;
+            onChanged();
+          } else {
+            treeBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder getTreeBuilder() {
+          bitField0_ |= 0x00000002;
+          onChanged();
+          return getTreeFieldBuilder().getBuilder();
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder getTreeOrBuilder() {
+          if (treeBuilder_ != null) {
+            return treeBuilder_.getMessageOrBuilder();
+          } else {
+            return tree_ == null ?
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.getDefaultInstance() : tree_;
+          }
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.FlattenedParseTree tree = 2;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder> 
+            getTreeFieldBuilder() {
+          if (treeBuilder_ == null) {
+            treeBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.FlattenedParseTreeOrBuilder>(
+                    getTree(),
+                    getParentForChildren(),
+                    isClean());
+            tree_ = null;
+          }
+          return treeBuilder_;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<DependencyConversion>
+          PARSER = new com.google.protobuf.AbstractParser<DependencyConversion>() {
+        @java.lang.Override
+        public DependencyConversion parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
+        }
+      };
+
+      public static com.google.protobuf.Parser<DependencyConversion> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<DependencyConversion> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public static final int CONVERSIONS_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion> conversions_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion> getConversionsList() {
+      return conversions_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversionOrBuilder> 
+        getConversionsOrBuilderList() {
+      return conversions_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+     */
+    @java.lang.Override
+    public int getConversionsCount() {
+      return conversions_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion getConversions(int index) {
+      return conversions_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversionOrBuilder getConversionsOrBuilder(
+        int index) {
+      return conversions_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      for (int i = 0; i < getConversionsCount(); i++) {
+        if (!getConversions(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < conversions_.size(); i++) {
+        output.writeMessage(1, conversions_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < conversions_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, conversions_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse other = (edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse) obj;
+
+      if (!getConversionsList()
+          .equals(other.getConversionsList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getConversionsCount() > 0) {
+        hash = (37 * hash) + CONVERSIONS_FIELD_NUMBER;
+        hash = (53 * hash) + getConversionsList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The result of using the CoreNLP dependency converter.
+     * One graph per tree
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.DependencyConverterResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.DependencyConverterResponse)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (conversionsBuilder_ == null) {
+          conversions_ = java.util.Collections.emptyList();
+        } else {
+          conversions_ = null;
+          conversionsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse result = new edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse(this);
+        int from_bitField0_ = bitField0_;
+        if (conversionsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            conversions_ = java.util.Collections.unmodifiableList(conversions_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.conversions_ = conversions_;
+        } else {
+          result.conversions_ = conversionsBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.getDefaultInstance()) return this;
+        if (conversionsBuilder_ == null) {
+          if (!other.conversions_.isEmpty()) {
+            if (conversions_.isEmpty()) {
+              conversions_ = other.conversions_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureConversionsIsMutable();
+              conversions_.addAll(other.conversions_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.conversions_.isEmpty()) {
+            if (conversionsBuilder_.isEmpty()) {
+              conversionsBuilder_.dispose();
+              conversionsBuilder_ = null;
+              conversions_ = other.conversions_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              conversionsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getConversionsFieldBuilder() : null;
+            } else {
+              conversionsBuilder_.addAllMessages(other.conversions_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        for (int i = 0; i < getConversionsCount(); i++) {
+          if (!getConversions(i).isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.PARSER,
+                        extensionRegistry);
+                if (conversionsBuilder_ == null) {
+                  ensureConversionsIsMutable();
+                  conversions_.add(m);
+                } else {
+                  conversionsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion> conversions_ =
+        java.util.Collections.emptyList();
+      private void ensureConversionsIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          conversions_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion>(conversions_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversionOrBuilder> conversionsBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion> getConversionsList() {
+        if (conversionsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(conversions_);
+        } else {
+          return conversionsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public int getConversionsCount() {
+        if (conversionsBuilder_ == null) {
+          return conversions_.size();
+        } else {
+          return conversionsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion getConversions(int index) {
+        if (conversionsBuilder_ == null) {
+          return conversions_.get(index);
+        } else {
+          return conversionsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public Builder setConversions(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion value) {
+        if (conversionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConversionsIsMutable();
+          conversions_.set(index, value);
+          onChanged();
+        } else {
+          conversionsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public Builder setConversions(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder builderForValue) {
+        if (conversionsBuilder_ == null) {
+          ensureConversionsIsMutable();
+          conversions_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          conversionsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public Builder addConversions(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion value) {
+        if (conversionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConversionsIsMutable();
+          conversions_.add(value);
+          onChanged();
+        } else {
+          conversionsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public Builder addConversions(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion value) {
+        if (conversionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConversionsIsMutable();
+          conversions_.add(index, value);
+          onChanged();
+        } else {
+          conversionsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public Builder addConversions(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder builderForValue) {
+        if (conversionsBuilder_ == null) {
+          ensureConversionsIsMutable();
+          conversions_.add(builderForValue.build());
+          onChanged();
+        } else {
+          conversionsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public Builder addConversions(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder builderForValue) {
+        if (conversionsBuilder_ == null) {
+          ensureConversionsIsMutable();
+          conversions_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          conversionsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public Builder addAllConversions(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion> values) {
+        if (conversionsBuilder_ == null) {
+          ensureConversionsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, conversions_);
+          onChanged();
+        } else {
+          conversionsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public Builder clearConversions() {
+        if (conversionsBuilder_ == null) {
+          conversions_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          conversionsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public Builder removeConversions(int index) {
+        if (conversionsBuilder_ == null) {
+          ensureConversionsIsMutable();
+          conversions_.remove(index);
+          onChanged();
+        } else {
+          conversionsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder getConversionsBuilder(
+          int index) {
+        return getConversionsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversionOrBuilder getConversionsOrBuilder(
+          int index) {
+        if (conversionsBuilder_ == null) {
+          return conversions_.get(index);  } else {
+          return conversionsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversionOrBuilder> 
+           getConversionsOrBuilderList() {
+        if (conversionsBuilder_ != null) {
+          return conversionsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(conversions_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder addConversionsBuilder() {
+        return getConversionsFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder addConversionsBuilder(
+          int index) {
+        return getConversionsFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyConverterResponse.DependencyConversion conversions = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder> 
+           getConversionsBuilderList() {
+        return getConversionsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversionOrBuilder> 
+          getConversionsFieldBuilder() {
+        if (conversionsBuilder_ == null) {
+          conversionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse.DependencyConversionOrBuilder>(
+                  conversions_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          conversions_ = null;
+        }
+        return conversionsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.DependencyConverterResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.DependencyConverterResponse)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<DependencyConverterResponse>
+        PARSER = new com.google.protobuf.AbstractParser<DependencyConverterResponse>() {
+      @java.lang.Override
+      public DependencyConverterResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DependencyConverterResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DependencyConverterResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyConverterResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_Document_descriptor;
   private static final 
@@ -91835,6 +94242,21 @@ public final class CoreNLPProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_DependencyConversion_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_DependencyConversion_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -92150,18 +94572,28 @@ public final class CoreNLPProtos {
       "I\n\005words\030\001 \003(\0132:.edu.stanford.nlp.pipeli" +
       "ne.MorphologyResponse.WordTagLemma\0329\n\014Wo" +
       "rdTagLemma\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\022\r" +
-      "\n\005lemma\030\003 \002(\t*\243\001\n\010Language\022\013\n\007Unknown\020\000\022" +
-      "\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007Eng" +
-      "lish\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew" +
-      "\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n" +
-      "\020UniversalChinese\020\n*h\n\tSentiment\022\023\n\017STRO" +
-      "NG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUT" +
-      "RAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_POSIT" +
-      "IVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013EQUIVA" +
-      "LENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REVER" +
-      "SE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNA" +
-      "TION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031e" +
-      "du.stanford.nlp.pipelineB\rCoreNLPProtos"
+      "\n\005lemma\030\003 \002(\t\"Z\n\032DependencyConverterRequ" +
+      "est\022<\n\005trees\030\001 \003(\0132-.edu.stanford.nlp.pi" +
+      "peline.FlattenedParseTree\"\220\002\n\033Dependency" +
+      "ConverterResponse\022`\n\013conversions\030\001 \003(\0132K" +
+      ".edu.stanford.nlp.pipeline.DependencyCon" +
+      "verterResponse.DependencyConversion\032\216\001\n\024" +
+      "DependencyConversion\0229\n\005graph\030\001 \002(\0132*.ed" +
+      "u.stanford.nlp.pipeline.DependencyGraph\022" +
+      ";\n\004tree\030\002 \001(\0132-.edu.stanford.nlp.pipelin" +
+      "e.FlattenedParseTree*\243\001\n\010Language\022\013\n\007Unk" +
+      "nown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003" +
+      "\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n" +
+      "\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEngli" +
+      "sh\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentiment\022" +
+      "\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022" +
+      "\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRON" +
+      "G_POSITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n" +
+      "\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026" +
+      "\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013" +
+      "ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE" +
+      "\020\006B*\n\031edu.stanford.nlp.pipelineB\rCoreNLP" +
+      "Protos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -92479,6 +94911,24 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_descriptor,
         new java.lang.String[] { "Word", "Xpos", "Lemma", });
+    internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_descriptor =
+      getDescriptor().getMessageTypes().get(35);
+    internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_descriptor,
+        new java.lang.String[] { "Trees", });
+    internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_descriptor =
+      getDescriptor().getMessageTypes().get(36);
+    internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_descriptor,
+        new java.lang.String[] { "Conversions", });
+    internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_DependencyConversion_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_descriptor.getNestedTypes().get(0);
+    internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_DependencyConversion_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_DependencyConversion_descriptor,
+        new java.lang.String[] { "Graph", "Tree", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

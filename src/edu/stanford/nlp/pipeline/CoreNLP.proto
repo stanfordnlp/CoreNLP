@@ -779,3 +779,21 @@ message MorphologyResponse {
 
   repeated WordTagLemma            words          = 1;
 }
+
+
+// A request for converting constituency trees to dependency graphs
+message DependencyConverterRequest {
+  repeated FlattenedParseTree      trees          = 1;
+}
+
+// The result of using the CoreNLP dependency converter.
+// One graph per tree
+message DependencyConverterResponse {
+  message DependencyConversion {
+    required DependencyGraph       graph          = 1;
+    optional FlattenedParseTree    tree           = 2;
+  }
+
+  repeated DependencyConversion    conversions         = 1;
+}
+
