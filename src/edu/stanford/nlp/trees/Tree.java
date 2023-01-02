@@ -1625,12 +1625,24 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *  @return A tagged, labeled yield.
    */
   public List<CoreLabel> taggedLabeledYield() {
+    return taggedLabeledYield(true);
+  }
+
+
+  /** Returns a {@code List<CoreLabel>} from the tree.
+   *  These are a copy of the complete token representation
+   *  along with the tag.
+   *
+   *  @param tagValues use the tags for the values (otherwise use the leaf)
+   *  @return A tagged, labeled yield.
+   */
+  public List<CoreLabel> taggedLabeledYield(boolean tagValues) {
     List<CoreLabel> ty = new ArrayList<>();
-    taggedLabeledYield(ty, 0);
+    taggedLabeledYield(ty, 0, tagValues);
     return ty;
   }
 
-  private int taggedLabeledYield(List<CoreLabel> ty, int termIdx) {
+  private int taggedLabeledYield(List<CoreLabel> ty, int termIdx, boolean tagValues) {
     if (isPreTerminal()) {
       // usually this will fill in all the usual keys for a token
       CoreLabel taggedWord = new CoreLabel(firstChild().label());
@@ -1640,7 +1652,11 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       }
       final String tag = (value() == null) ? "" : value();
       // set value and tag to the tag
-      taggedWord.setValue(tag);
+      if (tagValues) {
+        taggedWord.setValue(tag);
+      } else {
+        taggedWord.setValue(taggedWord.word());
+      }
       taggedWord.setTag(tag);
       taggedWord.setIndex(termIdx);
       ty.add(taggedWord);
@@ -1649,7 +1665,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
     } else {
       for (Tree kid : getChildrenAsList())
-        termIdx = kid.taggedLabeledYield(ty, termIdx);
+        termIdx = kid.taggedLabeledYield(ty, termIdx, tagValues);
     }
 
     return termIdx;
