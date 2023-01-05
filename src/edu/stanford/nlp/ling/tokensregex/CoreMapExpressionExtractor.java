@@ -54,6 +54,8 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
   private boolean keepTags = false;
   /* Collapses extraction rules - use with care */
   private final boolean collapseExtractionRules;
+  private final boolean keepNestedMatches;
+  private final boolean keepOverlappingMatches;
   private final Class<CoreAnnotation<List<? extends CoreMap>>> tokensAnnotationKey;
   private final Map<Integer, Stage<T>> stages;
 
@@ -136,11 +138,16 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     this.tokensAnnotationKey = EnvLookup.getDefaultTokensAnnotationKey(env);
     if (env != null) {
       this.collapseExtractionRules = Objects.equals((Boolean) env.get("collapseExtractionRules"), true);
+      this.keepNestedMatches = Objects.equals((Boolean) env.get("keepNestedMatches"), true);
+      this.keepOverlappingMatches = Objects.equals((Boolean) env.get("keepOverlappingMatches"), true);
+
       if (env.get("verbose") != null)
         verbose =  (env.get("verbose") != null) &&
                 Objects.equals((Boolean) env.get("verbose"), true);
     } else {
       this.collapseExtractionRules = false;
+      this.keepNestedMatches = false;
+      this.keepOverlappingMatches = false;
     }
   }
 
@@ -433,13 +440,13 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
         annotateExpressions(merged, newExprs);
         newExprs = MatchedExpression.removeNullValues(newExprs);
         if ( ! newExprs.isEmpty()) {
-          newExprs = MatchedExpression.removeNested(newExprs);
-          newExprs = MatchedExpression.removeOverlapping(newExprs);
+          newExprs = this.keepNestedMatches ? newExprs : MatchedExpression.removeNested(newExprs);
+          newExprs = this.keepOverlappingMatches ? newExprs : MatchedExpression.removeOverlapping(newExprs);
           merged = MatchedExpression.replaceMerged(merged, newExprs);
           // Favor newly matched expressions over older ones
           newExprs.addAll(matchedExpressions);
-          matchedExpressions = MatchedExpression.removeNested(newExprs);
-          matchedExpressions = MatchedExpression.removeOverlapping(matchedExpressions);
+          matchedExpressions = this.keepNestedMatches ? newExprs : MatchedExpression.removeNested(newExprs);
+          matchedExpressions = this.keepOverlappingMatches ? matchedExpressions : MatchedExpression.removeOverlapping(matchedExpressions);
         } else {
           extracted = false;
         }
@@ -486,8 +493,8 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
         }
         annotateExpressions(annotation, matchedExpressions);
         matchedExpressions = MatchedExpression.removeNullValues(matchedExpressions);
-        matchedExpressions = MatchedExpression.removeNested(matchedExpressions);
-        matchedExpressions = MatchedExpression.removeOverlapping(matchedExpressions);
+        matchedExpressions = this.keepNestedMatches ? matchedExpressions : MatchedExpression.removeNested(matchedExpressions);
+        matchedExpressions = this.keepOverlappingMatches ? matchedExpressions : MatchedExpression.removeOverlapping(matchedExpressions);
       }
 
       List<? extends CoreMap> merged = MatchedExpression.replaceMergedUsingTokenOffsets(annotation.get(tokensAnnotationKey), matchedExpressions);

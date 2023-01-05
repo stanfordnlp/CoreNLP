@@ -277,6 +277,10 @@ public class MatchedExpression {
     return text;
   }
 
+  public String getName() {
+    return this.extractFunc.name;
+  }
+
   public CoreMap getAnnotation() {
     return annotation;
   }
