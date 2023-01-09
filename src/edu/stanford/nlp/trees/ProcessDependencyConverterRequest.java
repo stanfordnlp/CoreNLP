@@ -26,7 +26,12 @@ public class ProcessDependencyConverterRequest extends ProcessProtobufRequest {
    * Convert a single Tree to basic dependencies
    */
   static SemanticGraph convert(Tree tree) {
-    SemanticGraph uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(tree);
+    SemanticGraph uncollapsedDeps = SemanticGraphFactory.makeFromTree(tree,
+                                                                      SemanticGraphFactory.Mode.BASIC,
+                                                                      GrammaticalStructure.Extras.NONE,
+                                                                      null,
+                                                                      false,
+                                                                      true);
     return uncollapsedDeps;
   }
 
