@@ -10,8 +10,10 @@ import org.junit.Test;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
+import edu.stanford.nlp.util.XMLUtils;
 
 public class SsurgeonTest {
 
@@ -31,15 +33,16 @@ public class SsurgeonTest {
     assertEquals(pattern.size(), 1);
   }
 
+  static final String newline = System.getProperty("line.separator");
+
   @Test
-  public void readXMLEdit() {
-    String newline = System.getProperty("line.separator");
+  public void readXMLAddEdgeExecute() {
     String doc = String.join(newline,
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
                              "    <uid>38</uid>",
                              "    <notes>This is a simple test of addEdge</notes>",
-                             "    <semgrex>{}=a1 &gt; {}=a2</semgrex>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 > {}=a2") + "</semgrex>",
                              "    <edit-list>addEdge -gov a1 -dep a2 -reln dep -weight 0.5</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
@@ -50,9 +53,35 @@ public class SsurgeonTest {
 
     SemanticGraph sg = SemanticGraph.valueOf("[A obj> B obj> C]");
     Collection<SemanticGraph> newSgs = pattern.execute(sg);
-    // TODO: perhaps it would be better to have an execution scheme
-    // where one graph has all possible modifications applied
     assertEquals(newSgs.size(), 2);
+  }
+
+
+  /**
+   * Test that AddEdge, when iterated, adds exactly one more edge
+   * between each parent/child pair if they matched the target relation
+   */
+  @Test
+  public void readXMLAddEdgeIterate() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This is a simple test of addEdge</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >obj {}=a2") + "</semgrex>",
+                             "    <edit-list>addEdge -gov a1 -dep a2 -reln dep -weight 0.5</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[A obj> B obj> C nsubj> [D obj> E]]");
+    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph expected = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1 obj> C-2 dep> C-2 nsubj> [D-3 obj> E-4 dep> E-4]]");
+
+    assertEquals(newSg, expected);
   }
 
   /**
