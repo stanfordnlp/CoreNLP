@@ -155,6 +155,47 @@ public class SsurgeonPattern {
   }
 
   /**
+   * This alternative processing style repeatedly matches the graph
+   * and executes patterns until all of the matches are exhausted and
+   * there are no more edits performed.
+   *<br>
+   * Note that this means "bomb" patterns will go infinite.  In
+   * particular, adding a node without a check that the node already
+   * exists is a problem.  Most other patterns are self-limiting, in
+   * that the change will not be repeated more than once.
+   *<br>
+   * The graph is always copied, although operations which change the
+   * text or otherwise edit a word node will affect the original graph.
+   *<br>
+   * It's not clear what to do with a multiple edit pattern.
+   * Currently we just operate until one edit occurs, then break.
+   * This makes it harder to do consecutive operations using the
+   * same match, but there are a couple issues to easily doing that:
+   * <ul>
+   * <li> what do we do when an edit doesn't fire?  keep going or break?
+   * <li> what node names do the later edits get?  rearranging nodes
+   *   may change the indices, affecting the match
+   * </ul>
+   */
+  public SemanticGraph iterate(SemanticGraph sg) {
+    SemanticGraph copied = new SemanticGraph(sg);
+
+    SemgrexMatcher matcher = semgrexPattern.matcher(copied);
+    while (matcher.find()) {
+      // We reset the named node map with each edit set, since these edits
+      // should exist in a separate graph for each unique Semgrex match.
+      nodeMap = Generics.newHashMap();
+      for (SsurgeonEdit edit : editScript) {
+        if (edit.evaluate(copied, matcher)) {
+          matcher = semgrexPattern.matcher(copied);
+          break;
+        }
+      }
+    }
+    return copied;
+  }
+
+  /**
    * Executes the Ssurgeon edit, but with the given Semgrex Pattern, instead of the one attached to this
    * pattern.
    * 
