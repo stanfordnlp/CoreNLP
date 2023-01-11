@@ -85,6 +85,39 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test that removing an edge given its endpoints and the dependency type will remove all matching edges
+   */
+  @Test
+  public void readXMLRemoveEdgeIterate() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This is a simple test of addEdge</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 > {}=a2") + "</semgrex>",
+                             "    <edit-list>removeEdge -gov a1 -dep a2 -reln dep</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
+    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph expected = SemanticGraph.valueOf("[A-0 obj> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
+    assertEquals(newSg, sg);
+
+    sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
+    newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+
+    sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1 obj> C-2 dep> C-2 nsubj> [D-3 obj> E-4 dep> E-4]]");
+    newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+  }
+
+  /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
    * a semgrex pattern, and then the resulting actions over the named nodes in the
    * semgrex match.
