@@ -258,4 +258,93 @@ public class SemanticGraphTest extends TestCase {
     }
   }
 
+  /**
+   * Test the vertices and edges of a very simple valueOf graph
+   */
+   public void testValueOfSimple() {
+    SemanticGraph sg = SemanticGraph.valueOf("[A/foo obj> B/bar obj> C/foo nsubj> [D/bar obj> E/baz]]");
+
+    List<IndexedWord> words = sg.vertexListSorted();
+    assertEquals(words.size(), 5);
+
+    for (int i = 0; i < 5; ++i) {
+      assertEquals(words.get(i).index(), i);
+    }
+    IndexedWord A = words.get(0);
+    IndexedWord B = words.get(1);
+    IndexedWord C = words.get(2);
+    IndexedWord D = words.get(3);
+    IndexedWord E = words.get(4);
+
+    assertEquals(A.word(), "A");
+    assertEquals(A.tag(),  "foo");
+    assertEquals(B.word(), "B");
+    assertEquals(B.tag(),  "bar");
+    assertEquals(C.word(), "C");
+    assertEquals(C.tag(),  "foo");
+    assertEquals(D.word(), "D");
+    assertEquals(D.tag(),  "bar");
+    assertEquals(E.word(), "E");
+    assertEquals(E.tag(),  "baz");
+
+    assertEquals(sg.getAllEdges(A, B).size(), 1);
+    assertEquals(sg.getParentsWithReln(B, "obj").size(), 1);
+
+    assertEquals(sg.getAllEdges(A, C).size(), 1);
+    assertEquals(sg.getParentsWithReln(C, "obj").size(), 1);
+
+    assertEquals(sg.getAllEdges(A, D).size(), 1);
+    assertEquals(sg.getParentsWithReln(D, "nsubj").size(), 1);
+    assertEquals(sg.getParentsWithReln(D, "obj").size(), 0);
+    assertEquals(sg.getParentsWithReln(D, "dep").size(), 0);
+
+    assertEquals(sg.getAllEdges(A, E).size(), 0);
+    assertEquals(sg.getAllEdges(D, E).size(), 1);
+    assertEquals(sg.getParentsWithReln(E, "obj").size(), 1);
+    assertEquals(sg.getParentsWithReln(E, "dep").size(), 0);
+  }
+
+  /**
+   * Test the vertices and edges of a very simple valueOf graph with indices added
+   */
+  public void testValueOfIndices() {
+    // test some with tags and some without
+    SemanticGraph sg = SemanticGraph.valueOf("[A/foo-3 obj> B/bar-1 obj> C-4 nsubj> [D-2 obj> E-0]]");
+
+    List<IndexedWord> words = sg.vertexListSorted();
+    assertEquals(words.size(), 5);
+
+    for (int i = 0; i < 5; ++i) {
+      assertEquals(words.get(i).index(), i);
+    }
+    IndexedWord A = words.get(3);
+    IndexedWord B = words.get(1);
+    IndexedWord C = words.get(4);
+    IndexedWord D = words.get(2);
+    IndexedWord E = words.get(0);
+
+    assertEquals(A.word(), "A");
+    assertEquals(A.tag(),  "foo");
+    assertEquals(B.word(), "B");
+    assertEquals(B.tag(),  "bar");
+    assertEquals(C.word(), "C");
+    assertEquals(D.word(), "D");
+    assertEquals(E.word(), "E");
+
+    assertEquals(sg.getAllEdges(A, B).size(), 1);
+    assertEquals(sg.getParentsWithReln(B, "obj").size(), 1);
+
+    assertEquals(sg.getAllEdges(A, C).size(), 1);
+    assertEquals(sg.getParentsWithReln(C, "obj").size(), 1);
+
+    assertEquals(sg.getAllEdges(A, D).size(), 1);
+    assertEquals(sg.getParentsWithReln(D, "nsubj").size(), 1);
+    assertEquals(sg.getParentsWithReln(D, "obj").size(), 0);
+    assertEquals(sg.getParentsWithReln(D, "dep").size(), 0);
+
+    assertEquals(sg.getAllEdges(A, E).size(), 0);
+    assertEquals(sg.getAllEdges(D, E).size(), 1);
+    assertEquals(sg.getParentsWithReln(E, "obj").size(), 1);
+    assertEquals(sg.getParentsWithReln(E, "dep").size(), 0);
+  }
 }
