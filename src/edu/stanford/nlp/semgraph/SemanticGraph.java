@@ -67,7 +67,7 @@ public class SemanticGraph implements Serializable  {
   /**
    * The distinguished root vertices, if known.
    */
-  private final Collection<IndexedWord> roots;
+  private final Set<IndexedWord> roots;
 
   private final DirectedMultiGraph<IndexedWord, SemanticGraphEdge> graph;
 
@@ -789,6 +789,10 @@ public class SemanticGraph implements Serializable  {
 
   public Collection<IndexedWord> getRoots() {
     return roots;
+  }
+
+  public boolean isRoot(IndexedWord vertex) {
+    return roots.contains(vertex);
   }
 
   /**
