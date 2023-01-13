@@ -70,14 +70,18 @@ public class DeleteGraphFromNode extends SsurgeonEdit {
       return false;
     }
 
+    boolean deletedRoot = false;
     Set<IndexedWord> nodesToDestroy = crawl(seedNode, sg);
     for (IndexedWord node : nodesToDestroy) {
+      if (sg.isRoot(node)) {
+        deletedRoot = true;
+      }
       sg.removeVertex(node);
     }
-    // After destroy nodes, need to reset the roots, since it's possible a root node
-    // was destroyed.
-    // TODO: better is to check first
-    sg.resetRoots();
+    // After destroy nodes, need to reset the roots if any roots were destroyed
+    if (deletedRoot) {
+      sg.resetRoots();
+    }
     return true;
   }
 

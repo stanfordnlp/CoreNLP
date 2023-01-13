@@ -118,6 +118,122 @@ public class SsurgeonTest {
   }
 
   /**
+   * Check that cutting a graph with two nodes into two pieces, then
+   * pruning any disjoint pieces, results in a graph with just the root
+   */
+  @Test
+  public void readXMLPruneNodesIterate() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    String cut = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Remove dep edges</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 > {}=a2") + "</semgrex>",
+                             "    <edit-list>removeEdge -gov a1 -dep a2 -reln dep</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern ssurgeonCut = patterns.get(0);
+
+    String prune = String.join(newline,
+                               "<ssurgeon-pattern-list>",
+                               "  <ssurgeon-pattern>",
+                               "    <uid>38</uid>",
+                               "    <notes>This semgrex detects disjoint nodes</notes>",
+                               "    <semgrex>" + XMLUtils.escapeXML("{}=disjoint !== {$} !<< {$}") + "</semgrex>",
+                               "    <edit-list>delete -node disjoint</edit-list>",
+                               "  </ssurgeon-pattern>",
+                               "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(prune);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern ssurgeonPrune = patterns.get(0);
+
+    // Test a two node only version
+    SemanticGraph sg = SemanticGraph.valueOf("[A dep> B]");
+    SemanticGraph cutSG = ssurgeonCut.iterate(sg);
+    assertEquals(cutSG.vertexSet().size(), 2);
+    SemanticGraph pruneSG = ssurgeonPrune.iterate(cutSG);
+    SemanticGraph expected = SemanticGraph.valueOf("[A]");
+    assertEquals(pruneSG, expected);
+
+    // Test a chain cut at the start
+    sg = SemanticGraph.valueOf("[A dep> [B obj> C]]");
+    cutSG = ssurgeonCut.iterate(sg);
+    assertEquals(cutSG.vertexSet().size(), 3);
+    pruneSG = ssurgeonPrune.iterate(cutSG);
+    assertEquals(pruneSG, expected);
+
+    // Test the chain cut at the bottom
+    sg = SemanticGraph.valueOf("[A obj> [B dep> C]]");
+    cutSG = ssurgeonCut.iterate(sg);
+    assertEquals(cutSG.vertexSet().size(), 3);
+    pruneSG = ssurgeonPrune.iterate(cutSG);
+    assertEquals(pruneSG, SemanticGraph.valueOf("[A obj> B]"));
+
+    // Test a chain cut at the start
+    // Only the root will be left at the end
+    sg = SemanticGraph.valueOf("[A dep> B dep> C]");
+    cutSG = ssurgeonCut.iterate(sg);
+    assertEquals(cutSG.vertexSet().size(), 3);
+    pruneSG = ssurgeonPrune.iterate(cutSG);
+    assertEquals(pruneSG, expected);
+  }
+
+  /**
+   * Test that if the root is removed by a prune operation,
+   * the roots on the graph are reset
+   */
+  @Test
+  public void readXMLPruneNodesResetRoots() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    String cut = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Remove any dep edges from the graph</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 > {}=a2") + "</semgrex>",
+                             "    <edit-list>removeEdge -gov a1 -dep a2 -reln dep</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern ssurgeonCut = patterns.get(0);
+
+    String prune = String.join(newline,
+                               "<ssurgeon-pattern-list>",
+                               "  <ssurgeon-pattern>",
+                               "    <uid>38</uid>",
+                               "    <notes>This semgrex detects disjoint roots</notes>",
+                               "    <semgrex>" + XMLUtils.escapeXML("{$}=root : {} !== {}=root !>> {}=root") + "</semgrex>",
+                               "    <edit-list>delete -node root</edit-list>",
+                               "  </ssurgeon-pattern>",
+                               "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(prune);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern ssurgeonPrune = patterns.get(0);
+
+    // Test a two node only version
+    SemanticGraph sg = SemanticGraph.valueOf("[A dep> B]");
+    SemanticGraph cutSG = ssurgeonCut.iterate(sg);
+    assertEquals(2, cutSG.vertexSet().size());
+    SemanticGraph pruneSG = ssurgeonPrune.iterate(cutSG);
+    // note that for now, the prune operation doesn't renumber nodes in any way
+    SemanticGraph expected = SemanticGraph.valueOf("[B-1]");
+    assertEquals(expected, pruneSG);
+
+    // Test the chain cut at the bottom
+    sg = SemanticGraph.valueOf("[A obj> [B dep> C]]");
+    cutSG = ssurgeonCut.iterate(sg);
+    assertEquals(cutSG.vertexSet().size(), 3);
+    pruneSG = ssurgeonPrune.iterate(cutSG);
+    assertEquals(SemanticGraph.valueOf("[C-2]"), pruneSG);
+  }
+
+  /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
    * a semgrex pattern, and then the resulting actions over the named nodes in the
    * semgrex match.
