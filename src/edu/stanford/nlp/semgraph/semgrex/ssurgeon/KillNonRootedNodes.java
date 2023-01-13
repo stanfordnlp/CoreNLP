@@ -24,6 +24,7 @@ public class KillNonRootedNodes extends SsurgeonEdit {
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     boolean changed = false;
+    // keep a separate list so that deleting items doesn't affect the iteration
     List<IndexedWord> nodes = new ArrayList<>(sg.vertexSet());
     for (IndexedWord node : nodes) {
       List<IndexedWord> rootPath = sg.getPathToRoot(node);
@@ -33,7 +34,7 @@ public class KillNonRootedNodes extends SsurgeonEdit {
     }
     return changed;
   }
-  
+
   @Override
   public String toEditString() {
      StringWriter buf = new StringWriter();
