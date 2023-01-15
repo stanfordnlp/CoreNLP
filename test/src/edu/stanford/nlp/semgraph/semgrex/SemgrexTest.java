@@ -12,6 +12,7 @@ import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 
 
@@ -766,6 +767,130 @@ public class SemgrexTest extends TestCase {
     pattern = SemgrexPattern.compile("{}=A >=foo {}=B >=foo ({}=C !== {}=B)");
     matcher = pattern.matcher(graph);
     assertFalse(matcher.find());
+  }
+
+  /**
+   * Test the named edge feature, including backreferences
+   */
+  public void testNamedEdgeGovernor() {
+    // Test a simple version of the named edge search
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
+    SemgrexPattern pattern = SemgrexPattern.compile("{}=A >subj~foo {}=B");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    SemanticGraphEdge edge = matcher.getEdge("foo");
+    assertTrue(edge != null);
+    assertEquals(edge.getSource(), matcher.getNode("A"));
+    assertEquals(edge.getSource().word(), "ate");
+    assertEquals(edge.getTarget(), matcher.getNode("B"));
+    assertEquals(edge.getTarget().word(), "Bill");
+    assertEquals(edge.getRelation().getShortName(), "subj");
+    assertFalse(matcher.find());
+
+    // Test the expected behavior of a pattern without backref
+    graph = SemanticGraph.valueOf("[antennae amod> big amod> blue]");
+    pattern = SemgrexPattern.compile("{}=A > {}=B > {}=C");
+    matcher = pattern.matcher(graph);
+    // two children, iterate for both halves of the expression,
+    // so there should be 4 matches total
+    assertTrue(matcher.find());
+    assertTrue(matcher.find());
+    assertTrue(matcher.find());
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    // Test the expected behavior of a pattern *with* backref
+    graph = SemanticGraph.valueOf("[antennae amod> big amod> blue]");
+    pattern = SemgrexPattern.compile("{}=A >~foo {}=B >~foo {}=C");
+    matcher = pattern.matcher(graph);
+    // this time it should only accept when the edges are the same
+    assertTrue(matcher.find());
+    edge = matcher.getEdge("foo");
+    assertTrue(edge != null);
+    assertEquals(edge.getSource(), matcher.getNode("A"));
+    assertEquals(edge.getTarget(), matcher.getNode("B"));
+    assertEquals(matcher.getNode("B"), matcher.getNode("C"));
+    assertTrue(matcher.find());
+    edge = matcher.getEdge("foo");
+    assertTrue(edge != null);
+    assertEquals(edge.getSource(), matcher.getNode("A"));
+    assertEquals(edge.getTarget(), matcher.getNode("C"));
+    assertEquals(matcher.getNode("B"), matcher.getNode("C"));
+    assertFalse(matcher.find());
+  }
+
+  /**
+   * Short test that the dependent edge matching is working as well
+   */
+  public void testNamedEdgeDependent() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
+    SemgrexPattern pattern = SemgrexPattern.compile("{}=A <subj~foo {}=B");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    SemanticGraphEdge edge = matcher.getEdge("foo");
+    assertTrue(edge != null);
+    assertEquals(edge.getSource(), matcher.getNode("B"));
+    assertEquals(edge.getSource().word(), "ate");
+    assertEquals(edge.getTarget(), matcher.getNode("A"));
+    assertEquals(edge.getTarget().word(), "Bill");
+    assertEquals(edge.getRelation().getShortName(), "subj");
+    assertFalse(matcher.find());
+  }
+
+  /**
+   * Short test that the left/right versions of governor and dependent do the right thing
+   */
+  public void testNamedEdgeLeftRight() {
+    SemanticGraph graph = SemanticGraph.valueOf("[antennae-2 amod> blue-1 nmod> [head-5 case> on-3 nmod:poss> her-4]]");
+    SemgrexPattern pattern = SemgrexPattern.compile("{$}=A >--~foo {}=B");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    SemanticGraphEdge edge = matcher.getEdge("foo");
+    assertTrue(edge != null);
+    assertEquals(edge.getSource().word(), "antennae");
+    assertEquals(edge.getTarget().word(), "blue");
+    assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{$}=A >++~foo {}=B");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    edge = matcher.getEdge("foo");
+    assertTrue(edge != null);
+    assertEquals(edge.getSource().word(), "antennae");
+    assertEquals(edge.getTarget().word(), "head");
+    assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{}=A <++~foo {$}=B");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    edge = matcher.getEdge("foo");
+    assertTrue(edge != null);
+    assertEquals(edge.getSource().word(), "antennae");
+    assertEquals(edge.getTarget().word(), "blue");
+    assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{}=A <--~foo {$}=B");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    edge = matcher.getEdge("foo");
+    assertTrue(edge != null);
+    assertEquals(edge.getSource().word(), "antennae");
+    assertEquals(edge.getTarget().word(), "head");
+    assertFalse(matcher.find());
+  }
+
+  /**
+   * Relations other than the gov / dep relations should not allow a named edge
+   */
+  public void testNamedEdgeException() {
+    try {
+      SemgrexPattern pattern = SemgrexPattern.compile("{} <<~foo {}");
+      // an unexpected exception would not be caught
+      // failing to throw an exception falls through to the error
+      throw new AssertionError("Expected a SemgrexParseException");
+    } catch (SemgrexParseException e) {
+      // good
+    }
   }
 
   public void testAttributeConjunction() {

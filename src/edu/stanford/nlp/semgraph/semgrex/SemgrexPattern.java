@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
@@ -178,7 +179,20 @@ import edu.stanford.nlp.util.logging.Redwood;
  * relation in the sequence of relations is the name used.
  * <p>
  *
- * TODO
+ * <h3>Naming edges</h3>
+ *
+ * It is also possible to name edges themselves.  The following
+ * pattern will iterate through the edges from the root:
+ * {@code {$} >~edge {}}
+ * The edge itself is now stored with the matcher and can
+ * be extracted with {@code getEdgeName("edge")}.  If the edge is
+ * later referenced a second time, the exact edge must be the same, or
+ * the potential match will not be accepted.
+ * <br>
+ * This is only legal on relations with only one link between the two endpoints.
+ * Other relations (such as grandparent) will throw an exception.
+ *
+ * <h3>TODO</h3>
  * At present a Semgrex pattern will match only once at a root node, even if there is more than one way of satisfying
  * it under the root node. Probably its semantics should be changed, or at least the option should be given, to return
  * all matches, as is the case for Tregex.
@@ -236,11 +250,13 @@ public abstract class SemgrexPattern implements Serializable  {
 
   // These get implemented in semgrex.CoordinationMatcher and NodeMatcher
   abstract SemgrexMatcher matcher(SemanticGraph sg, IndexedWord node, Map<String, IndexedWord> namesToNodes,
-      Map<String, String> namesToRelations, VariableStrings variableStrings, boolean ignoreCase);
+                                  Map<String, String> namesToRelations, Map<String, SemanticGraphEdge> namesToEdges,
+                                  VariableStrings variableStrings, boolean ignoreCase);
 
   abstract SemgrexMatcher matcher(SemanticGraph sg, Alignment alignment, SemanticGraph sg_align, boolean hypToText,
-      IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
-      VariableStrings variableStrings, boolean ignoreCase);
+                                  IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
+                                  Map<String, SemanticGraphEdge> namesToEdges,
+                                  VariableStrings variableStrings, boolean ignoreCase);
 
   /**
    * Get a {@link SemgrexMatcher} for this pattern in this graph.
@@ -249,7 +265,7 @@ public abstract class SemgrexPattern implements Serializable  {
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg) {
-    return matcher(sg, sg.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
+    return matcher(sg, sg.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }
 
   /**
@@ -260,7 +276,7 @@ public abstract class SemgrexPattern implements Serializable  {
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg, IndexedWord root) {
-    return matcher(sg, root, new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
+    return matcher(sg, root, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }
 
   /**
@@ -268,7 +284,7 @@ public abstract class SemgrexPattern implements Serializable  {
    * initial conditions on the variable assignments
    */
   public SemgrexMatcher matcher(SemanticGraph sg, Map<String, IndexedWord> variables) {
-    return matcher(sg, sg.getFirstRoot(), variables, new LinkedHashMap<>(), new VariableStrings(), false);
+    return matcher(sg, sg.getFirstRoot(), variables, new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }
 
   /**
@@ -280,15 +296,15 @@ public abstract class SemgrexPattern implements Serializable  {
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg, boolean ignoreCase) {
-    return matcher(sg, sg.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
+    return matcher(sg, sg.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
   }
 
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph) {
-    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
+    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }
 
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph, boolean ignoreCase) {
-    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
+    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
   }
 
   // compile method

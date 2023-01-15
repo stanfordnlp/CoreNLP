@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -274,10 +275,10 @@ public class NodePattern extends SemgrexPattern  {
   public SemgrexMatcher matcher(SemanticGraph sg, IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
+                                Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings,
                                 boolean ignoreCase) {
-    return new NodeMatcher(this, sg, null, null, true, node, namesToNodes, namesToRelations, variableStrings,
-        ignoreCase);
+    return new NodeMatcher(this, sg, null, null, true, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);
   }
 
   @Override
@@ -286,6 +287,7 @@ public class NodePattern extends SemgrexPattern  {
                                 boolean hyp, IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
+                                Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings,
                                 boolean ignoreCase) {
     // log.info("making matcher: " +
@@ -293,7 +295,7 @@ public class NodePattern extends SemgrexPattern  {
     return new NodeMatcher(this, sg, alignment, sg_align,
                            (reln.equals(GraphRelation.ALIGNED_ROOT)) ? false : hyp,
                            (reln.equals(GraphRelation.ALIGNED_ROOT)) ? sg_align.getFirstRoot() : node,
-                           namesToNodes, namesToRelations,
+                           namesToNodes, namesToRelations, namesToEdges,
                            variableStrings, ignoreCase);
   }
 
@@ -315,10 +317,12 @@ public class NodePattern extends SemgrexPattern  {
     private boolean committedVariables = false;
 
     private String nextMatchReln = null;
+    private SemanticGraphEdge nextMatchEdge = null;
     private IndexedWord nextMatch = null;
 
     private boolean namedFirst = false;
     private boolean relnNamedFirst = false;
+    private boolean edgeNamedFirst = false;
 
     private boolean ignoreCase = false;
 
@@ -326,9 +330,10 @@ public class NodePattern extends SemgrexPattern  {
     // myNode.child == null OR resetChild has never been called
 
     public NodeMatcher(NodePattern n, SemanticGraph sg, Alignment alignment, SemanticGraph sg_align, boolean hyp,
-        IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
-        VariableStrings variableStrings, boolean ignoreCase) {
-      super(sg, alignment, sg_align, hyp, node, namesToNodes, namesToRelations, variableStrings);
+                       IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
+                       Map<String, SemanticGraphEdge> namesToEdges,
+                       VariableStrings variableStrings, boolean ignoreCase) {
+      super(sg, alignment, sg_align, hyp, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       myNode = n;
       this.ignoreCase = ignoreCase;
       resetChildIter();
@@ -356,8 +361,9 @@ public class NodePattern extends SemgrexPattern  {
           matchedOnce = false;
         } else {
           childMatcher = myNode.child.matcher(sg, alignment, sg_aligned,
-              (myNode.reln instanceof GraphRelation.ALIGNMENT) ? !hyp : hyp, nextMatch, namesToNodes, namesToRelations,
-              variableStrings, ignoreCase);
+                                              (myNode.reln instanceof GraphRelation.ALIGNMENT) ? !hyp : hyp,
+                                              nextMatch, namesToNodes, namesToRelations, namesToEdges,
+                                              variableStrings, ignoreCase);
         }
       } else {
         childMatcher.resetChildIter(nextMatch);
@@ -381,6 +387,15 @@ public class NodePattern extends SemgrexPattern  {
           String foundReln = namesToRelations.get(myNode.reln.getName());
           nextMatchReln = ((GraphRelation.SearchNodeIterator) nodeMatchCandidateIterator).getReln();
           if ((foundReln != null) && (!nextMatchReln.equals(foundReln))) {
+            nextMatch = nodeMatchCandidateIterator.next();
+            continue;
+          }
+        }
+
+        if (myNode.reln.getEdgeName() != null) {
+          SemanticGraphEdge foundEdge = namesToEdges.get(myNode.reln.getEdgeName());
+          nextMatchEdge = ((GraphRelation.SearchNodeIterator) nodeMatchCandidateIterator).getEdge();
+          if ((foundEdge != null) && (!nextMatchEdge.equals(foundEdge))) {
             nextMatch = nodeMatchCandidateIterator.next();
             continue;
           }
@@ -470,6 +485,11 @@ public class NodePattern extends SemgrexPattern  {
             relnNamedFirst = true;
           namesToRelations.put(myNode.reln.getName(), nextMatchReln);
         }
+        if (myNode.reln.getEdgeName() != null) {
+          if (!namesToEdges.containsKey(myNode.reln.getEdgeName()))
+            edgeNamedFirst = true;
+          namesToEdges.put(myNode.reln.getEdgeName(), nextMatchEdge);
+        }
         commitVariableGroups(m); // commit my variable groups.
       }
       // finished is false exiting this if and only if nextChild exists
@@ -505,6 +525,10 @@ public class NodePattern extends SemgrexPattern  {
       if (namesToRelations.containsKey(myNode.reln.name) && relnNamedFirst) {
         relnNamedFirst = false;
         namesToRelations.remove(myNode.reln.name);
+      }
+      if (namesToEdges.containsKey(myNode.reln.edgeName) && edgeNamedFirst) {
+        edgeNamedFirst = false;
+        namesToEdges.remove(myNode.reln.edgeName);
       }
     }
 

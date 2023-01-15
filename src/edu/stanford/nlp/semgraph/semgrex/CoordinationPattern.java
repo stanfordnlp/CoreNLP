@@ -5,6 +5,7 @@ import java.util.*;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 
 /** @author Chloe Kiddon */
 public class CoordinationPattern extends SemgrexPattern  {
@@ -102,10 +103,11 @@ public class CoordinationPattern extends SemgrexPattern  {
   public SemgrexMatcher matcher(SemanticGraph sg, IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes, 
                                 Map<String, String> namesToRelations,
+                                Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings, 
                                 boolean ignoreCase) {
     return new CoordinationMatcher(this, sg, null, null, true, node, 
-                                   namesToNodes, namesToRelations,
+                                   namesToNodes, namesToRelations, namesToEdges,
                                    variableStrings, ignoreCase);
   }
 
@@ -115,11 +117,12 @@ public class CoordinationPattern extends SemgrexPattern  {
                                 boolean hypToText, IndexedWord node, 
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations, 
+                                Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings, 
                                 boolean ignoreCase) {
     return new CoordinationMatcher(this, sg, alignment, sg_align, 
                                    hypToText, node,
-                                   namesToNodes, namesToRelations, 
+                                   namesToNodes, namesToRelations, namesToEdges,
                                    variableStrings, ignoreCase);
   }
 
@@ -136,16 +139,18 @@ public class CoordinationPattern extends SemgrexPattern  {
     public CoordinationMatcher(CoordinationPattern c, SemanticGraph sg, Alignment alignment,
                                SemanticGraph sg_align, boolean hypToText, IndexedWord n,
                                Map<String, IndexedWord> namesToNodes,
-                               Map<String, String> namesToRelations, VariableStrings variableStrings,
+                               Map<String, String> namesToRelations,
+                               Map<String, SemanticGraphEdge> namesToEdges,
+                               VariableStrings variableStrings,
                                boolean ignoreCase) {
-      super(sg, alignment, sg_align, hypToText, n, namesToNodes, namesToRelations, variableStrings);
+      super(sg, alignment, sg_align, hypToText, n, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       myNode = c;
       children = new SemgrexMatcher[myNode.children.size()];
       for (int i = 0; i < children.length; i++) {
         SemgrexPattern node = myNode.children.get(i);
         children[i] = node.matcher(sg, alignment, sg_align, hypToText,
                                    n, namesToNodes,
-                                   namesToRelations, variableStrings, ignoreCase);
+                                   namesToRelations, namesToEdges, variableStrings, ignoreCase);
       }
       currChild = 0;
       considerAll = myNode.isConj ^ myNode.isNegated();

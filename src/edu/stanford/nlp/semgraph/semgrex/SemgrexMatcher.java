@@ -2,6 +2,7 @@ package edu.stanford.nlp.semgraph.semgrex;
 
 import edu.stanford.nlp.graph.CyclicGraphException;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -23,6 +24,7 @@ public abstract class SemgrexMatcher  {
   final SemanticGraph sg;
   final Map<String, IndexedWord> namesToNodes;
   final Map<String, String> namesToRelations;
+  final Map<String, SemanticGraphEdge> namesToEdges;
   final VariableStrings variableStrings;
 
   IndexedWord node;
@@ -44,6 +46,7 @@ public abstract class SemgrexMatcher  {
                  IndexedWord node,
                  Map<String, IndexedWord> namesToNodes,
                  Map<String, String> namesToRelations,
+                 Map<String, SemanticGraphEdge> namesToEdges,
                  VariableStrings variableStrings) {
     this.sg = sg;
     this.alignment = alignment;
@@ -52,6 +55,7 @@ public abstract class SemgrexMatcher  {
     this.node = node;
     this.namesToNodes = namesToNodes;
     this.namesToRelations = namesToRelations;
+    this.namesToEdges = namesToEdges;
     this.variableStrings = variableStrings;
   }
   
@@ -59,8 +63,9 @@ public abstract class SemgrexMatcher  {
                  IndexedWord node,
                  Map<String, IndexedWord> namesToNodes,
                  Map<String, String> namesToRelations,
+                 Map<String, SemanticGraphEdge> namesToEdges,
                  VariableStrings variableStrings) {
-    this(sg, null, null, true, node, namesToNodes, namesToRelations, variableStrings);
+    this(sg, null, null, true, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
   }
 
   /**
@@ -70,6 +75,7 @@ public abstract class SemgrexMatcher  {
     findIterator = null;
     namesToNodes.clear();
     namesToRelations.clear();
+    namesToEdges.clear();
   }
 
   /**
@@ -198,6 +204,10 @@ public abstract class SemgrexMatcher  {
     return namesToRelations.get(name);
   }
   
+  public SemanticGraphEdge getEdge(String name) {
+    return namesToEdges.get(name);
+  }
+
   /**
    * Returns the set of names for named nodes in this pattern.
    * This is used as a convenience routine, when there are numerous patterns

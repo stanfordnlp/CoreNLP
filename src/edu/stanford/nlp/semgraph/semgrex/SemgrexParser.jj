@@ -180,31 +180,36 @@ SemgrexPattern Relation() : {
 	Token numArg = null;
 	Token numArg2 = null;
 	Token name = null;
+	Token edgeName = null;
 	SemgrexPattern node;
 	boolean pC = false;
 } {
 	(
 	( ( ( (numArg = <IDENTIFIER> ("," numArg2 = <IDENTIFIER>)?)? rel = <RELATION>
 		(relnType = <IDENTIFIER> | relnType = <REGEX>)?)
-		(( ("=") name = <IDENTIFIER> )   )? )
+		(( ("=") name = <IDENTIFIER> ) )?
+                (( ("~") edgeName = <IDENTIFIER> ) )? )
 	  | (rel = <ALIGNRELN>))
 
 	{
           if (numArg == null && numArg2 == null) {
             reln = GraphRelation.getRelation(rel != null ? rel.image : null,
                       relnType != null ? relnType.image : null,
-                      name != null ? name.image : null);
+                      name != null ? name.image : null,
+                      edgeName != null ? edgeName.image : null);
           } else if (numArg2 == null) {
             reln = GraphRelation.getRelation(rel != null ? rel.image : null,
                       relnType != null ? relnType.image : null,
 	              Integer.parseInt(numArg.image),
-                      name != null ? name.image : null);
+                      name != null ? name.image : null,
+                      edgeName != null ? edgeName.image : null);
           } else {
             reln = GraphRelation.getRelation(rel != null ? rel.image : null,
                       relnType != null ? relnType.image : null,
                       Integer.parseInt(numArg.image),
                       Integer.parseInt(numArg2.image),
-                      name != null ? name.image : null);
+                      name != null ? name.image : null,
+                      edgeName != null ? edgeName.image : null);
 	  }
 	}
 	( (node = ModNode(reln)) |
