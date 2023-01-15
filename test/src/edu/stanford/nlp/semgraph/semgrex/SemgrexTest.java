@@ -718,6 +718,56 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  /**
+   * The named relation feature should incorporate backreferences
+   */
+  public void testNamedRelationBackreference() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
+
+    SemgrexPattern pattern = SemgrexPattern.compile("{}=A >=foo ({}=B >=foo {}=C)");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertFalse(matcher.find());
+
+    graph = SemanticGraph.valueOf("[ate dep> [Bill dep> cat]]");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("ate", matcher.getNode("A").toString());
+    assertEquals("Bill", matcher.getNode("B").toString());
+    assertEquals("cat", matcher.getNode("C").toString());
+    assertEquals("dep", matcher.getRelnString("foo"));
+    assertFalse(matcher.find());
+
+    graph = SemanticGraph.valueOf("[ate cop> [Bill dep> cat]]");
+    matcher = pattern.matcher(graph);
+    assertFalse(matcher.find());
+
+    graph = SemanticGraph.valueOf("[ate dep> [Bill cop> cat]]");
+    matcher = pattern.matcher(graph);
+    assertFalse(matcher.find());
+
+    graph = SemanticGraph.valueOf("[antennae amod> big amod> blue]");
+    pattern = SemgrexPattern.compile("{}=A >=foo {}=B >=foo ({}=C !== {}=B)");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("antennae", matcher.getNode("A").toString());
+    assertEquals("big", matcher.getNode("B").toString());
+    assertEquals("blue", matcher.getNode("C").toString());
+    assertEquals("amod", matcher.getRelnString("foo"));
+
+    assertTrue(matcher.find());
+    assertEquals("antennae", matcher.getNode("A").toString());
+    assertEquals("blue", matcher.getNode("B").toString());
+    assertEquals("big", matcher.getNode("C").toString());
+    assertEquals("amod", matcher.getRelnString("foo"));
+
+    assertFalse(matcher.find());
+
+    graph = SemanticGraph.valueOf("[antennae amod> big dep> blue]");
+    pattern = SemgrexPattern.compile("{}=A >=foo {}=B >=foo ({}=C !== {}=B)");
+    matcher = pattern.matcher(graph);
+    assertFalse(matcher.find());
+  }
+
   public void testAttributeConjunction() {
     // A possible user submitted error: https://github.com/stanfordnlp/CoreNLP/issues/552
     // A match with both POS and word labeled should have both attributes on the same node
