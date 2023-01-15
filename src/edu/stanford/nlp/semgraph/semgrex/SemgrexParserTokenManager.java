@@ -56,7 +56,7 @@ private int jjMoveStringLiteralDfa0_0(){
       case 58:
          return jjStopAtPos(0, 10);
       case 59:
-         return jjStopAtPos(0, 22);
+         return jjStopAtPos(0, 23);
       case 61:
          return jjStartNfaWithStates_0(0, 20, 2);
       case 63:
@@ -68,11 +68,13 @@ private int jjMoveStringLiteralDfa0_0(){
       case 93:
          return jjStopAtPos(0, 18);
       case 123:
-         return jjStopAtPos(0, 21);
+         return jjStopAtPos(0, 22);
       case 124:
          return jjStopAtPos(0, 13);
       case 125:
-         return jjStopAtPos(0, 23);
+         return jjStopAtPos(0, 24);
+      case 126:
+         return jjStopAtPos(0, 21);
       default :
          return jjMoveNfa_0(1, 0);
    }
@@ -331,8 +333,8 @@ private int jjMoveNfa_0(int startState, int curPos)
 /** Token literal values. */
 public static final String[] jjstrLiteralImages = {
 "", null, null, "\100", null, null, "\43", "\44", null, "\12", "\72", "\50", 
-"\51", "\174", "\46", "\41", "\77", "\133", "\135", "\54", "\75", "\173", "\73", 
-"\175", };
+"\51", "\174", "\46", "\41", "\77", "\133", "\135", "\54", "\75", "\176", "\173", 
+"\73", "\175", };
 protected Token jjFillToken()
 {
    final Token t;
@@ -568,10 +570,10 @@ public static final String[] lexStateNames = {
 
 /** Lex State array. */
 public static final int[] jjnewLexState = {
-   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
 };
 static final long[] jjtoToken = {
-   0xfffffdL, 
+   0x1fffffdL, 
 };
 static final long[] jjtoSkip = {
    0x2L, 
