@@ -169,10 +169,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * It is also possible to name relations.  For example, you can write the pattern
  * {@code {idx:1} >=reln {idx:2}}  The name of the relation will then
- * be stored in the matcher and can be extracted with {@code getRelnName("reln")}
- * At present, though, there is no backreferencing capability such as with the
- * named nodes; this is only useful when using the API to extract the name of the
- * relation used when making the match.
+ * be stored in the matcher and can be extracted with {@code getRelnName("reln")}.
+ * If the relation is later referenced a second time, the type of
+ * relation must be the same, or the potential match will not be
+ * accepted.
  * <p>
  * In the case of ancestor and descendant relations, the <b>last</b>
  * relation in the sequence of relations is the name used.
