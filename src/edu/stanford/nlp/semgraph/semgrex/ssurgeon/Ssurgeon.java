@@ -362,7 +362,7 @@ public class Ssurgeon  {
     } else if (command.equalsIgnoreCase(RemoveEdge.LABEL)) {
       retEdit = new RemoveEdge(GrammaticalRelation.valueOf(argsBox.reln), argsBox.govNodeName, argsBox.dep);
     } else if (command.equalsIgnoreCase(RemoveNamedEdge.LABEL)) {
-      retEdit = new RemoveNamedEdge(argsBox.edge, argsBox.govNodeName, argsBox.dep);
+      retEdit = new RemoveNamedEdge(argsBox.edge);
     } else if (command.equalsIgnoreCase(SetRoots.LABEL)) {
       String[] names = tuples1[1].split("\\s+");
       List<String> newRoots = Arrays.asList(names);
