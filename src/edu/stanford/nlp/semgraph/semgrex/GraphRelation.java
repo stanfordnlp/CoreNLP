@@ -308,13 +308,7 @@ abstract class GraphRelation implements Serializable {
     @Override
     Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
       return new SearchNodeIterator() {
-          int nextNum; // subtle bug warning here: if we use int nextNum=0;
-
-          // instead,
-
-          // we get the first daughter twice because the assignment occurs after
-          // advance() has already been
-          // called once by the constructor of SearchNodeIterator.
+          Iterator<SemanticGraphEdge> iterator;
 
           @Override
           public void advance() {
@@ -322,17 +316,19 @@ abstract class GraphRelation implements Serializable {
               next = null;
               return;
             }
-            List<Pair<GrammaticalRelation, IndexedWord>> govs = sg.parentPairs(node);
-            while (nextNum < govs.size() && !type.test(govs.get(nextNum).first().toString())) {
-              nextNum++;
+            if (iterator == null) {
+              iterator = sg.incomingEdgeIterator(node);
             }
-            if (nextNum < govs.size()) {
-              next = govs.get(nextNum).second();
-              relation = govs.get(nextNum).first().toString();
-              nextNum++;
-            } else {
-              next = null;
+            while (iterator.hasNext()) {
+              SemanticGraphEdge edge = iterator.next();
+              relation = edge.getRelation().toString();
+              if (!type.test(relation)) {
+                continue;
+              }
+              this.next = edge.getSource();
+              return;
             }
+            this.next = null;
           }
         };
     }
