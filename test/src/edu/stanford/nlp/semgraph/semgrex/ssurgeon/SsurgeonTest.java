@@ -117,6 +117,40 @@ public class SsurgeonTest {
     assertEquals(newSg, expected);
   }
 
+
+  /**
+   * Test that removing a named edge will remove all matching edges
+   */
+  @Test
+  public void readXMLRemoveNamedEdgeIterate() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This is a simple test of RemoveNamedEdge</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >dep~foo {}=a2") + "</semgrex>",
+                             "    <edit-list>removeNamedEdge -edge foo</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
+    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph expected = SemanticGraph.valueOf("[A-0 obj> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
+    assertEquals(newSg, sg);
+
+    sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
+    newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+
+    sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1 obj> C-2 dep> C-2 nsubj> [D-3 obj> E-4 dep> E-4]]");
+    newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+  }
+
   /**
    * Check that cutting a graph with two nodes into two pieces, then
    * pruning any disjoint pieces, results in a graph with just the root
@@ -241,16 +275,16 @@ public class SsurgeonTest {
   @Test
   public void simpleTest() {
     SemanticGraph sg = SemanticGraph.valueOf("[mixed/VBN nsubj>[Joe/NNP appos>[bartender/NN det>the/DT]]  obj>[drink/NN det>a/DT]]");
-    SemgrexPattern semgrexPattern = SemgrexPattern.compile("{}=a1 >appos=e1 {}=a2 <nsubj=e2 {}=a3");
+    SemgrexPattern semgrexPattern = SemgrexPattern.compile("{}=a1 >appos~e1 {}=a2 <nsubj~e2 {}=a3");
     SsurgeonPattern pattern = new SsurgeonPattern(semgrexPattern);
 
     System.out.println("Start = "+sg.toCompactString());
 
     // Find and snip the appos and root to nsubj links
-    SsurgeonEdit apposSnip = new RemoveNamedEdge("e1", "a1", "a2");
+    SsurgeonEdit apposSnip = new RemoveNamedEdge("e1");
     pattern.addEdit(apposSnip);
 
-    SsurgeonEdit nsubjSnip = new RemoveNamedEdge("e2", "a3", "a1");
+    SsurgeonEdit nsubjSnip = new RemoveNamedEdge("e2");
     pattern.addEdit(nsubjSnip);
 
     // Attach Joe to be the nsubj of bartender
