@@ -360,7 +360,11 @@ public class Ssurgeon  {
     } else if (command.equalsIgnoreCase(DeleteGraphFromNode.LABEL)) {
       retEdit = new DeleteGraphFromNode(argsBox.node);
     } else if (command.equalsIgnoreCase(RemoveEdge.LABEL)) {
-      retEdit = new RemoveEdge(GrammaticalRelation.valueOf(argsBox.reln), argsBox.govNodeName, argsBox.dep);
+      GrammaticalRelation reln = null;
+      if (argsBox.reln != null) {
+        reln = GrammaticalRelation.valueOf(argsBox.reln);
+      }
+      retEdit = new RemoveEdge(reln, argsBox.govNodeName, argsBox.dep);
     } else if (command.equalsIgnoreCase(RemoveNamedEdge.LABEL)) {
       retEdit = new RemoveNamedEdge(argsBox.edge);
     } else if (command.equalsIgnoreCase(SetRoots.LABEL)) {
