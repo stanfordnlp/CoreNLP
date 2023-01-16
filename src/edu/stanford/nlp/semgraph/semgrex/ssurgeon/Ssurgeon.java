@@ -299,12 +299,12 @@ public class Ssurgeon  {
    */
   public static SsurgeonEdit parseEditLine(String editLine) {
     // Extract the operation name first
-    String[] tuples1 = editLine.split("\\s+", 2);
-    if (tuples1.length < 2) {
+    final String[] tuples1 = editLine.split("\\s+", 2);
+    if (tuples1.length < 1) {
       throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: invalid number of arguments");
     }
-    String command = tuples1[0];
-    String[] argsArray = parseArgs(tuples1[1]);
+    final String command = tuples1[0];
+    final String[] argsArray = tuples1.length == 1 ? new String[0] : parseArgs(tuples1[1]);
     SsurgeonArgs argsBox = new SsurgeonArgs();
 
     for (int argIndex = 0; argIndex < argsArray.length; ++argIndex) {
