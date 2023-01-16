@@ -119,6 +119,32 @@ public class SsurgeonTest {
 
 
   /**
+   * Test that removing an edge given its endpoints and the dependency type will remove all matching edges
+   */
+  @Test
+  public void readXMLRemoveEdgeNoRelationIterate() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Test removing an edge with no relation set</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:B}=a1 > {word:E}=a2") + "</semgrex>",
+                             "    <edit-list>removeEdge -gov a1 -dep a2</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> [B-1 nsubj> E-4] obj> C-2 nsubj> [D-3 obj> E-4]]");
+    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph expected = SemanticGraph.valueOf("[A-0 obj> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
+    assertEquals(newSg, expected);
+  }
+
+
+  /**
    * Test that removing a named edge will remove all matching edges
    */
   @Test
