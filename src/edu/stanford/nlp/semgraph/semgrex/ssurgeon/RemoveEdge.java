@@ -1,6 +1,8 @@
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
@@ -31,8 +33,10 @@ public class RemoveEdge extends SsurgeonEdit {
   public String toEditString() {
     StringWriter buf = new StringWriter();
     buf.write(LABEL); buf.write("\t");
-    buf.write(Ssurgeon.RELN_ARG);buf.write(" ");
-    buf.write(relation.toString()); buf.write("\t");
+    if (relation != null) {
+      buf.write(Ssurgeon.RELN_ARG);buf.write(" ");
+      buf.write(relation.toString()); buf.write("\t");
+    }
     buf.write(Ssurgeon.GOV_NODENAME_ARG);buf.write(" ");
     buf.write(govName); buf.write("\t");
     buf.write(Ssurgeon.DEP_NODENAME_ARG);buf.write(" ");
@@ -61,30 +65,57 @@ public class RemoveEdge extends SsurgeonEdit {
     IndexedWord depNode = getNamedNode(depName, sm);
     boolean success = false;
 
+    List<SemanticGraphEdge> edgesToDelete = null;
     if (govNode != null && depNode != null) {
-      SemanticGraphEdge edge = sg.getEdge(govNode, depNode, relation);
-      while (edge != null) {
-        if (!sg.removeEdge(edge)) {
-          throw new IllegalStateException("Found an edge and tried to delete it, but somehow this didn't work!  " + edge);
+      if (relation == null) {
+        edgesToDelete = new ArrayList<>(sg.getAllEdges(govNode, depNode));
+      } else {
+        SemanticGraphEdge edge = sg.getEdge(govNode, depNode, relation);
+        while (edge != null) {
+          if (!sg.removeEdge(edge)) {
+            throw new IllegalStateException("Found an edge and tried to delete it, but somehow this didn't work!  " + edge);
+          }
+          edge = sg.getEdge(govNode, depNode, relation);
+          success = true;
         }
-        edge = sg.getEdge(govNode, depNode, relation);
-        success = true;
       }
     } else if (depNode != null && govWild) {
       // dep known, wildcard gov
-      for (SemanticGraphEdge edge : sg.incomingEdgeIterable(depNode)) {
-        if (edge.getRelation().equals(relation) && sg.containsEdge(edge) ) {
-          success = success || sg.removeEdge(edge);
+      if (relation == null) {
+        edgesToDelete = new ArrayList<>();
+        sg.incomingEdgeIterable(depNode).forEach(edgesToDelete::add);
+      } else {
+        edgesToDelete = new ArrayList<>();
+        for (SemanticGraphEdge edge : sg.incomingEdgeIterable(depNode)) {
+          if (edge.getRelation().equals(relation)) {
+            edgesToDelete.add(edge);
+          }
         }
       }
-    }  else if (govNode != null && depWild) {
+    } else if (govNode != null && depWild) {
       // gov known, wildcard dep
-      for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(govNode)) {
-        if (edge.getRelation().equals(relation) && sg.containsEdge(edge) ) {
-          success = success || sg.removeEdge(edge);
+      if (relation == null) {
+        edgesToDelete = new ArrayList<>();
+        sg.outgoingEdgeIterable(govNode).forEach(edgesToDelete::add);
+      } else {
+        edgesToDelete = new ArrayList<>();
+        for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(govNode)) {
+          if (edge.getRelation().equals(relation)) {
+            edgesToDelete.add(edge);
+          }
         }
       }
     }
+
+    if (edgesToDelete != null) {
+      for (SemanticGraphEdge edge : edgesToDelete) {
+        if (!sg.removeEdge(edge)) {
+          throw new IllegalStateException("Found an edge and tried to delete it, but somehow this didn't work!  " + edge);
+        }
+        success = true;
+      }
+    }
+
     // will be true if at least one edge was removed
     return success;
   }
