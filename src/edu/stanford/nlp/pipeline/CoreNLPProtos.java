@@ -71937,6 +71937,1290 @@ public final class CoreNLPProtos {
 
     }
 
+    public interface NamedEdgeOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string name = 1;</code>
+       * @return Whether the name field is set.
+       */
+      boolean hasName();
+      /**
+       * <code>required string name = 1;</code>
+       * @return The name.
+       */
+      java.lang.String getName();
+      /**
+       * <code>required string name = 1;</code>
+       * @return The bytes for name.
+       */
+      com.google.protobuf.ByteString
+          getNameBytes();
+
+      /**
+       * <code>required int32 source = 2;</code>
+       * @return Whether the source field is set.
+       */
+      boolean hasSource();
+      /**
+       * <code>required int32 source = 2;</code>
+       * @return The source.
+       */
+      int getSource();
+
+      /**
+       * <code>required int32 target = 3;</code>
+       * @return Whether the target field is set.
+       */
+      boolean hasTarget();
+      /**
+       * <code>required int32 target = 3;</code>
+       * @return The target.
+       */
+      int getTarget();
+
+      /**
+       * <code>optional string reln = 4;</code>
+       * @return Whether the reln field is set.
+       */
+      boolean hasReln();
+      /**
+       * <code>optional string reln = 4;</code>
+       * @return The reln.
+       */
+      java.lang.String getReln();
+      /**
+       * <code>optional string reln = 4;</code>
+       * @return The bytes for reln.
+       */
+      com.google.protobuf.ByteString
+          getRelnBytes();
+
+      /**
+       * <code>optional bool isExtra = 5;</code>
+       * @return Whether the isExtra field is set.
+       */
+      boolean hasIsExtra();
+      /**
+       * <code>optional bool isExtra = 5;</code>
+       * @return The isExtra.
+       */
+      boolean getIsExtra();
+
+      /**
+       * <code>optional uint32 sourceCopy = 6;</code>
+       * @return Whether the sourceCopy field is set.
+       */
+      boolean hasSourceCopy();
+      /**
+       * <code>optional uint32 sourceCopy = 6;</code>
+       * @return The sourceCopy.
+       */
+      int getSourceCopy();
+
+      /**
+       * <code>optional uint32 targetCopy = 7;</code>
+       * @return Whether the targetCopy field is set.
+       */
+      boolean hasTargetCopy();
+      /**
+       * <code>optional uint32 targetCopy = 7;</code>
+       * @return The targetCopy.
+       */
+      int getTargetCopy();
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge}
+     */
+    public static final class NamedEdge extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge)
+        NamedEdgeOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use NamedEdge.newBuilder() to construct.
+      private NamedEdge(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private NamedEdge() {
+        name_ = "";
+        reln_ = "";
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new NamedEdge();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int NAME_FIELD_NUMBER = 1;
+      private volatile java.lang.Object name_;
+      /**
+       * <code>required string name = 1;</code>
+       * @return Whether the name field is set.
+       */
+      @java.lang.Override
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>required string name = 1;</code>
+       * @return The name.
+       */
+      @java.lang.Override
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            name_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string name = 1;</code>
+       * @return The bytes for name.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int SOURCE_FIELD_NUMBER = 2;
+      private int source_;
+      /**
+       * <code>required int32 source = 2;</code>
+       * @return Whether the source field is set.
+       */
+      @java.lang.Override
+      public boolean hasSource() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>required int32 source = 2;</code>
+       * @return The source.
+       */
+      @java.lang.Override
+      public int getSource() {
+        return source_;
+      }
+
+      public static final int TARGET_FIELD_NUMBER = 3;
+      private int target_;
+      /**
+       * <code>required int32 target = 3;</code>
+       * @return Whether the target field is set.
+       */
+      @java.lang.Override
+      public boolean hasTarget() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>required int32 target = 3;</code>
+       * @return The target.
+       */
+      @java.lang.Override
+      public int getTarget() {
+        return target_;
+      }
+
+      public static final int RELN_FIELD_NUMBER = 4;
+      private volatile java.lang.Object reln_;
+      /**
+       * <code>optional string reln = 4;</code>
+       * @return Whether the reln field is set.
+       */
+      @java.lang.Override
+      public boolean hasReln() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>optional string reln = 4;</code>
+       * @return The reln.
+       */
+      @java.lang.Override
+      public java.lang.String getReln() {
+        java.lang.Object ref = reln_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            reln_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string reln = 4;</code>
+       * @return The bytes for reln.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getRelnBytes() {
+        java.lang.Object ref = reln_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          reln_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int ISEXTRA_FIELD_NUMBER = 5;
+      private boolean isExtra_;
+      /**
+       * <code>optional bool isExtra = 5;</code>
+       * @return Whether the isExtra field is set.
+       */
+      @java.lang.Override
+      public boolean hasIsExtra() {
+        return ((bitField0_ & 0x00000010) != 0);
+      }
+      /**
+       * <code>optional bool isExtra = 5;</code>
+       * @return The isExtra.
+       */
+      @java.lang.Override
+      public boolean getIsExtra() {
+        return isExtra_;
+      }
+
+      public static final int SOURCECOPY_FIELD_NUMBER = 6;
+      private int sourceCopy_;
+      /**
+       * <code>optional uint32 sourceCopy = 6;</code>
+       * @return Whether the sourceCopy field is set.
+       */
+      @java.lang.Override
+      public boolean hasSourceCopy() {
+        return ((bitField0_ & 0x00000020) != 0);
+      }
+      /**
+       * <code>optional uint32 sourceCopy = 6;</code>
+       * @return The sourceCopy.
+       */
+      @java.lang.Override
+      public int getSourceCopy() {
+        return sourceCopy_;
+      }
+
+      public static final int TARGETCOPY_FIELD_NUMBER = 7;
+      private int targetCopy_;
+      /**
+       * <code>optional uint32 targetCopy = 7;</code>
+       * @return Whether the targetCopy field is set.
+       */
+      @java.lang.Override
+      public boolean hasTargetCopy() {
+        return ((bitField0_ & 0x00000040) != 0);
+      }
+      /**
+       * <code>optional uint32 targetCopy = 7;</code>
+       * @return The targetCopy.
+       */
+      @java.lang.Override
+      public int getTargetCopy() {
+        return targetCopy_;
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasName()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasSource()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasTarget()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          output.writeInt32(2, source_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          output.writeInt32(3, target_);
+        }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 4, reln_);
+        }
+        if (((bitField0_ & 0x00000010) != 0)) {
+          output.writeBool(5, isExtra_);
+        }
+        if (((bitField0_ & 0x00000020) != 0)) {
+          output.writeUInt32(6, sourceCopy_);
+        }
+        if (((bitField0_ & 0x00000040) != 0)) {
+          output.writeUInt32(7, targetCopy_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(2, source_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(3, target_);
+        }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, reln_);
+        }
+        if (((bitField0_ & 0x00000010) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBoolSize(5, isExtra_);
+        }
+        if (((bitField0_ & 0x00000020) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeUInt32Size(6, sourceCopy_);
+        }
+        if (((bitField0_ & 0x00000040) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeUInt32Size(7, targetCopy_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge) obj;
+
+        if (hasName() != other.hasName()) return false;
+        if (hasName()) {
+          if (!getName()
+              .equals(other.getName())) return false;
+        }
+        if (hasSource() != other.hasSource()) return false;
+        if (hasSource()) {
+          if (getSource()
+              != other.getSource()) return false;
+        }
+        if (hasTarget() != other.hasTarget()) return false;
+        if (hasTarget()) {
+          if (getTarget()
+              != other.getTarget()) return false;
+        }
+        if (hasReln() != other.hasReln()) return false;
+        if (hasReln()) {
+          if (!getReln()
+              .equals(other.getReln())) return false;
+        }
+        if (hasIsExtra() != other.hasIsExtra()) return false;
+        if (hasIsExtra()) {
+          if (getIsExtra()
+              != other.getIsExtra()) return false;
+        }
+        if (hasSourceCopy() != other.hasSourceCopy()) return false;
+        if (hasSourceCopy()) {
+          if (getSourceCopy()
+              != other.getSourceCopy()) return false;
+        }
+        if (hasTargetCopy() != other.hasTargetCopy()) return false;
+        if (hasTargetCopy()) {
+          if (getTargetCopy()
+              != other.getTargetCopy()) return false;
+        }
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasName()) {
+          hash = (37 * hash) + NAME_FIELD_NUMBER;
+          hash = (53 * hash) + getName().hashCode();
+        }
+        if (hasSource()) {
+          hash = (37 * hash) + SOURCE_FIELD_NUMBER;
+          hash = (53 * hash) + getSource();
+        }
+        if (hasTarget()) {
+          hash = (37 * hash) + TARGET_FIELD_NUMBER;
+          hash = (53 * hash) + getTarget();
+        }
+        if (hasReln()) {
+          hash = (37 * hash) + RELN_FIELD_NUMBER;
+          hash = (53 * hash) + getReln().hashCode();
+        }
+        if (hasIsExtra()) {
+          hash = (37 * hash) + ISEXTRA_FIELD_NUMBER;
+          hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+              getIsExtra());
+        }
+        if (hasSourceCopy()) {
+          hash = (37 * hash) + SOURCECOPY_FIELD_NUMBER;
+          hash = (53 * hash) + getSourceCopy();
+        }
+        if (hasTargetCopy()) {
+          hash = (37 * hash) + TARGETCOPY_FIELD_NUMBER;
+          hash = (53 * hash) + getTargetCopy();
+        }
+        hash = (29 * hash) + getUnknownFields().hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.newBuilder()
+        private Builder() {
+
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          name_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          source_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          target_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000004);
+          reln_ = "";
+          bitField0_ = (bitField0_ & ~0x00000008);
+          isExtra_ = false;
+          bitField0_ = (bitField0_ & ~0x00000010);
+          sourceCopy_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000020);
+          targetCopy_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000040);
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.name_ = name_;
+          if (((from_bitField0_ & 0x00000002) != 0)) {
+            result.source_ = source_;
+            to_bitField0_ |= 0x00000002;
+          }
+          if (((from_bitField0_ & 0x00000004) != 0)) {
+            result.target_ = target_;
+            to_bitField0_ |= 0x00000004;
+          }
+          if (((from_bitField0_ & 0x00000008) != 0)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.reln_ = reln_;
+          if (((from_bitField0_ & 0x00000010) != 0)) {
+            result.isExtra_ = isExtra_;
+            to_bitField0_ |= 0x00000010;
+          }
+          if (((from_bitField0_ & 0x00000020) != 0)) {
+            result.sourceCopy_ = sourceCopy_;
+            to_bitField0_ |= 0x00000020;
+          }
+          if (((from_bitField0_ & 0x00000040) != 0)) {
+            result.targetCopy_ = targetCopy_;
+            to_bitField0_ |= 0x00000040;
+          }
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.getDefaultInstance()) return this;
+          if (other.hasName()) {
+            bitField0_ |= 0x00000001;
+            name_ = other.name_;
+            onChanged();
+          }
+          if (other.hasSource()) {
+            setSource(other.getSource());
+          }
+          if (other.hasTarget()) {
+            setTarget(other.getTarget());
+          }
+          if (other.hasReln()) {
+            bitField0_ |= 0x00000008;
+            reln_ = other.reln_;
+            onChanged();
+          }
+          if (other.hasIsExtra()) {
+            setIsExtra(other.getIsExtra());
+          }
+          if (other.hasSourceCopy()) {
+            setSourceCopy(other.getSourceCopy());
+          }
+          if (other.hasTargetCopy()) {
+            setTargetCopy(other.getTargetCopy());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          if (!hasName()) {
+            return false;
+          }
+          if (!hasSource()) {
+            return false;
+          }
+          if (!hasTarget()) {
+            return false;
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  name_ = input.readBytes();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 16: {
+                  source_ = input.readInt32();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 16
+                case 24: {
+                  target_ = input.readInt32();
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 24
+                case 34: {
+                  reln_ = input.readBytes();
+                  bitField0_ |= 0x00000008;
+                  break;
+                } // case 34
+                case 40: {
+                  isExtra_ = input.readBool();
+                  bitField0_ |= 0x00000010;
+                  break;
+                } // case 40
+                case 48: {
+                  sourceCopy_ = input.readUInt32();
+                  bitField0_ |= 0x00000020;
+                  break;
+                } // case 48
+                case 56: {
+                  targetCopy_ = input.readUInt32();
+                  bitField0_ |= 0x00000040;
+                  break;
+                } // case 56
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.unwrapIOException();
+          } finally {
+            onChanged();
+          } // finally
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object name_ = "";
+        /**
+         * <code>required string name = 1;</code>
+         * @return Whether the name field is set.
+         */
+        public boolean hasName() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @return The name.
+         */
+        public java.lang.String getName() {
+          java.lang.Object ref = name_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              name_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @return The bytes for name.
+         */
+        public com.google.protobuf.ByteString
+            getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @param value The name to set.
+         * @return This builder for chaining.
+         */
+        public Builder setName(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          name_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearName() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          name_ = getDefaultInstance().getName();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string name = 1;</code>
+         * @param value The bytes for name to set.
+         * @return This builder for chaining.
+         */
+        public Builder setNameBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          name_ = value;
+          onChanged();
+          return this;
+        }
+
+        private int source_ ;
+        /**
+         * <code>required int32 source = 2;</code>
+         * @return Whether the source field is set.
+         */
+        @java.lang.Override
+        public boolean hasSource() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <code>required int32 source = 2;</code>
+         * @return The source.
+         */
+        @java.lang.Override
+        public int getSource() {
+          return source_;
+        }
+        /**
+         * <code>required int32 source = 2;</code>
+         * @param value The source to set.
+         * @return This builder for chaining.
+         */
+        public Builder setSource(int value) {
+          bitField0_ |= 0x00000002;
+          source_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 source = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearSource() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          source_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private int target_ ;
+        /**
+         * <code>required int32 target = 3;</code>
+         * @return Whether the target field is set.
+         */
+        @java.lang.Override
+        public boolean hasTarget() {
+          return ((bitField0_ & 0x00000004) != 0);
+        }
+        /**
+         * <code>required int32 target = 3;</code>
+         * @return The target.
+         */
+        @java.lang.Override
+        public int getTarget() {
+          return target_;
+        }
+        /**
+         * <code>required int32 target = 3;</code>
+         * @param value The target to set.
+         * @return This builder for chaining.
+         */
+        public Builder setTarget(int value) {
+          bitField0_ |= 0x00000004;
+          target_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 target = 3;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearTarget() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          target_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object reln_ = "";
+        /**
+         * <code>optional string reln = 4;</code>
+         * @return Whether the reln field is set.
+         */
+        public boolean hasReln() {
+          return ((bitField0_ & 0x00000008) != 0);
+        }
+        /**
+         * <code>optional string reln = 4;</code>
+         * @return The reln.
+         */
+        public java.lang.String getReln() {
+          java.lang.Object ref = reln_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              reln_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string reln = 4;</code>
+         * @return The bytes for reln.
+         */
+        public com.google.protobuf.ByteString
+            getRelnBytes() {
+          java.lang.Object ref = reln_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            reln_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string reln = 4;</code>
+         * @param value The reln to set.
+         * @return This builder for chaining.
+         */
+        public Builder setReln(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+          reln_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string reln = 4;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearReln() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          reln_ = getDefaultInstance().getReln();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string reln = 4;</code>
+         * @param value The bytes for reln to set.
+         * @return This builder for chaining.
+         */
+        public Builder setRelnBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+          reln_ = value;
+          onChanged();
+          return this;
+        }
+
+        private boolean isExtra_ ;
+        /**
+         * <code>optional bool isExtra = 5;</code>
+         * @return Whether the isExtra field is set.
+         */
+        @java.lang.Override
+        public boolean hasIsExtra() {
+          return ((bitField0_ & 0x00000010) != 0);
+        }
+        /**
+         * <code>optional bool isExtra = 5;</code>
+         * @return The isExtra.
+         */
+        @java.lang.Override
+        public boolean getIsExtra() {
+          return isExtra_;
+        }
+        /**
+         * <code>optional bool isExtra = 5;</code>
+         * @param value The isExtra to set.
+         * @return This builder for chaining.
+         */
+        public Builder setIsExtra(boolean value) {
+          bitField0_ |= 0x00000010;
+          isExtra_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional bool isExtra = 5;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearIsExtra() {
+          bitField0_ = (bitField0_ & ~0x00000010);
+          isExtra_ = false;
+          onChanged();
+          return this;
+        }
+
+        private int sourceCopy_ ;
+        /**
+         * <code>optional uint32 sourceCopy = 6;</code>
+         * @return Whether the sourceCopy field is set.
+         */
+        @java.lang.Override
+        public boolean hasSourceCopy() {
+          return ((bitField0_ & 0x00000020) != 0);
+        }
+        /**
+         * <code>optional uint32 sourceCopy = 6;</code>
+         * @return The sourceCopy.
+         */
+        @java.lang.Override
+        public int getSourceCopy() {
+          return sourceCopy_;
+        }
+        /**
+         * <code>optional uint32 sourceCopy = 6;</code>
+         * @param value The sourceCopy to set.
+         * @return This builder for chaining.
+         */
+        public Builder setSourceCopy(int value) {
+          bitField0_ |= 0x00000020;
+          sourceCopy_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional uint32 sourceCopy = 6;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearSourceCopy() {
+          bitField0_ = (bitField0_ & ~0x00000020);
+          sourceCopy_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private int targetCopy_ ;
+        /**
+         * <code>optional uint32 targetCopy = 7;</code>
+         * @return Whether the targetCopy field is set.
+         */
+        @java.lang.Override
+        public boolean hasTargetCopy() {
+          return ((bitField0_ & 0x00000040) != 0);
+        }
+        /**
+         * <code>optional uint32 targetCopy = 7;</code>
+         * @return The targetCopy.
+         */
+        @java.lang.Override
+        public int getTargetCopy() {
+          return targetCopy_;
+        }
+        /**
+         * <code>optional uint32 targetCopy = 7;</code>
+         * @param value The targetCopy to set.
+         * @return This builder for chaining.
+         */
+        public Builder setTargetCopy(int value) {
+          bitField0_ |= 0x00000040;
+          targetCopy_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional uint32 targetCopy = 7;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearTargetCopy() {
+          bitField0_ = (bitField0_ & ~0x00000040);
+          targetCopy_ = 0;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<NamedEdge>
+          PARSER = new com.google.protobuf.AbstractParser<NamedEdge>() {
+        @java.lang.Override
+        public NamedEdge parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
+        }
+      };
+
+      public static com.google.protobuf.Parser<NamedEdge> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<NamedEdge> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
     public interface MatchOrBuilder extends
         // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SemgrexResponse.Match)
         com.google.protobuf.MessageOrBuilder {
@@ -72001,6 +73285,30 @@ public final class CoreNLPProtos {
           int index);
 
       /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+       */
+      java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge> 
+          getEdgeList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge getEdge(int index);
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+       */
+      int getEdgeCount();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+       */
+      java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder> 
+          getEdgeOrBuilderList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder getEdgeOrBuilder(
+          int index);
+
+      /**
        * <pre>
        * when processing multiple dependency graphs at once,
        * which dependency graph this applies to
@@ -72059,6 +73367,7 @@ public final class CoreNLPProtos {
       private Match() {
         node_ = java.util.Collections.emptyList();
         reln_ = java.util.Collections.emptyList();
+        edge_ = java.util.Collections.emptyList();
       }
 
       @java.lang.Override
@@ -72186,6 +73495,46 @@ public final class CoreNLPProtos {
         return reln_.get(index);
       }
 
+      public static final int EDGE_FIELD_NUMBER = 6;
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge> edge_;
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+       */
+      @java.lang.Override
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge> getEdgeList() {
+        return edge_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+       */
+      @java.lang.Override
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder> 
+          getEdgeOrBuilderList() {
+        return edge_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+       */
+      @java.lang.Override
+      public int getEdgeCount() {
+        return edge_.size();
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge getEdge(int index) {
+        return edge_.get(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder getEdgeOrBuilder(
+          int index) {
+        return edge_.get(index);
+      }
+
       public static final int GRAPHINDEX_FIELD_NUMBER = 4;
       private int graphIndex_;
       /**
@@ -72269,6 +73618,12 @@ public final class CoreNLPProtos {
             return false;
           }
         }
+        for (int i = 0; i < getEdgeCount(); i++) {
+          if (!getEdge(i).isInitialized()) {
+            memoizedIsInitialized = 0;
+            return false;
+          }
+        }
         memoizedIsInitialized = 1;
         return true;
       }
@@ -72290,6 +73645,9 @@ public final class CoreNLPProtos {
         }
         if (((bitField0_ & 0x00000004) != 0)) {
           output.writeInt32(5, semgrexIndex_);
+        }
+        for (int i = 0; i < edge_.size(); i++) {
+          output.writeMessage(6, edge_.get(i));
         }
         getUnknownFields().writeTo(output);
       }
@@ -72320,6 +73678,10 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeInt32Size(5, semgrexIndex_);
         }
+        for (int i = 0; i < edge_.size(); i++) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(6, edge_.get(i));
+        }
         size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
@@ -72344,6 +73706,8 @@ public final class CoreNLPProtos {
             .equals(other.getNodeList())) return false;
         if (!getRelnList()
             .equals(other.getRelnList())) return false;
+        if (!getEdgeList()
+            .equals(other.getEdgeList())) return false;
         if (hasGraphIndex() != other.hasGraphIndex()) return false;
         if (hasGraphIndex()) {
           if (getGraphIndex()
@@ -72376,6 +73740,10 @@ public final class CoreNLPProtos {
         if (getRelnCount() > 0) {
           hash = (37 * hash) + RELN_FIELD_NUMBER;
           hash = (53 * hash) + getRelnList().hashCode();
+        }
+        if (getEdgeCount() > 0) {
+          hash = (37 * hash) + EDGE_FIELD_NUMBER;
+          hash = (53 * hash) + getEdgeList().hashCode();
         }
         if (hasGraphIndex()) {
           hash = (37 * hash) + GRAPHINDEX_FIELD_NUMBER;
@@ -72529,10 +73897,17 @@ public final class CoreNLPProtos {
             relnBuilder_.clear();
           }
           bitField0_ = (bitField0_ & ~0x00000004);
-          graphIndex_ = 0;
+          if (edgeBuilder_ == null) {
+            edge_ = java.util.Collections.emptyList();
+          } else {
+            edge_ = null;
+            edgeBuilder_.clear();
+          }
           bitField0_ = (bitField0_ & ~0x00000008);
-          semgrexIndex_ = 0;
+          graphIndex_ = 0;
           bitField0_ = (bitField0_ & ~0x00000010);
+          semgrexIndex_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000020);
           return this;
         }
 
@@ -72583,11 +73958,20 @@ public final class CoreNLPProtos {
           } else {
             result.reln_ = relnBuilder_.build();
           }
-          if (((from_bitField0_ & 0x00000008) != 0)) {
+          if (edgeBuilder_ == null) {
+            if (((bitField0_ & 0x00000008) != 0)) {
+              edge_ = java.util.Collections.unmodifiableList(edge_);
+              bitField0_ = (bitField0_ & ~0x00000008);
+            }
+            result.edge_ = edge_;
+          } else {
+            result.edge_ = edgeBuilder_.build();
+          }
+          if (((from_bitField0_ & 0x00000010) != 0)) {
             result.graphIndex_ = graphIndex_;
             to_bitField0_ |= 0x00000002;
           }
-          if (((from_bitField0_ & 0x00000010) != 0)) {
+          if (((from_bitField0_ & 0x00000020) != 0)) {
             result.semgrexIndex_ = semgrexIndex_;
             to_bitField0_ |= 0x00000004;
           }
@@ -72695,6 +74079,32 @@ public final class CoreNLPProtos {
               }
             }
           }
+          if (edgeBuilder_ == null) {
+            if (!other.edge_.isEmpty()) {
+              if (edge_.isEmpty()) {
+                edge_ = other.edge_;
+                bitField0_ = (bitField0_ & ~0x00000008);
+              } else {
+                ensureEdgeIsMutable();
+                edge_.addAll(other.edge_);
+              }
+              onChanged();
+            }
+          } else {
+            if (!other.edge_.isEmpty()) {
+              if (edgeBuilder_.isEmpty()) {
+                edgeBuilder_.dispose();
+                edgeBuilder_ = null;
+                edge_ = other.edge_;
+                bitField0_ = (bitField0_ & ~0x00000008);
+                edgeBuilder_ = 
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                     getEdgeFieldBuilder() : null;
+              } else {
+                edgeBuilder_.addAllMessages(other.edge_);
+              }
+            }
+          }
           if (other.hasGraphIndex()) {
             setGraphIndex(other.getGraphIndex());
           }
@@ -72718,6 +74128,11 @@ public final class CoreNLPProtos {
           }
           for (int i = 0; i < getRelnCount(); i++) {
             if (!getReln(i).isInitialized()) {
+              return false;
+            }
+          }
+          for (int i = 0; i < getEdgeCount(); i++) {
+            if (!getEdge(i).isInitialized()) {
               return false;
             }
           }
@@ -72773,14 +74188,27 @@ public final class CoreNLPProtos {
                 } // case 26
                 case 32: {
                   graphIndex_ = input.readInt32();
-                  bitField0_ |= 0x00000008;
+                  bitField0_ |= 0x00000010;
                   break;
                 } // case 32
                 case 40: {
                   semgrexIndex_ = input.readInt32();
-                  bitField0_ |= 0x00000010;
+                  bitField0_ |= 0x00000020;
                   break;
                 } // case 40
+                case 50: {
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge m =
+                      input.readMessage(
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.PARSER,
+                          extensionRegistry);
+                  if (edgeBuilder_ == null) {
+                    ensureEdgeIsMutable();
+                    edge_.add(m);
+                  } else {
+                    edgeBuilder_.addMessage(m);
+                  }
+                  break;
+                } // case 50
                 default: {
                   if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                     done = true; // was an endgroup tag
@@ -73317,6 +74745,246 @@ public final class CoreNLPProtos {
           return relnBuilder_;
         }
 
+        private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge> edge_ =
+          java.util.Collections.emptyList();
+        private void ensureEdgeIsMutable() {
+          if (!((bitField0_ & 0x00000008) != 0)) {
+            edge_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge>(edge_);
+            bitField0_ |= 0x00000008;
+           }
+        }
+
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder> edgeBuilder_;
+
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge> getEdgeList() {
+          if (edgeBuilder_ == null) {
+            return java.util.Collections.unmodifiableList(edge_);
+          } else {
+            return edgeBuilder_.getMessageList();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public int getEdgeCount() {
+          if (edgeBuilder_ == null) {
+            return edge_.size();
+          } else {
+            return edgeBuilder_.getCount();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge getEdge(int index) {
+          if (edgeBuilder_ == null) {
+            return edge_.get(index);
+          } else {
+            return edgeBuilder_.getMessage(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public Builder setEdge(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge value) {
+          if (edgeBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureEdgeIsMutable();
+            edge_.set(index, value);
+            onChanged();
+          } else {
+            edgeBuilder_.setMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public Builder setEdge(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder builderForValue) {
+          if (edgeBuilder_ == null) {
+            ensureEdgeIsMutable();
+            edge_.set(index, builderForValue.build());
+            onChanged();
+          } else {
+            edgeBuilder_.setMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public Builder addEdge(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge value) {
+          if (edgeBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureEdgeIsMutable();
+            edge_.add(value);
+            onChanged();
+          } else {
+            edgeBuilder_.addMessage(value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public Builder addEdge(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge value) {
+          if (edgeBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureEdgeIsMutable();
+            edge_.add(index, value);
+            onChanged();
+          } else {
+            edgeBuilder_.addMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public Builder addEdge(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder builderForValue) {
+          if (edgeBuilder_ == null) {
+            ensureEdgeIsMutable();
+            edge_.add(builderForValue.build());
+            onChanged();
+          } else {
+            edgeBuilder_.addMessage(builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public Builder addEdge(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder builderForValue) {
+          if (edgeBuilder_ == null) {
+            ensureEdgeIsMutable();
+            edge_.add(index, builderForValue.build());
+            onChanged();
+          } else {
+            edgeBuilder_.addMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public Builder addAllEdge(
+            java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge> values) {
+          if (edgeBuilder_ == null) {
+            ensureEdgeIsMutable();
+            com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                values, edge_);
+            onChanged();
+          } else {
+            edgeBuilder_.addAllMessages(values);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public Builder clearEdge() {
+          if (edgeBuilder_ == null) {
+            edge_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000008);
+            onChanged();
+          } else {
+            edgeBuilder_.clear();
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public Builder removeEdge(int index) {
+          if (edgeBuilder_ == null) {
+            ensureEdgeIsMutable();
+            edge_.remove(index);
+            onChanged();
+          } else {
+            edgeBuilder_.remove(index);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder getEdgeBuilder(
+            int index) {
+          return getEdgeFieldBuilder().getBuilder(index);
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder getEdgeOrBuilder(
+            int index) {
+          if (edgeBuilder_ == null) {
+            return edge_.get(index);  } else {
+            return edgeBuilder_.getMessageOrBuilder(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder> 
+             getEdgeOrBuilderList() {
+          if (edgeBuilder_ != null) {
+            return edgeBuilder_.getMessageOrBuilderList();
+          } else {
+            return java.util.Collections.unmodifiableList(edge_);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder addEdgeBuilder() {
+          return getEdgeFieldBuilder().addBuilder(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder addEdgeBuilder(
+            int index) {
+          return getEdgeFieldBuilder().addBuilder(
+              index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge edge = 6;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder> 
+             getEdgeBuilderList() {
+          return getEdgeFieldBuilder().getBuilderList();
+        }
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder> 
+            getEdgeFieldBuilder() {
+          if (edgeBuilder_ == null) {
+            edgeBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder>(
+                    edge_,
+                    ((bitField0_ & 0x00000008) != 0),
+                    getParentForChildren(),
+                    isClean());
+            edge_ = null;
+          }
+          return edgeBuilder_;
+        }
+
         private int graphIndex_ ;
         /**
          * <pre>
@@ -73330,7 +74998,7 @@ public final class CoreNLPProtos {
          */
         @java.lang.Override
         public boolean hasGraphIndex() {
-          return ((bitField0_ & 0x00000008) != 0);
+          return ((bitField0_ & 0x00000010) != 0);
         }
         /**
          * <pre>
@@ -73358,7 +75026,7 @@ public final class CoreNLPProtos {
          * @return This builder for chaining.
          */
         public Builder setGraphIndex(int value) {
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000010;
           graphIndex_ = value;
           onChanged();
           return this;
@@ -73374,7 +75042,7 @@ public final class CoreNLPProtos {
          * @return This builder for chaining.
          */
         public Builder clearGraphIndex() {
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
           graphIndex_ = 0;
           onChanged();
           return this;
@@ -73392,7 +75060,7 @@ public final class CoreNLPProtos {
          */
         @java.lang.Override
         public boolean hasSemgrexIndex() {
-          return ((bitField0_ & 0x00000010) != 0);
+          return ((bitField0_ & 0x00000020) != 0);
         }
         /**
          * <pre>
@@ -73418,7 +75086,7 @@ public final class CoreNLPProtos {
          * @return This builder for chaining.
          */
         public Builder setSemgrexIndex(int value) {
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000020;
           semgrexIndex_ = value;
           onChanged();
           return this;
@@ -73433,7 +75101,7 @@ public final class CoreNLPProtos {
          * @return This builder for chaining.
          */
         public Builder clearSemgrexIndex() {
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000020);
           semgrexIndex_ = 0;
           onChanged();
           return this;
@@ -94138,6 +95806,11 @@ public final class CoreNLPProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedRelation_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -94514,86 +96187,91 @@ public final class CoreNLPProtos {
       "ncies\032z\n\014Dependencies\022/\n\005token\030\001 \003(\0132 .e" +
       "du.stanford.nlp.pipeline.Token\0229\n\005graph\030" +
       "\002 \002(\0132*.edu.stanford.nlp.pipeline.Depend" +
-      "encyGraph\"\264\004\n\017SemgrexResponse\022F\n\006result\030" +
+      "encyGraph\"\373\005\n\017SemgrexResponse\022F\n\006result\030" +
       "\001 \003(\01326.edu.stanford.nlp.pipeline.Semgre" +
       "xResponse.GraphResult\032-\n\tNamedNode\022\014\n\004na" +
       "me\030\001 \002(\t\022\022\n\nmatchIndex\030\002 \002(\005\032+\n\rNamedRel" +
-      "ation\022\014\n\004name\030\001 \002(\t\022\014\n\004reln\030\002 \002(\t\032\321\001\n\005Ma" +
-      "tch\022\022\n\nmatchIndex\030\001 \002(\005\022B\n\004node\030\002 \003(\01324." +
+      "ation\022\014\n\004name\030\001 \002(\t\022\014\n\004reln\030\002 \002(\t\032\200\001\n\tNa" +
+      "medEdge\022\014\n\004name\030\001 \002(\t\022\016\n\006source\030\002 \002(\005\022\016\n" +
+      "\006target\030\003 \002(\005\022\014\n\004reln\030\004 \001(\t\022\017\n\007isExtra\030\005" +
+      " \001(\010\022\022\n\nsourceCopy\030\006 \001(\r\022\022\n\ntargetCopy\030\007" +
+      " \001(\r\032\225\002\n\005Match\022\022\n\nmatchIndex\030\001 \002(\005\022B\n\004no" +
+      "de\030\002 \003(\01324.edu.stanford.nlp.pipeline.Sem" +
+      "grexResponse.NamedNode\022F\n\004reln\030\003 \003(\01328.e" +
+      "du.stanford.nlp.pipeline.SemgrexResponse" +
+      ".NamedRelation\022B\n\004edge\030\006 \003(\01324.edu.stanf" +
+      "ord.nlp.pipeline.SemgrexResponse.NamedEd" +
+      "ge\022\022\n\ngraphIndex\030\004 \001(\005\022\024\n\014semgrexIndex\030\005" +
+      " \001(\005\032P\n\rSemgrexResult\022?\n\005match\030\001 \003(\01320.e" +
+      "du.stanford.nlp.pipeline.SemgrexResponse" +
+      ".Match\032W\n\013GraphResult\022H\n\006result\030\001 \003(\01328." +
       "edu.stanford.nlp.pipeline.SemgrexRespons" +
-      "e.NamedNode\022F\n\004reln\030\003 \003(\01328.edu.stanford" +
-      ".nlp.pipeline.SemgrexResponse.NamedRelat" +
-      "ion\022\022\n\ngraphIndex\030\004 \001(\005\022\024\n\014semgrexIndex\030" +
-      "\005 \001(\005\032P\n\rSemgrexResult\022?\n\005match\030\001 \003(\01320." +
-      "edu.stanford.nlp.pipeline.SemgrexRespons" +
-      "e.Match\032W\n\013GraphResult\022H\n\006result\030\001 \003(\01328" +
-      ".edu.stanford.nlp.pipeline.SemgrexRespon" +
-      "se.SemgrexResult\"W\n\022TokensRegexRequest\0220" +
-      "\n\003doc\030\001 \002(\0132#.edu.stanford.nlp.pipeline." +
-      "Document\022\017\n\007pattern\030\002 \003(\t\"\247\003\n\023TokensRege" +
-      "xResponse\022J\n\005match\030\001 \003(\0132;.edu.stanford." +
-      "nlp.pipeline.TokensRegexResponse.Pattern" +
-      "Match\0329\n\rMatchLocation\022\014\n\004text\030\001 \001(\t\022\r\n\005" +
-      "begin\030\002 \001(\005\022\013\n\003end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010se" +
-      "ntence\030\001 \002(\005\022K\n\005match\030\002 \002(\0132<.edu.stanfo" +
-      "rd.nlp.pipeline.TokensRegexResponse.Matc" +
-      "hLocation\022K\n\005group\030\003 \003(\0132<.edu.stanford." +
-      "nlp.pipeline.TokensRegexResponse.MatchLo" +
-      "cation\032S\n\014PatternMatch\022C\n\005match\030\001 \003(\01324." +
-      "edu.stanford.nlp.pipeline.TokensRegexRes" +
-      "ponse.Match\"\256\001\n\031DependencyEnhancerReques" +
-      "t\0225\n\010document\030\001 \002(\0132#.edu.stanford.nlp.p" +
-      "ipeline.Document\0227\n\010language\030\002 \001(\0162#.edu" +
-      ".stanford.nlp.pipeline.LanguageH\000\022\032\n\020rel" +
-      "ativePronouns\030\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022Flatten" +
-      "edParseTree\022A\n\005nodes\030\001 \003(\01322.edu.stanfor" +
-      "d.nlp.pipeline.FlattenedParseTree.Node\032[" +
-      "\n\004Node\022\022\n\010openNode\030\001 \001(\010H\000\022\023\n\tcloseNode\030" +
-      "\002 \001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B" +
-      "\n\n\010contents\"\366\001\n\025EvaluateParserRequest\022N\n" +
-      "\010treebank\030\001 \003(\0132<.edu.stanford.nlp.pipel" +
-      "ine.EvaluateParserRequest.ParseResult\032\214\001" +
-      "\n\013ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stanfo" +
-      "rd.nlp.pipeline.FlattenedParseTree\022@\n\tpr" +
-      "edicted\030\002 \003(\0132-.edu.stanford.nlp.pipelin" +
-      "e.FlattenedParseTree\"5\n\026EvaluateParserRe" +
-      "sponse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001\n\017" +
-      "TsurgeonRequest\022H\n\noperations\030\001 \003(\01324.ed" +
-      "u.stanford.nlp.pipeline.TsurgeonRequest." +
-      "Operation\022<\n\005trees\030\002 \003(\0132-.edu.stanford." +
-      "nlp.pipeline.FlattenedParseTree\032-\n\tOpera" +
-      "tion\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P" +
-      "\n\020TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.edu." +
-      "stanford.nlp.pipeline.FlattenedParseTree" +
-      "\"\205\001\n\021MorphologyRequest\022F\n\005words\030\001 \003(\01327." +
-      "edu.stanford.nlp.pipeline.MorphologyRequ" +
-      "est.TaggedWord\032(\n\nTaggedWord\022\014\n\004word\030\001 \002" +
-      "(\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022MorphologyResponse\022" +
-      "I\n\005words\030\001 \003(\0132:.edu.stanford.nlp.pipeli" +
-      "ne.MorphologyResponse.WordTagLemma\0329\n\014Wo" +
-      "rdTagLemma\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\022\r" +
-      "\n\005lemma\030\003 \002(\t\"Z\n\032DependencyConverterRequ" +
-      "est\022<\n\005trees\030\001 \003(\0132-.edu.stanford.nlp.pi" +
-      "peline.FlattenedParseTree\"\220\002\n\033Dependency" +
-      "ConverterResponse\022`\n\013conversions\030\001 \003(\0132K" +
-      ".edu.stanford.nlp.pipeline.DependencyCon" +
-      "verterResponse.DependencyConversion\032\216\001\n\024" +
-      "DependencyConversion\0229\n\005graph\030\001 \002(\0132*.ed" +
-      "u.stanford.nlp.pipeline.DependencyGraph\022" +
-      ";\n\004tree\030\002 \001(\0132-.edu.stanford.nlp.pipelin" +
-      "e.FlattenedParseTree*\243\001\n\010Language\022\013\n\007Unk" +
-      "nown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003" +
-      "\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n" +
-      "\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEngli" +
-      "sh\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentiment\022" +
-      "\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022" +
-      "\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRON" +
-      "G_POSITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n" +
-      "\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026" +
-      "\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013" +
-      "ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE" +
-      "\020\006B*\n\031edu.stanford.nlp.pipelineB\rCoreNLP" +
-      "Protos"
+      "e.SemgrexResult\"W\n\022TokensRegexRequest\0220\n" +
+      "\003doc\030\001 \002(\0132#.edu.stanford.nlp.pipeline.D" +
+      "ocument\022\017\n\007pattern\030\002 \003(\t\"\247\003\n\023TokensRegex" +
+      "Response\022J\n\005match\030\001 \003(\0132;.edu.stanford.n" +
+      "lp.pipeline.TokensRegexResponse.PatternM" +
+      "atch\0329\n\rMatchLocation\022\014\n\004text\030\001 \001(\t\022\r\n\005b" +
+      "egin\030\002 \001(\005\022\013\n\003end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010sen" +
+      "tence\030\001 \002(\005\022K\n\005match\030\002 \002(\0132<.edu.stanfor" +
+      "d.nlp.pipeline.TokensRegexResponse.Match" +
+      "Location\022K\n\005group\030\003 \003(\0132<.edu.stanford.n" +
+      "lp.pipeline.TokensRegexResponse.MatchLoc" +
+      "ation\032S\n\014PatternMatch\022C\n\005match\030\001 \003(\01324.e" +
+      "du.stanford.nlp.pipeline.TokensRegexResp" +
+      "onse.Match\"\256\001\n\031DependencyEnhancerRequest" +
+      "\0225\n\010document\030\001 \002(\0132#.edu.stanford.nlp.pi" +
+      "peline.Document\0227\n\010language\030\002 \001(\0162#.edu." +
+      "stanford.nlp.pipeline.LanguageH\000\022\032\n\020rela" +
+      "tivePronouns\030\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022Flattene" +
+      "dParseTree\022A\n\005nodes\030\001 \003(\01322.edu.stanford" +
+      ".nlp.pipeline.FlattenedParseTree.Node\032[\n" +
+      "\004Node\022\022\n\010openNode\030\001 \001(\010H\000\022\023\n\tcloseNode\030\002" +
+      " \001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B\n" +
+      "\n\010contents\"\366\001\n\025EvaluateParserRequest\022N\n\010" +
+      "treebank\030\001 \003(\0132<.edu.stanford.nlp.pipeli" +
+      "ne.EvaluateParserRequest.ParseResult\032\214\001\n" +
+      "\013ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stanfor" +
+      "d.nlp.pipeline.FlattenedParseTree\022@\n\tpre" +
+      "dicted\030\002 \003(\0132-.edu.stanford.nlp.pipeline" +
+      ".FlattenedParseTree\"5\n\026EvaluateParserRes" +
+      "ponse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001\n\017T" +
+      "surgeonRequest\022H\n\noperations\030\001 \003(\01324.edu" +
+      ".stanford.nlp.pipeline.TsurgeonRequest.O" +
+      "peration\022<\n\005trees\030\002 \003(\0132-.edu.stanford.n" +
+      "lp.pipeline.FlattenedParseTree\032-\n\tOperat" +
+      "ion\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P\n" +
+      "\020TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.edu.s" +
+      "tanford.nlp.pipeline.FlattenedParseTree\"" +
+      "\205\001\n\021MorphologyRequest\022F\n\005words\030\001 \003(\01327.e" +
+      "du.stanford.nlp.pipeline.MorphologyReque" +
+      "st.TaggedWord\032(\n\nTaggedWord\022\014\n\004word\030\001 \002(" +
+      "\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022MorphologyResponse\022I" +
+      "\n\005words\030\001 \003(\0132:.edu.stanford.nlp.pipelin" +
+      "e.MorphologyResponse.WordTagLemma\0329\n\014Wor" +
+      "dTagLemma\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\022\r\n" +
+      "\005lemma\030\003 \002(\t\"Z\n\032DependencyConverterReque" +
+      "st\022<\n\005trees\030\001 \003(\0132-.edu.stanford.nlp.pip" +
+      "eline.FlattenedParseTree\"\220\002\n\033DependencyC" +
+      "onverterResponse\022`\n\013conversions\030\001 \003(\0132K." +
+      "edu.stanford.nlp.pipeline.DependencyConv" +
+      "erterResponse.DependencyConversion\032\216\001\n\024D" +
+      "ependencyConversion\0229\n\005graph\030\001 \002(\0132*.edu" +
+      ".stanford.nlp.pipeline.DependencyGraph\022;" +
+      "\n\004tree\030\002 \001(\0132-.edu.stanford.nlp.pipeline" +
+      ".FlattenedParseTree*\243\001\n\010Language\022\013\n\007Unkn" +
+      "own\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022" +
+      "\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006" +
+      "Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglis" +
+      "h\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentiment\022\023" +
+      "\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013" +
+      "\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG" +
+      "_POSITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013" +
+      "EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n" +
+      "\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013A" +
+      "LTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020" +
+      "\006B*\n\031edu.stanford.nlp.pipelineB\rCoreNLPP" +
+      "rotos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -94785,20 +96463,26 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedRelation_descriptor,
         new java.lang.String[] { "Name", "Reln", });
-    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_descriptor =
+    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_descriptor =
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(2);
+    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_descriptor,
+        new java.lang.String[] { "Name", "Source", "Target", "Reln", "IsExtra", "SourceCopy", "TargetCopy", });
+    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(3);
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_descriptor,
-        new java.lang.String[] { "MatchIndex", "Node", "Reln", "GraphIndex", "SemgrexIndex", });
+        new java.lang.String[] { "MatchIndex", "Node", "Reln", "Edge", "GraphIndex", "SemgrexIndex", });
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_descriptor =
-      internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(3);
+      internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(4);
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_descriptor,
         new java.lang.String[] { "Match", });
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_descriptor =
-      internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(4);
+      internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(5);
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_descriptor,
