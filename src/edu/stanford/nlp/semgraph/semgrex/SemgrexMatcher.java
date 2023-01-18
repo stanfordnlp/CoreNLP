@@ -216,14 +216,21 @@ public abstract class SemgrexMatcher  {
   public Set<String> getNodeNames() {
     return namesToNodes.keySet();
   }
+
   /**
-  
    * Returns the set of names for named relations in this pattern.
    */
   public Set<String> getRelationNames() {
     return namesToRelations.keySet();
   }
   
+  /**
+   * Returns the set of names for named edges in this pattern
+   */
+  public Set<String> getEdgeNames() {
+    return namesToEdges.keySet();
+  }
+
   @Override
   public abstract String toString();
 

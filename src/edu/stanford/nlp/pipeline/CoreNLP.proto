@@ -642,10 +642,22 @@ message SemgrexResponse {
     required string          reln        = 2;
   }
 
+  message NamedEdge {
+    required string          name        = 1;
+    required int32           source      = 2;
+    required int32           target      = 3;
+    optional string          reln        = 4;
+    optional bool            isExtra     = 5;
+    optional uint32          sourceCopy  = 6;
+    optional uint32          targetCopy  = 7;
+  }
+
   message Match {
     required int32           matchIndex   = 1;
     repeated NamedNode       node         = 2;
     repeated NamedRelation   reln         = 3;
+    repeated NamedEdge       edge         = 6;
+
     // when processing multiple dependency graphs at once,
     // which dependency graph this applies to
     // indexed from 0
