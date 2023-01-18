@@ -17,6 +17,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.util.ProcessProtobufRequest;
@@ -34,6 +35,7 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
       matchBuilder.setSemgrexIndex(patternIdx);
       matchBuilder.setGraphIndex(graphIdx);
 
+      // add descriptions of the named nodes
       for (String nodeName : matcher.getNodeNames()) {
         CoreNLPProtos.SemgrexResponse.NamedNode.Builder nodeBuilder = CoreNLPProtos.SemgrexResponse.NamedNode.newBuilder();
         nodeBuilder.setName(nodeName);
@@ -41,11 +43,30 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
         matchBuilder.addNode(nodeBuilder.build());
       }
 
+      // add descriptions of the named relations
       for (String relnName : matcher.getRelationNames()) {
         CoreNLPProtos.SemgrexResponse.NamedRelation.Builder relnBuilder = CoreNLPProtos.SemgrexResponse.NamedRelation.newBuilder();
         relnBuilder.setName(relnName);
         relnBuilder.setReln(matcher.getRelnString(relnName));
         matchBuilder.addReln(relnBuilder.build());
+      }
+
+      // add descriptions of the named edges
+      for (String edgeName : matcher.getEdgeNames()) {
+        CoreNLPProtos.SemgrexResponse.NamedEdge.Builder edgeBuilder = CoreNLPProtos.SemgrexResponse.NamedEdge.newBuilder();
+        edgeBuilder.setName(edgeName);
+        SemanticGraphEdge edge = matcher.getEdge(edgeName);
+        edgeBuilder.setSource(edge.getSource().index());
+        edgeBuilder.setTarget(edge.getTarget().index());
+        edgeBuilder.setReln(edge.getRelation().toString());
+        edgeBuilder.setIsExtra(edge.isExtra());
+        if (edge.getSource().copyCount() != 0) {
+          edgeBuilder.setSourceCopy(edge.getSource().copyCount());
+        }
+        if (edge.getTarget().copyCount() != 0) {
+          edgeBuilder.setTargetCopy(edge.getTarget().copyCount());
+        }
+        matchBuilder.addEdge(edgeBuilder.build());
       }
 
       semgrexResultBuilder.addMatch(matchBuilder.build());

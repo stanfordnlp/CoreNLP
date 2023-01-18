@@ -18,7 +18,7 @@ public class ProcessSemgrexRequestTest {
   public static CoreNLPProtos.SemgrexRequest buildFakeRequest(int numQueries, int numSemgrex) {
     CoreNLPProtos.SemgrexRequest.Builder request = CoreNLPProtos.SemgrexRequest.newBuilder();
     for (int i = 0; i < numSemgrex; ++i) {
-      request.addSemgrex("{}=source >dobj=zzz {}=target");
+      request.addSemgrex("{}=source >dobj=zzz~foo {}=target");
     }
 
     for (int i = 0; i < numQueries; ++i) {
@@ -112,6 +112,7 @@ result {
       Assert.assertEquals("Match is supposed to be at the root", 1, match.getMatchIndex());
       Assert.assertEquals("Expected exactly 2 named nodes", 2, match.getNodeList().size());
       Assert.assertEquals("Expected exactly 1 named reln", 1, match.getRelnList().size());
+      Assert.assertEquals("Expected exactly 1 named edge", 1, match.getEdgeList().size());
 
       Assert.assertEquals("Node 1 should be source", 1, match.getNodeList().get(0).getMatchIndex());
       Assert.assertEquals("Node 1 should be source", "source", match.getNodeList().get(0).getName());
@@ -120,6 +121,11 @@ result {
 
       Assert.assertEquals("Reln dobj should be named zzz", "zzz", match.getRelnList().get(0).getName());
       Assert.assertEquals("Reln dobj should be named zzz", "dobj", match.getRelnList().get(0).getReln());
+
+      Assert.assertEquals("Edge dobj should be named foo", "foo", match.getEdgeList().get(0).getName());
+      Assert.assertEquals("Edge dobj should have reln dobj", "dobj", match.getEdgeList().get(0).getReln());
+      Assert.assertEquals("Edge dobj source should be 1", 1, match.getEdgeList().get(0).getSource());
+      Assert.assertEquals("Edge dobj source should be 2", 2, match.getEdgeList().get(0).getTarget());
 
       Assert.assertEquals("Graph count was off", graphIdx, match.getGraphIndex());
       Assert.assertEquals("Semgrex pattern count was off", semgrexIdx, match.getSemgrexIndex());
