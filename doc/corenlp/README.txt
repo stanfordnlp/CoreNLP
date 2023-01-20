@@ -41,6 +41,10 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2023-01-19    4.5.2     Update package dependencies to avoid security 
+                        problems.  Add protobuf CLI tools for use in 
+                        Python or elsewhere 
+
 2022-08-29    4.5.1     Bugfixes to tokenizer and semgrex 
 
 2022-07-21    4.5.0     Tokenizer and lemmatizer upgrades, along with
