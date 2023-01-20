@@ -905,10 +905,9 @@ public class Document {
         SemanticGraph enhancedPlusPlusDependencies =
                 sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
         if (basicDependencies != null && enhancedDependencies != null && enhancedPlusPlusDependencies != null) {
-          sentences.get(i).updateDependencies(
-                  ProtobufAnnotationSerializer.toProto(basicDependencies),
-                  ProtobufAnnotationSerializer.toProto(enhancedDependencies),
-                  ProtobufAnnotationSerializer.toProto(enhancedPlusPlusDependencies));
+          sentences.get(i).updateDependencies(serializer.toProto(basicDependencies),
+                                              serializer.toProto(enhancedDependencies),
+                                              serializer.toProto(enhancedPlusPlusDependencies));
         }
       }
     }
@@ -931,9 +930,9 @@ public class Document {
       for (int i = 0; i < sentences.size(); ++i) {
         CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
         sentences.get(i).updateDependencies(
-            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
-            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)),
-            ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)));
+            serializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
+            serializer.toProto(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)),
+            serializer.toProto(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)));
       }
     }
     return this;
@@ -953,9 +952,9 @@ public class Document {
     // Update data
     synchronized (serializer) {
       for (int i = 0; i < sentences.size(); ++i) {
-        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, Polarity> pair) -> pair.first().setPolarity(ProtobufAnnotationSerializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.PolarityAnnotation.class));
+        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, Polarity> pair) -> pair.first().setPolarity(serializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.PolarityAnnotation.class));
         sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, String> pair) -> pair.first().setPolarityDir(pair.second()), x -> x.get(NaturalLogicAnnotations.PolarityDirectionAnnotation.class));
-        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, OperatorSpec> pair) -> pair.first().setOperator(ProtobufAnnotationSerializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.OperatorAnnotation.class));
+        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, OperatorSpec> pair) -> pair.first().setOperator(serializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.OperatorAnnotation.class));
       }
     }
     return this;
@@ -976,7 +975,7 @@ public class Document {
       for (int i = 0; i < sentences.size(); ++i) {
         CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
         Collection<RelationTriple> triples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-        sentences.get(i).updateOpenIE(triples.stream().map(ProtobufAnnotationSerializer::toProto));
+        sentences.get(i).updateOpenIE(triples.stream().map(serializer::toProto));
       }
     }
     // Return
@@ -1002,7 +1001,7 @@ public class Document {
       for (int i = 0; i < sentences.size(); ++i) {
         CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
         Collection<RelationTriple> triples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
-        sentences.get(i).updateKBP(triples.stream().map(ProtobufAnnotationSerializer::toProto));
+        sentences.get(i).updateKBP(triples.stream().map(serializer::toProto));
       }
     }
     // Return
