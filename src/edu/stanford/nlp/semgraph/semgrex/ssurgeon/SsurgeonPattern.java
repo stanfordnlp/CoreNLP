@@ -185,11 +185,14 @@ public class SsurgeonPattern {
       // We reset the named node map with each edit set, since these edits
       // should exist in a separate graph for each unique Semgrex match.
       nodeMap = Generics.newHashMap();
+      boolean edited = false;
       for (SsurgeonEdit edit : editScript) {
         if (edit.evaluate(copied, matcher)) {
-          matcher = semgrexPattern.matcher(copied);
-          break;
+          edited = true;
         }
+      }
+      if (edited) {
+        matcher = semgrexPattern.matcher(copied);
       }
     }
     return copied;

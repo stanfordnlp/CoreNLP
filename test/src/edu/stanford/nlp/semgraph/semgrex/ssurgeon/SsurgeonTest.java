@@ -180,6 +180,7 @@ public class SsurgeonTest {
   /**
    * Check that cutting a graph with two nodes into two pieces, then
    * pruning any disjoint pieces, results in a graph with just the root
+   * when done as a single operation
    */
   @Test
   public void readXMLPruneNodesIterate() {
@@ -240,6 +241,55 @@ public class SsurgeonTest {
     assertEquals(cutSG.vertexSet().size(), 3);
     pruneSG = ssurgeonPrune.iterate(cutSG);
     assertEquals(pruneSG, expected);
+  }
+
+
+  /**
+   * Check that cutting a graph with two nodes into two pieces, then
+   * pruning any disjoint pieces, results in a graph with just the root,
+   * this time done as one combined operation
+   */
+  @Test
+  public void readXMLTwoStepPruneIterate() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    String xml = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Remove dep edges and prune</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >dep {}=a2") + "</semgrex>",
+                             "    <edit-list>removeEdge -gov a1 -dep a2 -reln dep</edit-list>",
+                             "    <edit-list>delete -node a2</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(xml);
+    assertEquals(1, patterns.size());
+    SsurgeonPattern ssurgeon = patterns.get(0);
+    assertEquals(2, ssurgeon.editScript.size());
+
+    // Test a two node only version
+    SemanticGraph sg = SemanticGraph.valueOf("[A dep> B]");
+    SemanticGraph cutSG = ssurgeon.iterate(sg);
+    SemanticGraph expected = SemanticGraph.valueOf("[A]");
+    assertEquals(1, cutSG.vertexSet().size());
+    assertEquals(expected, cutSG);
+
+    // Test a chain cut at the start
+    sg = SemanticGraph.valueOf("[A dep> [B obj> C]]");
+    cutSG = ssurgeon.iterate(sg);
+    assertEquals(expected, cutSG);
+
+    // Test the chain cut at the bottom
+    sg = SemanticGraph.valueOf("[A obj> [B dep> C]]");
+    cutSG = ssurgeon.iterate(sg);
+    assertEquals(SemanticGraph.valueOf("[A obj> B]"), cutSG);
+
+    // Test a chain cut at the start
+    // Only the root will be left at the end
+    sg = SemanticGraph.valueOf("[A dep> B dep> C]");
+    cutSG = ssurgeon.iterate(sg);
+    assertEquals(expected, cutSG);
   }
 
   /**
