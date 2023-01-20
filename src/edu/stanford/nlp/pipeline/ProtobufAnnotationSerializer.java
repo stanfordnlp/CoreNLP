@@ -820,7 +820,16 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param graph The dependency graph to save.
    * @return A protocol buffer message corresponding to this parse.
    */
-  public static CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph) {
+  public CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph) {
+    return toProto(graph, false);
+  }
+
+  /**
+   * Create a compact representation of the semantic graph for this dependency parse.
+   * @param graph The dependency graph to save.
+   * @return A protocol buffer message corresponding to this parse.
+   */
+  public CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph, boolean storeTokens) {
     CoreNLPProtos.DependencyGraph.Builder builder = CoreNLPProtos.DependencyGraph.newBuilder();
     // Roots
     Set<Integer> rootSet = graph.getRoots().stream().map(IndexedWord::index).collect(Collectors.toCollection(IdentityHashSet::new));
@@ -837,6 +846,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       // Register root
       if (rootSet.contains(node.index())) {
         builder.addRoot(node.index());
+      }
+      // Nodes, if we want to store them as tokens
+      if (storeTokens) {
+        builder.addToken(toProto(node.backingLabel()));
       }
     }
     // Edges
@@ -1211,7 +1224,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   /**
    * Return a Protobuf RelationTriple from a RelationTriple.
    */
-  public static CoreNLPProtos.RelationTriple toProto(RelationTriple triple) {
+  public CoreNLPProtos.RelationTriple toProto(RelationTriple triple) {
     CoreNLPProtos.RelationTriple.Builder builder = CoreNLPProtos.RelationTriple.newBuilder()
         .setSubject(triple.subjectGloss())
         .setRelation(triple.relationGloss())
@@ -1281,7 +1294,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   /**
    * Convert a quote object to a protocol buffer.
    */
-  public static CoreNLPProtos.Quote toProtoQuote(CoreMap quote) {
+  public CoreNLPProtos.Quote toProtoQuote(CoreMap quote) {
     CoreNLPProtos.Quote.Builder builder = CoreNLPProtos.Quote.newBuilder();
     if (quote.get(TextAnnotation.class) != null) { builder.setText(quote.get(TextAnnotation.class)); }
     if (quote.get(DocIDAnnotation.class) != null) { builder.setDocid(quote.get(DocIDAnnotation.class)); }

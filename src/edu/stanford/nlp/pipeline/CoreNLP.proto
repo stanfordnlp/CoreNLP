@@ -315,6 +315,9 @@ message DependencyGraph {
   repeated Node     node     = 1;
   repeated Edge     edge     = 2;
   repeated uint32   root     = 3 [packed=true];
+  // optional: if this graph message is not part of a larger context,
+  // the tokens will help reconstruct the actual sentence
+  repeated Token    token    = 4;
 }
 
 //
@@ -678,6 +681,35 @@ message SemgrexResponse {
   repeated GraphResult       result      = 1;
 }
 
+
+// A message for processing an Ssurgeon
+// Each sentence stores information about the tokens making up the
+// corresponding graph
+// An alternative would have been to use the existing Document or
+// Sentence classes, but the problem with that is it would be
+// ambiguous which dependency object to use.
+// The Ssurgeon is composed of two pieces, the semgrex and the
+// ssurgeon operations, along with some optional documentation.
+message SsurgeonRequest {
+  message Ssurgeon {
+    optional string          semgrex     = 1;
+    repeated string          operation   = 2;
+    optional string          id          = 3;
+    optional string          notes       = 4;
+  }
+
+  repeated Ssurgeon          ssurgeon    = 1;
+  repeated DependencyGraph   graph       = 2;
+}
+
+message SsurgeonResponse {
+  message SsurgeonResult {
+    optional DependencyGraph graph      = 1;
+    optional bool            changed    = 2;
+  }
+
+  repeated SsurgeonResult    result      = 1;
+}
 
 // It's possible to send in a whole document, but we
 // only care about the Sentences and Tokens

@@ -51,7 +51,7 @@ public class ProcessDependencyConverterRequest extends ProcessProtobufRequest {
         node.set(CoreAnnotations.SentenceIndexAnnotation.class, treeIdx);
       }
       CoreNLPProtos.DependencyConverterResponse.DependencyConversion.Builder conversionBuilder = CoreNLPProtos.DependencyConverterResponse.DependencyConversion.newBuilder();
-      conversionBuilder.setGraph(ProtobufAnnotationSerializer.toProto(graph));
+      conversionBuilder.setGraph(serializer.toProto(graph));
       conversionBuilder.setTree(flattenedTree);
       responseBuilder.addConversions(conversionBuilder.build());
       ++treeIdx;

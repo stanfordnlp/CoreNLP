@@ -34644,6 +34644,55 @@ public final class CoreNLPProtos {
      * @return The root at the given index.
      */
     int getRoot(int index);
+
+    /**
+     * <pre>
+     * optional: if this graph message is not part of a larger context,
+     * the tokens will help reconstruct the actual sentence
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token> 
+        getTokenList();
+    /**
+     * <pre>
+     * optional: if this graph message is not part of a larger context,
+     * the tokens will help reconstruct the actual sentence
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.Token getToken(int index);
+    /**
+     * <pre>
+     * optional: if this graph message is not part of a larger context,
+     * the tokens will help reconstruct the actual sentence
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+     */
+    int getTokenCount();
+    /**
+     * <pre>
+     * optional: if this graph message is not part of a larger context,
+     * the tokens will help reconstruct the actual sentence
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
+        getTokenOrBuilderList();
+    /**
+     * <pre>
+     * optional: if this graph message is not part of a larger context,
+     * the tokens will help reconstruct the actual sentence
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder getTokenOrBuilder(
+        int index);
   }
   /**
    * <pre>
@@ -34665,6 +34714,7 @@ public final class CoreNLPProtos {
       node_ = java.util.Collections.emptyList();
       edge_ = java.util.Collections.emptyList();
       root_ = emptyIntList();
+      token_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -36722,6 +36772,71 @@ public final class CoreNLPProtos {
     }
     private int rootMemoizedSerializedSize = -1;
 
+    public static final int TOKEN_FIELD_NUMBER = 4;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token> token_;
+    /**
+     * <pre>
+     * optional: if this graph message is not part of a larger context,
+     * the tokens will help reconstruct the actual sentence
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token> getTokenList() {
+      return token_;
+    }
+    /**
+     * <pre>
+     * optional: if this graph message is not part of a larger context,
+     * the tokens will help reconstruct the actual sentence
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
+        getTokenOrBuilderList() {
+      return token_;
+    }
+    /**
+     * <pre>
+     * optional: if this graph message is not part of a larger context,
+     * the tokens will help reconstruct the actual sentence
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+     */
+    @java.lang.Override
+    public int getTokenCount() {
+      return token_.size();
+    }
+    /**
+     * <pre>
+     * optional: if this graph message is not part of a larger context,
+     * the tokens will help reconstruct the actual sentence
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.Token getToken(int index) {
+      return token_.get(index);
+    }
+    /**
+     * <pre>
+     * optional: if this graph message is not part of a larger context,
+     * the tokens will help reconstruct the actual sentence
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder getTokenOrBuilder(
+        int index) {
+      return token_.get(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -36737,6 +36852,12 @@ public final class CoreNLPProtos {
       }
       for (int i = 0; i < getEdgeCount(); i++) {
         if (!getEdge(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      for (int i = 0; i < getTokenCount(); i++) {
+        if (!getToken(i).isInitialized()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -36761,6 +36882,9 @@ public final class CoreNLPProtos {
       }
       for (int i = 0; i < root_.size(); i++) {
         output.writeUInt32NoTag(root_.getInt(i));
+      }
+      for (int i = 0; i < token_.size(); i++) {
+        output.writeMessage(4, token_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -36793,6 +36917,10 @@ public final class CoreNLPProtos {
         }
         rootMemoizedSerializedSize = dataSize;
       }
+      for (int i = 0; i < token_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, token_.get(i));
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -36814,6 +36942,8 @@ public final class CoreNLPProtos {
           .equals(other.getEdgeList())) return false;
       if (!getRootList()
           .equals(other.getRootList())) return false;
+      if (!getTokenList()
+          .equals(other.getTokenList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -36836,6 +36966,10 @@ public final class CoreNLPProtos {
       if (getRootCount() > 0) {
         hash = (37 * hash) + ROOT_FIELD_NUMBER;
         hash = (53 * hash) + getRootList().hashCode();
+      }
+      if (getTokenCount() > 0) {
+        hash = (37 * hash) + TOKEN_FIELD_NUMBER;
+        hash = (53 * hash) + getTokenList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -36985,6 +37119,13 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         root_ = emptyIntList();
         bitField0_ = (bitField0_ & ~0x00000004);
+        if (tokenBuilder_ == null) {
+          token_ = java.util.Collections.emptyList();
+        } else {
+          token_ = null;
+          tokenBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -37035,6 +37176,15 @@ public final class CoreNLPProtos {
           bitField0_ = (bitField0_ & ~0x00000004);
         }
         result.root_ = root_;
+        if (tokenBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0)) {
+            token_ = java.util.Collections.unmodifiableList(token_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.token_ = token_;
+        } else {
+          result.token_ = tokenBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -37145,6 +37295,32 @@ public final class CoreNLPProtos {
           }
           onChanged();
         }
+        if (tokenBuilder_ == null) {
+          if (!other.token_.isEmpty()) {
+            if (token_.isEmpty()) {
+              token_ = other.token_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensureTokenIsMutable();
+              token_.addAll(other.token_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.token_.isEmpty()) {
+            if (tokenBuilder_.isEmpty()) {
+              tokenBuilder_.dispose();
+              tokenBuilder_ = null;
+              token_ = other.token_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              tokenBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getTokenFieldBuilder() : null;
+            } else {
+              tokenBuilder_.addAllMessages(other.token_);
+            }
+          }
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -37159,6 +37335,11 @@ public final class CoreNLPProtos {
         }
         for (int i = 0; i < getEdgeCount(); i++) {
           if (!getEdge(i).isInitialized()) {
+            return false;
+          }
+        }
+        for (int i = 0; i < getTokenCount(); i++) {
+          if (!getToken(i).isInitialized()) {
             return false;
           }
         }
@@ -37223,6 +37404,19 @@ public final class CoreNLPProtos {
                 input.popLimit(limit);
                 break;
               } // case 26
+              case 34: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Token m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER,
+                        extensionRegistry);
+                if (tokenBuilder_ == null) {
+                  ensureTokenIsMutable();
+                  token_.add(m);
+                } else {
+                  tokenBuilder_.addMessage(m);
+                }
+                break;
+              } // case 34
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -37797,6 +37991,336 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
+      }
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token> token_ =
+        java.util.Collections.emptyList();
+      private void ensureTokenIsMutable() {
+        if (!((bitField0_ & 0x00000008) != 0)) {
+          token_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Token>(token_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.Token, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> tokenBuilder_;
+
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token> getTokenList() {
+        if (tokenBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(token_);
+        } else {
+          return tokenBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public int getTokenCount() {
+        if (tokenBuilder_ == null) {
+          return token_.size();
+        } else {
+          return tokenBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.Token getToken(int index) {
+        if (tokenBuilder_ == null) {
+          return token_.get(index);
+        } else {
+          return tokenBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public Builder setToken(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.Token value) {
+        if (tokenBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTokenIsMutable();
+          token_.set(index, value);
+          onChanged();
+        } else {
+          tokenBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public Builder setToken(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder builderForValue) {
+        if (tokenBuilder_ == null) {
+          ensureTokenIsMutable();
+          token_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          tokenBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public Builder addToken(edu.stanford.nlp.pipeline.CoreNLPProtos.Token value) {
+        if (tokenBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTokenIsMutable();
+          token_.add(value);
+          onChanged();
+        } else {
+          tokenBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public Builder addToken(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.Token value) {
+        if (tokenBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTokenIsMutable();
+          token_.add(index, value);
+          onChanged();
+        } else {
+          tokenBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public Builder addToken(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder builderForValue) {
+        if (tokenBuilder_ == null) {
+          ensureTokenIsMutable();
+          token_.add(builderForValue.build());
+          onChanged();
+        } else {
+          tokenBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public Builder addToken(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder builderForValue) {
+        if (tokenBuilder_ == null) {
+          ensureTokenIsMutable();
+          token_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          tokenBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public Builder addAllToken(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.Token> values) {
+        if (tokenBuilder_ == null) {
+          ensureTokenIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, token_);
+          onChanged();
+        } else {
+          tokenBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public Builder clearToken() {
+        if (tokenBuilder_ == null) {
+          token_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          tokenBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public Builder removeToken(int index) {
+        if (tokenBuilder_ == null) {
+          ensureTokenIsMutable();
+          token_.remove(index);
+          onChanged();
+        } else {
+          tokenBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder getTokenBuilder(
+          int index) {
+        return getTokenFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder getTokenOrBuilder(
+          int index) {
+        if (tokenBuilder_ == null) {
+          return token_.get(index);  } else {
+          return tokenBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
+           getTokenOrBuilderList() {
+        if (tokenBuilder_ != null) {
+          return tokenBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(token_);
+        }
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder addTokenBuilder() {
+        return getTokenFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.Token.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder addTokenBuilder(
+          int index) {
+        return getTokenFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * optional: if this graph message is not part of a larger context,
+       * the tokens will help reconstruct the actual sentence
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.Token token = 4;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder> 
+           getTokenBuilderList() {
+        return getTokenFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.Token, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
+          getTokenFieldBuilder() {
+        if (tokenBuilder_ == null) {
+          tokenBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.Token, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder>(
+                  token_,
+                  ((bitField0_ & 0x00000008) != 0),
+                  getParentForChildren(),
+                  isClean());
+          token_ = null;
+        }
+        return tokenBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -77469,6 +77993,3854 @@ public final class CoreNLPProtos {
 
   }
 
+  public interface SsurgeonRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SsurgeonRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon> 
+        getSsurgeonList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon getSsurgeon(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+     */
+    int getSsurgeonCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.SsurgeonOrBuilder> 
+        getSsurgeonOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.SsurgeonOrBuilder getSsurgeonOrBuilder(
+        int index);
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph> 
+        getGraphList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+     */
+    int getGraphCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
+        getGraphOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * A message for processing an Ssurgeon
+   * Each sentence stores information about the tokens making up the
+   * corresponding graph
+   * An alternative would have been to use the existing Document or
+   * Sentence classes, but the problem with that is it would be
+   * ambiguous which dependency object to use.
+   * The Ssurgeon is composed of two pieces, the semgrex and the
+   * ssurgeon operations, along with some optional documentation.
+   * </pre>
+   *
+   * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonRequest}
+   */
+  public static final class SsurgeonRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SsurgeonRequest)
+      SsurgeonRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SsurgeonRequest.newBuilder() to construct.
+    private SsurgeonRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SsurgeonRequest() {
+      ssurgeon_ = java.util.Collections.emptyList();
+      graph_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SsurgeonRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Builder.class);
+    }
+
+    public interface SsurgeonOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>optional string semgrex = 1;</code>
+       * @return Whether the semgrex field is set.
+       */
+      boolean hasSemgrex();
+      /**
+       * <code>optional string semgrex = 1;</code>
+       * @return The semgrex.
+       */
+      java.lang.String getSemgrex();
+      /**
+       * <code>optional string semgrex = 1;</code>
+       * @return The bytes for semgrex.
+       */
+      com.google.protobuf.ByteString
+          getSemgrexBytes();
+
+      /**
+       * <code>repeated string operation = 2;</code>
+       * @return A list containing the operation.
+       */
+      java.util.List<java.lang.String>
+          getOperationList();
+      /**
+       * <code>repeated string operation = 2;</code>
+       * @return The count of operation.
+       */
+      int getOperationCount();
+      /**
+       * <code>repeated string operation = 2;</code>
+       * @param index The index of the element to return.
+       * @return The operation at the given index.
+       */
+      java.lang.String getOperation(int index);
+      /**
+       * <code>repeated string operation = 2;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the operation at the given index.
+       */
+      com.google.protobuf.ByteString
+          getOperationBytes(int index);
+
+      /**
+       * <code>optional string id = 3;</code>
+       * @return Whether the id field is set.
+       */
+      boolean hasId();
+      /**
+       * <code>optional string id = 3;</code>
+       * @return The id.
+       */
+      java.lang.String getId();
+      /**
+       * <code>optional string id = 3;</code>
+       * @return The bytes for id.
+       */
+      com.google.protobuf.ByteString
+          getIdBytes();
+
+      /**
+       * <code>optional string notes = 4;</code>
+       * @return Whether the notes field is set.
+       */
+      boolean hasNotes();
+      /**
+       * <code>optional string notes = 4;</code>
+       * @return The notes.
+       */
+      java.lang.String getNotes();
+      /**
+       * <code>optional string notes = 4;</code>
+       * @return The bytes for notes.
+       */
+      com.google.protobuf.ByteString
+          getNotesBytes();
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon}
+     */
+    public static final class Ssurgeon extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon)
+        SsurgeonOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use Ssurgeon.newBuilder() to construct.
+      private Ssurgeon(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private Ssurgeon() {
+        semgrex_ = "";
+        operation_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        id_ = "";
+        notes_ = "";
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new Ssurgeon();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int SEMGREX_FIELD_NUMBER = 1;
+      private volatile java.lang.Object semgrex_;
+      /**
+       * <code>optional string semgrex = 1;</code>
+       * @return Whether the semgrex field is set.
+       */
+      @java.lang.Override
+      public boolean hasSemgrex() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional string semgrex = 1;</code>
+       * @return The semgrex.
+       */
+      @java.lang.Override
+      public java.lang.String getSemgrex() {
+        java.lang.Object ref = semgrex_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            semgrex_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string semgrex = 1;</code>
+       * @return The bytes for semgrex.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getSemgrexBytes() {
+        java.lang.Object ref = semgrex_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          semgrex_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int OPERATION_FIELD_NUMBER = 2;
+      private com.google.protobuf.LazyStringList operation_;
+      /**
+       * <code>repeated string operation = 2;</code>
+       * @return A list containing the operation.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getOperationList() {
+        return operation_;
+      }
+      /**
+       * <code>repeated string operation = 2;</code>
+       * @return The count of operation.
+       */
+      public int getOperationCount() {
+        return operation_.size();
+      }
+      /**
+       * <code>repeated string operation = 2;</code>
+       * @param index The index of the element to return.
+       * @return The operation at the given index.
+       */
+      public java.lang.String getOperation(int index) {
+        return operation_.get(index);
+      }
+      /**
+       * <code>repeated string operation = 2;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the operation at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getOperationBytes(int index) {
+        return operation_.getByteString(index);
+      }
+
+      public static final int ID_FIELD_NUMBER = 3;
+      private volatile java.lang.Object id_;
+      /**
+       * <code>optional string id = 3;</code>
+       * @return Whether the id field is set.
+       */
+      @java.lang.Override
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional string id = 3;</code>
+       * @return The id.
+       */
+      @java.lang.Override
+      public java.lang.String getId() {
+        java.lang.Object ref = id_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            id_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string id = 3;</code>
+       * @return The bytes for id.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getIdBytes() {
+        java.lang.Object ref = id_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          id_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int NOTES_FIELD_NUMBER = 4;
+      private volatile java.lang.Object notes_;
+      /**
+       * <code>optional string notes = 4;</code>
+       * @return Whether the notes field is set.
+       */
+      @java.lang.Override
+      public boolean hasNotes() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>optional string notes = 4;</code>
+       * @return The notes.
+       */
+      @java.lang.Override
+      public java.lang.String getNotes() {
+        java.lang.Object ref = notes_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            notes_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string notes = 4;</code>
+       * @return The bytes for notes.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getNotesBytes() {
+        java.lang.Object ref = notes_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          notes_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, semgrex_);
+        }
+        for (int i = 0; i < operation_.size(); i++) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 2, operation_.getRaw(i));
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 3, id_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 4, notes_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, semgrex_);
+        }
+        {
+          int dataSize = 0;
+          for (int i = 0; i < operation_.size(); i++) {
+            dataSize += computeStringSizeNoTag(operation_.getRaw(i));
+          }
+          size += dataSize;
+          size += 1 * getOperationList().size();
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, id_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, notes_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon) obj;
+
+        if (hasSemgrex() != other.hasSemgrex()) return false;
+        if (hasSemgrex()) {
+          if (!getSemgrex()
+              .equals(other.getSemgrex())) return false;
+        }
+        if (!getOperationList()
+            .equals(other.getOperationList())) return false;
+        if (hasId() != other.hasId()) return false;
+        if (hasId()) {
+          if (!getId()
+              .equals(other.getId())) return false;
+        }
+        if (hasNotes() != other.hasNotes()) return false;
+        if (hasNotes()) {
+          if (!getNotes()
+              .equals(other.getNotes())) return false;
+        }
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasSemgrex()) {
+          hash = (37 * hash) + SEMGREX_FIELD_NUMBER;
+          hash = (53 * hash) + getSemgrex().hashCode();
+        }
+        if (getOperationCount() > 0) {
+          hash = (37 * hash) + OPERATION_FIELD_NUMBER;
+          hash = (53 * hash) + getOperationList().hashCode();
+        }
+        if (hasId()) {
+          hash = (37 * hash) + ID_FIELD_NUMBER;
+          hash = (53 * hash) + getId().hashCode();
+        }
+        if (hasNotes()) {
+          hash = (37 * hash) + NOTES_FIELD_NUMBER;
+          hash = (53 * hash) + getNotes().hashCode();
+        }
+        hash = (29 * hash) + getUnknownFields().hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.SsurgeonOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.newBuilder()
+        private Builder() {
+
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          semgrex_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          operation_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          id_ = "";
+          bitField0_ = (bitField0_ & ~0x00000004);
+          notes_ = "";
+          bitField0_ = (bitField0_ & ~0x00000008);
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.semgrex_ = semgrex_;
+          if (((bitField0_ & 0x00000002) != 0)) {
+            operation_ = operation_.getUnmodifiableView();
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.operation_ = operation_;
+          if (((from_bitField0_ & 0x00000004) != 0)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.id_ = id_;
+          if (((from_bitField0_ & 0x00000008) != 0)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.notes_ = notes_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.getDefaultInstance()) return this;
+          if (other.hasSemgrex()) {
+            bitField0_ |= 0x00000001;
+            semgrex_ = other.semgrex_;
+            onChanged();
+          }
+          if (!other.operation_.isEmpty()) {
+            if (operation_.isEmpty()) {
+              operation_ = other.operation_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureOperationIsMutable();
+              operation_.addAll(other.operation_);
+            }
+            onChanged();
+          }
+          if (other.hasId()) {
+            bitField0_ |= 0x00000004;
+            id_ = other.id_;
+            onChanged();
+          }
+          if (other.hasNotes()) {
+            bitField0_ |= 0x00000008;
+            notes_ = other.notes_;
+            onChanged();
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  semgrex_ = input.readBytes();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 18: {
+                  com.google.protobuf.ByteString bs = input.readBytes();
+                  ensureOperationIsMutable();
+                  operation_.add(bs);
+                  break;
+                } // case 18
+                case 26: {
+                  id_ = input.readBytes();
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 26
+                case 34: {
+                  notes_ = input.readBytes();
+                  bitField0_ |= 0x00000008;
+                  break;
+                } // case 34
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.unwrapIOException();
+          } finally {
+            onChanged();
+          } // finally
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object semgrex_ = "";
+        /**
+         * <code>optional string semgrex = 1;</code>
+         * @return Whether the semgrex field is set.
+         */
+        public boolean hasSemgrex() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>optional string semgrex = 1;</code>
+         * @return The semgrex.
+         */
+        public java.lang.String getSemgrex() {
+          java.lang.Object ref = semgrex_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              semgrex_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string semgrex = 1;</code>
+         * @return The bytes for semgrex.
+         */
+        public com.google.protobuf.ByteString
+            getSemgrexBytes() {
+          java.lang.Object ref = semgrex_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            semgrex_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string semgrex = 1;</code>
+         * @param value The semgrex to set.
+         * @return This builder for chaining.
+         */
+        public Builder setSemgrex(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          semgrex_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string semgrex = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearSemgrex() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          semgrex_ = getDefaultInstance().getSemgrex();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string semgrex = 1;</code>
+         * @param value The bytes for semgrex to set.
+         * @return This builder for chaining.
+         */
+        public Builder setSemgrexBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          semgrex_ = value;
+          onChanged();
+          return this;
+        }
+
+        private com.google.protobuf.LazyStringList operation_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        private void ensureOperationIsMutable() {
+          if (!((bitField0_ & 0x00000002) != 0)) {
+            operation_ = new com.google.protobuf.LazyStringArrayList(operation_);
+            bitField0_ |= 0x00000002;
+           }
+        }
+        /**
+         * <code>repeated string operation = 2;</code>
+         * @return A list containing the operation.
+         */
+        public com.google.protobuf.ProtocolStringList
+            getOperationList() {
+          return operation_.getUnmodifiableView();
+        }
+        /**
+         * <code>repeated string operation = 2;</code>
+         * @return The count of operation.
+         */
+        public int getOperationCount() {
+          return operation_.size();
+        }
+        /**
+         * <code>repeated string operation = 2;</code>
+         * @param index The index of the element to return.
+         * @return The operation at the given index.
+         */
+        public java.lang.String getOperation(int index) {
+          return operation_.get(index);
+        }
+        /**
+         * <code>repeated string operation = 2;</code>
+         * @param index The index of the value to return.
+         * @return The bytes of the operation at the given index.
+         */
+        public com.google.protobuf.ByteString
+            getOperationBytes(int index) {
+          return operation_.getByteString(index);
+        }
+        /**
+         * <code>repeated string operation = 2;</code>
+         * @param index The index to set the value at.
+         * @param value The operation to set.
+         * @return This builder for chaining.
+         */
+        public Builder setOperation(
+            int index, java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureOperationIsMutable();
+          operation_.set(index, value);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string operation = 2;</code>
+         * @param value The operation to add.
+         * @return This builder for chaining.
+         */
+        public Builder addOperation(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureOperationIsMutable();
+          operation_.add(value);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string operation = 2;</code>
+         * @param values The operation to add.
+         * @return This builder for chaining.
+         */
+        public Builder addAllOperation(
+            java.lang.Iterable<java.lang.String> values) {
+          ensureOperationIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, operation_);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string operation = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearOperation() {
+          operation_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string operation = 2;</code>
+         * @param value The bytes of the operation to add.
+         * @return This builder for chaining.
+         */
+        public Builder addOperationBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureOperationIsMutable();
+          operation_.add(value);
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object id_ = "";
+        /**
+         * <code>optional string id = 3;</code>
+         * @return Whether the id field is set.
+         */
+        public boolean hasId() {
+          return ((bitField0_ & 0x00000004) != 0);
+        }
+        /**
+         * <code>optional string id = 3;</code>
+         * @return The id.
+         */
+        public java.lang.String getId() {
+          java.lang.Object ref = id_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              id_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string id = 3;</code>
+         * @return The bytes for id.
+         */
+        public com.google.protobuf.ByteString
+            getIdBytes() {
+          java.lang.Object ref = id_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            id_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string id = 3;</code>
+         * @param value The id to set.
+         * @return This builder for chaining.
+         */
+        public Builder setId(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+          id_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string id = 3;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearId() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          id_ = getDefaultInstance().getId();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string id = 3;</code>
+         * @param value The bytes for id to set.
+         * @return This builder for chaining.
+         */
+        public Builder setIdBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+          id_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object notes_ = "";
+        /**
+         * <code>optional string notes = 4;</code>
+         * @return Whether the notes field is set.
+         */
+        public boolean hasNotes() {
+          return ((bitField0_ & 0x00000008) != 0);
+        }
+        /**
+         * <code>optional string notes = 4;</code>
+         * @return The notes.
+         */
+        public java.lang.String getNotes() {
+          java.lang.Object ref = notes_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              notes_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string notes = 4;</code>
+         * @return The bytes for notes.
+         */
+        public com.google.protobuf.ByteString
+            getNotesBytes() {
+          java.lang.Object ref = notes_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            notes_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string notes = 4;</code>
+         * @param value The notes to set.
+         * @return This builder for chaining.
+         */
+        public Builder setNotes(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+          notes_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string notes = 4;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearNotes() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          notes_ = getDefaultInstance().getNotes();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string notes = 4;</code>
+         * @param value The bytes for notes to set.
+         * @return This builder for chaining.
+         */
+        public Builder setNotesBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+          notes_ = value;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<Ssurgeon>
+          PARSER = new com.google.protobuf.AbstractParser<Ssurgeon>() {
+        @java.lang.Override
+        public Ssurgeon parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
+        }
+      };
+
+      public static com.google.protobuf.Parser<Ssurgeon> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Ssurgeon> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public static final int SSURGEON_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon> ssurgeon_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon> getSsurgeonList() {
+      return ssurgeon_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.SsurgeonOrBuilder> 
+        getSsurgeonOrBuilderList() {
+      return ssurgeon_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+     */
+    @java.lang.Override
+    public int getSsurgeonCount() {
+      return ssurgeon_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon getSsurgeon(int index) {
+      return ssurgeon_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.SsurgeonOrBuilder getSsurgeonOrBuilder(
+        int index) {
+      return ssurgeon_.get(index);
+    }
+
+    public static final int GRAPH_FIELD_NUMBER = 2;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph> graph_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph> getGraphList() {
+      return graph_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
+        getGraphOrBuilderList() {
+      return graph_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+     */
+    @java.lang.Override
+    public int getGraphCount() {
+      return graph_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph(int index) {
+      return graph_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder(
+        int index) {
+      return graph_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      for (int i = 0; i < getGraphCount(); i++) {
+        if (!getGraph(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < ssurgeon_.size(); i++) {
+        output.writeMessage(1, ssurgeon_.get(i));
+      }
+      for (int i = 0; i < graph_.size(); i++) {
+        output.writeMessage(2, graph_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < ssurgeon_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, ssurgeon_.get(i));
+      }
+      for (int i = 0; i < graph_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, graph_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest) obj;
+
+      if (!getSsurgeonList()
+          .equals(other.getSsurgeonList())) return false;
+      if (!getGraphList()
+          .equals(other.getGraphList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getSsurgeonCount() > 0) {
+        hash = (37 * hash) + SSURGEON_FIELD_NUMBER;
+        hash = (53 * hash) + getSsurgeonList().hashCode();
+      }
+      if (getGraphCount() > 0) {
+        hash = (37 * hash) + GRAPH_FIELD_NUMBER;
+        hash = (53 * hash) + getGraphList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * A message for processing an Ssurgeon
+     * Each sentence stores information about the tokens making up the
+     * corresponding graph
+     * An alternative would have been to use the existing Document or
+     * Sentence classes, but the problem with that is it would be
+     * ambiguous which dependency object to use.
+     * The Ssurgeon is composed of two pieces, the semgrex and the
+     * ssurgeon operations, along with some optional documentation.
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SsurgeonRequest)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (ssurgeonBuilder_ == null) {
+          ssurgeon_ = java.util.Collections.emptyList();
+        } else {
+          ssurgeon_ = null;
+          ssurgeonBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        if (graphBuilder_ == null) {
+          graph_ = java.util.Collections.emptyList();
+        } else {
+          graph_ = null;
+          graphBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest(this);
+        int from_bitField0_ = bitField0_;
+        if (ssurgeonBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            ssurgeon_ = java.util.Collections.unmodifiableList(ssurgeon_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.ssurgeon_ = ssurgeon_;
+        } else {
+          result.ssurgeon_ = ssurgeonBuilder_.build();
+        }
+        if (graphBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0)) {
+            graph_ = java.util.Collections.unmodifiableList(graph_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.graph_ = graph_;
+        } else {
+          result.graph_ = graphBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.getDefaultInstance()) return this;
+        if (ssurgeonBuilder_ == null) {
+          if (!other.ssurgeon_.isEmpty()) {
+            if (ssurgeon_.isEmpty()) {
+              ssurgeon_ = other.ssurgeon_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureSsurgeonIsMutable();
+              ssurgeon_.addAll(other.ssurgeon_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.ssurgeon_.isEmpty()) {
+            if (ssurgeonBuilder_.isEmpty()) {
+              ssurgeonBuilder_.dispose();
+              ssurgeonBuilder_ = null;
+              ssurgeon_ = other.ssurgeon_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              ssurgeonBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getSsurgeonFieldBuilder() : null;
+            } else {
+              ssurgeonBuilder_.addAllMessages(other.ssurgeon_);
+            }
+          }
+        }
+        if (graphBuilder_ == null) {
+          if (!other.graph_.isEmpty()) {
+            if (graph_.isEmpty()) {
+              graph_ = other.graph_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureGraphIsMutable();
+              graph_.addAll(other.graph_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.graph_.isEmpty()) {
+            if (graphBuilder_.isEmpty()) {
+              graphBuilder_.dispose();
+              graphBuilder_ = null;
+              graph_ = other.graph_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              graphBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getGraphFieldBuilder() : null;
+            } else {
+              graphBuilder_.addAllMessages(other.graph_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        for (int i = 0; i < getGraphCount(); i++) {
+          if (!getGraph(i).isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.PARSER,
+                        extensionRegistry);
+                if (ssurgeonBuilder_ == null) {
+                  ensureSsurgeonIsMutable();
+                  ssurgeon_.add(m);
+                } else {
+                  ssurgeonBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.PARSER,
+                        extensionRegistry);
+                if (graphBuilder_ == null) {
+                  ensureGraphIsMutable();
+                  graph_.add(m);
+                } else {
+                  graphBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon> ssurgeon_ =
+        java.util.Collections.emptyList();
+      private void ensureSsurgeonIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          ssurgeon_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon>(ssurgeon_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.SsurgeonOrBuilder> ssurgeonBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon> getSsurgeonList() {
+        if (ssurgeonBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(ssurgeon_);
+        } else {
+          return ssurgeonBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public int getSsurgeonCount() {
+        if (ssurgeonBuilder_ == null) {
+          return ssurgeon_.size();
+        } else {
+          return ssurgeonBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon getSsurgeon(int index) {
+        if (ssurgeonBuilder_ == null) {
+          return ssurgeon_.get(index);
+        } else {
+          return ssurgeonBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public Builder setSsurgeon(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon value) {
+        if (ssurgeonBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSsurgeonIsMutable();
+          ssurgeon_.set(index, value);
+          onChanged();
+        } else {
+          ssurgeonBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public Builder setSsurgeon(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder builderForValue) {
+        if (ssurgeonBuilder_ == null) {
+          ensureSsurgeonIsMutable();
+          ssurgeon_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          ssurgeonBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public Builder addSsurgeon(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon value) {
+        if (ssurgeonBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSsurgeonIsMutable();
+          ssurgeon_.add(value);
+          onChanged();
+        } else {
+          ssurgeonBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public Builder addSsurgeon(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon value) {
+        if (ssurgeonBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureSsurgeonIsMutable();
+          ssurgeon_.add(index, value);
+          onChanged();
+        } else {
+          ssurgeonBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public Builder addSsurgeon(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder builderForValue) {
+        if (ssurgeonBuilder_ == null) {
+          ensureSsurgeonIsMutable();
+          ssurgeon_.add(builderForValue.build());
+          onChanged();
+        } else {
+          ssurgeonBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public Builder addSsurgeon(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder builderForValue) {
+        if (ssurgeonBuilder_ == null) {
+          ensureSsurgeonIsMutable();
+          ssurgeon_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          ssurgeonBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public Builder addAllSsurgeon(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon> values) {
+        if (ssurgeonBuilder_ == null) {
+          ensureSsurgeonIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, ssurgeon_);
+          onChanged();
+        } else {
+          ssurgeonBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public Builder clearSsurgeon() {
+        if (ssurgeonBuilder_ == null) {
+          ssurgeon_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          ssurgeonBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public Builder removeSsurgeon(int index) {
+        if (ssurgeonBuilder_ == null) {
+          ensureSsurgeonIsMutable();
+          ssurgeon_.remove(index);
+          onChanged();
+        } else {
+          ssurgeonBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder getSsurgeonBuilder(
+          int index) {
+        return getSsurgeonFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.SsurgeonOrBuilder getSsurgeonOrBuilder(
+          int index) {
+        if (ssurgeonBuilder_ == null) {
+          return ssurgeon_.get(index);  } else {
+          return ssurgeonBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.SsurgeonOrBuilder> 
+           getSsurgeonOrBuilderList() {
+        if (ssurgeonBuilder_ != null) {
+          return ssurgeonBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(ssurgeon_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder addSsurgeonBuilder() {
+        return getSsurgeonFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder addSsurgeonBuilder(
+          int index) {
+        return getSsurgeonFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon ssurgeon = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder> 
+           getSsurgeonBuilderList() {
+        return getSsurgeonFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.SsurgeonOrBuilder> 
+          getSsurgeonFieldBuilder() {
+        if (ssurgeonBuilder_ == null) {
+          ssurgeonBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.SsurgeonOrBuilder>(
+                  ssurgeon_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          ssurgeon_ = null;
+        }
+        return ssurgeonBuilder_;
+      }
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph> graph_ =
+        java.util.Collections.emptyList();
+      private void ensureGraphIsMutable() {
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          graph_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph>(graph_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> graphBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph> getGraphList() {
+        if (graphBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(graph_);
+        } else {
+          return graphBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public int getGraphCount() {
+        if (graphBuilder_ == null) {
+          return graph_.size();
+        } else {
+          return graphBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph(int index) {
+        if (graphBuilder_ == null) {
+          return graph_.get(index);
+        } else {
+          return graphBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public Builder setGraph(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
+        if (graphBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureGraphIsMutable();
+          graph_.set(index, value);
+          onChanged();
+        } else {
+          graphBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public Builder setGraph(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder builderForValue) {
+        if (graphBuilder_ == null) {
+          ensureGraphIsMutable();
+          graph_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          graphBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public Builder addGraph(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
+        if (graphBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureGraphIsMutable();
+          graph_.add(value);
+          onChanged();
+        } else {
+          graphBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public Builder addGraph(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
+        if (graphBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureGraphIsMutable();
+          graph_.add(index, value);
+          onChanged();
+        } else {
+          graphBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public Builder addGraph(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder builderForValue) {
+        if (graphBuilder_ == null) {
+          ensureGraphIsMutable();
+          graph_.add(builderForValue.build());
+          onChanged();
+        } else {
+          graphBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public Builder addGraph(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder builderForValue) {
+        if (graphBuilder_ == null) {
+          ensureGraphIsMutable();
+          graph_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          graphBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public Builder addAllGraph(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph> values) {
+        if (graphBuilder_ == null) {
+          ensureGraphIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, graph_);
+          onChanged();
+        } else {
+          graphBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public Builder clearGraph() {
+        if (graphBuilder_ == null) {
+          graph_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          graphBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public Builder removeGraph(int index) {
+        if (graphBuilder_ == null) {
+          ensureGraphIsMutable();
+          graph_.remove(index);
+          onChanged();
+        } else {
+          graphBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder getGraphBuilder(
+          int index) {
+        return getGraphFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder(
+          int index) {
+        if (graphBuilder_ == null) {
+          return graph_.get(index);  } else {
+          return graphBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
+           getGraphOrBuilderList() {
+        if (graphBuilder_ != null) {
+          return graphBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(graph_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder addGraphBuilder() {
+        return getGraphFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder addGraphBuilder(
+          int index) {
+        return getGraphFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder> 
+           getGraphBuilderList() {
+        return getGraphFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
+          getGraphFieldBuilder() {
+        if (graphBuilder_ == null) {
+          graphBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder>(
+                  graph_,
+                  ((bitField0_ & 0x00000002) != 0),
+                  getParentForChildren(),
+                  isClean());
+          graph_ = null;
+        }
+        return graphBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SsurgeonRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SsurgeonRequest)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<SsurgeonRequest>
+        PARSER = new com.google.protobuf.AbstractParser<SsurgeonRequest>() {
+      @java.lang.Override
+      public SsurgeonRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<SsurgeonRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SsurgeonRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface SsurgeonResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SsurgeonResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult> 
+        getResultList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult getResult(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+     */
+    int getResultCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResultOrBuilder> 
+        getResultOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResultOrBuilder getResultOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonResponse}
+   */
+  public static final class SsurgeonResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SsurgeonResponse)
+      SsurgeonResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SsurgeonResponse.newBuilder() to construct.
+    private SsurgeonResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SsurgeonResponse() {
+      result_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SsurgeonResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.Builder.class);
+    }
+
+    public interface SsurgeonResultOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       * @return Whether the graph field is set.
+       */
+      boolean hasGraph();
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       * @return The graph.
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph();
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder();
+
+      /**
+       * <code>optional bool changed = 2;</code>
+       * @return Whether the changed field is set.
+       */
+      boolean hasChanged();
+      /**
+       * <code>optional bool changed = 2;</code>
+       * @return The changed.
+       */
+      boolean getChanged();
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult}
+     */
+    public static final class SsurgeonResult extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult)
+        SsurgeonResultOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use SsurgeonResult.newBuilder() to construct.
+      private SsurgeonResult(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private SsurgeonResult() {
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new SsurgeonResult();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_SsurgeonResult_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_SsurgeonResult_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int GRAPH_FIELD_NUMBER = 1;
+      private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph graph_;
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       * @return Whether the graph field is set.
+       */
+      @java.lang.Override
+      public boolean hasGraph() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       * @return The graph.
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph() {
+        return graph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder() {
+        return graph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
+      }
+
+      public static final int CHANGED_FIELD_NUMBER = 2;
+      private boolean changed_;
+      /**
+       * <code>optional bool changed = 2;</code>
+       * @return Whether the changed field is set.
+       */
+      @java.lang.Override
+      public boolean hasChanged() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional bool changed = 2;</code>
+       * @return The changed.
+       */
+      @java.lang.Override
+      public boolean getChanged() {
+        return changed_;
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (hasGraph()) {
+          if (!getGraph().isInitialized()) {
+            memoizedIsInitialized = 0;
+            return false;
+          }
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          output.writeMessage(1, getGraph());
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          output.writeBool(2, changed_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, getGraph());
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBoolSize(2, changed_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult) obj;
+
+        if (hasGraph() != other.hasGraph()) return false;
+        if (hasGraph()) {
+          if (!getGraph()
+              .equals(other.getGraph())) return false;
+        }
+        if (hasChanged() != other.hasChanged()) return false;
+        if (hasChanged()) {
+          if (getChanged()
+              != other.getChanged()) return false;
+        }
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasGraph()) {
+          hash = (37 * hash) + GRAPH_FIELD_NUMBER;
+          hash = (53 * hash) + getGraph().hashCode();
+        }
+        if (hasChanged()) {
+          hash = (37 * hash) + CHANGED_FIELD_NUMBER;
+          hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+              getChanged());
+        }
+        hash = (29 * hash) + getUnknownFields().hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResultOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_SsurgeonResult_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_SsurgeonResult_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+            getGraphFieldBuilder();
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          if (graphBuilder_ == null) {
+            graph_ = null;
+          } else {
+            graphBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000001);
+          changed_ = false;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_SsurgeonResult_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            if (graphBuilder_ == null) {
+              result.graph_ = graph_;
+            } else {
+              result.graph_ = graphBuilder_.build();
+            }
+            to_bitField0_ |= 0x00000001;
+          }
+          if (((from_bitField0_ & 0x00000002) != 0)) {
+            result.changed_ = changed_;
+            to_bitField0_ |= 0x00000002;
+          }
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.getDefaultInstance()) return this;
+          if (other.hasGraph()) {
+            mergeGraph(other.getGraph());
+          }
+          if (other.hasChanged()) {
+            setChanged(other.getChanged());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          if (hasGraph()) {
+            if (!getGraph().isInitialized()) {
+              return false;
+            }
+          }
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  input.readMessage(
+                      getGraphFieldBuilder().getBuilder(),
+                      extensionRegistry);
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 16: {
+                  changed_ = input.readBool();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 16
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.unwrapIOException();
+          } finally {
+            onChanged();
+          } // finally
+          return this;
+        }
+        private int bitField0_;
+
+        private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph graph_;
+        private com.google.protobuf.SingleFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> graphBuilder_;
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         * @return Whether the graph field is set.
+         */
+        public boolean hasGraph() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         * @return The graph.
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph() {
+          if (graphBuilder_ == null) {
+            return graph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
+          } else {
+            return graphBuilder_.getMessage();
+          }
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public Builder setGraph(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
+          if (graphBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            graph_ = value;
+            onChanged();
+          } else {
+            graphBuilder_.setMessage(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public Builder setGraph(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder builderForValue) {
+          if (graphBuilder_ == null) {
+            graph_ = builderForValue.build();
+            onChanged();
+          } else {
+            graphBuilder_.setMessage(builderForValue.build());
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public Builder mergeGraph(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
+          if (graphBuilder_ == null) {
+            if (((bitField0_ & 0x00000001) != 0) &&
+                graph_ != null &&
+                graph_ != edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance()) {
+              graph_ =
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.newBuilder(graph_).mergeFrom(value).buildPartial();
+            } else {
+              graph_ = value;
+            }
+            onChanged();
+          } else {
+            graphBuilder_.mergeFrom(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public Builder clearGraph() {
+          if (graphBuilder_ == null) {
+            graph_ = null;
+            onChanged();
+          } else {
+            graphBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000001);
+          return this;
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder getGraphBuilder() {
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return getGraphFieldBuilder().getBuilder();
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder() {
+          if (graphBuilder_ != null) {
+            return graphBuilder_.getMessageOrBuilder();
+          } else {
+            return graph_ == null ?
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
+          }
+        }
+        /**
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph graph = 1;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
+            getGraphFieldBuilder() {
+          if (graphBuilder_ == null) {
+            graphBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder>(
+                    getGraph(),
+                    getParentForChildren(),
+                    isClean());
+            graph_ = null;
+          }
+          return graphBuilder_;
+        }
+
+        private boolean changed_ ;
+        /**
+         * <code>optional bool changed = 2;</code>
+         * @return Whether the changed field is set.
+         */
+        @java.lang.Override
+        public boolean hasChanged() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <code>optional bool changed = 2;</code>
+         * @return The changed.
+         */
+        @java.lang.Override
+        public boolean getChanged() {
+          return changed_;
+        }
+        /**
+         * <code>optional bool changed = 2;</code>
+         * @param value The changed to set.
+         * @return This builder for chaining.
+         */
+        public Builder setChanged(boolean value) {
+          bitField0_ |= 0x00000002;
+          changed_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional bool changed = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearChanged() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          changed_ = false;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<SsurgeonResult>
+          PARSER = new com.google.protobuf.AbstractParser<SsurgeonResult>() {
+        @java.lang.Override
+        public SsurgeonResult parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
+        }
+      };
+
+      public static com.google.protobuf.Parser<SsurgeonResult> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<SsurgeonResult> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public static final int RESULT_FIELD_NUMBER = 1;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult> result_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult> getResultList() {
+      return result_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResultOrBuilder> 
+        getResultOrBuilderList() {
+      return result_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+     */
+    @java.lang.Override
+    public int getResultCount() {
+      return result_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult getResult(int index) {
+      return result_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResultOrBuilder getResultOrBuilder(
+        int index) {
+      return result_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      for (int i = 0; i < getResultCount(); i++) {
+        if (!getResult(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < result_.size(); i++) {
+        output.writeMessage(1, result_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < result_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, result_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse)) {
+        return super.equals(obj);
+      }
+      edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse) obj;
+
+      if (!getResultList()
+          .equals(other.getResultList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getResultCount() > 0) {
+        hash = (37 * hash) + RESULT_FIELD_NUMBER;
+        hash = (53 * hash) + getResultList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SsurgeonResponse)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.Builder.class);
+      }
+
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (resultBuilder_ == null) {
+          result_ = java.util.Collections.emptyList();
+        } else {
+          result_ = null;
+          resultBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse(this);
+        int from_bitField0_ = bitField0_;
+        if (resultBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            result_ = java.util.Collections.unmodifiableList(result_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.result_ = result_;
+        } else {
+          result.result_ = resultBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.getDefaultInstance()) return this;
+        if (resultBuilder_ == null) {
+          if (!other.result_.isEmpty()) {
+            if (result_.isEmpty()) {
+              result_ = other.result_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureResultIsMutable();
+              result_.addAll(other.result_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.result_.isEmpty()) {
+            if (resultBuilder_.isEmpty()) {
+              resultBuilder_.dispose();
+              resultBuilder_ = null;
+              result_ = other.result_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              resultBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getResultFieldBuilder() : null;
+            } else {
+              resultBuilder_.addAllMessages(other.result_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        for (int i = 0; i < getResultCount(); i++) {
+          if (!getResult(i).isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.PARSER,
+                        extensionRegistry);
+                if (resultBuilder_ == null) {
+                  ensureResultIsMutable();
+                  result_.add(m);
+                } else {
+                  resultBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult> result_ =
+        java.util.Collections.emptyList();
+      private void ensureResultIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          result_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult>(result_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResultOrBuilder> resultBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult> getResultList() {
+        if (resultBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(result_);
+        } else {
+          return resultBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public int getResultCount() {
+        if (resultBuilder_ == null) {
+          return result_.size();
+        } else {
+          return resultBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult getResult(int index) {
+        if (resultBuilder_ == null) {
+          return result_.get(index);
+        } else {
+          return resultBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public Builder setResult(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult value) {
+        if (resultBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResultIsMutable();
+          result_.set(index, value);
+          onChanged();
+        } else {
+          resultBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public Builder setResult(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder builderForValue) {
+        if (resultBuilder_ == null) {
+          ensureResultIsMutable();
+          result_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          resultBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public Builder addResult(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult value) {
+        if (resultBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResultIsMutable();
+          result_.add(value);
+          onChanged();
+        } else {
+          resultBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public Builder addResult(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult value) {
+        if (resultBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResultIsMutable();
+          result_.add(index, value);
+          onChanged();
+        } else {
+          resultBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public Builder addResult(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder builderForValue) {
+        if (resultBuilder_ == null) {
+          ensureResultIsMutable();
+          result_.add(builderForValue.build());
+          onChanged();
+        } else {
+          resultBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public Builder addResult(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder builderForValue) {
+        if (resultBuilder_ == null) {
+          ensureResultIsMutable();
+          result_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          resultBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public Builder addAllResult(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult> values) {
+        if (resultBuilder_ == null) {
+          ensureResultIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, result_);
+          onChanged();
+        } else {
+          resultBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public Builder clearResult() {
+        if (resultBuilder_ == null) {
+          result_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          resultBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public Builder removeResult(int index) {
+        if (resultBuilder_ == null) {
+          ensureResultIsMutable();
+          result_.remove(index);
+          onChanged();
+        } else {
+          resultBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder getResultBuilder(
+          int index) {
+        return getResultFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResultOrBuilder getResultOrBuilder(
+          int index) {
+        if (resultBuilder_ == null) {
+          return result_.get(index);  } else {
+          return resultBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResultOrBuilder> 
+           getResultOrBuilderList() {
+        if (resultBuilder_ != null) {
+          return resultBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(result_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder addResultBuilder() {
+        return getResultFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder addResultBuilder(
+          int index) {
+        return getResultFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonResponse.SsurgeonResult result = 1;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder> 
+           getResultBuilderList() {
+        return getResultFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResultOrBuilder> 
+          getResultFieldBuilder() {
+        if (resultBuilder_ == null) {
+          resultBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse.SsurgeonResultOrBuilder>(
+                  result_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          result_ = null;
+        }
+        return resultBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SsurgeonResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SsurgeonResponse)
+    private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse();
+    }
+
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<SsurgeonResponse>
+        PARSER = new com.google.protobuf.AbstractParser<SsurgeonResponse>() {
+      @java.lang.Override
+      public SsurgeonResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<SsurgeonResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SsurgeonResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface TokensRegexRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TokensRegexRequest)
       com.google.protobuf.MessageOrBuilder {
@@ -95826,6 +100198,26 @@ public final class CoreNLPProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_SsurgeonResult_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_SsurgeonResult_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_TokensRegexRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -96066,212 +100458,223 @@ public final class CoreNLPProtos {
       ".pipeline.ParseTree\022\r\n\005value\030\002 \001(\t\022\027\n\017yi" +
       "eldBeginIndex\030\003 \001(\r\022\025\n\ryieldEndIndex\030\004 \001" +
       "(\r\022\r\n\005score\030\005 \001(\001\0227\n\tsentiment\030\006 \001(\0162$.e" +
-      "du.stanford.nlp.pipeline.Sentiment\"\226\003\n\017D" +
+      "du.stanford.nlp.pipeline.Sentiment\"\307\003\n\017D" +
       "ependencyGraph\022=\n\004node\030\001 \003(\0132/.edu.stanf" +
       "ord.nlp.pipeline.DependencyGraph.Node\022=\n" +
       "\004edge\030\002 \003(\0132/.edu.stanford.nlp.pipeline." +
-      "DependencyGraph.Edge\022\020\n\004root\030\003 \003(\rB\002\020\001\032D" +
-      "\n\004Node\022\025\n\rsentenceIndex\030\001 \002(\r\022\r\n\005index\030\002" +
-      " \002(\r\022\026\n\016copyAnnotation\030\003 \001(\r\032\254\001\n\004Edge\022\016\n" +
-      "\006source\030\001 \002(\r\022\016\n\006target\030\002 \002(\r\022\013\n\003dep\030\003 \001" +
-      "(\t\022\017\n\007isExtra\030\004 \001(\010\022\022\n\nsourceCopy\030\005 \001(\r\022" +
-      "\022\n\ntargetCopy\030\006 \001(\r\022>\n\010language\030\007 \001(\0162#." +
-      "edu.stanford.nlp.pipeline.Language:\007Unkn" +
-      "own\"\306\002\n\nCorefChain\022\017\n\007chainID\030\001 \002(\005\022C\n\007m" +
-      "ention\030\002 \003(\01322.edu.stanford.nlp.pipeline" +
-      ".CorefChain.CorefMention\022\026\n\016representati" +
-      "ve\030\003 \002(\r\032\311\001\n\014CorefMention\022\021\n\tmentionID\030\001" +
-      " \001(\005\022\023\n\013mentionType\030\002 \001(\t\022\016\n\006number\030\003 \001(" +
-      "\t\022\016\n\006gender\030\004 \001(\t\022\017\n\007animacy\030\005 \001(\t\022\022\n\nbe" +
-      "ginIndex\030\006 \001(\r\022\020\n\010endIndex\030\007 \001(\r\022\021\n\thead" +
-      "Index\030\t \001(\r\022\025\n\rsentenceIndex\030\n \001(\r\022\020\n\010po" +
-      "sition\030\013 \001(\r\"\357\010\n\007Mention\022\021\n\tmentionID\030\001 " +
-      "\001(\005\022\023\n\013mentionType\030\002 \001(\t\022\016\n\006number\030\003 \001(\t" +
-      "\022\016\n\006gender\030\004 \001(\t\022\017\n\007animacy\030\005 \001(\t\022\016\n\006per" +
-      "son\030\006 \001(\t\022\022\n\nstartIndex\030\007 \001(\r\022\020\n\010endInde" +
-      "x\030\t \001(\r\022\021\n\theadIndex\030\n \001(\005\022\022\n\nheadString" +
-      "\030\013 \001(\t\022\021\n\tnerString\030\014 \001(\t\022\023\n\013originalRef" +
-      "\030\r \001(\005\022\032\n\022goldCorefClusterID\030\016 \001(\005\022\026\n\016co" +
-      "refClusterID\030\017 \001(\005\022\022\n\nmentionNum\030\020 \001(\005\022\017" +
-      "\n\007sentNum\030\021 \001(\005\022\r\n\005utter\030\022 \001(\005\022\021\n\tparagr" +
-      "aph\030\023 \001(\005\022\021\n\tisSubject\030\024 \001(\010\022\026\n\016isDirect" +
-      "Object\030\025 \001(\010\022\030\n\020isIndirectObject\030\026 \001(\010\022\033" +
-      "\n\023isPrepositionObject\030\027 \001(\010\022\017\n\007hasTwin\030\030" +
-      " \001(\010\022\017\n\007generic\030\031 \001(\010\022\023\n\013isSingleton\030\032 \001" +
-      "(\010\022\032\n\022hasBasicDependency\030\033 \001(\010\022\035\n\025hasEnh" +
-      "ancedDepenedncy\030\034 \001(\010\022\033\n\023hasContextParse" +
-      "Tree\030\035 \001(\010\022?\n\017headIndexedWord\030\036 \001(\0132&.ed" +
-      "u.stanford.nlp.pipeline.IndexedWord\022=\n\rd" +
-      "ependingVerb\030\037 \001(\0132&.edu.stanford.nlp.pi" +
-      "peline.IndexedWord\0228\n\010headWord\030  \001(\0132&.e" +
-      "du.stanford.nlp.pipeline.IndexedWord\022;\n\013" +
-      "speakerInfo\030! \001(\0132&.edu.stanford.nlp.pip" +
-      "eline.SpeakerInfo\022=\n\rsentenceWords\0302 \003(\013" +
-      "2&.edu.stanford.nlp.pipeline.IndexedWord" +
-      "\022<\n\014originalSpan\0303 \003(\0132&.edu.stanford.nl" +
-      "p.pipeline.IndexedWord\022\022\n\ndependents\0304 \003" +
-      "(\t\022\031\n\021preprocessedTerms\0305 \003(\t\022\023\n\013apposit" +
-      "ions\0306 \003(\005\022\034\n\024predicateNominatives\0307 \003(\005" +
-      "\022\030\n\020relativePronouns\0308 \003(\005\022\023\n\013listMember" +
-      "s\0309 \003(\005\022\025\n\rbelongToLists\030: \003(\005\"X\n\013Indexe" +
-      "dWord\022\023\n\013sentenceNum\030\001 \001(\005\022\022\n\ntokenIndex" +
-      "\030\002 \001(\005\022\r\n\005docID\030\003 \001(\005\022\021\n\tcopyCount\030\004 \001(\r" +
-      "\"4\n\013SpeakerInfo\022\023\n\013speakerName\030\001 \001(\t\022\020\n\010" +
-      "mentions\030\002 \003(\005\"\"\n\004Span\022\r\n\005begin\030\001 \002(\r\022\013\n" +
-      "\003end\030\002 \002(\r\"w\n\005Timex\022\r\n\005value\030\001 \001(\t\022\020\n\010al" +
-      "tValue\030\002 \001(\t\022\014\n\004text\030\003 \001(\t\022\014\n\004type\030\004 \001(\t" +
-      "\022\013\n\003tid\030\005 \001(\t\022\022\n\nbeginPoint\030\006 \001(\r\022\020\n\010end" +
-      "Point\030\007 \001(\r\"\333\001\n\006Entity\022\021\n\theadStart\030\006 \001(" +
-      "\r\022\017\n\007headEnd\030\007 \001(\r\022\023\n\013mentionType\030\010 \001(\t\022" +
-      "\026\n\016normalizedName\030\t \001(\t\022\026\n\016headTokenInde" +
-      "x\030\n \001(\r\022\017\n\007corefID\030\013 \001(\t\022\020\n\010objectID\030\001 \001" +
-      "(\t\022\023\n\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001" +
-      "(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\267\001\n\010Re" +
-      "lation\022\017\n\007argName\030\006 \003(\t\022.\n\003arg\030\007 \003(\0132!.e" +
-      "du.stanford.nlp.pipeline.Entity\022\021\n\tsigna" +
-      "ture\030\010 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n\013extentSt" +
-      "art\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n\004type\030\004 \001" +
-      "(\t\022\017\n\007subtype\030\005 \001(\t\"\262\001\n\010Operator\022\014\n\004name" +
-      "\030\001 \002(\t\022\033\n\023quantifierSpanBegin\030\002 \002(\005\022\031\n\021q" +
-      "uantifierSpanEnd\030\003 \002(\005\022\030\n\020subjectSpanBeg" +
-      "in\030\004 \002(\005\022\026\n\016subjectSpanEnd\030\005 \002(\005\022\027\n\017obje" +
-      "ctSpanBegin\030\006 \002(\005\022\025\n\robjectSpanEnd\030\007 \002(\005" +
-      "\"\251\004\n\010Polarity\022K\n\022projectEquivalence\030\001 \002(" +
-      "\0162/.edu.stanford.nlp.pipeline.NaturalLog" +
-      "icRelation\022Q\n\030projectForwardEntailment\030\002" +
-      " \002(\0162/.edu.stanford.nlp.pipeline.Natural" +
-      "LogicRelation\022Q\n\030projectReverseEntailmen" +
-      "t\030\003 \002(\0162/.edu.stanford.nlp.pipeline.Natu" +
-      "ralLogicRelation\022H\n\017projectNegation\030\004 \002(" +
-      "\0162/.edu.stanford.nlp.pipeline.NaturalLog" +
-      "icRelation\022K\n\022projectAlternation\030\005 \002(\0162/" +
+      "DependencyGraph.Edge\022\020\n\004root\030\003 \003(\rB\002\020\001\022/" +
+      "\n\005token\030\004 \003(\0132 .edu.stanford.nlp.pipelin" +
+      "e.Token\032D\n\004Node\022\025\n\rsentenceIndex\030\001 \002(\r\022\r" +
+      "\n\005index\030\002 \002(\r\022\026\n\016copyAnnotation\030\003 \001(\r\032\254\001" +
+      "\n\004Edge\022\016\n\006source\030\001 \002(\r\022\016\n\006target\030\002 \002(\r\022\013" +
+      "\n\003dep\030\003 \001(\t\022\017\n\007isExtra\030\004 \001(\010\022\022\n\nsourceCo" +
+      "py\030\005 \001(\r\022\022\n\ntargetCopy\030\006 \001(\r\022>\n\010language" +
+      "\030\007 \001(\0162#.edu.stanford.nlp.pipeline.Langu" +
+      "age:\007Unknown\"\306\002\n\nCorefChain\022\017\n\007chainID\030\001" +
+      " \002(\005\022C\n\007mention\030\002 \003(\01322.edu.stanford.nlp" +
+      ".pipeline.CorefChain.CorefMention\022\026\n\016rep" +
+      "resentative\030\003 \002(\r\032\311\001\n\014CorefMention\022\021\n\tme" +
+      "ntionID\030\001 \001(\005\022\023\n\013mentionType\030\002 \001(\t\022\016\n\006nu" +
+      "mber\030\003 \001(\t\022\016\n\006gender\030\004 \001(\t\022\017\n\007animacy\030\005 " +
+      "\001(\t\022\022\n\nbeginIndex\030\006 \001(\r\022\020\n\010endIndex\030\007 \001(" +
+      "\r\022\021\n\theadIndex\030\t \001(\r\022\025\n\rsentenceIndex\030\n " +
+      "\001(\r\022\020\n\010position\030\013 \001(\r\"\357\010\n\007Mention\022\021\n\tmen" +
+      "tionID\030\001 \001(\005\022\023\n\013mentionType\030\002 \001(\t\022\016\n\006num" +
+      "ber\030\003 \001(\t\022\016\n\006gender\030\004 \001(\t\022\017\n\007animacy\030\005 \001" +
+      "(\t\022\016\n\006person\030\006 \001(\t\022\022\n\nstartIndex\030\007 \001(\r\022\020" +
+      "\n\010endIndex\030\t \001(\r\022\021\n\theadIndex\030\n \001(\005\022\022\n\nh" +
+      "eadString\030\013 \001(\t\022\021\n\tnerString\030\014 \001(\t\022\023\n\013or" +
+      "iginalRef\030\r \001(\005\022\032\n\022goldCorefClusterID\030\016 " +
+      "\001(\005\022\026\n\016corefClusterID\030\017 \001(\005\022\022\n\nmentionNu" +
+      "m\030\020 \001(\005\022\017\n\007sentNum\030\021 \001(\005\022\r\n\005utter\030\022 \001(\005\022" +
+      "\021\n\tparagraph\030\023 \001(\005\022\021\n\tisSubject\030\024 \001(\010\022\026\n" +
+      "\016isDirectObject\030\025 \001(\010\022\030\n\020isIndirectObjec" +
+      "t\030\026 \001(\010\022\033\n\023isPrepositionObject\030\027 \001(\010\022\017\n\007" +
+      "hasTwin\030\030 \001(\010\022\017\n\007generic\030\031 \001(\010\022\023\n\013isSing" +
+      "leton\030\032 \001(\010\022\032\n\022hasBasicDependency\030\033 \001(\010\022" +
+      "\035\n\025hasEnhancedDepenedncy\030\034 \001(\010\022\033\n\023hasCon" +
+      "textParseTree\030\035 \001(\010\022?\n\017headIndexedWord\030\036" +
+      " \001(\0132&.edu.stanford.nlp.pipeline.Indexed" +
+      "Word\022=\n\rdependingVerb\030\037 \001(\0132&.edu.stanfo" +
+      "rd.nlp.pipeline.IndexedWord\0228\n\010headWord\030" +
+      "  \001(\0132&.edu.stanford.nlp.pipeline.Indexe" +
+      "dWord\022;\n\013speakerInfo\030! \001(\0132&.edu.stanfor" +
+      "d.nlp.pipeline.SpeakerInfo\022=\n\rsentenceWo" +
+      "rds\0302 \003(\0132&.edu.stanford.nlp.pipeline.In" +
+      "dexedWord\022<\n\014originalSpan\0303 \003(\0132&.edu.st" +
+      "anford.nlp.pipeline.IndexedWord\022\022\n\ndepen" +
+      "dents\0304 \003(\t\022\031\n\021preprocessedTerms\0305 \003(\t\022\023" +
+      "\n\013appositions\0306 \003(\005\022\034\n\024predicateNominati" +
+      "ves\0307 \003(\005\022\030\n\020relativePronouns\0308 \003(\005\022\023\n\013l" +
+      "istMembers\0309 \003(\005\022\025\n\rbelongToLists\030: \003(\005\"" +
+      "X\n\013IndexedWord\022\023\n\013sentenceNum\030\001 \001(\005\022\022\n\nt" +
+      "okenIndex\030\002 \001(\005\022\r\n\005docID\030\003 \001(\005\022\021\n\tcopyCo" +
+      "unt\030\004 \001(\r\"4\n\013SpeakerInfo\022\023\n\013speakerName\030" +
+      "\001 \001(\t\022\020\n\010mentions\030\002 \003(\005\"\"\n\004Span\022\r\n\005begin" +
+      "\030\001 \002(\r\022\013\n\003end\030\002 \002(\r\"w\n\005Timex\022\r\n\005value\030\001 " +
+      "\001(\t\022\020\n\010altValue\030\002 \001(\t\022\014\n\004text\030\003 \001(\t\022\014\n\004t" +
+      "ype\030\004 \001(\t\022\013\n\003tid\030\005 \001(\t\022\022\n\nbeginPoint\030\006 \001" +
+      "(\r\022\020\n\010endPoint\030\007 \001(\r\"\333\001\n\006Entity\022\021\n\theadS" +
+      "tart\030\006 \001(\r\022\017\n\007headEnd\030\007 \001(\r\022\023\n\013mentionTy" +
+      "pe\030\010 \001(\t\022\026\n\016normalizedName\030\t \001(\t\022\026\n\016head" +
+      "TokenIndex\030\n \001(\r\022\017\n\007corefID\030\013 \001(\t\022\020\n\010obj" +
+      "ectID\030\001 \001(\t\022\023\n\013extentStart\030\002 \001(\r\022\021\n\texte" +
+      "ntEnd\030\003 \001(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001" +
+      "(\t\"\267\001\n\010Relation\022\017\n\007argName\030\006 \003(\t\022.\n\003arg\030" +
+      "\007 \003(\0132!.edu.stanford.nlp.pipeline.Entity" +
+      "\022\021\n\tsignature\030\010 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n" +
+      "\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n" +
+      "\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\262\001\n\010Operato" +
+      "r\022\014\n\004name\030\001 \002(\t\022\033\n\023quantifierSpanBegin\030\002" +
+      " \002(\005\022\031\n\021quantifierSpanEnd\030\003 \002(\005\022\030\n\020subje" +
+      "ctSpanBegin\030\004 \002(\005\022\026\n\016subjectSpanEnd\030\005 \002(" +
+      "\005\022\027\n\017objectSpanBegin\030\006 \002(\005\022\025\n\robjectSpan" +
+      "End\030\007 \002(\005\"\251\004\n\010Polarity\022K\n\022projectEquival" +
+      "ence\030\001 \002(\0162/.edu.stanford.nlp.pipeline.N" +
+      "aturalLogicRelation\022Q\n\030projectForwardEnt" +
+      "ailment\030\002 \002(\0162/.edu.stanford.nlp.pipelin" +
+      "e.NaturalLogicRelation\022Q\n\030projectReverse" +
+      "Entailment\030\003 \002(\0162/.edu.stanford.nlp.pipe" +
+      "line.NaturalLogicRelation\022H\n\017projectNega" +
+      "tion\030\004 \002(\0162/.edu.stanford.nlp.pipeline.N" +
+      "aturalLogicRelation\022K\n\022projectAlternatio" +
+      "n\030\005 \002(\0162/.edu.stanford.nlp.pipeline.Natu" +
+      "ralLogicRelation\022E\n\014projectCover\030\006 \002(\0162/" +
       ".edu.stanford.nlp.pipeline.NaturalLogicR" +
-      "elation\022E\n\014projectCover\030\006 \002(\0162/.edu.stan" +
-      "ford.nlp.pipeline.NaturalLogicRelation\022L" +
-      "\n\023projectIndependence\030\007 \002(\0162/.edu.stanfo" +
-      "rd.nlp.pipeline.NaturalLogicRelation\"\335\002\n" +
-      "\nNERMention\022\025\n\rsentenceIndex\030\001 \001(\r\022%\n\035to" +
-      "kenStartInSentenceInclusive\030\002 \002(\r\022#\n\033tok" +
-      "enEndInSentenceExclusive\030\003 \002(\r\022\013\n\003ner\030\004 " +
-      "\002(\t\022\025\n\rnormalizedNER\030\005 \001(\t\022\022\n\nentityType" +
-      "\030\006 \001(\t\022/\n\005timex\030\007 \001(\0132 .edu.stanford.nlp" +
-      ".pipeline.Timex\022\027\n\017wikipediaEntity\030\010 \001(\t" +
-      "\022\016\n\006gender\030\t \001(\t\022\032\n\022entityMentionIndex\030\n" +
-      " \001(\r\022#\n\033canonicalEntityMentionIndex\030\013 \001(" +
-      "\r\022\031\n\021entityMentionText\030\014 \001(\t\"Y\n\020Sentence" +
-      "Fragment\022\022\n\ntokenIndex\030\001 \003(\r\022\014\n\004root\030\002 \001" +
-      "(\r\022\024\n\014assumedTruth\030\003 \001(\010\022\r\n\005score\030\004 \001(\001\"" +
-      ":\n\rTokenLocation\022\025\n\rsentenceIndex\030\001 \001(\r\022" +
-      "\022\n\ntokenIndex\030\002 \001(\r\"\232\003\n\016RelationTriple\022\017" +
-      "\n\007subject\030\001 \001(\t\022\020\n\010relation\030\002 \001(\t\022\016\n\006obj" +
-      "ect\030\003 \001(\t\022\022\n\nconfidence\030\004 \001(\001\022?\n\rsubject" +
-      "Tokens\030\r \003(\0132(.edu.stanford.nlp.pipeline" +
-      ".TokenLocation\022@\n\016relationTokens\030\016 \003(\0132(" +
-      ".edu.stanford.nlp.pipeline.TokenLocation" +
-      "\022>\n\014objectTokens\030\017 \003(\0132(.edu.stanford.nl" +
-      "p.pipeline.TokenLocation\0228\n\004tree\030\010 \001(\0132*" +
-      ".edu.stanford.nlp.pipeline.DependencyGra" +
-      "ph\022\016\n\006istmod\030\t \001(\010\022\020\n\010prefixBe\030\n \001(\010\022\020\n\010" +
-      "suffixBe\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(\010\"-\n\017MapS" +
-      "tringString\022\013\n\003key\030\001 \003(\t\022\r\n\005value\030\002 \003(\t\"" +
-      "*\n\014MapIntString\022\013\n\003key\030\001 \003(\r\022\r\n\005value\030\002 " +
-      "\003(\t\"\374\001\n\007Section\022\021\n\tcharBegin\030\001 \002(\r\022\017\n\007ch" +
-      "arEnd\030\002 \002(\r\022\016\n\006author\030\003 \001(\t\022\027\n\017sentenceI" +
-      "ndexes\030\004 \003(\r\022\020\n\010datetime\030\005 \001(\t\0220\n\006quotes" +
-      "\030\006 \003(\0132 .edu.stanford.nlp.pipeline.Quote" +
-      "\022\027\n\017authorCharBegin\030\007 \001(\r\022\025\n\rauthorCharE" +
-      "nd\030\010 \001(\r\0220\n\006xmlTag\030\t \002(\0132 .edu.stanford." +
-      "nlp.pipeline.Token\"\344\001\n\016SemgrexRequest\022\017\n" +
-      "\007semgrex\030\001 \003(\t\022E\n\005query\030\002 \003(\01326.edu.stan" +
-      "ford.nlp.pipeline.SemgrexRequest.Depende" +
-      "ncies\032z\n\014Dependencies\022/\n\005token\030\001 \003(\0132 .e" +
-      "du.stanford.nlp.pipeline.Token\0229\n\005graph\030" +
-      "\002 \002(\0132*.edu.stanford.nlp.pipeline.Depend" +
-      "encyGraph\"\373\005\n\017SemgrexResponse\022F\n\006result\030" +
-      "\001 \003(\01326.edu.stanford.nlp.pipeline.Semgre" +
-      "xResponse.GraphResult\032-\n\tNamedNode\022\014\n\004na" +
-      "me\030\001 \002(\t\022\022\n\nmatchIndex\030\002 \002(\005\032+\n\rNamedRel" +
-      "ation\022\014\n\004name\030\001 \002(\t\022\014\n\004reln\030\002 \002(\t\032\200\001\n\tNa" +
-      "medEdge\022\014\n\004name\030\001 \002(\t\022\016\n\006source\030\002 \002(\005\022\016\n" +
-      "\006target\030\003 \002(\005\022\014\n\004reln\030\004 \001(\t\022\017\n\007isExtra\030\005" +
-      " \001(\010\022\022\n\nsourceCopy\030\006 \001(\r\022\022\n\ntargetCopy\030\007" +
-      " \001(\r\032\225\002\n\005Match\022\022\n\nmatchIndex\030\001 \002(\005\022B\n\004no" +
-      "de\030\002 \003(\01324.edu.stanford.nlp.pipeline.Sem" +
-      "grexResponse.NamedNode\022F\n\004reln\030\003 \003(\01328.e" +
-      "du.stanford.nlp.pipeline.SemgrexResponse" +
-      ".NamedRelation\022B\n\004edge\030\006 \003(\01324.edu.stanf" +
-      "ord.nlp.pipeline.SemgrexResponse.NamedEd" +
-      "ge\022\022\n\ngraphIndex\030\004 \001(\005\022\024\n\014semgrexIndex\030\005" +
-      " \001(\005\032P\n\rSemgrexResult\022?\n\005match\030\001 \003(\01320.e" +
-      "du.stanford.nlp.pipeline.SemgrexResponse" +
-      ".Match\032W\n\013GraphResult\022H\n\006result\030\001 \003(\01328." +
+      "elation\022L\n\023projectIndependence\030\007 \002(\0162/.e" +
+      "du.stanford.nlp.pipeline.NaturalLogicRel" +
+      "ation\"\335\002\n\nNERMention\022\025\n\rsentenceIndex\030\001 " +
+      "\001(\r\022%\n\035tokenStartInSentenceInclusive\030\002 \002" +
+      "(\r\022#\n\033tokenEndInSentenceExclusive\030\003 \002(\r\022" +
+      "\013\n\003ner\030\004 \002(\t\022\025\n\rnormalizedNER\030\005 \001(\t\022\022\n\ne" +
+      "ntityType\030\006 \001(\t\022/\n\005timex\030\007 \001(\0132 .edu.sta" +
+      "nford.nlp.pipeline.Timex\022\027\n\017wikipediaEnt" +
+      "ity\030\010 \001(\t\022\016\n\006gender\030\t \001(\t\022\032\n\022entityMenti" +
+      "onIndex\030\n \001(\r\022#\n\033canonicalEntityMentionI" +
+      "ndex\030\013 \001(\r\022\031\n\021entityMentionText\030\014 \001(\t\"Y\n" +
+      "\020SentenceFragment\022\022\n\ntokenIndex\030\001 \003(\r\022\014\n" +
+      "\004root\030\002 \001(\r\022\024\n\014assumedTruth\030\003 \001(\010\022\r\n\005sco" +
+      "re\030\004 \001(\001\":\n\rTokenLocation\022\025\n\rsentenceInd" +
+      "ex\030\001 \001(\r\022\022\n\ntokenIndex\030\002 \001(\r\"\232\003\n\016Relatio" +
+      "nTriple\022\017\n\007subject\030\001 \001(\t\022\020\n\010relation\030\002 \001" +
+      "(\t\022\016\n\006object\030\003 \001(\t\022\022\n\nconfidence\030\004 \001(\001\022?" +
+      "\n\rsubjectTokens\030\r \003(\0132(.edu.stanford.nlp" +
+      ".pipeline.TokenLocation\022@\n\016relationToken" +
+      "s\030\016 \003(\0132(.edu.stanford.nlp.pipeline.Toke" +
+      "nLocation\022>\n\014objectTokens\030\017 \003(\0132(.edu.st" +
+      "anford.nlp.pipeline.TokenLocation\0228\n\004tre" +
+      "e\030\010 \001(\0132*.edu.stanford.nlp.pipeline.Depe" +
+      "ndencyGraph\022\016\n\006istmod\030\t \001(\010\022\020\n\010prefixBe\030" +
+      "\n \001(\010\022\020\n\010suffixBe\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(" +
+      "\010\"-\n\017MapStringString\022\013\n\003key\030\001 \003(\t\022\r\n\005val" +
+      "ue\030\002 \003(\t\"*\n\014MapIntString\022\013\n\003key\030\001 \003(\r\022\r\n" +
+      "\005value\030\002 \003(\t\"\374\001\n\007Section\022\021\n\tcharBegin\030\001 " +
+      "\002(\r\022\017\n\007charEnd\030\002 \002(\r\022\016\n\006author\030\003 \001(\t\022\027\n\017" +
+      "sentenceIndexes\030\004 \003(\r\022\020\n\010datetime\030\005 \001(\t\022" +
+      "0\n\006quotes\030\006 \003(\0132 .edu.stanford.nlp.pipel" +
+      "ine.Quote\022\027\n\017authorCharBegin\030\007 \001(\r\022\025\n\rau" +
+      "thorCharEnd\030\010 \001(\r\0220\n\006xmlTag\030\t \002(\0132 .edu." +
+      "stanford.nlp.pipeline.Token\"\344\001\n\016SemgrexR" +
+      "equest\022\017\n\007semgrex\030\001 \003(\t\022E\n\005query\030\002 \003(\01326" +
+      ".edu.stanford.nlp.pipeline.SemgrexReques" +
+      "t.Dependencies\032z\n\014Dependencies\022/\n\005token\030" +
+      "\001 \003(\0132 .edu.stanford.nlp.pipeline.Token\022" +
+      "9\n\005graph\030\002 \002(\0132*.edu.stanford.nlp.pipeli" +
+      "ne.DependencyGraph\"\373\005\n\017SemgrexResponse\022F" +
+      "\n\006result\030\001 \003(\01326.edu.stanford.nlp.pipeli" +
+      "ne.SemgrexResponse.GraphResult\032-\n\tNamedN" +
+      "ode\022\014\n\004name\030\001 \002(\t\022\022\n\nmatchIndex\030\002 \002(\005\032+\n" +
+      "\rNamedRelation\022\014\n\004name\030\001 \002(\t\022\014\n\004reln\030\002 \002" +
+      "(\t\032\200\001\n\tNamedEdge\022\014\n\004name\030\001 \002(\t\022\016\n\006source" +
+      "\030\002 \002(\005\022\016\n\006target\030\003 \002(\005\022\014\n\004reln\030\004 \001(\t\022\017\n\007" +
+      "isExtra\030\005 \001(\010\022\022\n\nsourceCopy\030\006 \001(\r\022\022\n\ntar" +
+      "getCopy\030\007 \001(\r\032\225\002\n\005Match\022\022\n\nmatchIndex\030\001 " +
+      "\002(\005\022B\n\004node\030\002 \003(\01324.edu.stanford.nlp.pip" +
+      "eline.SemgrexResponse.NamedNode\022F\n\004reln\030" +
+      "\003 \003(\01328.edu.stanford.nlp.pipeline.Semgre" +
+      "xResponse.NamedRelation\022B\n\004edge\030\006 \003(\01324." +
       "edu.stanford.nlp.pipeline.SemgrexRespons" +
-      "e.SemgrexResult\"W\n\022TokensRegexRequest\0220\n" +
-      "\003doc\030\001 \002(\0132#.edu.stanford.nlp.pipeline.D" +
-      "ocument\022\017\n\007pattern\030\002 \003(\t\"\247\003\n\023TokensRegex" +
-      "Response\022J\n\005match\030\001 \003(\0132;.edu.stanford.n" +
-      "lp.pipeline.TokensRegexResponse.PatternM" +
-      "atch\0329\n\rMatchLocation\022\014\n\004text\030\001 \001(\t\022\r\n\005b" +
-      "egin\030\002 \001(\005\022\013\n\003end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010sen" +
-      "tence\030\001 \002(\005\022K\n\005match\030\002 \002(\0132<.edu.stanfor" +
-      "d.nlp.pipeline.TokensRegexResponse.Match" +
-      "Location\022K\n\005group\030\003 \003(\0132<.edu.stanford.n" +
-      "lp.pipeline.TokensRegexResponse.MatchLoc" +
-      "ation\032S\n\014PatternMatch\022C\n\005match\030\001 \003(\01324.e" +
-      "du.stanford.nlp.pipeline.TokensRegexResp" +
-      "onse.Match\"\256\001\n\031DependencyEnhancerRequest" +
-      "\0225\n\010document\030\001 \002(\0132#.edu.stanford.nlp.pi" +
-      "peline.Document\0227\n\010language\030\002 \001(\0162#.edu." +
-      "stanford.nlp.pipeline.LanguageH\000\022\032\n\020rela" +
-      "tivePronouns\030\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022Flattene" +
-      "dParseTree\022A\n\005nodes\030\001 \003(\01322.edu.stanford" +
-      ".nlp.pipeline.FlattenedParseTree.Node\032[\n" +
-      "\004Node\022\022\n\010openNode\030\001 \001(\010H\000\022\023\n\tcloseNode\030\002" +
-      " \001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B\n" +
-      "\n\010contents\"\366\001\n\025EvaluateParserRequest\022N\n\010" +
-      "treebank\030\001 \003(\0132<.edu.stanford.nlp.pipeli" +
-      "ne.EvaluateParserRequest.ParseResult\032\214\001\n" +
-      "\013ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stanfor" +
-      "d.nlp.pipeline.FlattenedParseTree\022@\n\tpre" +
-      "dicted\030\002 \003(\0132-.edu.stanford.nlp.pipeline" +
-      ".FlattenedParseTree\"5\n\026EvaluateParserRes" +
-      "ponse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001\n\017T" +
-      "surgeonRequest\022H\n\noperations\030\001 \003(\01324.edu" +
-      ".stanford.nlp.pipeline.TsurgeonRequest.O" +
-      "peration\022<\n\005trees\030\002 \003(\0132-.edu.stanford.n" +
-      "lp.pipeline.FlattenedParseTree\032-\n\tOperat" +
-      "ion\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P\n" +
-      "\020TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.edu.s" +
-      "tanford.nlp.pipeline.FlattenedParseTree\"" +
-      "\205\001\n\021MorphologyRequest\022F\n\005words\030\001 \003(\01327.e" +
-      "du.stanford.nlp.pipeline.MorphologyReque" +
-      "st.TaggedWord\032(\n\nTaggedWord\022\014\n\004word\030\001 \002(" +
-      "\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022MorphologyResponse\022I" +
-      "\n\005words\030\001 \003(\0132:.edu.stanford.nlp.pipelin" +
-      "e.MorphologyResponse.WordTagLemma\0329\n\014Wor" +
-      "dTagLemma\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\022\r\n" +
-      "\005lemma\030\003 \002(\t\"Z\n\032DependencyConverterReque" +
-      "st\022<\n\005trees\030\001 \003(\0132-.edu.stanford.nlp.pip" +
-      "eline.FlattenedParseTree\"\220\002\n\033DependencyC" +
-      "onverterResponse\022`\n\013conversions\030\001 \003(\0132K." +
-      "edu.stanford.nlp.pipeline.DependencyConv" +
-      "erterResponse.DependencyConversion\032\216\001\n\024D" +
-      "ependencyConversion\0229\n\005graph\030\001 \002(\0132*.edu" +
-      ".stanford.nlp.pipeline.DependencyGraph\022;" +
-      "\n\004tree\030\002 \001(\0132-.edu.stanford.nlp.pipeline" +
-      ".FlattenedParseTree*\243\001\n\010Language\022\013\n\007Unkn" +
-      "own\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022" +
-      "\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006" +
-      "Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglis" +
-      "h\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentiment\022\023" +
-      "\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013" +
-      "\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG" +
-      "_POSITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013" +
-      "EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n" +
-      "\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013A" +
-      "LTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020" +
-      "\006B*\n\031edu.stanford.nlp.pipelineB\rCoreNLPP" +
-      "rotos"
+      "e.NamedEdge\022\022\n\ngraphIndex\030\004 \001(\005\022\024\n\014semgr" +
+      "exIndex\030\005 \001(\005\032P\n\rSemgrexResult\022?\n\005match\030" +
+      "\001 \003(\01320.edu.stanford.nlp.pipeline.Semgre" +
+      "xResponse.Match\032W\n\013GraphResult\022H\n\006result" +
+      "\030\001 \003(\01328.edu.stanford.nlp.pipeline.Semgr" +
+      "exResponse.SemgrexResult\"\336\001\n\017SsurgeonReq" +
+      "uest\022E\n\010ssurgeon\030\001 \003(\01323.edu.stanford.nl" +
+      "p.pipeline.SsurgeonRequest.Ssurgeon\0229\n\005g" +
+      "raph\030\002 \003(\0132*.edu.stanford.nlp.pipeline.D" +
+      "ependencyGraph\032I\n\010Ssurgeon\022\017\n\007semgrex\030\001 " +
+      "\001(\t\022\021\n\toperation\030\002 \003(\t\022\n\n\002id\030\003 \001(\t\022\r\n\005no" +
+      "tes\030\004 \001(\t\"\274\001\n\020SsurgeonResponse\022J\n\006result" +
+      "\030\001 \003(\0132:.edu.stanford.nlp.pipeline.Ssurg" +
+      "eonResponse.SsurgeonResult\032\\\n\016SsurgeonRe" +
+      "sult\0229\n\005graph\030\001 \001(\0132*.edu.stanford.nlp.p" +
+      "ipeline.DependencyGraph\022\017\n\007changed\030\002 \001(\010" +
+      "\"W\n\022TokensRegexRequest\0220\n\003doc\030\001 \002(\0132#.ed" +
+      "u.stanford.nlp.pipeline.Document\022\017\n\007patt" +
+      "ern\030\002 \003(\t\"\247\003\n\023TokensRegexResponse\022J\n\005mat" +
+      "ch\030\001 \003(\0132;.edu.stanford.nlp.pipeline.Tok" +
+      "ensRegexResponse.PatternMatch\0329\n\rMatchLo" +
+      "cation\022\014\n\004text\030\001 \001(\t\022\r\n\005begin\030\002 \001(\005\022\013\n\003e" +
+      "nd\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010sentence\030\001 \002(\005\022K\n\005" +
+      "match\030\002 \002(\0132<.edu.stanford.nlp.pipeline." +
+      "TokensRegexResponse.MatchLocation\022K\n\005gro" +
+      "up\030\003 \003(\0132<.edu.stanford.nlp.pipeline.Tok" +
+      "ensRegexResponse.MatchLocation\032S\n\014Patter" +
+      "nMatch\022C\n\005match\030\001 \003(\01324.edu.stanford.nlp" +
+      ".pipeline.TokensRegexResponse.Match\"\256\001\n\031" +
+      "DependencyEnhancerRequest\0225\n\010document\030\001 " +
+      "\002(\0132#.edu.stanford.nlp.pipeline.Document" +
+      "\0227\n\010language\030\002 \001(\0162#.edu.stanford.nlp.pi" +
+      "peline.LanguageH\000\022\032\n\020relativePronouns\030\003 " +
+      "\001(\tH\000B\005\n\003ref\"\264\001\n\022FlattenedParseTree\022A\n\005n" +
+      "odes\030\001 \003(\01322.edu.stanford.nlp.pipeline.F" +
+      "lattenedParseTree.Node\032[\n\004Node\022\022\n\010openNo" +
+      "de\030\001 \001(\010H\000\022\023\n\tcloseNode\030\002 \001(\010H\000\022\017\n\005value" +
+      "\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B\n\n\010contents\"\366\001\n\025" +
+      "EvaluateParserRequest\022N\n\010treebank\030\001 \003(\0132" +
+      "<.edu.stanford.nlp.pipeline.EvaluatePars" +
+      "erRequest.ParseResult\032\214\001\n\013ParseResult\022;\n" +
+      "\004gold\030\001 \002(\0132-.edu.stanford.nlp.pipeline." +
+      "FlattenedParseTree\022@\n\tpredicted\030\002 \003(\0132-." +
+      "edu.stanford.nlp.pipeline.FlattenedParse" +
+      "Tree\"5\n\026EvaluateParserResponse\022\n\n\002f1\030\001 \002" +
+      "(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001\n\017TsurgeonRequest\022" +
+      "H\n\noperations\030\001 \003(\01324.edu.stanford.nlp.p" +
+      "ipeline.TsurgeonRequest.Operation\022<\n\005tre" +
+      "es\030\002 \003(\0132-.edu.stanford.nlp.pipeline.Fla" +
+      "ttenedParseTree\032-\n\tOperation\022\016\n\006tregex\030\001" +
+      " \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P\n\020TsurgeonRespon" +
+      "se\022<\n\005trees\030\001 \003(\0132-.edu.stanford.nlp.pip" +
+      "eline.FlattenedParseTree\"\205\001\n\021MorphologyR" +
+      "equest\022F\n\005words\030\001 \003(\01327.edu.stanford.nlp" +
+      ".pipeline.MorphologyRequest.TaggedWord\032(" +
+      "\n\nTaggedWord\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t" +
+      "\"\232\001\n\022MorphologyResponse\022I\n\005words\030\001 \003(\0132:" +
+      ".edu.stanford.nlp.pipeline.MorphologyRes" +
+      "ponse.WordTagLemma\0329\n\014WordTagLemma\022\014\n\004wo" +
+      "rd\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\022\r\n\005lemma\030\003 \002(\t\"Z\n" +
+      "\032DependencyConverterRequest\022<\n\005trees\030\001 \003" +
+      "(\0132-.edu.stanford.nlp.pipeline.Flattened" +
+      "ParseTree\"\220\002\n\033DependencyConverterRespons" +
+      "e\022`\n\013conversions\030\001 \003(\0132K.edu.stanford.nl" +
+      "p.pipeline.DependencyConverterResponse.D" +
+      "ependencyConversion\032\216\001\n\024DependencyConver" +
+      "sion\0229\n\005graph\030\001 \002(\0132*.edu.stanford.nlp.p" +
+      "ipeline.DependencyGraph\022;\n\004tree\030\002 \001(\0132-." +
+      "edu.stanford.nlp.pipeline.FlattenedParse" +
+      "Tree*\243\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022" +
+      "\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n" +
+      "\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spa" +
+      "nish\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n\020Universa" +
+      "lChinese\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATI" +
+      "VE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\r" +
+      "WEAK_POSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n" +
+      "\024NaturalLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026" +
+      "\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAIL" +
+      "MENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n" +
+      "\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanfo" +
+      "rd.nlp.pipelineB\rCoreNLPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -96312,7 +100715,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_DependencyGraph_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_DependencyGraph_descriptor,
-        new java.lang.String[] { "Node", "Edge", "Root", });
+        new java.lang.String[] { "Node", "Edge", "Root", "Token", });
     internal_static_edu_stanford_nlp_pipeline_DependencyGraph_Node_descriptor =
       internal_static_edu_stanford_nlp_pipeline_DependencyGraph_descriptor.getNestedTypes().get(0);
     internal_static_edu_stanford_nlp_pipeline_DependencyGraph_Node_fieldAccessorTable = new
@@ -96487,14 +100890,38 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_descriptor,
         new java.lang.String[] { "Result", });
-    internal_static_edu_stanford_nlp_pipeline_TokensRegexRequest_descriptor =
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor =
       getDescriptor().getMessageTypes().get(25);
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor,
+        new java.lang.String[] { "Ssurgeon", "Graph", });
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor.getNestedTypes().get(0);
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_descriptor,
+        new java.lang.String[] { "Semgrex", "Operation", "Id", "Notes", });
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_descriptor =
+      getDescriptor().getMessageTypes().get(26);
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_descriptor,
+        new java.lang.String[] { "Result", });
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_SsurgeonResult_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_descriptor.getNestedTypes().get(0);
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_SsurgeonResult_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_SsurgeonResult_descriptor,
+        new java.lang.String[] { "Graph", "Changed", });
+    internal_static_edu_stanford_nlp_pipeline_TokensRegexRequest_descriptor =
+      getDescriptor().getMessageTypes().get(27);
     internal_static_edu_stanford_nlp_pipeline_TokensRegexRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_TokensRegexRequest_descriptor,
         new java.lang.String[] { "Doc", "Pattern", });
     internal_static_edu_stanford_nlp_pipeline_TokensRegexResponse_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_edu_stanford_nlp_pipeline_TokensRegexResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_TokensRegexResponse_descriptor,
@@ -96518,13 +100945,13 @@ public final class CoreNLPProtos {
         internal_static_edu_stanford_nlp_pipeline_TokensRegexResponse_PatternMatch_descriptor,
         new java.lang.String[] { "Match", });
     internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_DependencyEnhancerRequest_descriptor,
         new java.lang.String[] { "Document", "Language", "RelativePronouns", "Ref", });
     internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_descriptor,
@@ -96536,7 +100963,7 @@ public final class CoreNLPProtos {
         internal_static_edu_stanford_nlp_pipeline_FlattenedParseTree_Node_descriptor,
         new java.lang.String[] { "OpenNode", "CloseNode", "Value", "Score", "Contents", });
     internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor =
-      getDescriptor().getMessageTypes().get(29);
+      getDescriptor().getMessageTypes().get(31);
     internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_descriptor,
@@ -96548,13 +100975,13 @@ public final class CoreNLPProtos {
         internal_static_edu_stanford_nlp_pipeline_EvaluateParserRequest_ParseResult_descriptor,
         new java.lang.String[] { "Gold", "Predicted", });
     internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor =
-      getDescriptor().getMessageTypes().get(30);
+      getDescriptor().getMessageTypes().get(32);
     internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor,
         new java.lang.String[] { "F1", "KbestF1", });
     internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor =
-      getDescriptor().getMessageTypes().get(31);
+      getDescriptor().getMessageTypes().get(33);
     internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor,
@@ -96566,13 +100993,13 @@ public final class CoreNLPProtos {
         internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_Operation_descriptor,
         new java.lang.String[] { "Tregex", "Tsurgeon", });
     internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor =
-      getDescriptor().getMessageTypes().get(32);
+      getDescriptor().getMessageTypes().get(34);
     internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_TsurgeonResponse_descriptor,
         new java.lang.String[] { "Trees", });
     internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_descriptor =
-      getDescriptor().getMessageTypes().get(33);
+      getDescriptor().getMessageTypes().get(35);
     internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_descriptor,
@@ -96584,7 +101011,7 @@ public final class CoreNLPProtos {
         internal_static_edu_stanford_nlp_pipeline_MorphologyRequest_TaggedWord_descriptor,
         new java.lang.String[] { "Word", "Xpos", });
     internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_descriptor =
-      getDescriptor().getMessageTypes().get(34);
+      getDescriptor().getMessageTypes().get(36);
     internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_descriptor,
@@ -96596,13 +101023,13 @@ public final class CoreNLPProtos {
         internal_static_edu_stanford_nlp_pipeline_MorphologyResponse_WordTagLemma_descriptor,
         new java.lang.String[] { "Word", "Xpos", "Lemma", });
     internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_descriptor =
-      getDescriptor().getMessageTypes().get(35);
+      getDescriptor().getMessageTypes().get(37);
     internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_DependencyConverterRequest_descriptor,
         new java.lang.String[] { "Trees", });
     internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_descriptor =
-      getDescriptor().getMessageTypes().get(36);
+      getDescriptor().getMessageTypes().get(38);
     internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_DependencyConverterResponse_descriptor,
