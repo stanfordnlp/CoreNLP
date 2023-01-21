@@ -31,7 +31,9 @@ public class KillAllIncomingEdges extends SsurgeonEdit {
       return false;
     }
     boolean success = false;
-    for (SemanticGraphEdge edge : sg.incomingEdgeIterable(tgtNode)) {
+    // use incomingEdgeList so that deleting an edge
+    // doesn't affect the iteration
+    for (SemanticGraphEdge edge : sg.incomingEdgeList(tgtNode)) {
       success = success || sg.removeEdge(edge);
     }
     return success;
