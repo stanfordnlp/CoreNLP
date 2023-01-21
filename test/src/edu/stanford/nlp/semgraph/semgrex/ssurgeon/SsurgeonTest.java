@@ -1,3 +1,4 @@
+
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import static org.junit.Assert.*;
@@ -406,6 +407,31 @@ public class SsurgeonTest {
     assertEquals(cutSG.vertexSet().size(), 3);
     pruneSG = ssurgeonPrune.iterate(cutSG);
     assertEquals(pruneSG, expected);
+  }
+
+  @Test
+  public void readXMLKillIncomingEdges() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    String cut = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Remove all incoming edges for a node</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >dep {}=a2") + "</semgrex>",
+                             "    <edit-list>killAllIncomingEdges -node a2</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern ssurgeonCut = patterns.get(0);
+
+    // Test a two node only version
+    SemanticGraph sg = SemanticGraph.valueOf("[A dep> B]");
+    SemanticGraph cutSG = ssurgeonCut.iterate(sg);
+    assertEquals(2, cutSG.vertexSet().size());
+    cutSG.resetRoots();
+    assertEquals(2, cutSG.getRoots().size());
   }
 
   /**
