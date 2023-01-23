@@ -294,18 +294,9 @@ public class Ssurgeon  {
     return retList.toArray(StringUtils.EMPTY_STRING_ARRAY);
   }
 
-  /**
-   * Given a string entry, converts it into a SsurgeonEdit object.
-   */
-  public static SsurgeonEdit parseEditLine(String editLine) {
-    // Extract the operation name first
-    final String[] tuples1 = editLine.split("\\s+", 2);
-    if (tuples1.length < 1) {
-      throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: invalid number of arguments");
-    }
-    final String command = tuples1[0];
-    final String[] argsArray = tuples1.length == 1 ? new String[0] : parseArgs(tuples1[1]);
+  private static SsurgeonArgs parseArgsBox(String args) {
     SsurgeonArgs argsBox = new SsurgeonArgs();
+    final String[] argsArray = parseArgs(args);
 
     for (int argIndex = 0; argIndex < argsArray.length; ++argIndex) {
       switch (argsArray[argIndex]) {
@@ -345,7 +336,29 @@ public class Ssurgeon  {
           throw new SsurgeonParseException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
       }
     }
+    return argsBox;
+  }
 
+  /**
+   * Given a string entry, converts it into a SsurgeonEdit object.
+   */
+  public static SsurgeonEdit parseEditLine(String editLine) {
+    // Extract the operation name first
+    final String[] tuples1 = editLine.split("\\s+", 2);
+    if (tuples1.length < 1) {
+      throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: invalid number of arguments");
+    }
+    final String command = tuples1[0];
+
+    if (command.equalsIgnoreCase(SetRoots.LABEL)) {
+      String[] names = tuples1[1].split("\\s+");
+      List<String> newRoots = Arrays.asList(names);
+      return new SetRoots(newRoots);
+    } else if (command.equalsIgnoreCase(KillNonRootedNodes.LABEL)) {
+      return new KillNonRootedNodes();
+    }
+
+    final SsurgeonArgs argsBox = parseArgsBox(tuples1.length == 1 ? "" : tuples1[1]);
 
     // Parse the arguments based upon the type of command to execute.
     // TODO: this logic really should be moved into the individual classes.  The string-->class
@@ -367,12 +380,6 @@ public class Ssurgeon  {
       retEdit = new RemoveEdge(reln, argsBox.govNodeName, argsBox.dep);
     } else if (command.equalsIgnoreCase(RemoveNamedEdge.LABEL)) {
       retEdit = new RemoveNamedEdge(argsBox.edge);
-    } else if (command.equalsIgnoreCase(SetRoots.LABEL)) {
-      String[] names = tuples1[1].split("\\s+");
-      List<String> newRoots = Arrays.asList(names);
-      retEdit = new SetRoots(newRoots);
-    } else if (command.equalsIgnoreCase(KillNonRootedNodes.LABEL)) {
-      retEdit = new KillNonRootedNodes();
     } else if (command.equalsIgnoreCase(KillAllIncomingEdges.LABEL)) {
       retEdit = new KillAllIncomingEdges(argsBox.node);
     } else {
