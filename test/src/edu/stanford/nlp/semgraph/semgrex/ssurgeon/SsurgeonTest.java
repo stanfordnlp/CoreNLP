@@ -435,6 +435,68 @@ public class SsurgeonTest {
   }
 
   /**
+   * Check the result of rearranging an edge and then setting the root to a new label
+   */
+  @Test
+  public void readXMLSetRoots() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    String cut = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Test the effects of setRoots on a simple change</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:A}=a >dep=dep {word:B}=b") + "</semgrex>",
+                             "    <edit-list>removeNamedEdge -edge dep</edit-list>",
+                             "    <edit-list>addEdge -gov b -dep a -reln dep</edit-list>",
+                             "    <edit-list>setRoots b</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern rearrange = patterns.get(0);
+
+    // Test a two node only version
+    SemanticGraph sg = SemanticGraph.valueOf("[A-1 dep> B-2]");
+    SemanticGraph newSG = rearrange.iterate(sg);
+    SemanticGraph expected = SemanticGraph.valueOf("[B-2 dep> A-1]");
+    assertEquals(expected, newSG);
+  }
+
+
+  /**
+   * Check that a readable exception is thrown if the expected node doesn't exist for setRoots
+   */
+  @Test
+  public void readXMLSetRootsException() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    String cut = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Remove all incoming edges for a node</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:A}=a >dep~dep {word:B}=b") + "</semgrex>",
+                             "    <edit-list>removeNamedEdge -edge dep</edit-list>",
+                             "    <edit-list>addEdge -gov b -dep a -reln dep</edit-list>",
+                             "    <edit-list>setRoots c</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern rearrange = patterns.get(0);
+
+    // Test a two node only version
+    SemanticGraph sg = SemanticGraph.valueOf("[A-1 dep> B-2]");
+    try {
+      SemanticGraph newSG = rearrange.iterate(sg);
+      throw new AssertionError("Expected a specific exception SsurgeonRuntimeException here");
+    } catch (SsurgeonRuntimeException e) {
+      // yay
+    }
+  }
+
+  /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
    * a semgrex pattern, and then the resulting actions over the named nodes in the
    * semgrex match.
