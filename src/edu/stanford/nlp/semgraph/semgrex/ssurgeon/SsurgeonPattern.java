@@ -168,11 +168,12 @@ public class SsurgeonPattern {
    * text or otherwise edit a word node will affect the original graph.
    *<br>
    * It's not clear what to do with a multiple edit pattern.
-   * Currently we just operate until one edit occurs, then break.
-   * This makes it harder to do consecutive operations using the
-   * same match, but there are a couple issues to easily doing that:
+   * Currently we iterate through multiple patterns.  If any of them fire,
+   * we rerun the semgrex and restart.
+   * There are a couple issues to doing this:
    * <ul>
    * <li> what do we do when an edit doesn't fire?  keep going or break?
+   *   Currently we continue and give the other edits an opportunity to fire
    * <li> what node names do the later edits get?  rearranging nodes
    *   may change the indices, affecting the match
    * </ul>
