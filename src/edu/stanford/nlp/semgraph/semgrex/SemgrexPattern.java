@@ -190,12 +190,12 @@ import edu.stanford.nlp.util.logging.Redwood;
  * the potential match will not be accepted.
  * <br>
  * This is only legal on relations with only one link between the two endpoints.
- * Other relations (such as grandparent) will throw an exception.
+ * Other relations (such as grandparent) will throw a parse exception.
  *
  * <h3>TODO</h3>
  * At present a Semgrex pattern will match only once at a root node, even if there is more than one way of satisfying
  * it under the root node. Probably its semantics should be changed, or at least the option should be given, to return
- * all matches, as is the case for Tregex.
+ * all matches, as is the case for Tregex.  (Is this still true?  It seems to match multiple times from root.)
  *
  * @author Chloe Kiddon
  */
