@@ -657,7 +657,6 @@ public class KBPAnnotator implements Annotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     Set<Class<? extends CoreAnnotation>> requirements = new HashSet<>(Arrays.asList(
-        CoreAnnotations.MentionsAnnotation.class,
         CoreAnnotations.KBPTriplesAnnotation.class
     ));
     return Collections.unmodifiableSet(requirements);
@@ -677,6 +676,7 @@ public class KBPAnnotator implements Annotator {
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
+        CoreAnnotations.MentionsAnnotation.class,
         CoreAnnotations.OriginalTextAnnotation.class
     ));
     return Collections.unmodifiableSet(requirements);
