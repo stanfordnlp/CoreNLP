@@ -71,12 +71,14 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
           rel.validNamedEntityLabels.contains(input.objectType)) {
         Collection<SemgrexPattern> rulesForRel = rules.get(rel);
         CoreMap sentence = input.sentence.asCoreMap(Sentence::nerTags, Sentence::dependencyGraph);
-        boolean matches = (matches(sentence, rulesForRel, input,
-                                   sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)) ||
-                           matches(sentence, rulesForRel, input,
-                                   sentence.get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class)));
-        if (matches) {
-          //logger.log("MATCH for " + rel +  ".  sentence:" + sentence + " with rules for  " + rel);
+        SemgrexPattern matchedPattern = matches(sentence, rulesForRel, input,
+                                                sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class));
+        if (matchedPattern == null) {
+          matchedPattern = matches(sentence, rulesForRel, input,
+                                   sentence.get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class));
+        }
+        if (matchedPattern != null) {
+          //logger.log("MATCH for " + rel +  ".  sentence:" + sentence + " with rules for  " + rel + ": " + matchedPattern);
           return Pair.makePair(rel.canonicalName, 1.0);
         }
       }
@@ -89,10 +91,10 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
   /**
    * Returns whether any of the given patterns match this tree.
    */
-  private boolean matches(CoreMap sentence, Collection<SemgrexPattern> rulesForRel,
+  private SemgrexPattern matches(CoreMap sentence, Collection<SemgrexPattern> rulesForRel,
                           KBPInput input, SemanticGraph graph) {
     if (graph == null || graph.isEmpty()) {
-      return false;
+      return null;
     }
 
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
@@ -127,11 +129,11 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
         boolean hasObject  = slot.index() >= input.objectSpan.start() + 1 && slot.index() <= input.objectSpan.end();
         
         if (hasSubject && hasObject) {
-          return true;
+          return p;
         } 
       }
     }
-    return false;
+    return null;
   }
 
 
