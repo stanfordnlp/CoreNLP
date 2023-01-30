@@ -1,0 +1,9 @@
+{ner:/PERSON/}=slot >/appos/ ( {word:/hijo|hija|niño|niña/} >/nmod/ ( {} >/appos/ {ner:/PERSON/}=entity ) )
+{ner:/PERSON/}=slot >/appos/ ( {word:/hijo|hija|niño|niña/} >/nmod/ {ner:/PERSON/}=entity )
+{ner:/PERSON/}=entity >/appos/ ( {word:/padre|madre/} >/nmod/ ( {} >/appos/ {ner:/PERSON/}=slot ) )
+{ner:/PERSON/}=entity >/appos/ ( {word:/padre|madre/} >/nmod/ {ner:/PERSON/}=slot )
+{word:/hijo|hija|niño|niña/} >/nsubj/ {ner:/PERSON/}=slot >/obl|nmod|obj/ {ner:/PERSON/}=entity
+{word:/padre|madre/} >/nsubj/ {ner:/PERSON/}=entity >/obl|nmod|obj/ {ner:/PERSON/}=slot
+{ner:/PERSON/}=entity >/conj/ ( {word:/hijo|hija|niño|niña/} >/appos/ {ner:/PERSON/}=slot )
+{ner:/PERSON/}=entity >/conj/ ( {ner:/PERSON/}=slot >/appos/ {word:/hijo|hija|niño|niña/} )
+{word:/hijo|hija|niño|niña/} >/nmod/ {ner:/PERSON/}=entity >/appos/ {ner:/PERSON/}=slot

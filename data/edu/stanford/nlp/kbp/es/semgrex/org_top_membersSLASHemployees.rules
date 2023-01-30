@@ -1,0 +1,17 @@
+macro TOPTITLE = word:/[Ee]jecutiv[oa]|[Pp]resident[ea]|[Jj]ef[ae]|[Cc]abeza|[Gg]eneral|[Cc][Ee][Oo]|[Oo]ficial|[Ll]ídera?|[Vv]ici[oa]|[Rr]ey|[Rr]eina|[Pp]ríncipe|[Pp]rincipesa|[Gg]erente|[Mm]inistr[ao]|[Aa]sesora?|[Ss]illa|[Ee]mbajadora?|[Ee]strella|[Gg]obernadora?|[Ii]nversora?|[Rr]epresentante|[Dd]ecanoa?|[Nn]otario|[Cc]omandante|[Cc]entrocampista|[Aa]ltavoz|[Ii]nvestigadora?|[Ee]ditora?|[Cc]ancillera?|[Cc]ompañer[oa]|[Ll]iderazg[oa]|[Dd]iplomátic[oa]|[Aa]socia|[Hh]uelguista|[Pp]ilot[oa]|[Cc]apitán|[Bb]anquer[oa]|[Mm]ayor|[Pp]rimer ministro|[Pp]rimera ministra|[Pp]roductora?|[Aa]rquitect[oa]|[Dd]iseñadora?|[Mm]ayora?|[Tt]utor|[Pp]residente|[Ss]enadora?|[Es]pecialista|[Ff]acultad|[Pp]residenta|[Mm]ediadora?|[Ff]iscal|[Ee]mpresari[oa]|[Cc]readora?|[Ss]uperestrella|[Cc]omentarista|[Dd]irectora? de escuela|[Oo]peratori[oa]|[Ee]mpresario|[Pp]acificadora?|[Ii]nvestigadora?|[Cc]oordinadora?|[Cc]aballer[oa]|[Ée]l que hace leyes|[Jj]usticia|[Ee]ditora?|[Jj]uger[oa]|[Mm]oderadora?|[Nn]egociadora?|[Dd]irectora?|[Jj]usticia|[Pp]rofesora?|[Ee]ntrenadora?|[Vv]icecancillera?|[Mm]iembro/
+
+{${TOPTITLE}} >/nmod/ ( {ner:/ORGANIZATION|COUNTRY|STATE_OR_PROVINCE|CITY/}=entity >/case/ {word:/de|del|d/} ) >/nsubj/ {ner:/PERSON/}=slot
+{ner:/PERSON/}=slot >/acl/ ( {${TOPTITLE}} >/nmod/ ( {ner:/ORGANIZATION|COUNTRY|STATE_OR_PROVINCE|CITY/}=entity >/case/ {word:/de|del|d/ } ) )
+{ner:/PERSON/}=slot >/appos/ ( {${TOPTITLE}} >/nmod/ ( {ner:/ORGANIZATION|COUNTRY|STATE_OR_PROVINCE|CITY/}=entity >/case/ {word:/de|del|d/ } ) )
+
+{ner:/PERSON/}=slot >/acl/ ( {${TOPTITLE}} >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION|COUNTRY|STATE_OR_PROVINCE|CITY/}=entity >/case/ {word:/de|del|d/ } ) )
+{ner:/PERSON/}=slot >/appos/ ( {${TOPTITLE}} >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION|COUNTRY|STATE_OR_PROVINCE|CITY/}=entity >/case/ {word:/de|del|d/ } ) )
+
+
+{${TOPTITLE}} >/nmod/ ( {ner:/ORGANIZATION|COUNTRY|STATE_OR_PROVINCE|CITY/}=entity >/case/ {word:/de|del|d/ } ) >/appos/ {ner:/PERSON/}=slot
+#{ner:/PERSON/}=slot  ( {${TOPTITLE}} >/nmod/ ( {ner:/ORGANIZATION|COUNTRY|STATE_OR_PROVINCE|CITY/}=entity >/case/ {word:/de|del|d/ } ) )
+{${TOPTITLE}} >/amod/ {ner:/NATIONALITY/}=entity >/appos/ {ner:/PERSON/}=slot
+{ner:/PERSON/}=slot >appos ( {${TOPTITLE}} >amod {ner:/NATIONALITY/}=entity )
+#{${TOPTITLE}} >/nmod/ ( {} >/nmod/ {ner:/ORGANIZATION|COUNTRY|STATE_OR_PROVINCE|CITY/}=entity ) >/appos/ {ner:/PERSON/}=slot
+
+{ner:/ORGANIZATION/}=entity >/amod/ ( {word:/manejab[oa]|organizad[oa]|cabezad[oa]/} >/obj|obl/ {ner:/PERSON/}=slot )

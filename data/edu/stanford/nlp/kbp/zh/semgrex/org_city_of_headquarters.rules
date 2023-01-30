@@ -1,0 +1,18 @@
+macro ESTABLISHED = lemma:/位于|坐落|成立|建立|创设|创造|设立|设置|树立|兴办|创办|缔造|制造|创建|创制|创作发明|扶植|建设|建树|创立/
+
+{ner:ORGANIZATION}=entity >appos ( {} >/compound(:nn)?|nn|amod|nmod(:assmod)?/ {ner:/CITY|LOCATION/}=slot )
+{ner:ORGANIZATION}=entity >/nmod(:(assmod|prep))?|compound(:nn)?/ {ner:/CITY|LOCATION/}=slot
+{${ESTABLISHED}} >nsubj {ner:ORGANIZATION}=entity >/dobj|nmod(:prep)?/ {ner:/CITY|LOCATION/}=slot
+{ner:ORGANIZATION}=entity >acl ({${ESTABLISHED}}  >/dobj|nmod(:prep)?/ {ner:/CITY|LOCATION/}=slot)
+
+# X 所在地
+# (the location of X)
+( {tag:/N.*/} >/nmod(:topic)?|compound(:nn)?/ {ner:ORGANIZATION}=entity ) >appos ( {} >/compound(:nn)?|nn|amod|nmod(:assmod)?/ {ner:/CITY|LOCATION/}=slot )
+( {tag:/N.*/} >/nmod(:topic)?|compound(:nn)?/ {ner:ORGANIZATION}=entity ) >/nmod(:(assmod|prep))?|compound(:nn)?/ {ner:/CITY|LOCATION/}=slot
+{${ESTABLISHED}} >nsubj ( {tag:/N.*/} >/nmod(:topic)?|compound(:nn)?/ {ner:ORGANIZATION}=entity ) >/dobj|nmod(:prep)?/ {ner:/CITY|LOCATION/}=slot
+( {tag:/N.*/} >/nmod(:topic)?|compound(:nn)?/ {ner:ORGANIZATION}=entity ) >acl ({${ESTABLISHED}}  >/dobj|nmod(:prep)?/ {ner:/CITY|LOCATION/}=slot)
+
+# X 位于 Y 的 Z
+# (X is located in Z of Y)
+{${ESTABLISHED}} >nsubj {ner:ORGANIZATION}=entity >/dobj|nmod(:prep)?/ ( {} >/nmod(:(assmod|prep))?|compound(:nn)?/ {ner:/CITY|LOCATION/}=slot )
+{ner:ORGANIZATION}=entity >acl ({${ESTABLISHED}}  >/dobj|nmod(:prep)?/ ( {} >/nmod(:(assmod|prep))?|compound(:nn)?/ {ner:/CITY|LOCATION/}=slot ))

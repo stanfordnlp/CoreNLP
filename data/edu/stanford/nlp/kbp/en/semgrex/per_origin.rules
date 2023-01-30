@@ -1,0 +1,1 @@
+{ner:PERSON}=entity >/appos/ ( {ner:TITLE} >/amod|nn|compound|flat/ {ner:NATIONALITY}=slot )

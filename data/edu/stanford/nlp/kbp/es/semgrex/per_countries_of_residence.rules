@@ -1,0 +1,18 @@
+{ word:/[Cc]ancillera?|[Pp]residente|[Pp]residenta|[Vv]icepresident[ea]|[Vv]icecandcillera?|[Mm]inistr[oa]|[Em]bajadora?|[Rr]ey|[Rr]eina/ } >/amod/ {ner:/NATIONALITY|COUNTRY/}=slot >/appos/ {ner:/PERSON/}=entity
+{ word:/[Cc]ancillera?|[Pp]residente|[Pp]residenta|[Vv]icepresident[ea]|[Vv]icecandcillera?|[Mm]inistr[oa]|[Em]bajadora?|[Rr]ey|[Rr]eina/ } >/nmod/ ( {ner:/COUNTRY/}=slot >/case/ {word:/de/} ) >/appos/ {ner:/PERSON/}=entity
+{ word:/[Em]bajadora?/} >/appos/{ner:/PERSON/}=entity >/nmod/ ( {ner:/COUNTRY/}=slot >/case/ {word:/en/} ) 
+{ner:/PERSON/}=entity >/appos/ ({ word:/[Em]bajadora?/ } >/nmod/ ( {ner:/COUNTRY/}=slot >/case/ {word:/en/} ) )
+{ner:/PERSON/}=entity >/appos/ ({ word:/[Cc]ancillera?|[Pp]residente|[Pp]residenta|[Vv]icepresident[ea]|[Vv]icecandcillera?|[Mm]inistr[oa]|[Em]bajadora?|[Rr]ey|[Rr]eina/ } >/nmod/ {ner:/COUNTRY/}=slot ) 
+{pos:/NOUN|NN.*/} >/amod/ {ner:/NATIONALITY/}=slot >/appos/ {ner:/PERSON/}=entity
+
+
+{word:/vive|vivía|vivido/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/COUNTRY/}=slot
+{word:/vive|vivía|vivido/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obl/ {ner:/COUNTRY/}=slot
+{}  >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/conj/ ( {word:/vive|vivía|vivido/} >/obl/ {ner:/COUNTRY/}=slot )
+
+{word:/trasladó|trasladará|trasladaba|trasladaría/} >/obj/ {word:/se/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/COUNTRY/}=slot
+{ner:/PERSON/}=entity >/acl/ ( {word:/trasladó|trasladará|trasladaba|trasladaría/} >/obl/ {ner:/COUNTRY/}=slot )
+{} >/appos/ {ner:/PERSON/}=entity >/acl/ ( {word:/trasladó|trasladará|trasladaba|trasladaría/} >/obl/ {ner:/COUNTRY/}=slot )
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/trasladó|trasladará|trasladaba|trasladaría/} >/obj/ {word:/se/} >/obl/ {ner:/COUNTRY/}=slot )
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/trasladó|trasladará|trasladaba|trasladaría/} >/obj/ {word:/se/} ) >/obl/ {ner:/COUNTRY/}=slot 
+

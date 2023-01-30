@@ -1,0 +1,28 @@
+macro DIE = lemma:/(.*[死逝].*)|[离辞去]世|[病身]故|故去/;tag:/V.*/
+macro AGE_OF_DEATH = lemma:/享年|世寿|圆寂|终年|阳寿|时年/
+
+# Joe 享年 X 岁
+# (Joe died at X)
+{lemma:/享年|世寿|圆寂|终年|阳寿|时年/} >nsubj {ner:PERSON}=entity >/dobj|nmod(:range)?/ {ner:NUMBER}=slot
+{lemma:/享年|世寿|圆寂|终年|阳寿|时年/} </ccomp|conj/ ( {} >nsubj {ner:PERSON}=entity ) >/dobj|nmod(:range)?/ {ner:NUMBER}=slot
+{lemma:/享年|世寿|圆寂|终年|阳寿|时年/} >nsubj ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/dobj|nmod(:range)?/ {ner:NUMBER}=slot
+{lemma:/享年|世寿|圆寂|终年|阳寿|时年/} </ccomp|conj/ ( {} >nsubj ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) ) >/dobj|nmod(:range)?/ {ner:NUMBER}=slot
+
+# (现年) X 岁 的 Joe
+# (Joe, who is of age X)
+{ner:PERSON}=entity >/amod|nummod|nmod(:range)?/ ( {ner:NUMBER}=slot >/mark(:clf)?/ {lemma:/岁/} )
+{ner:PERSON}=entity >acl ( {} >/amod|nummod|nmod(:range)?/ ( {ner:NUMBER}=slot >/mark(:clf)?/ {lemma:/岁/} ))
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/amod|nummod|nmod(:range)?/ ( {ner:NUMBER}=slot >/mark(:clf)?/ {lemma:/岁/} )
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >acl ( {} >/amod|nummod|nmod(:range)?/ ( {ner:NUMBER}=slot >/mark(:clf)?/ {lemma:/岁/} ))
+
+# Joe 去世， [blah] X 岁
+{tag:/V.*/} </ccomp|conj/ ( {${DIE}} >nsubj {ner:PERSON}=entity ) >/dobj|nmod(:range)?|nummod|amod/ ( {ner:NUMBER}=slot >/mark(:clf)?/ {lemma:/岁/} )
+{tag:/V.*/} </ccomp|conj/ ( {${DIE}} >nsubj ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) ) >/dobj|nmod(:range)?|nummod|amod/ ( {ner:NUMBER}=slot >/mark(:clf)?/ {lemma:/岁/} )
+
+#{lemma:${DIE};tag:/V.*/} >nsubj {ner:PERSON}=entity >/(prep_|nmod:)(at)/ {ner:NUMBER}=slot
+#{lemma:${DIE};tag:/V.*/} >nsubj {ner:PERSON}=entity >/(prep_|nmod:)(at)/ ( {lemma:/age/} >nummod {ner:NUMBER}=slot )
+#{lemma:${DIE};tag:/V.*/} >nsubj {}=entity >/(prep_|nmod:).*/ ({} >/(prep_|nmod:)(at)/ {ner:NUMBER}=slot)
+#{lemma:${DIE};tag:/V.*/} >nsubj {}=entity >/(prep_|nmod:).*/ ({} >/(prep_|nmod:)(at)/ ({lemma:/age/} >nummod {ner:NUMBER}=slot ))
+## X, who rel Y
+#{}=entity >/acl:relclause/ ({lemma:/die/;tag:/VB.*/} >nsubj {lemma:who} >/(prep_|nmod:)(at)/ {ner:NUMBER}=slot)
+#{}=entity >/acl:relclause/ ({lemma:/die/;tag:/VB.*/} >nsubj {lemma:who} >/(prep_|nmod:).*/ ({} >/(prep_|nmod:)(at)/ {ner:NUMBER}=slot))

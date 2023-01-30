@@ -1,0 +1,11 @@
+This contains the semgrex-based patterns for each slot type.
+
+Each slot type must contain a file with the EXACT same name followed by ".rules" as the slot.
+Each file contains one pattern per line.
+Each pattern must contain two named nodes: one "entity" and one "slot".
+
+Note: 1) Finding parents is EXPENSIVE, so avoid the "<" expressions as much as possible!
+      2) You can find decendents upto multiple levels by using ">>" instead of ">" (which just compares the immediate children)
+
+
+These patterns were written by Mihai.

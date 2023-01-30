@@ -1,0 +1,26 @@
+macro DIE = lemma:/(.*(死|逝).*)|[离辞去]世/;tag:/V.*/
+
+#example: Obama was born in Hawaii.
+{${DIE}} >/nsubj|dep/ {ner:PERSON}=entity >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot
+{${DIE}} >/nsubj|dep/ {ner:PERSON}=entity >/nmod(:.*)?/ ({} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot)
+{${DIE}} </conj|ccomp/ ( {} >/nsubj|dep/ {ner:PERSON}=entity ) >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot
+{${DIE}} </conj|ccomp/ ( {} >/nsubj|dep/ {ner:PERSON}=entity ) >/nmod(:.*)?/ ({} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot)
+
+{${DIE}} >/nsubj|dep/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot
+{${DIE}} >/nsubj|dep/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/nmod(:.*)?/ ({} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot)
+{${DIE}} </conj|ccomp/ ( {} >/nsubj|dep/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) ) >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot
+{${DIE}} </conj|ccomp/ ( {} >/nsubj|dep/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) ) >/nmod(:.*)?/ ({} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot)
+
+# X, who rel Y
+{ner:PERSON}=entity >/acl/ ({${DIE}} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot)
+{ner:PERSON}=entity >/acl/ ({${DIE}} >/nmod(:.*)?/ ({} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot))
+{ner:PERSON}=entity >/acl/ ( {} >/conj|ccomp/ ( {${DIE}} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot))
+{ner:PERSON}=entity >/acl/ ( {} >/conj|ccomp/ ( {${DIE}} >/nmod(:.*)?/ ({} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot)))
+
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/acl/ ({${DIE}} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot)
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/acl/ ({${DIE}} >/nmod(:.*)?/ ({} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot))
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/acl/ ( {} >/conj|ccomp/ ( {${DIE}} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot))
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/acl/ ( {} >/conj|ccomp/ ( {${DIE}} >/nmod(:.*)?/ ({} >/nmod(:prep)?|dep/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot)))
+
+{lemma:/逝世地/} >/nmod(:(assmod|poss))?/ {ner:PERSON}=entity >/nmod(:prep)?/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot
+{lemma:/逝世地/} >/nmod(:(assmod|poss))?/ {ner:PERSON}=entity </conj|ccomp/ ( {} >/nmod(:prep)?/ {ner:/STATE_OR_PROVINCE|LOCATION/}=slot )

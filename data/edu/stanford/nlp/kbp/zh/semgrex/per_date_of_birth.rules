@@ -1,0 +1,28 @@
+macro BEAR = lemma:/[出降诞]?生于?/;tag:/V.*/
+
+# Joe 生于 X
+# (Joe was born on X)
+{${BEAR}} >/nsubj|dep/ {ner:PERSON}=entity >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot
+{${BEAR}} >/nsubj|dep/ {ner:PERSON}=entity >/nmod(:.*)?/ ({} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot)
+{${BEAR}} </conj|ccomp/ ( {} >/nsubj|dep/ {ner:PERSON}=entity ) >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot
+{${BEAR}} </conj|ccomp/ ( {} >/nsubj|dep/ {ner:PERSON}=entity ) >/nmod(:.*)?/ ({} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot)
+
+{${BEAR}} >/nsubj|dep/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot
+{${BEAR}} >/nsubj|dep/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/nmod(:.*)?/ ({} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot)
+{${BEAR}} </conj|ccomp/ ( {} >/nsubj|dep/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) ) >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot
+{${BEAR}} </conj|ccomp/ ( {} >/nsubj|dep/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) ) >/nmod(:.*)?/ ({} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot)
+
+# X, who rel Y
+{ner:PERSON}=entity >/acl/ ({${BEAR}} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot)
+{ner:PERSON}=entity >/acl/ ({${BEAR}} >/nmod(:.*)?/ ({} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot))
+{ner:PERSON}=entity >/acl/ ( {} >/conj|ccomp/ ( {${BEAR}} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot))
+{ner:PERSON}=entity >/acl/ ( {} >/conj|ccomp/ ( {${BEAR}} >/nmod(:.*)?/ ({} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot)))
+
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/acl/ ({${BEAR}} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot)
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/acl/ ({${BEAR}} >/nmod(:.*)?/ ({} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot))
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/acl/ ( {} >/conj|ccomp/ ( {${BEAR}} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot))
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/acl/ ( {} >/conj|ccomp/ ( {${BEAR}} >/nmod(:.*)?/ ({} >/nmod(:(tmod|prep))?|dep/ {ner:/DATE/}=slot)))
+
+{lemma:/.*生日.*/} >/nmod(:(assmod|poss))?/ {ner:PERSON}=entity >/nmod(:tmod)?/ {ner:DATE}=slot
+{lemma:/.*生日.*/} >/nmod(:(assmod|poss))?/ {ner:PERSON}=entity </conj|ccomp/ ( {} >/nmod(:tmod)?/ {ner:DATE}=slot )
+

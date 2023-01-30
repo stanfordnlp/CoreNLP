@@ -1,0 +1,26 @@
+#Juan vive en los Estados Unidos
+#{lemma:/raise|live|reside|grow/;tag:/VB.*/} >/nsubj.*/ {}=entity [ >/(prep_|nmod:)in/ {ner:CITY}=slot | >/(prep_|nmod:)at/ {ner:CITY}=slot ]
+#{word:/vive|reside|mora|viven|residen|moran|vivía|vivían|moraba|moraban|residía|residían/} >nsubj {ner:PERSON}=entity >nmod ({ ner:CITY }=slot >case { word:/en/ } ) 
+#Juan nacío en España pero vive en los EEUU. 
+#{} >/nsubj.*/ {}=entity >/conj.*/ ({lemma:/raise|live|reside|grow/;tag:/VB.*/} [ >/(prep_|nmod:)in/ {ner:CITY}=slot | >/(prep_|nmod:)at/ {ner:CITY}=slot ] )
+#{ ctag:/VERB/ } >nsubj {ner:PERSON}=entity >conj {word:/vive|reside|mora|viven|residen|moran|vivía|vivían|moraba|moraban|residía|residían/} >nmod ({ ner:CITY }=slot >case { word:/en/ } ) 
+#John, who lives in Stanford, met me today.
+#{}=entity >/rcmod|acl:relclause/ ({lemma:/raise|live|reside/;tag:/VB.*/} [ >/(prep_|nmod:)in/ {ner:CITY}=slot | >/(prep_|nmod:)at/ {ner:CITY}=slot])
+#{ner:PERSON}=entity >/acl.*/ {word:/vive|reside|mora|viven|residen|moran|vivía|vivían|moraba|moraban|residía|residían/}  >nmod ({ ner:CITY }=slot >case { word:/en/ } ) 
+# "John, of Stanford" -- consistently marked wrong by annotators?
+#{}=entity >nmod ( {ner:CITY}=slot >case {word:/de/} ) 
+
+{ner:/TITLE/} >/nmod/ {ner:/CITY/}=slot >/appos/ {ner:/PERSON/}=entity
+{ner:/PERSON/}=entity >/appos/ ( {ner:/TITLE/} >/nmod/ {ner:/CITY/}=slot )
+{} >/nsubj/ {ner:/PERSON/}=entity >/acl/ ( {word:/vive|vivía/ } >/obl/ ( {ner:/CITY/}=slot >/case/ {word:/en/} ) )
+{ner:/PERSON/}=entity >/appos/ ( {} >/acl/ ( {word:/vive|vivía/ } >/obl/ ( {ner:/CITY/}=slot >/case/ {word:/en/} ) ))
+{word:/vive|vivía/} >/nsubj/ ( {} > /appos/ {ner:/PERSON/}=entity ) >/obl/ ( {ner:/CITY/}=slot >/case/ {word:/en/} )
+{word:/vive|vivía/} >/nsubj/ ( {} > /appos/ {ner:/PERSON/}=entity ) >/obl/ ( {} >/nmod/ {ner:/CITY/}=slot )
+{word:/vive|vivía/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {ner:/CITY/}=slot >/case/ {word:/en/} )
+{word:/vive|vivía/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/nmod/ {ner:/CITY/}=slot )
+{ner:/PERSON/}=entity >/acl/ ( {word:/vive|vivía/} >/obl/ ( {ner:/CITY/}=slot >/case/ {word:/en/} ) )
+{word:/trasladó|trasladará|trasladaba|trasladaría/} >/obj/ {word:/se/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/CITY/}=slot
+{ner:/PERSON/}=entity >/acl/ ( {word:/trasladó|trasladará|trasladaba|trasladaría/} >/obl/ {ner:/CITY/}=slot )
+{} >/appos/ {ner:/PERSON/}=entity >/acl/ ( {word:/trasladó|trasladará|trasladaba|trasladaría/} >/obl/ {ner:/CITY/}=slot )
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/trasladó|trasladará|trasladaba|trasladaría/} >/obj/ {word:/se/} >/obl/ {ner:/CITY/}=slot )
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/trasladó|trasladará|trasladaba|trasladaría/} >/obj/ {word:/se/} ) >/obl/ {ner:/CITY/}=slot 

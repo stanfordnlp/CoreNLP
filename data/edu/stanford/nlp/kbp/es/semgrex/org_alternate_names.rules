@@ -1,0 +1,5 @@
+{ner:/ORGANIZATION/}=entity >/amod/ ( {word:/nacid[oa]/} >/obj/ {ner:/ORGANIZATION/}=slot  )
+{ner:/ORGANIZATION/}=slot >/amod/ ( {word:/nacid[oa]/} >/obj/ {ner:/ORGANIZATION/}=entity )
+{ner:/ORGANIZATION/}=entity >/amod/ ( {word:/conocid[oa]/} >/obl/ {ner:/ORGANIZATION/}=slot )
+{ner:/ORGANIZATION/}=slot >/amod/ ( {word:/conocid[oa]/} >/obl/ {ner:/ORGANIZATION/}=entity )
+

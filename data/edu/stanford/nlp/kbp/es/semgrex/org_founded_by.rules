@@ -1,0 +1,22 @@
+{ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity >/amod|acl/ ( {word:/fundado|fundada|creado|creada|formado|formada|establecido|establecida/} >/obj|obl/ {ner:/PERSON|ORGANIZATION/}=slot )
+{ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity >/amod|acl/ ( {word:/fundado|fundada|creado|creada|formado|formada|establecido|establecida/} >/obj|obl/ ( {} >/conj.*/ {ner:/PERSON|ORGANIZATION/}=slot ) ) 
+{ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity >/appos/ ( {} >/amod/ ( {word:/fundado|fundada|creado|creada|formado|formada|establecido|establecida/} >/obj|obl/ {ner:/PERSON|ORGANIZATION/}=slot ) )
+{ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity >/appos/ ( {} >/amod/ ( {word:/fundado|fundada|creado|creada|formado|formada|establecido|establecida/} >/obj|obl/ ( {} >/conj.*/ {ner:/PERSON|ORGANIZATION/}=slot ) ) )
+{word:/fundado|fundada|creado|creada|formado|formada|establecido|establecida/} >/nsubj/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity >>/obj|obl/ { ner:/PERSON|ORGANIZATION/}=slot
+{word:/fundado|fundada|creado|creada|formado|formada|establecido|establecida/} >/nsubj/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity >/obj|obl/ ( {} >/conj.*/ {ner:/PERSON|ORGANIZATION/}=slot )
+{} >/appos/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity >/amod/ ( {word:/fundado|fundada|creado|creada|formado|formada|establecido|establecida/} >/obj|obl/ {ner:/PERSON|ORGANIZATION/}=slot ) 
+{} >/appos/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity >/amod/ ( {word:/fundado|fundada|creado|creada|formado|formada|establecido|establecida/} >/obj|obl/ ( {} >/conj.*/ {ner:/PERSON|ORGANIZATION/}=slot ) )
+{ner:/PERSON/}=slot >/appos/ ( {word:/fundador|fundadora/} >/nmod/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity )
+{ner:/PERSON/}=slot >/appos/ ( {word:/fundador|fundadora/} >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity ) )
+{ner:/PERSON/}=slot >/acl/ ( {word:/fundador|fundadora/} >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity ) )
+{ner:/PERSON/}=slot >/acl/ ( {word:/fundador|fundadora/} >/nmod/ ( {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity ) )
+{word:/fundador|fundadora/} >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity ) >/nsubj/ {ner:/PERSON/}=slot
+{word:/fundador|fundadora/} >/nmod/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity  >/nsubj/ {ner:/PERSON/}=slot
+{} >/conj.*/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot >/appos/ ( {word:/fundadores|fundadoras/} >/nmod/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity )
+{} >/conj.*/ {ner:/PERSON/}=slot >/appos/ ( {word:/fundadores|fundadoras/} >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity ) )
+{} >/conj.*/ {ner:/PERSON/} >/acl/ ( {word:/fundadores|fundadoras/} >/nmod/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity )
+{} >/conj.*/ {ner:/PERSON/}=slot >/acl/ ( {word:/fundadores|fundadoras/} >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=enity ) )
+{word:/fundadores|fundadoras/} >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity ) >/nsubj/ ( {} >/conj.*/ {ner:/PERSON/}=slot )
+{word:/fundó|fundaron/} >/nsubj/ {}=slot >/obj|dobj/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity
+{word:/fundó|fundaron/} >/nsubj/ {}=slot >/obj|dobj/ ( {} >/appos/ {ner:/ORGANIZATION|COUNTRY|CITY|STATE_OR_PROVINCE/}=entity )
+

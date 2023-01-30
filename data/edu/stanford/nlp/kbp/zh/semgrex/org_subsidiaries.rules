@@ -1,0 +1,7 @@
+macro OWN = lemma:/收购|出售|并购|拥有|占有|持有|控股/
+
+{${OWN}} >/.subj.*/ {ner:ORGANIZATION}=entity >/.obj/ {ner:ORGANIZATION}=slot
+{${OWN}} >/.subj.*/ {ner:ORGANIZATION}=entity >/.obj/ ( {} >/appos|compound(:nn)?/ {ner:ORGANIZATION}=slot )
+{${OWN}} >/.subj.*/ {ner:ORGANIZATION}=entity >/.obj/ ( {lemma:/.*股.*|利润/} >/nmod(:assmod)?/ {ner:ORGANIZATION}=slot )
+{ner:ORGANIZATION}=entity >/appos|conj.*/ ( {lemma:/子.*|下属?.*|[分支].*/} >/nmod(:assmod)?/ {ner:ORGANIZATION}=slot )
+# {ner:ORGANIZATION}=slot >/nmod:poss/ {ner:ORGANIZATION}=entity

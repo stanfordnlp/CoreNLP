@@ -1,0 +1,10 @@
+{ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {ner:/STATE_OR_PROVINCE/}=slot >/case/ {word:/en/} ) )
+{word:/murió|falleció|matad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/STATE_OR_PROVINCE/}=slot 
+{word:/murió|falleció|matad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/nmod/ {ner:/STATE_OR_PROVINCE/}=slot  )
+{ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {} >/nmod/ {ner:/STATE_OR_PROVINCE/}=slot ) )
+{} >/appos|flat/ {ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {ner:/STATE_OR_PROVINCE/}=slot >/case/ {word:/en/} ) )
+{word:/murió|falleció|matad[oa]/} >/nsubj/ ( {} >/appos|flat/ {ner:/PERSON/}=entity ) >/obl/ {ner:/STATE_OR_PROVINCE/}=slot 
+{word:/murió|falleció|matad[oa]/} >/nsubj/ ( {} >/appos|flat/ {ner:/PERSON/}=entity ) >/obl/ ( {} >/nmod/ {ner:/STATE_OR_PROVINCE/}=slot  )
+{} >/appos|flat/ {ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {} >/nmod/ {ner:/STATE_OR_PROVINCE/}=slot ) )
+{word:/murió|falleció|matad[oa]|asesinad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/advcl/ ( {} >/obl/ {ner:/STATE_OR_PROVINCE/}=slot )
+{word:/murió|falleció|matad[oa]|asesinad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/advcl/ ( {} >/obl/ ( {} >/flat/ {ner:/STATE_OR_PROVINCE/}=slot ))

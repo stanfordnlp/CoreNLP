@@ -1,0 +1,7 @@
+#{ner:/ORGANIZATION/}=entity >/amod/ {ner:/RELIGION/}=slot
+#{} >/amod/ {ner:/RELIGION/}=slot >/appos/ {ner:/ORGANIZATION/}=entity
+#{ner:/ORGANIZATION/}=entity >/appos/ ( {} >/amod/ {ner:/RELIGION/}=slot )
+#{ner:/ORGANIZATION/}=entity >/appos/ {ner:/RELIGION/}=slot
+#{ner:/RELIGION/}=slot >/nsubj/ {ner:/ORGANIZATION/}=entity
+#{} >/amod/ {ner:/RELIGION/}=slot >/nsubj/ {ner:/ORGANIZATION/}=entity
+#{ner:/ORGANIZATION/}=entity >/nmod/ ( {} >/amod/ {ner:/RELIGION/}=slot )

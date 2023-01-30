@@ -1,0 +1,11 @@
+# El hombre de 27 años de edad murió 
+{ner:/PERSON/}=entity >/nmod/ ( {word:/años/ } >/nummod/ {word:/[0-9]+/}=slot )
+{ner:/PERSON/}=entity >/appos/ ( {} >/nmod/ ( {word:/años/} >/nummod/ {word:/[0-9]+/}=slot ) )
+{}=entity >/nmod/ ( {word:/años/ } >/nummod/ {word:/[0-9]+/}=slot >/nmod/ {word:/edad/} )
+{}=entity >/appos/ ( {} >/nmod/ ( {word:/años/} >/nummod/ {word:/[0-9]+/}=slot ) )
+{word:/murió/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {word:/años/} >/nummod/ {word:/[0-9]+/}=slot )
+{} >/appos/ {ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció/} >/obl/ ( {word:/años/} >/nummod/ {word:/[0-9]+/}=slot  ) )
+{} >/appos/ {}=entity >/acl/ ( {word:/murió|falleció/} >/obl/ ( {word:/años/} >/nummod/ {word:/[0-9]+/}=slot  ) )
+{}=entity >/acl/ ( {word:/tenía|tiene/ } >/obl/ ( {word:/años/} >/nummod/ {word:/[0-9]+/}=slot ) )
+{word:/tenía|tiene/} >/nsubj/ {ner:/PERSON/} >/obj/ ( {word:/años/} >/nummod/ {}=slot ) 
+

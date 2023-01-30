@@ -1,0 +1,4 @@
+{lemma:/charge|convict|indict|accuse/} >nsubj {}=entity >/(prep_|nmod:|obl:)(of|with)/ {ner:/CRIMINAL_CHARGE/}=slot
+{lemma:/charge|convict|indict|accuse/} >nsubj {}=entity >/(prep_|nmod:|obl:)(of|with)/ ( {ner:/CRIMINAL_CHARGE/} >/conj:and/ {ner:/CRIMINAL_CHARGE/}=slot )
+{lemma:/plead/} >nsubj {}=entity >obj {} >/(prep_|nmod:|obl:)(of|to)/ {ner:/CRIMINAL_CHARGE/}
+{lemma:/face/} >nsubj {}=entity >obj {ner:/CRIMINAL_CHARGE/}

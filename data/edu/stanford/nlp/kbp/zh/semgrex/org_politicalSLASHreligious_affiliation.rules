@@ -1,0 +1,1 @@
+{tag:/N.?/} >/.subj.*/ {ner:ORGANIZATION}=entity >/appos|conj.*/ ( {tag:/NN.*/} >/amod|nn|compound(:nn)?|nmod(:(assmod|prep)?)/ {ner:IDEOLOGY}=slot )

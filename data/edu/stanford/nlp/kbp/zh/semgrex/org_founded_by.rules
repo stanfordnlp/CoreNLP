@@ -1,0 +1,29 @@
+macro ESTABLISHED = lemma:/位于|(坐落|成立|建立|创设|创造|设立|设置|发起|树立|兴办|创办|缔造|制造|创建|创制|创作发明|扶植|建设|建树|创立|始建|组建)于?/
+
+# Joe (宣布) 成立 IBM
+# (Joe founded IBM)
+{${ESTABLISHED}} >/nsubj(pass)?|dobj/ {ner:ORGANIZATION}=entity >/dobj|nmod(:prep)?|nsubj/ {ner:/PERSON/}=slot
+{${ESTABLISHED}} </ccomp|conj/ ( {} >/nsubj(pass)?|dobj/ {ner:ORGANIZATION}=entity ) >/dobj|nmod(:prep)?|nsubj/ {ner:/PERSON/}=slot
+
+# relcl
+{ner:ORGANIZATION}=entity >acl ( {${ESTABLISHED}} >/dobj|nmod(:(topic|prep))?|nsubj/ {ner:/PERSON/}=slot )
+{ner:ORGANIZATION}=entity >acl ( {${ESTABLISHED}} </ccomp|conj/ ( {} >/dobj|nmod(:(topic|prep))?|nsubj/ {ner:/PERSON/}=slot ))
+{ner:ORGANIZATION}=entity >acl ( {${ESTABLISHED}} >/dobj|nmod(:(topic|prep))?|nsubj/ ( {} >/nmod(:(assmod|prep))?|dep/ {ner:/PERSON/}=slot ) )
+{ner:ORGANIZATION}=entity >acl ( {${ESTABLISHED}} </ccomp|conj/ ( {} >/dobj|nmod(:(topic|prep))?|nsubj/ ( {} >/nmod(:(assmod|prep))?|dep/ {ner:/PERSON/}=slot ) ))
+
+{ner:ORGANIZATION}=entity >/nmod(:poss)?/ {ner:/PERSON/}=slot
+{lemma:/公司|企业|集团|乐队|团队|商店|店铺|俱乐部/} >/nmod:poss/ {ner:PERSON}=slot >appos {ner:ORGANIZATION}=entity
+
+# Joe (宣布) 成立 IBM
+# (Joe founded IBM)
+{${ESTABLISHED}} >/nsubj(pass)?|dobj/ {ner:ORGANIZATION}=entity >/dobj|nmod(:prep)?|nsubj/ ( {} >/compound(:nn)?|appos|dep/ {ner:/PERSON/}=slot )
+{${ESTABLISHED}} </ccomp|conj/ ( {} >/nsubj(pass)?|dobj/ {ner:ORGANIZATION}=entity ) >/dobj|nmod(:prep)?|nsubj/ ( {} >/compound(:nn)?|appos|dep/ {ner:/PERSON/}=slot )
+
+# relcl
+{ner:ORGANIZATION}=entity >acl ( {${ESTABLISHED}} >/dobj|nmod(:(topic|prep))?|nsubj/ ( {} >/compound(:nn)?|appos|dep/ {ner:/PERSON/}=slot ) )
+{ner:ORGANIZATION}=entity >acl ( {${ESTABLISHED}} </ccomp|conj/ ( {} >/dobj|nmod(:(topic|prep))?|nsubj/ ( {} >/compound(:nn)?|appos|dep/ {ner:/PERSON/}=slot ) ))
+{ner:ORGANIZATION}=entity >acl ( {${ESTABLISHED}} >/dobj|nmod(:(topic|prep))?|nsubj/ ( {} >/nmod(:(assmod|prep))?|dep/ ( {} >/compound(:nn)?|appos|dep/ {ner:/PERSON/}=slot ) ) )
+{ner:ORGANIZATION}=entity >acl ( {${ESTABLISHED}} </ccomp|conj/ ( {} >/dobj|nmod(:(topic|prep))?|nsubj/ ( {} >/nmod(:(assmod|prep))?|dep/ ( {} >/compound(:nn)?|appos|dep/ {ner:/PERSON/}=slot ) ) ))
+
+{ner:ORGANIZATION}=entity >/nmod(:poss)?/ ( {} >/compound(:nn)?|appos|dep/ {ner:/PERSON/}=slot )
+{lemma:/公司|企业|集团|乐队|团队|商店|店铺|俱乐部/} >/nmod:poss/ ( {} >/compound(:nn)?|appos|dep/ {ner:PERSON}=slot ) >appos {ner:ORGANIZATION}=entity

@@ -1,0 +1,10 @@
+macro DIE = lemma:/(.*(死|逝).*)|[离辞去]世/;tag:/V.*/
+
+# Joe died of X
+{${DIE}} >nsubj {ner:PERSON}=entity >/nmod(:prep)?/ {ner:CAUSE_OF_DEATH}=slot
+{${DIE}} >nsubj {ner:PERSON}=entity >/(prep_|nmod:).*/ ({} >/nmod(:prep)?/ {ner:CAUSE_OF_DEATH}=slot)
+{${DIE}} </ccomp|conj/ ( {} >nsubj {ner:PERSON}=entity ) >/nmod(:prep)?/ {ner:CAUSE_OF_DEATH}=slot
+{${DIE}} </ccomp|conj/ ( {} >nsubj {ner:PERSON}=entity ) >/(prep_|nmod:).*/ ({} >/nmod(:prep)?/ {ner:CAUSE_OF_DEATH}=slot)
+# X, who rel Y
+{ner:PERSON}=entity >/acl/ ({${DIE}} >/nmod(:prep)?/ {ner:CAUSE_OF_DEATH}=slot)
+{ner:PERSON}=entity >/acl/ ({${DIE}} >/(prep_|nmod:).*/ ({} >/nmod(:prep)?/ {ner:CAUSE_OF_DEATH}=slot))

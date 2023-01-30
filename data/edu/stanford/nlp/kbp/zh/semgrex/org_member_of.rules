@@ -1,0 +1,7 @@
+macro JOIN = lemma:/加入|参加/
+
+{${JOIN}} >/nsubj/ {ner:ORGANIZATION}=entity >/dobj/ {ner:ORGANIZATION}=slot
+{tag:/V.*/} >/ccomp|conj.*/ {${JOIN}} >/nsubj/ {ner:ORGANIZATION}=entity >/dobj/ {ner:ORGANIZATION}=slot
+{${JOIN}} >/nsubj/ {ner:ORGANIZATION}=entity >/dobj/ ( {} >/compound(:nn)?|dep|nmod(:assmod)?/ {ner:ORGANIZATION}=slot )
+{tag:/V.*/} >/ccomp|conj.*/ {${JOIN}} >/nsubj/ {ner:ORGANIZATION}=entity >/dobj/ ( {} >/compound(:nn)?|dep|nmod(:assmod)?/ {ner:ORGANIZATION}=slot )
+

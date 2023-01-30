@@ -1,0 +1,19 @@
+This contains the semgrex-based patterns for each slot type.
+
+Each slot type must contain a file with the EXACT same name followed by ".rules" as the slot.
+Each file contains one pattern per line.
+Each pattern must contain two named nodes: one "entity" and one "slot".
+
+Note: 1) Finding parents is EXPENSIVE, so avoid the "<" expressions as much as possible!
+      2) You can find decendents upto multiple levels by using ">>" instead of ">" (which just compares the immediate children)
+
+
+These patterns were written by Mihai.
+
+
+Spanish specific notes: there will probably not be any iobj relations,
+but in some cases the UD 1.0 semgrex expressions allowed .obj, so for
+possibly compatibility with UD 2.0 we allow (.)?obj
+
+also, compound should not ever occur, so there is no need to allow
+flat|compound instead of just allowing flat

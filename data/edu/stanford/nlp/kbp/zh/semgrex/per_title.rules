@@ -1,0 +1,33 @@
+macro TITLESLOT = ( {ner:TITLE}=slot !>/compound(:nn)?|appos/ {ner:PERSON} )
+macro EMPLOY = lemma:/在?(受?雇|就职|就任|委任|委托|任?命|任职?|担任?|[授受]职?|工作|上.|.入|[加进].)于?|从?(辞.?|.休|离.|.出)|.*[升降贬谪提拔].*/
+
+{ner:PERSON}=entity >/nn|compound(:nn)?|amod|appos/ ${TITLESLOT}
+{ner:PERSON}=entity >/nn|compound(:nn)?|amod|appos/ ( {ner:TITLE} >>/conj.*/ ${TITLESLOT} )
+${TITLESLOT} >/appos/ {ner:PERSON}=entity
+${TITLESLOT} >/nsubj.*/ {ner:PERSON}=entity >cop {}
+{${EMPLOY}} >nsubj {ner:PERSON}=entity >/dobj|nmod(:assmod)?/ ${TITLESLOT}
+{${EMPLOY}} >nsubj {ner:PERSON}=entity >/dobj|nmod(:assmod)?/ ( {ner:TITLE} >>/conj.*/ ${TITLESLOT} )
+{ner:PERSON}=entity >/acl/ ({${EMPLOY}} >/dobj|nmod(:assmod)?/ ${TITLESLOT})
+# As a TITLE, PERSON VERB'd
+{tag:/V.?|N.?/} >nsubj {ner:PERSON}=entity >/nmod(:(assmod|prep))?/ ${TITLESLOT}
+# PERSON 被任命为/担任 TITLE
+# (PERSON was appointed as TITLE)
+{${EMPLOY}} >/nsubj(pass)?/ {ner:PERSON}=entity >/dobj/ ${TITLESLOT}
+{${EMPLOY}} >/nsubj(pass)?/ {ner:PERSON}=entity >/dobj/ ( {ner:TITLE} >>/conj.*/ ${TITLESLOT} )
+
+{${EMPLOY}} >/nsubj(pass)?/ {ner:PERSON}=entity >/conj|ccomp/ ( {${EMPLOY}} >/dobj/ ${TITLESLOT} )
+{${EMPLOY}} >/nsubj(pass)?/ {ner:PERSON}=entity >/conj|ccomp/ ( {${EMPLOY}} >/dobj/ ( {ner:TITLE} >>/conj.*/ ${TITLESLOT} ))
+
+{${EMPLOY}} >/nsubj(pass)?/ ( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity) >/dobj/ ${TITLESLOT}
+{${EMPLOY}} >/nsubj(pass)?/ ( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity) >/dobj/ ( {ner:TITLE} >>/conj.*/ ${TITLESLOT} )
+
+{${EMPLOY}} >/nsubj(pass)?/ ( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity) >/conj|ccomp/ ( {${EMPLOY}} >/dobj/ ${TITLESLOT} )
+{${EMPLOY}} >/nsubj(pass)?/ ( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity) >/conj|ccomp/ ( {${EMPLOY}} >/dobj/ ( {ner:TITLE} >>/conj.*/ ${TITLESLOT} ))
+
+# X 会长 、 Y 主席 Z (长老)
+# (Title) Z, the head of X and chair of Y
+{ner:PERSON}=entity >/conj.*|dep/ ${TITLESLOT}
+{ner:PERSON}=entity >/conj.*|dep/ ({ner:TITLE} >>/conj.*/ ${TITLESLOT})
+
+( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity ) >/conj.*|dep/ ${TITLESLOT}
+( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity ) >/conj.*|dep/ ({ner:TITLE} >>/conj.*/ ${TITLESLOT})

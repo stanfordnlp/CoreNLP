@@ -1,0 +1,10 @@
+{word:/graduó/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/ORGANIZATION/}=slot
+# Lazzarini se graduó de la licenciatura de Economía en la Universidad de Neuchatel y tiene un posgrado en administración empresarial de la Universidad de Lausana.
+{word:/graduó/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/nmod/ {ner:/ORGANIZATION/}=slot )
+# Li, nacido en 1955 en la provincia de Anhui, ingresó en el Partido Comunista de China (PCCh) en 1976 y se graduó de la Universidad de Pekin,donde se licenció en Economía.
+{} >/conj/ {word:/graduó|asistió|asistía|estudiaba/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/nmod/ {ner:/ORGANIZATION/}=slot )
+# Henry Louis Gates, nació en Virginia, en 1950, se graduó en Yale y en la actualidad es profesor en la Universidad de Harvard, además de tene
+{} >/parataxis.*/ ({word:/graduó/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/ORGANIZATION/}=slot )
+#  Mandela, quien estudió Derecho en la Universidad de Witwatersrand y se graduó en 1942 como abogado, visitó Cuba en 1991 y se retiró de su ca
+{ner:/PERSON/}=entity >/acl/ ({word:/estudiaba|estudió|asistía|asistió/ } >>/obl/ {ner:/ORGANIZATION/}=slot )
+{word:/graduó/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >>/conj/ {ner:/ORGANIZATION/}=slot )

@@ -1,0 +1,14 @@
+macro PERSONCLF = lemma:/人|名|.*[工员].*|位/
+
+{tag:/V.*/} >/nsubj/ {ner:ORGANIZATION}=entity >/dobj|nmod(:range)?|nummod|amod/ ({ner:NUMBER}=slot >/mark(:clf)?|dep/ {${PERSONCLF}})
+{tag:/V.*/} >/nsubj/ ({tag:/N.*/} >/nmod(:assmod)?|compound(:nn)?/ {ner:ORGANIZATION}=entity) >/dobj|nmod(:range)?|nummod|amod/ ({ner:NUMBER}=slot >/mark(:clf)?|dep/ {${PERSONCLF}})
+{tag:/V.*/} </conj|ccomp/ ( {tag:/V.*/} >/nsubj/ {ner:ORGANIZATION}=entity) >/dobj|nmod(:range)?|nummod|amod/ ({ner:NUMBER}=slot >/mark(:clf)?|dep/ {${PERSONCLF}})
+{tag:/V.*/} </conj|ccomp/ ( {tag:/V.*/} >/nsubj/ ({tag:/N.*/} >/nmod(:assmod)?|compound(:nn)?/ {ner:ORGANIZATION}=entity)) >/dobj|nmod(:range)?|nummod|amod/ ({ner:NUMBER}=slot >/mark(:clf)?|dep/ {${PERSONCLF}})
+{ner:ORGANIZATION}=entity >acl ( {tag:/V.*/} >/nmod(:prep)?|nsubj|dobj/ ( {} >/nummod|amod/ ({ner:NUMBER}=slot >/mark(:clf)?|dep/ {${PERSONCLF}}) ))
+
+# the following rules are mainly for battling parse errors
+#{tag:/V.*/} >/nsubj/ {ner:ORGANIZATION}=entity >/dobj|nmod(:range)?|nummod|amod/ ({ner:NUMBER}=slot >/mark(:clf)?|dep/ {${PERSONCLF}})
+#{tag:/V.*/} >/nsubj/ ({tag:/N.*/} >/nmod(:assmod)?|compound(:nn)?/ {ner:ORGANIZATION}=entity) >/dobj|nmod(:range)?|nummod|amod/ ({ner:NUMBER}=slot >/mark(:clf)?|dep/ {${PERSONCLF}})
+#{tag:/V.*/} </conj|ccomp/ ( {tag:/V.*/} >/nsubj/ {ner:ORGANIZATION}=entity) >/dobj|nmod(:range)?|nummod|amod/ ({ner:NUMBER}=slot >/mark(:clf)?|dep/ {${PERSONCLF}})
+#{tag:/V.*/} </conj|ccomp/ ( {tag:/V.*/} >/nsubj/ ({tag:/N.*/} >/nmod(:assmod)?|compound(:nn)?/ {ner:ORGANIZATION}=entity)) >/dobj|nmod(:range)?|nummod|amod/ ({ner:NUMBER}=slot >/mark(:clf)?|dep/ {${PERSONCLF}})
+#{ner:ORGANIZATION}=entity >acl ( {tag:/V.*/} >/nmod(:prep)?|nsubj|dobj/ ( {} >/nummod|amod/ ({ner:NUMBER}=slot >/mark(:clf)?|dep/ {${PERSONCLF}}) ))

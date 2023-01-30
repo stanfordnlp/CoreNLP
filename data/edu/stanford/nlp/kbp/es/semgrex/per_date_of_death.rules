@@ -1,0 +1,26 @@
+{word:/murió|falleció|asesinado/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/DATE/}=slot 
+{ner:/PERSON/}=entity >/amod/ {word:/muert[oa]|asesinad[oa]/} >/obl/ {ner:/DATE/}=slot
+{word:/murió|falleció|asesinado/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obl/ {ner:/DATE/}=slot
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/murió|falleció|asesinado/} >/obl/ {ner:/DATE/}=slot )
+
+
+{word:/moría/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/DATE/}=slot 
+{word:/moría/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obl/ {ner:/DATE/}=slot
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/moría/} >/obl/ {ner:/DATE/}=slot )
+{word:/muriera/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/DATE/}=slot 
+{word:/muriera/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obl/ {ner:/DATE/}=slot
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/muriera/} >/obl/ {ner:/DATE/}=slot )
+{word:/muerto/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/DATE/}=slot 
+{word:/muerto/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obl/ {ner:/DATE/}=slot
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/muerto/} >/obl/ {ner:/DATE/}=slot )
+
+
+{} >/obl/ {ner:/DATE/}=slot  >/ccomp/ ( {word:/muerto/} >/nsubj/ {ner:/PERSON/}=entity )
+{} >/obl/ {ner:/DATE/}=slot  >/ccomp/ ( {word:/muerto/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) )
+
+{word:/muerto|fallecimiento/} >/nmod/ {ner:/PERSON/}=entity >/appos/ {ner:/DATE/}=slot
+{word:/muerto|fallecimiento/} >/nmod/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/appos/ {ner:/DATE/}=slot
+
+
+{word:/murió|falleció/} >/nsubj/ {ner:/PERSON/}=entity >/nummod|appos/ {ner:/DATE/}=slot
+

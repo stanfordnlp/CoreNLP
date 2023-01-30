@@ -1,0 +1,9 @@
+# His family, Joe
+# (Stanford dependencies; conj is fixing common parse errors)
+{ner:PERSON}=entity >/poss/ ( {lemma:/grandson|granddaughter|uncle|aunt|cousin|niece|nephew/} >/appos|conj.*/ {ner:PERSON}=slot )
+# (Universal dependencies; conj is fixing common parse errors)
+{lemma:/grandson|granddaughter|uncle|aunt|cousin|niece|nephew/} >/nmod:poss/ {ner:PERSON}=entity >/appos|conj.*/ {ner:PERSON}=slot
+# Among ENTITY's sons are SLOT.
+{lemma:/be/} >/(prep_|nmod:|obl:).*/ ( {lemma:/grandson|granddaughter|uncle|aunt|cousin|niece|nephew/} >/nmod:poss/ {ner:PERSON}=entity ) >/.subj/ {ner:PERSON}=slot
+# SLOT, son of ENTITY
+{ner:PERSON}=slot >/appos|conj.*/ ( {lemma:/grandson|granddaughter|uncle|aunt|cousin|niece|nephew/} >/(prep_|nmod:|obl:)of/ {ner:PERSON}=entity )

@@ -1,0 +1,35 @@
+{lemma: /\Qdaughter\E/}=null  >nsubj=E1 {}=entity  >/(prep_|nmod:)of/=E2 {}=slot
+{}=entity >/acl:relclause/ ({lemma: /\Qdaughter\E/}=null  >nsubj=E1 {lemma:who} >/(prep_|nmod:)of/=E2 {}=slot)
+
+# COPIED FROM PER:CHILDREN
+macro CHILD = lemma:/.*女儿?|.*儿子?|孩?子|小孩/
+macro PARENT = lemma:/妈+|爸+|[父母]亲?/
+
+# His son, Joe
+# (Stanford dependencies; conj is fixing common parse errors)
+#{ner:PERSON}=slot >/nmod(:poss)?|compound(:nn)?/ ( {${CHILD}} >/dep|appos|conj.*/ {ner:PERSON}=entity )
+# (Universal dependencies; conj is fixing common parse errors)
+{${CHILD}} >/nmod(:poss)?|compound(:nn)?/ {ner:PERSON}=slot >/dep|appos|conj.*/ {ner:PERSON}=entity
+{ner:PERSON}=slot >/nmod(:poss)?|compound(:nn)?/ ( {${CHILD}}  >/dep|appos|conj.*/ {ner:PERSON}=entity )
+# Among ENTITY's sons are SLOT.
+{tag:/V[CE]/} >/(prep_|nmod:).*/ ( {${CHILD}} >/nmod(:poss)?|compound(:nn)?/ {ner:PERSON}=slot ) >/.subj/ {ner:PERSON}=entity
+# SLOT, son of ENTITY
+{ner:PERSON}=entity >/dep|appos|conj.*/ ( {${CHILD}} >/nmod(:prep)?/ {ner:PERSON}=slot )
+
+{${CHILD}} >/nmod(:poss)?|compound(:nn)?/ {ner:PERSON}=slot >/dep|appos|conj.*/ ( {ner:PERSON} >>/conj.*|dep/ {ner:PERSON}=entity )
+{ner:PERSON}=slot >/nmod(:poss)?|compound(:nn)?/ ( {${CHILD}}  >/dep|appos|conj.*/ ( {ner:PERSON} >>/conj.*|dep/ {ner:PERSON}=entity ) )
+# Among ENTITY's sons are SLOT.
+{tag:/V[CE]/} >/(prep_|nmod:).*/ ( {${CHILD}} >/nmod(:poss)?|compound(:nn)?/ {ner:PERSON}=slot ) >/.subj/ ( {ner:PERSON} >>/conj.*|dep/ {ner:PERSON}=entity )
+# SLOT, son of ENTITY
+( {ner:PERSON} >>/conj.*|dep/ {ner:PERSON}=entity ) >/dep|appos|conj.*/ ( {${CHILD}} >/nmod(:prep)?/ {ner:PERSON}=slot )
+
+# His parent, Joe
+# (Stanford dependencies; conj is fixing common parse errors)
+{ner:PERSON}=entity >/nmod(:poss)?|compound(:nn)?/ ( {${PARENT}} >/dep|appos|conj.*/ {ner:PERSON}=slot )
+# (Universal dependencies; conj is fixing common parse errors)
+{${PARENT}} >/nmod(:poss)?|compound(:nn)?/ {ner:PERSON}=entity >/dep|appos|conj.*/ {ner:PERSON}=slot
+{ner:PERSON}=entity >/nmod(:poss)?|compound(:nn)?/ ( {${PARENT}}  >/dep|appos|conj.*/ {ner:PERSON}=slot )
+# Among ENTITY's parents are SLOT.
+{tag:/V[CE]/} >/(prep_|nmod:).*/ ( {${PARENT}} >/nmod(:poss)?|compound(:nn)?/ {ner:PERSON}=entity ) >/.subj/ {ner:PERSON}=slot
+# SLOT, parent of ENTITY
+{ner:PERSON}=slot >/dep|appos|conj.*/ ( {${PARENT}} >/nmod(:prep)?/ {ner:PERSON}=entity )

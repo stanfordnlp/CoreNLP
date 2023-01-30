@@ -1,0 +1,14 @@
+macro ESTABLISHED = lemma:/位于|(坐落|成立|建立|创设|创造|设立|设置|发起|树立|兴办|创办|缔造|制造|创建|创制|创作发明|扶植|建设|建树|创立|始建|组建)于?/
+
+# IBM (宣布) 成立 于 X
+# (IBM was founded in X)
+{${ESTABLISHED}} >/nsubj|dobj/ {ner:ORGANIZATION}=entity >/dobj|nmod(:(tmod|topic|prep))?/ {ner:/DATE/}=slot
+{${ESTABLISHED}} </ccomp|conj/ ( {} >/nsubj|dobj/ {ner:ORGANIZATION}=entity >/dobj|nmod(:(tmod|topic|prep))?/ {ner:/DATE/}=slot )
+{${ESTABLISHED}} </ccomp|conj/ ( {} >/nsubj|dobj/ {ner:ORGANIZATION}=entity ) >/dobj|nmod(:(tmod|topic|prep))?/ {ner:/DATE/}=slot
+
+# （宣布） 成立 于 X 的 IBM
+# (IBM, founded in X)
+{ner:ORGANIZATION}=entity >acl ( {${ESTABLISHED}} >/dobj|nmod(:(tmod|topic|prep))?/ {ner:/DATE/}=slot )
+{ner:ORGANIZATION}=entity >acl ( {${ESTABLISHED}} </ccomp|conj/ ( {} >/dobj|nmod(:(tmod|topic|prep))?/ {ner:/DATE/}=slot ))
+
+{ner:ORGANIZATION}=entity >/nmod:tmod/ {ner:/DATE/}=slot >/nmod:prep/ {${ESTABLISHED}}

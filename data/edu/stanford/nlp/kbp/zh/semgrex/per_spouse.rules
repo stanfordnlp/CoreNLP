@@ -1,0 +1,32 @@
+macro MARRY = lemma:/结婚|迎?娶|[远下]?嫁[入给]?/
+macro SPOUSE = lemma:/丈?夫|妻子?|配偶|老伴|[娇发]妻|夫人/
+
+#Obama married Michelle
+{${MARRY}} >nsubj {ner:PERSON}=entity >dobj {ner:PERSON}=slot
+#Obama is married to Michelle.
+{${MARRY}} >nsubjpass {}=entity >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {ner:PERSON}=slot
+{}=entity >/acl/ ({${MARRY}} >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {ner:PERSON}=slot)
+#Michelle is married to Obama.
+{${MARRY}} >nsubjpass {ner:PERSON}=slot >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {}=entity
+{}=entity >/acl/ ({${MARRY}} >nsubjpass {ner:PERSON}=slot >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {lemma:who})
+#John married Laura in July. (removed tag:/V.*/ since sometimes POS tagging is incorrect and cannot tag "marry" right!)
+{${MARRY}} >nsubj {}=entity >dobj {ner:PERSON}=slot
+{}=entity >/acl/ ({${MARRY}} >dobj {ner:PERSON}=slot)
+#Laura is marrying John in July
+{${MARRY}} >nsubj {ner:PERSON}=slot >dobj {}=entity
+{}=entity >/acl/ ({${MARRY}} >nsubj {ner:PERSON}=slot >dobj {lemma:who})
+#Michelle, who is married to Obama, ...
+{ner:PERSON}=entity  >/rcmod|acl/ ( {${MARRY}} >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {ner:PERSON}=slot)
+#Michelle, who is married to Obama, ...
+{ner:PERSON}=slot  >/rcmod|acl/ ( {${MARRY}} >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {ner:PERSON}=entity )
+#John, the husband of Judy, ...
+{ner:PERSON}=entity >appos ( {${SPOUSE}}  >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {ner:PERSON}=slot )
+#Judy, the wife of John, ...
+{ner:PERSON}=slot >appos ( {${SPOUSE}} >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {ner:PERSON}=entity)
+#John tied knot with Judy in July.
+{lemma:结} >nsubj {ner:PERSON}=entity >dobj {lemma:/连理|同心|婚姻?|[良姻]缘/} >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {ner:PERSON}=slot
+{}=entity >/acl/ ({lemma:结} >dobj {lemma:/连理|同心|婚姻?|[良姻]缘/} >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {ner:PERSON}=slot)
+#Judy tied knot with John in July.
+{lemma:结} >nsubj {ner:PERSON}=slot >dobj {lemma:/连理|同心|婚姻?|[良姻]缘/} >/nmod(:(prep|assmod|poss))?|compound(:nn)?|dep/ {ner:PERSON}=entity
+# His wife, Michelle
+{ner:PERSON} >/nmod(:poss)?/ ( {${SPOUSE}} >appos {ner:PERSON}=slot )

@@ -1,0 +1,6 @@
+{lemma:/buy|sell|acquire|own/} >/.subj.*/ {ner:ORGANIZATION}=entity >/(i?)obj/ {ner:ORGANIZATION}=slot
+{lemma:/buy|sell|acquire|own/} >/.subj.*/ {ner:ORGANIZATION}=entity >/(i?)obj/ ( {} >/appos/ {ner:ORGANIZATION}=slot )
+{lemma:/buy|sell|acquire|own/} >/.subj.*/ {ner:ORGANIZATION}=slot >/(prep_|nmod:|obl:)(by|to)/ {ner:ORGANIZATION}=entity
+{lemma:/buy|sell|acquire|own/} >/.subj.*/ {ner:ORGANIZATION}=entity >/(i?)obj/ ( {lemma:/stake|interest|share/} >/(prep_|nmod:|obl:)in/ {ner:ORGANIZATION}=slot )
+{ner:ORGANIZATION}=entity >/appos|conj.*/ ( {lemma:/part|subsidiary|unit|division|branch|wing/} >/(prep_|nmod:|obl:)of/ {ner:ORGANIZATION}=slot )
+# {ner:ORGANIZATION}=slot >/nmod:poss/ {ner:ORGANIZATION}=entity 

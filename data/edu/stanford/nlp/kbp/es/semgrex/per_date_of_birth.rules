@@ -1,0 +1,21 @@
+{word:/nació/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/DATE/}=slot 
+{ner:/PERSON/}=entity >/amod/ {word:/nacid[oa]/} >/obl/ {ner:/DATE/}=slot
+{word:/nació/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obl/ {ner:/DATE/}=slot
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/nació/} >/obl/ {ner:/DATE/}=slot )
+
+{word:/nacía/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/DATE/}=slot 
+{word:/nacía/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obl/ {ner:/DATE/}=slot
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/nacía/} >/obl/ {ner:/DATE/}=slot )
+{word:/naciera/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/DATE/}=slot 
+{word:/naciera/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obl/ {ner:/DATE/}=slot
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/naciera/} >/obl/ {ner:/DATE/}=slot )
+{word:/nacido/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/DATE/}=slot 
+{word:/nacido/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obl/ {ner:/DATE/}=slot
+{} >/nsubj/ {ner:/PERSON/}=entity >/conj/ ( {word:/nacido/} >/obl/ {ner:/DATE/}=slot )
+
+
+{} >/obl/ {ner:/DATE/}=slot  >/ccomp/ ( {word:/nacido/} >/nsubj/ {ner:/PERSON/}=entity )
+{} >/obl/ {ner:/DATE/}=slot  >/ccomp/ ( {word:/nacido/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) )
+
+{word:/nacido|nació|naciera/} >/nsubj/ {ner:/PERSON/}=entity >/appos|dep/ {ner:/DATE/}=slot 
+

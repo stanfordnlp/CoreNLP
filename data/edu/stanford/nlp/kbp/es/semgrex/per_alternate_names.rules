@@ -1,0 +1,7 @@
+{ner:/PERSON/}=entity >/amod/ ( {word:/nacid[oa]/} >/obj/ {ner:/PERSON/}=slot  )
+{ner:/PERSON/}=slot >/amod/ ( {word:/nacid[oa]/} >/obj/ {ner:/PERSON/}=entity )
+{ner:/PERSON/}=entity >/amod/ ( {word:/conocid[oa]/} >/obl/ {ner:/PERSON/}=slot )
+{ner:/PERSON/}=slot >/amod/ ( {word:/conocid[oa]/} >/obl/ {ner:/PERSON/}=entity )
+{ner:/PERSON/}=slot >/appos/ ( {word:/seudónimo/ } >/nmod/ {ner:/PERSON/}=entity )
+#{} >/appos/ {ner:/PERSON/}=entity >/appos/ {ner:/PERSON/}=slot
+#{ner:/PERSON/}=entity >/appos/ {ner:/PERSON/}=slot

@@ -1,0 +1,4 @@
+{lemma:/触?犯|[起公]?诉|涉嫌?|宣?判|判处/} >nsubj {}=entity >/nmod(:prep)?|dobj/ {ner:/CRIMINAL_CHARGE/}=slot
+{lemma:/触?犯|[起公]?诉|涉嫌?|宣?判|判处/} >nsubj {}=entity >/nmod(:prep)?|dobj/ ( {ner:/CRIMINAL_CHARGE/} >/conj:and/ {ner:/CRIMINAL_CHARGE/}=slot )
+{lemma:/认罪/} >nsubj {}=entity >dobj {} >/nmod(:prep)?|dobj/ {ner:/CRIMINAL_CHARGE/}
+{lemma:/面临/} >nsubj {}=entity >dobj {ner:/CRIMINAL_CHARGE/}

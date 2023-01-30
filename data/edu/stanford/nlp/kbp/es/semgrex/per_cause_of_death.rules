@@ -1,0 +1,10 @@
+{word:/murió|falleció|muerto|asesinato|matado/} >/nsubj/ {}=entity >/obl/ {ner:/CAUSE_OF_DEATH/}=slot
+{word:/murió|falleció|muerto|asesinato|matado/} >/nsubj/ ( {} >/appos/ {}=entity ) >/obl/ {ner:/CAUSE_OF_DEATH/}=slot
+{word:/murió|falleció|muerto|asesinato|matado/} >/nsubj/ {}=entity >/advmod.*/ ( {} >/nmod/ {ner:/CAUSE_OF_DEATH/}=slot )
+{word:/murió|falleció|muerto|asesinato/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/advmod.*/ ( {} >/nmod/ {ner:/CAUSE_OF_DEATH/}=slot )
+{word:/suicidio|asesinato|homicido/}=slot >/nmod/ {ner:/PERSON/}=entity
+{ner:/PERSON/}=entity >/amod/ {ner:/CAUSE_OF_DEATH/}
+{ner:/PERSON/}=entity >/amod/ ( {} >/nmod/ ( {ner:/CAUSE_OF_DEATH/} >/case/ {word:/por|de|con/ } ) )
+{word:/murió|falleció|muerto/} >/nsubj/ {ner:/PERSON/}=entity >/advcl/ ( {} >/nmod|obl|obj/ {ner:/CAUSE_OF_DEATH/} )
+{word:/murió|falleció|muerto/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/advcl/ ( {} >/nmod|obl|obj/ {ner:/CAUSE_OF_DEATH/} )
+{ner:/PERSON/}=entity >/appos/ ( {word:/víctima/ } >/nmod/ {ner:/CAUSE_OF_DEATH/} )

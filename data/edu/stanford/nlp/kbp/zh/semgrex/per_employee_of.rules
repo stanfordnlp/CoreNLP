@@ -1,0 +1,99 @@
+#macro JOB = lemma:/(p|P)resident|(E|e)x\-president|ceo|CEO|(S|s)tar|(P|p)rofessor|(o|O)rganizer|(m|M)anager|(c|C)oach|(E|e)mployee|(n|N)egotiator|(m|M)inister|(H|h)ead|(E|e)mployee|(S|s)enator|(G|g)overnor|(F|f)ounder|(C|c)o\-founder|(O|o)wner|(C|c)hancell?or|(V|v)ice-chancell?or|(M|m)ayor|(L|l)eader|(P|p)remier|(S|s)ecretary|(R|r)uler|[Mm]ember/
+macro ORG = ner:/ORGANIZATION|LOCATION|COUNTRY|STATE_OR_PROVINCE|CITY|NATIONALITY/
+#macro EMPLOY = lemma:/(S|s)ign|(E|e)mploy|(E|e)elect|(R|r)e\-elect/
+macro EMPLOY = lemma:/在?(受?雇|就职|就任|委任|委托|任?命|任职?|担任?|[授受]职?|工作|上.|.入|[加进].)于?|从?(辞.?|.休|离.|.出)|.*[升降贬谪提拔].*/
+
+# !!!Note: not all titles of interest here will be marked accordingly by our NER system
+
+# IBM 的 CEO Joe
+# IBM 总裁 Joe
+# (Joe, CEO of IBM)
+{ner:PERSON}=entity >appos ( ({ner:TITLE} >/nmod(:assmod)?|compound(:nn)?/ {${ORG}}=slot) )
+#{}=entity >appos ( ({${JOB}} >/(nmod:|prep_)of/ {${ORG}}=slot) )
+# ^ from Jason's: {}=entity >appos ({${JOB}} >/nn|poss|amod|prep_from|nmod:from|prep_of|nmod:of|prep_at|nmod:at/ {${ORG}}=slot)S
+
+# Joe 是 IBM 的 CEO
+# (Joe is the CEO of IBM)
+#{ner:TITLE} >nsubj {ner:PERSON}=entity >cop {} >/nmod(:assmod)?|compound(:nn)?/ {${ORG}}=slot
+# ^ Peng: merged into the following pattern
+#{${JOB}} >nsubj {}=entity >cop {lemma:/be/} >/(prep_|nmod:)(of|at|from|for)/ {${ORG}}=slot
+# ^ from Jason's: {${JOB}} >nsubj {}=entity >cop {lemma:/be/} >>/prep_at|nmod:at|prep_of|nmod:of|prep_from|nmod:from/ {${ORG}}=slot
+
+# Joe 就职 于 IBM
+# (Joe is working at IBM)
+# Joe 是 IBM 的 研究 科学家
+# (Joe is a research scientist at IBM)
+[ {${EMPLOY}} | {ner:TITLE} ] >nsubj {ner:PERSON}=entity ?>cop {} >/nmod(:(assmod|prep))?|dobj|compound(:nn)?/ {${ORG}}=slot
+
+# Joe 是 就任 于 IBM 的 研究 科学家
+# (Joe is a research scientist working at IBM)
+{ner:TITLE} >nsubj {ner:PERSON}=entity ?>cop {} >/acl/ ( {${EMPLOY}} >/nmod(:(prep|assmod))?/ {${ORG}}=slot )
+{ner:TITLE} </conj|ccomp/ ( {} >nsubj {ner:PERSON}=entity ) ?>cop {} >/acl/ ( {${EMPLOY}} >/nmod(:(prep|assmod))?/ {${ORG}}=slot )
+
+# Joe 在 IBM 任 研究 科学家
+# (Joe is working as a research scientist at IBM)
+{${EMPLOY}} >nsubj {ner:PERSON}=entity >/dobj|nmod/ {ner:TITLE} >/nmod(:(prep|assmod))?/ {${ORG}}=slot
+{${EMPLOY}} </conj|ccomp/ ( {} >nsubj {ner:PERSON}=entity ) >/dobj|nmod/ {ner:TITLE} >/nmod(:(prep|assmod))?/ {${ORG}}=slot
+
+# Joe 的 公司 IBM
+# (Joe's company, IBM)
+{lemma:/公司|企业|集团|乐队|团队|商店|店铺|俱乐部/} >/nmod:poss/ {ner:PERSON}=entity >appos {${ORG}}=slot
+
+# IBM 某机构 的 Joe
+# (Joe of IBM 's XYZ)
+{ner:PERSON}=entity >/nmod(:assmod)?/ ( {} >/nmod:poss/ {${ORG}} )
+
+# 任职 于 IBM 某机构 的 Joe
+# (Joe who works at IBM 's XYZ)
+{ner:PERSON}=entity >/acl/ ( {${EMPLOY}} >/dobj/ ( {} >/nmod:poss/ {${ORG}} ) )
+
+# COPIED FROM PER:TITLE
+# Joe 就任 IBM 首席 科学家
+# (Joe was appointed IBM's chief scientist)
+{${EMPLOY}} >/nsubj(pass)?/ {ner:PERSON}=entity >/dobj/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot )
+{${EMPLOY}} >/nsubj(pass)?/ {ner:PERSON}=entity >/dobj/ ( {ner:TITLE} >/conj.*/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot ) )
+
+{${EMPLOY}} >/nsubj(pass)?/ {ner:PERSON}=entity >/conj|ccomp/ ( {${EMPLOY}} >/dobj/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot ) )
+{${EMPLOY}} >/nsubj(pass)?/ {ner:PERSON}=entity >/conj|ccomp/ ( {${EMPLOY}} >/dobj/ ( {ner:TITLE} >/conj.*/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot ) ))
+
+{${EMPLOY}} >/nsubj(pass)?/ ( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity) >/dobj/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot )
+{${EMPLOY}} >/nsubj(pass)?/ ( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity) >/dobj/ ( {ner:TITLE} >/conj.*/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot ) )
+
+{${EMPLOY}} >/nsubj(pass)?/ ( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity) >/conj|ccomp/ ( {${EMPLOY}} >/dobj/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot ) )
+{${EMPLOY}} >/nsubj(pass)?/ ( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity) >/conj|ccomp/ ( {${EMPLOY}} >/dobj/ ( {ner:TITLE} >/conj.*/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot ) ))
+
+# As a TITLE, PERSON VERB'd
+{tag:/V.?|N.?/} >nsubj {ner:PERSON}=entity >/nmod(:(assmod|prep))?/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot )
+
+# X 会长 、 Y 主席 Z (长老)
+# (Title) Z, the head of X and chair of Y
+{ner:PERSON}=entity >/conj.*|dep/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot )
+{ner:PERSON}=entity >/conj.*|dep/ ({ner:TITLE} >/conj.*/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot ))
+
+( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity ) >/conj.*|dep/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot )
+( {} >/appos|compound(:nn)?/ {ner:PERSON}=entity ) >/conj.*|dep/ ({ner:TITLE} >>/conj.*|dep/ ( {ner:TITLE} >/compound(:nn)?|nmod(:(poss|assmod))?/ {${ORG}}=slot ))
+
+##{}=entity >appos ({${JOB}} >/prep_from|prep_of|prep_at/ {${ORG}}=slot)
+##too generic
+#{}=entity >nn {${ORG}}=slot >nn {${JOB}}
+##too generic
+#{}=entity >dep ({${JOB}} >/prep_of|nmod:of|prep_from|nmod:from/ {${ORG}}=slot)
+##too generic
+#{}=entity >/amod|poss/ {${ORG}}=slot >nn {${JOB}}
+#{}=entity >/abbrev/ {${ORG}}=slot
+#{${JOB}} >poss {${ORG}}=slot >tmod {}=entity
+##too generic
+#{${JOB}} >/(prep_|nmod:)of/ ({}=entity >nn {${ORG}}=slot)
+#{tag:/VB.*/} >dep ({${JOB}} >poss {${ORG}}=slot) >nsubj {}=entity
+#{${EMPLOY}} >nsubjpass {}=entity >/prep_to|nmod:to|prep_by|nmod:by/ {${ORG}}=slot
+#{${EMPLOY}} >nsubj {}=entity >/dobj|prep_as|nmod:as/ ({${JOB}} >/(prep_|nmod:)of/ {${ORG}}=slot)
+
+### COPIED FROM top_employees ###
+{ner:PERSON}=entity >/nn|compound(:nn)?|amod|appos/ ( {ner:TITLE} >/(prep_|nmod:)(prep|poss|assmod)|compound(:nn)?/ {ner:ORGANIZATION}=slot )
+{ner:PERSON}=entity >/nn|compound(:nn)?|amod|appos/ ( {ner:TITLE} >/(prep_|nmod:).*|compound(:nn)?/ ({} >/(prep_|nmod:)(prep|poss|assmod)|compound(:nn)?/ {ner:ORGANIZATION}=slot ) )
+{ner:TITLE} >/(prep_|nmod:)(prep|poss|assmod)/ {ner:ORGANIZATION}=slot >/appos/ {ner:PERSON}=entity
+#{ner:TITLE} >/(prep_|nmod:)(prep|assmod)/ ( {ner:ORGANIZATION}=slot >/appos/ {ner:PERSON}=entity )
+# ^ Peng: what is this???
+( {ner:TITLE} >/(prep_|nmod:)(prep|poss|assmod)/ {ner:ORGANIZATION}=slot ) >/nsubj.*/ {ner:PERSON}=entity >cop {}
+{${EMPLOY}} >nsubj {ner:PERSON}=entity >/nmod:prep|dobj/ ( {ner:TITLE} >/(prep_|nmod:)(prep|poss|assmod)|compound(:nn)?/ {ner:ORGANIZATION}=slot )
+{ner:PERSON}=entity >/acl/ ({tag:/VB.*/} >/nmod(:prep)?|dobj/ ( {ner:TITLE} >/(prep_|nmod:)(prep|poss|assmod)|compound(:nn)?/ {ner:ORGANIZATION}=slot ) )

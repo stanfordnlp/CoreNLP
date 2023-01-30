@@ -1,0 +1,18 @@
+{ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {} >/amod/ {ner:/COUNTRY|NATIONALITY/}=slot ) )
+{ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {ner:/COUNTRY|NATIONALITY/}=slot >/case/ {word:/en/} ) )
+{word:/murió|falleció|matad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/COUNTRY/}=slot 
+{word:/murió|falleció|matad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/amod/ {ner:/COUNTRY|NATIONALITY/}=slot  )
+{word:/murió|falleció|matad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/nmod/ {ner:/COUNTRY|NATIONALITY/}=slot  )
+{ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {} >/nmod/ {ner:/COUNTRY|NATIONALITY/}=slot ) )
+{ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {ner:/CITY|STATE_OR_PROVINCE/} >/flat/ {ner:/COUNTRY|NATIONALITY/}=slot ) )
+{word:/murió|falleció|matad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {ner:/CITY|STATE_OR_PROVINCE/} >/flat/ {ner:/COUNTRY|NATIONALITY/}=slot  )
+{ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {ner:/CITY|STATE_OR_PROVINCE/} >/flat/ {ner:/COUNTRY|NATIONALITY/}=slot ) )
+{} >/appos|flat/ {ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {ner:/COUNTRY/}=slot >/case/ {word:/en/} ) )
+{word:/murió|falleció|matad[oa]/} >/nsubj/ ( {} >/appos|flat/ {ner:/PERSON/}=entity )  >/obl/ {ner:/COUNTRY/}=slot 
+{word:/murió|falleció|matad[oa]/} >/nsubj/ ( {} >/appos|flat/ {ner:/PERSON/}=entity ) >/obl/ ( {} >/nmod/ {ner:/COUNTRY/}=slot  )
+{word:/murió|falleció|matad[oa]/} >/nsubj/ ( {} >/appos|flat/ {ner:/PERSON/}=entity ) >/obl/ ( {} >/nmod/ {ner:/COUNTRY/}=slot  )
+{} >/appos|flat/ {ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {ner:/CITY|STATE_OR_PROVINCE/} >/flat/ {ner:/COUNTRY|NATIONALITY/}=slot ) )
+{word:/murió|falleció|matad[oa]/} >/nsubj/ ( {} >/appos|flat/ {ner:/PERSON/}=entity ) >/obl/ ( {ner:/CITY|STATE_OR_PROVINCE/} >/flat/ {ner:/COUNTRY|NATIONALITY/}=slot  )
+{} >/appos|flat/ {ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]/} >/obl/ ( {ner:/CITY|STATE_OR_PROVINCE/} >/flat/ {ner:/COUNTRY|NATIONALITY/}=slot ) )
+{word:/murió|falleció|matad[oa]|asesinad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/advcl/ ( {} >/obl/ {ner:/COUNTRY/}=slot )
+{word:/murió|falleció|matad[oa]|asesinad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/advcl/ ( {} >/obl/ ( {} >/flat/ {ner:/COUNTRY/}=slot ) )

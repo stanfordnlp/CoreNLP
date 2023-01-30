@@ -1,0 +1,12 @@
+#{ner:/ORGANIZATION/}=entity >/nummod/ {ner:/DATE/}=slot
+{word:/disuelve|disolvió/} >/obj/ {word:/se/} >/nsubj/ {ner:/ORGANIZATION/}=entity >/obl/ {ner:/DATE/}=slot
+{word:/disuelve|disolvió/} >/obj/ {word:/se/} >/nsubj/ {ner:/ORGANIZATION/}=entity >/obl/ ( {ner:/DATE/} >/appos/ {ner:/DATE/}=slot )
+{word:/cerrar|cerró/} >/obj/ {word:/puertas?/} >/nsubj/ {ner:/ORGANIZATION/}=entity >/obl/ {ner:/DATE/}=slot
+{word:/cerrar|cerró/} >/obj/ {word:/puertas?/} >/nsubj/ ( {} >/appos/ {ner:/ORGANIZATION/}=entity ) >/obl/ {ner:/DATE/}=slot
+{word:/declar.+/} >/nsubj/ {ner:/ORGANIZATION/}=entity >/obl/ {word:/bancarrota/} >/obl/ {ner:/DATE/}=slot
+{ner:/ORGANIZATION/}=entity >/acl|amod/ ( {word:/quebrad[oa]|cerrad[oa]|extinguid[oa]/} >/obl/ {ner:/DATE/}=slot )
+{word:/fall.+/} >/nsubj/ {ner:/ORGANIZATION/}=entity >/obl/ {ner:/DATE/}=slot
+{word:/fall.+/} >/nsubj/ ( {} >/appos/ {ner:/ORGANIZATION/}=entity ) >/obl/ {ner:/DATE/}=slot
+{word:/declar.+/} >/nsubj/ {ner:/ORGANIZATION/}=entity >/obl|adv.*/ {word:/bancarrota|insolvente/} >/obl/ {ner:/DATE/}=slot
+
+

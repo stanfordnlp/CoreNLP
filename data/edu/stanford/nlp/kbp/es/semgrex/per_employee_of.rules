@@ -1,0 +1,11 @@
+# ex primera ministra británica Margaret Thatcher
+{ word:/[Cc]ancillera?|[Pp]residente|[Pp]residenta|[Vv]icepresident[ea]|[Vv]icecandcillera?|[Mm]inistr[oa]|[Em]bajadora?|[Rr]ey|[Rr]eina/ } >/amod/ {ner:/NATIONALITY|COUNTRY/}=slot >/appos/ {ner:/PERSON/}=entity
+{ word:/[Cc]ancillera?|[Pp]residente|[Pp]residenta|[Vv]icepresident[ea]|[Vv]icecandcillera?|[Mm]inistr[oa]|[Em]bajadora?|[Rr]ey|[Rr]eina/ } >/nmod/ ( {ner:/COUNTRY|ORGANIZATION/}=slot >/case/ {word:/de/} ) >/appos/ {ner:/PERSON/}=entity
+# {} do more with organizaitons and titles! 
+{ner:/TITLE/} >/appos/ {ner:/PERSON/}=entity >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION/}=slot )
+{ner:/TITLE/} >/appos/ {ner:/PERSON/}=entity >/nmod/ {ner:/ORGANIZATION/}=slot
+{ner:/PERSON/}=entity >/appos/ ( {ner:/TITLE/} >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION/}=slot ))
+{ner:/PERSON/}=entity >/appos/ ( {ner:/TITLE/} >/nmod/ {ner:/ORGANIZATION/}=slot )
+{ner:/TITLE/} >/nmod/ {ner:/CITY|STATE_OR_PROVINCE/}=slot >/appos/ {ner:/PERSON/}=entity
+{ner:/PERSON/}=entity >/appos/ ( {ner:/TITLE/} >/nmod/ {ner:/CITY|STATE_OR_PROVINCE/}=slot )
+{word:/ingresó|ingresará|ingresara/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/ORGANIZATION/}=slot

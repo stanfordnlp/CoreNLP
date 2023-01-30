@@ -1,0 +1,22 @@
+#example: Obama se nació en Hawaii
+#{word:/nació|nacido/ } >nsubj {ner:PERSON}=entity >nmod ( {ner:/STATE_OR_PROVINCE/}=slot > {word:en} )
+#example: Obama es nacido de Hawaii
+#{word:/nacido|nacida/ } >/nsubj:pass/ {ner:PERSON}=entity >nmod ( {ner:/STATE_OR_PROVINCE/}=slot > {word:/de|en/} )
+# Obama, qien nació en Hawaii, era presidente.
+#{ner:PERSON}=entity >/acl.*/ ({word:/nació/} >nmod ( {ner:/STATE_OR_PROVINCE/}=slot > {word:/de|en/} ))
+#Juan vive en España pero nació en los EEUU. 
+#{ ctag:/VERB/ } >nsubj {ner:PERSON}=entity >conj {word:/nació|nacido/} >nmod ({ ner:STATE_OR_PROVINCE }=slot >case { word:/en/ } ) 
+# Chávez, quien nació el 28 de julio de 1954 en Sabaneta, estado Barinas
+{ ner:/STATE_OR_PROVINCE/ }=slot >/appos/ ( {word:/ciudad|pueblo|aldea|localidad/} >/amod/ {word:/natal/} >/nmod/ { ner:/PERSON/ }=entity )
+# Li , natal de Fushun 
+{ner:/PERSON/ }=entity >/amod/ ( { word:/natal/ } >/nmod/ { ner:/STATE_OR_PROVINCE/ }=slot )
+# Maduro nació en Caracas
+{word:/nació/} >/nsubj/ {ner:/PERSON/}=entity >/obl|dep/ {ner:/STATE_OR_PROVINCE/}=slot 
+# ... en el localidad de Caracas
+{word:/nació/} >/nsubj/ {ner:/PERSON/}=entity >/obl|dep/ ( {} >/nmod/ {ner:/STATE_OR_PROVINCE/}=slot )
+# Meiling, quien nació en la ciudad china de Shandong
+{ner:/PERSON/}=entity >/acl/ ( {word:/nació/} >/nmod/ {ner:/STATE_OR_PROVINCE/}=slot )
+{ner:/PERSON/}=entity >/acl/ ( {word:/nació/} >>/nmod/ {ner:/STATE_OR_PROVINCE/}=slot )
+# Manuel Valls, el primer ministro francés, es nacido en Barcelona.   
+{word:/nacid[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/STATE_OR_PROVINCE/}=slot
+{word:/nacid[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/nmod/ {ner:/STATE_OR_PROVINCE/}=slot )

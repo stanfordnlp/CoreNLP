@@ -1,0 +1,6 @@
+{ner:/PERSON/}=entity >/appos/ {ner:/TITLE/}=slot
+{ner:/TITLE/}=slot >/appos/ {ner:/PERSON/}=entity
+{ner:/TITLE/}=slot >/cop/ {ner:/PERSON/}=entity
+{ner:/PERSON/}=entity >/cop/ {ner:/TITLE/}=slot
+
+

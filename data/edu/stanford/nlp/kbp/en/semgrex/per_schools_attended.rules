@@ -1,0 +1,8 @@
+# PER recieved his degree from SCHOOL
+{lemma:/receive|earn/} >nsubj {ner:PERSON}=entity >obj {lemma:/diploma|degree|doctorate|master|bachelor|PhD/} >/(prep_|nmod:|obl:)(from|at)/ {ner:ORGANIZATION}=slot
+# PER graduated from SCHOOL
+{lemma:/graduate|enroll/} >nsubj {ner:PERSON}=entity >/(prep_|nmod:|obl:)(from|at)/ {ner:ORGANIZATION}=slot
+# PER attend SCHOOL
+{lemma:attend} >nsubj {ner:PERSON}=entity >obj {ner:ORGANIZATION}=slot
+#SCHOOL-educated PER
+{ner:PERSON}=entity >/amod/ ( {word:/educated|trained/} >/obl/ {ner:/ORGANIZATION/}=slot )

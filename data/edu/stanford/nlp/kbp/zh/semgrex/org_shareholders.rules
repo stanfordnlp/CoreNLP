@@ -1,0 +1,6 @@
+{lemma:/(sell|transfer)/}=entity >nsubj {ner:ORGANIZATION}=entity >dobj {lemma:share} >/(nmod:|prep_)to/ {ner:/(ORGANIZATION|LOCATION|CITY|STATE_OR_PROVINCE|COUNTRY)/}=slot
+{lemma:/(purchase|buy|retain)/} >nsubj {ner:/(ORGANIZATION|CITY|STATE_OR_PROVINCE|COUNTRY|PERSON)/}=slot  >dobj {lemma:/(stake|share)/} >/nmod*/ {ner:ORGANIZATION}=entity
+{lemma:invest} >nsubj {ner:/(ORGANIZATION|CITY|STATE_OR_PROVINCE|COUNTRY|PERSON)/}=slot  >dobj {} >/nmod:in/ {ner:ORGANIZATION}=entity
+{lemma:acquire} >nsubj {ner:/(ORGANIZATION|CITY|STATE_OR_PROVINCE|COUNTRY|PERSON)/}=slot  >dobj {} >/.*/ {ner:ORGANIZATION}=entity
+{lemma:get} >nsubj {ner:/(ORGANIZATION|CITY|STATE_OR_PROVINCE|COUNTRY|PERSON)/}=slot  >dobj {lemma:stake} >/.*/ {ner:ORGANIZATION}=entity
+{lemma:transfer} >nsubj {ner:/(ORGANIZATION|CITY|STATE_OR_PROVINCE|COUNTRY|PERSON)/}=slot  >dobj {lemma:stake} >/nmod:in/ {ner:ORGANIZATION}=entity

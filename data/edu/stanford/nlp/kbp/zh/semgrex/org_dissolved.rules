@@ -1,0 +1,13 @@
+macro BUST = lemma:/遣散|终结|收场|完结|结束|解散|倒闭|歇业|破产|停业|崩溃|解体/
+
+# IBM (宣布) 破产 于 X
+# (IBM went bankrupt in X)
+{${BUST}} >/subj|dobj/ {ner:ORGANIZATION}=entity >/dobj|nmod(:(tmod|topic|prep))?/ {ner:/DATE/}=slot
+{${BUST}} </ccomp|conj/ ( {} >/subj|dobj/ {ner:ORGANIZATION}=entity >/dobj|nmod(:(tmod|topic|prep))?/ {ner:/DATE/}=slot )
+
+# （宣布） 破产 于 X 的 IBM
+# (IBM, bankrupt in X)
+{ner:ORGANIZATION}=entity >acl ( {${BUST}} >/dobj|nmod(:(tmod|topic|prep))?/ {ner:/DATE/}=slot )
+{ner:ORGANIZATION}=entity >acl ( {${BUST}} </ccomp|conj/ ( {} >/dobj|nmod(:(tmod|topic|prep))?/ {ner:/DATE/}=slot ))
+
+{ner:ORGANIZATION}=entity >/nmod:tmod/ {ner:/DATE/}=slot >/nmod:prep/ {${BUST}}

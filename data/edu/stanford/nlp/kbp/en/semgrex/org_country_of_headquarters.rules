@@ -1,0 +1,3 @@
+{ner:/ORGANIZATION/}=entity >appos ( {} >/compound|flat|nn|amod/ {ner:/COUNTRY|LOCATION/}=slot )
+{ner:/ORGANIZATION/}=entity >appos ( {} >/compound|flat|nn|amod/ {ner:/NATIONALITY|LOCATION/}=slot )
+{ner:/ORGANIZATION/}=entity >/amod/ ({word:/based|registered|headquartered/} >/obl/ {ner:/COUNTRY|NATIONALITY/}=slot)

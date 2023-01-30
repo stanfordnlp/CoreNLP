@@ -1,0 +1,32 @@
+macro ATTEND = lemma:/([毕肄结]业|求学|学习|就读)于?/
+macro OBTAIN = lemma:/获得?|取?得/
+macro STUDY = lemma:/学习|习.*|进修|修行|[主兼]修|.*学/
+macro DEGREE = lemma:/学[位士]|[硕博学]士?/
+
+# PER 毕业于 SCHOOL / PER 从 SCHOOL 取得 degree
+# (PER graduated from SCHOOL / PER received their degree from SCHOOL)
+{${ATTEND}} >/nsubj|dep/ {ner:PERSON}=entity >/dobj|dep|nmod(:prep)?/ {ner:ORGANIZATION}=slot
+{${ATTEND}} >/nsubj|dep/ {ner:PERSON}=entity >/dobj|dep/ ( {} >/nmod(:assmod)?/ {ner:ORGANIZATION}=slot )
+{${ATTEND}} <</ccomp|conj/ ( {} >/nsubj|dep/ {ner:PERSON}=entity ) >/dobj|dep|nmod(:prep)?/ {ner:ORGANIZATION}=slot
+{${ATTEND}} <</ccomp|conj/ ( {} >/nsubj|dep/ {ner:PERSON}=entity ) >/dobj|dep/ ( {} >/nmod(:assmod)?/ {ner:ORGANIZATION}=slot )
+
+{${OBTAIN}} >/nsubj|dep/ {ner:PERSON}=entity >/nmod(:prep)?/ {ner:ORGANIZATION}=slot >dobj {${DEGREE}}
+{${OBTAIN}} >/nsubj|dep/ {ner:PERSON}=entity >/dboj/ ( {${DEGREE}} >/nmod(:assmod)?/ {ner:ORGANIZATION}=slot )
+{${OBTAIN}} <</ccomp|conj/ ( {} >/nsubj|dep/ {ner:PERSON}=entity ) >/nmod(:prep)?/ {ner:ORGANIZATION}=slot >dobj {${DEGREE}}
+{${OBTAIN}} <</ccomp|conj/ ( {} >/nsubj|dep/ {ner:PERSON}=entity ) >/dboj/ ( {${DEGREE}} >/nmod(:assmod)?/ {ner:ORGANIZATION}=slot )
+
+# 毕业于 SCHOOL 的 PER
+# (SCHOOL-educated PER)
+{ner:PERSON}=entity >/acl/ ({${ATTEND}} >/dobj|dep|nmod(:prep)?/ {ner:ORGANIZATION}=slot)
+{ner:PERSON}=entity >/acl/ ({${STUDY}} >/nmod(:prep)?/ {ner:ORGANIZATION}=slot)
+
+# 从 SCHOOL 毕业 后， PER VV'd
+# (After graduating from SCHOOL, PER did something else)
+{tag:/V.*/} >/nsubj/ {ner:PERSON}=entity >/advmod.*|advcl.*/ ( {${ATTEND}} > /dobj|dep|nmod(:prep)?/ {ner:ORGANIZATION}=slot )
+{tag:/V.*/} >/nsubj/ {ner:PERSON}=entity >/advmod.*|advcl.*/ ( {${STUDY}} > /nmod(:prep)?/ {ner:ORGANIZATION}=slot )
+
+# PER (进入) SCHOOL 学习 blah
+# (PER (attend) SCHOOL to study blah)
+{tag:/V.*/} >>/ccomp|conj/ {${STUDY}} >/nsubj|dep/ {ner:PERSON}=entity >/dobj|dep|nmod(:prep)?/ {ner:ORGANIZATION}=slot
+
+{ner:PERSON}=entity >appos ( ({lemma:/毕业生/} >/nmod(:assmod)?|compound(:nn)?/ {ner:ORGANIZATION}=slot) )

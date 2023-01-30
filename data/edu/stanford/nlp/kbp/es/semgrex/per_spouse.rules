@@ -1,0 +1,19 @@
+{ner:/PERSON/}=entity >/conj/ ( {ner:/PERSON/}=slot >/appos/ {word:/esposo|esposa|cónyuge/ }  )
+{ner:/PERSON/}=entity >/conj/ ( {word:/esposo|esposa|cónyuge/} >/appos/ {ner:/PERSON/}=slot )
+{} >/appos/ {ner:/PERSON/}=entity >/conj/ ( {ner:/PERSON/}=slot >/appos/ {word:/esposo|esposa|cónyuge/ }  )
+{} >/appos/ {ner:/PERSON/}=entity >/conj/ ( {word:/esposo|esposa|cónyuge/} >/appos/ {ner:/PERSON/}=slot )
+{word:/esposo|esposa|cónyuge/} >/nsubj/ {ner:/PERSON/}=entity >/nmod|obl/ {ner:/PERSON/}=slot
+{word:/esposo|esposa|cónyuge/} >/nmod/ {ner:/PERSON/}=entity >/appos/ {ner:/PERSON/}=slot
+{word:/esposo|esposa|cónyuge/} >/nmod/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/appos/ {ner:/PERSON/}=slot
+
+{ner:/PERSON/}=entity >/appos/ ( {word:/esposo|esposa|cónyuge/} >/nmod/ {ner:/PERSON/}=slot )
+{ner:/PERSON/}=entity >/appos/ ( {word:/esposo|esposa|cónyuge/} >/nmod/ ( {ner:/TITLE/} >/appos/ {ner:/PERSON/}=slot ))
+{word:/casó|casará|casaría|divorció|divorciaría/} >/nsubj/ {ner:/PERSON/}=entity >/obj|obl/ {ner:/PERSON/}=slot
+{word:/casó|casará|casaría|divorció|divorciaría/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obj|obl/ {ner:/PERSON/}=slot
+{word:/casó|casará|casaría|divorció|divorciaría/} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/obj|obl/ ( {} >/appos/ {ner:/PERSON/}=slot )
+{word:/casaron|casarán|casarían|divorciaron|divorciarían/} >/nsubj/ {ner:/PERSON/}=entity >/conj/ {ner:/PERSON/}=slot
+{} >/nsubj/ {ner:/PERSON/}=entity >/advcl/ ( {word:/casó|casará|casaría|divorció|divorciaría/} >/obj|obl/ {ner:/PERSON/}=slot ) 
+{} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/advcl/ ( {word:/casó|casará|casaría|divorció|divorciaría/} >/obj|obl/ {ner:/PERSON/}=slot )
+{} >/nsubj/ ( {} >/appos/ {ner:/PERSON/}=entity ) >/advcl/ ( {word:/casó|casará|casaría|divorció|divorciaría/} >/obj|obl/ ( {} >/appos/ {ner:/PERSON/}=slot ))
+{} >/advcl/ {word:/casaron|casarán|casarían|divorciaron|divorciarían/} >/nsubj/ {ner:/PERSON/}=entity >/conj/ {ner:/PERSON/}=slot
+

@@ -1,0 +1,15 @@
+macro SIBLING = lemma:/[^堂表]*[兄弟姊妹哥姐]+/
+
+# His brother, Joe
+# (Stanford dependencies; conj is fixing common parse errors)
+{ner:PERSON}=entity >/nmod(:poss)?/ ( {${SIBLING}} >/appos|conj.*/ {ner:PERSON}=slot )
+# (Universal dependencies; conj is fixing common parse errors)
+{${SIBLING}} >/nmod(:poss)?/ {ner:PERSON}=entity >/appos|conj.*/ {ner:PERSON}=slot
+# Among ENTITY's sons are SLOT.
+{tag:/V[CE]/} >/(prep_|nmod:).*/ ( {${SIBLING}} >/nmod(:poss)?/ {ner:PERSON}=entity ) >/.subj/ {ner:PERSON}=slot
+# SLOT, son of ENTITY
+{ner:PERSON}=slot >/appos|conj.*/ ( {${SIBLING}} >/(prep_|nmod:)of/ {ner:PERSON}=entity )
+
+# A, B, C, D 四 兄弟
+{${SIBLING}} >/nmod|compound(:nn)?|appos|dep/ ({ner:PERSON}=entity >>/conj.*|dep/ {ner:PERSON}=slot)
+{${SIBLING}} >/nmod|compound(:nn)?|appos|dep/ ({ner:PERSON}=slot >>/conj.*|dep/ {ner:PERSON}=entity)

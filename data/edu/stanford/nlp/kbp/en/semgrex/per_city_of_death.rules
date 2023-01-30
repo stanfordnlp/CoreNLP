@@ -1,0 +1,7 @@
+#example: Joe died in Hawaii.
+{lemma:die} >nsubj {}=entity >/(prep_|nmod:|obl:)(in|at)/ {ner:/CITY|LOCATION/}=slot
+{lemma:die} >nsubj {}=entity >/(prep_|nmod:|obl:)(in|at)/ ( {} >/compound|flat|nn|amod/ {ner:/CITY|LOCATION/}=slot )
+{lemma:die} >nsubj {}=entity >/(prep_|nmod:|obl:).*/ ({} >/(prep_|nmod:|obl:)(in|at)/ {ner:/CITY|LOCATION/}=slot)
+# X, who rel Y
+{}=entity >/acl:relcl/ ({lemma:die;tag:/VB.*/} >nsubj {lemma:who} >/(prep_|nmod:|obl:)(in|at)/ {ner:/CITY|LOCATION/}=slot)
+{}=entity >/acl:relcl/ ({lemma:/die/;tag:/VB.*/} >nsubj {lemma:who} >/(prep_|nmod:|obl:).*/ ({} >/(prep_|nmod:|obl:)(in|at)/ {ner:/CITY|LOCATION/}=slot))

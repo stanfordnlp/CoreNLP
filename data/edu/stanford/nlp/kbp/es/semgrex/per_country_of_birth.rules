@@ -1,0 +1,12 @@
+#Kevin Carter fotógrafo nacido en Johannesburgo, Sudáfrica
+{ner:/PERSON/}=entity >/amod/ ( {word:/nacid[oa]/} >/obl|dep/ {ner:/COUNTRY/}=slot )
+{ner:/PERSON/}=entity >/amod/ ( {word:/nacid[oa]/} >/obl|dep/ ( {} >/flat/ {ner:/COUNTRY/}=slot ))
+# El multimillonario alemán Adolf Merckle, ... , en su localidad natal (Blaubeuren) al suroeste de Alemania.
+{} >>/appos/ {ner:/PERSON/}=entity >/obl/ ( {} >/amod/ {word:/natal/} >/nmod/ ( {} >/nmod/ {ner:/COUNTRY/}=slot ) )
+{} >>/appos/ {ner:/PERSON/}=entity >/obl/ ( {} >/amod/ {word:/natal/} >/nmod/ { ner:/COUNTRY/}=slot ) 
+{} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/amod/ {word:/natal/} >/nmod/ ( {} >/nmod/ {ner:/COUNTRY/}=slot ) ) 
+{} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/amod/ {word:/natal/} >/nmod/ {ner:/COUNTRY/}=slot ) 
+{word:/nació/} >/nsubj/ {ner:/PERSON/}=entity >/dep/ {ner:/COUNTRY/}=slot
+{word:/nació/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/COUNTRY/}=slot
+{word:/nació/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/nmod|appos/ {ner:/COUNTRY/}=slot )
+

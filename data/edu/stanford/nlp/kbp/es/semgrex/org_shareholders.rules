@@ -1,0 +1,18 @@
+#{lemma:/(sell|transfer)/}=entity >nsubj {ner:ORGANIZATION}=entity >/obj|dobj/ {lemma:share} >/(nmod:|prep_)to/ {ner:/(ORGANIZATION|LOCATION|CITY|STATE_OR_PROVINCE|COUNTRY)/}=slot
+#{lemma:/(purchase|buy|retain)/} >nsubj {ner:/(ORGANIZATION|CITY|STATE_OR_PROVINCE|COUNTRY|PERSON|ORGANIZATION)/}=slot  >/obj|dobj/ {lemma:/(stake|share)/} >/nmod*/ {ner:ORGANIZATION}=entity
+#{lemma:invest} >nsubj {ner:/(ORGANIZATION|CITY|STATE_OR_PROVINCE|COUNTRY|PERSON|ORGANIZATION)/}=slot  >/obj|dobj/ {} >/nmod:in/ {ner:ORGANIZATION}=entity
+#{lemma:acquire} >nsubj {ner:/(ORGANIZATION|CITY|STATE_OR_PROVINCE|COUNTRY|PERSON|ORGANIZATION)/}=slot  >/obj|dobj/ {} >/.*/ {ner:ORGANIZATION}=entity
+#{lemma:get} >nsubj {ner:/(ORGANIZATION|CITY|STATE_OR_PROVINCE|COUNTRY|PERSON|ORGANIZATION)/}=slot  >/obj|dobj/ {lemma:stake} >/.*/ {ner:ORGANIZATION}=entity
+#{lemma:transfer} >nsubj {ner:/(ORGANIZATION|CITY|STATE_OR_PROVINCE|COUNTRY|PERSON|ORGANIZATION)/}=slot  >/obj|dobj/ {lemma:stake} >/nmod:in/ {ner:ORGANIZATION}=entity
+{} >/conj/ ( {word:/accionista|participante|fundador|cofundador/} >/nmod/ ( {ner:/ORGANIZATION/}=entity >/case/ {word:/de|d|del/ } ) ) >/appos/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot
+{word:/accionista|participante|fundador|cofundador/} >/nmod/ ( {ner:/ORGANIZATION/}=entity >/case/ {word:/de|d|del/ } ) >/appos/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot
+{word:/accionista|participante|fundador|cofundador/} >/conj/ ( {} >/nmod/ ( {ner:/ORGANIZATION/}=entity >/case/ {word:/de|d|del/ } ) ) >/appos/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot
+{word:/accionista|participante|fundador|cofundador/} >/conj/ ( {} >/nmod/ ( {} >/case/ {word:/de|d|del/} >/obj/ {ner:/ORGANIZATION/}=entity ) ) >/appos/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot
+{ner:/PERSON|ORGANIZATION|COUNRTY/}=slot >/appos/ ( {word:/accionista|participante|fundador|cofundador/} >/nmod/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=entity )
+{word:/accionista|participante|fundador|cofundador/} >/nmod/ {ner:/ORGANIZATION/}=entity >/appos/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot
+{word:/accionista|participante|fundador|cofundador/} >/conj.*/ ( {} >/appos|nmod/ {ner:/ORGANIZATION|COUNTRY/}=entity >/appos/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot )
+{word:/accionista|participante|fundador|cofundador/} >/nsubj/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot >/cop/ {} >/nmod/ {ner:/ORGANIZATION/}=entity 
+{word:/accionista|participante|fundador|cofundador/} >/nsubj/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot >/cop/ {} >/nmod/ ( {} >/appos/ {ner:/ORGANIZATION/}=entity )
+{ner:/PERSON|ORGANIZATION|COUNTRY/}=slot >/nsubj/ ( {word:/accionista|participante|fundador|cofundador/} >/nmod/ {ner:/ORGANIZATION/}=entity )
+{} >/appos/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot >/nsubj/ ( {word:/accionista|participante|fundador|cofundador/} >/nmod/ {ner:/ORGANIZATION/}=entity )
+{} >/appos/ {ner:/PERSON|ORGANIZATION|COUNTRY/}=slot >/nsubj/ ( {word:/accionista|participante|fundador|cofundador/} >/nmod/ {ner:/ORGANIZATION/}=entity ) 

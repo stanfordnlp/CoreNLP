@@ -1,0 +1,5 @@
+{ner:/PERSON|ORGANIZATION|STATE_OR_PROVINCE|COUNTRY|CITY/}=entity >/advcl/ ( {word:/fundad[oa]|establecid[oa]|formad[oa]|cread[oa]/} >/obl/ {ner:/DATE/}=slot )
+{ner:/PERSON|ORGANIZATION|STATE_OR_PROVINCE|COUNTRY|CITY/}=entity >/acl|appos|amod/ ( {word:/fundad[oa]|establecid[oa]|formad[oa]|cread[oa]/} >/obl/ {ner:/DATE/}=slot )
+{word:/fundó|fundaron|fundaba|fundara|funda|estableció|establecido|fundad[oa]/} >/obj/ {ner:/PERSON|ORGANIZATION|STATE_OR_PROVINCE|COUNTRY|CITY/}=entity >/obl/ {ner:/DATE/}=slot
+{word:/fundad[oa]|cread[oa]|establecid[oa]|empezad[oa]/} >/nsubj/ {ner:/PERSON|ORGANIZATION|STATE_OR_PROVINCE|COUNTRY|CITY/}=entity >/obl/ {ner:/DATE/}=slot
+{ner:/PERSON|ORGANIZATION|STATE_OR_PROVINCE|COUNTRY|CITY/}=entity >/appos|nummod/ {ner:/DATE/}=slot

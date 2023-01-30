@@ -1,0 +1,17 @@
+{pos:/NOUN|NN/} >/amod/ {ner:/NATIONALITY/}=slot >/appos/ {ner:/ORGANIZATION/}=entity
+{ner:/ORGANIZATION/}=entity >/amod/ {ner:/NATIONALITY/}=slot
+{ner:/ORGANIZATION/}=entity >/nmod/ ( {word:/sede|jefatura/} >/nmod/ {ner:/STATE_OR_PROVINCE/}=slot )
+{ner:/localizado|ubicado|basado/} >/nsubj/ {ner:/ORGANIZATION/}=entity >/obl/ {ner:/STATE_OR_PROVINCE/}=slot 
+{word:/sede|jefatura/} >/nmod/ ( {ner:/ORGANIZATION/}=entity >/case/ {word:/de|del|d/} ) >/nmod/ ( {ner:/STATE_OR_PROVINCE/}=slot >/case/ {word:/en/} )
+{word:/sede|jefatura/} >/nsubj/ ( {ner:/STATE_OR_PROVINCE/}=slot >/nmod/ ( {ner:/STATE_OR_PROVINCE/} >/case/ {word:/de|del|d/}) )
+{ner:/ORGANIZATION/}=entity >/nmod/ ( {word:/oficina|cuartel/} >/nmod/ {ner:/STATE_OR_PROVINCE/}=slot >/amod/ {word:/central/} )
+{word:/oficina|cuartel/} >/amod/ {word:/central/} >/nsubj/ ( {ner:/STATE_OR_PROVINCE/}=slot >/nmod/ ( {ner:/STATE_OR_PROVINCE/} >/case/ {word:/de|del|d/}) )
+{word:/oficina|cuartel/} >/amod/ {word:/central/} >/nmod/ ( {ner:/ORGANIZATION/}=entity >/case/ {word:/de|del|d/} ) >/nmod/ ( {ner:/STATE_OR_PROVINCE/}=slot >/case/ {word:/en/} )
+
+{ner:/ORGANIZATION/}=entity >/appos/ ( {} >/nmod/ ( {word:/sede|cuartel|oficina|jefatura/} >/nmod/ {ner:/STATE_OR_PROVINCE/ }=slot ))
+{ner:/ORGANIZATION/}=entity >/nmod/ ( {word:/sede|cuartel|oficina|jefatura/} >/nmod/ {ner:/STATE_OR_PROVINCE/}=slot >/case/ {word:/con/ } )
+
+{ner:/ORGANIZATION/}=entity >/appos/ ( {} >/amod/ ( {word:/basad[oa]/} >/obj|obl/ {ner:/STATE_OR_PROVINCE/}=slot ))
+{ner:/ORGANIZATION/}=entity >/amod/ ( {word:/basad[oa]/} >/obj|obl/ {ner:/STATE_OR_PROVINCE/}=slot )
+{ner:/ORGANIZATION/}=entity >/acl/ ( {} >/nsubj/ {word:/sede|cuartel|oficina|jefatura/} >/obl/ {ner:/STATE_OR_PROVINCE/}=slot )
+{ner:/ORGANIZATION/}=entity >/acl/ ( {} >/nsubj/ {word:/sede|cuartel|oficina|jefatura/} >/obl/ ( {} >/nmod|appos/ {ner:/STATE_OR_PROVINCE/}=slot ) )

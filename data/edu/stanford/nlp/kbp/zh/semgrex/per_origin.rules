@@ -1,0 +1,2 @@
+{ner:PERSON}=entity >/appos/ ( {ner:TITLE} >/amod|nn|nmod(:assmod)?|compound(:nn)?/ {ner:/COUNTRY|NATIONALITY/}=slot )
+{ner:PERSON}=entity </appos/ ( {ner:TITLE} >/amod|nn|nmod(:assmod)?|compound(:nn)?/ {ner:/COUNTRY|NATIONALITY/}=slot )

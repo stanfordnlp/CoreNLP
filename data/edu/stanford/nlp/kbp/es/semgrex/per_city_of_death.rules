@@ -1,0 +1,9 @@
+{ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]|asesinad[oa]/} >/obl/ ( {ner:/CITY/}=slot >/case/ {word:/en/} ) )
+{word:/murió|falleció|matad[oa]|asesinad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ {ner:/CITY/}=slot 
+{word:/murió|falleció|matad[oa]|asesinad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/obl/ ( {} >/nmod/ {ner:/CITY/}=slot  )
+{ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]|asesinad[oa]/} >/obl/ ( {} >/nmod/ {ner:/CITY/}=slot ) )
+{} >/appos|flat/ {ner:/PERSON/}=entity >/acl/ ( {word:/murió|falleció|matad[oa]|asesinad[oa]/} >/obl/ ( {ner:/CITY/}=slot >/case/ {word:/en/} ) )
+{word:/murió|falleció|matad[oa]|asesinad[oa]/} >/nsubj/ ( {} >/appos|flat/ {ner:/PERSON/}=entity )  >/obl/ {ner:/CITY/}=slot 
+{word:/murió|falleció|matad[oa]|asesinad[oa]/} >/nsubj/ ( {} >/appos|flat/ {ner:/PERSON/}=entity ) >/obl/ ( {} >/nmod/ {ner:/CITY/}=slot  )
+{word:/murió|falleció|matad[oa]|asesinad[oa]/} >/nsubj/ ( {} >/appos|flat/ {ner:/PERSON/}=entity ) >/obl/ ( {} >/nmod/ {ner:/CITY/}=slot  ) 
+{word:/murió|falleció|matad[oa]|asesinad[oa]/} >/nsubj/ {ner:/PERSON/}=entity >/advcl/ ( {} >/obl/ {ner:/CITY/}=slot )

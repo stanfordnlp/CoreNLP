@@ -1,0 +1,8 @@
+{ner:PERSON}=entity >/nn|compound|flat|amod|appos/ {ner:TITLE}=slot
+{ner:PERSON}=entity >/nn|compound|flat|amod|appos/ ( {ner:TITLE} >/conj.*/ {ner:TITLE}=slot )
+{ner:TITLE}=slot >/appos/ {ner:PERSON}=entity
+{ner:TITLE}=slot >/nsubj.*/ {ner:PERSON}=entity >cop {}
+{tag:/VB.*/} >nsubj {ner:PERSON}=entity >/(prep_|nmod:|obl:)as/ {ner:TITLE}=slot
+{}=entity >/acl:relcl/ ({tag:/VB.*/} >nsubj {lemma:who} >/(prep_|nmod:|obl:)as/ {ner:TITLE}=slot)
+# As a TITLE, PERSON VERB'd
+{tag:/VB.?|NN.?/} >nsubj {ner:PERSON}=entity >/(prep_|nmod:|obl:)as/ {ner:TITLE}=slot

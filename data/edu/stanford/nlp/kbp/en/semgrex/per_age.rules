@@ -1,0 +1,8 @@
+# Joe died of X
+{lemma:/die/;tag:/VB.*/} >nsubj {}=entity >/(prep_|nmod:|obl:)(at)/ {ner:NUMBER}=slot
+{lemma:/die/;tag:/VB.*/} >nsubj {}=entity >/(prep_|nmod:|obl:)(at)/ ( {lemma:/age/} >nummod {ner:NUMBER}=slot )
+{lemma:/die/;tag:/VB.*/} >nsubj {}=entity >/(prep_|nmod:|obl:).*/ ({} >/(prep_|nmod:|obl:)(at)/ {ner:NUMBER}=slot)
+{lemma:/die/;tag:/VB.*/} >nsubj {}=entity >/(prep_|nmod:|obl:).*/ ({} >/(prep_|nmod:|obl:)(at)/ ({lemma:/age/} >nummod {ner:NUMBER}=slot ))
+# X, who rel Y
+{}=entity >/acl:relcl/ ({lemma:/die/;tag:/VB.*/} >nsubj {lemma:who} >/(prep_|nmod:|obl:)(at)/ {ner:NUMBER}=slot)
+{}=entity >/acl:relcl/ ({lemma:/die/;tag:/VB.*/} >nsubj {lemma:who} >/(prep_|nmod:|obl:).*/ ({} >/(prep_|nmod:|obl:)(at)/ {ner:NUMBER}=slot))

@@ -1,0 +1,13 @@
+#John lives in Stanford
+{lemma:/raise|live|reside|grow/;tag:/VB.*/} >/nsubj.*/ {}=entity [ >/(prep_|nmod:|obl:)in/ {ner:STATE_OR_PROVINCE}=slot | >/(prep_|nmod:|obl:)at/ {ner:STATE_OR_PROVINCE}=slot ]
+#John was born in Kansas but lives in Stanford
+{} >/nsubj.*/ {}=entity >/conj.*/ ({lemma:/raise|live|reside|grow/;tag:/VB.*/} [ >/(prep_|nmod:|obl:)in/ {ner:STATE_OR_PROVINCE}=slot | >/(prep_|nmod:|obl:)at/ {ner:STATE_OR_PROVINCE}=slot ] )
+#John, who lives in Stanford, met me today.
+{}=entity >/rcmod|acl:relcl/ ({lemma:/raise|live|reside/;tag:/VB.*/} [ >/(prep_|nmod:|obl:)in/ {ner:STATE_OR_PROVINCE}=slot | >/(prep_|nmod:|obl:)at/ {ner:STATE_OR_PROVINCE}=slot])
+# X, who rel Y
+{}=entity >/rcmod|acl:relcl/ ({lemma:/raise|live|reside/;tag:/VB.*/} >/nsubj.*/ {lemma:who} [ >/(prep_|nmod:|obl:)in/ {ner:STATE_OR_PROVINCE}=slot | >/(prep_|nmod:|obl:)at/ {ner:STATE_OR_PROVINCE}=slot ])
+{}=entity >/rcmod|acl:relcl/ ({lemma:who} >rcmod ({lemma:/raise|live|reside/;tag:/VB.*/} [ >/(prep_|nmod:|obl:)in/ {ner:STATE_OR_PROVINCE}=slot | >/(prep_|nmod:|obl:)at/ {ner:STATE_OR_PROVINCE}=slot]))
+# "John, of Stanford" -- consistently marked wrong by annotators?
+{}=entity >/(prep_|nmod:|obl:)of/ {ner:STATE_OR_PROVINCE}=slot
+#Canada-based John
+{ner:PERSON}=entity >/amod/ ( {word:/based|raised/} >/obl/ {ner:/STATE_OR_PROVINCE/}=slot )

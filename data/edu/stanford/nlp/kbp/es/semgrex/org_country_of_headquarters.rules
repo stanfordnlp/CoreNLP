@@ -1,0 +1,16 @@
+{} >/amod/ {ner:/NATIONALITY/}=slot >/appos/ {ner:/ORGANIZATION/}=entity
+{ner:/ORGANIZATION/}=entity >/amod/ {ner:/NATIONALITY/}=slot
+{ner:/ORGANIZATION/}=entity >/nmod/ ( {word:/sede|jefatura/} >/nmod/ {ner:/COUNTRY/}=slot )
+{ner:/localizad[oa]|ubicad[oa]|basad[oa]/} >/nsubj/ {ner:/ORGANIZATION/}=entity >/obl/ {ner:/COUNTRY/}=slot 
+{ner:/ORGANIZATION/}=entity >/acl|amod/ ( {ner:/localizad[oa]|ubicad[oa]|basad[oa]/} >/obl/ {ner:/COUNTRY/}=slot )
+{word:/sede|jefatura/} >/nmod/ ( {ner:/ORGANIZATION/}=entity >/case/ {word:/de|del|d/} ) >/nmod/ ( {ner:/COUNTRY/}=slot >/case/ {word:/en/} )
+{word:/sede|jefatura/} >/nsubj/ ( {ner:/COUNTRY/}=slot >/nmod/ ( {ner:/COUNTRY/} >/case/ {word:/de|del|d/}) )
+{ner:/ORGANIZATION/}=entity >/nmod/ ( {word:/oficina|cuartel/} >/nmod/ {ner:/COUNTRY/}=slot >/amod/ {word:/central/} )
+{word:/oficina|cuartel/} >/amod/ {word:/central/} >/nsubj/ ( {ner:/COUNTRY/}=slot >/nmod/ ( {ner:/COUNTRY/} >/case/ {word:/de|del|d/}) )
+{word:/oficina|cuartel/} >/amod/ {word:/central/} >/nmod/ ( {ner:/ORGANIZATION/}=entity >/case/ {word:/de|del|d/} ) >/nmod/ ( {ner:/COUNTRY/}=slot >/case/ {word:/en/} )
+{ner:/ORGANIZATION/}=entity >/appos/ ( {} >/nmod/ ( {word:/sede|cuartel|oficina|jefatura/} >/nmod/ {ner:/COUNTRY/}=slot ))
+{ner:/ORGANIZATION/}=entity >/nmod/ ( {word:/sede|cuartel|oficina|jefatura/} >/nmod/ {ner:/COUNTRY/ }=slot >/case/ {word:/con/ } )
+{ner:/ORGANIZATION/}=entity >/appos/ ( {} >/amod/ ( {word:/basad[oa]/} >/obj|obl/ {ner:/COUNTRY/}=slot ))
+{ner:/ORGANIZATION/}=entity >/amod/ ( {word:/basad[oa]/} >/obj|obl/ {ner:/COUNTRY/}=slot )
+{ner:/ORGANIZATION/}=entity >/acl/ ( {} >/nsubj/ {word:/sede|cuartel|oficina|jefatura/} >/obl/ {ner:/COUNTRY/}=slot )
+{ner:/ORGANIZATION/}=entity >/acl/ ( {} >/nsubj/ {word:/sede|cuartel|oficina|jefatura/} >/obl/ ( {} >/nmod|flat/ {ner:/COUNTRY/}=slot ) )

@@ -1,0 +1,15 @@
+macro LIVE = lemma:/(居?住|旅居|定居|游学|游历)[在于]?|前往|[来回]到?|离开|搬[进出入离到]|[远奔]?赴|逃[出往]|偷渡/;tag:/V.*/
+
+{${LIVE}} >/nsubj/ {ner:PERSON}=entity >/nmod(:prep)|dobj|dep/ {ner:/CITY|LOCATION/}=slot
+{${LIVE}} </conj|ccomp/ ( {} >/nsubj/ {ner:PERSON}=entity ) >/nmod(:prep)|dobj|dep/ {ner:/CITY|LOCATION/}=slot
+{${LIVE}} >/nsubj/ {ner:PERSON}=entity >/nmod(:prep)|dobj|dep/ ( {} >/nmod(:(assmod|prep))?|compound(:nn)?/ {ner:/CITY|LOCATION/}=slot )
+{${LIVE}} </conj|ccomp/ ( {} >/nsubj/ {ner:PERSON}=entity ) >/nmod(:prep)|dobj|dep/ ( {} >/nmod(:(assmod|prep))?|compound(:nn)?/ {ner:/CITY|LOCATION/}=slot )
+{${LIVE}} >/nsubj/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/nmod(:prep)|dobj|dep/ {ner:/CITY|LOCATION/}=slot
+{${LIVE}} </conj|ccomp/ ( {} >/nsubj/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) ) >/nmod(:prep)|dobj|dep/ {ner:/CITY|LOCATION/}=slot
+{${LIVE}} >/nsubj/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >/nmod(:prep)|dobj|dep/ ( {} >/nmod(:(assmod|prep))?|compound(:nn)?/ {ner:/CITY|LOCATION/}=slot )
+{${LIVE}} </conj|ccomp/ ( {} >/nsubj/ ( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) ) >/nmod(:prep)|dobj|dep/ ( {} >/nmod(:(assmod|prep))?|compound(:nn)?/ {ner:/CITY|LOCATION/}=slot )
+
+{ner:PERSON}=entity >acl ( {${LIVE}} >/nmod(:prep)|dobj|dep/ {ner:/CITY|LOCATION/}=slot )
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >acl ( {${LIVE}} >/nmod(:prep)|dobj|dep/ {ner:/CITY|LOCATION/}=slot )
+{ner:PERSON}=entity >acl ( {${LIVE}} >/nmod(:prep)|dobj|dep/ ( {} >/nmod(:(assmod|prep))?|compound(:nn)?/ {ner:/CITY|LOCATION/}=slot ) )
+( {} >/appos|compound(:nn)?|dep/ {ner:PERSON}=entity ) >acl ( {${LIVE}} >/nmod(:prep)|dobj|dep/ ( {} >/nmod(:(assmod|prep))?|compound(:nn)?/ {ner:/CITY|LOCATION/}=slot ) )

@@ -1,0 +1,25 @@
+#{lemma:/buy|sell|acquire|own/} >/.subj.*/ {ner:ORGANIZATION}=entity >/(.)?obj/ {ner:ORGANIZATION}=slot
+#{lemma:/buy|sell|acquire|own/} >/.subj.*/ {ner:ORGANIZATION}=entity >/(.)?obj/ ( {} >/appos/ {ner:ORGANIZATION}=slot )
+#{lemma:/buy|sell|acquire|own/} >/.subj.*/ {ner:ORGANIZATION}=slot >/(prep_|nmod:)(by|to)/ {ner:ORGANIZATION}=entity
+#{lemma:/buy|sell|acquire|own/} >/.subj.*/ {ner:ORGANIZATION}=entity >/(.)?obj/ ( {lemma:/stake|interest|share/} >/(prep_|nmod:)in/ {ner:ORGANIZATION}=slot )
+#{ner:ORGANIZATION}=entity >/appos|conj.*/ ( {lemma:/part|subsidiary|unit|division|branch|wing/} >/(prep_|nmod:)of/ {ner:ORGANIZATION}=slot )
+# {ner:ORGANIZATION}=slot >/nmod:poss/ {ner:ORGANIZATION}=entity
+
+{ner:/ORGANIZATION|COUNTRY/}=slot >/appos/ ( {lemma:/parte|sucursal|subsidiario|filial|miembro/ } >/nmod/ {ner:/ORGANIZATION/}=entity ) 
+{ner:/ORGANIZATION|COUNTRY/}=slot >/acl/ ( {lemma:/parte|sucursal|subsidiario|filial|miembro/ } >/nmod/ {ner:/ORGANIZATION/ } ) 
+{lemma:/parte|sucursal|subsidiario|filial|miembro/ } >/nsubj/ {ner:/ORGANIZATION|COUNTRY/}=slot >/nmod/ {ner:/ORGAIZATION/}=entity
+
+{ner:/ORGANIZATION/}=entity >/conj.*/ ( {word:/filial/} >/det/ {word:/su/} >/appos/ {ner:/ORGANIZATION/}=slot )
+{ner:/ORGANIZATION/}=entity >/conj.*/ ( {word:/filial/} >/det/ {word:/su/} >/appos|amod/ {ner:/ORGANIZATION/}=slot )
+{word:/adquir.*|vend.*/} >/nsubj/ {ner:/ORGANIZATION/}=entity >/dobj|obj/ {ner:/ORGANIZATION/}=slot
+{word:/adquir.*|vend.*/} >/nsubj/ ( {} >/appos|amod/ {ner:/ORGANIZATION/}=entity ) >/dobj|obj/ {ner:/ORGANIZATION/}=slot
+{word:/adquir.*|vend.*/} >/nsubj/ ( {} >/appos|amod/ {ner:/ORGANIZATION/}=entity ) >/dobj|obj/ ( {} >/appos|amod/ {ner:/ORGANIZATION/}=slot )
+{word:/adquir.*|vend.*/} >/nsubj/ ( {ner:/ORGANIZATION/}=entity ) >/dobj|obj/ ( {} >/appos|amod/ {ner:/ORGANIZATION/}=slot )
+{word:/órgano/} >/nsubj/ {ner:/ORGANIZATION/}=entity >>/nmod/ {ner:/ORGANIZATION/}=entity
+{ner:/particip.*/} >/nsubj/ {ner:/COUNTRY|ORGANIZATION/} >/dobj|obj/ {ner:/ORGANIZATION/}=entity
+
+{} >/appos|amod/ {ner:/ORGANIZATION/}=slot >/acl/ ( {word:/adquirid[oa]/ } >/dobj|obj/ ( {} >/appos/ {ner:/ORGANIZATION/ }=entity) )
+{ner:/ORGANIZATION/}=slot >/acl/ ( {word:/adquirid[oa]/ } >/dobj|obj/ ( {} >/appos/ {ner:/ORGANIZATION/}=entity ) )
+{ner:/ORGANIZATION/}=slot >/appos/ ( {} >/amod/ ( {word:/adquirid[oa]/ } >/dobj|obj/ {ner:/ORGANIZATION/}=entity ) )
+
+{word:/compró|comprará|compraron|compraría/} >/nsubj/ {ner:/ORGANIZATION/}=entity >/obj|dobj/ {ner:/ORGANIZATION/}=slot

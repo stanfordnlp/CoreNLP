@@ -1,0 +1,5 @@
+# appos is a very finicky edge
+# {ner:PERSON}=entity  >/appos/ {ner:PERSON}=slot
+{ner:PERSON}=slot >punct {lemma:/[“"]/} >punct {lemma:/["”]/} </dep|appos|compound:nn/ {ner:PERSON}=entity
+{ner:PERSON}=slot >punct {lemma:/[“"]/} >punct {lemma:/["”]/} >/dep|appos|compound:nn/ {ner:PERSON}=entity
+{} >/nmod:topic/ ( {ner:PERSON}=slot >punct {lemma:/[“"]/} >punct {lemma:/["”]/} ) >/nmod:topic/ {ner:PERSON}=entity

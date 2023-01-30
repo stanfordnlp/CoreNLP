@@ -1,0 +1,41 @@
+macro TOPTITLE = lemma:/((已故)?[原前]?(常务)?(名誉)?(首席)?(联合)?(代理?)?副?总?)(董事长?|主席|总理|.+长|主任|(党组|团?支部)?书记|干事长?|经理|长官|.+?次?官|大使|领事|编辑|国王|君主|[王皇]后|女[王皇]|王储|王子|公主|银行家|创始人|[大上中下少准][将校尉士]|首相|顾问|投资人|.?议员|工(程师)?|老总)/
+macro EMPLOY = lemma:/在?(受?雇|就职|就任|委任|委托|任?命|任职?|担任?|[授受]职?|工作|上.|.入|[加进].)于?|从?(辞.?|.休|离.|.出)|.*[升降贬谪提拔].*/
+macro ORGENTITY = {ner:ORGANIZATION;lemma:/^(?![分支].*(部|会|团|社)).*/}=entity
+
+{ner:PERSON}=slot >/nn|compound(:nn)?|amod|appos/ ( {${TOPTITLE}} >/(prep_|nmod:)(prep|poss|assmod)|compound(:nn)?/ ${ORGENTITY} )
+{ner:PERSON}=slot >/nn|compound(:nn)?|amod|appos/ ( {${TOPTITLE}} >/(prep_|nmod:).*|compound(:nn)?/ ({} >/(prep_|nmod:)(prep|poss|assmod)|compound(:nn)?/ ${ORGENTITY} ) )
+{${TOPTITLE}} >/(prep_|nmod:)(prep|poss|assmod)/ ${ORGENTITY} >/appos/ {ner:PERSON}=slot
+#{${TOPTITLE}} >/(prep_|nmod:)(prep|assmod)/ ( ${ORGENTITY} >/appos/ {ner:PERSON}=slot )
+# ^ Peng: what is this???
+( {${TOPTITLE}} >/(prep_|nmod:)(prep|poss|assmod)/ ${ORGENTITY} ) >/nsubj.*/ {ner:PERSON}=slot >cop {}
+{${EMPLOY}} >nsubj {ner:PERSON}=slot >/nmod:prep|dobj/ ( {${TOPTITLE}} >/(prep_|nmod:)(prep|poss|assmod)|compound(:nn)?/ ${ORGENTITY} )
+{ner:PERSON}=slot >/acl/ ({tag:/VB.*/} >/nmod(:prep)?|dobj/ ( {${TOPTITLE}} >/(prep_|nmod:)(prep|poss|assmod)|compound(:nn)?/ ${ORGENTITY} ) )
+#{${TOPTITLE}} >/nmod:poss/ ${ORGENTITY} >/appos/ {ner:PERSON}=slot
+#{ner:PERSON}=slot >appos ( {${TOPTITLE}} >/nmod:(poss|prep)/ ${ORGENTITY} )
+#{${TOPTITLE}} >/(prep_|nmod:)(prep|poss|assmod)/ ${ORGENTITY} >/nn|compound(:nn)?|amod|appos/ {ner:PERSON}=slot
+# ^ duplicates
+# Variants with things that aren't titles, but are good for employee relationships
+#{ner:PERSON}=slot >/nn|compound(:nn)?|amod|appos/ ( {lemma:/speaker|head|chief/} >/(prep_|nmod:)(prep)/ ${ORGENTITY} )
+#{lemma:/speaker|head|chief/} >/(prep_|nmod:)(prep)/ ${ORGENTITY} >/nn|compound(:nn)?|amod|appos/ {ner:PERSON}=slot
+#{lemma:/speaker|head|chief/} >/(prep_|nmod:)(prep)/ ${ORGENTITY} >/appos/ {ner:PERSON}=slot
+#{lemma:/speaker|head|chief/} >/(prep_|nmod:)(prep)/ ( ${ORGENTITY} >/appos/ {ner:PERSON}=slot )
+#( {lemma:/speaker|head|chief/} >/(prep_|nmod:)(prep)/ ${ORGENTITY} ) >/nsubj.*/ {ner:PERSON}=slot >cop {}
+#{tag:/VB.*/} >nsubj {ner:PERSON}=slot >/(prep_|nmod:)as/ ( {lemma:/speaker|head|chief/} >/(prep_|nmod:)(prep)/ ${ORGENTITY} )
+#{}=slot >/acl/ ({tag:/VB.*/} >nsubj {lemma:who} >/(prep_|nmod:)as/ ( {lemma:/speaker|head|chief/} >/(prep_|nmod:)(prep)/ ${ORGENTITY} ) )
+#${ORGENTITY} >/nmod:poss/ ( {lemma:/speaker|head|chief/} >/appos/ {ner:PERSON}=slot )
+# ^ duplicates
+# SLOT's firm, ENTITY
+{lemma:/公司|企业|集团|乐队|团队|商店|店铺|俱乐部/} >/nmod:poss/ {ner:PERSON}=slot >appos ${ORGENTITY}
+${ORGENTITY} >/nmod(:poss)?/ {ner:/PERSON/}=slot
+# TITLE prep ORG, ENTITY / ORG 's TITLE, ENTITY
+{ner:PERSON}=slot >appos ( ({${TOPTITLE}} >/nmod(:assmod)?|compound(:nn)?/ ${ORGENTITY}) )
+#{lemma:/speaker|head|chief/}  >/(prep_|nmod:)(prep|poss)/ ${ORGENTITY} >/appos/ {ner:PERSON}=slot
+# ^ duplicate
+# COPIED FROM PER:TITLE
+# X 会长 、 Y 主席 Z (长老)
+# (Title) Z, the head of X and chair of Y
+{ner:PERSON}=slot >/conj.*|dep/ ( {${TOPTITLE}} >/compound(:nn)?|nmod(:(poss|assmod))?/ ${ORGENTITY} )
+{ner:PERSON}=slot >/conj.*|dep/ ({tag:/N.*/} >>/conj.*/ ( {${TOPTITLE}} !>/compound(:nn)?|appos/ {ner:PERSON} >/compound(:nn)?|nmod(:(poss|assmod))?/ ${ORGENTITY} ))
+
+( {} >/appos|compound(:nn)?/ {ner:PERSON}=slot ) >/conj.*|dep/ ( {${TOPTITLE}} !>/compound(:nn)?|appos/ {ner:PERSON} >/compound(:nn)?|nmod(:(poss|assmod))?/ ${ORGENTITY} )
+( {} >/appos|compound(:nn)?/ {ner:PERSON}=slot ) >/conj.*|dep/ ({tag:/N.*/} >>/conj.*|dep/ ( {${TOPTITLE}} >/compound(:nn)?|nmod(:(poss|assmod))?/ ${ORGENTITY} ))

@@ -1,0 +1,26 @@
+macro TOPTITLE = lemma:/[eE]xecutive|[cC]hairman|[pP]resident|[cC]hief|[hH]ead|[gG]eneral|[cC][eE][oO]|[oO]fficer|[lL]eader|[vV]ice|[kK]ing|[pP]rince|[mM]anager|[mM]inister|[aA]dviser|[bB]oss|[cC]hair|[aA]mbassador|[sS]tar|[gG]overnor|[iI]nvestor|[rR]epresentative|[dD]ean|[cC]ommissioner|[cC]ommander|[mM]idfielder|[sS]peaker|[Rr]esearcher|[eE]ditor|[Cc]hancellor|[fF]ellow|[lL]eadership|[dD]iplomat|[aA]ssociate|[sS]triker|[pP]ilot|[cC]aptain|[bB]anker|[mM]ayor|[pP]remier|[pP]roducer|[aA]rchitect|[dD]esigner|[mM]ajor|[aA]dvisor|[pP]resident|[sS]enator|[sS]pecialist|[fF]aculty|[cC]hairwoman|[mM]ediator|[pP]rosecutor|[eE]ntrepreneur|[cC]reator|[sS]uperstar|[cC]ommentator|[pP]rincipal|[oO]perative|[bB]usinessman|[pP]eacekeeper|[iI]nvestigator|[cC]oordinator|[kK]night|[lL]awmaker|[jJ]ustice|[pP]ublisher|[pP]laymaker|[mM]oderator|[nN]egotiator|[Dd]irector|[Jj]ustice/
+
+{ner:PERSON}=slot >/nn|compound|flat|amod|appos/ ( {${TOPTITLE}} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity )
+{ner:PERSON}=slot >/nn|compound|flat|amod|appos/ ( {${TOPTITLE}} >/(prep_|nmod:|obl:).*/ ({} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity ) )
+{${TOPTITLE}} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity >/appos/ {ner:PERSON}=slot
+{${TOPTITLE}} >/(prep_|nmod:|obl:)(of|at)/ ( {ner:ORGANIZATION}=entity >/appos/ {ner:PERSON}=slot )
+( {${TOPTITLE}} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity ) >/nsubj.*/ {ner:PERSON}=slot >cop {}
+{tag:/VB.*/} >nsubj {ner:PERSON}=slot >/(prep_|nmod:|obl:)as/ ( {${TOPTITLE}} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity )
+{}=slot >/acl:relcl/ ({tag:/VB.*/} >nsubj {lemma:who} >/(prep_|nmod:|obl:)as/ ( {${TOPTITLE}} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity ) )
+{${TOPTITLE}} >/nmod:poss/ {ner:ORGANIZATION}=entity >/appos/ {ner:PERSON}=slot
+{ner:PERSON}=slot >appos ( {${TOPTITLE}} >/(nmod:|obl:)(poss|of|at)/ {ner:ORGANIZATION}=entity )
+{${TOPTITLE}} >/(prep_|nmod:|obl:)(of|at|poss)/ {ner:ORGANIZATION}=entity >/nn|compound|flat|amod|appos/ {ner:PERSON}=slot
+# Variants with things that aren't titles, but are good for employee relationships
+{ner:PERSON}=slot >/nn|compound|flat|amod|appos/ ( {lemma:/speaker|head|chief/} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity )
+{lemma:/speaker|head|chief/} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity >/nn|compound|flat|amod|appos/ {ner:PERSON}=slot
+{lemma:/speaker|head|chief/} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity >/appos/ {ner:PERSON}=slot
+{lemma:/speaker|head|chief/} >/(prep_|nmod:|obl:)(of|at)/ ( {ner:ORGANIZATION}=entity >/appos/ {ner:PERSON}=slot )
+( {lemma:/speaker|head|chief/} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity ) >/nsubj.*/ {ner:PERSON}=slot >cop {}
+{tag:/VB.*/} >nsubj {ner:PERSON}=slot >/(prep_|nmod:|obl:)as/ ( {lemma:/speaker|head|chief/} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity )
+{}=slot >/acl:relcl/ ({tag:/VB.*/} >nsubj {lemma:who} >/(prep_|nmod:|obl:)as/ ( {lemma:/speaker|head|chief/} >/(prep_|nmod:|obl:)(of|at)/ {ner:ORGANIZATION}=entity ) )
+{ner:ORGANIZATION}=entity >/nmod:poss/ ( {lemma:/speaker|head|chief/} >/appos/ {ner:PERSON}=slot )
+# SLOT's firm, ENTITY
+{lemma:/firm|company|business|association|corporation|organization|society/}  >/nmod:poss/ {ner:PERSON}=slot >/appos/ {ner:ORGANIZATION}=entity
+# TITLE of ORG, ENTITY / ORG 's TITLE, ENTITY
+{${TOPTITLE}}  >/(prep_|nmod:|obl:)(of|poss)/ {ner:ORGANIZATION}=entity >/appos/ {ner:PERSON}=slot
+{lemma:/speaker|head|chief/}  >/(prep_|nmod:|obl:)(of|poss)/ {ner:ORGANIZATION}=entity >/appos/ {ner:PERSON}=slot

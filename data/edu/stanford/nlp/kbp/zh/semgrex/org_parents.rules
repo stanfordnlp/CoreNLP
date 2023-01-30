@@ -1,0 +1,3 @@
+{ner:ORGANIZATION}=entity >/appos|conj.*/ ( {lemma:/parent|owner/} >/(nmod:|prep_)of/ {ner:ORGANIZATION}=slot )
+{ner:ORGANIZATION}=entity >/amod./ {lemma:/[a-zA-Z ]+-(owned|backed|controlled)/;ner:ORGANIZATION}=slot
+
