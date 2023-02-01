@@ -686,7 +686,7 @@ public class SemgrexTest extends TestCase {
 
   public void testNamedRelation() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
-    SemgrexPattern pattern = SemgrexPattern.compile("{idx:0}=gov >>=foo {idx:3}=dep");
+    SemgrexPattern pattern = SemgrexPattern.compile("{idx:0}=gov >>~foo {idx:3}=dep");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("ate", matcher.getNode("gov").toString());
@@ -694,7 +694,7 @@ public class SemgrexTest extends TestCase {
     assertEquals("compound", matcher.getRelnString("foo"));
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{idx:3}=dep <<=foo {idx:0}=gov");
+    pattern = SemgrexPattern.compile("{idx:3}=dep <<~foo {idx:0}=gov");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("ate", matcher.getNode("gov").toString());
@@ -702,7 +702,7 @@ public class SemgrexTest extends TestCase {
     assertEquals("obj", matcher.getRelnString("foo"));
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{idx:3}=dep <=foo {idx:2}=gov");
+    pattern = SemgrexPattern.compile("{idx:3}=dep <~foo {idx:2}=gov");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("muffins", matcher.getNode("gov").toString());
@@ -710,9 +710,32 @@ public class SemgrexTest extends TestCase {
     assertEquals("compound", matcher.getRelnString("foo"));
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{idx:2}=gov >=foo {idx:3}=dep");
+    pattern = SemgrexPattern.compile("{idx:2}=gov >~foo {idx:3}=dep");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
+    assertEquals("muffins", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("compound", matcher.getRelnString("foo"));
+    assertFalse(matcher.find());
+  }
+
+  /** named edges should also have the named reference functionality, as long as you are testing a parent or child relation */
+  public void testNamedRelationEdge() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
+    SemgrexPattern pattern = SemgrexPattern.compile("{idx:2}=gov >=foo {idx:3}=dep");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("muffins", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("compound", matcher.getRelnString("foo"));
+    assertFalse(matcher.find());
+
+    // it should accept this once, going from root to the dep node,
+    // as the ~foo will require that it have the same edge label as =foo
+    pattern = SemgrexPattern.compile("{idx:2}=gov >=foo {idx:3}=dep : {$}=root >>~foo {}");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("ate", matcher.getNode("root").toString());
     assertEquals("muffins", matcher.getNode("gov").toString());
     assertEquals("blueberry", matcher.getNode("dep").toString());
     assertEquals("compound", matcher.getRelnString("foo"));
@@ -725,7 +748,7 @@ public class SemgrexTest extends TestCase {
   public void testNamedRelationBackreference() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
 
-    SemgrexPattern pattern = SemgrexPattern.compile("{}=A >=foo ({}=B >=foo {}=C)");
+    SemgrexPattern pattern = SemgrexPattern.compile("{}=A >~foo ({}=B >~foo {}=C)");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertFalse(matcher.find());
 
@@ -747,7 +770,7 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
 
     graph = SemanticGraph.valueOf("[antennae amod> big amod> blue]");
-    pattern = SemgrexPattern.compile("{}=A >=foo {}=B >=foo ({}=C !== {}=B)");
+    pattern = SemgrexPattern.compile("{}=A >~foo {}=B >~foo ({}=C !== {}=B)");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("antennae", matcher.getNode("A").toString());
@@ -764,7 +787,7 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
 
     graph = SemanticGraph.valueOf("[antennae amod> big dep> blue]");
-    pattern = SemgrexPattern.compile("{}=A >=foo {}=B >=foo ({}=C !== {}=B)");
+    pattern = SemgrexPattern.compile("{}=A >~foo {}=B >~foo ({}=C !== {}=B)");
     matcher = pattern.matcher(graph);
     assertFalse(matcher.find());
   }
@@ -775,7 +798,7 @@ public class SemgrexTest extends TestCase {
   public void testNamedEdgeGovernor() {
     // Test a simple version of the named edge search
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
-    SemgrexPattern pattern = SemgrexPattern.compile("{}=A >subj~foo {}=B");
+    SemgrexPattern pattern = SemgrexPattern.compile("{}=A >subj=foo {}=B");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     SemanticGraphEdge edge = matcher.getEdge("foo");
@@ -801,7 +824,7 @@ public class SemgrexTest extends TestCase {
 
     // Test the expected behavior of a pattern *with* backref
     graph = SemanticGraph.valueOf("[antennae amod> big amod> blue]");
-    pattern = SemgrexPattern.compile("{}=A >~foo {}=B >~foo {}=C");
+    pattern = SemgrexPattern.compile("{}=A >=foo {}=B >=foo {}=C");
     matcher = pattern.matcher(graph);
     // this time it should only accept when the edges are the same
     assertTrue(matcher.find());
@@ -824,7 +847,7 @@ public class SemgrexTest extends TestCase {
    */
   public void testNamedEdgeDependent() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
-    SemgrexPattern pattern = SemgrexPattern.compile("{}=A <subj~foo {}=B");
+    SemgrexPattern pattern = SemgrexPattern.compile("{}=A <subj=foo {}=B");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     SemanticGraphEdge edge = matcher.getEdge("foo");
@@ -842,7 +865,7 @@ public class SemgrexTest extends TestCase {
    */
   public void testNamedEdgeLeftRight() {
     SemanticGraph graph = SemanticGraph.valueOf("[antennae-2 amod> blue-1 nmod> [head-5 case> on-3 nmod:poss> her-4]]");
-    SemgrexPattern pattern = SemgrexPattern.compile("{$}=A >--~foo {}=B");
+    SemgrexPattern pattern = SemgrexPattern.compile("{$}=A >--=foo {}=B");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     SemanticGraphEdge edge = matcher.getEdge("foo");
@@ -851,7 +874,7 @@ public class SemgrexTest extends TestCase {
     assertEquals(edge.getTarget().word(), "blue");
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{$}=A >++~foo {}=B");
+    pattern = SemgrexPattern.compile("{$}=A >++=foo {}=B");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     edge = matcher.getEdge("foo");
@@ -860,7 +883,7 @@ public class SemgrexTest extends TestCase {
     assertEquals(edge.getTarget().word(), "head");
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{}=A <++~foo {$}=B");
+    pattern = SemgrexPattern.compile("{}=A <++=foo {$}=B");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     edge = matcher.getEdge("foo");
@@ -869,7 +892,7 @@ public class SemgrexTest extends TestCase {
     assertEquals(edge.getTarget().word(), "blue");
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{}=A <--~foo {$}=B");
+    pattern = SemgrexPattern.compile("{}=A <--=foo {$}=B");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     edge = matcher.getEdge("foo");
@@ -884,7 +907,7 @@ public class SemgrexTest extends TestCase {
    */
   public void testNamedEdgeException() {
     try {
-      SemgrexPattern pattern = SemgrexPattern.compile("{} <<~foo {}");
+      SemgrexPattern pattern = SemgrexPattern.compile("{} <<=foo {}");
       // an unexpected exception would not be caught
       // failing to throw an exception falls through to the error
       throw new AssertionError("Expected a SemgrexParseException");

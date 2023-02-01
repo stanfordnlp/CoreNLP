@@ -187,8 +187,8 @@ SemgrexPattern Relation() : {
 	(
 	( ( ( (numArg = <IDENTIFIER> ("," numArg2 = <IDENTIFIER>)?)? rel = <RELATION>
 		(relnType = <IDENTIFIER> | relnType = <REGEX>)?)
-		(( ("=") name = <IDENTIFIER> ) )?
-                (( ("~") edgeName = <IDENTIFIER> ) )? )
+		(( ("~") name = <IDENTIFIER> ) )?
+                (( ("=") edgeName = <IDENTIFIER> ) )? )
 	  | (rel = <ALIGNRELN>))
 
 	{
