@@ -58,8 +58,15 @@ abstract class GraphRelation implements Serializable {
     this.symbol = symbol;
     this.type   = getPattern(type);
     this.rawType = type;
-    this.name = name;
     this.edgeName = edgeName;
+    if (name != null && edgeName != null && !name.equals(edgeName)) {
+      throw new SemgrexParseException("GraphRelation had both = and ~ set, but the names were different!  " + this.toString());
+    }
+    if (name != null) {
+      this.name = name;
+    } else {
+      this.name = edgeName;
+    }
   }
 
   private GraphRelation(String symbol, String type, String name) {
@@ -91,12 +98,12 @@ abstract class GraphRelation implements Serializable {
   }
 
   public String getName() {
-    if (name == null || name == "") return null;
+    if (name == null || name.equals("")) return null;
     return name;
   }
 
   public String getEdgeName() {
-    if (edgeName == null || edgeName == "") return null;
+    if (edgeName == null || edgeName.equals("")) return null;
     return edgeName;
   }
 

@@ -18,7 +18,7 @@ public class ProcessSemgrexRequestTest {
   public static CoreNLPProtos.SemgrexRequest buildFakeRequest(int numQueries, int numSemgrex) {
     CoreNLPProtos.SemgrexRequest.Builder request = CoreNLPProtos.SemgrexRequest.newBuilder();
     for (int i = 0; i < numSemgrex; ++i) {
-      request.addSemgrex("{}=source >dobj=zzz~foo {}=target");
+      request.addSemgrex("{}=source >dobj~foo {}=target");
     }
 
     for (int i = 0; i < numQueries; ++i) {
@@ -74,7 +74,7 @@ result {
       index: 2
     }
     reln {
-      name: "zzz"
+      name: "foo"
       reln: "dobj"
     }
   }
@@ -119,8 +119,8 @@ result {
       Assert.assertEquals("Node 2 should be target", 2, match.getNodeList().get(1).getMatchIndex());
       Assert.assertEquals("Node 2 should be target", "target", match.getNodeList().get(1).getName());
 
-      Assert.assertEquals("Reln dobj should be named zzz", "zzz", match.getRelnList().get(0).getName());
-      Assert.assertEquals("Reln dobj should be named zzz", "dobj", match.getRelnList().get(0).getReln());
+      Assert.assertEquals("Reln dobj should be named foo", "foo", match.getRelnList().get(0).getName());
+      Assert.assertEquals("Reln dobj should be have reln dobj", "dobj", match.getRelnList().get(0).getReln());
 
       Assert.assertEquals("Edge dobj should be named foo", "foo", match.getEdgeList().get(0).getName());
       Assert.assertEquals("Edge dobj should have reln dobj", "dobj", match.getEdgeList().get(0).getReln());
