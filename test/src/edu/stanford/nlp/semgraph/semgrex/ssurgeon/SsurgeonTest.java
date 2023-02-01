@@ -154,7 +154,7 @@ public class SsurgeonTest {
                              "  <ssurgeon-pattern>",
                              "    <uid>38</uid>",
                              "    <notes>This is a simple test of RemoveNamedEdge</notes>",
-                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >dep~foo {}=a2") + "</semgrex>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >dep=foo {}=a2") + "</semgrex>",
                              "    <edit-list>removeNamedEdge -edge foo</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
@@ -416,7 +416,7 @@ public class SsurgeonTest {
   @Test
   public void simpleTest() {
     SemanticGraph sg = SemanticGraph.valueOf("[mixed/VBN nsubj>[Joe/NNP appos>[bartender/NN det>the/DT]]  obj>[drink/NN det>a/DT]]");
-    SemgrexPattern semgrexPattern = SemgrexPattern.compile("{}=a1 >appos~e1 {}=a2 <nsubj~e2 {}=a3");
+    SemgrexPattern semgrexPattern = SemgrexPattern.compile("{}=a1 >appos=e1 {}=a2 <nsubj=e2 {}=a3");
     SsurgeonPattern pattern = new SsurgeonPattern(semgrexPattern);
 
     System.out.println("Start = "+sg.toCompactString());

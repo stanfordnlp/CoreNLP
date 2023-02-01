@@ -18,7 +18,7 @@ public class ProcessSemgrexRequestTest {
   public static CoreNLPProtos.SemgrexRequest buildFakeRequest(int numQueries, int numSemgrex) {
     CoreNLPProtos.SemgrexRequest.Builder request = CoreNLPProtos.SemgrexRequest.newBuilder();
     for (int i = 0; i < numSemgrex; ++i) {
-      request.addSemgrex("{}=source >dobj~foo {}=target");
+      request.addSemgrex("{}=source >dobj=foo {}=target");
     }
 
     for (int i = 0; i < numQueries; ++i) {
