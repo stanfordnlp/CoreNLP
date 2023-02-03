@@ -853,6 +853,11 @@ public class SemanticGraph implements Serializable  {
       return;
     }
 
+    if (vertexSet().size() == 0) {
+      roots.clear();
+      return;
+    }
+
     /*
      * else { Collection<IndexedWord> oldRoots = new
      * ArrayList<IndexedWord>(roots); for (IndexedWord oldRoot : oldRoots) { if
@@ -887,7 +892,6 @@ public class SemanticGraph implements Serializable  {
     IndexedWord winner = Counters.argmax(dominatedEdgeCount);
     // TODO: account for multiply rooted graphs later
     setRoot(winner);
-
   }
 
   public void setRoot(IndexedWord word) {
