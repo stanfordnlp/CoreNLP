@@ -41474,15 +41474,15 @@ public final class CoreNLPProtos {
     boolean getHasBasicDependency();
 
     /**
-     * <code>optional bool hasEnhancedDepenedncy = 28;</code>
-     * @return Whether the hasEnhancedDepenedncy field is set.
+     * <code>optional bool hasEnhancedDependency = 28;</code>
+     * @return Whether the hasEnhancedDependency field is set.
      */
-    boolean hasHasEnhancedDepenedncy();
+    boolean hasHasEnhancedDependency();
     /**
-     * <code>optional bool hasEnhancedDepenedncy = 28;</code>
-     * @return The hasEnhancedDepenedncy.
+     * <code>optional bool hasEnhancedDependency = 28;</code>
+     * @return The hasEnhancedDependency.
      */
-    boolean getHasEnhancedDepenedncy();
+    boolean getHasEnhancedDependency();
 
     /**
      * <code>optional bool hasContextParseTree = 29;</code>
@@ -42492,23 +42492,23 @@ public final class CoreNLPProtos {
       return hasBasicDependency_;
     }
 
-    public static final int HASENHANCEDDEPENEDNCY_FIELD_NUMBER = 28;
-    private boolean hasEnhancedDepenedncy_;
+    public static final int HASENHANCEDDEPENDENCY_FIELD_NUMBER = 28;
+    private boolean hasEnhancedDependency_;
     /**
-     * <code>optional bool hasEnhancedDepenedncy = 28;</code>
-     * @return Whether the hasEnhancedDepenedncy field is set.
+     * <code>optional bool hasEnhancedDependency = 28;</code>
+     * @return Whether the hasEnhancedDependency field is set.
      */
     @java.lang.Override
-    public boolean hasHasEnhancedDepenedncy() {
+    public boolean hasHasEnhancedDependency() {
       return ((bitField0_ & 0x04000000) != 0);
     }
     /**
-     * <code>optional bool hasEnhancedDepenedncy = 28;</code>
-     * @return The hasEnhancedDepenedncy.
+     * <code>optional bool hasEnhancedDependency = 28;</code>
+     * @return The hasEnhancedDependency.
      */
     @java.lang.Override
-    public boolean getHasEnhancedDepenedncy() {
-      return hasEnhancedDepenedncy_;
+    public boolean getHasEnhancedDependency() {
+      return hasEnhancedDependency_;
     }
 
     public static final int HASCONTEXTPARSETREE_FIELD_NUMBER = 29;
@@ -43012,7 +43012,7 @@ public final class CoreNLPProtos {
         output.writeBool(27, hasBasicDependency_);
       }
       if (((bitField0_ & 0x04000000) != 0)) {
-        output.writeBool(28, hasEnhancedDepenedncy_);
+        output.writeBool(28, hasEnhancedDependency_);
       }
       if (((bitField0_ & 0x08000000) != 0)) {
         output.writeBool(29, hasContextParseTree_);
@@ -43164,7 +43164,7 @@ public final class CoreNLPProtos {
       }
       if (((bitField0_ & 0x04000000) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(28, hasEnhancedDepenedncy_);
+          .computeBoolSize(28, hasEnhancedDependency_);
       }
       if (((bitField0_ & 0x08000000) != 0)) {
         size += com.google.protobuf.CodedOutputStream
@@ -43400,10 +43400,10 @@ public final class CoreNLPProtos {
         if (getHasBasicDependency()
             != other.getHasBasicDependency()) return false;
       }
-      if (hasHasEnhancedDepenedncy() != other.hasHasEnhancedDepenedncy()) return false;
-      if (hasHasEnhancedDepenedncy()) {
-        if (getHasEnhancedDepenedncy()
-            != other.getHasEnhancedDepenedncy()) return false;
+      if (hasHasEnhancedDependency() != other.hasHasEnhancedDependency()) return false;
+      if (hasHasEnhancedDependency()) {
+        if (getHasEnhancedDependency()
+            != other.getHasEnhancedDependency()) return false;
       }
       if (hasHasContextParseTree() != other.hasHasContextParseTree()) return false;
       if (hasHasContextParseTree()) {
@@ -43571,10 +43571,10 @@ public final class CoreNLPProtos {
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
             getHasBasicDependency());
       }
-      if (hasHasEnhancedDepenedncy()) {
-        hash = (37 * hash) + HASENHANCEDDEPENEDNCY_FIELD_NUMBER;
+      if (hasHasEnhancedDependency()) {
+        hash = (37 * hash) + HASENHANCEDDEPENDENCY_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-            getHasEnhancedDepenedncy());
+            getHasEnhancedDependency());
       }
       if (hasHasContextParseTree()) {
         hash = (37 * hash) + HASCONTEXTPARSETREE_FIELD_NUMBER;
@@ -43824,7 +43824,7 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x01000000);
         hasBasicDependency_ = false;
         bitField0_ = (bitField0_ & ~0x02000000);
-        hasEnhancedDepenedncy_ = false;
+        hasEnhancedDependency_ = false;
         bitField0_ = (bitField0_ & ~0x04000000);
         hasContextParseTree_ = false;
         bitField0_ = (bitField0_ & ~0x08000000);
@@ -44014,7 +44014,7 @@ public final class CoreNLPProtos {
           to_bitField0_ |= 0x02000000;
         }
         if (((from_bitField0_ & 0x04000000) != 0)) {
-          result.hasEnhancedDepenedncy_ = hasEnhancedDepenedncy_;
+          result.hasEnhancedDependency_ = hasEnhancedDependency_;
           to_bitField0_ |= 0x04000000;
         }
         if (((from_bitField0_ & 0x08000000) != 0)) {
@@ -44247,8 +44247,8 @@ public final class CoreNLPProtos {
         if (other.hasHasBasicDependency()) {
           setHasBasicDependency(other.getHasBasicDependency());
         }
-        if (other.hasHasEnhancedDepenedncy()) {
-          setHasEnhancedDepenedncy(other.getHasEnhancedDepenedncy());
+        if (other.hasHasEnhancedDependency()) {
+          setHasEnhancedDependency(other.getHasEnhancedDependency());
         }
         if (other.hasHasContextParseTree()) {
           setHasContextParseTree(other.getHasContextParseTree());
@@ -44544,7 +44544,7 @@ public final class CoreNLPProtos {
                 break;
               } // case 216
               case 224: {
-                hasEnhancedDepenedncy_ = input.readBool();
+                hasEnhancedDependency_ = input.readBool();
                 bitField0_ |= 0x04000000;
                 break;
               } // case 224
@@ -46046,41 +46046,41 @@ public final class CoreNLPProtos {
         return this;
       }
 
-      private boolean hasEnhancedDepenedncy_ ;
+      private boolean hasEnhancedDependency_ ;
       /**
-       * <code>optional bool hasEnhancedDepenedncy = 28;</code>
-       * @return Whether the hasEnhancedDepenedncy field is set.
+       * <code>optional bool hasEnhancedDependency = 28;</code>
+       * @return Whether the hasEnhancedDependency field is set.
        */
       @java.lang.Override
-      public boolean hasHasEnhancedDepenedncy() {
+      public boolean hasHasEnhancedDependency() {
         return ((bitField0_ & 0x04000000) != 0);
       }
       /**
-       * <code>optional bool hasEnhancedDepenedncy = 28;</code>
-       * @return The hasEnhancedDepenedncy.
+       * <code>optional bool hasEnhancedDependency = 28;</code>
+       * @return The hasEnhancedDependency.
        */
       @java.lang.Override
-      public boolean getHasEnhancedDepenedncy() {
-        return hasEnhancedDepenedncy_;
+      public boolean getHasEnhancedDependency() {
+        return hasEnhancedDependency_;
       }
       /**
-       * <code>optional bool hasEnhancedDepenedncy = 28;</code>
-       * @param value The hasEnhancedDepenedncy to set.
+       * <code>optional bool hasEnhancedDependency = 28;</code>
+       * @param value The hasEnhancedDependency to set.
        * @return This builder for chaining.
        */
-      public Builder setHasEnhancedDepenedncy(boolean value) {
+      public Builder setHasEnhancedDependency(boolean value) {
         bitField0_ |= 0x04000000;
-        hasEnhancedDepenedncy_ = value;
+        hasEnhancedDependency_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bool hasEnhancedDepenedncy = 28;</code>
+       * <code>optional bool hasEnhancedDependency = 28;</code>
        * @return This builder for chaining.
        */
-      public Builder clearHasEnhancedDepenedncy() {
+      public Builder clearHasEnhancedDependency() {
         bitField0_ = (bitField0_ & ~0x04000000);
-        hasEnhancedDepenedncy_ = false;
+        hasEnhancedDependency_ = false;
         onChanged();
         return this;
       }
@@ -100492,7 +100492,7 @@ public final class CoreNLPProtos {
       "t\030\026 \001(\010\022\033\n\023isPrepositionObject\030\027 \001(\010\022\017\n\007" +
       "hasTwin\030\030 \001(\010\022\017\n\007generic\030\031 \001(\010\022\023\n\013isSing" +
       "leton\030\032 \001(\010\022\032\n\022hasBasicDependency\030\033 \001(\010\022" +
-      "\035\n\025hasEnhancedDepenedncy\030\034 \001(\010\022\033\n\023hasCon" +
+      "\035\n\025hasEnhancedDependency\030\034 \001(\010\022\033\n\023hasCon" +
       "textParseTree\030\035 \001(\010\022?\n\017headIndexedWord\030\036" +
       " \001(\0132&.edu.stanford.nlp.pipeline.Indexed" +
       "Word\022=\n\rdependingVerb\030\037 \001(\0132&.edu.stanfo" +
@@ -100745,7 +100745,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_Mention_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_Mention_descriptor,
-        new java.lang.String[] { "MentionID", "MentionType", "Number", "Gender", "Animacy", "Person", "StartIndex", "EndIndex", "HeadIndex", "HeadString", "NerString", "OriginalRef", "GoldCorefClusterID", "CorefClusterID", "MentionNum", "SentNum", "Utter", "Paragraph", "IsSubject", "IsDirectObject", "IsIndirectObject", "IsPrepositionObject", "HasTwin", "Generic", "IsSingleton", "HasBasicDependency", "HasEnhancedDepenedncy", "HasContextParseTree", "HeadIndexedWord", "DependingVerb", "HeadWord", "SpeakerInfo", "SentenceWords", "OriginalSpan", "Dependents", "PreprocessedTerms", "Appositions", "PredicateNominatives", "RelativePronouns", "ListMembers", "BelongToLists", });
+        new java.lang.String[] { "MentionID", "MentionType", "Number", "Gender", "Animacy", "Person", "StartIndex", "EndIndex", "HeadIndex", "HeadString", "NerString", "OriginalRef", "GoldCorefClusterID", "CorefClusterID", "MentionNum", "SentNum", "Utter", "Paragraph", "IsSubject", "IsDirectObject", "IsIndirectObject", "IsPrepositionObject", "HasTwin", "Generic", "IsSingleton", "HasBasicDependency", "HasEnhancedDependency", "HasContextParseTree", "HeadIndexedWord", "DependingVerb", "HeadWord", "SpeakerInfo", "SentenceWords", "OriginalSpan", "Dependents", "PreprocessedTerms", "Appositions", "PredicateNominatives", "RelativePronouns", "ListMembers", "BelongToLists", });
     internal_static_edu_stanford_nlp_pipeline_IndexedWord_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_edu_stanford_nlp_pipeline_IndexedWord_fieldAccessorTable = new
