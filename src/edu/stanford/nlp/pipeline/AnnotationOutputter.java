@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -38,6 +39,8 @@ public abstract class AnnotationOutputter {
 
   private static final Options DEFAULT_OPTIONS = new Options(); // IMPORTANT: must come after DEFAULT_CONSTITUENCY_TREE_PRINTER
 
+  /** Some outputters output all of the SemanticGraphs.  Others may just output one */
+  private static final SemanticGraphFactory.Mode DEFAULT_SEMANTIC_GRAPH = SemanticGraphFactory.Mode.ENHANCED_PLUS_PLUS;
 
   public static class Options {
 
@@ -66,7 +69,8 @@ public abstract class AnnotationOutputter {
     /** Print some fake dependency info in the CoNLL output.
         Useful for the original conll eval script, for example */
     public final boolean printFakeDeps;
-
+    /** Which graph to output if we only output one */
+    public final SemanticGraphFactory.Mode semanticGraphMode;
 
     public Options() {
       // this creates the default options object
@@ -84,6 +88,7 @@ public abstract class AnnotationOutputter {
       relationsBeam = 0.0;
       keysToPrint = getKeysToPrint(DEFAULT_KEYS);
       printFakeDeps = false;
+      semanticGraphMode = DEFAULT_SEMANTIC_GRAPH;
     }
 
     public Options(Properties properties) {
@@ -99,6 +104,12 @@ public abstract class AnnotationOutputter {
       relationsBeam = PropertiesUtils.getDouble(properties, "output.relation.beam", 0.0);
       keysToPrint = getKeysToPrint(properties.getProperty("output.columns", DEFAULT_KEYS));
       printFakeDeps = PropertiesUtils.getBool(properties, "output.printFakeDeps", false);
+      String graphMode = properties.getProperty("output.dependencyType", null);
+      if (graphMode == null) {
+        semanticGraphMode = DEFAULT_SEMANTIC_GRAPH;
+      } else {
+        semanticGraphMode = SemanticGraphFactory.Mode.valueOf(graphMode.toUpperCase());
+      }
     }
 
     private static List<Class<? extends CoreAnnotation<?>>> getKeysToPrint(String columns) {

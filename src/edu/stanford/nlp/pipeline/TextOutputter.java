@@ -19,6 +19,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.naturalli.OpenIE;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
@@ -148,10 +149,36 @@ public class TextOutputter extends AnnotationOutputter {
         // case we don't want to recreate them using the dependency
         // printer.  This might be relevant if using CoreNLP for a
         // language which doesn't have dependencies, for example.
-        if (sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class) != null) {
+        final SemanticGraph graph;
+        final String graphName;
+        switch (options.semanticGraphMode) {
+        case BASIC:
+          graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+          graphName = "basic dependencies";
+          break;
+        case ENHANCED:
+          graph = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+          graphName = "enhanced dependencies";
+          break;
+        case ENHANCED_PLUS_PLUS:
+          graph = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
+          graphName = "enhanced plus plus dependencies";
+          break;
+        case COLLAPSED:
+          graph = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+          graphName = "collapsed dependencies";
+          break;
+        case CCPROCESSED:
+          graph = sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+          graphName = "cc processed dependencies";
+          break;
+        default:
+          throw new RuntimeException("Sorry, but " + options.semanticGraphMode + " dependencies cannot be output as part of the TextOutputter");
+        }
+        if (graph != null) {
           pw.println();
-          pw.println("Dependency Parse (enhanced plus plus dependencies):");
-          pw.print(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class).toList());
+          pw.println("Dependency Parse (" + graphName + "):");
+          pw.print(graph.toList());
         }
 
         // display the entity mentions
