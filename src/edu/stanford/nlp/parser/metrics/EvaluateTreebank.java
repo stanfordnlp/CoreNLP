@@ -319,7 +319,7 @@ public class EvaluateTreebank  {
           int sz = parses.size();
           if (sz > 1) {
             pwOut.println("There were " + sz + " best PCFG parses with score " + parses.get(0).score() + '.');
-            Tree transGoldTree = collinizer.transformTree(goldTree);
+            Tree transGoldTree = collinizer.transformTree(goldTree, goldTree);
             int iii = 0;
             for (ScoredObject<Tree> sot : parses) {
               iii++;
@@ -329,7 +329,7 @@ public class EvaluateTreebank  {
               pq.restoreOriginalWords(tbd);
               pwOut.println("PCFG Parse #" + iii + " with score " + tbd.score());
               tbd.pennPrint(pwOut);
-              Tree tbtr = collinizer.transformTree(tbd);
+              Tree tbtr = collinizer.transformTree(tbd, goldTree);
               // pwOut.println("Tree size = " + tbtr.size() + "; depth = " + tbtr.depth());
               kGoodLB.evaluate(tbtr, transGoldTree, pwErr);
             }
@@ -338,14 +338,14 @@ public class EvaluateTreebank  {
         // Huang and Chiang (2006) Algorithm 3 output from the PCFG parser
         else if (op.testOptions.printPCFGkBest > 0 && op.testOptions.outputkBestEquivocation == null) {
           List<ScoredObject<Tree>> trees = kbestPCFGTrees.subList(0, op.testOptions.printPCFGkBest);
-          Tree transGoldTree = collinizer.transformTree(goldTree);
+          Tree transGoldTree = collinizer.transformTree(goldTree, goldTree);
           int i = 0;
           for (ScoredObject<Tree> tp : trees) {
             i++;
             pwOut.println("PCFG Parse #" + i + " with score " + tp.score());
             Tree tbd = tp.object();
             tbd.pennPrint(pwOut);
-            Tree tbtr = collinizer.transformTree(tbd);
+            Tree tbtr = collinizer.transformTree(tbd, goldTree);
             kGoodLB.evaluate(tbtr, transGoldTree, pwErr);
           }
         }
@@ -353,14 +353,14 @@ public class EvaluateTreebank  {
         else if (op.testOptions.printFactoredKGood > 0 && pq.hasFactoredParse()) {
           // DZ: debug n best trees
           List<ScoredObject<Tree>> trees = pq.getKGoodFactoredParses(op.testOptions.printFactoredKGood);
-          Tree transGoldTree = collinizer.transformTree(goldTree);
+          Tree transGoldTree = collinizer.transformTree(goldTree, goldTree);
           int ii = 0;
           for (ScoredObject<Tree> tp : trees) {
             ii++;
             pwOut.println("Factored Parse #" + ii + " with score " + tp.score());
             Tree tbd = tp.object();
             tbd.pennPrint(pwOut);
-            Tree tbtr = collinizer.transformTree(tbd);
+            Tree tbtr = collinizer.transformTree(tbd, goldTree);
             kGoodLB.evaluate(tbtr, transGoldTree, pwOut);
           }
         }
@@ -396,14 +396,14 @@ public class EvaluateTreebank  {
       if (tree != null) {
         //Strip subcategories and remove punctuation for evaluation
         tree = subcategoryStripper.transformTree(tree);
-        Tree treeFact = collinizer.transformTree(tree);
+        Tree treeFact = collinizer.transformTree(tree, goldTree);
 
         //Setup the gold tree
         if (op.testOptions.verbose) {
           pwOut.println("Correct parse");
           treePrint.printTree(goldTree, pwOut);
         }
-        Tree transGoldTree = collinizer.transformTree(goldTree);
+        Tree transGoldTree = collinizer.transformTree(goldTree, goldTree);
         if(transGoldTree != null)
           transGoldTree = subcategoryStripper.transformTree(transGoldTree);
 
@@ -436,7 +436,7 @@ public class EvaluateTreebank  {
           List<Tree> transGuesses = new ArrayList<>();
           int kbest = Math.min(op.testOptions.evalPCFGkBest, kbestPCFGTrees.size());
           for (ScoredObject<Tree> guess : kbestPCFGTrees.subList(0, kbest)) {
-            transGuesses.add(collinizer.transformTree(guess.object()));
+            transGuesses.add(collinizer.transformTree(guess.object(), goldTree));
           }
           for (BestOfTopKEval eval : topKEvals) {
             eval.evaluate(transGuesses, transGoldTree, pwErr);
@@ -446,7 +446,7 @@ public class EvaluateTreebank  {
         //PCFG eval
         Tree treePCFG = pq.getBestPCFGParse();
         if (treePCFG != null) {
-          Tree treePCFGeval = collinizer.transformTree(treePCFG);
+          Tree treePCFGeval = collinizer.transformTree(treePCFG, goldTree);
           if (pcfgLB != null) {
             pcfgLB.evaluate(treePCFGeval, transGoldTree, pwErr);
           }

@@ -262,7 +262,6 @@ public class CollinsDepEval extends AbstractEval  {
     int skippedGuessTrees = 0;
 
     for(final Tree guess : guessTreebank) {
-      final Tree evalGuess = tc.transformTree(guess);
       if(guess.yield().size() > MAX_GUESS_YIELD) {
         skippedGuessTrees++;
         continue;
@@ -271,13 +270,14 @@ public class CollinsDepEval extends AbstractEval  {
       boolean doneEval = false;
       while(goldItr.hasNext() && !doneEval) {
         final Tree gold = goldItr.next();
-        final Tree evalGold = tc.transformTree(gold);
+        final Tree evalGold = tc.transformTree(gold, gold);
         goldLineId++;
 
-        if(gold.yield().size() > MAX_GOLD_YIELD) {
+        if(gold.yield().size() > MAX_GOLD_YIELD)
           continue;
 
-        } else if(evalGold.yield().size() != evalGuess.yield().size()) {
+        final Tree evalGuess = tc.transformTree(guess, gold);
+        if (evalGuess == null || evalGold.yield().size() != evalGuess.yield().size()) {
           pwOut.println("Yield mismatch at gold line " + goldLineId);
           skippedGuessTrees++;
           break; //Default evalb behavior -- skip this guess tree

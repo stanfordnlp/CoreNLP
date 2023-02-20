@@ -1,7 +1,8 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import edu.stanford.nlp.trees.*;
 
@@ -49,16 +50,25 @@ public class TreeCollinizer implements AbstractCollinizer {
             ", fixCollinsBaseNP: " + fixCollinsBaseNP + ", whOption: " + whOption + ")");
   }
 
-  public Tree transformTree(Tree tree) {
-    if (tree == null) return null;
-    TreeFactory tf = tree.treeFactory();
+  public Tree transformTree(Tree guess, Tree gold) {
+    if (guess == null || gold == null) return null;
+    if (guess.yield().size() != gold.yield().size()) {
+      return null;
+    }
 
-    String s = tree.value();
+    return transformTree(guess, Trees.preTerminals(gold).iterator());
+  }
+
+  private Tree transformTree(Tree guess, Iterator<Tree> goldPreterminals) {
+    if (guess == null) return null;
+    TreeFactory tf = guess.treeFactory();
+
+    String s = guess.value();
     if (tlp.isStartSymbol(s))
-      return transformTree(tree.firstChild());
+      return transformTree(guess.firstChild(), goldPreterminals);
 
-    if (tree.isLeaf()) {
-      return tf.newLeaf(tree.label());
+    if (guess.isLeaf()) {
+      return tf.newLeaf(guess.label());
     }
     s = tlp.basicCategory(s);
     if (((whOption & 1) != 0) && s.startsWith("WH")) {
@@ -76,17 +86,17 @@ public class TreeCollinizer implements AbstractCollinizer {
     // wsg2010: Might need a better way to deal with tag ambiguity. This still doesn't handle the
     // case where the GOLD tree does not label a punctuation mark as such (common in French), and
     // the guess tree does.
-    if (deletePunct && tree.isPreTerminal() &&
+    if (deletePunct && guess.isPreTerminal() &&
         (tlp.isEvalBIgnoredPunctuationTag(s) ||
-         tlp.isPunctuationWord(tree.firstChild().value()))) {
+         tlp.isPunctuationWord(guess.firstChild().value()))) {
       return null;
     }
 
     // remove the extra NPs inserted in the collinsBaseNP option
     if (fixCollinsBaseNP && s.equals("NP")) {
-      Tree[] kids = tree.children();
+      Tree[] kids = guess.children();
       if (kids.length == 1 && tlp.basicCategory(kids[0].value()).equals("NP")) {
-        return transformTree(kids[0]);
+        return transformTree(kids[0], goldPreterminals);
       }
     }
     // Magerman erased this distinction, and everyone else has followed like sheep...
@@ -94,9 +104,9 @@ public class TreeCollinizer implements AbstractCollinizer {
       s = "ADVP";
     }
     List<Tree> children = new ArrayList<>();
-    for (int cNum = 0, numKids = tree.numChildren(); cNum < numKids; cNum++) {
-      Tree child = tree.children()[cNum];
-      Tree newChild = transformTree(child);
+    for (int cNum = 0, numKids = guess.numChildren(); cNum < numKids; cNum++) {
+      Tree child = guess.children()[cNum];
+      Tree newChild = transformTree(child, goldPreterminals);
       if (newChild != null) {
         children.add(newChild);
       }
@@ -105,7 +115,7 @@ public class TreeCollinizer implements AbstractCollinizer {
       return null;
     }
 
-    Tree node = tf.newTreeNode(tree.label(), children);
+    Tree node = tf.newTreeNode(guess.label(), children);
     node.setValue(s);
 
     return node;

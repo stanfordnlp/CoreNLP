@@ -371,8 +371,8 @@ public class ChineseCharacterBasedLexiconTraining  {
           System.out.println("\nScores:");
           basicEval.displayLast();
 
-          Tree collinsTree = collinizer.transformTree(tree);
-          Tree collinsGold = collinizer.transformTree(gold);
+          Tree collinsTree = collinizer.transformTree(tree, gold);
+          Tree collinsGold = collinizer.transformTree(gold, gold);
           ourBrackets = proc.allBrackets(collinsTree);
           goldBrackets = proc.allBrackets(collinsGold);
           if (goodPOS) {

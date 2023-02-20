@@ -216,9 +216,9 @@ public class UnlabeledAttachmentEval extends AbstractEval  {
         continue;
       }
 
-      final Tree evalGuess = tc.transformTree(guessTree);
+      final Tree evalGuess = tc.transformTree(guessTree, goldTree);
       evalGuess.indexLeaves(true);
-      final Tree evalGold = tc.transformTree(goldTree);
+      final Tree evalGold = tc.transformTree(goldTree, goldTree);
       evalGold.indexLeaves(true);
 
       metric.evaluate(evalGuess, evalGold, ((VERBOSE) ? pwOut : null));

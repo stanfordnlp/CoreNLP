@@ -471,8 +471,8 @@ public class FactoredParser  {
         //System.out.println("True Best Parse:");
         //tree.pennPrint();
         //tc.transformTree(tree).pennPrint();
-        pcfgPE.evaluate(tc.transformTree(tree2), tc.transformTree(tree), pw);
-        pcfgCB.evaluate(tc.transformTree(tree2), tc.transformTree(tree), pw);
+        pcfgPE.evaluate(tc.transformTree(tree2, tree2), tc.transformTree(tree, tree), pw);
+        pcfgCB.evaluate(tc.transformTree(tree2, tree2), tc.transformTree(tree, tree), pw);
         Tree tree4b = null;
         if (op.doDep) {
           comboDE.evaluate((bothPassed ? tree4 : tree3), binaryTree, pw);
@@ -483,15 +483,15 @@ public class FactoredParser  {
             tree4 = np.prune(tree4);
           }
           //tree4.pennPrint();
-          comboPE.evaluate(tc.transformTree(tree4), tc.transformTree(tree), pw);
+          comboPE.evaluate(tc.transformTree(tree4, tree4), tc.transformTree(tree, tree), pw);
         }
         //pcfgTE.evaluate(tree2, tree);
-        pcfgTE.evaluate(tcEvalb.transformTree(tree2), tcEvalb.transformTree(tree), pw);
-        pcfgTEnoPunct.evaluate(tc.transformTree(tree2), tc.transformTree(tree), pw);
+        pcfgTE.evaluate(tcEvalb.transformTree(tree2, tree2), tcEvalb.transformTree(tree, tree), pw);
+        pcfgTEnoPunct.evaluate(tc.transformTree(tree2, tree2), tc.transformTree(tree, tree), pw);
 
         if (op.doDep) {
-          comboTE.evaluate(tcEvalb.transformTree(tree4), tcEvalb.transformTree(tree), pw);
-          comboTEnoPunct.evaluate(tc.transformTree(tree4), tc.transformTree(tree), pw);
+          comboTE.evaluate(tcEvalb.transformTree(tree4, tree4), tcEvalb.transformTree(tree, tree), pw);
+          comboTEnoPunct.evaluate(tc.transformTree(tree4, tree4), tc.transformTree(tree, tree), pw);
         }
         System.out.println("PCFG only: " + parser.scoreBinarizedTree(tree2b, 0));
 
@@ -515,11 +515,11 @@ public class FactoredParser  {
 
       if (op.testOptions.evalb) {
         if (op.doPCFG && op.doDep) {
-          EvalbFormatWriter.writeEVALBline(tcEvalb.transformTree(tree), tcEvalb.transformTree(tree4));
+          EvalbFormatWriter.writeEVALBline(tcEvalb.transformTree(tree, tree), tcEvalb.transformTree(tree4, tree4));
         } else if (op.doPCFG) {
-          EvalbFormatWriter.writeEVALBline(tcEvalb.transformTree(tree), tcEvalb.transformTree(tree2));
+          EvalbFormatWriter.writeEVALBline(tcEvalb.transformTree(tree, tree), tcEvalb.transformTree(tree2, tree2));
         } else if (op.doDep) {
-          EvalbFormatWriter.writeEVALBline(tcEvalb.transformTree(tree), tcEvalb.transformTree(tree3db));
+          EvalbFormatWriter.writeEVALBline(tcEvalb.transformTree(tree, tree), tcEvalb.transformTree(tree3db, tree3db));
         }
       }
     } // end for each tree in test treebank

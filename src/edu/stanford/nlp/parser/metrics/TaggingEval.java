@@ -357,8 +357,8 @@ public class TaggingEval extends AbstractEval  {
         continue;
       }
 
-      final Tree evalGuess = tc.transformTree(guessTree);
-      final Tree evalGold = tc.transformTree(goldTree);
+      final Tree evalGuess = tc.transformTree(guessTree, goldTree);
+      final Tree evalGold = tc.transformTree(goldTree, goldTree);
 
       metric.evaluate(evalGuess, evalGold, ((VERBOSE) ? pwOut : null));
     }
