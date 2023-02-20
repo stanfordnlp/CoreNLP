@@ -5,9 +5,11 @@ import edu.stanford.nlp.ling.StringLabel;
 import edu.stanford.nlp.parser.lexparser.AbstractCollinizer;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.TreeFactory;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -46,30 +48,40 @@ public class ChineseCollinizer implements AbstractCollinizer  {
   }
 
 
-  public Tree transformTree(Tree tree) {
-    return transformTree(tree, true);
+  public Tree transformTree(Tree guess, Tree gold) {
+    return transformTree(guess, gold, true);
   }
 
-  private Tree transformTree(Tree tree, boolean isRoot) {
-    String label = tree.label().value();
+  private Tree transformTree(Tree guess, Tree gold, boolean isRoot) {
+    if (guess == null || gold == null) return null;
+    if (guess.yield().size() != gold.yield().size()) {
+      return null;
+    }
+
+    return transformTree(guess, Trees.preTerminals(gold).iterator(), isRoot);
+  }
+
+  private Tree transformTree(Tree guess, Iterator<Tree> goldPreterminals, boolean isRoot) {
+    String label = guess.label().value();
 
     // log.info("ChineseCollinizer: Node label is " + label);
 
-    if (tree.isLeaf()) {
+    // TODO: use the gold tree to delete the same punct from both trees
+    if (guess.isLeaf()) {
       if (deletePunct && ctlp.isPunctuationWord(label)) {
         return null;
       } else {
         return tf.newLeaf(new StringLabel(label));
       }
     }
-    if (tree.isPreTerminal() && deletePunct && ctlp.isPunctuationTag(label)) {
+    if (guess.isPreTerminal() && deletePunct && ctlp.isPunctuationTag(label)) {
       // System.out.println("Deleting punctuation");
       return null;
     }
     List<Tree> children = new ArrayList<>();
 
-    if (label.matches("ROOT.*") && tree.numChildren() == 1) { // keep non-unary roots for now
-      return transformTree(tree.children()[0], true);
+    if (label.matches("ROOT.*") && guess.numChildren() == 1) { // keep non-unary roots for now
+      return transformTree(guess.children()[0], goldPreterminals, true);
     }
 
     //System.out.println("Enhanced label is " + label);
@@ -81,9 +93,9 @@ public class ChineseCollinizer implements AbstractCollinizer  {
 
     //System.out.println("New label is " + label);
 
-    for (int cNum = 0; cNum < tree.children().length; cNum++) {
-      Tree child = tree.children()[cNum];
-      Tree newChild = transformTree(child, false);
+    for (int cNum = 0; cNum < guess.children().length; cNum++) {
+      Tree child = guess.children()[cNum];
+      Tree newChild = transformTree(child, goldPreterminals, false);
       if (newChild != null) {
         children.add(newChild);
       }

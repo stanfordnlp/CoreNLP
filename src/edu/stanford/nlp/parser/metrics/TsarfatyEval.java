@@ -174,7 +174,6 @@ public class TsarfatyEval extends AbstractEval {
     int skippedGuessTrees = 0;
 
     for(final Tree guess : guessTreebank) {
-      final Tree evalGuess = tc.transformTree(guess);
       final ArrayList<Label> guessSent = guess.yield();
       final String guessChars = SentenceUtils.listToString(guessSent).replaceAll("\\s+","");
       if(guessSent.size() > maxGuessYield) {
@@ -185,21 +184,27 @@ public class TsarfatyEval extends AbstractEval {
       boolean doneEval = false;
       while(goldItr.hasNext() && !doneEval) {
         final Tree gold = goldItr.next();
-        final Tree evalGold = tc.transformTree(gold);
+        final Tree evalGold = tc.transformTree(gold, gold);
         goldLineId++;
 
         final ArrayList<Label> goldSent = gold.yield();
         final String goldChars = SentenceUtils.listToString(goldSent).replaceAll("\\s+","");
 
-        if(goldSent.size() > maxGoldYield) {
+        if(goldSent.size() > maxGoldYield)
           continue;
 
-        } else if(goldChars.length() != guessChars.length()) {
+        if(goldChars.length() != guessChars.length()) {
           pwOut.printf("Char level yield mismatch at line %d (guess: %d gold: %d)\n",goldLineId,guessChars.length(),goldChars.length());
           skippedGuessTrees++;
           break; //Default evalb behavior -- skip this guess tree
         }
 
+        final Tree evalGuess = tc.transformTree(guess, gold);
+        if (evalGuess == null) {
+          pwOut.printf("Collinizer failure at line %d\n", goldLineId);
+          skippedGuessTrees++;
+          break; //Default evalb behavior -- skip this guess tree
+        }
         eval.evaluate(evalGuess, evalGold, ((VERBOSE) ? pwOut : null));
 
         doneEval = true; //Move to the next guess parse

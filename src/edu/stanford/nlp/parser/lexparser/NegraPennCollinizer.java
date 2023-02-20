@@ -2,14 +2,15 @@ package edu.stanford.nlp.parser.lexparser;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.StringLabel;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.TreeFactory;
-import edu.stanford.nlp.trees.TreeTransformer;
 
 
 public class NegraPennCollinizer implements AbstractCollinizer {
@@ -31,9 +32,18 @@ public class NegraPennCollinizer implements AbstractCollinizer {
 
   protected TreeFactory tf = new LabeledScoredTreeFactory();
 
-  public Tree transformTree(Tree tree) {
-    Label l = tree.label();
-    if (tree.isLeaf()) {
+  public Tree transformTree(Tree guess, Tree gold) {
+    if (guess == null || gold == null) return null;
+    if (guess.yield().size() != gold.yield().size()) {
+      return null;
+    }
+
+    return transformTree(guess, Trees.preTerminals(gold).iterator());
+  }
+
+  private Tree transformTree(Tree guess, Iterator<Tree> goldPreterminals) {
+    Label l = guess.label();
+    if (guess.isLeaf()) {
       return tf.newLeaf(l);
     }
     String s = l.value();
@@ -43,25 +53,25 @@ public class NegraPennCollinizer implements AbstractCollinizer {
       // is any tag ambiguity -- and there is for ' (POS/'').  Sentences
       // can then have more or less words.  It's also unnecessary for EVALB,
       // since it ignores punctuation anyway
-      if (tree.isPreTerminal() && tlpp.treebankLanguagePack().isEvalBIgnoredPunctuationTag(s)) {
+      if (guess.isPreTerminal() && tlpp.treebankLanguagePack().isEvalBIgnoredPunctuationTag(s)) {
         return null;
       }
     }
     // TEMPORARY: eliminate the TOPP constituent
-    if (tree.children()[0].label().value().equals("TOPP")) {
+    if (guess.children()[0].label().value().equals("TOPP")) {
       log.info("Found a TOPP");
-      tree.setChildren(tree.children()[0].children());
+      guess.setChildren(guess.children()[0].children());
     }
 
     // Negra has lots of non-unary roots; delete unary roots
-    if (tlpp.treebankLanguagePack().isStartSymbol(s) && tree.numChildren() == 1) {
+    if (tlpp.treebankLanguagePack().isStartSymbol(s) && guess.numChildren() == 1) {
       // NB: This deletes the boundary symbol, which is in the tree!
-      return transformTree(tree.getChild(0));
+      return transformTree(guess.getChild(0), goldPreterminals);
     }
     List<Tree> children = new ArrayList<>();
-    for (int cNum = 0, numC = tree.numChildren(); cNum < numC; cNum++) {
-      Tree child = tree.getChild(cNum);
-      Tree newChild = transformTree(child);
+    for (int cNum = 0, numC = guess.numChildren(); cNum < numC; cNum++) {
+      Tree child = guess.getChild(cNum);
+      Tree newChild = transformTree(child, goldPreterminals);
       if (newChild != null) {
         children.add(newChild);
       }

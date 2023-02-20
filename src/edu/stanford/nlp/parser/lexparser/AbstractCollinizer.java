@@ -10,5 +10,5 @@ import edu.stanford.nlp.trees.Tree;
  * @author John Bauer
  */
 public interface AbstractCollinizer  {
-  Tree transformTree(Tree guess);
+  Tree transformTree(Tree guess, Tree gold);
 }
