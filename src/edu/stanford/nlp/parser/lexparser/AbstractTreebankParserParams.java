@@ -336,7 +336,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    * tree. Should strip punctuation and maybe do some other things.
    */
   @Override
-  public abstract TreeTransformer collinizer();
+  public abstract AbstractCollinizer collinizer();
 
   /**
    * the tree transformer used to produce trees for evaluation.  Will
@@ -346,7 +346,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    * off. (finish this doc!)
    */
   @Override
-  public abstract TreeTransformer collinizerEvalb();
+  public abstract AbstractCollinizer collinizerEvalb();
 
 
   /**

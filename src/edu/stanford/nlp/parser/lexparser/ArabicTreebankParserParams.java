@@ -207,7 +207,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
    * The collinizer eliminates punctuation
    */
   @Override
-  public TreeTransformer collinizer() {
+  public AbstractCollinizer collinizer() {
     return new TreeCollinizer(tlp, !collinizerRetainsPunctuation, false);
   }
 
@@ -215,7 +215,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
    * Stand-in collinizer does nothing to the tree.
    */
   @Override
-  public TreeTransformer collinizerEvalb() {
+  public AbstractCollinizer collinizerEvalb() {
     return collinizer();
   }
 

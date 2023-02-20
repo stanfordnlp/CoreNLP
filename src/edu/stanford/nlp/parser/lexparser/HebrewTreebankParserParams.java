@@ -47,7 +47,7 @@ public class HebrewTreebankParserParams extends AbstractTreebankParserParams  {
   }
 
   @Override
-  public TreeTransformer collinizer() {
+  public AbstractCollinizer collinizer() {
     return new TreeCollinizer(tlp, true, false);
   }
 
@@ -55,7 +55,7 @@ public class HebrewTreebankParserParams extends AbstractTreebankParserParams  {
    * Stand-in collinizer does nothing to the tree.
    */
   @Override
-  public TreeTransformer collinizerEvalb() {
+  public AbstractCollinizer collinizerEvalb() {
     return collinizer();
   }
 

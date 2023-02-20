@@ -461,8 +461,8 @@ public class FactoredParser  {
         depDE.evaluate(tree3, binaryTree, pw);
         depTE.evaluate(tree3db, tree, pw);
       }
-      TreeTransformer tc = op.tlpParams.collinizer();
-      TreeTransformer tcEvalb = op.tlpParams.collinizerEvalb();
+      AbstractCollinizer tc = op.tlpParams.collinizer();
+      AbstractCollinizer tcEvalb = op.tlpParams.collinizerEvalb();
       if (op.doPCFG) {
         // System.out.println("XXXX Best PCFG was: ");
         // tree2.pennPrint();

@@ -57,12 +57,12 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams  {
   }
 
   @Override
-  public TreeTransformer collinizer() {
+  public AbstractCollinizer collinizer() {
     return new TreeCollinizer(treebankLanguagePack());
   }
 
   @Override
-  public TreeTransformer collinizerEvalb() {
+  public AbstractCollinizer collinizerEvalb() {
     return new TreeCollinizer(treebankLanguagePack());
   }
 

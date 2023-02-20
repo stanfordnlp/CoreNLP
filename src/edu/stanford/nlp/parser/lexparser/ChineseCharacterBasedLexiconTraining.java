@@ -282,7 +282,7 @@ public class ChineseCharacterBasedLexiconTraining  {
       FileFilter testFilt = new NumberRangesFileFilter(testArgs[1], false);
       testTreebank.loadPath(new File(testArgs[0]), testFilt);
       TreeTransformer subcategoryStripper = op.tlpParams.subcategoryStripper();
-      TreeTransformer collinizer = ctpp.collinizer();
+      AbstractCollinizer collinizer = ctpp.collinizer();
 
       WordCatEquivalenceClasser eqclass = new WordCatEquivalenceClasser();
       WordCatEqualityChecker eqcheck = new WordCatEqualityChecker();

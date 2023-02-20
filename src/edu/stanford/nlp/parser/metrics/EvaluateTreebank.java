@@ -22,6 +22,7 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserQueryFactory;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
+import edu.stanford.nlp.parser.lexparser.AbstractCollinizer;
 import edu.stanford.nlp.parser.lexparser.BoundaryRemover;
 import edu.stanford.nlp.parser.lexparser.Debinarizer;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -50,7 +51,7 @@ public class EvaluateTreebank  {
   private final Options op;
   private final TreeTransformer debinarizer;
   private final TreeTransformer subcategoryStripper;
-  private final TreeTransformer collinizer;
+  private final AbstractCollinizer collinizer;
   private final TreeTransformer boundaryRemover;
 
   private final ParserQueryFactory pqFactory;

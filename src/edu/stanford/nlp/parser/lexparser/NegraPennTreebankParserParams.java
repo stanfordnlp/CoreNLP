@@ -125,7 +125,7 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
    * returns a NegraPennCollinizer
    */
   @Override
-  public TreeTransformer collinizer() {
+  public AbstractCollinizer collinizer() {
     return new NegraPennCollinizer(this);
   }
 
@@ -133,7 +133,7 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
    * returns a NegraPennCollinizer
    */
   @Override
-  public TreeTransformer collinizerEvalb() {
+  public AbstractCollinizer collinizerEvalb() {
     return new NegraPennCollinizer(this, false);
   }
 
