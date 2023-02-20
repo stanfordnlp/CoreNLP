@@ -8,13 +8,13 @@ import java.util.Set;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.parser.lexparser.AbstractCollinizer;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.ConstituentFactory;
 import edu.stanford.nlp.trees.LabeledScoredConstituentFactory;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.Generics;
 
@@ -156,7 +156,7 @@ public class TsarfatyEval extends AbstractEval {
     final String evalName = (tagMode) ? "TsarfatyTAG" : "TsarfatySEG";
     final TsarfatyEval eval = new TsarfatyEval(evalName, tagMode);
 
-    final TreeTransformer tc = tlpp.collinizer();
+    final AbstractCollinizer tc = tlpp.collinizer();
 
     //PennTreeReader skips over null/malformed parses. So when the yields of the gold/guess trees
     //don't match, we need to keep looking for the next gold tree that matches.

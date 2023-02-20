@@ -90,7 +90,7 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    *     or equivalence class things not evaluated in the parser performance
    *     evaluation.
    */
-  TreeTransformer collinizer();
+  AbstractCollinizer collinizer();
 
 
   /**
@@ -100,7 +100,7 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * things. The evalb version should strip some more stuff
    * off. (finish this doc!)
    */
-  TreeTransformer collinizerEvalb();
+  AbstractCollinizer collinizerEvalb();
 
   /**
    * returns a MemoryTreebank appropriate to the treebank source

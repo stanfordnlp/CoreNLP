@@ -15,13 +15,13 @@ import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.parser.lexparser.AbstractCollinizer;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
 import edu.stanford.nlp.parser.lexparser.Lexicon;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
@@ -321,7 +321,7 @@ public class TaggingEval extends AbstractEval  {
 
     final TaggingEval metric = new TaggingEval("Tagging LP/LR");
 
-    final TreeTransformer tc = tlpp.collinizer();
+    final AbstractCollinizer tc = tlpp.collinizer();
 
     //The evalb ref implementation assigns status for each tree pair as follows:
     //

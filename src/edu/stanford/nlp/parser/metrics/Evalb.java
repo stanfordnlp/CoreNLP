@@ -18,12 +18,12 @@ import java.util.Set;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.parser.lexparser.AbstractCollinizer;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.ConstituentFactory;
 import edu.stanford.nlp.trees.LabeledScoredConstituentFactory;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -203,7 +203,7 @@ public class Evalb extends AbstractEval  {
 
     final Evalb metric = new Evalb("Evalb LP/LR", true);
     final EvalbByCat evalbCat = (doCatLevel) ? new EvalbByCat("EvalbByCat LP/LR", true, labelRegex) : null;
-    final TreeTransformer tc = tlpp.collinizer();
+    final AbstractCollinizer tc = tlpp.collinizer();
 
     //The evalb ref implementation assigns status for each tree pair as follows:
     //

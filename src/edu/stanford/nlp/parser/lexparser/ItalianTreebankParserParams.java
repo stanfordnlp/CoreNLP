@@ -53,12 +53,12 @@ public class ItalianTreebankParserParams extends AbstractTreebankParserParams  {
   }
 
   @Override
-  public TreeTransformer collinizer() {
+  public AbstractCollinizer collinizer() {
     return new TreeCollinizer(tlp, true, false, 0);
   }
 
   @Override
-  public TreeTransformer collinizerEvalb() {
+  public AbstractCollinizer collinizerEvalb() {
     return collinizer();
   }
 

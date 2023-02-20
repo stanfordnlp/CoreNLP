@@ -221,12 +221,12 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams  {
    * be applied both to the parser output and the gold tree.
    */
   @Override
-  public TreeTransformer collinizer() {
+  public AbstractCollinizer collinizer() {
     return new TreeCollinizer(tlp, true, englishTrain.splitBaseNP == 2, englishTrain.collapseWhCategories);
   }
 
   @Override
-  public TreeTransformer collinizerEvalb() {
+  public AbstractCollinizer collinizerEvalb() {
     return new TreeCollinizer(tlp, true, englishTrain.splitBaseNP == 2, englishTrain.collapseWhCategories);
   }
 

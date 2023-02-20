@@ -10,12 +10,12 @@ import java.util.Set;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.parser.lexparser.AbstractCollinizer;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.trees.Dependency;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
 import java.util.function.Predicate;
 import edu.stanford.nlp.util.Filters;
@@ -180,7 +180,7 @@ public class UnlabeledAttachmentEval extends AbstractEval  {
 
     final UnlabeledAttachmentEval metric = new UnlabeledAttachmentEval("UAS LP/LR", true, tlpp.headFinder());
 
-    final TreeTransformer tc = tlpp.collinizer();
+    final AbstractCollinizer tc = tlpp.collinizer();
 
     //The evalb ref implementation assigns status for each tree pair as follows:
     //

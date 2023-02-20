@@ -2,10 +2,10 @@ package edu.stanford.nlp.trees.international.pennchinese;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.StringLabel;
+import edu.stanford.nlp.parser.lexparser.AbstractCollinizer;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
-import edu.stanford.nlp.trees.TreeTransformer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.List;
  * @author Roger Levy
  * @author Christopher Manning
  */
-public class ChineseCollinizer implements TreeTransformer  {
+public class ChineseCollinizer extends AbstractCollinizer  {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(ChineseCollinizer.class);

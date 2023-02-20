@@ -178,7 +178,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
    * Returns a ChineseCollinizer
    */
   @Override
-  public TreeTransformer collinizer() {
+  public AbstractCollinizer collinizer() {
     return new ChineseCollinizer(ctlp);
   }
 
@@ -186,7 +186,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
    * Returns a ChineseCollinizer that doesn't delete punctuation
    */
   @Override
-  public TreeTransformer collinizerEvalb() {
+  public AbstractCollinizer collinizerEvalb() {
     return new ChineseCollinizer(ctlp, false);
   }
 

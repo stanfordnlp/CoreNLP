@@ -17,7 +17,7 @@ import edu.stanford.nlp.trees.*;
  * @author Dan Klein
  * @author Christopher Manning
  */
-public class TreeCollinizer implements TreeTransformer {
+public class TreeCollinizer extends AbstractCollinizer {
 
   private final TreebankLanguagePack tlp;
   private final boolean deletePunct;

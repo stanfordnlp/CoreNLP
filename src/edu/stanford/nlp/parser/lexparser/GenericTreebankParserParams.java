@@ -24,13 +24,13 @@ public class GenericTreebankParserParams extends AbstractTreebankParserParams {
   }
 
   @Override
-  public TreeTransformer collinizer() {
+  public AbstractCollinizer collinizer() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public TreeTransformer collinizerEvalb() {
+  public AbstractCollinizer collinizerEvalb() {
     // TODO Auto-generated method stub
     return null;
   }

@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.parser.lexparser.AbstractCollinizer;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -20,7 +21,6 @@ import edu.stanford.nlp.trees.CollinsDependency;
 import edu.stanford.nlp.trees.CollinsRelation;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -244,7 +244,7 @@ public class CollinsDepEval extends AbstractEval  {
 
     final CollinsDepEval depEval = new CollinsDepEval("CollinsDep", true, tlpp.headFinder(), tlpp.treebankLanguagePack().startSymbol());
 
-    final TreeTransformer tc = tlpp.collinizer();
+    final AbstractCollinizer tc = tlpp.collinizer();
 
     //PennTreeReader skips over null/malformed parses. So when the yields of the gold/guess trees
     //don't match, we need to keep looking for the next gold tree that matches.
