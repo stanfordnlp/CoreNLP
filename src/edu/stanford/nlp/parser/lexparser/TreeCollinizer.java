@@ -78,7 +78,7 @@ public class TreeCollinizer implements TreeTransformer {
     // the guess tree does.
     if (deletePunct && tree.isPreTerminal() &&
         (tlp.isEvalBIgnoredPunctuationTag(s) ||
-        tlp.isPunctuationWord(tree.firstChild().value()))) {
+         tlp.isPunctuationWord(tree.firstChild().value()))) {
       return null;
     }
 
