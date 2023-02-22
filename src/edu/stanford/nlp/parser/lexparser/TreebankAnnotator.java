@@ -19,7 +19,6 @@ public class TreebankAnnotator {
 
   final TreeTransformer treeTransformer;
   final TreeTransformer treeUnTransformer;
-  final TreeTransformer collinizer;
   final Options op;
 
   public List<Tree> annotateTrees(List<Tree> trees) {
@@ -70,10 +69,6 @@ public class TreebankAnnotator {
     return tree;
   }
 
-  public Tree collinize(Tree tree) {
-    return collinizer.transformTree(tree);
-  }
-
   public TreebankAnnotator(Options op, String treebankRoot) {
     //    op.tlpParams = new EnglishTreebankParserParams();
     // CDM: Aug 2004: With new implementation of treebank split categories,
@@ -85,7 +80,6 @@ public class TreebankAnnotator {
     treeTransformer = new TreeAnnotatorAndBinarizer(op.tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), true, op);
     //    BinarizerFactory.TreeAnnotator.setTreebankLang(op.tlpParams);
     treeUnTransformer = new Debinarizer(op.forceCNF);
-    collinizer = op.tlpParams.collinizer();
     this.op = op;
   }
 
