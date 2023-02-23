@@ -48,12 +48,13 @@ public class NegraPennCollinizer implements AbstractCollinizer {
     }
     String s = l.value();
     s = tlpp.treebankLanguagePack().basicCategory(s);
-    if (deletePunct) {
-      // this is broken as it's not the right thing to do when there
-      // is any tag ambiguity -- and there is for ' (POS/'').  Sentences
-      // can then have more or less words.  It's also unnecessary for EVALB,
-      // since it ignores punctuation anyway
-      if (guess.isPreTerminal() && tlpp.treebankLanguagePack().isEvalBIgnoredPunctuationTag(s)) {
+    if (deletePunct && guess.isPreTerminal()) {
+      // Eliminate unwanted (in terms of evaluation) punctuation
+      // by comparing the gold punctuation, not the guess tree
+      // This way, retagging does not change the results
+      Tree goldPT = goldPreterminals.next();
+      String goldTag = tlpp.treebankLanguagePack().basicCategory(goldPT.value());
+      if (tlpp.treebankLanguagePack().isEvalBIgnoredPunctuationTag(goldTag)) {
         return null;
       }
     }

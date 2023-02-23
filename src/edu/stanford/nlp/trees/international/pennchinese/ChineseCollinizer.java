@@ -66,18 +66,22 @@ public class ChineseCollinizer implements AbstractCollinizer  {
 
     // log.info("ChineseCollinizer: Node label is " + label);
 
-    // TODO: use the gold tree to delete the same punct from both trees
-    if (guess.isLeaf()) {
-      if (deletePunct && ctlp.isPunctuationWord(label)) {
+    // Eliminate unwanted (in terms of evaluation) punctuation
+    // by comparing the gold punctuation, not the guess tree
+    // This way, retagging does not change the results
+    if (guess.isPreTerminal() && deletePunct) {
+      Tree goldPT = goldPreterminals.next();
+      if (ctlp.isPunctuationTag(goldPT.label().value()) ||
+          ctlp.isPunctuationWord(goldPT.firstChild().label().value())) {
+        // System.out.println("Deleting punctuation");
         return null;
-      } else {
-        return tf.newLeaf(new StringLabel(label));
       }
     }
-    if (guess.isPreTerminal() && deletePunct && ctlp.isPunctuationTag(label)) {
-      // System.out.println("Deleting punctuation");
-      return null;
+
+    if (guess.isLeaf()) {
+      return tf.newLeaf(new StringLabel(label));
     }
+
     List<Tree> children = new ArrayList<>();
 
     if (label.matches("ROOT.*") && guess.numChildren() == 1) { // keep non-unary roots for now
