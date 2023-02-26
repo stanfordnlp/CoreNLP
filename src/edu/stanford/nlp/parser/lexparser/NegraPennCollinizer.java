@@ -12,7 +12,7 @@ import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
 
 
-public class NegraPennCollinizer extends AbstractCollinizer {
+public class NegraPennCollinizer implements AbstractCollinizer {
 
   /** A logger for this class */
   Redwood.RedwoodChannels log = Redwood.channels(NegraPennCollinizer.class);

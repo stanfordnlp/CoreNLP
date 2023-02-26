@@ -23,7 +23,7 @@ import java.util.List;
  * @author Roger Levy
  * @author Christopher Manning
  */
-public class ChineseCollinizer extends AbstractCollinizer  {
+public class ChineseCollinizer implements AbstractCollinizer  {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(ChineseCollinizer.class);
