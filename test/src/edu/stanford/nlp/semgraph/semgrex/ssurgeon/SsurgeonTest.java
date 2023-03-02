@@ -179,6 +179,91 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test a few various relabel edge operations
+   */
+  @Test
+  public void readXMLRelabelEdgeIterate() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This is a simple test of RelabelNamedEdge</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >obj=foo {}=a2") + "</semgrex>",
+                             "    <edit-list>relabelNamedEdge -edge foo -reln dep</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    // check a simple case of relabeling
+    SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> B-1]");
+    SemanticGraph expected = SemanticGraph.valueOf("[A-0 dep> B-1]");
+    SemanticGraph newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+
+    // check iteration over multiple edges
+    sg = SemanticGraph.valueOf("[A-0 obj> [B-1 obj> C-2]]");
+    expected = SemanticGraph.valueOf("[A-0 dep> [B-1 dep> C-2]]");
+    newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+
+    // check that relabeling doesn't change a non-matching edge
+    // (how would it?)
+    sg = SemanticGraph.valueOf("[A-0 iobj> B-1]");
+    expected = SemanticGraph.valueOf("[A-0 iobj> B-1]");
+    newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+
+    // check that you don't get double edges if an update
+    // makes two edges into the same edge
+    sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1]");
+    expected = SemanticGraph.valueOf("[A-0 dep> B-1]");
+    newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+  }
+
+
+  /**
+   * Test that the RelabelNamedEdge operation updates the name of the edge in the SemgrexMatcher
+   */
+  @Test
+  public void readXMLRelabelEdgeUpdateNamedEdge() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This is a simple test of RelabelNamedEdge</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >obj=foo {}=a2") + "</semgrex>",
+                             "    <edit-list>relabelNamedEdge -edge foo -reln dep</edit-list>",
+                             "    <edit-list>relabelNamedEdge -edge foo -reln gov</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    // check the result of a double relabel - should wind up as gov
+    SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> B-1]");
+    SemanticGraph expected = SemanticGraph.valueOf("[A-0 gov> B-1]");
+    SemanticGraph newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+
+    // in this case, the dep should acquire the name of the obj
+    // in the SemgrexMatcher.  the subsequent operation will pick up
+    // that edge (with the original edge being deleted) and the
+    // result will be one edge with the name "gov"
+    // if the matcher did not update the named edge as expected,
+    // the second operation would not fire
+    sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1]");
+    expected = SemanticGraph.valueOf("[A-0 gov> B-1]");
+    newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+  }
+
+  /**
    * Check that cutting a graph with two nodes into two pieces, then
    * pruning any disjoint pieces, results in a graph with just the root
    * when done as a single operation
