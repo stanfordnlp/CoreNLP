@@ -231,6 +231,10 @@ public abstract class SemgrexMatcher  {
     return namesToEdges.keySet();
   }
 
+  public SemanticGraphEdge putNamedEdge(String name, SemanticGraphEdge edge) {
+    return namesToEdges.put(name, edge);
+  }
+
   @Override
   public abstract String toString();
 
