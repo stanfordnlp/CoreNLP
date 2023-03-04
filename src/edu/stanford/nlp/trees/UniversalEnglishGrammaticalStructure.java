@@ -404,7 +404,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       IndexedWord gov, IndexedWord mod, IndexedWord caseMarker) {
 
     SemanticGraphEdge edge = sg.getEdge(gov, mod);
-    edge.setRelation(UniversalEnglishGrammaticalRelations.AGENT);
+    sg.updateEdge(edge, UniversalEnglishGrammaticalRelations.AGENT);
   }
 
 
@@ -446,7 +446,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       lastCaseMarkerIndex = cm.index();
     }
     GrammaticalRelation reln = getCaseMarkedRelation(edge.getRelation(), sb.toString().toLowerCase());
-    edge.setRelation(reln);
+    sg.updateEdge(edge, reln);
   }
 
   private static final SemgrexPattern PREP_CONJP_PATTERN = SemgrexPattern.compile("{} >/(case|mark)/ ({}=gov  >conj ({} >cc {}=cc) >conj {}=conj)" +
@@ -752,7 +752,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     for (IndexedWord conjDep : conjDeps) {
       SemanticGraphEdge edge = sg.getEdge(gov, conjDep);
       if (edge.getRelation() == CONJUNCT || conjDep.index() > ccDep.index()) {
-        edge.setRelation(conjValue(ccDep, sg));
+        sg.updateEdge(edge, conjValue(ccDep, sg));
       }
     }
   }
@@ -876,23 +876,23 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
           if (nmod.getGovernor().tag().startsWith("NN")
                   || nmod.getGovernor().tag().startsWith("PRN")
                   || nmod.getGovernor().tag().startsWith("DT")) {
-            nmod.setRelation(NOMINAL_MODIFIER);
+            sg.updateEdge(nmod, NOMINAL_MODIFIER);
           } else {
-            nmod.setRelation(OBLIQUE_MODIFIER);
+            sg.updateEdge(nmod, OBLIQUE_MODIFIER);
           }
         }
 
         break;
       }
 
-      if ( ! changedPrep) {
-        prep.setRelation(OBLIQUE_MODIFIER);
+      if (!changedPrep) {
+        sg.updateEdge(prep, OBLIQUE_MODIFIER);
       }
     }
 
     /* Rename remaining "rel" relations. */
     for (SemanticGraphEdge edge : sg.findAllRelns(RELATIVE)) {
-      edge.setRelation(DIRECT_OBJECT);
+      sg.updateEdge(edge, DIRECT_OBJECT);
     }
   }
 

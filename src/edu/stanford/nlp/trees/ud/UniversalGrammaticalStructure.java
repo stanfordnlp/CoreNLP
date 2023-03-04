@@ -411,7 +411,7 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
 
                         if (edge1.getRelation().toString().startsWith(relnName) && edge1.getRelation().getSpecific() != null) {
                             changed = true;
-                            sg.getEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation()).setRelation(edge1.getRelation());
+                            sg.updateEdge(edge, edge1.getRelation());
                             break;
                         }
                     }
@@ -442,7 +442,7 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
         //GrammaticalRelation reln = getCaseMarkedRelation(edge.getRelation(), relnName.toLowerCase() + ":ENH_CASE");
         GrammaticalRelation reln = getCaseMarkedRelation(edge.getRelation(), relnName.toLowerCase());
 
-        edge.setRelation(reln);
+        sg.updateEdge(edge, reln);
     }
 
     /**
@@ -538,7 +538,7 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
                 if (relnName.matches("[^a-zA-Z_]")) {
                     continue;
                 }
-                edge.setRelation(UniversalGrammaticalRelations.getConj(relnName));
+                sg.updateEdge(edge, UniversalGrammaticalRelations.getConj(relnName));
             }
         }
     }

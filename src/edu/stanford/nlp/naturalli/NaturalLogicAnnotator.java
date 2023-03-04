@@ -394,7 +394,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     while (matcher.find()) {
       IndexedWord gov = matcher.getNode("gov");
       IndexedWord dep = matcher.getNode("quantifier");
-      tree.getEdge(gov, dep).setRelation(UniversalEnglishGrammaticalRelations.NEGATION_MODIFIER);
+      tree.updateEdge(tree.getEdge(gov, dep), UniversalEnglishGrammaticalRelations.NEGATION_MODIFIER);
     }
     // System.out.println("becomes");
     // System.out.println(tree);

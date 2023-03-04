@@ -133,6 +133,15 @@ public class SemanticGraph implements Serializable  {
     return graph.removeVertex(vertex);
   }
 
+  public boolean updateEdge(SemanticGraphEdge edge, GrammaticalRelation reln) {
+    boolean removed = removeEdge(edge);
+    if (removed) {
+      SemanticGraphEdge newEdge = new SemanticGraphEdge(edge.getSource(), edge.getTarget(), reln, edge.getWeight(), edge.isExtra());
+      addEdge(newEdge);
+    }
+    return removed;
+  }
+
   /**
    * This returns an ordered list of vertices (based upon their
    * indices in the sentence). This creates and sorts a list, so
