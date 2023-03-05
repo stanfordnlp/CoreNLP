@@ -52,7 +52,7 @@ public class AddDep extends SsurgeonEdit {
     }
 
     if (position != null) {
-      if (!position.equals("-") && !position.equals("+")) {
+      if (!position.startsWith("-") && !position.startsWith("+")) {
         throw new SsurgeonParseException("Unknown position " + position + " in AddDep operation");
       }
     }
@@ -151,6 +151,7 @@ public class AddDep extends SsurgeonEdit {
     CoreLabel newWord = fromCheapStrings(attributes);
     IndexedWord newNode = new IndexedWord(newWord);
     final int tempIndex;
+    final int newIndex;
     if (position != null && !position.equals("+")) {
       // +2 to leave room: we will increase all other nodes with the
       // proper index, so we need +1 of room, then another +1 for
@@ -158,9 +159,30 @@ public class AddDep extends SsurgeonEdit {
       // TODO: when we implement updating the SemgrexMatcher,
       // this won't be necessary
       tempIndex = SemanticGraphUtils.maxIndex(sg) + 2;
+
+      if (position.equals("-")) {
+        newIndex = SemanticGraphUtils.minIndex(sg);
+      } else if (position.startsWith("-") || position.startsWith("+")) {
+        String targetName = position.substring(1);
+        IndexedWord target = sm.getNode(targetName);
+        if (target == null) {
+          return false;
+        }
+        if (position.startsWith("-")) {
+          // it will be exactly to the left rather than pushing over
+          // something a word earlier if we do .index(), not .index() - 1
+          newIndex = target.index();
+        } else {
+          newIndex = target.index() + 1;
+        }
+      } else {
+        throw new UnsupportedOperationException("Unknown position in AddDep: |" + position + "|");
+      }
     } else {
       tempIndex = SemanticGraphUtils.maxIndex(sg) + 1;
+      newIndex = -1;
     }
+
     newNode.setDocID(govNode.docID());
     newNode.setIndex(tempIndex);
     newNode.setSentIndex(govNode.sentIndex());
@@ -169,12 +191,6 @@ public class AddDep extends SsurgeonEdit {
     sg.addEdge(govNode, newNode, relation, weight, false);
 
     if (position != null && !position.equals("+")) {
-      final int newIndex;
-      if (position.equals("-")) {
-        newIndex = SemanticGraphUtils.minIndex(sg);
-      } else {
-        throw new UnsupportedOperationException("Unknown position in AddDep: |" + position + "|");
-      }
       // the payoff for tempIndex == maxIndex + 2:
       // everything will be moved one higher, unless it's the new node
       moveNodes(sg, x -> (x >= newIndex && x != tempIndex), x -> x+1);
