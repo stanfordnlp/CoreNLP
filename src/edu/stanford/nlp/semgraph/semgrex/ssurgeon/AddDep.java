@@ -3,13 +3,13 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 import java.io.StringWriter;
 import java.util.*;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphUtils;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Adds a new dependent node, based off of a prototype IndexedWord, with the given relation.
@@ -26,32 +26,32 @@ import edu.stanford.nlp.util.Generics;
  */
 public class AddDep extends SsurgeonEdit {
   public static final String LABEL = "addDep";
-  IndexedWord newNodePrototype;
-  GrammaticalRelation relation;
-  String govNodeName;
-  double weight;
+  final Map<String, String> attributes;
+  final GrammaticalRelation relation;
+  final String govNodeName;
+  final double weight;
 
   /**
    * Creates an EnglishGrammaticalRelation AddDep edit.
    * @param newNode String representation of new dependent IndexedFeatureNode map.
    */
-  public static AddDep createEngAddDep(String govNodeName, String engRelation,  String newNode) {
+  public static AddDep createEngAddDep(String govNodeName, String engRelation,  Map<String, String> attributes) {
     GrammaticalRelation relation = EnglishGrammaticalRelations.valueOf(engRelation);
-//  IndexedWord newNodeObj = new IndexedWord(CoreLabel.fromAbstractMapLabel(IndexedFeatureLabel.valueOf(newNode, MapFactory.HASH_MAP_FACTORY)));
-    IndexedWord newNodeObj = fromCheapString(newNode);
-    return new AddDep(govNodeName, relation, newNodeObj);
+    return new AddDep(govNodeName, relation, attributes);
   }
 
-  public AddDep(String govNodeName, GrammaticalRelation relation, IndexedWord newNodePrototype) {
-    this.newNodePrototype = newNodePrototype;
+  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes) {
+    this(govNodeName, relation, attributes, 0.0);
+  }
+
+  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, double weight) {
+    // if there's an exception, we'll barf here rather than at runtime
+    CoreLabel newNodeObj = fromCheapStrings(attributes);
+
+    this.attributes = new TreeMap<>(attributes);
     this.relation = relation;
     this.govNodeName = govNodeName;
     this.weight = 0;
-  }
-
-  public AddDep(String govNodeName, GrammaticalRelation relation, IndexedWord newNodePrototype, double weight) {
-    this(govNodeName, relation, newNodePrototype);
-    this.weight = weight;
   }
 
   /**
@@ -67,9 +67,13 @@ public class AddDep extends SsurgeonEdit {
     buf.write(relation.toString()); buf.write("\t");
     buf.write(Ssurgeon.NODE_PROTO_ARG);buf.write(" ");
     buf.write("\"");
-//  buf.write(newNodePrototype.toString("map")); buf.write("\"\t")
-    buf.write(cheapWordToString(newNodePrototype));
-    buf.write("\"\t");
+    for (String key : attributes.keySet()) {
+      buf.write("-");
+      buf.write(key);
+      buf.write(" ");
+      buf.write(attributes.get(key));
+      buf.write("\"\t");
+    }
 
     buf.write(Ssurgeon.WEIGHT_ARG);buf.write(" ");
     buf.write(String.valueOf(weight));
@@ -86,84 +90,43 @@ public class AddDep extends SsurgeonEdit {
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     IndexedWord govNode = sm.getNode(govNodeName);
-    IndexedWord newNode = new IndexedWord(newNodePrototype);
-    int newIndex = SemanticGraphUtils.leftMostChildVertice(govNode, sg).index(); // cheap En-specific hack for placing copula (beginning of governing phrase)
+    // must make new copy of CoreLabel - if the same word is added
+    // multiple times by the same operation, we don't want to have the
+    // same backing CoreLabel in each instance
+    CoreLabel newWord = fromCheapStrings(attributes);
+    IndexedWord newNode = new IndexedWord(newWord);
+    int newIndex = 0;
+    for (IndexedWord node : sg.vertexSet()) {
+      if (node.index() >= newIndex) {
+        newIndex = node.index() + 1;
+      }
+    }
     newNode.setDocID(govNode.docID());
     newNode.setIndex(newIndex);
     newNode.setSentIndex(govNode.sentIndex());
     sg.addVertex(newNode);
-    sg.addEdge(govNode, newNode, relation, weight,false);
+    sg.addEdge(govNode, newNode, relation, weight, false);
     return true;
   }
 
-  public static final String WORD_KEY = "word";
-  public static final String LEMMA_KEY = "lemma";
-  public static final String VALUE_KEY = "value";
-  public static final String CURRENT_KEY = "current";
-  public static final String POS_KEY = "POS";
-  public static final String TUPLE_DELIMITER="=";
-  public static final String ATOM_DELIMITER = " ";
-
-  // Simple mapping of all the stuff we care about (until IndexedFeatureLabel --> CoreLabel map pain is fixed)
   /**
-   * This converts the node into a simple string based representation.
-   * NOTE: this is extremely brittle, and presumes values do not contain delimiters
+   * Given the keys and values of the CoreAnnotation attributes,
+   * build a CoreLabel to use as the new word
    */
-  public static String cheapWordToString(IndexedWord node) {
-    StringWriter buf = new StringWriter();
-    buf.write("{");
-    buf.write(WORD_KEY);
-    buf.write(TUPLE_DELIMITER);
-    buf.write(nullShield(node.word()));
-    buf.write(ATOM_DELIMITER);
-
-    buf.write(LEMMA_KEY);
-    buf.write(TUPLE_DELIMITER);
-    buf.write(nullShield(node.lemma()));
-    buf.write(ATOM_DELIMITER);
-
-    buf.write(POS_KEY);
-    buf.write(TUPLE_DELIMITER);
-    buf.write(nullShield(node.tag()));
-    buf.write(ATOM_DELIMITER);
-
-    buf.write(VALUE_KEY);
-    buf.write(TUPLE_DELIMITER);
-    buf.write(nullShield(node.value()));
-    buf.write(ATOM_DELIMITER);
-
-    buf.write(CURRENT_KEY);
-    buf.write(TUPLE_DELIMITER);
-    buf.write(nullShield(node.originalText()));
-    buf.write("}");
-    return buf.toString();
-  }
-
-  /**
-   * Given the node arg string, converts it into an IndexedWord.
-   */
-  public static IndexedWord fromCheapString(String rawArg) {
-    String arg = rawArg.substring(1, rawArg.length()-1);
-    String[] tuples=arg.split(ATOM_DELIMITER);
-    Map<String,String> args = Generics.newHashMap();
-    for (String tuple : tuples) {
-      String[] vals = tuple.split(TUPLE_DELIMITER);
-      String key = vals[0];
-      String value = "";
-      if (vals.length == 2)
-        value = vals[1];
-      args.put(key, value);
+  public static CoreLabel fromCheapStrings(Map<String, String> attributes) {
+    String[] keys = new String[attributes.size()];
+    String[] values = new String[attributes.size()];
+    int idx = 0;
+    for (String key : attributes.keySet()) {
+      String value = attributes.get(key);
+      keys[idx] = key;
+      values[idx] = value;
+      ++idx;
     }
-    IndexedWord newWord = new IndexedWord();
-    newWord.setWord(args.get(WORD_KEY));
-    newWord.setLemma(args.get(LEMMA_KEY));
-    newWord.setTag(args.get(POS_KEY));
-    newWord.setValue(args.get(VALUE_KEY));
-    newWord.setOriginalText(args.get(CURRENT_KEY));
+    CoreLabel newWord = new CoreLabel(keys, values);
+    if (newWord.value() == null && newWord.word() != null) {
+      newWord.setValue(newWord.word());
+    }
     return newWord;
-  }
-
-  public static String nullShield(String str) {
-    return str == null ? "" : str;
   }
 }
