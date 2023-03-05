@@ -2,10 +2,13 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import java.io.StringWriter;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
@@ -16,11 +19,6 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  * The new node's sentence index is inherited from the governing node.  Currently a cheap heuristic
  * is made, placing the new node as the leftmost child of the governing node.
  *
- * TODO: add position (a la Tregex)
- * TODO: determine consistent and intuitive arguments
- * TODO: because word position is important for certain features (such as bigram lexical overlap), need
- * ability to specify in which position the new node is inserted.
- *
  * @author Eric Yeh
  *
  */
@@ -29,22 +27,23 @@ public class AddDep extends SsurgeonEdit {
   final Map<String, String> attributes;
   final GrammaticalRelation relation;
   final String govNodeName;
+  final String position;
   final double weight;
 
   /**
    * Creates an EnglishGrammaticalRelation AddDep edit.
    * @param newNode String representation of new dependent IndexedFeatureNode map.
    */
-  public static AddDep createEngAddDep(String govNodeName, String engRelation,  Map<String, String> attributes) {
+  public static AddDep createEngAddDep(String govNodeName, String engRelation,  Map<String, String> attributes, String position) {
     GrammaticalRelation relation = EnglishGrammaticalRelations.valueOf(engRelation);
-    return new AddDep(govNodeName, relation, attributes);
+    return new AddDep(govNodeName, relation, attributes, position);
   }
 
-  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes) {
-    this(govNodeName, relation, attributes, 0.0);
+  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position) {
+    this(govNodeName, relation, attributes, position, 0.0);
   }
 
-  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, double weight) {
+  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight) {
     // if there's an exception, we'll barf here rather than at runtime
     try {
       CoreLabel newNodeObj = fromCheapStrings(attributes);
@@ -52,9 +51,16 @@ public class AddDep extends SsurgeonEdit {
       throw new SsurgeonParseException("Unable to process keys for AddDep operation", e);
     }
 
+    if (position != null) {
+      if (!position.equals("-") && !position.equals("+")) {
+        throw new SsurgeonParseException("Unknown position " + position + " in AddDep operation");
+      }
+    }
+
     this.attributes = new TreeMap<>(attributes);
     this.relation = relation;
     this.govNodeName = govNodeName;
+    this.position = position;
     this.weight = 0;
   }
 
@@ -70,6 +76,11 @@ public class AddDep extends SsurgeonEdit {
     buf.write(Ssurgeon.RELN_ARG);buf.write(" ");
     buf.write(relation.toString()); buf.write("\t");
 
+    if (position != null) {
+      buf.write(Ssurgeon.POSITION_ARG);buf.write(" ");
+      buf.write(position);buf.write("\t");
+    }
+
     for (String key : attributes.keySet()) {
       buf.write("-");
       buf.write(key);
@@ -83,12 +94,53 @@ public class AddDep extends SsurgeonEdit {
     return buf.toString();
   }
 
+  // TODO: update the SemgrexMatcher
+  // currently the Ssurgeon will not be able to proceed after this edit
+  // since all of the node and edge pointers will be rewritten
+  public static void moveNode(SemanticGraph sg, IndexedWord word, int newIndex) {
+    List<SemanticGraphEdge> outgoing = sg.outgoingEdgeList(word);
+    List<SemanticGraphEdge> incoming = sg.incomingEdgeList(word);
+    boolean isRoot = sg.isRoot(word);
+    sg.removeVertex(word);
+
+    IndexedWord newWord = new IndexedWord(word.backingLabel());
+    newWord.setIndex(newIndex);
+
+    // could be more expensive than necessary if we move multiple roots,
+    // but the expectation is there is usually only the 1 root
+    if (isRoot) {
+      Set<IndexedWord> newRoots = new HashSet<>(sg.getRoots());
+      newRoots.remove(word);
+      newRoots.add(newWord);
+      sg.setRoots(newRoots);
+    }
+
+    for (SemanticGraphEdge oldEdge : outgoing) {
+      SemanticGraphEdge newEdge = new SemanticGraphEdge(newWord, oldEdge.getTarget(), oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
+      sg.addEdge(newEdge);
+    }
+
+    for (SemanticGraphEdge oldEdge : incoming) {
+      SemanticGraphEdge newEdge = new SemanticGraphEdge(oldEdge.getSource(), newWord, oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
+      sg.addEdge(newEdge);
+    }
+  }
+
+  public static void moveNodes(SemanticGraph sg, Function<Integer, Boolean> shouldMove, Function<Integer, Integer> destination) {
+    // iterate first, then move, so that we don't screw up the graph while iterating
+    List<IndexedWord> toMove = sg.vertexSet().stream().filter(x -> shouldMove.apply(x.index())).collect(Collectors.toList());
+    Collections.sort(toMove);
+    Collections.reverse(toMove);
+    for (IndexedWord word : toMove) {
+      moveNode(sg, word, destination.apply(word.index()));
+    }
+  }
+
   /**
    * TODO: figure out how to specify where in the sentence this node goes.
-   * TODO: determine if we should be copying an IndexedWord, or working just with a FeatureLabel.
+   *   currently allows - and + for start and end.  before and after
+   *   matched node would be good
    * TODO: bombproof if this gov, dep, and reln already exist.
-   * TODO: This is not used anywhere, even in the old RTE code, so we can redo it however we want.
-   *       Perhaps it could reorder the indices of the new nodes, for example
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
@@ -98,17 +150,37 @@ public class AddDep extends SsurgeonEdit {
     // same backing CoreLabel in each instance
     CoreLabel newWord = fromCheapStrings(attributes);
     IndexedWord newNode = new IndexedWord(newWord);
-    int newIndex = 0;
-    for (IndexedWord node : sg.vertexSet()) {
-      if (node.index() >= newIndex) {
-        newIndex = node.index() + 1;
-      }
+    final int tempIndex;
+    if (position != null && !position.equals("+")) {
+      // +2 to leave room: we will increase all other nodes with the
+      // proper index, so we need +1 of room, then another +1 for
+      // a temp place to put this node
+      // TODO: when we implement updating the SemgrexMatcher,
+      // this won't be necessary
+      tempIndex = SemanticGraphUtils.maxIndex(sg) + 2;
+    } else {
+      tempIndex = SemanticGraphUtils.maxIndex(sg) + 1;
     }
     newNode.setDocID(govNode.docID());
-    newNode.setIndex(newIndex);
+    newNode.setIndex(tempIndex);
     newNode.setSentIndex(govNode.sentIndex());
+
     sg.addVertex(newNode);
     sg.addEdge(govNode, newNode, relation, weight, false);
+
+    if (position != null && !position.equals("+")) {
+      final int newIndex;
+      if (position.equals("-")) {
+        newIndex = SemanticGraphUtils.minIndex(sg);
+      } else {
+        throw new UnsupportedOperationException("Unknown position in AddDep: |" + position + "|");
+      }
+      // the payoff for tempIndex == maxIndex + 2:
+      // everything will be moved one higher, unless it's the new node
+      moveNodes(sg, x -> (x >= newIndex && x != tempIndex), x -> x+1);
+      moveNode(sg, newNode, newIndex);
+    }
+
     return true;
   }
 
