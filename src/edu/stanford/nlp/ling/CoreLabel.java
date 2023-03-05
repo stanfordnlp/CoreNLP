@@ -198,9 +198,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
           } else if(valueClass == Long.class) {
             this.set(coreKeyClass, Long.parseLong(values[i]));
           } else {
-            throw new RuntimeException("Can't handle " + valueClass);
+            throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: " +
+                                                    "Can't handle " + valueClass + " (key " + key + ")");
           }
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
           // unexpected value type
           throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: "
               + "Bad type for " + key
@@ -246,9 +247,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
         } else if (valueClass == Long.class) {
           this.set(coreKeyClass, Long.parseLong(values[i]));
         } else {
-          throw new RuntimeException("Can't handle " + valueClass);
+          throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: " +
+                                                  "Can't handle " + valueClass + " (key " + coreKeyClass + ")");
         }
-      } catch (Exception e) {
+      } catch (NumberFormatException e) {
         // unexpected value type
         throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: "
             + "Bad type for " + coreKeyClass.getSimpleName()
