@@ -671,6 +671,53 @@ public class SsurgeonTest {
     }
   }
 
+  @Test
+  public void checkAnnotationConversionErrors() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // this should exist, but a string will not produce it
+    assertNotNull(AnnotationLookup.toCoreKey("SPAN"));
+
+    // This will fail because IntPair cannot be converted from a String
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Remove all incoming edges for a node</notes>",
+                             // have to bomb-proof the pattern
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae !> {word:blue}") + "</semgrex>",
+                             "    <edit-list>addDep -gov antennae -reln dep -SPAN blue</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+
+    try {
+      List<SsurgeonPattern> patterns = inst.readFromString(add);
+      throw new AssertionError("Expected a failure because IntPair is not readable from a String in CoreLabel");
+    } catch (SsurgeonParseException e) {
+      // yay
+    }
+    
+    assertNotNull(AnnotationLookup.toCoreKey("headidx"));
+    // This will also fail, this time because Integer cannot be converted from a String
+    add = String.join(newline,
+                      "<ssurgeon-pattern-list>",
+                      "  <ssurgeon-pattern>",
+                      "    <uid>38</uid>",
+                      "    <notes>Remove all incoming edges for a node</notes>",
+                      // have to bomb-proof the pattern
+                      "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae !> {word:blue}") + "</semgrex>",
+                      "    <edit-list>addDep -gov antennae -reln dep -headidx blue</edit-list>",
+                      "  </ssurgeon-pattern>",
+                      "</ssurgeon-pattern-list>");
+
+    try {
+      List<SsurgeonPattern> patterns = inst.readFromString(add);
+      throw new AssertionError("Expected a failure because IntPair is not readable from a String in CoreLabel");
+    } catch (SsurgeonParseException e) {
+      // yay
+    }
+  }
+
   /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
    * a semgrex pattern, and then the resulting actions over the named nodes in the

@@ -46,7 +46,11 @@ public class AddDep extends SsurgeonEdit {
 
   public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, double weight) {
     // if there's an exception, we'll barf here rather than at runtime
-    CoreLabel newNodeObj = fromCheapStrings(attributes);
+    try {
+      CoreLabel newNodeObj = fromCheapStrings(attributes);
+    } catch (UnsupportedOperationException e) {
+      throw new SsurgeonParseException("Unable to process keys for AddDep operation", e);
+    }
 
     this.attributes = new TreeMap<>(attributes);
     this.relation = relation;
@@ -65,8 +69,7 @@ public class AddDep extends SsurgeonEdit {
     buf.write(govNodeName); buf.write("\t");
     buf.write(Ssurgeon.RELN_ARG);buf.write(" ");
     buf.write(relation.toString()); buf.write("\t");
-    buf.write(Ssurgeon.NODE_PROTO_ARG);buf.write(" ");
-    buf.write("\"");
+
     for (String key : attributes.keySet()) {
       buf.write("-");
       buf.write(key);
@@ -123,7 +126,7 @@ public class AddDep extends SsurgeonEdit {
       values[idx] = value;
       ++idx;
     }
-    CoreLabel newWord = new CoreLabel(keys, values);
+    final CoreLabel newWord = new CoreLabel(keys, values);
     if (newWord.value() == null && newWord.word() != null) {
       newWord.setValue(newWord.word());
     }
