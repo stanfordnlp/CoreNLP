@@ -24,11 +24,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.ling.AnnotationLookup;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.*;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.XMLUtils;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -268,6 +270,8 @@ public class Ssurgeon  {
     public double weight = 0.0;
 
     public String name = null;
+
+    public Map<String, String> annotations = new TreeMap<>();
   }
 
   /**
@@ -333,7 +337,13 @@ public class Ssurgeon  {
           argIndex += 1;
           break;
         default:
-          throw new SsurgeonParseException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
+          String key = argsArray[argIndex].substring(1);
+          Class<? extends CoreAnnotation<?>> annotation = AnnotationLookup.toCoreKey(key);
+          if (annotation == null) {
+            throw new SsurgeonParseException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
+          }
+          argsBox.annotations.put(key, argsArray[argIndex + 1]);
+          argIndex += 1;
       }
     }
     return argsBox;
@@ -365,7 +375,13 @@ public class Ssurgeon  {
     // mappings should also be stored in more appropriate data structure.
     SsurgeonEdit retEdit;
     if (command.equalsIgnoreCase(AddDep.LABEL)) {
-      retEdit = AddDep.createEngAddDep(argsBox.govNodeName, argsBox.reln, argsBox.nodeString);
+      if (argsBox.govNodeName == null) {
+        throw new SsurgeonParseException("No governor given for an AddDep edit: " + editLine);
+      }
+      if (argsBox.reln == null) {
+        throw new SsurgeonParseException("No relation given for an AddDep edit: " + editLine);
+      }
+      retEdit = AddDep.createEngAddDep(argsBox.govNodeName, argsBox.reln, argsBox.annotations);
     } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
       retEdit = AddNode.createAddNode(argsBox.nodeString, argsBox.name);
     } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {

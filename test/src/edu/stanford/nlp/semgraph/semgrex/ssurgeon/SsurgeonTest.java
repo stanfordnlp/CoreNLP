@@ -4,10 +4,13 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 import static org.junit.Assert.*;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
+import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -582,6 +585,93 @@ public class SsurgeonTest {
   }
 
   /**
+   * Check some various ways of adding nodes work as expected
+   */
+  @Test
+  public void readXMLAddDep() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // use "dep" as the dependency so as to be language-agnostic in this test
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Remove all incoming edges for a node</notes>",
+                             // have to bomb-proof the pattern
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae !> {word:blue}") + "</semgrex>",
+                             "    <edit-list>addDep -gov antennae -reln dep -word blue</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern addSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
+    IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
+    assertNull(blueVertex);
+    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-3 dep> blue-4]]");
+    assertEquals(expected, newSG);
+    // the Ssurgeon we just created should not put a tag on the word
+    blueVertex = newSG.getNodeByIndexSafe(4);
+    assertNotNull(blueVertex);
+    assertNull(blueVertex.tag());
+
+    // This time, we expect that there will be a tag
+    add = String.join(newline,
+                      "<ssurgeon-pattern-list>",
+                      "  <ssurgeon-pattern>",
+                      "    <uid>38</uid>",
+                      "    <notes>Remove all incoming edges for a node</notes>",
+                      // have to bomb-proof the pattern
+                      "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae !> {word:blue}") + "</semgrex>",
+                      "    <edit-list>addDep -gov antennae -reln dep -word blue -tag JJ</edit-list>",
+                      "  </ssurgeon-pattern>",
+                      "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(add);
+    assertEquals(patterns.size(), 1);
+    addSsurgeon = patterns.get(0);
+
+    sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
+    newSG = addSsurgeon.iterate(sg);
+    expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-3 dep> blue-4]]");
+    assertEquals(expected, newSG);
+    // this new Ssurgeon SHOULD put a tag on the word
+    blueVertex = newSG.getNodeByIndexSafe(4);
+    assertNotNull(blueVertex);
+    assertEquals("JJ", blueVertex.tag());
+  }
+
+
+  /**
+   * There should be an exception for an annotation key that does not exist
+   */
+  @Test
+  public void readXMLAddDepBrokenAnnotation() {
+    String missingKey = "zzzzzz";
+    assertNull(AnnotationLookup.toCoreKey(missingKey));
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // use "dep" as the dependency so as to be language-agnostic in this test
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Remove all incoming edges for a node</notes>",
+                             // have to bomb-proof the pattern
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae !> {word:blue}") + "</semgrex>",
+                             "    <edit-list>addDep -gov antennae -reln dep -" + missingKey + " blue</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    try {
+      List<SsurgeonPattern> patterns = inst.readFromString(add);
+      throw new AssertionError("Expected a failure because of missingKey " + missingKey);
+    } catch (SsurgeonParseException e) {
+      // yay
+    }
+  }
+
+  /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
    * a semgrex pattern, and then the resulting actions over the named nodes in the
    * semgrex match.
@@ -606,12 +696,12 @@ public class SsurgeonTest {
     pattern.addEdit(reattachSubj);
 
     // Attach copula
-    IndexedWord isNode = new IndexedWord();
-    isNode.set(CoreAnnotations.TextAnnotation.class, "is");
-    isNode.set(CoreAnnotations.LemmaAnnotation.class, "is");
-    isNode.set(CoreAnnotations.OriginalTextAnnotation.class, "is");
-    isNode.set(CoreAnnotations.PartOfSpeechAnnotation.class, "VBN");
-    SsurgeonEdit addCopula = new AddDep("a2", EnglishGrammaticalRelations.COPULA, isNode);
+    Map<String, String> attributes = new HashMap<>();
+    attributes.put("word", "is");
+    attributes.put("lemma", "is");
+    attributes.put("current", "is");
+    attributes.put("pos", "VBN");
+    SsurgeonEdit addCopula = new AddDep("a2", EnglishGrammaticalRelations.COPULA, attributes);
     pattern.addEdit(addCopula);
 
     // Destroy subgraph
@@ -623,6 +713,6 @@ public class SsurgeonTest {
     for (SemanticGraph newSg : newSgs)
       System.out.println("Modified = "+newSg.toCompactString());
     String firstGraphString = newSgs.iterator().next().toCompactString().trim();
-    assertEquals(firstGraphString, "[bartender cop>is nsubj>Joe det>the]");
+    assertEquals("[bartender nsubj>Joe det>the cop>is]", firstGraphString);
   }
 }
