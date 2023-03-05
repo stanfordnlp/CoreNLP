@@ -69,6 +69,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td>{@code A x,y>>reln B} <td>A is the governor of a relation reln in a chain to B following {@code gov->dep} paths between distances of x and y
  * <tr><td>A == B <td>A and B are the same nodes in the same graph
  * <tr><td>A . B <td>A immediately precedes B, i.e. A.index() == B.index() - 1
+ * <tr><td>A - B <td>A immediately succeeds B, i.e. A.index() == B.index() + 1
+ * <tr><td>A .. B <td>A precedes B, i.e. {@code A.index() < B.index()}
+ * <tr><td>A -- B <td>A succeeds B, i.e. {@code A.index() > B.index()}
  * <tr><td>A $+ B <td>B is a right immediate sibling of A, i.e. A and B have the same parent and A.index() == B.index() - 1
  * <tr><td>A $- B <td>B is a left immediate sibling of A, i.e. A and B have the same parent and A.index() == B.index() + 1
  * <tr><td>A $++ B <td>B is a right sibling of A, i.e. A and B have the same parent and {@code A.index() < B.index()}
