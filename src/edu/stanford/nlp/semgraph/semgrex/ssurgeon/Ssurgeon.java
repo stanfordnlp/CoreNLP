@@ -248,6 +248,7 @@ public class Ssurgeon  {
   public static final String NODE_PROTO_ARG = "-nodearg";
   public static final String WEIGHT_ARG = "-weight";
   public static final String NAME_ARG = "-name";
+  public static final String POSITION_ARG = "-position";
 
 
   // args for Ssurgeon edits, allowing us to not
@@ -270,6 +271,8 @@ public class Ssurgeon  {
     public double weight = 0.0;
 
     public String name = null;
+
+    public String position = null;
 
     public Map<String, String> annotations = new TreeMap<>();
   }
@@ -336,6 +339,10 @@ public class Ssurgeon  {
           argsBox.name = argsArray[argIndex + 1];
           argIndex += 1;
           break;
+        case POSITION_ARG:
+          argsBox.position = argsArray[argIndex + 1];
+          argIndex += 1;
+          break;
         default:
           String key = argsArray[argIndex].substring(1);
           Class<? extends CoreAnnotation<?>> annotation = AnnotationLookup.toCoreKey(key);
@@ -381,7 +388,7 @@ public class Ssurgeon  {
       if (argsBox.reln == null) {
         throw new SsurgeonParseException("No relation given for an AddDep edit: " + editLine);
       }
-      retEdit = AddDep.createEngAddDep(argsBox.govNodeName, argsBox.reln, argsBox.annotations);
+      retEdit = AddDep.createEngAddDep(argsBox.govNodeName, argsBox.reln, argsBox.annotations, argsBox.position);
     } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
       retEdit = AddNode.createAddNode(argsBox.nodeString, argsBox.name);
     } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {
