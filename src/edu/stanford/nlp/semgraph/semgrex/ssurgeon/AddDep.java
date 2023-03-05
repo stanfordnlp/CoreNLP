@@ -16,8 +16,11 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 
 /**
  * Adds a new dependent node, based off of a prototype IndexedWord, with the given relation.
- * The new node's sentence index is inherited from the governing node.  Currently a cheap heuristic
- * is made, placing the new node as the leftmost child of the governing node.
+ * The new node's sentence index is inherited from the governing node.
+ *<br>
+ * Nodes will be placed at the end of the sentence by default, at the
+ * start or end using "-position -" or "-position +", or
+ * before or after a node with "-position -word" and "-position +word"
  *
  * @author Eric Yeh
  *
@@ -137,9 +140,6 @@ public class AddDep extends SsurgeonEdit {
   }
 
   /**
-   * TODO: figure out how to specify where in the sentence this node goes.
-   *   currently allows - and + for start and end.  before and after
-   *   matched node would be good
    * TODO: bombproof if this gov, dep, and reln already exist.
    */
   @Override
