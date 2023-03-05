@@ -1287,4 +1287,24 @@ public class SemanticGraphUtils  {
 
     return visitedNodes.size() == sg.size();
   }
+
+  public static int maxIndex(SemanticGraph sg) {
+    int index = Integer.MIN_VALUE;
+    for (IndexedWord node : sg.vertexSet()) {
+      if (node.index() > index) {
+        index = node.index();
+      }
+    }
+    return index;
+  }
+
+  public static int minIndex(SemanticGraph sg) {
+    int index = Integer.MAX_VALUE;
+    for (IndexedWord node : sg.vertexSet()) {
+      if (node.index() < index) {
+        index = node.index();
+      }
+    }
+    return index;
+  }
 }
