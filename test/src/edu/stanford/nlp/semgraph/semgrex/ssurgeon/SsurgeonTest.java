@@ -862,6 +862,47 @@ public class SsurgeonTest {
     assertEquals("blue", blueVertex.value());
   }
 
+
+  /**
+   * Test that we don't allow changing a word index, for example, in EditNode or AddDep
+   */
+  @Test
+  public void forbidIllegalAttributes() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // use "dep" as the dependency so as to be language-agnostic in this test
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Edit a node</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:green}=blue") + "</semgrex>",
+                             "    <edit-list>EditNode -node blue -idx 5</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    try {
+      List<SsurgeonPattern> patterns = inst.readFromString(add);
+      throw new AssertionError("Expected a parse exception!");
+    } catch(SsurgeonParseException e) {
+      // yay
+    }
+    add = String.join(newline,
+                      "<ssurgeon-pattern-list>",
+                      "  <ssurgeon-pattern>",
+                      "    <uid>38</uid>",
+                      "    <notes>Edit a node</notes>",
+                      "    <semgrex>" + XMLUtils.escapeXML("{word:green}=blue") + "</semgrex>",
+                      "    <edit-list>addDep -gov antennae -reln dep -headidx blue -idx 5</edit-list>",
+                      "  </ssurgeon-pattern>",
+                      "</ssurgeon-pattern-list>");
+    try {
+      List<SsurgeonPattern> patterns = inst.readFromString(add);
+      throw new AssertionError("Expected a parse exception!");
+    } catch(SsurgeonParseException e) {
+      // yay
+    }
+  }
+
   /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
    * a semgrex pattern, and then the resulting actions over the named nodes in the

@@ -26,6 +26,7 @@ public class EditNode extends SsurgeonEdit {
     if (attributes.size() == 0) {
       throw new SsurgeonParseException("Cannot make an EditNode with no attributes");
     }
+    AddDep.checkIllegalAttributes(attributes);
     this.nodeName = nodeName;
     this.attributes = new TreeMap<>(attributes);
   }
