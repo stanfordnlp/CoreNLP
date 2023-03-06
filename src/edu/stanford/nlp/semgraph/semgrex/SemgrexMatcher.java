@@ -199,7 +199,11 @@ public abstract class SemgrexMatcher  {
   public IndexedWord getNode(String name) {
     return namesToNodes.get(name);
   }
-  
+
+  public IndexedWord putNode(String name, IndexedWord node) {
+    return namesToNodes.put(name, node);
+  }
+
   public String getRelnString(String name) {
     return namesToRelations.get(name);
   }
