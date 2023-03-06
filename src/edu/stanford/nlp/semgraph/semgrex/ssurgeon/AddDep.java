@@ -99,10 +99,8 @@ public class AddDep extends SsurgeonEdit {
     return buf.toString();
   }
 
-  // TODO: update the SemgrexMatcher
-  // currently the Ssurgeon will not be able to proceed after this edit
-  // since all of the node and edge pointers will be rewritten
-  public static void moveNode(SemanticGraph sg, IndexedWord word, int newIndex) {
+  // TODO: update the SemgrexMatcher's edges as well
+  public static void moveNode(SemanticGraph sg, SemgrexMatcher sm, IndexedWord word, int newIndex) {
     List<SemanticGraphEdge> outgoing = sg.outgoingEdgeList(word);
     List<SemanticGraphEdge> incoming = sg.incomingEdgeList(word);
     boolean isRoot = sg.isRoot(word);
@@ -120,6 +118,12 @@ public class AddDep extends SsurgeonEdit {
       sg.setRoots(newRoots);
     }
 
+    for (String name : sm.getNodeNames()) {
+      if (sm.getNode(name) == word) {
+        sm.putNode(name, newWord);
+      }
+    }
+
     for (SemanticGraphEdge oldEdge : outgoing) {
       SemanticGraphEdge newEdge = new SemanticGraphEdge(newWord, oldEdge.getTarget(), oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
       sg.addEdge(newEdge);
@@ -131,13 +135,13 @@ public class AddDep extends SsurgeonEdit {
     }
   }
 
-  public static void moveNodes(SemanticGraph sg, Function<Integer, Boolean> shouldMove, Function<Integer, Integer> destination) {
+  public static void moveNodes(SemanticGraph sg, SemgrexMatcher sm, Function<Integer, Boolean> shouldMove, Function<Integer, Integer> destination) {
     // iterate first, then move, so that we don't screw up the graph while iterating
     List<IndexedWord> toMove = sg.vertexSet().stream().filter(x -> shouldMove.apply(x.index())).collect(Collectors.toList());
     Collections.sort(toMove);
     Collections.reverse(toMove);
     for (IndexedWord word : toMove) {
-      moveNode(sg, word, destination.apply(word.index()));
+      moveNode(sg, sm, word, destination.apply(word.index()));
     }
   }
 
@@ -195,8 +199,8 @@ public class AddDep extends SsurgeonEdit {
     if (position != null && !position.equals("+")) {
       // the payoff for tempIndex == maxIndex + 2:
       // everything will be moved one higher, unless it's the new node
-      moveNodes(sg, x -> (x >= newIndex && x != tempIndex), x -> x+1);
-      moveNode(sg, newNode, newIndex);
+      moveNodes(sg, sm, x -> (x >= newIndex && x != tempIndex), x -> x+1);
+      moveNode(sg, sm, newNode, newIndex);
     }
 
     return true;
