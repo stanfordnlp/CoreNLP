@@ -60,6 +60,8 @@ public class AddDep extends SsurgeonEdit {
       }
     }
 
+    checkIllegalAttributes(attributes);
+
     this.attributes = new TreeMap<>(attributes);
     this.relation = relation;
     this.govNodeName = govNodeName;
@@ -198,6 +200,22 @@ public class AddDep extends SsurgeonEdit {
     }
 
     return true;
+  }
+
+  /**
+   * Certain attributes cannot be edited, especially docid, sentid, idx,
+   * or they mess up the hashmaps in the SemanticGraph
+   */
+  public static void checkIllegalAttributes(Map<String, String> attributes) {
+    if (attributes.containsKey("idx")) {
+      throw new SsurgeonParseException("Cannot manually set the index attribute.  If you need a moveWord operation, please file an issue on github.");
+    }
+    if (attributes.containsKey("sentIndex")) {
+      throw new SsurgeonParseException("Cannot manually change the sentence index.  If you need an operation to change an entire sentence's sentIndex, please file an issue on github.");
+    }
+    if (attributes.containsKey("docID")) {
+      throw new SsurgeonParseException("Cannot manually change a document ID.  If you need an operation to change an entire sentence's document ID, please file an issue on github.");
+    }
   }
 
   /**
