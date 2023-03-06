@@ -47,19 +47,17 @@ public class AddDep extends SsurgeonEdit {
   }
 
   public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight) {
-    // if there's an exception, we'll barf here rather than at runtime
-    try {
-      CoreLabel newNodeObj = fromCheapStrings(attributes);
-    } catch (UnsupportedOperationException e) {
-      throw new SsurgeonParseException("Unable to process keys for AddDep operation", e);
-    }
-
     if (position != null) {
       if (!position.startsWith("-") && !position.startsWith("+")) {
         throw new SsurgeonParseException("Unknown position " + position + " in AddDep operation");
       }
     }
-
+    if (govNodeName == null) {
+      throw new SsurgeonParseException("No governor given for an AddDep");
+    }
+    if (relation == null) {
+      throw new SsurgeonParseException("No relation given for an AddDep");
+    }
     checkIllegalAttributes(attributes);
 
     this.attributes = new TreeMap<>(attributes);
@@ -219,6 +217,13 @@ public class AddDep extends SsurgeonEdit {
     }
     if (attributes.containsKey("docID")) {
       throw new SsurgeonParseException("Cannot manually change a document ID.  If you need an operation to change an entire sentence's document ID, please file an issue on github.");
+    }
+
+    // if there's an exception, we'll barf when creating the pattern rather than at runtime
+    try {
+      CoreLabel newNodeObj = fromCheapStrings(attributes);
+    } catch (UnsupportedOperationException e) {
+      throw new SsurgeonParseException("Unable to process node attribute keys for Ssurgeon operation", e);
     }
   }
 
