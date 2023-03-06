@@ -5,6 +5,8 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Constants and parameters for multilingual NLP (primarily, parsing).
@@ -77,6 +79,21 @@ public enum Language {
   Vietnamese(       treebankForLanguage("Vietnamese"));
 
   public static final String langList = StringUtils.join(Arrays.asList(Language.values()), " ");
+
+  public static final Map<String, Language> lowerLangNames = new HashMap() {{
+    for (Language lang : Language.values()) {
+      String lowerLang = lang.name().toLowerCase();
+      if (containsKey(lowerLang)) {
+        throw new AssertionError("Duplicate Language names: " + lang.name() + " and " + lowerLangNames.get(lowerLang).name());
+      }
+      put(lowerLang, lang);
+    }
+  }};
+
+  /** return a case insensitive search with no exceptions (unknown language becomes null) */
+  public static Language valueOfSafe(String language) {
+    return lowerLangNames.get(language.toLowerCase());
+  }
 
   public final TreebankLangParserParams params;
 
