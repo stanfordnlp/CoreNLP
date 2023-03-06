@@ -3,9 +3,10 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 import java.io.*;
 import java.util.*;
 
+import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
-import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.SsurgPred;
 import edu.stanford.nlp.semgraph.semgrex.*;
 import edu.stanford.nlp.util.Generics;
@@ -26,6 +27,7 @@ import edu.stanford.nlp.util.Generics;
 public class SsurgeonPattern {
   protected String UID;
   protected String notes = "";
+  protected Language language = Language.English;
   protected List<SsurgeonEdit> editScript;
   protected SemgrexPattern semgrexPattern;
   protected SemanticGraph semgrexGraph = null; // Source graph semgrex pattern was derived from (used for pattern learning)
@@ -236,6 +238,7 @@ public class SsurgeonPattern {
    * ------ */
   public static final String ELT_LIST_TAG = "ssurgeon-pattern-list";
   public static final String UID_ELEM_TAG = "uid";
+  public static final String LANGUAGE_TAG = "language";
   public static final String RESOURCE_TAG = "resource";
   public static final String SSURGEON_ELEM_TAG = "ssurgeon-pattern";
   public static final String SEMGREX_ELEM_TAG = "semgrex";
@@ -272,6 +275,15 @@ public class SsurgeonPattern {
 
   public void setUID(String uid) {
     UID = uid;
+  }
+
+  public Language getLanguage() {
+    return language;
+  }
+
+  public void setLanguage(String language) {
+    // might be null if the language doesn't exist
+    this.language = Language.valueOfSafe(language);
   }
 
   /**

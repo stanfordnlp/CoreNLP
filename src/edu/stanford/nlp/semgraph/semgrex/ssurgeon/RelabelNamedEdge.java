@@ -39,11 +39,6 @@ public class RelabelNamedEdge extends SsurgeonEdit {
     this.relation = relation;
   }
 
-  public static RelabelNamedEdge createEngRelabel(String edgeName, String relation) {
-    GrammaticalRelation reln = EnglishGrammaticalRelations.valueOf(relation);
-    return new RelabelNamedEdge(edgeName, reln);
-  }
-
   @Override
   public String toEditString() {
     StringWriter buf = new StringWriter();

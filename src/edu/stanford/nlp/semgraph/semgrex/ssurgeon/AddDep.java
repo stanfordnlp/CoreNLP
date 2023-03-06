@@ -33,15 +33,6 @@ public class AddDep extends SsurgeonEdit {
   final String position;
   final double weight;
 
-  /**
-   * Creates an EnglishGrammaticalRelation AddDep edit.
-   * @param newNode String representation of new dependent IndexedFeatureNode map.
-   */
-  public static AddDep createEngAddDep(String govNodeName, String engRelation,  Map<String, String> attributes, String position) {
-    GrammaticalRelation relation = EnglishGrammaticalRelations.valueOf(engRelation);
-    return new AddDep(govNodeName, relation, attributes, position);
-  }
-
   public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position) {
     this(govNodeName, relation, attributes, position, 0.0);
   }
