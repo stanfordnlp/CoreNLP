@@ -24,6 +24,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -359,7 +360,7 @@ public class Ssurgeon  {
   /**
    * Given a string entry, converts it into a SsurgeonEdit object.
    */
-  public static SsurgeonEdit parseEditLine(String editLine) {
+  public static SsurgeonEdit parseEditLine(String editLine, Language language) {
     try {
       // Extract the operation name first
       final String[] tuples1 = editLine.split("\\s+", 2);
@@ -380,20 +381,29 @@ public class Ssurgeon  {
       final SsurgeonArgs argsBox = parseArgsBox(tuples1.length == 1 ? "" : tuples1[1]);
 
       if (command.equalsIgnoreCase(AddDep.LABEL)) {
-        return AddDep.createEngAddDep(argsBox.govNodeName, argsBox.reln, argsBox.annotations, argsBox.position);
+        if (argsBox.reln == null) {
+          throw new SsurgeonParseException("Relation not specified for AddDep");
+        }
+        GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
+        return new AddDep(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position);
       } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
         return AddNode.createAddNode(argsBox.nodeString, argsBox.name);
       } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {
-        return AddEdge.createEngAddEdge(argsBox.govNodeName, argsBox.dep, argsBox.reln, argsBox.weight);
+        if (argsBox.reln == null) {
+          throw new SsurgeonParseException("Relation not specified for AddEdge");
+        }
+        GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
+        return new AddEdge(argsBox.govNodeName, argsBox.dep, reln, argsBox.weight);
       } else if (command.equalsIgnoreCase(DeleteGraphFromNode.LABEL)) {
         return new DeleteGraphFromNode(argsBox.node);
       } else if (command.equalsIgnoreCase(EditNode.LABEL)) {
         return new EditNode(argsBox.node, argsBox.annotations);
       } else if (command.equalsIgnoreCase(RelabelNamedEdge.LABEL)) {
-        // TODO: pass around a Language (perhaps via ssurgeon argument)
-        // rather than hardcoding English, which is probably not even true
-        // compared to UniversalEnglish these days
-        return RelabelNamedEdge.createEngRelabel(argsBox.edge, argsBox.reln);
+        if (argsBox.reln == null) {
+          throw new SsurgeonParseException("Relation not specified for AddEdge");
+        }
+        GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
+        return new RelabelNamedEdge(argsBox.edge, reln);
       } else if (command.equalsIgnoreCase(RemoveEdge.LABEL)) {
         GrammaticalRelation reln = null;
         if (argsBox.reln != null) {
@@ -592,13 +602,19 @@ public class Ssurgeon  {
     SemgrexPattern semgrexPattern = SemgrexPattern.compile(semgrexString);
     SsurgeonPattern retPattern = new SsurgeonPattern(uid, semgrexPattern);
     retPattern.setNotes(notes);
+
+    String language = getTagText(elt, SsurgeonPattern.LANGUAGE_TAG);
+    if (!language.equals("")) {
+      retPattern.setLanguage(language);
+    }
+
     NodeList editNodes = elt.getElementsByTagName(SsurgeonPattern.EDIT_LIST_ELEM_TAG);
     for (int i=0; i<editNodes.getLength(); i++) {
       Node node = editNodes.item(i);
       if (node.getNodeType() == Node.ELEMENT_NODE) {
         Element editElt = (Element) node;
         String editVal = getEltText(editElt);
-        retPattern.addEdit(Ssurgeon.parseEditLine(editVal));
+        retPattern.addEdit(Ssurgeon.parseEditLine(editVal, retPattern.getLanguage()));
       }
     }
 

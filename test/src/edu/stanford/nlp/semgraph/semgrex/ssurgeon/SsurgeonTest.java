@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -646,7 +647,6 @@ public class SsurgeonTest {
     assertEquals("blue", blueVertex.value());
   }
 
-
   /**
    * Check that adding a word to the start of a sentence works as expected
    */
@@ -745,6 +745,90 @@ public class SsurgeonTest {
     assertNotNull(blueVertex);
     assertNull(blueVertex.tag());
     assertEquals("blue", blueVertex.value());
+  }
+
+  /**
+   * Set the language when adding a dep.  Should create a UniversalEnglish dependency
+   */
+  @Test
+  public void readXMLAddUniversalDep() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Add a word before antennae using the position using a UniversalEnglish dependency</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             // have to bomb-proof the pattern
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae !> {word:blue}") + "</semgrex>",
+                             "    <edit-list>addDep -gov antennae -reln amod -word blue -position -antennae</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern addSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]", Language.UniversalEnglish);
+    IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
+    assertNull(blueVertex);
+    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 amod> blue-3]]", Language.UniversalEnglish);
+    for (SemanticGraphEdge edge : expected.edgeIterable()) {
+      assertEquals(Language.UniversalEnglish, edge.getRelation().getLanguage());
+    }
+    for (SemanticGraphEdge edge : newSG.edgeIterable()) {
+      assertEquals(Language.UniversalEnglish, edge.getRelation().getLanguage());
+    }
+    assertEquals(expected, newSG);
+    // the Ssurgeon we just created should not put a tag on the word
+    // but it SHOULD put blue immediately before antennae
+    blueVertex = newSG.getNodeByIndexSafe(3);
+    assertNotNull(blueVertex);
+    assertNull(blueVertex.tag());
+    assertEquals("blue", blueVertex.value());
+
+
+    // If we repeat the same test with English (SD, not UD) it should fail horribly
+    // this is because SemanticGraph.valueOf will use UniversalEnglish dependencies by default
+    add = String.join(newline,
+                      "<ssurgeon-pattern-list>",
+                      "  <ssurgeon-pattern>",
+                      "    <uid>38</uid>",
+                      "    <notes>Add a word before antennae using the position using an English dependency</notes>",
+                      "    <language>English</language>",
+                      // have to bomb-proof the pattern
+                      "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae !> {word:blue}") + "</semgrex>",
+                      "    <edit-list>addDep -gov antennae -reln amod -word blue -position -antennae</edit-list>",
+                      "  </ssurgeon-pattern>",
+                      "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(add);
+    assertEquals(patterns.size(), 1);
+    addSsurgeon = patterns.get(0);
+
+    sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]", Language.UniversalEnglish);
+    blueVertex = sg.getNodeByIndexSafe(4);
+    assertNull(blueVertex);
+    newSG = addSsurgeon.iterate(sg);
+    expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 amod> blue-3]]", Language.UniversalEnglish);
+    for (SemanticGraphEdge edge : expected.edgeIterable()) {
+      assertEquals(Language.UniversalEnglish, edge.getRelation().getLanguage());
+    }
+    // they look the same, but they're really not
+    assertEquals(expected.toString(), newSG.toString());
+    assertNotEquals(expected, newSG);
+
+    // In this third version, now valueOf is creating an English graph,
+    // not a UniversalEnglish graph, so it should work again
+    sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]", Language.English);
+    blueVertex = sg.getNodeByIndexSafe(4);
+    assertNull(blueVertex);
+    newSG = addSsurgeon.iterate(sg);
+    expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 amod> blue-3]]", Language.English);
+    for (SemanticGraphEdge edge : expected.edgeIterable()) {
+      assertEquals(Language.English, edge.getRelation().getLanguage());
+    }
+    assertEquals(expected, newSG);
   }
 
   /**
@@ -1014,7 +1098,7 @@ public class SsurgeonTest {
     attributes.put("lemma", "is");
     attributes.put("current", "is");
     attributes.put("pos", "VBN");
-    SsurgeonEdit addCopula = new AddDep("a2", EnglishGrammaticalRelations.COPULA, attributes, null);
+    SsurgeonEdit addCopula = new AddDep("a2", EnglishGrammaticalRelations.COPULA, attributes, null, 0.0);
     pattern.addEdit(addCopula);
 
     // Destroy subgraph
