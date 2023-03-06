@@ -826,6 +826,42 @@ public class SsurgeonTest {
     }
   }
 
+
+  /**
+   * Check that adding a word to the start of a sentence works as expected
+   */
+  @Test
+  public void readXMLEditNode() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // use "dep" as the dependency so as to be language-agnostic in this test
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Edit a node</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:green}=blue") + "</semgrex>",
+                             "    <edit-list>EditNode -node blue -word blue</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern editSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> green-3]]");
+    IndexedWord blueVertex = sg.getNodeByIndexSafe(3);
+    assertEquals("green", blueVertex.value());
+    SemanticGraph newSG = editSsurgeon.iterate(sg);
+    SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
+    assertEquals(expected, newSG);
+    // the Ssurgeon we just created should not put a tag on the word
+    // but it SHOULD put blue at the start of the sentence
+    blueVertex = newSG.getNodeByIndexSafe(3);
+    assertNotNull(blueVertex);
+    assertNull(blueVertex.tag());
+    assertEquals("blue", blueVertex.value());
+  }
+
   /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
    * a semgrex pattern, and then the resulting actions over the named nodes in the
