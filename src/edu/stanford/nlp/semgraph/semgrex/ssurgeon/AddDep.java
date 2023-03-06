@@ -97,7 +97,8 @@ public class AddDep extends SsurgeonEdit {
     return buf.toString();
   }
 
-  // TODO: update the SemgrexMatcher's edges as well
+  // TODO: make the updating of named nodes & edges faster,
+  // possibly by building a cache from node/edge to name?
   public static void moveNode(SemanticGraph sg, SemgrexMatcher sm, IndexedWord word, int newIndex) {
     List<SemanticGraphEdge> outgoing = sg.outgoingEdgeList(word);
     List<SemanticGraphEdge> incoming = sg.incomingEdgeList(word);
@@ -124,11 +125,25 @@ public class AddDep extends SsurgeonEdit {
 
     for (SemanticGraphEdge oldEdge : outgoing) {
       SemanticGraphEdge newEdge = new SemanticGraphEdge(newWord, oldEdge.getTarget(), oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
+
+      for (String name : sm.getEdgeNames()) {
+        if (sm.getEdge(name) == oldEdge) {
+          sm.putNamedEdge(name, newEdge);
+        }
+      }
+
       sg.addEdge(newEdge);
     }
 
     for (SemanticGraphEdge oldEdge : incoming) {
       SemanticGraphEdge newEdge = new SemanticGraphEdge(oldEdge.getSource(), newWord, oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
+
+      for (String name : sm.getEdgeNames()) {
+        if (sm.getEdge(name) == oldEdge) {
+          sm.putNamedEdge(name, newEdge);
+        }
+      }
+
       sg.addEdge(newEdge);
     }
   }
