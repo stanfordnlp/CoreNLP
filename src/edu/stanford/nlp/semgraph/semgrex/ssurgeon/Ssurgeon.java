@@ -360,54 +360,55 @@ public class Ssurgeon  {
    * Given a string entry, converts it into a SsurgeonEdit object.
    */
   public static SsurgeonEdit parseEditLine(String editLine) {
-    // Extract the operation name first
-    final String[] tuples1 = editLine.split("\\s+", 2);
-    if (tuples1.length < 1) {
-      throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: invalid number of arguments");
-    }
-    final String command = tuples1[0];
-
-    if (command.equalsIgnoreCase(SetRoots.LABEL)) {
-      String[] names = tuples1[1].split("\\s+");
-      List<String> newRoots = Arrays.asList(names);
-      return new SetRoots(newRoots);
-    } else if (command.equalsIgnoreCase(KillNonRootedNodes.LABEL)) {
-      return new KillNonRootedNodes();
-    }
-
-    // Parse the arguments based upon the type of command to execute.
-    final SsurgeonArgs argsBox = parseArgsBox(tuples1.length == 1 ? "" : tuples1[1]);
-
-    SsurgeonEdit retEdit;
-    if (command.equalsIgnoreCase(AddDep.LABEL)) {
-      retEdit = AddDep.createEngAddDep(argsBox.govNodeName, argsBox.reln, argsBox.annotations, argsBox.position);
-    } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
-      retEdit = AddNode.createAddNode(argsBox.nodeString, argsBox.name);
-    } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {
-      retEdit = AddEdge.createEngAddEdge(argsBox.govNodeName, argsBox.dep, argsBox.reln, argsBox.weight);
-    } else if (command.equalsIgnoreCase(DeleteGraphFromNode.LABEL)) {
-      retEdit = new DeleteGraphFromNode(argsBox.node);
-    } else if (command.equalsIgnoreCase(EditNode.LABEL)) {
-      retEdit = new EditNode(argsBox.node, argsBox.annotations);
-    } else if (command.equalsIgnoreCase(RelabelNamedEdge.LABEL)) {
-      // TODO: pass around a Language (perhaps via ssurgeon argument)
-      // rather than hardcoding English, which is probably not even true
-      // compared to UniversalEnglish these days
-      retEdit = RelabelNamedEdge.createEngRelabel(argsBox.edge, argsBox.reln);
-    } else if (command.equalsIgnoreCase(RemoveEdge.LABEL)) {
-      GrammaticalRelation reln = null;
-      if (argsBox.reln != null) {
-        reln = GrammaticalRelation.valueOf(argsBox.reln);
+    try {
+      // Extract the operation name first
+      final String[] tuples1 = editLine.split("\\s+", 2);
+      if (tuples1.length < 1) {
+        throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: invalid number of arguments");
       }
-      retEdit = new RemoveEdge(reln, argsBox.govNodeName, argsBox.dep);
-    } else if (command.equalsIgnoreCase(RemoveNamedEdge.LABEL)) {
-      retEdit = new RemoveNamedEdge(argsBox.edge);
-    } else if (command.equalsIgnoreCase(KillAllIncomingEdges.LABEL)) {
-      retEdit = new KillAllIncomingEdges(argsBox.node);
-    } else {
+      final String command = tuples1[0];
+
+      if (command.equalsIgnoreCase(SetRoots.LABEL)) {
+        String[] names = tuples1[1].split("\\s+");
+        List<String> newRoots = Arrays.asList(names);
+        return new SetRoots(newRoots);
+      } else if (command.equalsIgnoreCase(KillNonRootedNodes.LABEL)) {
+        return new KillNonRootedNodes();
+      }
+
+      // Parse the arguments based upon the type of command to execute.
+      final SsurgeonArgs argsBox = parseArgsBox(tuples1.length == 1 ? "" : tuples1[1]);
+
+      if (command.equalsIgnoreCase(AddDep.LABEL)) {
+        return AddDep.createEngAddDep(argsBox.govNodeName, argsBox.reln, argsBox.annotations, argsBox.position);
+      } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
+        return AddNode.createAddNode(argsBox.nodeString, argsBox.name);
+      } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {
+        return AddEdge.createEngAddEdge(argsBox.govNodeName, argsBox.dep, argsBox.reln, argsBox.weight);
+      } else if (command.equalsIgnoreCase(DeleteGraphFromNode.LABEL)) {
+        return new DeleteGraphFromNode(argsBox.node);
+      } else if (command.equalsIgnoreCase(EditNode.LABEL)) {
+        return new EditNode(argsBox.node, argsBox.annotations);
+      } else if (command.equalsIgnoreCase(RelabelNamedEdge.LABEL)) {
+        // TODO: pass around a Language (perhaps via ssurgeon argument)
+        // rather than hardcoding English, which is probably not even true
+        // compared to UniversalEnglish these days
+        return RelabelNamedEdge.createEngRelabel(argsBox.edge, argsBox.reln);
+      } else if (command.equalsIgnoreCase(RemoveEdge.LABEL)) {
+        GrammaticalRelation reln = null;
+        if (argsBox.reln != null) {
+          reln = GrammaticalRelation.valueOf(argsBox.reln);
+        }
+        return new RemoveEdge(reln, argsBox.govNodeName, argsBox.dep);
+      } else if (command.equalsIgnoreCase(RemoveNamedEdge.LABEL)) {
+        return new RemoveNamedEdge(argsBox.edge);
+      } else if (command.equalsIgnoreCase(KillAllIncomingEdges.LABEL)) {
+        return new KillAllIncomingEdges(argsBox.node);
+      }
       throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: command '"+command+"' is not supported");
+    } catch (SsurgeonParseException e) {
+      throw new SsurgeonParseException("Unable to process Ssurgeon edit line: " + editLine, e);
     }
-    return retEdit;
   }
 
   //public static SsurgeonPattern fromXML(String xmlString) throws Exception {
