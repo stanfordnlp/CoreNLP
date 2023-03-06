@@ -395,6 +395,8 @@ public class Ssurgeon  {
       retEdit = AddEdge.createEngAddEdge(argsBox.govNodeName, argsBox.dep, argsBox.reln, argsBox.weight);
     } else if (command.equalsIgnoreCase(DeleteGraphFromNode.LABEL)) {
       retEdit = new DeleteGraphFromNode(argsBox.node);
+    } else if (command.equalsIgnoreCase(EditNode.LABEL)) {
+      retEdit = new EditNode(argsBox.node, argsBox.annotations);
     } else if (command.equalsIgnoreCase(RelabelNamedEdge.LABEL)) {
       // TODO: pass around a Language (perhaps via ssurgeon argument)
       // rather than hardcoding English, which is probably not even true
