@@ -375,19 +375,11 @@ public class Ssurgeon  {
       return new KillNonRootedNodes();
     }
 
+    // Parse the arguments based upon the type of command to execute.
     final SsurgeonArgs argsBox = parseArgsBox(tuples1.length == 1 ? "" : tuples1[1]);
 
-    // Parse the arguments based upon the type of command to execute.
-    // TODO: this logic really should be moved into the individual classes.  The string-->class
-    // mappings should also be stored in more appropriate data structure.
     SsurgeonEdit retEdit;
     if (command.equalsIgnoreCase(AddDep.LABEL)) {
-      if (argsBox.govNodeName == null) {
-        throw new SsurgeonParseException("No governor given for an AddDep edit: " + editLine);
-      }
-      if (argsBox.reln == null) {
-        throw new SsurgeonParseException("No relation given for an AddDep edit: " + editLine);
-      }
       retEdit = AddDep.createEngAddDep(argsBox.govNodeName, argsBox.reln, argsBox.annotations, argsBox.position);
     } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
       retEdit = AddNode.createAddNode(argsBox.nodeString, argsBox.name);
