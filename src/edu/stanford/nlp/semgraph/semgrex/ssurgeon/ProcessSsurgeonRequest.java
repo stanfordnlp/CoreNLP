@@ -39,6 +39,9 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
       if (operation.hasNotes()) {
         xml.append("  <notes>" + XMLUtils.escapeXML(operation.getNotes()) + "</notes>\n");
       }
+      if (operation.hasLanguage()) {
+        xml.append("  <language>" + XMLUtils.escapeXML(operation.getLanguage()) + "</language>\n");
+      }
       xml.append("  <semgrex>" + XMLUtils.escapeXML(operation.getSemgrex()) + "</semgrex>\n");
       for (String op : operation.getOperationList()) {
         xml.append("  <edit-list>" + XMLUtils.escapeXML(op) + "</edit-list>\n");

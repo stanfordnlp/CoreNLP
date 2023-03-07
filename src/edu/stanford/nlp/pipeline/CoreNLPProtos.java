@@ -78177,6 +78177,23 @@ public final class CoreNLPProtos {
        */
       com.google.protobuf.ByteString
           getNotesBytes();
+
+      /**
+       * <code>optional string language = 5;</code>
+       * @return Whether the language field is set.
+       */
+      boolean hasLanguage();
+      /**
+       * <code>optional string language = 5;</code>
+       * @return The language.
+       */
+      java.lang.String getLanguage();
+      /**
+       * <code>optional string language = 5;</code>
+       * @return The bytes for language.
+       */
+      com.google.protobuf.ByteString
+          getLanguageBytes();
     }
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonRequest.Ssurgeon}
@@ -78195,6 +78212,7 @@ public final class CoreNLPProtos {
         operation_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         id_ = "";
         notes_ = "";
+        language_ = "";
       }
 
       @java.lang.Override
@@ -78402,6 +78420,54 @@ public final class CoreNLPProtos {
         }
       }
 
+      public static final int LANGUAGE_FIELD_NUMBER = 5;
+      private volatile java.lang.Object language_;
+      /**
+       * <code>optional string language = 5;</code>
+       * @return Whether the language field is set.
+       */
+      @java.lang.Override
+      public boolean hasLanguage() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>optional string language = 5;</code>
+       * @return The language.
+       */
+      @java.lang.Override
+      public java.lang.String getLanguage() {
+        java.lang.Object ref = language_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            language_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string language = 5;</code>
+       * @return The bytes for language.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getLanguageBytes() {
+        java.lang.Object ref = language_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          language_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
       private byte memoizedIsInitialized = -1;
       @java.lang.Override
       public final boolean isInitialized() {
@@ -78428,6 +78494,9 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000004) != 0)) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 4, notes_);
         }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 5, language_);
+        }
         getUnknownFields().writeTo(output);
       }
 
@@ -78453,6 +78522,9 @@ public final class CoreNLPProtos {
         }
         if (((bitField0_ & 0x00000004) != 0)) {
           size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, notes_);
+        }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, language_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
@@ -78486,6 +78558,11 @@ public final class CoreNLPProtos {
           if (!getNotes()
               .equals(other.getNotes())) return false;
         }
+        if (hasLanguage() != other.hasLanguage()) return false;
+        if (hasLanguage()) {
+          if (!getLanguage()
+              .equals(other.getLanguage())) return false;
+        }
         if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
@@ -78512,6 +78589,10 @@ public final class CoreNLPProtos {
         if (hasNotes()) {
           hash = (37 * hash) + NOTES_FIELD_NUMBER;
           hash = (53 * hash) + getNotes().hashCode();
+        }
+        if (hasLanguage()) {
+          hash = (37 * hash) + LANGUAGE_FIELD_NUMBER;
+          hash = (53 * hash) + getLanguage().hashCode();
         }
         hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
@@ -78649,6 +78730,8 @@ public final class CoreNLPProtos {
           bitField0_ = (bitField0_ & ~0x00000004);
           notes_ = "";
           bitField0_ = (bitField0_ & ~0x00000008);
+          language_ = "";
+          bitField0_ = (bitField0_ & ~0x00000010);
           return this;
         }
 
@@ -78694,6 +78777,10 @@ public final class CoreNLPProtos {
             to_bitField0_ |= 0x00000004;
           }
           result.notes_ = notes_;
+          if (((from_bitField0_ & 0x00000010) != 0)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.language_ = language_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -78768,6 +78855,11 @@ public final class CoreNLPProtos {
             notes_ = other.notes_;
             onChanged();
           }
+          if (other.hasLanguage()) {
+            bitField0_ |= 0x00000010;
+            language_ = other.language_;
+            onChanged();
+          }
           this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
@@ -78815,6 +78907,11 @@ public final class CoreNLPProtos {
                   bitField0_ |= 0x00000008;
                   break;
                 } // case 34
+                case 42: {
+                  language_ = input.readBytes();
+                  bitField0_ |= 0x00000010;
+                  break;
+                } // case 42
                 default: {
                   if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                     done = true; // was an endgroup tag
@@ -79189,6 +79286,90 @@ public final class CoreNLPProtos {
   }
   bitField0_ |= 0x00000008;
           notes_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object language_ = "";
+        /**
+         * <code>optional string language = 5;</code>
+         * @return Whether the language field is set.
+         */
+        public boolean hasLanguage() {
+          return ((bitField0_ & 0x00000010) != 0);
+        }
+        /**
+         * <code>optional string language = 5;</code>
+         * @return The language.
+         */
+        public java.lang.String getLanguage() {
+          java.lang.Object ref = language_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              language_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string language = 5;</code>
+         * @return The bytes for language.
+         */
+        public com.google.protobuf.ByteString
+            getLanguageBytes() {
+          java.lang.Object ref = language_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            language_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string language = 5;</code>
+         * @param value The language to set.
+         * @return This builder for chaining.
+         */
+        public Builder setLanguage(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000010;
+          language_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string language = 5;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearLanguage() {
+          bitField0_ = (bitField0_ & ~0x00000010);
+          language_ = getDefaultInstance().getLanguage();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string language = 5;</code>
+         * @param value The bytes for language to set.
+         * @return This builder for chaining.
+         */
+        public Builder setLanguageBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000010;
+          language_ = value;
           onChanged();
           return this;
         }
@@ -100599,82 +100780,83 @@ public final class CoreNLPProtos {
       "\001 \003(\01320.edu.stanford.nlp.pipeline.Semgre" +
       "xResponse.Match\032W\n\013GraphResult\022H\n\006result" +
       "\030\001 \003(\01328.edu.stanford.nlp.pipeline.Semgr" +
-      "exResponse.SemgrexResult\"\336\001\n\017SsurgeonReq" +
+      "exResponse.SemgrexResult\"\360\001\n\017SsurgeonReq" +
       "uest\022E\n\010ssurgeon\030\001 \003(\01323.edu.stanford.nl" +
       "p.pipeline.SsurgeonRequest.Ssurgeon\0229\n\005g" +
       "raph\030\002 \003(\0132*.edu.stanford.nlp.pipeline.D" +
-      "ependencyGraph\032I\n\010Ssurgeon\022\017\n\007semgrex\030\001 " +
+      "ependencyGraph\032[\n\010Ssurgeon\022\017\n\007semgrex\030\001 " +
       "\001(\t\022\021\n\toperation\030\002 \003(\t\022\n\n\002id\030\003 \001(\t\022\r\n\005no" +
-      "tes\030\004 \001(\t\"\274\001\n\020SsurgeonResponse\022J\n\006result" +
-      "\030\001 \003(\0132:.edu.stanford.nlp.pipeline.Ssurg" +
-      "eonResponse.SsurgeonResult\032\\\n\016SsurgeonRe" +
-      "sult\0229\n\005graph\030\001 \001(\0132*.edu.stanford.nlp.p" +
-      "ipeline.DependencyGraph\022\017\n\007changed\030\002 \001(\010" +
-      "\"W\n\022TokensRegexRequest\0220\n\003doc\030\001 \002(\0132#.ed" +
-      "u.stanford.nlp.pipeline.Document\022\017\n\007patt" +
-      "ern\030\002 \003(\t\"\247\003\n\023TokensRegexResponse\022J\n\005mat" +
-      "ch\030\001 \003(\0132;.edu.stanford.nlp.pipeline.Tok" +
-      "ensRegexResponse.PatternMatch\0329\n\rMatchLo" +
-      "cation\022\014\n\004text\030\001 \001(\t\022\r\n\005begin\030\002 \001(\005\022\013\n\003e" +
-      "nd\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010sentence\030\001 \002(\005\022K\n\005" +
-      "match\030\002 \002(\0132<.edu.stanford.nlp.pipeline." +
-      "TokensRegexResponse.MatchLocation\022K\n\005gro" +
-      "up\030\003 \003(\0132<.edu.stanford.nlp.pipeline.Tok" +
-      "ensRegexResponse.MatchLocation\032S\n\014Patter" +
-      "nMatch\022C\n\005match\030\001 \003(\01324.edu.stanford.nlp" +
-      ".pipeline.TokensRegexResponse.Match\"\256\001\n\031" +
-      "DependencyEnhancerRequest\0225\n\010document\030\001 " +
-      "\002(\0132#.edu.stanford.nlp.pipeline.Document" +
-      "\0227\n\010language\030\002 \001(\0162#.edu.stanford.nlp.pi" +
-      "peline.LanguageH\000\022\032\n\020relativePronouns\030\003 " +
-      "\001(\tH\000B\005\n\003ref\"\264\001\n\022FlattenedParseTree\022A\n\005n" +
-      "odes\030\001 \003(\01322.edu.stanford.nlp.pipeline.F" +
-      "lattenedParseTree.Node\032[\n\004Node\022\022\n\010openNo" +
-      "de\030\001 \001(\010H\000\022\023\n\tcloseNode\030\002 \001(\010H\000\022\017\n\005value" +
-      "\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B\n\n\010contents\"\366\001\n\025" +
-      "EvaluateParserRequest\022N\n\010treebank\030\001 \003(\0132" +
-      "<.edu.stanford.nlp.pipeline.EvaluatePars" +
-      "erRequest.ParseResult\032\214\001\n\013ParseResult\022;\n" +
-      "\004gold\030\001 \002(\0132-.edu.stanford.nlp.pipeline." +
-      "FlattenedParseTree\022@\n\tpredicted\030\002 \003(\0132-." +
-      "edu.stanford.nlp.pipeline.FlattenedParse" +
-      "Tree\"5\n\026EvaluateParserResponse\022\n\n\002f1\030\001 \002" +
-      "(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001\n\017TsurgeonRequest\022" +
-      "H\n\noperations\030\001 \003(\01324.edu.stanford.nlp.p" +
-      "ipeline.TsurgeonRequest.Operation\022<\n\005tre" +
-      "es\030\002 \003(\0132-.edu.stanford.nlp.pipeline.Fla" +
-      "ttenedParseTree\032-\n\tOperation\022\016\n\006tregex\030\001" +
-      " \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P\n\020TsurgeonRespon" +
-      "se\022<\n\005trees\030\001 \003(\0132-.edu.stanford.nlp.pip" +
-      "eline.FlattenedParseTree\"\205\001\n\021MorphologyR" +
-      "equest\022F\n\005words\030\001 \003(\01327.edu.stanford.nlp" +
-      ".pipeline.MorphologyRequest.TaggedWord\032(" +
-      "\n\nTaggedWord\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t" +
-      "\"\232\001\n\022MorphologyResponse\022I\n\005words\030\001 \003(\0132:" +
-      ".edu.stanford.nlp.pipeline.MorphologyRes" +
-      "ponse.WordTagLemma\0329\n\014WordTagLemma\022\014\n\004wo" +
-      "rd\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\022\r\n\005lemma\030\003 \002(\t\"Z\n" +
-      "\032DependencyConverterRequest\022<\n\005trees\030\001 \003" +
-      "(\0132-.edu.stanford.nlp.pipeline.Flattened" +
-      "ParseTree\"\220\002\n\033DependencyConverterRespons" +
-      "e\022`\n\013conversions\030\001 \003(\0132K.edu.stanford.nl" +
-      "p.pipeline.DependencyConverterResponse.D" +
-      "ependencyConversion\032\216\001\n\024DependencyConver" +
-      "sion\0229\n\005graph\030\001 \002(\0132*.edu.stanford.nlp.p" +
-      "ipeline.DependencyGraph\022;\n\004tree\030\002 \001(\0132-." +
-      "edu.stanford.nlp.pipeline.FlattenedParse" +
-      "Tree*\243\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022" +
-      "\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n" +
-      "\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spa" +
-      "nish\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n\020Universa" +
-      "lChinese\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATI" +
-      "VE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\r" +
-      "WEAK_POSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n" +
-      "\024NaturalLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026" +
-      "\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAIL" +
-      "MENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n" +
-      "\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanfo" +
-      "rd.nlp.pipelineB\rCoreNLPProtos"
+      "tes\030\004 \001(\t\022\020\n\010language\030\005 \001(\t\"\274\001\n\020Ssurgeon" +
+      "Response\022J\n\006result\030\001 \003(\0132:.edu.stanford." +
+      "nlp.pipeline.SsurgeonResponse.SsurgeonRe" +
+      "sult\032\\\n\016SsurgeonResult\0229\n\005graph\030\001 \001(\0132*." +
+      "edu.stanford.nlp.pipeline.DependencyGrap" +
+      "h\022\017\n\007changed\030\002 \001(\010\"W\n\022TokensRegexRequest" +
+      "\0220\n\003doc\030\001 \002(\0132#.edu.stanford.nlp.pipelin" +
+      "e.Document\022\017\n\007pattern\030\002 \003(\t\"\247\003\n\023TokensRe" +
+      "gexResponse\022J\n\005match\030\001 \003(\0132;.edu.stanfor" +
+      "d.nlp.pipeline.TokensRegexResponse.Patte" +
+      "rnMatch\0329\n\rMatchLocation\022\014\n\004text\030\001 \001(\t\022\r" +
+      "\n\005begin\030\002 \001(\005\022\013\n\003end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010" +
+      "sentence\030\001 \002(\005\022K\n\005match\030\002 \002(\0132<.edu.stan" +
+      "ford.nlp.pipeline.TokensRegexResponse.Ma" +
+      "tchLocation\022K\n\005group\030\003 \003(\0132<.edu.stanfor" +
+      "d.nlp.pipeline.TokensRegexResponse.Match" +
+      "Location\032S\n\014PatternMatch\022C\n\005match\030\001 \003(\0132" +
+      "4.edu.stanford.nlp.pipeline.TokensRegexR" +
+      "esponse.Match\"\256\001\n\031DependencyEnhancerRequ" +
+      "est\0225\n\010document\030\001 \002(\0132#.edu.stanford.nlp" +
+      ".pipeline.Document\0227\n\010language\030\002 \001(\0162#.e" +
+      "du.stanford.nlp.pipeline.LanguageH\000\022\032\n\020r" +
+      "elativePronouns\030\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022Flatt" +
+      "enedParseTree\022A\n\005nodes\030\001 \003(\01322.edu.stanf" +
+      "ord.nlp.pipeline.FlattenedParseTree.Node" +
+      "\032[\n\004Node\022\022\n\010openNode\030\001 \001(\010H\000\022\023\n\tcloseNod" +
+      "e\030\002 \001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(" +
+      "\001B\n\n\010contents\"\366\001\n\025EvaluateParserRequest\022" +
+      "N\n\010treebank\030\001 \003(\0132<.edu.stanford.nlp.pip" +
+      "eline.EvaluateParserRequest.ParseResult\032" +
+      "\214\001\n\013ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stan" +
+      "ford.nlp.pipeline.FlattenedParseTree\022@\n\t" +
+      "predicted\030\002 \003(\0132-.edu.stanford.nlp.pipel" +
+      "ine.FlattenedParseTree\"5\n\026EvaluateParser" +
+      "Response\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\"\310\001" +
+      "\n\017TsurgeonRequest\022H\n\noperations\030\001 \003(\01324." +
+      "edu.stanford.nlp.pipeline.TsurgeonReques" +
+      "t.Operation\022<\n\005trees\030\002 \003(\0132-.edu.stanfor" +
+      "d.nlp.pipeline.FlattenedParseTree\032-\n\tOpe" +
+      "ration\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t" +
+      "\"P\n\020TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.ed" +
+      "u.stanford.nlp.pipeline.FlattenedParseTr" +
+      "ee\"\205\001\n\021MorphologyRequest\022F\n\005words\030\001 \003(\0132" +
+      "7.edu.stanford.nlp.pipeline.MorphologyRe" +
+      "quest.TaggedWord\032(\n\nTaggedWord\022\014\n\004word\030\001" +
+      " \002(\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022MorphologyRespons" +
+      "e\022I\n\005words\030\001 \003(\0132:.edu.stanford.nlp.pipe" +
+      "line.MorphologyResponse.WordTagLemma\0329\n\014" +
+      "WordTagLemma\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t" +
+      "\022\r\n\005lemma\030\003 \002(\t\"Z\n\032DependencyConverterRe" +
+      "quest\022<\n\005trees\030\001 \003(\0132-.edu.stanford.nlp." +
+      "pipeline.FlattenedParseTree\"\220\002\n\033Dependen" +
+      "cyConverterResponse\022`\n\013conversions\030\001 \003(\013" +
+      "2K.edu.stanford.nlp.pipeline.DependencyC" +
+      "onverterResponse.DependencyConversion\032\216\001" +
+      "\n\024DependencyConversion\0229\n\005graph\030\001 \002(\0132*." +
+      "edu.stanford.nlp.pipeline.DependencyGrap" +
+      "h\022;\n\004tree\030\002 \001(\0132-.edu.stanford.nlp.pipel" +
+      "ine.FlattenedParseTree*\243\001\n\010Language\022\013\n\007U" +
+      "nknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese" +
+      "\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022" +
+      "\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEng" +
+      "lish\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentimen" +
+      "t\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020" +
+      "\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STR" +
+      "ONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelation\022" +
+      "\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001" +
+      "\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017" +
+      "\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDEN" +
+      "CE\020\006B*\n\031edu.stanford.nlp.pipelineB\rCoreN" +
+      "LPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -100901,7 +101083,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_descriptor,
-        new java.lang.String[] { "Semgrex", "Operation", "Id", "Notes", });
+        new java.lang.String[] { "Semgrex", "Operation", "Id", "Notes", "Language", });
     internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_descriptor =
       getDescriptor().getMessageTypes().get(26);
     internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_fieldAccessorTable = new
