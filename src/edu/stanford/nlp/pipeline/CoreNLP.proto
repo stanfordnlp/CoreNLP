@@ -696,6 +696,7 @@ message SsurgeonRequest {
     repeated string          operation   = 2;
     optional string          id          = 3;
     optional string          notes       = 4;
+    optional string          language    = 5;
   }
 
   repeated Ssurgeon          ssurgeon    = 1;
