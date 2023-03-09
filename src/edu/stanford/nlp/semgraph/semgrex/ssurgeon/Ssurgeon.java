@@ -52,6 +52,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     <uid>...</uid>
     <notes>...</notes>
     <semgrex>...</semgrex>
+    <language>...</language>
     <edit-list>...</edit-list>
   </ssurgeon-pattern>
 </ssurgeon-pattern-list>
@@ -61,11 +62,124 @@ import edu.stanford.nlp.util.logging.Redwood;
  * The {@code notes} are comments on the Ssurgeon. <br>
  * The {@code semgrex} is a Semgrex pattern to use when matching for this operation. <br>
  * The {@code edit-list} is the actual Ssurgeon operation to execute. <br>
+ * The {@code language} is an optional field to determine what
+ * language formalism to use when making new dependencies.  By default
+ * it will be English for SD when using the Java API, although most
+ * people probably want UniversalEnglish for UD (including non-English
+ * UD datasets) <br>
+ *<br>
+ * Below, edge means an edge in the Semgrex results, and node refers to a matched word.
+ *<br>
  *
  * Available operations and their arguments include:
  * <ul>
- * <li> {@code addEdge -gov a1 -dep a2 -reln dep -weight 0.5}
+ * <li> {@code addEdge -gov node1 -dep node2 -reln depType -weight 0.5}
+ * <li> {@code relabelNamedEdge -edge edgename -reln depType}
+ * <li> {@code removeEdge -gov node1 -dep node2 reln depType}
+ * <li> {@code removeNamedEdge -edge edgename}
+ * <li> {@code addDep -gov node1 -reln depType -position where ...attributes...}
+ * <li> {@code editNode -node node ...attributes...}
+ * <li> {@code setRoots n1 (n2 n3 ...)}
+ * <li> {@code killAllIncomingEdges -node node}
+ * <li> {@code deleteGraphFromNode -node node}
+ * <li> {@code killNonRootedNodes}
  * </ul>
+ *
+ *<p>
+ * {@code addEdge} adds a new edge between two existing nodes.
+ * {@code -gov} and {@code -dep} will be nodes matched by the Semgrex pattern.
+ * {@code -reln} is the name of the dependency type to add.
+ *</p><p>
+ * {@code relabelNamedEdge} changes the dependency type of a named edge.
+ * {@code edge} is the name of the edge in the Semgrex pattern.
+ * {@code -reln} is the name of the dependency type to use.
+ *</p><p>
+ * {@code removeEdge} deletes an edge based on its description.
+ * {@code -gov} is the governor to delete, a named node from the Semgrex pattern.
+ * {@code -dep} is the dependent to delete, a named node from the Semgrex pattern.
+ * {@code -reln} is the name of the dependency to delete.
+ * If {@code -gov} or {@code -dep} are left empty, then all (matching) edges to or from the
+ * remaining argument will be deleted.
+ *</p><p>
+ * {@code removeNamedEdge} deletes an edge based on its name.
+ * {@code edge} is the name of the edge in the Semgrex pattern.
+ *</p><p>
+ * {@code addDep} adds a word and a dependency arc to the dependency graph.
+ * {@code -gov} is the governor to attach to, a named node from the Semgrex pattern.
+ * {@code -reln} is the name of the dependency type to use.
+ * {@code -position} is where in the sentence the word should go.  {@code -} will be the first word of the sentence,
+ *   {@code +} will be the last word of the sentence, and {@code -node} or {@code +node} will be before or after the
+ *   named node.
+ * {@code ...attributes...} means any attributes which can be set from a string or numerical value
+ *   eg {@code -text ...} sets the text of the word (currently no spaces allowed, which would be a limitation for Vietnamese),
+ *   {@code -pos ...} sets the xpos of the word, {@code -cpos ...} sets the upos of the word, etc.
+ *   You cannot set the index of a word this way; an exception will be thrown.
+ *</p><p>
+ * {@code editNode} will edit the attributes of a word.
+ * {@code -node} is the node to edit.
+ * {@code ...attributes...} are the attributes to change, same as with {@code addDep}
+ *</p><p>
+ * {@code setRoots} sets the roots of the sentence to a new root.
+ * {@code n1, n2, ...} are the names of the nodes from the Semgrex to use as the root(s).
+ * This is best done in conjunction with other operations which actually manipulate the structure
+ * of the graph, or the new root will weirdly have dependents and the graph will be incorrect.
+ *</p><p>
+ * {@code killAllIncomingEdges} deletes all edges to a node.
+ * {@code -node} is the node to edit.
+ * Note that this is the same as {@code removeEdge} with only the dependent set.
+ *</p><p>
+ * {@code deleteGraphFromNode} deletes all nodes reachable from a specific node.
+ * {@code -node} is the node to delete.
+ * You will only want to do this after separating the node from the parts of the graph you want to keep.
+ *</p><p>
+ * {@code killNonRootedNodes} searches the graph and deletes all nodes which have no path to a root.
+ *</p>
+ *<p>
+ * A practical example comes from the {@code UD_English-Pronouns}
+ * dataset, where some words had both {@code nsubj} and {@code csubj}
+ * dependencies:
+ *<pre>
+1	Hers	hers	PRON	PRP	Gender=Fem|Number=Sing|Person=3|Poss=Yes|PronType=Prs	3	nsubj	_	_
+2	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	3	cop	_	_
+3	easy	easy	ADJ	JJ	Degree=Pos	0	root	_	_
+4	to	to	PART	TO	_	5	mark	_	_
+5	clean	clean	VERB	VB	VerbForm=Inf	3	csubj	_	SpaceAfter=No
+6	.	.	PUNCT	.	_	5	punct	_	_
+</pre>
+ *</p><p>
+ * We can update this with the following Semgrex/Ssurgeon pair:
+ *<pre>
+{}=source >nsubj {} >csubj=bad {}
+relabelNamedEdge -edge bad -reln advcl
+ *</pre>
+ *</p><p>
+ * The result will be the {@code csubj} updated to {@code advcl}
+ *</p><p>
+ * For the most part, each of these operations is already bomb-proof,
+ * eg the pattern will execute once and not repeat on the same part of
+ * the same dependency graph.
+ * However, in the case of {@code addDep}, it is not possible to automatically bomb-proof the command,
+ * as certain sentences may legitimately have multiple words with the same attributes as dependents
+ * of the same governor.  In this case, it is necessary to make the Semgrex pattern itself bomb-proof.
+ *</p><p>
+
+ * As an example, if the intent is to change "Jennifer has lovely
+ * antennae" to "Jennifer has lovely blue antennae", the following
+ * command would "bomb":                                         
+<pre>
+{@code
+  {word:antennae}=antennae
+  addDep -gov antennae -reln dep -word blue
+}
+</pre>
+ *</p><p>
+ * The following would not:
+<pre>
+{@code
+  {word:antennae}=antennae !> {word:blue}
+  addDep -gov antennae -reln dep -word blue
+}
+</pre>
  *
  * @author Eric Yeh
  */
