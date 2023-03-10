@@ -116,7 +116,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *   {@code -pos ...} sets the xpos of the word, {@code -cpos ...} sets the upos of the word, etc.
  *   You cannot set the index of a word this way; an exception will be thrown.
  *   To put whitespace in an attribute, you can quote it.
- *   So, for example, a Vietnamese word can be set as {@code -word "xin ch‡o"}
+ *   So, for example, a Vietnamese word can be set as {@code -word "xin ch√†o"}
  *</p><p>
  * {@code editNode} will edit the attributes of a word.
  * {@code -node} is the node to edit.
