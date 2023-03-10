@@ -112,9 +112,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  *   {@code +} will be the last word of the sentence, and {@code -node} or {@code +node} will be before or after the
  *   named node.
  * {@code ...attributes...} means any attributes which can be set from a string or numerical value
- *   eg {@code -text ...} sets the text of the word (currently no spaces allowed, which would be a limitation for Vietnamese),
+ *   eg {@code -text ...} sets the text of the word
  *   {@code -pos ...} sets the xpos of the word, {@code -cpos ...} sets the upos of the word, etc.
  *   You cannot set the index of a word this way; an exception will be thrown.
+ *   To put whitespace in an attribute, you can quote it.
+ *   So, for example, a Vietnamese word can be set as {@code -word "xin chào"}
  *</p><p>
  * {@code editNode} will edit the attributes of a word.
  * {@code -node} is the node to edit.
