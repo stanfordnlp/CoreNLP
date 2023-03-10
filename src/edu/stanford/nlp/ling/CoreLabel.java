@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 
+import edu.stanford.nlp.trees.ud.CoNLLUUtils;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
@@ -197,6 +198,8 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
             this.set(coreKeyClass, Double.parseDouble(values[i]));
           } else if(valueClass == Long.class) {
             this.set(coreKeyClass, Long.parseLong(values[i]));
+          } else if (coreKeyClass == CoreAnnotations.CoNLLUFeats.class) {
+            this.set(coreKeyClass, CoNLLUUtils.parseFeatures(values[i]));
           } else {
             throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: " +
                                                     "Can't handle " + valueClass + " (key " + key + ")");

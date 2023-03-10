@@ -42,6 +42,7 @@ public class AnnotationLookup {
     ANSWER_KEY(CoreAnnotations.AnswerAnnotation.class, "answer"),
     GOLDANSWER_Key(CoreAnnotations.GoldAnswerAnnotation.class, "goldAnswer"),
     FEATURES_KEY(CoreAnnotations.FeaturesAnnotation.class, "features"),
+    MORPHOLOGICAL_FEATURES_KEY(CoreAnnotations.CoNLLUFeats.class, "morphofeatures"),
     INTERPRETATION_KEY(CoreAnnotations.InterpretationAnnotation.class, "interpretation"),
     ROLE_KEY(CoreAnnotations.RoleAnnotation.class, "srl"),
     GAZETTEER_KEY(CoreAnnotations.GazetteerAnnotation.class, "gazetteer"),

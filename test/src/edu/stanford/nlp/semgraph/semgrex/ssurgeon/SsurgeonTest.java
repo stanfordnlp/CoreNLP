@@ -747,6 +747,49 @@ public class SsurgeonTest {
     assertEquals("blue", blueVertex.value());
   }
 
+
+  /**
+   * Add a word, this time setting the morphological features as well
+   */
+  @Test
+  public void readXMLAddDepMorphoFeatures() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // use "dep" as the dependency so as to be language-agnostic in this test
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Add a word before antennae using the position</notes>",
+                             // have to bomb-proof the pattern
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae !> {word:blue}") + "</semgrex>",
+                             "    <edit-list>addDep -gov antennae -reln dep -word blue -position -antennae -morphofeatures a=b|c=d</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern addSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
+    IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
+    assertNull(blueVertex);
+    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
+    assertEquals(expected, newSG);
+    // the Ssurgeon we just created should not put a tag on the word
+    // but it SHOULD put blue immediately before antennae
+    blueVertex = newSG.getNodeByIndexSafe(3);
+    assertNotNull(blueVertex);
+    assertNull(blueVertex.tag());
+    assertEquals("blue", blueVertex.value());
+
+    Map<String, String> expectedFeatures = new HashMap<String, String>() {{
+        put("a", "b");
+        put("c", "d");
+      }};
+    assertEquals(expectedFeatures, blueVertex.get(CoreAnnotations.CoNLLUFeats.class));
+  }
+
   /**
    * Set the language when adding a dep.  Should create a UniversalEnglish dependency
    */
