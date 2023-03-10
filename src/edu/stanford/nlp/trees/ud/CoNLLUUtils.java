@@ -18,7 +18,7 @@ public class CoNLLUUtils {
      * @return A HashMap<String,String> with the feature values.
      */
     public static HashMap<String,String> parseFeatures(String featureString) {
-        HashMap<String, String> features = new HashMap<>();
+        HashMap<String, String> features = new LinkedHashMap<>();
         if (! featureString.equals("_")) {
             String[] featValPairs = featureString.split("\\|");
             for (String p : featValPairs) {
