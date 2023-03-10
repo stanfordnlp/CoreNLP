@@ -19,6 +19,7 @@ import org.xml.sax.SAXException;
 
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -397,7 +398,7 @@ public class Ssurgeon  {
    * whitespace, but retain everything inside quotes, so we can pass
    * in hashmaps in String form.
    */
-  private static String[] parseArgs(String argsString) {
+  private static Map<String, String> parseArgs(String argsString) {
     List<String> retList = new ArrayList<>();
     String patternString = "(?:[^\\s\\\"]++|\\\"[^\\\"]*+\\\"|(\\\"))++";
     Pattern pattern = Pattern.compile(patternString);
@@ -413,59 +414,58 @@ public class Ssurgeon  {
       }  else
         throw new SsurgeonParseException("Unmatched quote in string to parse");
     }
-    return retList.toArray(StringUtils.EMPTY_STRING_ARRAY);
+
+    Map<String, String> parsedArgs = new LinkedHashMap<>();
+    for (int i = 0; i < retList.size() - 1; i += 2) {
+      parsedArgs.put(retList.get(i), retList.get(i + 1));
+    }
+    return parsedArgs;
   }
 
-  private static SsurgeonArgs parseArgsBox(String args) {
+  private static SsurgeonArgs parseArgsBox(String args, Map<String, String> additionalArgs) {
     SsurgeonArgs argsBox = new SsurgeonArgs();
-    final String[] argsArray = parseArgs(args);
+    Map<String, String> argsArray = parseArgs(args);
+    for (String additional : additionalArgs.keySet()) {
+      argsArray.put("-" + additional, additionalArgs.get(additional));
+    }
 
-    for (int argIndex = 0; argIndex < argsArray.length; ++argIndex) {
-      switch (argsArray[argIndex]) {
+    for (String argsKey : argsArray.keySet()) {
+      String argsValue = argsArray.get(argsKey);
+      switch (argsKey) {
         case GOV_NODENAME_ARG:
-          argsBox.govNodeName = argsArray[argIndex + 1];
-          argIndex += 1;
+          argsBox.govNodeName = argsValue;
           break;
         case DEP_NODENAME_ARG:
-          argsBox.dep = argsArray[argIndex + 1];
-          argIndex += 1;
+          argsBox.dep = argsValue;
           break;
         case EDGE_NAME_ARG:
-          argsBox.edge = argsArray[argIndex + 1];
-          argIndex += 1;
+          argsBox.edge = argsValue;
           break;
         case RELN_ARG:
-          argsBox.reln = argsArray[argIndex + 1];
-          argIndex += 1;
+          argsBox.reln = argsValue;
           break;
         case NODENAME_ARG:
-          argsBox.node = argsArray[argIndex + 1];
-          argIndex += 1;
+          argsBox.node = argsValue;
           break;
         case NODE_PROTO_ARG:
-          argsBox.nodeString = argsArray[argIndex + 1];
-          argIndex += 1;
+          argsBox.nodeString = argsValue;
           break;
         case WEIGHT_ARG:
-          argsBox.weight = Double.valueOf(argsArray[argIndex + 1]);
-          argIndex += 1;
+          argsBox.weight = Double.valueOf(argsValue);
           break;
         case NAME_ARG:
-          argsBox.name = argsArray[argIndex + 1];
-          argIndex += 1;
+          argsBox.name = argsValue;
           break;
         case POSITION_ARG:
-          argsBox.position = argsArray[argIndex + 1];
-          argIndex += 1;
+          argsBox.position = argsValue;
           break;
         default:
-          String key = argsArray[argIndex].substring(1);
+          String key = argsKey.substring(1);
           Class<? extends CoreAnnotation<?>> annotation = AnnotationLookup.toCoreKey(key);
           if (annotation == null) {
-            throw new SsurgeonParseException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
+            throw new SsurgeonParseException("Parsing Ssurgeon args: unknown flag " + argsKey);
           }
-          argsBox.annotations.put(key, argsArray[argIndex + 1]);
-          argIndex += 1;
+          argsBox.annotations.put(key, argsValue);
       }
     }
     return argsBox;
@@ -474,7 +474,7 @@ public class Ssurgeon  {
   /**
    * Given a string entry, converts it into a SsurgeonEdit object.
    */
-  public static SsurgeonEdit parseEditLine(String editLine, Language language) {
+  public static SsurgeonEdit parseEditLine(String editLine, Map<String, String> attributeArgs, Language language) {
     try {
       // Extract the operation name first
       final String[] tuples1 = editLine.split("\\s+", 2);
@@ -492,7 +492,7 @@ public class Ssurgeon  {
       }
 
       // Parse the arguments based upon the type of command to execute.
-      final SsurgeonArgs argsBox = parseArgsBox(tuples1.length == 1 ? "" : tuples1[1]);
+      final SsurgeonArgs argsBox = parseArgsBox(tuples1.length == 1 ? "" : tuples1[1], attributeArgs);
 
       if (command.equalsIgnoreCase(AddDep.LABEL)) {
         if (argsBox.reln == null) {
@@ -726,9 +726,23 @@ public class Ssurgeon  {
     for (int i=0; i<editNodes.getLength(); i++) {
       Node node = editNodes.item(i);
       if (node.getNodeType() == Node.ELEMENT_NODE) {
+        // read all arguments such as `after=" "` off the node
+        // this way, arguments which can't be parsed via whitespace
+        // (especially arguments which actually contain whitespace)
+        // can be passed to an EditLine
+        // LinkedHashMap so we can preserve insertion order
+        Map<String, String> attributeArgs = new LinkedHashMap<>();
+        for (int j = 0; j < node.getAttributes().getLength(); ++j) {
+          Node attrNode = node.getAttributes().item(j);
+          if (attrNode.getNodeType() == Node.ATTRIBUTE_NODE) {
+            Attr attr = (Attr) attrNode;
+            attributeArgs.put(attr.getName(), attr.getValue());
+          }
+        }
+
         Element editElt = (Element) node;
         String editVal = getEltText(editElt);
-        retPattern.addEdit(Ssurgeon.parseEditLine(editVal, retPattern.getLanguage()));
+        retPattern.addEdit(Ssurgeon.parseEditLine(editVal, attributeArgs, retPattern.getLanguage()));
       }
     }
 
