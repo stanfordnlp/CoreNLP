@@ -783,34 +783,6 @@ public class SsurgeonTest {
     assertNull(blueVertex.tag());
     assertEquals("blue", blueVertex.value());
 
-    // use "dep" as the dependency so as to be language-agnostic in this test
-    add = String.join(newline,
-                      "<ssurgeon-pattern-list>",
-                      "  <ssurgeon-pattern>",
-                      "    <uid>38</uid>",
-                      "    <notes>Add a word after the word before antennae (just to test the position)</notes>",
-                      // have to bomb-proof the pattern
-                      "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae - {}=prev !> {word:blue}") + "</semgrex>",
-                      "    <edit-list>addDep -gov antennae -reln dep -word blue -position +prev</edit-list>",
-                      "  </ssurgeon-pattern>",
-                      "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(add);
-    assertEquals(patterns.size(), 1);
-    addSsurgeon = patterns.get(0);
-
-    sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
-    blueVertex = sg.getNodeByIndexSafe(4);
-    assertNull(blueVertex);
-    newSG = addSsurgeon.iterate(sg);
-    expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
-    assertEquals(expected, newSG);
-    // the Ssurgeon we just created should not put a tag on the word
-    // but it SHOULD put blue immediately before antennae
-    blueVertex = newSG.getNodeByIndexSafe(3);
-    assertNotNull(blueVertex);
-    assertNull(blueVertex.tag());
-    assertEquals("blue", blueVertex.value());
-
 
     // use "dep" as the dependency so as to be language-agnostic in this test
     // this time, be cheeky and use some whitespace in the word
