@@ -2551,7 +2551,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A Java Map corresponding to the serialized map.
    */
   public static HashMap<String, String> fromProto(CoreNLPProtos.MapStringString proto) {
-    HashMap<String, String> map = new HashMap<>();
+    // LinkedHashMap so that the pieces stay in the order we receive them
+    // (could also use a TreeMap instead to enforce sorted by key)
+    HashMap<String, String> map = new LinkedHashMap<>();
     for (int i = 0; i < proto.getKeyCount(); ++i) {
       map.put(proto.getKey(i), proto.getValue(i));
     }
