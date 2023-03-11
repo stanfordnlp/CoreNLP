@@ -93,8 +93,12 @@ public class AnnotationLookup {
     POS_TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, "pos"),
     CPOS_TAG_KEY(CoreAnnotations.CoarseTagAnnotation.class, "cpos"),
     DEPREL_KEY(CoreAnnotations.CoNLLDepTypeAnnotation.class, "deprel"),
-    HEADIDX_KEY(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, "headidx");
+    HEADIDX_KEY(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, "headidx"),
 
+    // MWT specific annotations
+    MWT_TEXT_KEY(CoreAnnotations.MWTTokenTextAnnotation.class, "mwt_text"),
+    IS_MWT_KEY(CoreAnnotations.IsMultiWordTokenAnnotation.class, "is_mwt"),
+    IS_FIRST_MWT_KEY(CoreAnnotations.IsFirstWordOfMWTAnnotation.class, "is_first_mwt");
 
     private final Class<? extends CoreAnnotation<?>> coreKey;
     private final String oldKey;

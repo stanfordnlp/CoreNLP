@@ -198,6 +198,8 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
             this.set(coreKeyClass, Double.parseDouble(values[i]));
           } else if(valueClass == Long.class) {
             this.set(coreKeyClass, Long.parseLong(values[i]));
+          } else if (valueClass == Boolean.class) {
+            this.set(coreKeyClass, Boolean.parseBoolean(values[i]));
           } else if (coreKeyClass == CoreAnnotations.CoNLLUFeats.class) {
             this.set(coreKeyClass, CoNLLUUtils.parseFeatures(values[i]));
           } else {
@@ -249,6 +251,8 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
           this.set(coreKeyClass, Double.parseDouble(values[i]));
         } else if (valueClass == Long.class) {
           this.set(coreKeyClass, Long.parseLong(values[i]));
+        } else if (valueClass == Boolean.class) {
+          this.set(coreKeyClass, Boolean.parseBoolean(values[i]));
         } else if (coreKeyClass == CoreAnnotations.CoNLLUFeats.class) {
           this.set(coreKeyClass, CoNLLUUtils.parseFeatures(values[i]));
         } else {
