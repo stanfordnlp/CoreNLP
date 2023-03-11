@@ -41,6 +41,8 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2023-03-10    4.5.3     Fix the collinizer.  Add an Ssurgeon interface 
+
 2023-01-19    4.5.2     Update package dependencies to avoid security 
                         problems.  Add protobuf CLI tools for use in 
                         Python or elsewhere 
