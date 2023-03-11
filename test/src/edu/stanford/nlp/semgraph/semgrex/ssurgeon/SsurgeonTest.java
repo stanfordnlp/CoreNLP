@@ -1205,6 +1205,57 @@ public class SsurgeonTest {
 
 
   /**
+   * Put MWT annotations on a couple nodes using EditNode
+   */
+  @Test
+  public void readXMLEditNodeMWT() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // use "dep" as the dependency so as to be language-agnostic in this test
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Edit a node's MWT</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/[iI]t/}=it . {word:/'s/}=s") + "</semgrex>",
+                             "    <edit-list>EditNode -node it -is_mwt true  -is_first_mwt true  -mwt_text it's</edit-list>",
+                             "    <edit-list>EditNode -node s  -is_mwt true  -is_first_mwt false -mwt_text it's</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern editSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[yours-4 nsubj> it-1 cop> 's-2 advmod> yours-3 punct> !-5]");
+
+    // check the original values
+    IndexedWord itVertex = sg.getNodeByIndexSafe(1);
+    assertEquals(null, itVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertEquals(null, itVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals(null, itVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    IndexedWord sVertex = sg.getNodeByIndexSafe(2);
+    assertEquals(null, sVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertEquals(null, sVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals(null, sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+
+    SemanticGraph newSG = editSsurgeon.iterate(sg);
+    // the high level graph structure won't change
+    SemanticGraph expected = SemanticGraph.valueOf("[yours-4 nsubj> it-1 cop> 's-2 advmod> yours-3 punct> !-5]");
+    assertEquals(expected, newSG);
+
+    // check the updates
+    itVertex = newSG.getNodeByIndexSafe(1);
+    assertTrue(itVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertTrue(itVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals("it's", itVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    sVertex = newSG.getNodeByIndexSafe(2);
+    assertTrue(sVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertFalse(sVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals("it's", sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+  }
+
+
+  /**
    * Test that we don't allow changing a word index, for example, in EditNode or AddDep
    */
   @Test
