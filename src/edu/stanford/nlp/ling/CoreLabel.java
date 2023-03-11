@@ -249,6 +249,8 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
           this.set(coreKeyClass, Double.parseDouble(values[i]));
         } else if (valueClass == Long.class) {
           this.set(coreKeyClass, Long.parseLong(values[i]));
+        } else if (coreKeyClass == CoreAnnotations.CoNLLUFeats.class) {
+          this.set(coreKeyClass, CoNLLUUtils.parseFeatures(values[i]));
         } else {
           throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: " +
                                                   "Can't handle " + valueClass + " (key " + coreKeyClass + ")");
