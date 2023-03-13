@@ -228,6 +228,33 @@ public class SsurgeonTest {
     assertEquals(newSg, expected);
   }
 
+  /**
+   * Test that the relabel named edge operation is bomb-proof.
+   * The initial version would relabel an edge to the new edge name
+   * even if the existing edge had the same name
+   */
+  @Test
+  public void readXMLRelabelEdgeBombProof() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This is a simple test of RelabelNamedEdge</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >=foo {}=a2") + "</semgrex>",
+                             "    <edit-list>relabelNamedEdge -edge foo -reln dep</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    // check a simple case of relabeling
+    SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> B-1]");
+    SemanticGraph expected = SemanticGraph.valueOf("[A-0 dep> B-1]");
+    SemanticGraph newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+  }
 
   /**
    * Test that the RelabelNamedEdge operation updates the name of the edge in the SemgrexMatcher
