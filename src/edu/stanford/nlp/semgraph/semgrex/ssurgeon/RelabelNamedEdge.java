@@ -61,6 +61,12 @@ public class RelabelNamedEdge extends SsurgeonEdit {
     SemanticGraphEdge edge = sm.getEdge(edgeName);
 
     if (edge != null) {
+      // if the edge is already named what we want, then our work here is done
+      // this bomb-proofs the operation in the event someone writes an edit that
+      // generically changes any edge to nsubj, for example
+      if (edge.getRelation().equals(this.relation)) {
+        return false;
+      }
       boolean success = sg.removeEdge(edge);
       if (!success) {
         // maybe it was already removed somehow by a previous operation
