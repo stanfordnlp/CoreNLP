@@ -98,7 +98,7 @@ public class SsurgeonTest {
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
                              "    <uid>38</uid>",
-                             "    <notes>This is a simple test of addEdge</notes>",
+                             "    <notes>This is a simple test of removeEdge</notes>",
                              "    <semgrex>" + XMLUtils.escapeXML("{}=a1 > {}=a2") + "</semgrex>",
                              "    <edit-list>removeEdge -gov a1 -dep a2 -reln dep</edit-list>",
                              "  </ssurgeon-pattern>",
@@ -1174,7 +1174,7 @@ public class SsurgeonTest {
     }
     
     assertNotNull(AnnotationLookup.toCoreKey("headidx"));
-    // This will also fail, this time because Integer cannot be converted from a String
+    // This will also fail, this time because the property set is an Integer and the value is not legal
     add = String.join(newline,
                       "<ssurgeon-pattern-list>",
                       "  <ssurgeon-pattern>",
@@ -1188,7 +1188,7 @@ public class SsurgeonTest {
 
     try {
       List<SsurgeonPattern> patterns = inst.readFromString(add);
-      throw new AssertionError("Expected a failure because IntPair is not readable from a String in CoreLabel");
+      throw new AssertionError("Expected a failure in CoreLabel because the String given should not have been turned into an Integer");
     } catch (SsurgeonParseException e) {
       // yay
     }
