@@ -1323,6 +1323,110 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test a two step process to reattach an edge elsewhere
+   *<br>
+   * Uses a real example from UD_English-Pronouns
+   */
+  @Test
+  public void readXMLTwoStepReattach() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This tests the two step process of reattaching an edge</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/[.]/}=punct <punct=bad {}=parent << {$}=root : {}=parent << {}=root") + "</semgrex>",
+                             "    <edit-list>removeNamedEdge -edge bad</edit-list>",
+                             "    <edit-list>addEdge -gov root -dep punct -reln punct</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    // check a simple case of relabeling
+    SemanticGraph sg = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 csubj> [clean-5 mark> to-4 punct> .-6]]");
+    SemanticGraph expected = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 punct> .-6 csubj> [clean-5 mark> to-4]]");
+    SemanticGraph newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+  }
+
+  /**
+   * Test reattachNamedEdge, which is a one step version of reattaching where an edge goes
+   *<br>
+   * Uses a real example from UD_English-Pronouns
+   */
+  @Test
+  public void readXMLOneStepReattach() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This tests the two step process of reattaching an edge</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/[.]/}=punct <punct=bad {}=parent << {$}=root : {}=parent << {}=root") + "</semgrex>",
+                             "    <edit-list>reattachNamedEdge -edge bad -gov root</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    // check a simple case of relabeling
+    SemanticGraph sg = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 csubj> [clean-5 mark> to-4 punct> .-6]]");
+    SemanticGraph expected = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 punct> .-6 csubj> [clean-5 mark> to-4]]");
+    SemanticGraph newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+
+    // this tests -gov and -dep both set
+    doc = String.join(newline,
+                      "<ssurgeon-pattern-list>",
+                      "  <ssurgeon-pattern>",
+                      "    <uid>38</uid>",
+                      "    <notes>This tests the two step process of reattaching an edge</notes>",
+                      "    <language>UniversalEnglish</language>",
+                      "    <semgrex>" + XMLUtils.escapeXML("{word:/[.]/}=punct <punct=bad {}=parent << {$}=root : {}=parent << {}=root") + "</semgrex>",
+                      "    <edit-list>reattachNamedEdge -edge bad -gov root -dep punct</edit-list>",
+                      "  </ssurgeon-pattern>",
+                      "</ssurgeon-pattern-list>");
+    inst = Ssurgeon.inst();
+    patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    pattern = patterns.get(0);
+
+    // check a simple case of relabeling, this time with the (unnecessary) -dep specifier as well
+    sg = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 csubj> [clean-5 mark> to-4 punct> .-6]]");
+    expected = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 punct> .-6 csubj> [clean-5 mark> to-4]]");
+    newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+
+    // this tests -dep set by itself (although the operation itself is nonsense)
+    doc = String.join(newline,
+                      "<ssurgeon-pattern-list>",
+                      "  <ssurgeon-pattern>",
+                      "    <uid>38</uid>",
+                      "    <notes>This tests the two step process of reattaching an edge</notes>",
+                      "    <language>UniversalEnglish</language>",
+                      "    <semgrex>" + XMLUtils.escapeXML("{$}=root >csubj=foo ({word:clean}=n1 >mark=bar {}=n2)") + "</semgrex>",
+                      "    <edit-list>reattachNamedEdge -edge foo -dep n2</edit-list>",
+                      "    <edit-list>reattachNamedEdge -edge bar -gov n2 -dep n1</edit-list>",
+                      "  </ssurgeon-pattern>",
+                      "</ssurgeon-pattern-list>");
+    inst = Ssurgeon.inst();
+    patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    pattern = patterns.get(0);
+
+    // do some random rearranging to force a test of reattachNamedEdge with -dep set
+    sg = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 csubj> [clean-5 mark> to-4 punct> .-6]]");
+    expected = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 csubj> [to-4 mark> [clean-5 punct> .-6]]]");
+    newSg = pattern.iterate(sg);
+    assertEquals(newSg, expected);
+  }
+
+  /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
    * a semgrex pattern, and then the resulting actions over the named nodes in the
    * semgrex match.

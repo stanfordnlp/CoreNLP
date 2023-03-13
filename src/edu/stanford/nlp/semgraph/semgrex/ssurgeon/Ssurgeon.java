@@ -78,6 +78,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code relabelNamedEdge -edge edgename -reln depType}
  * <li> {@code removeEdge -gov node1 -dep node2 reln depType}
  * <li> {@code removeNamedEdge -edge edgename}
+ * <li> {@code reattachNamedEdge -edge edgename -gov gov -dep dep}
  * <li> {@code addDep -gov node1 -reln depType -position where ...attributes...}
  * <li> {@code editNode -node node ...attributes...}
  * <li> {@code setRoots n1 (n2 n3 ...)}
@@ -104,6 +105,12 @@ import edu.stanford.nlp.util.logging.Redwood;
  *</p><p>
  * {@code removeNamedEdge} deletes an edge based on its name.
  * {@code edge} is the name of the edge in the Semgrex pattern.
+ *</p><p>
+ * {@code reattachNamedEdge} changes an edge's gov and/or dep based on its name.
+ * {@code edge} is the name of the edge in the Semgrex pattern.
+ * {@code -gov} is the governor to attach to, a named node from the Semgrex pattern.  If left blank, no edit.
+ * {@code -dep} is the dependent to attach to, a named node from the Semgrex pattern.  If left blank, no edit.
+ * At least one of {@code -gov} or {@code -dep} must be set.
  *</p><p>
  * {@code addDep} adds a word and a dependency arc to the dependency graph.
  * {@code -gov} is the governor to attach to, a named node from the Semgrex pattern.
@@ -510,6 +517,8 @@ public class Ssurgeon  {
         }
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
         return new AddEdge(argsBox.govNodeName, argsBox.dep, reln, argsBox.weight);
+      } else if (command.equalsIgnoreCase(ReattachNamedEdge.LABEL)) {
+          return new ReattachNamedEdge(argsBox.edge, argsBox.govNodeName, argsBox.dep);
       } else if (command.equalsIgnoreCase(DeleteGraphFromNode.LABEL)) {
         return new DeleteGraphFromNode(argsBox.node);
       } else if (command.equalsIgnoreCase(EditNode.LABEL)) {
