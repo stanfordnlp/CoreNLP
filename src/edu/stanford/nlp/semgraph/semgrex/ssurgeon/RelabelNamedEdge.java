@@ -90,6 +90,8 @@ public class RelabelNamedEdge extends SsurgeonEdit {
       // or found an existing edge with the relation we wanted,
       // update the named edge in the SemgrexMatcher so future
       // iterations have the name connected to the edge
+      // TODO: if an existing edge was clobbered, perhaps we need to
+      // update anything that named it
       sm.putNamedEdge(edgeName, newEdge);
       return true;
     }
