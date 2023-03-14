@@ -18,6 +18,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ProcessProtobufRequest;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -61,10 +62,12 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
     CoreNLPProtos.SsurgeonResponse.Builder responseBuilder = CoreNLPProtos.SsurgeonResponse.newBuilder();
     for (SemanticGraph graph : graphs) {
       SemanticGraph newGraph = graph;
+      boolean isChanged = false;
       for (SsurgeonPattern pattern : patterns) {
-        newGraph = pattern.iterate(newGraph);
+        Pair<SemanticGraph, Boolean> result = pattern.iterate(newGraph);
+        newGraph = result.first;
+        isChanged = isChanged || result.second;
       }
-      boolean isChanged = !graph.equals(newGraph);
       CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder graphBuilder = CoreNLPProtos.SsurgeonResponse.SsurgeonResult.newBuilder();
       graphBuilder.setGraph(serializer.toProto(newGraph, true));
       graphBuilder.setChanged(isChanged);

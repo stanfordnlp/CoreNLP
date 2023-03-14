@@ -10,6 +10,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.SsurgPred;
 import edu.stanford.nlp.semgraph.semgrex.*;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 
 /**
  * This represents a source pattern and a subsequent edit script, or a sequence
@@ -181,10 +182,11 @@ public class SsurgeonPattern {
    *   and update the SemgrexMatcher when inserting new nodes.
    * </ul>
    */
-  public SemanticGraph iterate(SemanticGraph sg) {
+  public Pair<SemanticGraph, Boolean> iterate(SemanticGraph sg) {
     SemanticGraph copied = new SemanticGraph(sg);
 
     SemgrexMatcher matcher = semgrexPattern.matcher(copied);
+    boolean anyChanges = false;
     while (matcher.find()) {
       // We reset the named node map with each edit set, since these edits
       // should exist in a separate graph for each unique Semgrex match.
@@ -193,13 +195,14 @@ public class SsurgeonPattern {
       for (SsurgeonEdit edit : editScript) {
         if (edit.evaluate(copied, matcher)) {
           edited = true;
+          anyChanges = true;
         }
       }
       if (edited) {
         matcher = semgrexPattern.matcher(copied);
       }
     }
-    return copied;
+    return new Pair<>(copied, anyChanges);
   }
 
   /**
