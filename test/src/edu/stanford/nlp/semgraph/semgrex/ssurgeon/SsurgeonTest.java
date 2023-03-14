@@ -83,7 +83,7 @@ public class SsurgeonTest {
     SsurgeonPattern pattern = patterns.get(0);
 
     SemanticGraph sg = SemanticGraph.valueOf("[A obj> B obj> C nsubj> [D obj> E]]");
-    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph newSg = pattern.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1 obj> C-2 dep> C-2 nsubj> [D-3 obj> E-4 dep> E-4]]");
 
     assertEquals(newSg, expected);
@@ -109,16 +109,16 @@ public class SsurgeonTest {
     SsurgeonPattern pattern = patterns.get(0);
 
     SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
-    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph newSg = pattern.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[A-0 obj> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
     assertEquals(newSg, sg);
 
     sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
-    newSg = pattern.iterate(sg);
+    newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
 
     sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1 obj> C-2 dep> C-2 nsubj> [D-3 obj> E-4 dep> E-4]]");
-    newSg = pattern.iterate(sg);
+    newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
   }
 
@@ -143,7 +143,7 @@ public class SsurgeonTest {
     SsurgeonPattern pattern = patterns.get(0);
 
     SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> [B-1 nsubj> E-4] obj> C-2 nsubj> [D-3 obj> E-4]]");
-    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph newSg = pattern.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[A-0 obj> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
     assertEquals(newSg, expected);
   }
@@ -169,16 +169,16 @@ public class SsurgeonTest {
     SsurgeonPattern pattern = patterns.get(0);
 
     SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
-    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph newSg = pattern.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[A-0 obj> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
     assertEquals(newSg, sg);
 
     sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1 obj> C-2 nsubj> [D-3 obj> E-4]]");
-    newSg = pattern.iterate(sg);
+    newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
 
     sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1 obj> C-2 dep> C-2 nsubj> [D-3 obj> E-4 dep> E-4]]");
-    newSg = pattern.iterate(sg);
+    newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
   }
 
@@ -204,27 +204,27 @@ public class SsurgeonTest {
     // check a simple case of relabeling
     SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> B-1]");
     SemanticGraph expected = SemanticGraph.valueOf("[A-0 dep> B-1]");
-    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
 
     // check iteration over multiple edges
     sg = SemanticGraph.valueOf("[A-0 obj> [B-1 obj> C-2]]");
     expected = SemanticGraph.valueOf("[A-0 dep> [B-1 dep> C-2]]");
-    newSg = pattern.iterate(sg);
+    newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
 
     // check that relabeling doesn't change a non-matching edge
     // (how would it?)
     sg = SemanticGraph.valueOf("[A-0 iobj> B-1]");
     expected = SemanticGraph.valueOf("[A-0 iobj> B-1]");
-    newSg = pattern.iterate(sg);
+    newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
 
     // check that you don't get double edges if an update
     // makes two edges into the same edge
     sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1]");
     expected = SemanticGraph.valueOf("[A-0 dep> B-1]");
-    newSg = pattern.iterate(sg);
+    newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
   }
 
@@ -252,7 +252,7 @@ public class SsurgeonTest {
     // check a simple case of relabeling
     SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> B-1]");
     SemanticGraph expected = SemanticGraph.valueOf("[A-0 dep> B-1]");
-    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
   }
 
@@ -279,7 +279,7 @@ public class SsurgeonTest {
     // check the result of a double relabel - should wind up as gov
     SemanticGraph sg = SemanticGraph.valueOf("[A-0 obj> B-1]");
     SemanticGraph expected = SemanticGraph.valueOf("[A-0 gov> B-1]");
-    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
 
     // in this case, the dep should acquire the name of the obj
@@ -290,7 +290,7 @@ public class SsurgeonTest {
     // the second operation would not fire
     sg = SemanticGraph.valueOf("[A-0 obj> B-1 dep> B-1]");
     expected = SemanticGraph.valueOf("[A-0 gov> B-1]");
-    newSg = pattern.iterate(sg);
+    newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
   }
 
@@ -331,32 +331,32 @@ public class SsurgeonTest {
 
     // Test a two node only version
     SemanticGraph sg = SemanticGraph.valueOf("[A dep> B]");
-    SemanticGraph cutSG = ssurgeonCut.iterate(sg);
+    SemanticGraph cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(cutSG.vertexSet().size(), 2);
-    SemanticGraph pruneSG = ssurgeonPrune.iterate(cutSG);
+    SemanticGraph pruneSG = ssurgeonPrune.iterate(cutSG).first;
     SemanticGraph expected = SemanticGraph.valueOf("[A]");
     assertEquals(pruneSG, expected);
 
     // Test a chain cut at the start
     sg = SemanticGraph.valueOf("[A dep> [B obj> C]]");
-    cutSG = ssurgeonCut.iterate(sg);
+    cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(cutSG.vertexSet().size(), 3);
-    pruneSG = ssurgeonPrune.iterate(cutSG);
+    pruneSG = ssurgeonPrune.iterate(cutSG).first;
     assertEquals(pruneSG, expected);
 
     // Test the chain cut at the bottom
     sg = SemanticGraph.valueOf("[A obj> [B dep> C]]");
-    cutSG = ssurgeonCut.iterate(sg);
+    cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(cutSG.vertexSet().size(), 3);
-    pruneSG = ssurgeonPrune.iterate(cutSG);
+    pruneSG = ssurgeonPrune.iterate(cutSG).first;
     assertEquals(pruneSG, SemanticGraph.valueOf("[A obj> B]"));
 
     // Test a chain cut at the start
     // Only the root will be left at the end
     sg = SemanticGraph.valueOf("[A dep> B dep> C]");
-    cutSG = ssurgeonCut.iterate(sg);
+    cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(cutSG.vertexSet().size(), 3);
-    pruneSG = ssurgeonPrune.iterate(cutSG);
+    pruneSG = ssurgeonPrune.iterate(cutSG).first;
     assertEquals(pruneSG, expected);
   }
 
@@ -387,25 +387,25 @@ public class SsurgeonTest {
 
     // Test a two node only version
     SemanticGraph sg = SemanticGraph.valueOf("[A dep> B]");
-    SemanticGraph cutSG = ssurgeon.iterate(sg);
+    SemanticGraph cutSG = ssurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[A]");
     assertEquals(1, cutSG.vertexSet().size());
     assertEquals(expected, cutSG);
 
     // Test a chain cut at the start
     sg = SemanticGraph.valueOf("[A dep> [B obj> C]]");
-    cutSG = ssurgeon.iterate(sg);
+    cutSG = ssurgeon.iterate(sg).first;
     assertEquals(expected, cutSG);
 
     // Test the chain cut at the bottom
     sg = SemanticGraph.valueOf("[A obj> [B dep> C]]");
-    cutSG = ssurgeon.iterate(sg);
+    cutSG = ssurgeon.iterate(sg).first;
     assertEquals(SemanticGraph.valueOf("[A obj> B]"), cutSG);
 
     // Test a chain cut at the start
     // Only the root will be left at the end
     sg = SemanticGraph.valueOf("[A dep> B dep> C]");
-    cutSG = ssurgeon.iterate(sg);
+    cutSG = ssurgeon.iterate(sg).first;
     assertEquals(expected, cutSG);
   }
 
@@ -445,18 +445,18 @@ public class SsurgeonTest {
 
     // Test a two node only version
     SemanticGraph sg = SemanticGraph.valueOf("[A dep> B]");
-    SemanticGraph cutSG = ssurgeonCut.iterate(sg);
+    SemanticGraph cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(2, cutSG.vertexSet().size());
-    SemanticGraph pruneSG = ssurgeonPrune.iterate(cutSG);
+    SemanticGraph pruneSG = ssurgeonPrune.iterate(cutSG).first;
     // note that for now, the prune operation doesn't renumber nodes in any way
     SemanticGraph expected = SemanticGraph.valueOf("[B-1]");
     assertEquals(expected, pruneSG);
 
     // Test the chain cut at the bottom
     sg = SemanticGraph.valueOf("[A obj> [B dep> C]]");
-    cutSG = ssurgeonCut.iterate(sg);
+    cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(cutSG.vertexSet().size(), 3);
-    pruneSG = ssurgeonPrune.iterate(cutSG);
+    pruneSG = ssurgeonPrune.iterate(cutSG).first;
     assertEquals(SemanticGraph.valueOf("[C-2]"), pruneSG);
   }
 
@@ -496,32 +496,32 @@ public class SsurgeonTest {
 
     // Test a two node only version
     SemanticGraph sg = SemanticGraph.valueOf("[A dep> B]");
-    SemanticGraph cutSG = ssurgeonCut.iterate(sg);
+    SemanticGraph cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(cutSG.vertexSet().size(), 2);
-    SemanticGraph pruneSG = ssurgeonPrune.iterate(cutSG);
+    SemanticGraph pruneSG = ssurgeonPrune.iterate(cutSG).first;
     SemanticGraph expected = SemanticGraph.valueOf("[A]");
     assertEquals(pruneSG, expected);
 
     // Test a chain cut at the start
     sg = SemanticGraph.valueOf("[A dep> [B obj> C]]");
-    cutSG = ssurgeonCut.iterate(sg);
+    cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(cutSG.vertexSet().size(), 3);
-    pruneSG = ssurgeonPrune.iterate(cutSG);
+    pruneSG = ssurgeonPrune.iterate(cutSG).first;
     assertEquals(pruneSG, expected);
 
     // Test the chain cut at the bottom
     sg = SemanticGraph.valueOf("[A obj> [B dep> C]]");
-    cutSG = ssurgeonCut.iterate(sg);
+    cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(cutSG.vertexSet().size(), 3);
-    pruneSG = ssurgeonPrune.iterate(cutSG);
+    pruneSG = ssurgeonPrune.iterate(cutSG).first;
     assertEquals(pruneSG, SemanticGraph.valueOf("[A obj> B]"));
 
     // Test a chain cut at the start
     // Only the root will be left at the end
     sg = SemanticGraph.valueOf("[A dep> B dep> C]");
-    cutSG = ssurgeonCut.iterate(sg);
+    cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(cutSG.vertexSet().size(), 3);
-    pruneSG = ssurgeonPrune.iterate(cutSG);
+    pruneSG = ssurgeonPrune.iterate(cutSG).first;
     assertEquals(pruneSG, expected);
   }
 
@@ -544,7 +544,7 @@ public class SsurgeonTest {
 
     // Test a two node only version
     SemanticGraph sg = SemanticGraph.valueOf("[A dep> B]");
-    SemanticGraph cutSG = ssurgeonCut.iterate(sg);
+    SemanticGraph cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(2, cutSG.vertexSet().size());
     cutSG.resetRoots();
     assertEquals(2, cutSG.getRoots().size());
@@ -574,7 +574,7 @@ public class SsurgeonTest {
 
     // Test a two node only version
     SemanticGraph sg = SemanticGraph.valueOf("[A-1 dep> B-2]");
-    SemanticGraph newSG = rearrange.iterate(sg);
+    SemanticGraph newSG = rearrange.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[B-2 dep> A-1]");
     assertEquals(expected, newSG);
   }
@@ -605,7 +605,7 @@ public class SsurgeonTest {
     // Test a two node only version
     SemanticGraph sg = SemanticGraph.valueOf("[A-1 dep> B-2]");
     try {
-      SemanticGraph newSG = rearrange.iterate(sg);
+      SemanticGraph newSG = rearrange.iterate(sg).first;
       throw new AssertionError("Expected a specific exception SsurgeonRuntimeException here");
     } catch (SsurgeonRuntimeException e) {
       // yay
@@ -637,7 +637,7 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
     IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-3 dep> blue-4]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -663,7 +663,7 @@ public class SsurgeonTest {
     addSsurgeon = patterns.get(0);
 
     sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
-    newSG = addSsurgeon.iterate(sg);
+    newSG = addSsurgeon.iterate(sg).first;
     expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-3 dep> blue-4]]");
     assertEquals(expected, newSG);
     // this new Ssurgeon SHOULD put a tag on the word
@@ -699,7 +699,7 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
     IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[has-3 nsubj> Jennifer-2 obj> [antennae-4 dep> blue-1]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -735,7 +735,7 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
     IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -763,7 +763,7 @@ public class SsurgeonTest {
     sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
     blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    newSG = addSsurgeon.iterate(sg);
+    newSG = addSsurgeon.iterate(sg).first;
     expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -800,7 +800,7 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
     IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -830,7 +830,7 @@ public class SsurgeonTest {
     sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
     blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    newSG = addSsurgeon.iterate(sg);
+    newSG = addSsurgeon.iterate(sg).first;
     expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -867,7 +867,7 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
     IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -896,7 +896,7 @@ public class SsurgeonTest {
     sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
     blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    newSG = addSsurgeon.iterate(sg);
+    newSG = addSsurgeon.iterate(sg).first;
     expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -933,7 +933,7 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
     IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -975,7 +975,7 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]", Language.UniversalEnglish);
     IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 amod> blue-3]]", Language.UniversalEnglish);
     for (SemanticGraphEdge edge : expected.edgeIterable()) {
       assertEquals(Language.UniversalEnglish, edge.getRelation().getLanguage());
@@ -1012,7 +1012,7 @@ public class SsurgeonTest {
     sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]", Language.UniversalEnglish);
     blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    newSG = addSsurgeon.iterate(sg);
+    newSG = addSsurgeon.iterate(sg).first;
     expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 amod> blue-3]]", Language.UniversalEnglish);
     for (SemanticGraphEdge edge : expected.edgeIterable()) {
       assertEquals(Language.UniversalEnglish, edge.getRelation().getLanguage());
@@ -1026,7 +1026,7 @@ public class SsurgeonTest {
     sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]", Language.English);
     blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    newSG = addSsurgeon.iterate(sg);
+    newSG = addSsurgeon.iterate(sg).first;
     expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 amod> blue-3]]", Language.English);
     for (SemanticGraphEdge edge : expected.edgeIterable()) {
       assertEquals(Language.English, edge.getRelation().getLanguage());
@@ -1091,7 +1091,7 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antenna-3]");
     IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -1131,7 +1131,7 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
     IndexedWord blueVertex = sg.getNodeByIndexSafe(4);
     assertNull(blueVertex);
-    SemanticGraph newSG = addSsurgeon.iterate(sg);
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
     // the edge update to change the name of the edge to "dep" should fire
     SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 dep> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
@@ -1219,7 +1219,7 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> green-3]]");
     IndexedWord blueVertex = sg.getNodeByIndexSafe(3);
     assertEquals("green", blueVertex.value());
-    SemanticGraph newSG = editSsurgeon.iterate(sg);
+    SemanticGraph newSG = editSsurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
     // the Ssurgeon we just created should not put a tag on the word
@@ -1265,7 +1265,7 @@ public class SsurgeonTest {
     assertEquals(null, sVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
     assertEquals(null, sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
 
-    SemanticGraph newSG = editSsurgeon.iterate(sg);
+    SemanticGraph newSG = editSsurgeon.iterate(sg).first;
     // the high level graph structure won't change
     SemanticGraph expected = SemanticGraph.valueOf("[yours-4 nsubj> it-1 cop> 's-2 advmod> yours-3 punct> !-5]");
     assertEquals(expected, newSG);
@@ -1348,7 +1348,7 @@ public class SsurgeonTest {
     // check a simple case of relabeling
     SemanticGraph sg = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 csubj> [clean-5 mark> to-4 punct> .-6]]");
     SemanticGraph expected = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 punct> .-6 csubj> [clean-5 mark> to-4]]");
-    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
   }
 
@@ -1377,7 +1377,7 @@ public class SsurgeonTest {
     // check a simple case of relabeling
     SemanticGraph sg = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 csubj> [clean-5 mark> to-4 punct> .-6]]");
     SemanticGraph expected = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 punct> .-6 csubj> [clean-5 mark> to-4]]");
-    SemanticGraph newSg = pattern.iterate(sg);
+    SemanticGraph newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
 
     // this tests -gov and -dep both set
@@ -1399,7 +1399,7 @@ public class SsurgeonTest {
     // check a simple case of relabeling, this time with the (unnecessary) -dep specifier as well
     sg = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 csubj> [clean-5 mark> to-4 punct> .-6]]");
     expected = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 punct> .-6 csubj> [clean-5 mark> to-4]]");
-    newSg = pattern.iterate(sg);
+    newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
 
     // this tests -dep set by itself (although the operation itself is nonsense)
@@ -1422,7 +1422,7 @@ public class SsurgeonTest {
     // do some random rearranging to force a test of reattachNamedEdge with -dep set
     sg = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 csubj> [clean-5 mark> to-4 punct> .-6]]");
     expected = SemanticGraph.valueOf("[easy-3 nsubj> Hers-1 cop> is-2 csubj> [to-4 mark> [clean-5 punct> .-6]]]");
-    newSg = pattern.iterate(sg);
+    newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
   }
 
