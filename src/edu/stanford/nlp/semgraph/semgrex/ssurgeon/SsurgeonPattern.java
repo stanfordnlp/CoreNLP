@@ -177,7 +177,8 @@ public class SsurgeonPattern {
    * <li> what do we do when an edit doesn't fire?  keep going or break?
    *   Currently we continue and give the other edits an opportunity to fire
    * <li> what node names do the later edits get?  rearranging nodes
-   *   may change the indices, affecting the match
+   *   may change the indices, affecting the match.  currently we reindex
+   *   and update the SemgrexMatcher when inserting new nodes.
    * </ul>
    */
   public SemanticGraph iterate(SemanticGraph sg) {
