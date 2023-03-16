@@ -41,32 +41,32 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2023-03-15    4.5.4     Minor updates to Ssurgeon, include the 
-                        Morphology CLI 
+2023-03-15    4.5.4     Minor updates to Ssurgeon, include the
+                        Morphology CLI
 
-2023-03-10    4.5.3     Fix the collinizer.  Add an Ssurgeon interface 
+2023-03-10    4.5.3     Fix the collinizer.  Add an Ssurgeon interface
 
-2023-01-19    4.5.2     Update package dependencies to avoid security 
-                        problems.  Add protobuf CLI tools for use in 
-                        Python or elsewhere 
+2023-01-19    4.5.2     Update package dependencies to avoid security
+                        problems.  Add protobuf CLI tools for use in
+                        Python or elsewhere
 
-2022-08-29    4.5.1     Bugfixes to tokenizer and semgrex 
+2022-08-29    4.5.1     Bugfixes to tokenizer and semgrex
 
 2022-07-21    4.5.0     Tokenizer and lemmatizer upgrades, along with
                         a new tsurgeon operation and some bugfixes
 
-2022-01-20    4.4.0     Fix issue with Italian depparse, tsurgeon CLI, 
-                        fix security issues, bug fixes 
+2022-01-20    4.4.0     Fix issue with Italian depparse, tsurgeon CLI,
+                        fix security issues, bug fixes
 
 2021-10-14    4.3.1     Minor bugfixes to German umlaut tokenization,
                         CDC tokenizer offset, Hungarian model package
 
-2021-09-26    4.3.0     Add trained tokenizer from corenlp-it, add 
-                        Italian and Hungarian pipelines using data 
-                        from FBK, UD, Szeged, NYTK, and SPMRL.  Better 
-                        emoji support in the PTB tokenizer 
+2021-09-26    4.3.0     Add trained tokenizer from corenlp-it, add
+                        Italian and Hungarian pipelines using data
+                        from FBK, UD, Szeged, NYTK, and SPMRL.  Better
+                        emoji support in the PTB tokenizer
 
-2021-05-14    4.2.2     Fix issue with demo. 
+2021-05-14    4.2.2     Fix issue with demo.
 
 2021-05-05    4.2.1     Fix Turkish locale bug, QuoteAnnotator crash
                         fixes, smaller srparser models, improvements
@@ -74,15 +74,15 @@ CHANGES
                         (istack, protobuf), batch processing of
                         semgrex & enhancer requests when using stanza
 
-2020-11-16    4.2.0     Bug fixes, Retrained English parser models 
-                        with improved trees, Updated dependencies 
-                        (ejml, junit, jflex), Speed up loading 
-                        Wikidict annotator, New features for server 
-                        handling of tokensregex and tregex requests, 
-                        Release built directly from GitHub repo 
+2020-11-16    4.2.0     Bug fixes, Retrained English parser models
+                        with improved trees, Updated dependencies
+                        (ejml, junit, jflex), Speed up loading
+                        Wikidict annotator, New features for server
+                        handling of tokensregex and tregex requests,
+                        Release built directly from GitHub repo
 
-2020-07-31    4.1.0     Improved server interface, improved memory 
-                        usage of sutime, spanish tokenization upgrades 
+2020-07-31    4.1.0     Improved server interface, improved memory
+                        usage of sutime, spanish tokenization upgrades
 
 2020-04-19    4.0.0     Changed to UDv2 tokenization ("new" LDC Treebank,
                         for English); handles multi-word-tokens;
@@ -90,19 +90,19 @@ CHANGES
                         English, French, German, Spanish; new French NER;
                         new Chinese segmenter; library updates, bug fixes
 
-2018-10-05    3.9.2     improved NER pipeline and entity mention 
-                        confidences; support for Java 11; new POS 
-                        models for English; 4 methods for setting 
-                        document dates; tokenizer improvements; 
-                        CoreNLP runs as filter from stdin to stdout; 
-                        bug fixes 
+2018-10-05    3.9.2     improved NER pipeline and entity mention
+                        confidences; support for Java 11; new POS
+                        models for English; 4 methods for setting
+                        document dates; tokenizer improvements;
+                        CoreNLP runs as filter from stdin to stdout;
+                        bug fixes
 
-2018-02-27    3.9.1     Bug fixes, minor enhancements 
+2018-02-27    3.9.1     Bug fixes, minor enhancements
 
-2018-01-31    3.9.0     Spanish KBP and new dependency parse model, 
-                        wrapper API for data, quote attribution 
-                        improvements, easier use of coref info, bug 
-                        fixes 
+2018-01-31    3.9.0     Spanish KBP and new dependency parse model,
+                        wrapper API for data, quote attribution
+                        improvements, easier use of coref info, bug
+                        fixes
 
 2017-06-09    3.8.0     Web service annotator, discussion forum
                         handling, new French and Spanish models
