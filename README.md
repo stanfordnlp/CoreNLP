@@ -66,15 +66,15 @@ The jars can be directly downloaded from the links below or the Hugging Face Hub
 
 | Language | Model Jar | Last Updated |
 | --- | --- | --- |
-| Arabic  | [download](https://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-arabic/tree/main) | 4.5.3 |
-| Chinese | [download](https://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-chinese/tree/main)| 4.5.3 |
-| English (extra) | [download](https://nlp.stanford.edu/software/stanford-english-extra-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-extra/tree/main) | 4.5.3 |
-| English (KBP) | [download](https://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-kbp/tree/main) | 4.5.3 |
-| French | [download](https://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-french/tree/main) | 4.5.3 |
-| German | [download](https://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-german/tree/main) | 4.5.3 |
-| Hungarian | [download](https://nlp.stanford.edu/software/stanford-hungarian-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-hungarian/tree/main) | 4.5.3 |
-| Italian | [download](https://nlp.stanford.edu/software/stanford-italian-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-italian/tree/main)| 4.5.3 |
-| Spanish | [download](https://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-spanish/tree/main)| 4.5.3 |
+| Arabic  | [download](https://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-arabic/tree/main) | 4.5.4 |
+| Chinese | [download](https://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-chinese/tree/main)| 4.5.4 |
+| English (extra) | [download](https://nlp.stanford.edu/software/stanford-english-extra-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-extra/tree/main) | 4.5.4 |
+| English (KBP) | [download](https://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-kbp/tree/main) | 4.5.4 |
+| French | [download](https://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-french/tree/main) | 4.5.4 |
+| German | [download](https://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-german/tree/main) | 4.5.4 |
+| Hungarian | [download](https://nlp.stanford.edu/software/stanford-hungarian-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-hungarian/tree/main) | 4.5.4 |
+| Italian | [download](https://nlp.stanford.edu/software/stanford-italian-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-italian/tree/main)| 4.5.4 |
+| Spanish | [download](https://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-spanish/tree/main)| 4.5.4 |
 
 Thank you to [Hugging Face](https://huggingface.co/) for helping with our hosting!
 
