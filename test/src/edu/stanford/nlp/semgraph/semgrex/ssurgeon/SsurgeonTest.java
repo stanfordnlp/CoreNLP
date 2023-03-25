@@ -1018,6 +1018,7 @@ public class SsurgeonTest {
       assertEquals(Language.UniversalEnglish, edge.getRelation().getLanguage());
     }
     // they look the same, but they're really not
+    // the edge is of a different Relation formalism
     assertEquals(expected.toString(), newSG.toString());
     assertNotEquals(expected, newSG);
 
