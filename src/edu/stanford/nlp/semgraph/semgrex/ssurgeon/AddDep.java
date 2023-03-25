@@ -139,11 +139,16 @@ public class AddDep extends SsurgeonEdit {
     }
   }
 
-  public static void moveNodes(SemanticGraph sg, SemgrexMatcher sm, Function<Integer, Boolean> shouldMove, Function<Integer, Integer> destination) {
+  /**
+   * reverse: operate in reverse order, highest index to first.  You want true if moving indices up, false if moving indices down
+   */
+  public static void moveNodes(SemanticGraph sg, SemgrexMatcher sm, Function<Integer, Boolean> shouldMove, Function<Integer, Integer> destination, boolean reverse) {
     // iterate first, then move, so that we don't screw up the graph while iterating
     List<IndexedWord> toMove = sg.vertexSet().stream().filter(x -> shouldMove.apply(x.index())).collect(Collectors.toList());
     Collections.sort(toMove);
-    Collections.reverse(toMove);
+    if (reverse) {
+      Collections.reverse(toMove);
+    }
     for (IndexedWord word : toMove) {
       moveNode(sg, sm, word, destination.apply(word.index()));
     }
@@ -166,8 +171,8 @@ public class AddDep extends SsurgeonEdit {
       // +2 to leave room: we will increase all other nodes with the
       // proper index, so we need +1 of room, then another +1 for
       // a temp place to put this node
-      // TODO: when we implement updating the SemgrexMatcher,
-      // this won't be necessary
+      // TODO: we could theoretically put the new node in the right place
+      // immediately and move the other nodes, but this is easier
       tempIndex = SemanticGraphUtils.maxIndex(sg) + 2;
 
       if (position.equals("-")) {
@@ -203,7 +208,7 @@ public class AddDep extends SsurgeonEdit {
     if (position != null && !position.equals("+")) {
       // the payoff for tempIndex == maxIndex + 2:
       // everything will be moved one higher, unless it's the new node
-      moveNodes(sg, sm, x -> (x >= newIndex && x != tempIndex), x -> x+1);
+      moveNodes(sg, sm, x -> (x >= newIndex && x != tempIndex), x -> x+1, true);
       moveNode(sg, sm, newNode, newIndex);
     }
 

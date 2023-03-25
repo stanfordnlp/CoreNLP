@@ -1064,6 +1064,147 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test a basic case of two nodes that should be merged
+   *<br>
+   * The indices should be changed as well
+   */
+  @Test
+  public void readXMLMergeNodes() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // Test the head word being the first word
+    String merge = String.join(newline,
+                               "<ssurgeon-pattern-list>",
+                               "  <ssurgeon-pattern>",
+                               "    <uid>38</uid>",
+                               "    <notes>Merge two nodes that should not have been split</notes>",
+                               "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {})") + "</semgrex>",
+                               "    <edit-list>mergeNodes source punct</edit-list>",
+                               "  </ssurgeon-pattern>",
+                               "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern mergeSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[fare-7 aux> potrebbe-6 nsubj> [prof-3 det> Il-2 punct> .-4 nmod> Fotticchia-5] obj> [gag-9 det> una-8] obl> [situazione-12 case> su-10 det> la-11]]", Language.UniversalEnglish);
+    SemanticGraph newSG = mergeSsurgeon.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[fare-6 aux> potrebbe-5 nsubj> [prof.-3 det> Il-2 nmod> Fotticchia-4] obj> [gag-8 det> una-7] obl> [situazione-11 case> su-9 det> la-10]]", Language.UniversalEnglish);
+    assertEquals(expected, newSG);
+    IndexedWord prof = sg.getNodeByIndexSafe(3);
+    assertNotNull(prof);
+    assertEquals("prof.", prof.word());
+    assertEquals("prof.", prof.value());
+    assertNull(prof.lemma());
+
+    // Same test, but this time test merging the lemmas
+    sg = SemanticGraph.valueOf("[fare-7 aux> potrebbe-6 nsubj> [prof-3 det> Il-2 punct> .-4 nmod> Fotticchia-5] obj> [gag-9 det> una-8] obl> [situazione-12 case> su-10 det> la-11]]", Language.UniversalEnglish);
+    sg.getNodeByIndexSafe(3).setLemma("prof");
+    sg.getNodeByIndexSafe(4).setLemma(".");
+    newSG = mergeSsurgeon.iterate(sg).first;
+    assertEquals(expected, newSG);
+    prof = sg.getNodeByIndexSafe(3);
+    assertEquals("prof.", prof.lemma());
+
+    // Test the head word being the second word
+    merge = String.join(newline,
+                        "<ssurgeon-pattern-list>",
+                        "  <ssurgeon-pattern>",
+                        "    <uid>38</uid>",
+                        "    <notes>Merge two nodes that should not have been split</notes>",
+                        "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {})") + "</semgrex>",
+                        "    <edit-list>mergeNodes source punct</edit-list>",
+                        "  </ssurgeon-pattern>",
+                        "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(merge);
+    assertEquals(patterns.size(), 1);
+    mergeSsurgeon = patterns.get(0);
+
+    // Check what happens if the root of the phrase is on the right and the dep is on the left
+    // The words & lemmas should still hopefully be merged in order
+    sg = SemanticGraph.valueOf("[fare-7 aux> potrebbe-6 nsubj> [prof-4 det> Il-2 punct> .-3 nmod> Fotticchia-5] obj> [gag-9 det> una-8] obl> [situazione-12 case> su-10 det> la-11]]", Language.UniversalEnglish);
+    sg.getNodeByIndexSafe(3).setLemma(".");
+    assertEquals(".", sg.getNodeByIndexSafe(3).word());
+    sg.getNodeByIndexSafe(4).setLemma("prof");
+    newSG = mergeSsurgeon.iterate(sg).first;
+    expected = SemanticGraph.valueOf("[fare-6 aux> potrebbe-5 nsubj> [.prof-3 det> Il-2 nmod> Fotticchia-4] obj> [gag-8 det> una-7] obl> [situazione-11 case> su-9 det> la-10]]", Language.UniversalEnglish);
+    assertEquals(expected, newSG);
+    prof = newSG.getNodeByIndexSafe(3);
+    assertEquals(".prof", prof.word());
+    assertEquals(".prof", prof.lemma());
+  }
+
+
+  /**
+   * Test a basic case of two nodes that should be merged
+   *<br>
+   * The indices should be changed as well
+   */
+  @Test
+  public void readXMLMergeNodesAttributes() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // Test the head word being the first word
+    String merge = String.join(newline,
+                               "<ssurgeon-pattern-list>",
+                               "  <ssurgeon-pattern>",
+                               "    <uid>38</uid>",
+                               "    <notes>Merge two nodes that should not have been split</notes>",
+                               "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {})") + "</semgrex>",
+                               "    <edit-list>mergeNodes source punct -word foo -lemma bar</edit-list>",
+                               "  </ssurgeon-pattern>",
+                               "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern mergeSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[fare-7 aux> potrebbe-6 nsubj> [prof-3 det> Il-2 punct> .-4 nmod> Fotticchia-5] obj> [gag-9 det> una-8] obl> [situazione-12 case> su-10 det> la-11]]", Language.UniversalEnglish);
+    SemanticGraph newSG = mergeSsurgeon.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[fare-6 aux> potrebbe-5 nsubj> [foo-3 det> Il-2 nmod> Fotticchia-4] obj> [gag-8 det> una-7] obl> [situazione-11 case> su-9 det> la-10]]", Language.UniversalEnglish);
+    assertEquals(expected, newSG);
+    IndexedWord prof = sg.getNodeByIndexSafe(3);
+    assertNotNull(prof);
+    assertEquals("foo", prof.word());
+    assertEquals("foo", prof.value());
+    assertEquals("bar", prof.lemma());
+  }
+
+  /**
+   * Test a basic case of two nodes that should be merged
+   *<br>
+   * The indices should be changed as well
+   */
+  @Test
+  public void readXMLMergeNodesFailCases() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // use "dep" as the dependency so as to be language-agnostic in this test
+    String merge = String.join(newline,
+                               "<ssurgeon-pattern-list>",
+                               "  <ssurgeon-pattern>",
+                               "    <uid>38</uid>",
+                               "    <notes>Merge two nodes that should not have been split</notes>",
+                               "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {})") + "</semgrex>",
+                               "    <edit-list>mergeNodes source punct</edit-list>",
+                               "  </ssurgeon-pattern>",
+                               "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern mergeSsurgeon = patterns.get(0);
+
+    // Add an extra edge from the punct we want to squash to somewhere else
+    // The graph should not be changed
+    SemanticGraph sg = SemanticGraph.valueOf("[fare-7 aux> potrebbe-6 nsubj> [prof-3 det> Il-2 nmod> Fotticchia-5 punct> [.-4 nmod> Fotticchia-5]] obj> [gag-9 det> una-8] obl> [situazione-12 case> su-10 det> la-11]]", Language.UniversalEnglish);
+    SemanticGraph newSG = mergeSsurgeon.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[fare-7 aux> potrebbe-6 nsubj> [prof-3 det> Il-2 nmod> Fotticchia-5 punct> [.-4 nmod> Fotticchia-5]] obj> [gag-9 det> una-8] obl> [situazione-12 case> su-10 det> la-11]]", Language.UniversalEnglish);
+    assertEquals(expected, newSG);
+
+    sg = SemanticGraph.valueOf("[fare-7 aux> potrebbe-6 nsubj> [prof-3 det> Il-2 nmod> [Fotticchia-5 punct> .-4] punct> .-4] obj> [gag-9 det> una-8] obl> [situazione-12 case> su-10 det> la-11]]", Language.UniversalEnglish);
+    newSG = mergeSsurgeon.iterate(sg).first;
+    expected = SemanticGraph.valueOf("[fare-7 aux> potrebbe-6 nsubj> [prof-3 det> Il-2 nmod> [Fotticchia-5 punct> .-4] punct> .-4] obj> [gag-9 det> una-8] obl> [situazione-12 case> su-10 det> la-11]]", Language.UniversalEnglish);
+    assertEquals(expected, newSG);
+  }
+
+  /**
    * The AddDep should update the matches in the SemgrexMatcher.
    * If that isn't done correctly, then moving the words first
    * and then trying to update the word that was moved
