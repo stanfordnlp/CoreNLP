@@ -82,6 +82,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code addDep -gov node1 -reln depType -position where ...attributes...}
  * <li> {@code editNode -node node ...attributes...}
  * <li> {@code setRoots n1 (n2 n3 ...)}
+ * <li> {@code mergeNodes n1 n2}
  * <li> {@code killAllIncomingEdges -node node}
  * <li> {@code deleteGraphFromNode -node node}
  * <li> {@code killNonRootedNodes}
@@ -133,6 +134,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code n1, n2, ...} are the names of the nodes from the Semgrex to use as the root(s).
  * This is best done in conjunction with other operations which actually manipulate the structure
  * of the graph, or the new root will weirdly have dependents and the graph will be incorrect.
+ *</p><p>
+ * {@code mergeNodes} will merge n1 and n2, assuming they are  mergeable.
+ * The nodes can be merged if one of the nodes is the head of a phrase
+ * and the other node depends on the head.  TODO: can make it process
+ * more than two nodes at once.
  *</p><p>
  * {@code killAllIncomingEdges} deletes all edges to a node.
  * {@code -node} is the node to edit.
@@ -496,6 +502,13 @@ public class Ssurgeon  {
         String[] names = tuples1[1].split("\\s+");
         List<String> newRoots = Arrays.asList(names);
         return new SetRoots(newRoots);
+      } else if (command.equalsIgnoreCase(MergeNodes.LABEL)) {
+        String[] names = tuples1[1].split("\\s+", 3);
+        if (names.length == 2 && attributeArgs.size() == 0) {
+          return new MergeNodes(names[0], names[1], Collections.emptyMap());
+        }
+        final SsurgeonArgs argsBox = parseArgsBox(names.length == 2 ? "" : names[2], attributeArgs);
+        return new MergeNodes(names[0], names[1], argsBox.annotations);
       } else if (command.equalsIgnoreCase(KillNonRootedNodes.LABEL)) {
         return new KillNonRootedNodes();
       }
