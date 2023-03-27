@@ -416,6 +416,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(MWTTokenTextAnnotation.class)) {
       builder.setMwtText(getAndRegister(coreLabel, keysToSerialize, MWTTokenTextAnnotation.class));
     }
+    if (keySet.contains(MWTTokenMiscAnnotation.class)) {
+      builder.setMwtMisc(getAndRegister(coreLabel, keysToSerialize, MWTTokenMiscAnnotation.class));
+    }
 
     // handle numeric stuff
     if (keySet.contains(NumericValueAnnotation.class)) {
@@ -1481,6 +1484,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (proto.hasIsFirstMWT()) {
       word.set(IsFirstWordOfMWTAnnotation.class, proto.getIsFirstMWT());
+    }
+    if (proto.hasMwtMisc()) {
+      word.set(MWTTokenMiscAnnotation.class, proto.getMwtMisc());
     }
 
     // Numeric info

@@ -222,6 +222,11 @@ message Token {
   optional bool isMWT = 67;
   optional bool isFirstMWT = 68;
   optional string mwtText = 69;
+  // setting this to a map might be nice, but there are a couple issues
+  // for one, there can be values with no key
+  // for another, it's a pain to correctly parse, since different treebanks
+  // can have different standards for how to write out the misc field
+  optional string mwtMisc = 78;
 
   // number info
   optional uint64 numericValue = 70;

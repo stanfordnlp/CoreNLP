@@ -98,7 +98,8 @@ public class AnnotationLookup {
     // MWT specific annotations
     MWT_TEXT_KEY(CoreAnnotations.MWTTokenTextAnnotation.class, "mwt_text"),
     IS_MWT_KEY(CoreAnnotations.IsMultiWordTokenAnnotation.class, "is_mwt"),
-    IS_FIRST_MWT_KEY(CoreAnnotations.IsFirstWordOfMWTAnnotation.class, "is_first_mwt");
+    IS_FIRST_MWT_KEY(CoreAnnotations.IsFirstWordOfMWTAnnotation.class, "is_first_mwt"),
+    MWT_MISC_KEY(CoreAnnotations.MWTTokenMiscAnnotation.class, "mwt_misc");
 
     private final Class<? extends CoreAnnotation<?>> coreKey;
     private final String oldKey;
