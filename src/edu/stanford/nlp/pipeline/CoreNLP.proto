@@ -311,7 +311,7 @@ message DependencyGraph {
     optional uint32 targetCopy = 6;
     optional Language language = 7 [default=Unknown];
   }
-  
+
   repeated Node     node     = 1;
   repeated Edge     edge     = 2;
   repeated uint32   root     = 3 [packed=true];
