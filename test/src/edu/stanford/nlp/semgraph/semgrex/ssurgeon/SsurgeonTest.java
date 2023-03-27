@@ -1525,6 +1525,55 @@ public class SsurgeonTest {
       assertNull(vertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
       assertNull(vertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
     }
+
+
+    // This time, we put tags on the words... check that a bug in the
+    // initial implementation is fixed
+    mwt = String.join(newline,
+                      "<ssurgeon-pattern-list>",
+                      "  <ssurgeon-pattern>",
+                      "    <uid>38</uid>",
+                      "    <notes>Edit a node's MWT</notes>",
+                      "    <semgrex>" + XMLUtils.escapeXML("{word:/[iI]t/}=it . {word:/'s/}=s") + "</semgrex>",
+                      "    <edit-list>CombineMWT -node it -node s</edit-list>",
+                      "  </ssurgeon-pattern>",
+                      "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(mwt);
+    assertEquals(patterns.size(), 1);
+    editSsurgeon = patterns.get(0);
+
+    sg = SemanticGraph.valueOf("[yours-4 nsubj> it/PRP-1 cop> 's/VBZ-2 advmod> yours-3 punct> !-5]");
+
+    // check the original values
+    itVertex = sg.getNodeByIndexSafe(1);
+    assertEquals(null, itVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertEquals(null, itVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals(null, itVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    sVertex = sg.getNodeByIndexSafe(2);
+    assertEquals(null, sVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertEquals(null, sVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals(null, sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+
+    newSG = editSsurgeon.iterate(sg).first;
+    // the high level graph structure won't change
+    expected = SemanticGraph.valueOf("[yours-4 nsubj> it-1 cop> 's-2 advmod> yours-3 punct> !-5]");
+    assertEquals(expected, newSG);
+
+    // check the updates
+    itVertex = newSG.getNodeByIndexSafe(1);
+    assertTrue(itVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertTrue(itVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals("it's", itVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    sVertex = newSG.getNodeByIndexSafe(2);
+    assertTrue(sVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertFalse(sVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals("it's", sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    for (int i = 3; i <= 5; ++i) {
+      IndexedWord vertex = newSG.getNodeByIndexSafe(i);
+      assertNull(vertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+      assertNull(vertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+      assertNull(vertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    }
   }
 
 

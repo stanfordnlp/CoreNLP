@@ -77,7 +77,11 @@ public class CombineMWT extends SsurgeonEdit {
 
     String newWord = this.word;
     if (newWord == null || newWord.equals("")) {
-      newWord = StringUtils.join(nodes, "");
+      StringBuilder newWordBuilder = new StringBuilder();
+      for (IndexedWord node : nodes) {
+        newWordBuilder.append(node.word());
+      }
+      newWord = newWordBuilder.toString();
     }
 
     boolean changed = false;
