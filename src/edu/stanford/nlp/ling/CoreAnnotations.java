@@ -2217,5 +2217,13 @@ public class CoreAnnotations {
     }
   }
 
-
+  /**
+   * CoNLL-U misc features specifically on the MWT part of a token rather than the word
+   */
+  public static class MWTTokenMiscAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
 }
