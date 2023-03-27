@@ -1425,6 +1425,110 @@ public class SsurgeonTest {
 
 
   /**
+   * Put MWT annotations on a couple nodes using EditNode
+   */
+  @Test
+  public void readXMLCombineMWT() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // combine using the CombineMWT operation, using the default concatenation for the MWT text
+    String mwt = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Edit a node's MWT</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/[iI]t/}=it . {word:/'s/}=s") + "</semgrex>",
+                             "    <edit-list>CombineMWT -node it -node s</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(mwt);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern editSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[yours-4 nsubj> it-1 cop> 's-2 advmod> yours-3 punct> !-5]");
+
+    // check the original values
+    IndexedWord itVertex = sg.getNodeByIndexSafe(1);
+    assertEquals(null, itVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertEquals(null, itVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals(null, itVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    IndexedWord sVertex = sg.getNodeByIndexSafe(2);
+    assertEquals(null, sVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertEquals(null, sVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals(null, sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+
+    SemanticGraph newSG = editSsurgeon.iterate(sg).first;
+    // the high level graph structure won't change
+    SemanticGraph expected = SemanticGraph.valueOf("[yours-4 nsubj> it-1 cop> 's-2 advmod> yours-3 punct> !-5]");
+    assertEquals(expected, newSG);
+
+    // check the updates
+    itVertex = newSG.getNodeByIndexSafe(1);
+    assertTrue(itVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertTrue(itVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals("it's", itVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    sVertex = newSG.getNodeByIndexSafe(2);
+    assertTrue(sVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertFalse(sVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals("it's", sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    for (int i = 3; i <= 5; ++i) {
+      IndexedWord vertex = newSG.getNodeByIndexSafe(i);
+      assertNull(vertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+      assertNull(vertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+      assertNull(vertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    }
+
+
+    // This time, we use a custom -word
+    mwt = String.join(newline,
+                      "<ssurgeon-pattern-list>",
+                      "  <ssurgeon-pattern>",
+                      "    <uid>38</uid>",
+                      "    <notes>Edit a node's MWT</notes>",
+                      "    <semgrex>" + XMLUtils.escapeXML("{word:/[iI]t/}=it . {word:/'s/}=s") + "</semgrex>",
+                      "    <edit-list>CombineMWT -node it -node s -word foo</edit-list>",
+                      "  </ssurgeon-pattern>",
+                      "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(mwt);
+    assertEquals(patterns.size(), 1);
+    editSsurgeon = patterns.get(0);
+
+    sg = SemanticGraph.valueOf("[yours-4 nsubj> it-1 cop> 's-2 advmod> yours-3 punct> !-5]");
+
+    // check the original values
+    itVertex = sg.getNodeByIndexSafe(1);
+    assertEquals(null, itVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertEquals(null, itVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals(null, itVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    sVertex = sg.getNodeByIndexSafe(2);
+    assertEquals(null, sVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertEquals(null, sVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals(null, sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+
+    newSG = editSsurgeon.iterate(sg).first;
+    // the high level graph structure won't change
+    expected = SemanticGraph.valueOf("[yours-4 nsubj> it-1 cop> 's-2 advmod> yours-3 punct> !-5]");
+    assertEquals(expected, newSG);
+
+    // check the updates
+    itVertex = newSG.getNodeByIndexSafe(1);
+    assertTrue(itVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertTrue(itVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals("foo", itVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    sVertex = newSG.getNodeByIndexSafe(2);
+    assertTrue(sVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    assertFalse(sVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+    assertEquals("foo", sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    for (int i = 3; i <= 5; ++i) {
+      IndexedWord vertex = newSG.getNodeByIndexSafe(i);
+      assertNull(vertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+      assertNull(vertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+      assertNull(vertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    }
+  }
+
+
+  /**
    * Test that we don't allow changing a word index, for example, in EditNode or AddDep
    */
   @Test

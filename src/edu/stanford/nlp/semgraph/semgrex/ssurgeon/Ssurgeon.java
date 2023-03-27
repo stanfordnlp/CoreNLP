@@ -28,12 +28,14 @@ import org.w3c.dom.NodeList;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.*;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.XMLUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -413,7 +415,7 @@ public class Ssurgeon  {
    * whitespace, but retain everything inside quotes, so we can pass
    * in hashmaps in String form.
    */
-  private static Map<String, String> parseArgs(String argsString) {
+  private static List<Pair<String, String>> parseArgs(String argsString) {
     List<String> retList = new ArrayList<>();
     String patternString = "(?:[^\\s\\\"]++|\\\"[^\\\"]*+\\\"|(\\\"))++";
     Pattern pattern = Pattern.compile(patternString);
@@ -430,22 +432,23 @@ public class Ssurgeon  {
         throw new SsurgeonParseException("Unmatched quote in string to parse");
     }
 
-    Map<String, String> parsedArgs = new LinkedHashMap<>();
+    List<Pair<String, String>> parsedArgs = new ArrayList<>();
     for (int i = 0; i < retList.size() - 1; i += 2) {
-      parsedArgs.put(retList.get(i), retList.get(i + 1));
+      parsedArgs.add(new Pair<>(retList.get(i), retList.get(i + 1)));
     }
     return parsedArgs;
   }
 
   private static SsurgeonArgs parseArgsBox(String args, Map<String, String> additionalArgs) {
     SsurgeonArgs argsBox = new SsurgeonArgs();
-    Map<String, String> argsArray = parseArgs(args);
+    List<Pair<String, String>> argsArray = parseArgs(args);
     for (String additional : additionalArgs.keySet()) {
-      argsArray.put("-" + additional, additionalArgs.get(additional));
+      argsArray.add(new Pair<>("-" + additional, additionalArgs.get(additional)));
     }
 
-    for (String argsKey : argsArray.keySet()) {
-      String argsValue = argsArray.get(argsKey);
+    for (Pair<String, String> arg : argsArray) {
+      String argsKey = arg.first;
+      String argsValue = arg.second;
       switch (argsKey) {
         case GOV_NODENAME_ARG:
           argsBox.govNodeName = argsValue;
@@ -561,6 +564,8 @@ public class Ssurgeon  {
           throw new SsurgeonParseException("Cannot make a KillAllIncomingEdges out of " + argsBox.nodes.size() + " nodes");
         }
         return new KillAllIncomingEdges(argsBox.nodes.get(0));
+      } else if (command.equalsIgnoreCase(CombineMWT.LABEL)) {
+        return new CombineMWT(argsBox.nodes, argsBox.annotations.get("word"));
       }
       throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: command '"+command+"' is not supported");
     } catch (SsurgeonParseException e) {
