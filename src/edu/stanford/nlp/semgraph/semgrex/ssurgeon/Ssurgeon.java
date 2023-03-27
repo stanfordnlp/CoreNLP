@@ -394,7 +394,7 @@ public class Ssurgeon  {
 
     public String reln = null;
 
-    public String node = null;
+    public List<String> nodes = new ArrayList<>();
 
     // below are string representations of the intended values
     public String nodeString = null;
@@ -460,7 +460,7 @@ public class Ssurgeon  {
           argsBox.reln = argsValue;
           break;
         case NODENAME_ARG:
-          argsBox.node = argsValue;
+          argsBox.nodes.add(argsValue);
           break;
         case NODE_PROTO_ARG:
           argsBox.nodeString = argsValue;
@@ -533,9 +533,15 @@ public class Ssurgeon  {
       } else if (command.equalsIgnoreCase(ReattachNamedEdge.LABEL)) {
           return new ReattachNamedEdge(argsBox.edge, argsBox.govNodeName, argsBox.dep);
       } else if (command.equalsIgnoreCase(DeleteGraphFromNode.LABEL)) {
-        return new DeleteGraphFromNode(argsBox.node);
+        if (argsBox.nodes.size() != 1) {
+          throw new SsurgeonParseException("Cannot make a DeleteGraphFromNode out of " + argsBox.nodes.size() + " nodes");
+        }
+        return new DeleteGraphFromNode(argsBox.nodes.get(0));
       } else if (command.equalsIgnoreCase(EditNode.LABEL)) {
-        return new EditNode(argsBox.node, argsBox.annotations);
+        if (argsBox.nodes.size() != 1) {
+          throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes");
+        }
+        return new EditNode(argsBox.nodes.get(0), argsBox.annotations);
       } else if (command.equalsIgnoreCase(RelabelNamedEdge.LABEL)) {
         if (argsBox.reln == null) {
           throw new SsurgeonParseException("Relation not specified for AddEdge");
@@ -551,7 +557,10 @@ public class Ssurgeon  {
       } else if (command.equalsIgnoreCase(RemoveNamedEdge.LABEL)) {
         return new RemoveNamedEdge(argsBox.edge);
       } else if (command.equalsIgnoreCase(KillAllIncomingEdges.LABEL)) {
-        return new KillAllIncomingEdges(argsBox.node);
+        if (argsBox.nodes.size() != 1) {
+          throw new SsurgeonParseException("Cannot make a KillAllIncomingEdges out of " + argsBox.nodes.size() + " nodes");
+        }
+        return new KillAllIncomingEdges(argsBox.nodes.get(0));
       }
       throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: command '"+command+"' is not supported");
     } catch (SsurgeonParseException e) {
