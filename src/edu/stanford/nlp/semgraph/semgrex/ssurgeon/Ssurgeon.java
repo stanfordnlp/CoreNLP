@@ -132,6 +132,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -node} is the node to edit.
  * {@code ...attributes...} are the attributes to change, same as with {@code addDep}
  *</p><p>
+ * {@code combineMWT} will add MWT attributes to a sequence of two or more words.
+ * {@code -node} (repeated) is the nodes to edit.
+ * {@code -word} is the optional text to use for the new MWT.  If not set, the words will be concatenated.
+ *</p><p>
  * {@code setRoots} sets the roots of the sentence to a new root.
  * {@code n1, n2, ...} are the names of the nodes from the Semgrex to use as the root(s).
  * This is best done in conjunction with other operations which actually manipulate the structure

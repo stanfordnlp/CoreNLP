@@ -11,6 +11,18 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.util.StringUtils;
 
+
+/**
+ * Combines two or more words into one MWT
+ *<br>
+ * For the most part, the nodes themselves are unchanged, but the
+ * nodes now have the CoreAnnotations representing MWTness added
+ *<br>
+ * This is a convenience operation which exists because the basic
+ * version of it using EditNode is a bit of a pain
+ *
+ * @author John Bauer
+ */
 public class CombineMWT extends SsurgeonEdit {
   public static final String LABEL = "combineMWT";
   final List<String> names;
