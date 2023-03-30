@@ -687,7 +687,11 @@ message SemgrexResponse {
 // corresponding graph
 // An alternative would have been to use the existing Document or
 // Sentence classes, but the problem with that is it would be
-// ambiguous which dependency object to use.
+// ambiguous which dependency object to use.  Another problem
+// is that if the intent is to use multiple graphs from a
+// Sentence, then edits to the nodes of one graph would show up
+// in the nodes of the other graph (same backing CoreLabels)
+// and the operations themselves may not have the intended effect.
 // The Ssurgeon is composed of two pieces, the semgrex and the
 // ssurgeon operations, along with some optional documentation.
 message SsurgeonRequest {
