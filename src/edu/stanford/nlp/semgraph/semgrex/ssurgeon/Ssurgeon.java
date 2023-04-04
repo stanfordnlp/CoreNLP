@@ -86,7 +86,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code setRoots n1 (n2 n3 ...)}
  * <li> {@code mergeNodes n1 n2}
  * <li> {@code killAllIncomingEdges -node node}
- * <li> {@code deleteGraphFromNode -node node}
+ * <li> {@code delete -node node}
  * <li> {@code killNonRootedNodes}
  * </ul>
  *
@@ -150,7 +150,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -node} is the node to edit.
  * Note that this is the same as {@code removeEdge} with only the dependent set.
  *</p><p>
- * {@code deleteGraphFromNode} deletes all nodes reachable from a specific node.
+ * {@code delete} deletes all nodes reachable from a specific node.
  * {@code -node} is the node to delete.
  * You will only want to do this after separating the node from the parts of the graph you want to keep.
  *</p><p>
