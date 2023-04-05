@@ -1166,6 +1166,30 @@ public class SsurgeonTest {
     assertEquals("foo", prof.word());
     assertEquals("foo", prof.value());
     assertEquals("bar", prof.lemma());
+
+    // Test the head word being the first word
+    merge = String.join(newline,
+                        "<ssurgeon-pattern-list>",
+                        "  <ssurgeon-pattern>",
+                        "    <uid>38</uid>",
+                        "    <notes>Merge two nodes that should not have been split</notes>",
+                        "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {})") + "</semgrex>",
+                        "    <edit-list>mergeNodes source punct -lemma bar</edit-list>",
+                        "  </ssurgeon-pattern>",
+                        "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(merge);
+    assertEquals(patterns.size(), 1);
+    mergeSsurgeon = patterns.get(0);
+
+    sg = SemanticGraph.valueOf("[fare-7 aux> potrebbe-6 nsubj> [prof-3 det> Il-2 punct> .-4 nmod> Fotticchia-5] obj> [gag-9 det> una-8] obl> [situazione-12 case> su-10 det> la-11]]", Language.UniversalEnglish);
+    newSG = mergeSsurgeon.iterate(sg).first;
+    expected = SemanticGraph.valueOf("[fare-6 aux> potrebbe-5 nsubj> [foo-3 det> Il-2 nmod> Fotticchia-4] obj> [gag-8 det> una-7] obl> [situazione-11 case> su-9 det> la-10]]", Language.UniversalEnglish);
+    assertEquals(expected, newSG);
+    prof = sg.getNodeByIndexSafe(3);
+    assertNotNull(prof);
+    assertEquals("prof.", prof.word());
+    assertEquals("prof.", prof.value());
+    assertEquals("bar", prof.lemma());
   }
 
   /**
