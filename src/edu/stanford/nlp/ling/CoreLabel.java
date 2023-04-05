@@ -386,14 +386,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   public void setWord(String word) {
     String originalWord = get(CoreAnnotations.TextAnnotation.class);
     set(CoreAnnotations.TextAnnotation.class, word);
-    // Pado feb 09: if you change the word, delete the lemma.
-    // Gabor dec 2012: check if there was a real change -- this remove is actually rather expensive if it gets called a lot
-    // todo [cdm 2015]: probably no one now knows why this was even needed, but maybe it should just be removed. It's kind of weird.
-    if (word != null && !word.equals(originalWord) && containsKey(CoreAnnotations.LemmaAnnotation.class)) {
-      remove(CoreAnnotations.LemmaAnnotation.class);
-      // [cdm 2021] The only unit test that depends on this code is the one that tests for this exact behavior! Remove?
-      // throw new IllegalStateException("Looks like your code is relying on a dirty branch in setWord() that we want to remove!");
-    }
   }
 
   /**
