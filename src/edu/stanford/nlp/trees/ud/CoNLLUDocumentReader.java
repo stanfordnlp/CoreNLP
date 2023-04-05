@@ -30,7 +30,7 @@ public class CoNLLUDocumentReader implements
   
   private static final long serialVersionUID = -7340310509954331983L;
 
-  private IteratorFromReaderFactory<Pair<SemanticGraph, SemanticGraph>> ifrf;
+  private final IteratorFromReaderFactory<Pair<SemanticGraph, SemanticGraph>> ifrf;
 
 
   public CoNLLUDocumentReader() {
