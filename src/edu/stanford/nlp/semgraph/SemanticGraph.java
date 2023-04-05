@@ -1861,7 +1861,7 @@ public class SemanticGraph implements Serializable  {
 
   // ============================================================================
 
-  private static final Pattern WORD_AND_INDEX_PATTERN = Pattern.compile("([^-]*)-([0-9]+)");
+  private static final Pattern WORD_AND_INDEX_PATTERN = Pattern.compile("(.*)-([0-9]+)");
 
   /**
    * This nested class is a helper for valueOf(). It represents the task of

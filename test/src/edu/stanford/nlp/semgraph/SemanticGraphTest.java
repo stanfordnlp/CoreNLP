@@ -305,6 +305,32 @@ public class SemanticGraphTest extends TestCase {
   }
 
   /**
+   * Test that dashes as the word work as expected with indices
+   */
+  public void testValueOfDashes() {
+    SemanticGraph sg = SemanticGraph.valueOf("[--3 obj> -/bar-1 obj> C-4 nsubj> [D-2 obj> E-0]]");
+
+    List<IndexedWord> words = sg.vertexListSorted();
+    assertEquals(words.size(), 5);
+
+    for (int i = 0; i < 5; ++i) {
+      assertEquals(words.get(i).index(), i);
+    }
+    IndexedWord A = words.get(3);
+    IndexedWord B = words.get(1);
+    IndexedWord C = words.get(4);
+    IndexedWord D = words.get(2);
+    IndexedWord E = words.get(0);
+
+    assertEquals(A.word(), "-");
+    assertEquals(B.word(), "-");
+    assertEquals(B.tag(),  "bar");
+    assertEquals(C.word(), "C");
+    assertEquals(D.word(), "D");
+    assertEquals(E.word(), "E");
+  }
+
+  /**
    * Test the vertices and edges of a very simple valueOf graph with indices added
    */
   public void testValueOfIndices() {
