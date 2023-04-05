@@ -87,6 +87,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code mergeNodes n1 n2}
  * <li> {@code killAllIncomingEdges -node node}
  * <li> {@code delete -node node}
+ * <li> {@code deleteLeaf -node node}
  * <li> {@code killNonRootedNodes}
  * </ul>
  *
@@ -153,6 +154,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code delete} deletes all nodes reachable from a specific node.
  * {@code -node} is the node to delete.
  * You will only want to do this after separating the node from the parts of the graph you want to keep.
+ *</p><p>
+ * {@code deleteLeaf} deletes a node as long as it is a leaf.
+ * {@code -node} is the node to delete.
+ * If the node is not a leaf (no outgoing edges), it will not be deleted.
  *</p><p>
  * {@code killNonRootedNodes} searches the graph and deletes all nodes which have no path to a root.
  *</p>
@@ -544,6 +549,11 @@ public class Ssurgeon  {
           throw new SsurgeonParseException("Cannot make a DeleteGraphFromNode out of " + argsBox.nodes.size() + " nodes");
         }
         return new DeleteGraphFromNode(argsBox.nodes.get(0));
+      } else if (command.equalsIgnoreCase(DeleteLeaf.LABEL)) {
+        if (argsBox.nodes.size() != 1) {
+          throw new SsurgeonParseException("Cannot make a DeleteLeaf out of " + argsBox.nodes.size() + " nodes");
+        }
+        return new DeleteLeaf(argsBox.nodes.get(0));
       } else if (command.equalsIgnoreCase(EditNode.LABEL)) {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes");

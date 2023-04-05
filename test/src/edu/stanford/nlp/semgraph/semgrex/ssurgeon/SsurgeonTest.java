@@ -1721,6 +1721,44 @@ public class SsurgeonTest {
     assertEquals(newSg, expected);
   }
 
+
+  /**
+   * Test deleteLeaf, which removes an unwanted leaf and its edges, then renumbers everything
+   *<br>
+   * Uses a real example from UD_Portuguese-GSD
+   */
+  @Test
+  public void readXMLDeleteLeaf() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Test deleting a leaf (only if it's a leaf)</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             // the real life example used POS tags to make sure "verb" and "clitic" are the right pieces
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=verb . ({word:/-/}=dash . {word:se}=clitic)") + "</semgrex>",
+                             "    <edit-list>combineMWT -node verb -node dash -node clitic</edit-list>",
+                             "    <edit-list>deleteLeaf -node dash</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    // the dash should be removed and all words with an index after the dash should have that index decremented
+    SemanticGraph sg =       SemanticGraph.valueOf("[nobre-6 nmod> [decreto-9 case> com-7 det> o-8] cop> fez-3 punct> --4 expl:pv> [se-5 advmod> [Assim punct> ,-2]]]");
+    SemanticGraph expected = SemanticGraph.valueOf("[nobre-5 nmod> [decreto-8 case> com-6 det> o-7] cop> fez-3 expl:pv> [se-4 advmod> [Assim punct> ,-2]]]");
+    SemanticGraph newSg = pattern.iterate(sg).first;
+    assertEquals(newSg, expected);
+
+    // here, the dash isn't a leaf any more, so it shouldn't be deleted
+    sg =       SemanticGraph.valueOf("[nobre-6 nmod> [decreto-9 case> com-7 det> o-8] cop> fez-3 punct> [--4 expl:pv> [se-5 advmod> [Assim punct> ,-2]]]]");
+    expected = SemanticGraph.valueOf("[nobre-6 nmod> [decreto-9 case> com-7 det> o-8] cop> fez-3 punct> [--4 expl:pv> [se-5 advmod> [Assim punct> ,-2]]]]");
+    newSg = pattern.iterate(sg).first;
+    assertEquals(newSg, expected);
+  }
+
   /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
    * a semgrex pattern, and then the resulting actions over the named nodes in the
