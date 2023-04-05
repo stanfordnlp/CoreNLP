@@ -22,6 +22,8 @@ public class CoNLLUReader {
   /**
    * field constants
    **/
+  // TODO: we should handle field 8, DEPS, for an enhanced dependencies
+  // doing that requires processing the empty nodes somehow
   public static final int CoNLLU_IndexField = 0;
   public static final int CoNLLU_WordField = 1;
   public static final int CoNLLU_LemmaField = 2;
