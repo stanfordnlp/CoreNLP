@@ -112,6 +112,9 @@ public class MergeNodes extends SsurgeonEdit {
     }
 
     CoreLabel newLabel = AddDep.fromCheapStrings(attributes);
+    // CoreLabel.setWord wipes out the lemma for some reason
+    // we may eventually change that, but for now, we compensate for that here
+    String lemma = newLabel.lemma();
     if (newLabel.word() == null) {
       String newWord = left.word() + right.word();
       newLabel.setWord(newWord);
@@ -119,6 +122,8 @@ public class MergeNodes extends SsurgeonEdit {
     if (newLabel.value() == null) {
       newLabel.setValue(newLabel.word());
     }
+
+    newLabel.setLemma(lemma);
     if (newLabel.lemma() == null) {
       String newLemma = left.lemma() != null && right.lemma() != null ? left.lemma() + right.lemma() : null;
       newLabel.setLemma(newLemma);
