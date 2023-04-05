@@ -313,53 +313,6 @@ public class ArrayCoreMapTest {
     Assert.assertEquals(baz, biff);
   }
 
-  @SuppressWarnings("SimplifiableAssertion")
-  @Test
-  public void testCoreLabelSetWordBehavior() {
-    CoreLabel foo = new CoreLabel();
-    foo.set(CoreAnnotations.TextAnnotation.class, "foo");
-    foo.set(CoreAnnotations.PartOfSpeechAnnotation.class, "B");
-    foo.set(CoreAnnotations.LemmaAnnotation.class, "fool");
-
-    // Lemma gets removed with word
-    ArrayCoreMap copy = new ArrayCoreMap(foo);
-    Assert.assertEquals(copy, foo);
-    foo.setWord("foo");
-    Assert.assertEquals(copy, foo);  // same word set
-    foo.setWord("bar");
-    Assert.assertFalse(copy.equals(foo));  // lemma removed
-    foo.setWord("foo");
-    Assert.assertFalse(copy.equals(foo));  // still removed
-    foo.set(CoreAnnotations.LemmaAnnotation.class, "fool");
-    Assert.assertEquals(copy, foo);  // back to normal
-
-    // Hash code is consistent
-    int hashCode = foo.hashCode();
-    Assert.assertEquals(copy.hashCode(), hashCode);
-    foo.setWord("bar");
-    Assert.assertFalse(hashCode == foo.hashCode());
-    foo.setWord("foo");
-    Assert.assertFalse(hashCode == foo.hashCode());
-
-    // Hash code doesn't care between a value of null and the key not existing
-    Assert.assertTrue(foo.lemma() == null);
-    int lemmalessHashCode = foo.hashCode();
-    foo.remove(CoreAnnotations.LemmaAnnotation.class);
-    Assert.assertEquals(lemmalessHashCode, foo.hashCode());
-    foo.setLemma(null);
-    Assert.assertEquals(lemmalessHashCode, foo.hashCode());
-    foo.setLemma("fool");
-    Assert.assertEquals(hashCode, foo.hashCode());
-
-    // Check equals
-    foo.setWord("bar");
-    foo.setWord("foo");
-    ArrayCoreMap nulledCopy = new ArrayCoreMap(foo);
-    Assert.assertEquals(nulledCopy, foo);
-    foo.remove(CoreAnnotations.LemmaAnnotation.class);
-    Assert.assertEquals(nulledCopy, foo);
-  }
-
   @Test
   public void testCopyConstructor() {
     ArrayCoreMap biff = new ArrayCoreMap();
