@@ -1079,7 +1079,7 @@ public class SsurgeonTest {
                                "    <uid>38</uid>",
                                "    <notes>Merge two nodes that should not have been split</notes>",
                                "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {})") + "</semgrex>",
-                               "    <edit-list>mergeNodes source punct</edit-list>",
+                               "    <edit-list>mergeNodes -node source -node punct</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
     List<SsurgeonPattern> patterns = inst.readFromString(merge);
@@ -1112,7 +1112,7 @@ public class SsurgeonTest {
                         "    <uid>38</uid>",
                         "    <notes>Merge two nodes that should not have been split</notes>",
                         "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {})") + "</semgrex>",
-                        "    <edit-list>mergeNodes source punct</edit-list>",
+                        "    <edit-list>mergeNodes -node source -node punct</edit-list>",
                         "  </ssurgeon-pattern>",
                         "</ssurgeon-pattern-list>");
     patterns = inst.readFromString(merge);
@@ -1150,7 +1150,7 @@ public class SsurgeonTest {
                                "    <uid>38</uid>",
                                "    <notes>Merge two nodes that should not have been split</notes>",
                                "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {})") + "</semgrex>",
-                               "    <edit-list>mergeNodes source punct -word foo -lemma bar</edit-list>",
+                               "    <edit-list>mergeNodes -node source -node punct -word foo -lemma bar</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
     List<SsurgeonPattern> patterns = inst.readFromString(merge);
@@ -1174,7 +1174,7 @@ public class SsurgeonTest {
                         "    <uid>38</uid>",
                         "    <notes>Merge two nodes that should not have been split</notes>",
                         "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {})") + "</semgrex>",
-                        "    <edit-list>mergeNodes source punct -lemma bar</edit-list>",
+                        "    <edit-list>mergeNodes -node source -node punct -lemma bar</edit-list>",
                         "  </ssurgeon-pattern>",
                         "</ssurgeon-pattern-list>");
     patterns = inst.readFromString(merge);
@@ -1208,7 +1208,7 @@ public class SsurgeonTest {
                                "    <uid>38</uid>",
                                "    <notes>Merge two nodes that should not have been split</notes>",
                                "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {})") + "</semgrex>",
-                               "    <edit-list>mergeNodes source punct</edit-list>",
+                               "    <edit-list>mergeNodes -node source -node punct</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
     List<SsurgeonPattern> patterns = inst.readFromString(merge);

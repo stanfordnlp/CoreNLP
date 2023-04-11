@@ -26,13 +26,14 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
  */
 public class MergeNodes extends SsurgeonEdit {
   public static final String LABEL = "mergeNodes";
-  final String name1;
-  final String name2;
+  final List<String> nodes;
   final Map<String, String> attributes;
 
-  public MergeNodes(String name1, String name2, Map<String, String> attributes) {
-    this.name1 = name1;
-    this.name2 = name2;
+  public MergeNodes(List<String> nodes, Map<String, String> attributes) {
+    if (nodes.size() > 2) {
+      throw new SsurgeonParseException("Cannot support MergeNodes of size " + nodes.size() + " yet... please file an issue on github if you need this feature");
+    }
+    this.nodes = new ArrayList<>(nodes);
     this.attributes = new TreeMap<>(attributes);
   }
 
@@ -42,9 +43,11 @@ public class MergeNodes extends SsurgeonEdit {
   @Override
   public String toEditString() {
     StringWriter buf = new StringWriter();
-    buf.write(LABEL);  buf.write("\t");
-    buf.write(name1);  buf.write("\t");
-    buf.write(name2);
+    buf.write(LABEL);
+    for (String name : nodes) {
+      buf.write("\t");
+      buf.write(Ssurgeon.NODENAME_ARG + " " + name);
+    }
 
     // TODO: some attributes might need to be escaped!
     for (String key : attributes.keySet()) {
@@ -63,6 +66,9 @@ public class MergeNodes extends SsurgeonEdit {
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    String name1 = nodes.get(0);
+    String name2 = nodes.get(1);
+
     IndexedWord node1 = sm.getNode(name1);
     IndexedWord node2 = sm.getNode(name2);
 

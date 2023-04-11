@@ -514,13 +514,6 @@ public class Ssurgeon  {
         String[] names = tuples1[1].split("\\s+");
         List<String> newRoots = Arrays.asList(names);
         return new SetRoots(newRoots);
-      } else if (command.equalsIgnoreCase(MergeNodes.LABEL)) {
-        String[] names = tuples1[1].split("\\s+", 3);
-        if (names.length == 2 && attributeArgs.size() == 0) {
-          return new MergeNodes(names[0], names[1], Collections.emptyMap());
-        }
-        final SsurgeonArgs argsBox = parseArgsBox(names.length == 2 ? "" : names[2], attributeArgs);
-        return new MergeNodes(names[0], names[1], argsBox.annotations);
       } else if (command.equalsIgnoreCase(KillNonRootedNodes.LABEL)) {
         return new KillNonRootedNodes();
       }
@@ -559,6 +552,11 @@ public class Ssurgeon  {
           throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes");
         }
         return new EditNode(argsBox.nodes.get(0), argsBox.annotations);
+      } else if (command.equalsIgnoreCase(MergeNodes.LABEL)) {
+        if (argsBox.nodes.size() < 2) {
+          throw new SsurgeonParseException("Cannot make a MergeNodes out of fewer than 2 nodes (got " + argsBox.nodes.size() + ")");
+        }
+        return new MergeNodes(argsBox.nodes, argsBox.annotations);
       } else if (command.equalsIgnoreCase(RelabelNamedEdge.LABEL)) {
         if (argsBox.reln == null) {
           throw new SsurgeonParseException("Relation not specified for AddEdge");
