@@ -94,18 +94,19 @@ import edu.stanford.nlp.util.logging.Redwood;
  *  <i>Implementation note:</i> The scanner is caseless, but note, if adding
  *  or changing regexps, that caseless does not extend inside character
  *  classes.  From the manual: "The %caseless option does not change the
- *  matched text and does not effect character classes. So [a] still only
+ *  matched text and does not affect character classes. So [a] still only
  *  matches the character a and not A, too."  Note that some character
  *  classes deliberately don't have both cases, so the scanner's
  *  operation isn't completely case-independent, though it mostly is.
  *  <p>
  *  <i>Implementation note:</i> This Java class is automatically generated
- *  from PTBLexer.flex using jflex.  DO NOT EDIT THE JAVA SOURCE.  This file
+ *  from {@code PTBLexer.flex} using {@code jflex}.  DO NOT EDIT THE JAVA SOURCE.  This file
  *  has now been updated for JFlex 1.6.1+.
  *
  *  @author Tim Grow
  *  @author Christopher Manning
  *  @author Jenny Finkel
+ *  @author John Bauer
  */
 
 
