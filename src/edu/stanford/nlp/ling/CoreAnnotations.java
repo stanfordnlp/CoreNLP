@@ -341,6 +341,36 @@ public class CoreAnnotations {
   }
 
   /**
+   * Some datasets - for example, the UD Estonian EWT dataset - use
+   * "empty" nodes to represent words that were unspoken / unwritten
+   * but can be inferred from the structure of the sentence.  For
+   * example, in English, one could say "Gimme" instead of "Give me
+   * it", and "it" could be treated as an empty word.  A more common
+   * example is when it is used in a similar manner to the copy nodes,
+   * but displaced in time.  So, for example, a sentence which uses
+   * them in the UD English EWT dataset (no relation) is:
+   *<br>
+   * "Over 300 Iraqis are reported dead and 500 wounded in Fallujah alone."
+   *<br>
+   * Here, one could build a dependency graph using "reported" as a
+   * copy node, but instead the en_ewt dataset creates an "empty" node
+   * and builds the enhanced dependencies using that node.
+   *<br>
+   * "Over 300 Iraqis are reported dead and 500 *reported* wounded in Fallujah alone."
+   *<br>
+   * Rather than the second "reported" being a copy of word 5, it is treated
+   * as a separate word 8.1
+   *<br>
+   * As with IndexAnnotation, we count from 1.
+   */
+  public static class EmptyIndexAnnotation implements CoreAnnotation<Integer> {
+    @Override
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
+  /**
    * This indexes the beginning of a span of words, e.g., a constituent in a
    * tree. See {@link edu.stanford.nlp.trees.Tree#indexSpans(int)}.
    * This annotation counts tokens.

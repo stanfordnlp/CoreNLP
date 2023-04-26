@@ -35,4 +35,26 @@ public class IndexedWordTest {
     Assert.assertTrue(iw3.compareTo(iw5) > 0);
   }
 
+  @Test
+  public void testEmptyIndex() {
+    IndexedWord iw = new IndexedWord("foo", 1, 1);
+    iw.setWord("bar");
+
+    IndexedWord iw2 = new IndexedWord("foo", 1, 1);
+    iw2.setWord("bar");
+
+    Assert.assertEquals(iw, iw2);
+
+    iw2.setEmptyIndex(5);
+    Assert.assertNotEquals(iw, iw2);
+    Assert.assertNotEquals(iw2, iw);
+
+    iw.setEmptyIndex(5);
+    Assert.assertEquals(iw, iw2);
+    Assert.assertEquals(iw2, iw);
+
+    iw2.setEmptyIndex(3);
+    Assert.assertNotEquals(iw, iw2);
+    Assert.assertNotEquals(iw2, iw);
+  }
 }
