@@ -8,14 +8,14 @@ This directory is intended to contain only *current and necessary*
 .jar files used with CoreNLP.
 
 Each file here should have a name that includes a version number,
-such as lib/xom-1.3.8.jar and should have a corresponding sources
-archive such as libsrc/xom-1.3.8-src.{zip,jar}.
+such as lib/xom-1.3.9.jar and should have a corresponding sources
+archive such as libsrc/xom-1.3.9-src.{zip,jar}.
 
 Our original model was that each jar file in lib should be without
 its version number but include a corresponding source .zip/.jar file
 with a full version number in the libsrc folder.  For example, if
 there is a file  lib/xom.jar there should be a corresponding and
-up-to-date libsrc/xom-1.3.8-src.{zip,jar}. That model had some good
+up-to-date libsrc/xom-1.3.9-src.{zip,jar}. That model had some good
 properties but can also be a nuisance in the modern world, and so
 doing this is now deprecated but not quite yet eliminated.
 
@@ -201,13 +201,13 @@ LAST UPDATE: 2007/09/18
 LAST UPDATE BY: Anna Rafferty.
 
 -----------------------------------------------------------------------
-xom-1.3.8.jar
+xom-1.3.9.jar
 
-ORIGINAL JAR NAME: xom-1.3.8.jar
+ORIGINAL JAR NAME: xom-1.3.9.jar
 
-VERSION: 1.3.8
+VERSION: 1.3.9
 
-RELEASE DATE: 2022-09-11
+RELEASE DATE: 2023-05-14
 
 SOURCE AVAILABLE: yes
 
@@ -218,7 +218,7 @@ URL: http://www.xom.nu/
 USED BY: StanfordCoreNLP.java
 Needed by CoreNLP distributions
 
-LAST UPDATE: 2023-01-04
+LAST UPDATE: 2023-05-16
 
 LAST UPDATE BY: John Bauer
 
