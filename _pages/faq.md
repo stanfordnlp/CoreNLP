@@ -123,6 +123,12 @@ If running CoreNLP from within Eclipse, follow
 to increase the memory given to a program being run from inside
 Eclipse. Increasing the amount of memory given to Eclipse itself won't help.
 
+## What is the tagset used by the English POS tagger and constituency parser?
+
+The English POS tagger uses the Penn Treebank tags.  An expanded list [is here](https://gucorpling.org/ptb_tags.html)
+
+The constituent trees also use the Penn Treebank constituents, along with additional tags like NML, [such as described here](https://www.cis.upenn.edu/~bies/bioie/TBguidelines-addendum.pdf)
+
 ## What does SET mean in the NER output?
 
 This is part of SUTime. It applies to repeating events such as
