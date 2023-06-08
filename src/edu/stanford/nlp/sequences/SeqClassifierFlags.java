@@ -1006,6 +1006,7 @@ public class SeqClassifierFlags implements Serializable  {
   public String supFileEN = null;
   public String supFileCH = null;
   public transient String serializeFeatureIndexTo = null;
+  public transient String serializeFeatureIndexToText = null;
   public String loadFeatureIndexFromEN = null;
   public String loadFeatureIndexFromCH = null;
   public double lambdaEN = 1.0;
@@ -2570,6 +2571,8 @@ public class SeqClassifierFlags implements Serializable  {
         supFileCH = val;
       } else if (key.equalsIgnoreCase("serializeFeatureIndexTo")){
         serializeFeatureIndexTo = val;
+      } else if (key.equalsIgnoreCase("serializeFeatureIndexToText")){
+        serializeFeatureIndexToText = val;
       } else if (key.equalsIgnoreCase("loadFeatureIndexFromEN")){
         loadFeatureIndexFromEN = val;
       } else if (key.equalsIgnoreCase("loadFeatureIndexFromCH")){

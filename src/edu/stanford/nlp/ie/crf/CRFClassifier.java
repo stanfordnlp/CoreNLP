@@ -2449,6 +2449,22 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
   }
 
+  public void serializeFeatureIndexToText(String serializePath) {
+    PrintWriter fout = null;
+    try {
+      fout = IOUtils.getPrintWriter(serializePath);
+      for (String feature : featureIndex) {
+        fout.print(feature + "\n");
+      }
+      log.info("Serializing FeatureIndex to " + serializePath + "... done.");
+    } catch (IOException e) {
+      log.info("Failed");
+      log.info("Serializing FeatureIndex to " + serializePath + "... FAILED.", e);
+    } finally {
+      fout.close();
+    }
+  }
+
   public static Index<String> loadFeatureIndexFromFile(String serializePath) {
     ObjectInputStream ois = null;
     Index<String> f = null;
@@ -2997,6 +3013,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     if (crf.flags.serializeFeatureIndexTo != null) {
       crf.serializeFeatureIndex(crf.flags.serializeFeatureIndexTo);
+    }
+
+    if (crf.flags.serializeFeatureIndexToText != null) {
+      crf.serializeFeatureIndexToText(crf.flags.serializeFeatureIndexToText);
     }
 
     if (serializeToText != null) {
