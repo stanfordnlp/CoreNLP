@@ -380,6 +380,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
 
   private static Treebank makeTreebank(String treebankPath, Options op, FileFilter filt) {
     log.info("Training a parser from treebank dir: " + treebankPath);
+    Timing tim = new Timing();
     Treebank trainTreebank = op.tlpParams.diskTreebank();
     log.info("Reading trees...");
     if (filt == null) {
@@ -388,12 +389,13 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       trainTreebank.loadPath(treebankPath, filt);
     }
 
-    Timing.tick("done [read " + trainTreebank.size() + " trees].");
+    tim.tick("done [read " + trainTreebank.size() + " trees].");
     return trainTreebank;
   }
 
   private static DiskTreebank makeSecondaryTreebank(String treebankPath, Options op, FileFilter filt) {
     log.info("Additionally training using secondary disk treebank: " + treebankPath + ' ' + filt);
+    Timing tim = new Timing();
     DiskTreebank trainTreebank = op.tlpParams.diskTreebank();
     log.info("Reading trees...");
     if (filt == null) {
@@ -401,7 +403,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
     } else {
       trainTreebank.loadPath(treebankPath, filt);
     }
-    Timing.tick("done [read " + trainTreebank.size() + " trees].");
+    tim.tick("done [read " + trainTreebank.size() + " trees].");
     return trainTreebank;
   }
 
@@ -510,7 +512,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   protected static LexicalizedParser getParserFromTextFile(String textFileOrUrl, Options op) {
     try (BufferedReader in = IOUtils.readerFromString(textFileOrUrl)) {
       Timing tim = new Timing();
-      Timing.startTime();
 
       String line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
@@ -783,10 +784,10 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   {
     // log.info("Currently " + new Date()); // now printed when command-line args are printed
     printOptions(true, op);
-    Timing.startTime();
+    Timing tim = new Timing();
 
     Triple<Treebank, Treebank, Treebank> treebanks = TreeAnnotatorAndBinarizer.getAnnotatedBinaryTreebankFromTreebank(trainTreebank, secondaryTrainTreebank, tuneTreebank, op);
-    Timing.tick("done.");
+    tim.tick("done.");
 
     Treebank trainTreebankRaw = trainTreebank;
     trainTreebank = treebanks.first();
