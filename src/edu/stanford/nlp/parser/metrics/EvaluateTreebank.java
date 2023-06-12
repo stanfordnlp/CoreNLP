@@ -11,8 +11,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import edu.stanford.nlp.io.NullOutputStream;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.math.ArrayMath;
@@ -36,7 +39,6 @@ import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ScoredObject;
@@ -557,7 +559,7 @@ public class EvaluateTreebank  {
    * Wrapper for a way to pass in a dataset which may need reprocessing to get parse results
    */
   public static interface EvaluationDataset {
-    List<Pair<ParserQuery, Tree>> dataset(PrintWriter pwErr, PrintWriter pwOut, PrintWriter pwFileOut, PrintWriter pwStats, TreePrint treePrint);
+    void processDataset(PrintWriter pwErr, PrintWriter pwOut, PrintWriter pwFileOut, PrintWriter pwStats, TreePrint treePrint, BiConsumer<ParserQuery, Tree> processResults);
 
     void summarize(PrintWriter pwErr, TreebankLanguagePack tlp);
   }
@@ -603,8 +605,7 @@ public class EvaluateTreebank  {
       }
     }
 
-    public List<Pair<ParserQuery, Tree>> dataset(PrintWriter pwErr, PrintWriter pwOut, PrintWriter pwFileOut, PrintWriter pwStats, TreePrint treePrint) {
-      List<Pair<ParserQuery, Tree>> results = new ArrayList<>();
+    public void processDataset(PrintWriter pwErr, PrintWriter pwOut, PrintWriter pwFileOut, PrintWriter pwStats, TreePrint treePrint, BiConsumer<ParserQuery, Tree> processResults) {
 
       if (op.testOptions.testingThreads != 1) {
         MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
@@ -619,28 +620,26 @@ public class EvaluateTreebank  {
           while (wrapper.peek()) {
             ParserQuery pq = wrapper.poll();
             goldTree = goldTrees.poll();
-            results.add(new Pair<>(pq, goldTree));
+            processResults.accept(pq, goldTree);
           }
         } // for tree iterator
         wrapper.join();
         while (wrapper.peek()) {
           ParserQuery pq = wrapper.poll();
           Tree goldTree = goldTrees.poll();
-          results.add(new Pair<>(pq, goldTree));
+          processResults.accept(pq, goldTree);
         }
       } else {
+        ParserQuery pq = pqFactory.parserQuery();
         for (Tree goldTree : testTreebank) {
           final List<CoreLabel> sentence = getInputSentence(goldTree);
 
           pwErr.println("Parsing [len. " + sentence.size() + "]: " + SentenceUtils.listToString(sentence));
 
-          ParserQuery pq = pqFactory.parserQuery();
           pq.parseAndReport(sentence, pwErr);
-          results.add(new Pair<>(pq, goldTree));
+          processResults.accept(pq, goldTree);
         } // for tree iterator
       }
-
-      return results;
     }
 
     public void summarize(PrintWriter pwErr, TreebankLanguagePack tlp) {
@@ -656,8 +655,10 @@ public class EvaluateTreebank  {
       this.testTreebank = testTreebank;
     }
 
-    public List<Pair<ParserQuery, Tree>> dataset(PrintWriter pwErr, PrintWriter pwOut, PrintWriter pwFileOut, PrintWriter pwStats, TreePrint treePrint) {
-      return testTreebank;
+    public void processDataset(PrintWriter pwErr, PrintWriter pwOut, PrintWriter pwFileOut, PrintWriter pwStats, TreePrint treePrint, BiConsumer<ParserQuery, Tree> processResults) {
+      for (Pair<ParserQuery, Tree> result : testTreebank) {
+        processResults.accept(result.first, result.second);
+      }
     }
 
     public void summarize(PrintWriter pwErr, TreebankLanguagePack tlp) {
@@ -689,55 +690,53 @@ public class EvaluateTreebank  {
     TreePrint treePrint = op.testOptions.treePrint(op.tlpParams);
     TreebankLangParserParams tlpParams = op.tlpParams;
     TreebankLanguagePack tlp = op.langpack();
-    PrintWriter pwOut, pwErr;
+    PrintWriter pwOut, pwEvalErr;
     if (op.testOptions.quietEvaluation) {
       NullOutputStream quiet = new NullOutputStream();
       pwOut = tlpParams.pw(quiet);
-      pwErr = tlpParams.pw(quiet);
+      pwEvalErr = tlpParams.pw(quiet);
     } else {
       pwOut = tlpParams.pw();
-      pwErr = tlpParams.pw(System.err);
+      pwEvalErr = tlpParams.pw(System.err);
     }
     if (op.testOptions.verbose) {
-      testTreebank.summarize(pwErr, tlp);
+      testTreebank.summarize(pwEvalErr, tlp);
     }
     if (op.testOptions.evalb) {
       EvalbFormatWriter.initEVALBfiles(tlpParams);
     }
 
-    PrintWriter pwFileOut = null;
+    final PrintWriter pwFileOut;
     if (op.testOptions.writeOutputFiles) {
       String fname = op.testOptions.outputFilesPrefix + "." + op.testOptions.outputFilesExtension;
       try {
         pwFileOut = op.tlpParams.pw(new FileOutputStream(fname));
       } catch (IOException ioe) {
-        ioe.printStackTrace();
+        throw new RuntimeIOException(ioe);
       }
+    } else {
+      pwFileOut = null;
     }
 
-    PrintWriter pwStats = null;
-    if(op.testOptions.outputkBestEquivocation != null) {
+    final PrintWriter pwStats;
+    if (op.testOptions.outputkBestEquivocation != null) {
       try {
         pwStats = op.tlpParams.pw(new FileOutputStream(op.testOptions.outputkBestEquivocation));
       } catch(IOException ioe) {
-        ioe.printStackTrace();
+        throw new RuntimeIOException(ioe);
       }
+    } else {
+      pwStats = null;
     }
 
-    List<Pair<ParserQuery, Tree>> results = testTreebank.dataset(pwErr, pwOut, pwFileOut, pwStats, treePrint);
-    for (Pair<ParserQuery, Tree> result : results) {
-      ParserQuery pq = result.first;
-      Tree goldTree = result.second;
-      processResults(pq, goldTree, pwErr, pwOut, pwFileOut, pwStats, treePrint);
-    }
+    testTreebank.processDataset(pwEvalErr, pwOut, pwFileOut, pwStats, treePrint,
+                                (pq, goldTree) -> processResults(pq, goldTree, pwEvalErr, pwOut, pwFileOut, pwStats, treePrint));
 
     //Done parsing...print the results of the evaluations
     if (treebankTotalTimer != null) {
       treebankTotalTimer.done("Testing on treebank");
     }
-    if (op.testOptions.quietEvaluation) {
-      pwErr = tlpParams.pw(System.err);
-    }
+    PrintWriter pwErr = tlpParams.pw(System.err);
     if (saidMemMessage) {
       ParserUtils.printOutOfMemory(pwErr);
     }
