@@ -8,7 +8,12 @@ import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.international.pennchinese.CTBErrorCorrectingTreeNormalizer;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Filters;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
