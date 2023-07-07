@@ -54,7 +54,6 @@ public class ChineseHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("DP", new String[][]{{left, "DT", "DP"}}); // there's one instance of DP adjunction
     nonTerminalInfo.put("DVP", new String[][]{{right, "DEV", "DEC"}}); // DVP always has DEV under it
     nonTerminalInfo.put("FRAG", new String[][]{{right, "VV", "NN"}, rightExceptPunct}); //FRAG seems only to be used for bits at the beginnings of articles: "Xinwenshe<DATE>" and "(wan)"
-    nonTerminalInfo.put("INTJ", new String[][]{{right, "INTJ", "IJ", "SP"}});
     nonTerminalInfo.put("IP", new String[][]{{left, "VP", "IP"}, rightExceptPunct});  // CDM July 2010 following email from Pi-Chuan changed preference to VP over IP: IP can be -SBJ, -OBJ, or -ADV, and shouldn't be head
     nonTerminalInfo.put("LCP", new String[][]{{right, "LC", "LCP"}}); // there's a bit of LCP adjunction
     nonTerminalInfo.put("LST", new String[][]{{right, "CD", "PU"}}); // covers all examples
@@ -97,7 +96,9 @@ public class ChineseHeadFinder extends AbstractCollinsHeadFinder {
     // new for CTB9
     nonTerminalInfo.put("DFL", new String[][]{rightExceptPunct});
     nonTerminalInfo.put("EMO", new String[][]{leftExceptPunct}); // left/right doesn't matter
-    nonTerminalInfo.put("INC", new String[][]{leftExceptPunct}); 
+    nonTerminalInfo.put("INC", new String[][]{leftExceptPunct});
+    // old version suitable for v5.1 ... does not cover "我的天 哪" for example
+    // nonTerminalInfo.put("INTJ", new String[][]{{right, "INTJ", "IJ", "SP"}});
     nonTerminalInfo.put("INTJ", new String[][]{leftExceptPunct}); 
     nonTerminalInfo.put("OTH", new String[][]{leftExceptPunct}); 
     nonTerminalInfo.put("SKIP", new String[][]{leftExceptPunct}); 
