@@ -178,7 +178,11 @@ public abstract class GrammaticalStructure implements Serializable  {
     if (hf == null) {
       throw new AssertionError("Cannot use null HeadFinder");
     }
-    root.percolateHeads(hf);
+    try {
+      root.percolateHeads(hf);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("Cannot process tree:\n" + t, e);
+    }
     if (root.value() == null) {
       root.setValue("ROOT");  // todo: cdm: it doesn't seem like this line should be here
     }
