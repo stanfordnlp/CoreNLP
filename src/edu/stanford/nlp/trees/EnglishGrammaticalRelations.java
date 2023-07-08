@@ -935,15 +935,24 @@ public class EnglishGrammaticalRelations {
   /**
    * The "numeric modifier" grammatical relation.  A numeric
    * modifier of an NP is any number phrase that serves to modify
-   * the meaning of the NP.<p>
+   * the meaning of the NP.
    * <br>
+   * Also, the enumeration of lists have this relation to the head of
+   * the list item.  For that, we allow the list of constituents which
+   * have a list under them in any of the training data, as the parser
+   * will likely not produce anything else anyway.
+   * <br>
+   * PTB: PP NP X S FRAG <br>
+   * EWT: SQ SBARQ SINV SBAR NML VP <br>
+   * Craft: PRN <br>
+   * OntoNotes: ADJP <br>
    * Example: <br>
    * "Sam eats 3 sheep" &rarr;
    * {@code num}(sheep, 3)
    */
   public static final GrammaticalRelation NUMERIC_MODIFIER =
     new GrammaticalRelation(Language.English, "num", "numeric modifier",
-        MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|ADJP|WHADJP|QP", tregexCompiler,
+        MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|ADJP|WHADJP|QP|PP|X|S|FRAG|SQ|SBARQ|SINV|SBAR|VP|PRN", tregexCompiler,
             "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (CD|QP=target !$- CC)",
             // $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
             "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: (QP !< /^[$]$/))",
@@ -952,7 +961,9 @@ public class EnglishGrammaticalRelations {
             // Note that the earlier tregexes are usually enough to cover those phrases, such as when
             // the QP is by itself in an ADJP or NP, but sometimes it can have other siblings such
             // as in the phrase "$ 100 million or more".  In that case, this next expression is needed.
-            "QP < QP=target < /^[$]$/");
+            "QP < QP=target < /^[$]$/",
+            // Lists are treated as nummod in UD_English-EWT
+            "PP|NP|X|S|FRAG|SQ|SBARQ|SINV|SBAR|NML|VP|PRN|ADJP < LST=target");
 
 
   /**
