@@ -199,6 +199,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
 
     // add the constituent XS (special node to add a layer in a QP tree introduced in our QPTreeTransformer)
     nonTerminalInfo.put("XS", new String[][]{{"right", "IN"}});
+    // XSL is similar to XS, but is specifically for left headed phrases
+    nonTerminalInfo.put("XSL", new String[][]{{"left"}});
 
     // add a rule to deal with the CoNLL data
     nonTerminalInfo.put("EMBED", new String[][]{{"right", "INTJ"}});

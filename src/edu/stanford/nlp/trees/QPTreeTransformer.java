@@ -67,6 +67,14 @@ public class QPTreeTransformer implements TreeTransformer {
   private static TsurgeonPattern flattenNPoverQPTsurgeon =
     Tsurgeon.parseOperation("[createSubtree QP left right] [excise left left] [excise right right]");
 
+  private static TregexPattern multiwordXSLTregex =
+    // captures "up to"
+    // once "up to" is captured in the XSL, the following XS operation won't accidentally grab it
+    TregexPattern.compile("QP < ( /^RB|IN|RP/=left < /^(?:up)$/ ) < ( /^IN|TO/=right < /^(?:to)$/ $- =left )");
+
+  private static TsurgeonPattern multiwordXSLTsurgeon =
+    Tsurgeon.parseOperation("createSubtree XSL left right");
+
   private static TregexPattern multiwordXSTregex =
     // TODO: should add NN and $ to the numeric expressions captured
     //   NN is for words such as "half" which are probably misparsed
@@ -109,8 +117,10 @@ public class QPTreeTransformer implements TreeTransformer {
    */
   public Tree QPtransform(Tree t) {
     t = Tsurgeon.processPattern(flattenNPoverQPTregex, flattenNPoverQPTsurgeon, t);
-    if ( ! universalDependencies)
+    if (!universalDependencies) {
+      t = Tsurgeon.processPattern(multiwordXSLTregex, multiwordXSLTsurgeon, t);
       t = Tsurgeon.processPattern(multiwordXSTregex, multiwordXSTsurgeon, t);
+    }
     t = Tsurgeon.processPattern(splitCCTregex, splitCCTsurgeon, t);
     t = Tsurgeon.processPattern(splitMoneyTregex, splitMoneyTsurgeon, t);
     return t;

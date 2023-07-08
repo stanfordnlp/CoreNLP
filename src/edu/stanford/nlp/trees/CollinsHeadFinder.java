@@ -72,6 +72,8 @@ public class CollinsHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("TYPO", new String[][] {{"left"}}); // another crap rule, for Brown (Roger)
     nonTerminalInfo.put("EDITED", new String[][] {{"left"}});  // crap rule for Switchboard (if don't delete EDITED nodes)
     nonTerminalInfo.put("XS", new String[][] {{"right", "IN"}}); // rule for new structure in QP
+    // XSL is similar to XS, but is specifically for left headed phrases
+    nonTerminalInfo.put("XSL", new String[][]{{"left"}});
   }
 
   @Override

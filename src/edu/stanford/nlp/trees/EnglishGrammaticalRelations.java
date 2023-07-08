@@ -980,16 +980,10 @@ public class EnglishGrammaticalRelations {
   public static final GrammaticalRelation QUANTIFIER_MODIFIER =
     new GrammaticalRelation(Language.English, "quantmod", "quantifier modifier",
         MODIFIER, "QP", tregexCompiler,
-            // RP is because sometimes "up" in "up to ___" gets tagged RP in PTB
-            // this is probably a mistake - generally it is tagged IN
-            // but sometimes the tagger follows suit
-            // there are no conflicts elsewhere in the targets of a QP,
-            // so there should be no need to specifically check for the phrase "up to" for `up_RP`
-            "QP < IN|RB|RBR|RBS|PDT|DT|JJ|JJR|JJS|XS|RP=target",
-            // TO is for the "to" in "up to ___"
-            // TODO: but currently not working for up_IN to_IN foo_CD, since it wants to make TO the head of IN!
-            "(QP < (TO=target < /^(?i:to)$/) < (__=up < /^(?i:up)$/)) : (=up $++ =target)");
-
+            // XS and XSL is to match "up to" or similar phrases
+            // after the QPTreeTransformer's operation
+            "QP < IN|RB|RBR|RBS|PDT|DT|JJ|JJR|JJS|XS|XSL|RP=target"
+        );
 
   /**
    * The "noun compound modifier" grammatical relation.  A noun compound
@@ -1275,7 +1269,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation MULTI_WORD_EXPRESSION =
     new GrammaticalRelation(Language.English, "mwe", "multi-word expression",
-        MODIFIER, "PP|XS|ADVP|CONJP", tregexCompiler,
+        MODIFIER, "PP|XS|XSL|ADVP|CONJP", tregexCompiler,
             "PP|XS < (IN|TO < as|of|at|to|in) < (JJ|IN|JJR|JJS|NN=target < such|because|Because|least|instead|due|Due|addition|to)",
             "ADVP < (RB|IN < well) < (IN|RB|JJS=target < as)",
             // TODO: perhaps the phrase "all but" is more like "all" and should have that as the head
@@ -1283,7 +1277,9 @@ public class EnglishGrammaticalRelations {
             "CONJP < (RB < rather|well|instead) < (RB|IN=target < as|than|of)",
             "CONJP < (IN < in) < (NN|TO=target < addition|to)",
             // todo: note inconsistent head finding for "rather than"!
-            "XS < JJR|JJS=target" // more than, fewer than, well over -- maybe change some of these?
+            "XS < JJR|JJS=target", // more than, fewer than, well over -- maybe change some of these?
+            // currently only "up to"
+            "XSL < __=target"
     );
 
   /* mihai: this block needs to be uncommented to get the KBP 2010 system to work (due to the cached sentences using old code)

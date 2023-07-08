@@ -138,6 +138,8 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
 
     nonTerminalInfo.put("META", new String[][] {{"left"}});  // rule for OntoNotes, but maybe should just be deleted in TreeReader??
     nonTerminalInfo.put("XS", new String[][] {{"right", "IN"}}); // rule for new structure in QP, introduced by Stanford in QPTreeTransformer
+    // XSL is similar to XS, but is specifically for left headed phrases
+    nonTerminalInfo.put("XSL", new String[][]{{"left"}});
     // nonTerminalInfo.put(null, new String[][] {{"left"}});  // rule for OntoNotes from Michel, but it would be better to fix this in TreeReader or to use a default rule?
 
     // todo: Uncomment this line if we always want to take the leftmost if no head rule is defined for the mother category.
