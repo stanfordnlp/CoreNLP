@@ -1111,8 +1111,10 @@ public class EnglishGrammaticalRelations {
             // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
             // they wrote asking the SEC to ...
             "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") )",
-            "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
-            "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)",
+            // NML in the following rules is to cover some errors by the parser
+            // It makes no difference to PTB
+            "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS|NML)",
+            "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS|NML)",
             "SBARQ < WHNP < (S=target < (VP <1 TO))");
 
 

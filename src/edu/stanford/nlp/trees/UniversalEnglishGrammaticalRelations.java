@@ -1027,9 +1027,10 @@ public class UniversalEnglishGrammaticalRelations {
           //former pcomp
           "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) < /^((?!(PP|CC|CONJP|,)).)*$/  !< (@PP <1 IN|RB|MWE|PCONJP|VBN|JJ <2 @NP))  !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
 
-
-          "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
-          "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)");
+          // NML in the following rules is to cover some errors by the parser
+          // It makes no difference to PTB
+          "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS|NML)",
+          "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS|NML)");
           // [todo [cdm2019]: Add somthing for clause acl not acl:relcl like: (NP (NP no question) (SBAR that (S (NP some) (VP contracted (NP diseases)))))
 
   /**
