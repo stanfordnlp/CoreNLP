@@ -1066,6 +1066,8 @@ public class UniversalEnglishGrammaticalRelations {
             "/^(?:VP|ADJP|JJP|WHADJP|SQ?|SBARQ?|SINV|XS|RRC|(?:WH)?NP(?:-TMP|-ADV)?)$/ < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + ETC_PAT + " [!<+(/ADVP/) (@ADVP < (IN < /(?i:at)/)) |  !<+(/ADVP/) (@ADVP < NP)] )",
             "QP < IN|RB|RBR|RBS|PDT|DT|JJ|JJR|JJS|XS=target", //quantmod relation in original SD
             "QP < (MWE=target < (JJR|RBR|IN < /^(?i)(more|less)$/) < (IN < /^(?i)than$/))", //more than / less than
+            // TODO: could condense with the previous rule to save a little time
+            "QP < (MWE=target < (__ < /^(?i)up$/) < (__ < /^(?i)to$/))", // up to
             // avoids adverb conjunctions matching as advmod; added JJ to catch How long
             // "!< no" so we can get neg instead for "no foo" when no is tagged as RB
             // we allow CC|CONJP as long as it is not between the target and the head
