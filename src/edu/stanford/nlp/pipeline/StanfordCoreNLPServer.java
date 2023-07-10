@@ -11,6 +11,8 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.scenegraph.RuleBasedParser;
+import edu.stanford.nlp.scenegraph.SceneGraph;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.semgrex.ProcessSemgrexRequest;
@@ -108,6 +110,8 @@ public class StanfordCoreNLPServer implements Runnable {
    *  one we created.
    */
   private SoftReference<Pair<String, StanfordCoreNLP>> lastPipeline = new SoftReference<>(null);
+
+  private RuleBasedParser sceneParser = null;
 
   /**
    * An executor to time out CoreNLP execution with.
@@ -295,35 +299,18 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws ClassNotFoundException Thrown if we cannot load the serializer.
    */
   private Annotation getDocument(Properties props, HttpExchange httpExchange) throws IOException, ClassNotFoundException {
-    String inputFormat = props.getProperty("inputFormat", "text");
+    final String inputFormat = props.getProperty("inputFormat", "text");
     String date = props.getProperty("date");
     switch (inputFormat) {
       case "text":
-        // The default encoding by the HTTP standard is ISO-8859-1, but most
-        // real users of CoreNLP would likely assume UTF-8 by default.
-        String defaultEncoding = this.strict ? "ISO-8859-1" : "UTF-8";
-        // Get the encoding
         Headers headers = httpExchange.getRequestHeaders();
-        String encoding;
         // the original default behavior of the server was to
         // unescape, so let's assume by default that the input text is
         // escaped.  if the Content-type is set to text we will know
         // we shouldn't unescape after all
-        String contentType = URL_ENCODED;
-        if (headers.containsKey("Content-type")) {
-          contentType = headers.getFirst("Content-type").split(";")[0].trim();
-          String[] charsetPair = Arrays.stream(headers.getFirst("Content-type").split(";"))
-              .map(x -> x.split("="))
-              .filter(x -> x.length > 0 && "charset".equals(x[0]))
-              .findFirst().orElse(new String[]{"charset", defaultEncoding});
-          if (charsetPair.length == 2) {
-            encoding = charsetPair[1];
-          } else {
-            encoding = defaultEncoding;
-          }
-        } else {
-          encoding = defaultEncoding;
-        }
+        final String contentType = getContentType(headers);
+        // Get the encoding
+        final String encoding = getEncoding(headers);
 
         String text = IOUtils.slurpReader(IOUtils.encodedInputStreamReader(httpExchange.getRequestBody(), encoding));
         if (contentType.equals(URL_ENCODED)) {
@@ -352,6 +339,71 @@ public class StanfordCoreNLPServer implements Runnable {
     }
   }
 
+  private String getContentType(Headers headers) {
+    String contentType = URL_ENCODED;
+    if (headers.containsKey("Content-type")) {
+      contentType = headers.getFirst("Content-type").split(";")[0].trim();
+    }
+    return contentType;
+  }
+
+  private String getEncoding(Headers headers) {
+    // The default encoding by the HTTP standard is ISO-8859-1, but most
+    // real users of CoreNLP would likely assume UTF-8 by default.
+    String defaultEncoding = this.strict ? "ISO-8859-1" : "UTF-8";
+    if (headers.containsKey("Content-type")) {
+      String[] charsetPair = Arrays.stream(headers.getFirst("Content-type").split(";"))
+          .map(x -> x.split("="))
+          .filter(x -> x.length > 0 && "charset".equals(x[0]))
+          .findFirst().orElse(new String[]{"charset", defaultEncoding});
+      if (charsetPair.length == 2) {
+        return charsetPair[1];
+      } else {
+        return defaultEncoding;
+      }
+    } else {
+      return defaultEncoding;
+    }
+  }
+
+  /**
+   * Get a SceneGraph request from the query, either from a query parameter (q)
+   * or from the body of the request
+   * <br>
+   * TODO: don't actually know if the scenegraph parser is threadsafe.
+   *
+   * @return query
+   */
+  private String getSceneGraphRequest(Properties props, HttpExchange httpExchange) throws IOException, ClassNotFoundException {
+    final String inputFormat = props.getProperty("inputFormat", "text");
+    if (!inputFormat.equals("text")) {
+      throw new IOException("Unhandled input format for scenegraph: " + inputFormat);
+    }
+    String query = props.getProperty("q", null);
+    if (query != null) {
+      return query;
+    }
+
+    Headers headers = httpExchange.getRequestHeaders();
+    // the original default behavior of the server was to
+    // unescape, so let's assume by default that the input text is
+    // escaped.  if the Content-type is set to text we will know
+    // we shouldn't unescape after all
+    final String contentType = getContentType(headers);
+    // Get the encoding
+    final String encoding = getEncoding(headers);
+
+    String text = IOUtils.slurpReader(IOUtils.encodedInputStreamReader(httpExchange.getRequestBody(), encoding));
+    if (contentType.equals(URL_ENCODED)) {
+      try {
+        text = URLDecoder.decode(text, encoding);
+      } catch (IllegalArgumentException e) {
+        // ignore decoding errors so that libraries which don't specify a content type might not fail
+      }
+    }
+
+    return text;
+  }
 
   /**
    * Create (or retrieve) a StanfordCoreNLP object corresponding to these properties.
@@ -392,6 +444,29 @@ public class StanfordCoreNLPServer implements Runnable {
     }
 
     return impl;
+  }
+
+  /**
+   * This server has at most one SceneGraph parser, and it is not created at startup time
+   * as most applications will not use it.
+   * <br>
+   * This function call creates it in a synchronized manner, so at most one is ever created.
+   * <br>
+   * @return RuleBasedParser
+   */
+  private RuleBasedParser mkSceneGraphParser() {
+    if (sceneParser != null) {
+      return sceneParser;
+    }
+    synchronized (this) {
+      // in case it got created in another thread
+      if (sceneParser != null) {
+        return sceneParser;
+      }
+      RuleBasedParser parser = new RuleBasedParser();
+      sceneParser = parser;
+      return parser;
+    }
   }
 
   /**
@@ -1404,6 +1479,115 @@ public class StanfordCoreNLPServer implements Runnable {
     }
   }
 
+  /**
+   * A handler for executing scenegraph on text
+   */
+  protected class SceneGraphHandler implements HttpHandler {
+
+    /**
+     * An authenticator to determine if we can perform this API request.
+     */
+    private final Predicate<Properties> authenticator;
+
+    /**
+     * Create a new SceneGraphHandler.
+     * <br>
+     * It's not clear what a callback would do with this, since there's no Annotation at the end of a SceneGraph call, so we just skip it
+     * @param callback The callback to call when annotation has finished.
+     */
+    public SceneGraphHandler(Predicate<Properties> authenticator) {
+      this.authenticator = authenticator;
+    }
+
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+      if (onBlockList(httpExchange)) {
+        respondUnauthorized(httpExchange);
+        return;
+      }
+      setHttpExchangeResponseHeaders(httpExchange);
+
+      Properties props = getProperties(httpExchange);
+
+      if (authenticator != null && ! authenticator.test(props)) {
+        respondUnauthorized(httpExchange);
+        return;
+      }
+      Map<String, String> params = getURLParams(httpExchange.getRequestURI());
+
+      Future<Pair<String, SceneGraph>> response = corenlpExecutor.submit(() -> {
+          try {
+            // Get the document
+            String request = getSceneGraphRequest(props, httpExchange);
+            if (request == null || request.equals("")) {
+              respondBadInput("Blank input in scenegraph", httpExchange);
+              return Pair.makePair("", null);
+            }
+            RuleBasedParser parser = mkSceneGraphParser();
+
+            SceneGraph graph = parser.parse(request);
+            if (graph == null) {
+              respondError("Something weird happened and the text could not be parsed!", httpExchange);
+            }
+            return Pair.makePair(request, graph);
+          } catch (RuntimeException e) {
+            warn(e);
+            try {
+              respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
+            } catch (IOException ignored) {
+            }
+          }
+          return Pair.makePair("", null);
+        });
+
+      // Send response
+      try {
+        int timeout = getTimeout(props, httpExchange);
+        if (sceneParser == null) {
+          timeout = timeout + 60000; // add 60 seconds for loading a pipeline if needed
+        }
+        Pair<String, SceneGraph> pair = response.get(timeout, TimeUnit.MILLISECONDS);
+        SceneGraph graph = pair.second;
+        if (graph == null) {
+          // already responded with an error
+          return;
+        }
+
+        final StanfordCoreNLP.OutputFormat of;
+        try {
+          of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat", "json").toUpperCase(Locale.ROOT));
+        } catch (RuntimeException e) {
+          String badFormat = props.getProperty("outputFormat");
+          log("Received bad output format in scenegraph '" + badFormat + "'");
+          respondBadInput("Interface scenegraph does not handle output format '" + badFormat + "'", httpExchange);
+          return;
+        }
+
+        final String result;
+        switch(of) {
+        case JSON:
+          int id = PropertiesUtils.getInt(props, "id", -1);
+          String url = props.getProperty("url", "");
+          String phrase = pair.first;
+          result = graph.toJSON(id, url, phrase);
+          break;
+        case TEXT:
+          result = graph.toReadableString();
+          break;
+        default:
+          log("Received unhanded output format in scenegraph '" + of + "'");
+          respondBadInput("Interface scenegraph does not handle output format " + of, httpExchange);
+          return;
+        }
+
+        byte[] content = result.getBytes();
+        sendAndGetResponse(httpExchange, content);
+      } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        respondError("Timeout when executing scenegraph query", httpExchange);
+      }
+    }
+  }
+
   private static void sendAndGetResponse(HttpExchange httpExchange, byte[] response) throws IOException {
     if (response.length > 0) {
       httpExchange.getResponseHeaders().add("Content-type", "application/json");
@@ -1547,6 +1731,7 @@ public class StanfordCoreNLPServer implements Runnable {
       withAuth(server.createContext(uriContext+"/tokensregex", new TokensRegexHandler(authenticator, callback)), basicAuth);
       withAuth(server.createContext(uriContext+"/semgrex", new SemgrexHandler(authenticator, callback)), basicAuth);
       withAuth(server.createContext(uriContext+"/tregex", new TregexHandler(authenticator, callback)), basicAuth);
+      withAuth(server.createContext(uriContext+"/scenegraph", new SceneGraphHandler(authenticator)), basicAuth);
       withAuth(server.createContext(uriContext+"/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js", "application/javascript")), basicAuth);
       withAuth(server.createContext(uriContext+"/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css", "text/css")), basicAuth);
       withAuth(server.createContext(uriContext+"/corenlp-parseviewer.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-parseviewer.js", "application/javascript")), basicAuth);
