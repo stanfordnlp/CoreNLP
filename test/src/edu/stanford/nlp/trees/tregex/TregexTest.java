@@ -497,13 +497,13 @@ public class TregexTest extends TestCase {
     runTest("foo <: bar", "(foo (bar 1))", "(foo (bar 1))");
     runTest("foo <: bar", "(foo (bar 1) (bar 2))");
     runTest("foo <: bar", "(foo)");
-    runTest("foo <: bar", "(foo (baz (bar))))");
+    runTest("foo <: bar", "(foo (baz (bar)))");
     runTest("foo <: bar", "(foo 1)");
 
     runTest("bar >: foo", "(foo (bar 1))", "(bar 1)");
     runTest("bar >: foo", "(foo (bar 1) (bar 2))");
     runTest("bar >: foo", "(foo)");
-    runTest("bar >: foo", "(foo (baz (bar))))");
+    runTest("bar >: foo", "(foo (baz (bar)))");
     runTest("bar >: foo", "(bar (foo 1))");
 
     runTest("/.*/ >: foo", "(a (foo (bar 1)) (foo (baz 2)))",
