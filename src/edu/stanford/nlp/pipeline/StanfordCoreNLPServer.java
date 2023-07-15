@@ -369,6 +369,8 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * Get a SceneGraph request from the query, either from a query parameter (q)
    * or from the body of the request
+   * <br>
+   * TODO: don't actually know if the scenegraph parser is threadsafe.
    *
    * @return query
    */
