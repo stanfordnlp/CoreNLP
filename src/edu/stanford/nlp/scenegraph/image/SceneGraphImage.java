@@ -95,41 +95,41 @@ public class SceneGraphImage implements Serializable {
 
   @SuppressWarnings("unchecked")
   public String toJSON() {
-   JSONObject json = new JSONObject();
-   json.put("id", this.id);
-   json.put("height", this.height);
-   json.put("width", this.width);
-   json.put("url", this.url);
+    JSONObject json = new JSONObject();
+    json.put("id", this.id);
+    json.put("height", this.height);
+    json.put("width", this.width);
+    json.put("url", this.url);
 
-   JSONArray attributes = new JSONArray();
-   for (SceneGraphImageAttribute attr : this.attributes) {
-     attributes.add(attr.toJSONObject(this));
-   }
+    JSONArray attributes = new JSONArray();
+    for (SceneGraphImageAttribute attr : this.attributes) {
+      attributes.add(attr.toJSONObject(this));
+    }
 
-   json.put("attributes", attributes);
+    json.put("attributes", attributes);
 
-   JSONArray objects = new JSONArray();
-   for (SceneGraphImageObject obj : this.objects) {
-     objects.add(obj.toJSONObject(this));
-   }
+    JSONArray objects = new JSONArray();
+    for (SceneGraphImageObject obj : this.objects) {
+      objects.add(obj.toJSONObject(this));
+    }
 
-   json.put("objects", objects);
+    json.put("objects", objects);
 
-   JSONArray regions = new JSONArray();
-   for (SceneGraphImageRegion region : this.regions) {
-     regions.add(region.toJSONObject(this));
-   }
+    JSONArray regions = new JSONArray();
+    for (SceneGraphImageRegion region : this.regions) {
+      regions.add(region.toJSONObject(this));
+    }
 
-   json.put("regions", regions);
+    json.put("regions", regions);
 
-   JSONArray relationships = new JSONArray();
-   for (SceneGraphImageRelationship relation : this.relationships) {
-     relationships.add(relation.toJSONObject(this));
-   }
+    JSONArray relationships = new JSONArray();
+    for (SceneGraphImageRelationship relation : this.relationships) {
+      relationships.add(relation.toJSONObject(this));
+    }
 
-   json.put("relationships", relationships);
+    json.put("relationships", relationships);
 
-   return json.toJSONString();
+    return json.toJSONString();
   }
 
 
@@ -165,10 +165,10 @@ public class SceneGraphImage implements Serializable {
   }
 
   public void addAttribute(SceneGraphImageAttribute attr) {
-   this.attributes.add(attr);
-   if (attr.region != null) {
-     attr.region.attributes.add(attr);
-   }
+    this.attributes.add(attr);
+    if (attr.region != null) {
+      attr.region.attributes.add(attr);
+    }
   }
 
   public void addRelationship(SceneGraphImageRelationship reln) {
