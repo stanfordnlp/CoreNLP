@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import static org.junit.Assert.assertEquals;
 
 import edu.stanford.nlp.util.Sets;
@@ -19,6 +21,18 @@ import edu.stanford.nlp.util.Triple;
  * @author John Bauer
  */
 public class RuleBasedParserITest {
+
+  public static AbstractSceneGraphParser parser;
+
+  @BeforeClass
+  public static void initParser() {
+    parser = new RuleBasedParser();
+  }
+
+  @AfterClass
+  public static void disposeParser() {
+    parser = null;
+  }
 
   /**
    * The format of a test is:
@@ -60,10 +74,9 @@ public class RuleBasedParserITest {
       assertEquals(expectedAttributes, attributes);
     }
   }
-  
+
   @Test
   public void testSceneGraph() {
-    AbstractSceneGraphParser parser = new RuleBasedParser();
     runTest(parser,
             "A man is riding a horse.",
             Arrays.asList(new Triple<>("man-2", "ride", "horse-6")),
@@ -105,5 +118,22 @@ public class RuleBasedParserITest {
             Arrays.asList(new Triple<>("cat-2", "eat", "fish-5")),
             Arrays.asList(Arrays.asList("cat-2"),
                           Arrays.asList("fish-5")));
+  }
+
+  @Test
+  public void testJson() {
+    String text = "A smiling man is riding a horse.";
+    SceneGraph scene = parser.parse(text);
+
+    String expectedJSON = "{\"relationships\":[{\"predicate\":\"ride\",\"subject\":0,\"text\":[\"man\",\"ride\",\"horse\"],\"object\":1}],\"phrase\":\"A smiling man is riding a horse.\",\"objects\":[{\"names\":[\"man\"]},{\"names\":[\"horse\"]}],\"attributes\":[{\"predicate\":\"is\",\"subject\":0,\"attribute\":\"smile\",\"text\":[\"man\",\"is\",\"smile\"],\"object\":\"smile\"}],\"id\":1,\"url\":\"www.stanford.edu\"}";
+    assertEquals(expectedJSON, scene.toJSON(1, "www.stanford.edu", text));
+
+    // The json for the nodes is just the word of the node
+    List<String> expectedNodes = Arrays.asList("man", "horse");
+    List<SceneGraphNode> nodes = scene.nodeListSorted();
+    assertEquals(expectedNodes.size(), nodes.size());
+    for (int i = 0; i < nodes.size(); ++i) {
+      assertEquals(expectedNodes.get(i), nodes.get(i).toJSONString());
+    }
   }
 }
