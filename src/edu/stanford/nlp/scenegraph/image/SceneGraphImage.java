@@ -49,43 +49,43 @@ public class SceneGraphImage implements Serializable {
   @SuppressWarnings("unchecked")
   public static SceneGraphImage readFromJSON(String json) {
     try {
-    SceneGraphImage img = new SceneGraphImage();
+      SceneGraphImage img = new SceneGraphImage();
 
-    JSONObject obj = (JSONObject) JSONValue.parse(json);
+      JSONObject obj = (JSONObject) JSONValue.parse(json);
 
-    JSONArray regions = (JSONArray) obj.get("regions");
-    if (regions != null) {
-      for (JSONObject region : (List<JSONObject>) regions) {
-        img.regions.add(SceneGraphImageRegion.fromJSONObject(img, region));
+      JSONArray regions = (JSONArray) obj.get("regions");
+      if (regions != null) {
+        for (JSONObject region : (List<JSONObject>) regions) {
+          img.regions.add(SceneGraphImageRegion.fromJSONObject(img, region));
+        }
       }
-    }
 
-    JSONArray objects = (JSONArray) obj.get("objects");
-    for (JSONObject object: (List<JSONObject>) objects) {
-      img.objects.add(SceneGraphImageObject.fromJSONObject(img, object));
-    }
+      JSONArray objects = (JSONArray) obj.get("objects");
+      for (JSONObject object: (List<JSONObject>) objects) {
+        img.objects.add(SceneGraphImageObject.fromJSONObject(img, object));
+      }
 
-    JSONArray attributes = (JSONArray) obj.get("attributes");
-    for (JSONObject object: (List<JSONObject>) attributes) {
-      img.addAttribute(SceneGraphImageAttribute.fromJSONObject(img, object));
-    }
+      JSONArray attributes = (JSONArray) obj.get("attributes");
+      for (JSONObject object: (List<JSONObject>) attributes) {
+        img.addAttribute(SceneGraphImageAttribute.fromJSONObject(img, object));
+      }
 
-    JSONArray relationships = (JSONArray) obj.get("relationships");
-    for (JSONObject relation: (List<JSONObject>) relationships) {
-      img.addRelationship(SceneGraphImageRelationship.fromJSONObject(img, relation));
-    }
+      JSONArray relationships = (JSONArray) obj.get("relationships");
+      for (JSONObject relation: (List<JSONObject>) relationships) {
+        img.addRelationship(SceneGraphImageRelationship.fromJSONObject(img, relation));
+      }
 
-    if (obj.get("id") instanceof Number) {
-      img.id = ((Number) obj.get("id")).intValue();
-    } else {
-      img.id = Integer.parseInt(((String) obj.get("id")));
-    }
-    img.height = ((Number) obj.get("height")).intValue();
-    img.width = ((Number) obj.get("width")).intValue();
+      if (obj.get("id") instanceof Number) {
+        img.id = ((Number) obj.get("id")).intValue();
+      } else {
+        img.id = Integer.parseInt(((String) obj.get("id")));
+      }
+      img.height = ((Number) obj.get("height")).intValue();
+      img.width = ((Number) obj.get("width")).intValue();
 
-    img.url = (String) obj.get("url");
+      img.url = (String) obj.get("url");
 
-    return img;
+      return img;
     } catch (Exception e) {
       System.err.println("Couldn't parse " + json);
       e.printStackTrace();
