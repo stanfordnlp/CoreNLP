@@ -131,22 +131,51 @@ class CoordinationPattern extends TregexPattern {
       }
     }
 
+    @Override
+    boolean isReset() {
+      // if we partially or completely went through the node,
+      // we are obviously not reset
+      if (currChild != 0) {
+        return false;
+      }
+      // if we're at the start, and the first child is not
+      // initialized, we haven't done anything yet
+      if (children[0] == null) {
+        return true;
+      }
+      // otherwise, we may have initialized the child
+      // on a previous time through, then reset it
+      return (children[0].isReset());
+    }
+
     // find the next local match
     @Override
     public boolean matches() {  // also known as "FUN WITH LOGIC"
       if (considerAll) {
         // these are the cases where all children must be considered to match
         if (currChild < 0) {
-          // a past call to this node either got that it failed
+          // A past call to this node either got that it failed
           // matching or that it was a negative match that succeeded,
           // which we only want to accept once
-          return myNode.isOptional();
+          // Note that in the case of isOptional nodes, we want to NOT
+          // match again.  The previous time through failed to match,
+          // but was already returned as true because of isOptional().
+          // If we match again, it will infinite loop because it
+          // keeps "succeeding" at the optional match
+          return false;
         }
 
         // we must have happily reached the end of a match the last
         // time we were here
+        // we track pastSuccess so that if we reach a failure in
+        // an optional node after already succeeding, we don't return
+        // another success, which would be a spurious extra match
+        final boolean pastSuccess;
         if (currChild == children.length) {
           --currChild;
+          pastSuccess = true;
+        } else {
+          pastSuccess = false;
         }
 
         while (true) {
@@ -173,7 +202,7 @@ class CoordinationPattern extends TregexPattern {
             // earlier location.
             --currChild;
             if (currChild < 0) {
-              return myNode.isOptional();
+              return myNode.isOptional() && !pastSuccess;
             }
           } else {
             // oops, this didn't work - negated disjunction version
@@ -188,6 +217,16 @@ class CoordinationPattern extends TregexPattern {
           }
         }
       } else {
+        // Track the first time through this loop
+        // This will let us handle optional disjunctions
+        // Note that we can't just check currChild, since it might be 0
+        // for a match that already hit once on the first child
+        // We also can't check that children[0] is not created, since
+        // it might be created and then later reset if this node is
+        // reached a second time after something higher in the tree
+        // already matched
+        final boolean firstTime = isReset();
+
         // these are the cases where a single child node can make you match
         for (; currChild < children.length; currChild++) {
           if (children[currChild] == null) {
@@ -214,7 +253,9 @@ class CoordinationPattern extends TregexPattern {
             children[resetChild].resetChildIter();
           }
         }
-        return myNode.isOptional();
+        // only accept an optional disjunction if this is the first time through
+        // otherwise, we'd be accepting the same disjunction over and over
+        return firstTime && myNode.isOptional();
       }
     }
 

@@ -356,6 +356,11 @@ public class DescriptionPattern extends TregexPattern  {
       }
     }
 
+    @Override
+    boolean isReset() {
+      return (treeNodeMatchCandidateIterator == null);
+    }
+
     /* goes to the next node in the tree that is a successful match to my description pattern.
      * This is the hotspot method in running tregex, but not clear how to make it faster. */
     // when finished = false; break; is called, it means I successfully matched.

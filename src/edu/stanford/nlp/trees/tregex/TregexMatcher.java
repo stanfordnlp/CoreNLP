@@ -91,6 +91,16 @@ public abstract class TregexMatcher {
   abstract void resetChildIter();
 
   /**
+   * Specifically useful for CoordinationPattern optional disjunctions. <br>
+   * We want to know if the node has succeeded at least once already,
+   * in which case we won't succeed in the case of a failure of all
+   * remaining children. <br>
+   * Checking this instead of keeping a variable will be slightly faster
+   * for the standard use case of not using disjunctions
+   */
+  abstract boolean isReset();
+
+  /**
    * Does the pattern match the tree?  It's actually closer to java.util.regex's
    * "lookingAt" in that the root of the tree has to match the root of the pattern
    * but the whole tree does not have to be "accounted for".  Like with lookingAt
