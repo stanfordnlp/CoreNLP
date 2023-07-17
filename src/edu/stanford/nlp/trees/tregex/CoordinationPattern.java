@@ -58,12 +58,15 @@ class CoordinationPattern extends TregexPattern {
       if (isNegated()) {
         sb.append("!");
       }
+      if (isOptional()) {
+        sb.append("?");
+      }
       sb.append('[');
       for (Iterator<TregexPattern> iter = children.iterator(); iter.hasNext();) {
         TregexPattern node = iter.next();
         sb.append(node.toString());
         if (iter.hasNext()) {
-          sb.append(" |");
+          sb.append(" | ");
         }
       }
       sb.append(']');

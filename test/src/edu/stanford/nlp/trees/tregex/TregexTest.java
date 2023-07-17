@@ -1566,6 +1566,9 @@ public class TregexTest extends TestCase {
 
     pattern = TregexPattern.compile("A ?< B");
     assertEquals("Root (A ?< B )", pattern.toString());
+
+    pattern = TregexPattern.compile("A ?[< B | < C]");
+    assertEquals("Root (A ?[< B  | < C ])", pattern.toString());
   }
 
   /**
