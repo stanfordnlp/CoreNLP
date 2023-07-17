@@ -5,8 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -119,63 +122,63 @@ public class SceneGraph {
 
   @SuppressWarnings("unchecked")
   public String toJSON(int imageID, String url, String phrase) {
-    JSONObject obj = new JSONObject();
-    obj.put("id", imageID);
-    obj.put("url", url);
-    obj.put("phrase", phrase);
+    JsonObjectBuilder obj = Json.createObjectBuilder();
+    obj.add("id", imageID);
+    obj.add("url", url);
+    obj.add("phrase", phrase);
 
     List<SceneGraphNode> objects = this.nodeListSorted();
 
-    JSONArray attrs = new JSONArray();
+    JsonArrayBuilder attrs = Json.createArrayBuilder();
     for (SceneGraphNode node : objects) {
       for (SceneGraphAttribute attr : node.getAttributes()) {
-        JSONObject attrObj = new JSONObject();
-        attrObj.put("attribute", attr.toString());
-        attrObj.put("object", attr.toString());
-        attrObj.put("predicate", "is");
-        attrObj.put("subject", objects.indexOf(node));
-        JSONArray text = new JSONArray();
+        JsonObjectBuilder attrObj = Json.createObjectBuilder();
+        attrObj.add("attribute", attr.toString());
+        attrObj.add("object", attr.toString());
+        attrObj.add("predicate", "is");
+        attrObj.add("subject", objects.indexOf(node));
+        JsonArrayBuilder text = Json.createArrayBuilder();
         text.add(node.toJSONString());
         text.add("is");
         text.add(attr.toString());
-        attrObj.put("text", text);
-        attrs.add(attrObj);
+        attrObj.add("text", text.build());
+        attrs.add(attrObj.build());
       }
     }
 
-    obj.put("attributes", attrs);
+    obj.add("attributes", attrs.build());
 
-    JSONArray relns = new JSONArray();
+    JsonArrayBuilder relns = Json.createArrayBuilder();
 
     for (SceneGraphRelation reln : this.relationListSorted()) {
-      JSONObject relnObj = new JSONObject();
-      relnObj.put("predicate", reln.getRelation());
-      relnObj.put("subject", objects.indexOf(reln.getSource()));
-      relnObj.put("object", objects.indexOf(reln.getTarget()));
-      JSONArray text = new JSONArray();
+      JsonObjectBuilder relnObj = Json.createObjectBuilder();
+      relnObj.add("predicate", reln.getRelation());
+      relnObj.add("subject", objects.indexOf(reln.getSource()));
+      relnObj.add("object", objects.indexOf(reln.getTarget()));
+      JsonArrayBuilder text = Json.createArrayBuilder();
       text.add(reln.getSource().toJSONString());
       text.add(reln.getRelation());
       text.add(reln.getTarget().toJSONString());
-      relnObj.put("text", text);
-      relns.add(relnObj);
+      relnObj.add("text", text.build());
+      relns.add(relnObj.build());
     }
 
-    obj.put("relationships", relns);
+    obj.add("relationships", relns.build());
 
 
-    JSONArray objs = new JSONArray();
+    JsonArrayBuilder objs = Json.createArrayBuilder();
     for (SceneGraphNode node : objects) {
-      JSONObject objObj = new JSONObject();
-      JSONArray names = new JSONArray();
+      JsonObjectBuilder objObj = Json.createObjectBuilder();
+      JsonArrayBuilder names = Json.createArrayBuilder();
       names.add(node.toJSONString());
-      objObj.put("names", names);
-      objs.add(objObj);
+      objObj.add("names", names.build());
+      objs.add(objObj.build());
     }
 
-    obj.put("objects", objs);
+    obj.add("objects", objs.build());
 
 
-    return obj.toJSONString();
+    return obj.build().toString();
   }
 
 

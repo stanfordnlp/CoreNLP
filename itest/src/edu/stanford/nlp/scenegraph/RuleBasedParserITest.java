@@ -1,10 +1,16 @@
 package edu.stanford.nlp.scenegraph;
 
+import java.io.StringReader;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 import org.junit.Test;
 import org.junit.AfterClass;
@@ -125,8 +131,22 @@ public class RuleBasedParserITest {
     String text = "A smiling man is riding a horse.";
     SceneGraph scene = parser.parse(text);
 
-    String expectedJSON = "{\"relationships\":[{\"predicate\":\"ride\",\"subject\":0,\"text\":[\"man\",\"ride\",\"horse\"],\"object\":1}],\"phrase\":\"A smiling man is riding a horse.\",\"objects\":[{\"names\":[\"man\"]},{\"names\":[\"horse\"]}],\"attributes\":[{\"predicate\":\"is\",\"subject\":0,\"attribute\":\"smile\",\"text\":[\"man\",\"is\",\"smile\"],\"object\":\"smile\"}],\"id\":1,\"url\":\"www.stanford.edu\"}";
-    assertEquals(expectedJSON, scene.toJSON(1, "www.stanford.edu", text));
+    // This was how the simple-json library output the json
+    // Actually, since json is order-free, we need to process the
+    // expected results and the actual results back into maps and
+    // compare those maps
+    String expectedJSONtext = "{\"relationships\":[{\"predicate\":\"ride\",\"subject\":0,\"text\":[\"man\",\"ride\",\"horse\"],\"object\":1}],\"phrase\":\"A smiling man is riding a horse.\",\"objects\":[{\"names\":[\"man\"]},{\"names\":[\"horse\"]}],\"attributes\":[{\"predicate\":\"is\",\"subject\":0,\"attribute\":\"smile\",\"text\":[\"man\",\"is\",\"smile\"],\"object\":\"smile\"}],\"id\":1,\"url\":\"www.stanford.edu\"}";
+
+    StringReader reader = new StringReader(expectedJSONtext);
+    JsonReader parser = Json.createReader(reader);
+    JsonObject expectedJSON = parser.readObject();
+
+    String convertedText = scene.toJSON(1, "www.stanford.edu", text);
+    reader = new StringReader(convertedText);
+    parser = Json.createReader(reader);
+    JsonObject converted = parser.readObject();
+
+    assertEquals(expectedJSON, converted);
 
     // The json for the nodes is just the word of the node
     List<String> expectedNodes = Arrays.asList("man", "horse");
