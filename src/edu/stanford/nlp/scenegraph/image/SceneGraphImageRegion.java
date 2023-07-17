@@ -3,8 +3,12 @@ package edu.stanford.nlp.scenegraph.image;
 import java.util.List;
 import java.util.Set;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonString;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -31,27 +35,26 @@ public class SceneGraphImageRegion {
   public GrammaticalStructure gs;
 
   @SuppressWarnings("unchecked")
-  public static SceneGraphImageRegion fromJSONObject(SceneGraphImage img, JSONObject obj) {
+  public static SceneGraphImageRegion fromJSONObject(SceneGraphImage img, JsonObject obj) {
 
     SceneGraphImageRegion region = new SceneGraphImageRegion();
-    region.h = ((Number) obj.get("h")).intValue();
-    region.w = ((Number) obj.get("w")).intValue();
-    region.x = ((Number) obj.get("x")).intValue();
-    region.y = ((Number) obj.get("y")).intValue();
+    region.h = obj.getInt("h");
+    region.w = obj.getInt("w");
+    region.x = obj.getInt("x");
+    region.y = obj.getInt("y");
 
-    region.phrase = (String) obj.get("phrase");
-
+    region.phrase = obj.getString("phrase");
 
     if (obj.get("tokens") != null) {
-      List<String> tokenStrings = (List<String>) obj.get("tokens");
+      JsonArray tokenStrings = obj.getJsonArray("tokens");
       region.tokens = Generics.newArrayList(tokenStrings.size());
-      for (String str : tokenStrings) {
-        region.tokens.add(SceneGraphImageUtils.labelFromString(str));
+      for (JsonString str : tokenStrings.getValuesAs(JsonString.class)) {
+        region.tokens.add(SceneGraphImageUtils.labelFromString(str.getString()));
       }
     }
 
     if (region.tokens != null && obj.get("gs") != null) {
-      List<String> depTriplets = (List<String>) obj.get("gs");
+      JsonArray depTriplets = obj.getJsonArray("gs");
       region.gs = SceneGraphImageUtils.getSemanticGraph(depTriplets, region.tokens);
     }
 
@@ -63,29 +66,29 @@ public class SceneGraphImageRegion {
 
 
   @SuppressWarnings("unchecked")
-  public JSONObject toJSONObject(SceneGraphImage sceneGraphImage) {
-    JSONObject obj = new JSONObject();
+  public JsonObject toJSONObject(SceneGraphImage sceneGraphImage) {
+    JsonObjectBuilder obj = Json.createObjectBuilder();
 
-    obj.put("h", this.h);
-    obj.put("w", this.w);
-    obj.put("x", this.x);
-    obj.put("y", this.y);
+    obj.add("h", this.h);
+    obj.add("w", this.w);
+    obj.add("x", this.x);
+    obj.add("y", this.y);
 
-    obj.put("phrase", this.phrase);
+    obj.add("phrase", this.phrase);
 
     if (this.tokens != null && ! this.tokens.isEmpty()) {
-      JSONArray tokens = new JSONArray();
+      JsonArrayBuilder tokens = Json.createArrayBuilder();
       for (CoreLabel lbl : this.tokens) {
         tokens.add(SceneGraphImageUtils.labelToString(lbl));
       }
-      obj.put("tokens", tokens);
+      obj.add("tokens", tokens.build());
     }
 
     if (this.tokens != null && this.gs != null) {
-      obj.put("gs", SceneGraphImageUtils.grammaticalStructureToJSON(this.gs));
+      obj.add("gs", SceneGraphImageUtils.grammaticalStructureToJSON(this.gs));
     }
 
-    return obj;
+    return obj.build();
   }
 
   public SemanticGraph getBasicSemanticGraph() {

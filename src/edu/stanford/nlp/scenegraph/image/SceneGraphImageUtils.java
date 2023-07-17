@@ -1,10 +1,15 @@
 package edu.stanford.nlp.scenegraph.image;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.json.simple.JSONArray;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonString;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -121,7 +126,7 @@ public class SceneGraphImageUtils {
     return result;
   }
 
-  public static GrammaticalStructure getSemanticGraph(List<String> depTriplets, List<CoreLabel> tokens) {
+  public static GrammaticalStructure getSemanticGraph(JsonArray depTriplets, List<CoreLabel> tokens) {
     List<TypedDependency> dependencies = Generics.newArrayList(depTriplets.size());
 
     Map<Integer, IndexedWord> idx2Node = Generics.newHashMap(depTriplets.size());
@@ -129,7 +134,8 @@ public class SceneGraphImageUtils {
     IndexedWord root = new IndexedWord(new Word("ROOT"));
     root.set(CoreAnnotations.IndexAnnotation.class, 0);
 
-    for (String depTriplet : depTriplets) {
+    for (JsonString depTripletRaw : depTriplets.getValuesAs(JsonString.class)) {
+      String depTriplet = depTripletRaw.getString();
       String parts[] = depTriplet.split(SEPARATOR_PATTERN);
       int depIdx = Integer.parseInt(parts[0]);
       int govIdx = Integer.parseInt(parts[1]);
@@ -162,11 +168,23 @@ public class SceneGraphImageUtils {
 
 
   @SuppressWarnings("unchecked")
-  public static JSONArray grammaticalStructureToJSON(GrammaticalStructure gs) {
-    JSONArray arr = new JSONArray();
+  public static JsonArray grammaticalStructureToJSON(GrammaticalStructure gs) {
+    JsonArrayBuilder arr = Json.createArrayBuilder();
     for (TypedDependency td : gs.typedDependencies()) {
       arr.add(String.format("%d%s%d%s%s", td.dep().index(), SEPARATOR, td.gov().index(), SEPARATOR, td.reln().getShortName()));
     }
-    return arr;
+    return arr.build();
+  }
+
+  /**
+   * A utility method for javax json: extract a list of strings from the object
+   */
+  public static List<String> getJsonStringList(JsonObject obj, String name) {
+    JsonArray strArray = obj.getJsonArray(name);
+    List<String> strList = new ArrayList<>(strArray.size());
+    for (JsonString str : strArray.getValuesAs(JsonString.class)) {
+      strList.add(str.getString());
+    }
+    return strList;
   }
 }

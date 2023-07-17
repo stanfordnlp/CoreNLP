@@ -3,11 +3,16 @@ package edu.stanford.nlp.scenegraph.image;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.util.List;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.scenegraph.SceneGraphImageCleaner;
@@ -49,39 +54,37 @@ public class SceneGraphImage implements Serializable {
   @SuppressWarnings("unchecked")
   public static SceneGraphImage readFromJSON(String json) {
     try {
+      StringReader reader = new StringReader(json);
+      JsonReader parser = Json.createReader(reader);
+      JsonObject obj = parser.readObject();
+
       SceneGraphImage img = new SceneGraphImage();
 
-      JSONObject obj = (JSONObject) JSONValue.parse(json);
-
-      JSONArray regions = (JSONArray) obj.get("regions");
+      JsonArray regions = obj.getJsonArray("regions");
       if (regions != null) {
-        for (JSONObject region : (List<JSONObject>) regions) {
+        for (JsonObject region : regions.getValuesAs(JsonObject.class)) {
           img.regions.add(SceneGraphImageRegion.fromJSONObject(img, region));
         }
       }
 
-      JSONArray objects = (JSONArray) obj.get("objects");
-      for (JSONObject object: (List<JSONObject>) objects) {
+      JsonArray objects = obj.getJsonArray("objects");
+      for (JsonObject object: objects.getValuesAs(JsonObject.class)) {
         img.objects.add(SceneGraphImageObject.fromJSONObject(img, object));
       }
 
-      JSONArray attributes = (JSONArray) obj.get("attributes");
-      for (JSONObject object: (List<JSONObject>) attributes) {
+      JsonArray attributes = obj.getJsonArray("attributes");
+      for (JsonObject object: attributes.getValuesAs(JsonObject.class)) {
         img.addAttribute(SceneGraphImageAttribute.fromJSONObject(img, object));
       }
 
-      JSONArray relationships = (JSONArray) obj.get("relationships");
-      for (JSONObject relation: (List<JSONObject>) relationships) {
+      JsonArray relationships = obj.getJsonArray("relationships");
+      for (JsonObject relation: relationships.getValuesAs(JsonObject.class)) {
         img.addRelationship(SceneGraphImageRelationship.fromJSONObject(img, relation));
       }
 
-      if (obj.get("id") instanceof Number) {
-        img.id = ((Number) obj.get("id")).intValue();
-      } else {
-        img.id = Integer.parseInt(((String) obj.get("id")));
-      }
-      Number height = ((Number) obj.get("height"));
-      Number width = ((Number) obj.get("width"));
+      img.id = obj.getInt("id");
+      Number height = obj.getInt("height");
+      Number width = obj.getInt("width");
       if (height == null) {
         throw new NullPointerException("Image does not have height");
       }
@@ -91,52 +94,51 @@ public class SceneGraphImage implements Serializable {
       img.height = height.intValue();
       img.width = width.intValue();
 
-      img.url = (String) obj.get("url");
+      img.url = obj.getString("url");
 
       return img;
     } catch (RuntimeException e) {
-      System.err.println("Couldn't parse " + json);
       throw new RuntimeException("Couldn't parse \n" + json, e);
     }
   }
 
   @SuppressWarnings("unchecked")
   public String toJSON() {
-    JSONObject json = new JSONObject();
-    json.put("id", this.id);
-    json.put("height", this.height);
-    json.put("width", this.width);
-    json.put("url", this.url);
+    JsonObjectBuilder json = Json.createObjectBuilder();
+    json.add("id", this.id);
+    json.add("height", this.height);
+    json.add("width", this.width);
+    json.add("url", this.url);
 
-    JSONArray attributes = new JSONArray();
+    JsonArrayBuilder attributes = Json.createArrayBuilder();
     for (SceneGraphImageAttribute attr : this.attributes) {
       attributes.add(attr.toJSONObject(this));
     }
 
-    json.put("attributes", attributes);
+    json.add("attributes", attributes.build());
 
-    JSONArray objects = new JSONArray();
+    JsonArrayBuilder objects = Json.createArrayBuilder();
     for (SceneGraphImageObject obj : this.objects) {
       objects.add(obj.toJSONObject(this));
     }
 
-    json.put("objects", objects);
+    json.add("objects", objects.build());
 
-    JSONArray regions = new JSONArray();
+    JsonArrayBuilder regions = Json.createArrayBuilder();
     for (SceneGraphImageRegion region : this.regions) {
       regions.add(region.toJSONObject(this));
     }
 
-    json.put("regions", regions);
+    json.add("regions", regions.build());
 
-    JSONArray relationships = new JSONArray();
+    JsonArrayBuilder relationships = Json.createArrayBuilder();
     for (SceneGraphImageRelationship relation : this.relationships) {
       relationships.add(relation.toJSONObject(this));
     }
 
-    json.put("relationships", relationships);
+    json.add("relationships", relationships.build());
 
-    return json.toJSONString();
+    return json.build().toString();
   }
 
 

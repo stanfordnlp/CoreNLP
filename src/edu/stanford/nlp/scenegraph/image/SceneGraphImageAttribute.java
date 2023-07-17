@@ -2,10 +2,15 @@ package edu.stanford.nlp.scenegraph.image;
 
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonString;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Generics;
@@ -26,27 +31,27 @@ public class SceneGraphImageAttribute {
 
 
    @SuppressWarnings("unchecked")
-  public static SceneGraphImageAttribute fromJSONObject(SceneGraphImage img, JSONObject obj) {
+  public static SceneGraphImageAttribute fromJSONObject(SceneGraphImage img, JsonObject obj) {
     SceneGraphImageAttribute attr = new SceneGraphImageAttribute();
 
     attr.image = img;
-    attr.attribute = (String) obj.get("attribute");
-    attr.object = (String) obj.get("object");
-    attr.predicate = (String) obj.get("predicate");
+    attr.attribute = obj.getString("attribute");
+    attr.object = obj.getString("object");
+    attr.predicate = obj.getString("predicate");
 
     if (obj.get("region") != null) {
-      int regionId = ((Number) obj.get("region")).intValue() - 1;
+      int regionId = obj.getInt("region") - 1;
       attr.region = img.regions.get(regionId);
     }
 
-    int subjectId = ((Number) obj.get("subject")).intValue();
+    int subjectId = obj.getInt("subject");
     attr.subject = img.objects.get(subjectId);
 
-    List<String> textList = (List<String>) obj.get("text");
+    List<String> textList = SceneGraphImageUtils.getJsonStringList(obj, "text");
     attr.text = textList.toArray(new String[textList.size()]);
 
     if (obj.containsKey("attributeGloss")) {
-      List<String> attributeGlossList = (List<String>) obj.get("attributeGloss");
+      List<String> attributeGlossList = SceneGraphImageUtils.getJsonStringList(obj, "attributeGloss");
       attr.attributeGloss = Generics.newArrayList(attributeGlossList.size());
       for (String str : attributeGlossList) {
         attr.attributeGloss.add(SceneGraphImageUtils.labelFromString(str));
@@ -54,7 +59,7 @@ public class SceneGraphImageAttribute {
     }
 
     if (obj.containsKey("subjectGloss")) {
-      List<String> subjectGlossList = (List<String>) obj.get("subjectGloss");
+      List<String> subjectGlossList = SceneGraphImageUtils.getJsonStringList(obj, "subjectGloss");
       attr.subjectGloss = Generics.newArrayList(subjectGlossList.size());
       for (String str : subjectGlossList) {
         attr.subjectGloss.add(SceneGraphImageUtils.labelFromString(str));
@@ -66,42 +71,42 @@ public class SceneGraphImageAttribute {
 
 
   @SuppressWarnings("unchecked")
-  public JSONObject toJSONObject(SceneGraphImage img) {
-    JSONObject obj = new JSONObject();
-    obj.put("attribute", this.attribute);
-    obj.put("object", this.object);
-    obj.put("predicate", this.predicate);
+  public JsonObject toJSONObject(SceneGraphImage img) {
+    JsonObjectBuilder obj = Json.createObjectBuilder();
+    obj.add("attribute", this.attribute);
+    obj.add("object", this.object);
+    obj.add("predicate", this.predicate);
     if (this.region != null) {
-      obj.put("region", img.regions.indexOf(this.region) + 1);
+      obj.add("region", img.regions.indexOf(this.region) + 1);
     }
-    obj.put("subject", img.objects.indexOf(this.subject));
+    obj.add("subject", img.objects.indexOf(this.subject));
 
-    JSONArray text = new JSONArray();
+    JsonArrayBuilder text = Json.createArrayBuilder();
     for (String word : this.text) {
       text.add(word);
     }
-    obj.put("text", text);
+    obj.add("text", text.build());
 
 
     if (this.attributeGloss != null) {
-      JSONArray attributeGloss = new JSONArray();
+      JsonArrayBuilder attributeGloss = Json.createArrayBuilder();
       for (CoreLabel lbl : this.attributeGloss) {
         attributeGloss.add(SceneGraphImageUtils.labelToString(lbl));
       }
-      obj.put("attributeGloss", attributeGloss);
-      obj.put("attributeLemmaGloss", attributeLemmaGloss());
+      obj.add("attributeGloss", attributeGloss.build());
+      obj.add("attributeLemmaGloss", attributeLemmaGloss());
     }
 
     if (this.subjectGloss != null) {
-      JSONArray subjectGloss = new JSONArray();
+      JsonArrayBuilder subjectGloss = Json.createArrayBuilder();
       for (CoreLabel lbl : this.subjectGloss) {
         subjectGloss.add(SceneGraphImageUtils.labelToString(lbl));
       }
-      obj.put("subjectGloss", subjectGloss);
-      obj.put("subjectLemmaGloss", subjectLemmaGloss());
+      obj.add("subjectGloss", subjectGloss.build());
+      obj.add("subjectLemmaGloss", subjectLemmaGloss());
     }
 
-    return obj;
+    return obj.build();
   }
 
   @Override

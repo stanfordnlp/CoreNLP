@@ -4,8 +4,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonString;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Generics;
@@ -35,30 +39,30 @@ public class SceneGraphImageObject {
   }
 
   @SuppressWarnings("unchecked")
-  public static SceneGraphImageObject fromJSONObject(SceneGraphImage img, JSONObject obj) {
+  public static SceneGraphImageObject fromJSONObject(SceneGraphImage img, JsonObject obj) {
 
-    List<String> names = (List<String>) obj.get("names");
-    List<JSONArray> labelArrays = (List<JSONArray>) obj.get("labels");
+    List<String> names = SceneGraphImageUtils.getJsonStringList(obj, "names");
+    JsonArray labelArrays = obj.getJsonArray("labels");
     List<List<CoreLabel>> labelsList = null;
     if (labelArrays != null) {
       labelsList = Generics.newArrayList(labelArrays.size());
-      for (JSONArray arr : labelArrays) {
+      for (JsonArray arr : labelArrays.getValuesAs(JsonArray.class)) {
         List<CoreLabel> tokens = Generics.newArrayList(arr.size());
-        for (String str : (List<String>) arr) {
-          tokens.add(SceneGraphImageUtils.labelFromString(str));
+        for (JsonString str : arr.getValuesAs(JsonString.class)) {
+          tokens.add(SceneGraphImageUtils.labelFromString(str.getString()));
         }
         labelsList.add(tokens);
       }
     }
-    JSONObject boundingBoxObj = (JSONObject) obj.get("bbox");
+    JsonObject boundingBoxObj = obj.getJsonObject("bbox");
     if (boundingBoxObj == null) {
       throw new NullPointerException("object did not have bbox field");
     }
 
-    int h = ((Number) boundingBoxObj.get("h")).intValue();
-    int w = ((Number) boundingBoxObj.get("w")).intValue();
-    int x = ((Number) boundingBoxObj.get("x")).intValue();
-    int y = ((Number) boundingBoxObj.get("y")).intValue();
+    int h = boundingBoxObj.getInt("h");
+    int w = boundingBoxObj.getInt("w");
+    int x = boundingBoxObj.getInt("x");
+    int y = boundingBoxObj.getInt("y");
 
     SceneGraphImageBoundingBox boundingBox = new SceneGraphImageBoundingBox(h, w, x, y);
 
@@ -66,43 +70,43 @@ public class SceneGraphImageObject {
   }
 
   @SuppressWarnings("unchecked")
-  public JSONObject toJSONObject(SceneGraphImage sceneGraphImage) {
-    JSONObject obj = new JSONObject();
+  public JsonObject toJSONObject(SceneGraphImage sceneGraphImage) {
+    JsonObjectBuilder obj = Json.createObjectBuilder();
 
-    JSONObject bbox = new JSONObject();
-    bbox.put("h", this.boundingBox.h);
-    bbox.put("w", this.boundingBox.w);
-    bbox.put("x", this.boundingBox.x);
-    bbox.put("y", this.boundingBox.y);
+    JsonObjectBuilder bbox = Json.createObjectBuilder();
+    bbox.add("h", this.boundingBox.h);
+    bbox.add("w", this.boundingBox.w);
+    bbox.add("x", this.boundingBox.x);
+    bbox.add("y", this.boundingBox.y);
 
-    obj.put("bbox", bbox);
+    obj.add("bbox", bbox.build());
 
-    JSONArray names = new JSONArray();
+    JsonArrayBuilder names = Json.createArrayBuilder();
     for (String name : this.names) {
       names.add(name);
     }
 
-    obj.put("names", names);
+    obj.add("names", names.build());
 
 
     if (this.labels != null && ! this.labels.isEmpty()) {
-      JSONArray labelsList = new JSONArray();
-      JSONArray lemmataList = new JSONArray();
+      JsonArrayBuilder labelsList = Json.createArrayBuilder();
+      JsonArrayBuilder lemmataList = Json.createArrayBuilder();
       for (List<CoreLabel> list : this.labels) {
-        JSONArray labels = new JSONArray();
+        JsonArrayBuilder labels = Json.createArrayBuilder();
         for (CoreLabel lbl : list) {
           labels.add(SceneGraphImageUtils.labelToString(lbl));
         }
-        labelsList.add(labels);
+        labelsList.add(labels.build());
         lemmataList.add(StringUtils.join(list.stream().map(x -> x.lemma() != null ? x.lemma() : x.word()), " "));
       }
-      obj.put("labels", labelsList);
-      obj.put("lemmata", lemmataList);
+      obj.add("labels", labelsList.build());
+      obj.add("lemmata", lemmataList.build());
     }
 
 
 
-    return obj;
+    return obj.build();
   }
 
   public boolean equals(Object other) {

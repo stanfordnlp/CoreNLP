@@ -1,10 +1,15 @@
 package edu.stanford.nlp.scenegraph.image;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonString;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Generics;
@@ -27,30 +32,30 @@ public class SceneGraphImageRelationship {
   public SceneGraphImage image;
 
   @SuppressWarnings("unchecked")
-  public static SceneGraphImageRelationship fromJSONObject(SceneGraphImage img, JSONObject obj) {
+  public static SceneGraphImageRelationship fromJSONObject(SceneGraphImage img, JsonObject obj) {
     SceneGraphImageRelationship reln = new SceneGraphImageRelationship();
 
-    reln.predicate = (String) obj.get("predicate");
+    reln.predicate = obj.getString("predicate");
     if (reln.predicate == null && obj.get("relationship") != null) {
-      reln.predicate = (String) obj.get("relationship");
+      reln.predicate = obj.getString("relationship");
     }
 
     if (obj.get("region") != null) {
-      int regionId = ((Number) obj.get("region")).intValue() - 1;
+      int regionId = obj.getInt("region") - 1;
       reln.region = img.regions.get(regionId);
     }
 
-    int subjectId = ((Number) obj.get("subject")).intValue();
+    int subjectId = obj.getInt("subject");
     reln.subject = img.objects.get(subjectId);
 
-    int objectId = ((Number) obj.get("object")).intValue();
+    int objectId = obj.getInt("object");
     reln.object = img.objects.get(objectId);
 
-    List<String> textList = (List<String>) obj.get("text");
+    List<String> textList = SceneGraphImageUtils.getJsonStringList(obj, "text");
     reln.text = textList.toArray(new String[textList.size()]);
 
     if (obj.containsKey("subjectGloss")) {
-      List<String> subjectGlossStrings = (List <String>) obj.get("subjectGloss");
+      List<String> subjectGlossStrings = SceneGraphImageUtils.getJsonStringList(obj, "subjectGloss");
       reln.subjectGloss = Generics.newArrayList(subjectGlossStrings.size());
       for (String str : subjectGlossStrings) {
         reln.subjectGloss.add(SceneGraphImageUtils.labelFromString(str));
@@ -58,7 +63,7 @@ public class SceneGraphImageRelationship {
     }
 
     if (obj.containsKey("objectGloss")) {
-      List<String> objectGlossStrings = (List <String>) obj.get("objectGloss");
+      List<String> objectGlossStrings = SceneGraphImageUtils.getJsonStringList(obj, "objectGloss");
       reln.objectGloss = Generics.newArrayList(objectGlossStrings.size());
       for (String str : objectGlossStrings) {
         reln.objectGloss.add(SceneGraphImageUtils.labelFromString(str));
@@ -66,7 +71,7 @@ public class SceneGraphImageRelationship {
     }
 
     if (obj.containsKey("predicateGloss")) {
-      List<String> predicateGlossStrings = (List <String>) obj.get("predicateGloss");
+      List<String> predicateGlossStrings = SceneGraphImageUtils.getJsonStringList(obj, "predicateGloss");
       reln.predicateGloss = Generics.newArrayList(predicateGlossStrings.size());
       for (String str : predicateGlossStrings) {
         reln.predicateGloss.add(SceneGraphImageUtils.labelFromString(str));
@@ -79,51 +84,51 @@ public class SceneGraphImageRelationship {
   }
 
   @SuppressWarnings("unchecked")
-  public JSONObject toJSONObject(SceneGraphImage img) {
-    JSONObject obj = new JSONObject();
+  public JsonObject toJSONObject(SceneGraphImage img) {
+    JsonObjectBuilder obj = Json.createObjectBuilder();
 
-    obj.put("predicate", this.predicate);
+    obj.add("predicate", this.predicate);
     if (this.region != null) {
-      obj.put("region", img.regions.indexOf(this.region) + 1);
+      obj.add("region", img.regions.indexOf(this.region) + 1);
     }
-    obj.put("subject", img.objects.indexOf(this.subject));
-    obj.put("object", img.objects.indexOf(this.object));
+    obj.add("subject", img.objects.indexOf(this.subject));
+    obj.add("object", img.objects.indexOf(this.object));
 
-    JSONArray text = new JSONArray();
+    JsonArrayBuilder text = Json.createArrayBuilder();
     for (String word : this.text) {
       text.add(word);
     }
-    obj.put("text", text);
+    obj.add("text", text.build());
 
 
     if (this.subjectGloss != null) {
-      JSONArray subjectGloss = new JSONArray();
+      JsonArrayBuilder subjectGloss = Json.createArrayBuilder();
       for (CoreLabel lbl : this.subjectGloss) {
         subjectGloss.add(SceneGraphImageUtils.labelToString(lbl));
       }
-      obj.put("subjectGloss", subjectGloss);
-      obj.put("subjectLemmaGloss", this.subjectLemmaGloss());
+      obj.add("subjectGloss", subjectGloss.build());
+      obj.add("subjectLemmaGloss", this.subjectLemmaGloss());
     }
 
     if (this.objectGloss != null) {
-      JSONArray objectGloss = new JSONArray();
+      JsonArrayBuilder objectGloss = Json.createArrayBuilder();
       for (CoreLabel lbl : this.objectGloss) {
         objectGloss.add(SceneGraphImageUtils.labelToString(lbl));
       }
-      obj.put("objectGloss", objectGloss);
-      obj.put("objectLemmaGloss", this.objectLemmaGloss());
+      obj.add("objectGloss", objectGloss.build());
+      obj.add("objectLemmaGloss", this.objectLemmaGloss());
     }
 
     if (this.predicateGloss != null) {
-      JSONArray predicateGloss = new JSONArray();
+      JsonArrayBuilder predicateGloss = Json.createArrayBuilder();
       for (CoreLabel lbl : this.predicateGloss) {
         predicateGloss.add(SceneGraphImageUtils.labelToString(lbl));
       }
-      obj.put("predicateGloss", predicateGloss);
-      obj.put("predicateLemmaGloss", this.predicateLemmaGloss());
+      obj.add("predicateGloss", predicateGloss.build());
+      obj.add("predicateLemmaGloss", this.predicateLemmaGloss());
     }
 
-    return obj;
+    return obj.build();
   }
 
   public String subjectGloss() {
