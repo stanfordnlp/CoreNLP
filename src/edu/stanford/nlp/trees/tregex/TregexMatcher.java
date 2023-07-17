@@ -88,8 +88,7 @@ public abstract class TregexMatcher {
   /**
    * Resets the matcher to restart search for matching subexpressions
    */
-  void resetChildIter() {
-  }
+  abstract void resetChildIter();
 
   /**
    * Does the pattern match the tree?  It's actually closer to java.util.regex's
