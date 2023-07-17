@@ -266,6 +266,8 @@ public class DescriptionPattern extends TregexPattern  {
       sb.append('=');
       sb.append(name);
     }
+    // TODO: is this space necessary?  The CoordinationPattern could put spaces between terms
+    // Currently this results in extra blank spaces at the end of a pattern
     sb.append(' ');
     if (child != null) {
       sb.append(child.toString());

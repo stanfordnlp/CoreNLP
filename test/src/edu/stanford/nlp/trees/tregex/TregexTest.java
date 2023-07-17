@@ -1559,6 +1559,15 @@ public class TregexTest extends TestCase {
     }
   }
 
+  public void testOptionalToString() {
+    TregexPattern pattern;
+    pattern = TregexPattern.compile("A ?(< B < C)");
+    assertEquals("Root (A ?(< B < C ))", pattern.toString());
+
+    pattern = TregexPattern.compile("A ?< B");
+    assertEquals("Root (A ?< B )", pattern.toString());
+  }
+
   /**
    * A user supplied an example of a negated disjunction which went into an infinite loop.
    * Apparently no one had ever used a negated disjunction of tree structures before!
