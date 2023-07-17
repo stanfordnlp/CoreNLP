@@ -142,6 +142,8 @@ public class TregexPatternCompiler {
       throw new TregexParseException("Could not parse " + tregex, tme);
     } catch (ParseException e) {
       throw new TregexParseException("Could not parse " + tregex, e);
+    } catch (IllegalStateException e) {
+      throw new TregexParseException("Could not parse " + tregex, e);
     }
     pattern.setPatternString(tregex);
     return pattern;

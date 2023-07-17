@@ -36,6 +36,11 @@ class CoordinationPattern extends TregexPattern {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
+
+    if (isNegated() && isOptional()) {
+      throw new AssertionError("Shenanigans!  The parser should not allow a pattern which is both negated and optional");
+    }
+
     if (isConj) {
       if (isNegated()) {
         sb.append("!(");

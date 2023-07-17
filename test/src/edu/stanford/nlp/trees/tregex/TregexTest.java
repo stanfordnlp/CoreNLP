@@ -1523,6 +1523,42 @@ public class TregexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  /** The parser should not allow a pattern which is both negated and optional */
+  public void testNegatedOptional() {
+    TregexPattern pattern;
+    // these should be fine
+    pattern = TregexPattern.compile("A ?< B");
+    pattern = TregexPattern.compile("A !< B");
+    // this should break
+    try {
+      pattern = TregexPattern.compile("A !?< B");
+    } catch (TregexParseException e) {
+      // yay, passed
+    }
+    // this should also break
+    try {
+      pattern = TregexPattern.compile("A ?!< B");
+    } catch (TregexParseException e) {
+      // yay, passed
+    }
+
+    // these should be fine
+    pattern = TregexPattern.compile("A ?(< B < C)");
+    pattern = TregexPattern.compile("A !(< B < C)");
+    // this should break
+    try {
+      pattern = TregexPattern.compile("A !?(< B < C)");
+    } catch (TregexParseException e) {
+      // yay, passed
+    }
+    // this should also break
+    try {
+      pattern = TregexPattern.compile("A ?!(< B < C)");
+    } catch (TregexParseException e) {
+      // yay, passed
+    }
+  }
+
   /**
    * A user supplied an example of a negated disjunction which went into an infinite loop.
    * Apparently no one had ever used a negated disjunction of tree structures before!

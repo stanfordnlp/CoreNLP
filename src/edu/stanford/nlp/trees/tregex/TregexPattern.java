@@ -365,14 +365,14 @@ public abstract class TregexPattern implements Serializable  {
   void negate() {
     neg = true;
     if (opt) {
-      throw new RuntimeException("Node cannot be both negated and optional.");
+      throw new IllegalStateException("Node cannot be both negated and optional.");
     }
   }
 
   void makeOptional() {
     opt = true;
     if (neg) {
-      throw new RuntimeException("Node cannot be both negated and optional.");
+      throw new IllegalStateException("Node cannot be both negated and optional.");
     }
   }
 
