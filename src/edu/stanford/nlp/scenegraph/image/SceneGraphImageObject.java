@@ -51,6 +51,9 @@ public class SceneGraphImageObject {
       }
     }
     JSONObject boundingBoxObj = (JSONObject) obj.get("bbox");
+    if (boundingBoxObj == null) {
+      throw new NullPointerException("object did not have bbox field");
+    }
 
     int h = ((Number) boundingBoxObj.get("h")).intValue();
     int w = ((Number) boundingBoxObj.get("w")).intValue();
@@ -102,4 +105,19 @@ public class SceneGraphImageObject {
     return obj;
   }
 
+  public boolean equals(Object other) {
+    if (!(other instanceof SceneGraphImageObject)) {
+      return false;
+    }
+
+    SceneGraphImageObject obj = (SceneGraphImageObject) other;
+    if (!(this.boundingBox.equals(obj.boundingBox)))
+      return false;
+    if (!(this.names.equals(obj.names)))
+      return false;
+    if (!(this.labels.equals(obj.labels)))
+      return false;
+
+    return true;
+  }
 }

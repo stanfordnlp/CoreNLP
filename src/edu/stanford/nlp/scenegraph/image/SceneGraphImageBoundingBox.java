@@ -14,6 +14,16 @@ public class SceneGraphImageBoundingBox {
     this.x = x;
     this.y = y;
   }
-  
+
+  public boolean equals(Object other) {
+    if (!(other instanceof SceneGraphImageBoundingBox)) {
+      return false;
+    }
+    SceneGraphImageBoundingBox box = (SceneGraphImageBoundingBox) other;
+    if ((this.h == box.h) && (this.w == box.w) && (this.x == box.x) && (this.y == box.y)) {
+      return true;
+    }
+    return false;
+  }
 }
 

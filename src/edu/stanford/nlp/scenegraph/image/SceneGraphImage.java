@@ -80,16 +80,23 @@ public class SceneGraphImage implements Serializable {
       } else {
         img.id = Integer.parseInt(((String) obj.get("id")));
       }
-      img.height = ((Number) obj.get("height")).intValue();
-      img.width = ((Number) obj.get("width")).intValue();
+      Number height = ((Number) obj.get("height"));
+      Number width = ((Number) obj.get("width"));
+      if (height == null) {
+        throw new NullPointerException("Image does not have height");
+      }
+      if (width == null) {
+        throw new NullPointerException("Image does not have width");
+      }
+      img.height = height.intValue();
+      img.width = width.intValue();
 
       img.url = (String) obj.get("url");
 
       return img;
-    } catch (Exception e) {
+    } catch (RuntimeException e) {
       System.err.println("Couldn't parse " + json);
-      e.printStackTrace();
-      return null;
+      throw new RuntimeException("Couldn't parse \n" + json, e);
     }
   }
 
