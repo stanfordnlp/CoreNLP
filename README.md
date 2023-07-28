@@ -4,7 +4,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/edu.stanford.nlp/stanford-corenlp.svg)](https://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp)
 [![Twitter](https://img.shields.io/twitter/follow/stanfordnlp.svg?style=social&label=Follow)](https://twitter.com/stanfordnlp/)
 
-[Stanford CoreNLP](http://stanfordnlp.github.io/CoreNLP/) Provides a set of natural language analysis tools written in Java. It can take raw human language text input and give the base forms of words, their parts of speech, whether they are names of companies, people, etc., normalize and interpret dates, times, and numeric quantities, mark up the structure of sentences in terms of phrases or word dependencies, and indicate which noun phrases refer to the same entities. It was originally developed for English, but now also provides varying levels of support for (Modern Standard) Arabic, (mainland) Chinese, French, German, Hungarian, Italian, and Spanish. Stanford CoreNLP is an integrated framework, which makes it very easy to apply a bunch of language analysis tools to a piece of text. Starting from plain text, you can run all the tools with just two lines of code. Its analyses provide the foundational building blocks for higher-level and domain-specific text understanding applications. Stanford CoreNLP is a set of stable and well-tested natural language processing tools, widely used by various groups in academia, industry, and government. The tools variously use rule-based, probabilistic machine learning, and deep learning components.
+[Stanford CoreNLP](http://stanfordnlp.github.io/CoreNLP/) provides a set of natural language analysis tools written in Java. It can take raw human language text input and give the base forms of words, their parts of speech, whether they are names of companies, people, etc., normalize and interpret dates, times, and numeric quantities, mark up the structure of sentences in terms of syntactic phrases or dependencies, and indicate which noun phrases refer to the same entities. It was originally developed for English, but now also provides varying levels of support for (Modern Standard) Arabic, (mainland) Chinese, French, German, Hungarian, Italian, and Spanish. Stanford CoreNLP is an integrated framework, which makes it very easy to apply a bunch of language analysis tools to a piece of text. Starting from plain text, you can run all the tools with just two lines of code. Its analyses provide the foundational building blocks for higher-level and domain-specific text understanding applications. Stanford CoreNLP is a set of stable and well-tested natural language processing tools, widely used by various groups in academia, industry, and government. The tools variously use rule-based, probabilistic machine learning, and deep learning components.
 
 The Stanford CoreNLP code is written in Java and licensed under the GNU General Public License (v2 or later). Note that this is the full GPL, which allows many free uses, but not its use in proprietary software that you distribute to others.
 
@@ -38,9 +38,9 @@ At present, [the current released version of the code](https://stanfordnlp.githu
 #### Build with Maven
 
 1. Make sure you have Maven installed, details here: [https://maven.apache.org/](https://maven.apache.org/)
-2. If you run this command in the CoreNLP directory: `mvn package` , it should run the tests and build this jar file: `CoreNLP/target/stanford-corenlp-4.5.2.jar`
+2. If you run this command in the CoreNLP directory: `mvn package` , it should run the tests and build this jar file: `CoreNLP/target/stanford-corenlp-4.5.4.jar`
 3. When using the latest version of the code make sure to download the latest versions of the [corenlp-models](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar), [english-extra-models](http://nlp.stanford.edu/software/stanford-english-extra-corenlp-models-current.jar), and [english-kbp-models](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) and include them in your CLASSPATH.  If you are processing languages other than English, make sure to download the latest version of the models jar for the language you are interested in.  
-4. If you want to use Stanford CoreNLP as part of a Maven project you need to install the models jars into your Maven repository.  Below is a sample command for installing the Spanish models jar.  For other languages just change the language name in the command.  To install `stanford-corenlp-models-current.jar` you will need to set `-Dclassifier=models`.  Here is the sample command for Spanish: `mvn install:install-file -Dfile=/location/of/stanford-spanish-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=4.5.2 -Dclassifier=models-spanish -Dpackaging=jar`
+4. If you want to use Stanford CoreNLP as part of a Maven project you need to install the models jars into your Maven repository.  Below is a sample command for installing the Spanish models jar.  For other languages just change the language name in the command.  To install `stanford-corenlp-models-current.jar` you will need to set `-Dclassifier=models`.  Here is the sample command for Spanish: `mvn install:install-file -Dfile=/location/of/stanford-spanish-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=4.5.4 -Dclassifier=models-spanish -Dpackaging=jar`
 
 #### Models
 
@@ -82,23 +82,23 @@ Thank you to [Hugging Face](https://huggingface.co/) for helping with our hostin
 
 If you don't know Gradle itself, see official site: https://gradle.org
 
-Write the following in your build.gradle according to [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.5.2/jar):
+Write the following in your build.gradle according to [Maven Central](https://search.maven.org/artifact/edu.stanford.nlp/stanford-corenlp/4.5.4/jar):
 
 ```Gradle
 dependencies {
-    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.2'
+    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.4'
 }
 ```
 
 If you want to analyse English, add following:
 
 ```Gradle
-    implementation "edu.stanford.nlp:stanford-corenlp:4.5.2:models"
-    implementation "edu.stanford.nlp:stanford-corenlp:4.5.2:models-english"
-    implementation "edu.stanford.nlp:stanford-corenlp:4.5.2:models-english-kbp"
+    implementation "edu.stanford.nlp:stanford-corenlp:4.5.4:models"
+    implementation "edu.stanford.nlp:stanford-corenlp:4.5.4:models-english"
+    implementation "edu.stanford.nlp:stanford-corenlp:4.5.4:models-english-kbp"
 ```
 
-If you use other version, replace "4.5.2" to a version you use.
+If you use another version, replace "4.5.4" to a version you use.
 
 ### Useful resources
 
