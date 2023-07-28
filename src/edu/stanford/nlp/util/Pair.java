@@ -1,7 +1,7 @@
 package edu.stanford.nlp.util;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
@@ -105,10 +105,10 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
 
   /**
    * Write a string representation of a Pair to a DataStream.
-   * The <code>toString()</code> method is called on each of the pair
-   * of objects and a <code>String</code> representation is written.
+   * The {@code toString()} method is called on each of the pair
+   * of objects and a {@code String} representation is written.
    * This might not allow one to recover the pair of objects unless they
-   * are of type <code>String</code>.
+   * are of type {@code String}.
    */
   public void save(DataOutputStream out) {
     try {
@@ -120,24 +120,24 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   }
 
   /**
-   * Compares this <code>Pair</code> to another object.
-   * If the object is a <code>Pair</code>, this function will work providing
-   * the elements of the <code>Pair</code> are themselves comparable.
+   * Compares this {@code Pair} to another object.
+   * If the object is a {@code Pair}, this function will work providing
+   * the elements of the {@code Pair} are themselves comparable.
    * It will then return a value based on the pair of objects, where
    * <code>p &gt; q iff p.first() &gt; q.first() ||
    * (p.first().equals(q.first()) && p.second() &gt; q.second())</code>.
-   * If the other object is not a <code>Pair</code>, it throws a
-   * <code>ClassCastException</code>.
+   * If the other object is not a {@code Pair}, it throws a
+   * {@code ClassCastException}.
    *
    * @param another the <code>Object</code> to be compared.
    * @return the value <code>0</code> if the argument is a
-   *         <code>Pair</code> equal to this <code>Pair</code>; a value less than
-   *         <code>0</code> if the argument is a <code>Pair</code>
-   *         greater than this <code>Pair</code>; and a value
+   *         {@code Pair} equal to this {@code Pair}; a value less than
+   *         <code>0</code> if the argument is a {@code Pair}
+   *         greater than this {@code Pair}; and a value
    *         greater than <code>0</code> if the argument is a
-   *         <code>Pair</code> less than this <code>Pair</code>.
+   *         {@code Pair} less than this {@code Pair}.
    * @throws ClassCastException if the argument is not a
-   *                            <code>Pair</code>.
+   *                            {@code Pair}.
    * @see java.lang.Comparable
    */
   @SuppressWarnings("unchecked")
@@ -196,6 +196,7 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   /**
    * use serialVersionUID for cross version serialization compatibility
    */
+  @Serial
   private static final long serialVersionUID = 1360822168806852921L;
 
 
@@ -211,6 +212,7 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
       internStrings();
     }
 
+    @Serial
     protected Object readResolve() {
       internStrings();
       return this;
@@ -226,6 +228,7 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
     }
 
     // use serialVersionUID for cross version serialization compatibility
+    @Serial
     private static final long serialVersionUID = 1360822168806852922L;
 
   }
@@ -238,10 +241,10 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   }
   
   /**
-   * Compares a <code>Pair</code> to another <code>Pair</code> according to the first object of the pair only
-   * This function will work providing
-   * the first element of the <code>Pair</code> is comparable, otherwise will throw a 
-   * <code>ClassCastException</code>
+   * Compares a {@code Pair} to another {@code Pair} according to the first object of the pair only
+   * This function will work providing the first element of the {@code Pair} is comparable,
+   * otherwise will throw a {@code ClassCastException}.
+   *
    * @author jonathanberant
    */
   public static class ByFirstPairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
@@ -254,9 +257,9 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   }
   
   /**
-   * Compares a <code>Pair</code> to another <code>Pair</code> according to the first object of the pair only in decreasing order
+   * Compares a {@code Pair} to another {@code Pair} according to the first object of the pair only in decreasing order
    * This function will work providing
-   * the first element of the <code>Pair</code> is comparable, otherwise will throw a 
+   * the first element of the {@code Pair} is comparable, otherwise will throw a
    * <code>ClassCastException</code>
    * @author jonathanberant
    */
@@ -270,9 +273,9 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   }
   
   /**
-   * Compares a <code>Pair</code> to another <code>Pair</code> according to the second object of the pair only
+   * Compares a {@code Pair} to another {@code Pair} according to the second object of the pair only
    * This function will work providing
-   * the first element of the <code>Pair</code> is comparable, otherwise will throw a 
+   * the first element of the {@code Pair} is comparable, otherwise will throw a
    * <code>ClassCastException</code>
    * @author jonathanberant
    */
@@ -286,10 +289,11 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   }
   
   /**
-   * Compares a <code>Pair</code> to another <code>Pair</code> according to the second object of the pair only in decreasing order
+   * Compares a {@code Pair} to another {@code Pair} according to the second object of the pair only in decreasing order
    * This function will work providing
-   * the first element of the <code>Pair</code> is comparable, otherwise will throw a 
+   * the first element of the {@code Pair} is comparable, otherwise will throw a
    * <code>ClassCastException</code>
+   *
    * @author jonathanberant
    */
   public static class BySecondReversePairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
