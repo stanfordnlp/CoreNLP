@@ -1285,67 +1285,6 @@ public class StringUtils  {
     printToFile(new File(filename), message, false);
   }
 
-  /**
-   * A simpler form of command line argument parsing.
-   * Dan thinks this is highly superior to the overly complexified code that
-   * comes before it.
-   * Parses command line arguments into a Map. Arguments of the form
-   * -flag1 arg1 -flag2 -flag3 arg3
-   * will be parsed so that the flag is a key in the Map (including the hyphen)
-   * and the
-   * optional argument will be its value (if present).
-   *
-   * @return A Map from keys to possible values (String or null)
-   */
-  @SuppressWarnings("unchecked")
-  public static Map<String, String> parseCommandLineArguments(String[] args) {
-    return (Map)parseCommandLineArguments(args, false);
-  }
-
-  /**
-   * A simpler form of command line argument parsing.
-   * Dan thinks this is highly superior to the overly complexified code that
-   * comes before it.
-   * Parses command line arguments into a Map. Arguments of the form
-   * -flag1 arg1 -flag2 -flag3 arg3
-   * will be parsed so that the flag is a key in the Map (including the hyphen)
-   * and the
-   * optional argument will be its value (if present).
-   * In this version, if the argument is numeric, it will be a Double value
-   * in the map, not a String.
-   *
-   * @return A Map from keys to possible values (String or null)
-   */
-  public static Map<String, Object> parseCommandLineArguments(String[] args, boolean parseNumbers) {
-    Map<String, Object> result = Generics.newHashMap();
-    for (int i = 0; i < args.length; i++) {
-      String key = args[i];
-      if (key.charAt(0) == '-') {
-        if (i + 1 < args.length) {
-          String value = args[i + 1];
-          if (value.charAt(0) != '-') {
-            if (parseNumbers) {
-              Object numericValue = value;
-              try {
-                numericValue = Double.parseDouble(value);
-              } catch (NumberFormatException e2) {
-                // ignore
-              }
-              result.put(key, numericValue);
-            } else {
-              result.put(key, value);
-            }
-            i++;
-          } else {
-            result.put(key, null);
-          }
-        } else {
-          result.put(key, null);
-        }
-      }
-    }
-    return result;
-  }
 
   public static String stripNonAlphaNumerics(String orig) {
     StringBuilder sb = new StringBuilder();
@@ -1367,7 +1306,7 @@ public class StringUtils  {
   public static void printStringOneCharPerLine(String s) {
     for (int i = 0; i < s.length(); i++) {
       int c = s.charAt(i);
-      System.out.println(c + " \'" + (char) c + "\' ");
+      System.out.println(c + " '" + (char) c + "' ");
     }
   }
 
@@ -1675,7 +1614,7 @@ public class StringUtils  {
   public static <T> T columnStringToObject(Class<?> objClass, String str, Pattern delimiterPattern, String[] fieldNames)
           throws InstantiationException, IllegalAccessException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
     String[] fields = delimiterPattern.split(str);
-    T item = ErasureUtils.uncheckedCast(objClass.newInstance());
+    T item = ErasureUtils.uncheckedCast(objClass.getDeclaredConstructor().newInstance());
     for (int i = 0; i < fields.length; i++) {
       try {
         Field field = objClass.getDeclaredField(fieldNames[i]);
@@ -1955,7 +1894,7 @@ public class StringUtils  {
         } else if (c >= 0x00fd && c <= 0x00ff) {
           result = "y";
         } else if (c >= 0x2018 && c <= 0x2019) {
-          result = "\'";
+          result = "'";
         } else if (c >= 0x201c && c <= 0x201e) {
           result = "\"";
         } else if (c >= 0x0213 && c <= 0x2014) {
@@ -2316,7 +2255,8 @@ public class StringUtils  {
     return ngrams;
   }
 
-  private static Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
+  private static final Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
+
   public static String normalize(String s) {
     // Normalizes string and strips diacritics (map to ascii) by
     // 1. taking the NFKD (compatibility decomposition -
@@ -2711,12 +2651,12 @@ public class StringUtils  {
         i += 1;
       }else{
         //(case: normal)
-        if(chars[i] == '"'){
+        if (chars[i] == '"') {
           quoteCloseChar = '"';
-        } else if(chars[i] == '\''){
+        } else if(chars[i] == '\'') {
           quoteCloseChar = '\'';
         } else if (chars[i] == '\n' && current.length() == 0) {
-          current.append("");  // do nothing
+          // current.append("");  // do nothing
         } else if(chars[i] == ',' || chars[i] == ';' || chars[i] == '\t' || chars[i] == '\n'){
           // case: end a value
           if (onKey) {
