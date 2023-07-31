@@ -984,9 +984,9 @@ public class EnglishGrammaticalRelations {
    * The "quantifier phrase modifier" grammatical relation.  A quantifier
    * modifier is an element modifying the head of a QP constituent.
    * <br>
-   * Example: <br>
-   * "About 200 people came to the party" &rarr;
-   * {@code quantmod}(200, About)
+   * Examples: <br>
+   * "About 200 people came to the party" &rarr; {@code quantmod}(200, About)
+   * "They weigh up to 200 kilograms" &rarr; {@code quantmod}(200, to)
    */
   public static final GrammaticalRelation QUANTIFIER_MODIFIER =
     new GrammaticalRelation(Language.English, "quantmod", "quantifier modifier",

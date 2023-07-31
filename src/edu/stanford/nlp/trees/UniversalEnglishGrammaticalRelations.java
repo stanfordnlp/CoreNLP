@@ -1222,8 +1222,10 @@ public class UniversalEnglishGrammaticalRelations {
    * "fewer than 700 bottles" &rarr;
    * {@code mwe}(fewer, than)
    *
+   * TODO: Fix variable names etc. but right output relation is used: The name "mwe" is from UDv1. It should now be "fixed"
+   *
    * @see {@link CoordinationTransformer#MWETransform(Tree)}
-   * @see <a href="http://universaldependencies.github.io/docs/en/dep/mwe.html">List of multi-word expressions</a>
+   * @see <a href="https://universaldependencies.org/en/dep/fixed.html">List of multi-word expressions</a>
    */
   public static final GrammaticalRelation MULTI_WORD_EXPRESSION =
     new GrammaticalRelation(Language.UniversalEnglish, "fixed", "multi-word expression",

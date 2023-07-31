@@ -1,12 +1,11 @@
 package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
-
 
 import edu.stanford.nlp.ling.LabelFactory;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -44,7 +43,7 @@ import java.util.Properties;
 public class CoordinationTransformer implements TreeTransformer  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CoordinationTransformer.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CoordinationTransformer.class);
 
   private static final boolean VERBOSE = System.getProperty("CoordinationTransformer", null) != null;
   private final TreeTransformer tn = new DependencyTreeTransformer(); //to get rid of unwanted nodes and tag
@@ -156,10 +155,10 @@ public class CoordinationTransformer implements TreeTransformer  {
     return t;
   }
 
-  private static TregexPattern rearrangeNowThatTregex =
+  private static final TregexPattern rearrangeNowThatTregex =
     TregexPattern.compile("ADVP=advp <1 (RB < /^(?i:now)$/) <2 (SBAR=sbar <1 (IN < /^(?i:that)$/))");
 
-  private static TsurgeonPattern rearrangeNowThatTsurgeon =
+  private static final TsurgeonPattern rearrangeNowThatTsurgeon =
     Tsurgeon.parseOperation("[relabel advp SBAR] [excise sbar sbar]");
 
   private static Tree rearrangeNowThat(Tree t) {
@@ -170,10 +169,10 @@ public class CoordinationTransformer implements TreeTransformer  {
   }
 
 
-  private static TregexPattern changeSbarToPPTregex =
+  private static final TregexPattern changeSbarToPPTregex =
     TregexPattern.compile("NP < (NP $++ (SBAR=sbar < (IN < /^(?i:after|before|until|since|during)$/ $++ S)))");
 
-  private static TsurgeonPattern changeSbarToPPTsurgeon =
+  private static final TsurgeonPattern changeSbarToPPTsurgeon =
     Tsurgeon.parseOperation("relabel sbar PP");
 
   /**
@@ -191,7 +190,7 @@ public class CoordinationTransformer implements TreeTransformer  {
     return Tsurgeon.processPattern(changeSbarToPPTregex, changeSbarToPPTsurgeon, t);
   }
 
-  private static TregexPattern findFlatConjpTregex =
+  private static final TregexPattern findFlatConjpTregex =
     // TODO: add more patterns, perhaps ignore case
     // for example, what should we do with "and not"?  Is it right to
     // generally add the "not" to the following tree with moveRB, or
@@ -202,7 +201,7 @@ public class CoordinationTransformer implements TreeTransformer  {
                           "  (< and $+ (RB=end < so)) | " +
                           "  (< and $+ (ADVP=end < (RB|IN < so))) ] ))"); // TODO: this structure needs a dependency
 
-  private static TsurgeonPattern addConjpTsurgeon =
+  private static final TsurgeonPattern addConjpTsurgeon =
     Tsurgeon.parseOperation("createSubtree CONJP start end");
 
   private static Tree combineConjp(Tree t) {
@@ -212,13 +211,13 @@ public class CoordinationTransformer implements TreeTransformer  {
     return Tsurgeon.processPattern(findFlatConjpTregex, addConjpTsurgeon, t);
   }
 
-  private static TregexPattern[] moveRBTregex = {
+  private static final TregexPattern[] moveRBTregex = {
     TregexPattern.compile("/^S|PP|VP|NP/ < (/^(S|PP|VP|NP)/ $++ (/^(,|CC|CONJP)$/ [ $+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB) ])) : (=adv $+ /^(S(?!YM)|PP|VP|NP)/=dest) "),
     TregexPattern.compile("/^ADVP/ < (/^ADVP/ $++ (/^(,|CC|CONJP)$/ [$+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB)])) : (=adv $+ /^NP-ADV|ADVP|PP/=dest)"),
     TregexPattern.compile("/^FRAG/ < (ADVP|RB=adv $+ VP=dest)"),
   };
 
-  private static TsurgeonPattern moveRBTsurgeon =
+  private static final TsurgeonPattern moveRBTsurgeon =
     Tsurgeon.parseOperation("move adv >0 dest");
 
   static Tree moveRB(Tree t) {
@@ -236,7 +235,7 @@ public class CoordinationTransformer implements TreeTransformer  {
   //
   // TODO: maybe we want to catch more complicated tree structures
   // with something in between the WH and the actual question.
-  private static TregexPattern flattenSQTregex =
+  private static final TregexPattern flattenSQTregex =
     TregexPattern.compile("SBARQ < ((WHNP=what < WP) $+ (SQ=sq < (/^VB/=verb < " + EnglishPatterns.copularWordRegex + ") " +
                           // match against "is running" if the verb is under just a VBG
                           " !< (/^VB/ < !" + EnglishPatterns.copularWordRegex + ") " +
@@ -249,7 +248,7 @@ public class CoordinationTransformer implements TreeTransformer  {
                           // match against "good at"
                           " !< (ADJP < (PP <: IN|TO))))");
 
-  private static TsurgeonPattern flattenSQTsurgeon = Tsurgeon.parseOperation("excise sq sq");
+  private static final TsurgeonPattern flattenSQTsurgeon = Tsurgeon.parseOperation("excise sq sq");
 
   /**
    * Removes the SQ structure under a WHNP question, such as "Who am I
@@ -271,10 +270,10 @@ public class CoordinationTransformer implements TreeTransformer  {
     return Tsurgeon.processPattern(flattenSQTregex, flattenSQTsurgeon, t);
   }
 
-  private static TregexPattern removeXOverXTregex =
+  private static final TregexPattern removeXOverXTregex =
     TregexPattern.compile("__=repeat <: (~repeat < __)");
 
-  private static TsurgeonPattern removeXOverXTsurgeon = Tsurgeon.parseOperation("excise repeat repeat");
+  private static final TsurgeonPattern removeXOverXTsurgeon = Tsurgeon.parseOperation("excise repeat repeat");
 
   public static Tree removeXOverX(Tree t) {
     return Tsurgeon.processPattern(removeXOverXTregex, removeXOverXTsurgeon, t);
@@ -660,7 +659,7 @@ public class CoordinationTransformer implements TreeTransformer  {
   /**
    * Multi-word expression patterns
    */
-  private static TregexPattern[] MWE_PATTERNS = {
+  private static final TregexPattern[] MWE_PATTERNS = {
     TregexPattern.compile("@CONJP <1 (RB=node1 < /^(?i)as$/) <2 (RB=node2 < /^(?i)well$/) <- (IN=node3 < /^(?i)as$/)"), //as well as
     TregexPattern.compile("@ADVP|CONJP <1 (RB=node1 < /^(?i)as$/) <- (IN|RB=node2 < /^(?i)well$/)"), //as well
     TregexPattern.compile("@PP < ((JJ=node1 < /^(?i)such$/) $+ (IN=node2 < /^(?i)as$/))"), //such as
@@ -686,36 +685,37 @@ public class CoordinationTransformer implements TreeTransformer  {
     TregexPattern.compile("@WHADVP < ((WRB=node1 < /^(?i:how)$/) $+ (VB=node2 < /^(?i)come$/))"), //how come
     TregexPattern.compile("@VP < ((VBD=node1 < had|'d) $+ (@PRT|ADVP=node2 <: (RBR < /^(?i)better$/)))"), //had better
     TregexPattern.compile("@QP|XS < ((JJR|RBR|IN=node1 < /^(?i)(more|less)$/) $+ (IN=node2 < /^(?i)than$/))"), //more/less than
-    TregexPattern.compile("@QP < ((JJR|RBR|RP|IN=node1 < /^(?i)up$/) $+ (IN|TO=node2 < /^(?i)to$/))"), //up to
+    TregexPattern.compile("@QP|XS < ((JJR|RBR||RB|RP|IN=node1 < /^(?i)(up)$/) $+ (IN|TO=node2 < /^(?i)to$/))"), // up to
+    TregexPattern.compile("@QP < ((JJR|RBR|RB|RP|IN=node1 < /^(?i)up$/) $+ (IN|TO=node2 < /^(?i)to$/))"), //up to
     TregexPattern.compile("@S|SQ|VP|ADVP|PP < (@ADVP < ((IN|RB=node1 < /^(?i)at$/) $+ (JJS|RBS=node2 < /^(?i)least$/)) !$+ (RB < /(?i)(once|twice)/))"), //at least
 
   };
   
-  private static TsurgeonPattern MWE_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1 node2] [if exists node3 move node3 $- node2]");
+  private static final TsurgeonPattern MWE_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1 node2] [if exists node3 move node3 $- node2]");
   
-  private static TregexPattern ACCORDING_TO_PATTERN = TregexPattern.compile("PP=pp1 < (VBG=node1 < /^(?i)according$/ $+ (PP=pp2 < (TO|IN=node2 < to)))");
-  private static TsurgeonPattern ACCORDING_TO_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1] [move node2 $- node1] [excise pp2 pp2]");
+  private static final TregexPattern ACCORDING_TO_PATTERN = TregexPattern.compile("PP=pp1 < (VBG=node1 < /^(?i)according$/ $+ (PP=pp2 < (TO|IN=node2 < to)))");
+  private static final TsurgeonPattern ACCORDING_TO_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1] [move node2 $- node1] [excise pp2 pp2]");
 
   /* "but also" is not a MWE, so break up the CONJP. */ 
-  private static TregexPattern BUT_ALSO_PATTERN = TregexPattern.compile("CONJP=conjp < (CC=cc < but) < (RB=rb < also) ?$+ (__=nextNode < (__ < __))");
-  private static TsurgeonPattern BUT_ALSO_OPERATION = Tsurgeon.parseOperation("[move cc $- conjp] [move rb $- cc] [if exists nextNode move rb >1 nextNode] [createSubtree ADVP rb] [delete conjp]");
+  private static final TregexPattern BUT_ALSO_PATTERN = TregexPattern.compile("CONJP=conjp < (CC=cc < but) < (RB=rb < also) ?$+ (__=nextNode < (__ < __))");
+  private static final TsurgeonPattern BUT_ALSO_OPERATION = Tsurgeon.parseOperation("[move cc $- conjp] [move rb $- cc] [if exists nextNode move rb >1 nextNode] [createSubtree ADVP rb] [delete conjp]");
 
   /* at least / at most / at best / at worst / ... should be treated as if "at"
      was a preposition and the RBS was a noun. Assumes that the MWE "at least"
      has already been extracted. */
-  private static TregexPattern AT_RBS_PATTERN = TregexPattern.compile("@ADVP|QP < ((IN|RB=node1 < /^(?i)at$/) $+ (JJS|RBS=node2))");
-  private static TsurgeonPattern AT_RBS_OPERATION = Tsurgeon.parseOperation("[relabel node1 IN] [createSubtree ADVP node1] [move node2 $- node1] [createSubtree NP node2]");
+  private static final TregexPattern AT_RBS_PATTERN = TregexPattern.compile("@ADVP|QP < ((IN|RB=node1 < /^(?i)at$/) $+ (JJS|RBS=node2))");
+  private static final TsurgeonPattern AT_RBS_OPERATION = Tsurgeon.parseOperation("[relabel node1 IN] [createSubtree ADVP node1] [move node2 $- node1] [createSubtree NP node2]");
 
   /* at all should be treated like a PP. */
-  private static TregexPattern AT_ALL_PATTERN = TregexPattern.compile("@ADVP=head < (RB|IN=node1 < /^(?i)at$/ $+ (RB|DT=node2 < /^(?i)all$/))");
-  private static TsurgeonPattern AT_ALL_OPERATION = Tsurgeon.parseOperation("[relabel head PP] [relabel node1 IN] [createSubtree NP node2]");
+  private static final TregexPattern AT_ALL_PATTERN = TregexPattern.compile("@ADVP=head < (RB|IN=node1 < /^(?i)at$/ $+ (RB|DT=node2 < /^(?i)all$/))");
+  private static final TsurgeonPattern AT_ALL_OPERATION = Tsurgeon.parseOperation("[relabel head PP] [relabel node1 IN] [createSubtree NP node2]");
 
   /**
    * Puts all multi-word expressions below a single constituent labeled "MWE".
    * Patterns for multi-word expressions are defined in MWE_PATTERNS.
    */
   public static Tree MWETransform(Tree t) {
-    for (TregexPattern p: MWE_PATTERNS) {
+    for (TregexPattern p : MWE_PATTERNS) {
       Tsurgeon.processPattern(p, MWE_OPERATION, t);
     }
     
@@ -728,8 +728,8 @@ public class CoordinationTransformer implements TreeTransformer  {
   }
 
   
-  private static TregexPattern FLAT_PREP_CC_PATTERN = TregexPattern.compile("PP <, (/^(IN|TO)$/=p1 $+ (CC=cc $+ /^(IN|TO)$/=p2))");
-  private static TsurgeonPattern FLAT_PREP_CC_OPERATION = Tsurgeon.parseOperation("[createSubtree PCONJP p1 cc] [move p2 $- cc]");
+  private static final TregexPattern FLAT_PREP_CC_PATTERN = TregexPattern.compile("PP <, (/^(IN|TO)$/=p1 $+ (CC=cc $+ /^(IN|TO)$/=p2))");
+  private static final TsurgeonPattern FLAT_PREP_CC_OPERATION = Tsurgeon.parseOperation("[createSubtree PCONJP p1 cc] [move p2 $- cc]");
   
   public static Tree prepCCTransform(Tree t) {
     
@@ -738,8 +738,8 @@ public class CoordinationTransformer implements TreeTransformer  {
     return t;
   }
 
-  private static TregexPattern GAPPING_PATTERN = TregexPattern.compile("/^[^G].*/=gphrase < (/^[^V].*-ORPH.*/ $ /^[^V].*-ORPH.*/)");
-  private static TsurgeonPattern GAPPING_OPERATION = Tsurgeon.parseOperation("[adjoinH (GP (GAPPINGP@ )) gphrase] ");
+  private static final TregexPattern GAPPING_PATTERN = TregexPattern.compile("/^[^G].*/=gphrase < (/^[^V].*-ORPH.*/ $ /^[^V].*-ORPH.*/)");
+  private static final TsurgeonPattern GAPPING_OPERATION = Tsurgeon.parseOperation("[adjoinH (GP (GAPPINGP@ )) gphrase] ");
 
 
   public static Tree gappingTransform(Tree t) {
@@ -747,7 +747,6 @@ public class CoordinationTransformer implements TreeTransformer  {
     Tsurgeon.processPattern(GAPPING_PATTERN, GAPPING_OPERATION, t);
 
     return t;
-
   }
 
   public static void main(String[] args) {

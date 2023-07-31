@@ -8,6 +8,7 @@ import junit.framework.TestCase;
  * @author John Bauer
  */
 public class CoordinationTransformerTest extends TestCase {
+
   static final String SYM_DONT_MOVE_RB = "(ROOT (S (NP (NP (NN fire) (NN gear)) (, ,) (ADVP (RB annually)) (SYM fy) (: -)) (VP (NN fy) (: :))))";
 
   public void testMoveRB() {

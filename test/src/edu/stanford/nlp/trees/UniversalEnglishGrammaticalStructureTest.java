@@ -2668,7 +2668,25 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
                    "case(shape-11, in-9)\n" +
                    "amod(shape-11, good-10)\n" +
                    "root(ROOT-0, shape-11)\n"
-              }
+              },
+            {TestType.BASIC,
+                    "( (S (NP (NNS Hippos)) (VP (VBP weigh) (NP (QP (RP up) (IN to) (CD 2,700)) (NNS kilograms))) (. .)))",
+                    "nsubj(weigh-2, Hippos-1)\n" +
+                            "root(ROOT-0, weigh-2)\n" +
+                            "advmod(2,700-5, up-3)\n" +
+                            "fixed(up-3, to-4)\n" +
+                            "nummod(kilograms-6, 2,700-5)\n" +
+                            "obj(weigh-2, kilograms-6)\n",
+            },
+            {TestType.BASIC,
+                    "( (S (NP (NNS Hippos)) (VP (VBP weigh) (NP (QP (RB up) (IN to) (CD 2,700)) (NNS kilograms))) (. .)))",
+                    "nsubj(weigh-2, Hippos-1)\n" +
+                            "root(ROOT-0, weigh-2)\n" +
+                            "advmod(2,700-5, up-3)\n" +
+                            "fixed(up-3, to-4)\n" +
+                            "nummod(kilograms-6, 2,700-5)\n" +
+                            "obj(weigh-2, kilograms-6)\n",
+            },
 
     });
   }

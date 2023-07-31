@@ -26,7 +26,8 @@
 
 package edu.stanford.nlp.trees;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 
 /** Test cases for English typed dependencies (Stanford dependencies).
@@ -35,7 +36,7 @@ import junit.framework.TestCase;
  *  @author Christopher Manning
  *  @author John Bauer
  */
-public class EnglishGrammaticalStructureTest extends TestCase {
+public class EnglishGrammaticalStructureTest {
 
 
   /**
@@ -45,6 +46,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
    * Sentence examples from the manual to at least test each relation.
    *
    */
+  @Test
   public void testBasicRelations() {
     // the trees to test
     String[] testTrees = {
@@ -534,10 +536,12 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                     "det(man-4, the-3)\n" +
                     "dobj(asked-2, man-4)\n" +
                     "aux(leave-6, to-5)\n" +
-                    "xcomp(asked-2, leave-6)\n"
+                    "xcomp(asked-2, leave-6)\n",
+
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
+
     TreeReaderFactory trf = new PennTreeReaderFactory();
     for (int i = 0; i < testTrees.length; i++) {
       String testTree = testTrees[i];
@@ -558,6 +562,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
    * More tests that we can extract the basic grammatical relations correctly from
    * some hard-coded trees.
    */
+  @Test
   public void testMoreBasicRelations() {
     // the trees to test
     String[] testTrees = {
@@ -582,6 +587,8 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
         // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
         "(FRAG (ADVP (ADVP (RB So) (RB long)) (SBAR (IN as) (S (NP-SBJ (PRP you)) (VP (VBP do) (RB n't) (VP (VB look) (ADVP-DIR (RB down))))))) (. .))",
+        "( (S (NP (NNS Hippos)) (VP (VBP weigh) (NP (QP (RP up) (IN to) (CD 2,700)) (NNS kilograms))) (. .)))",
+        "( (S (NP (NNS Hippos)) (VP (VBP weigh) (NP (QP (RB up) (IN to) (CD 2,700)) (NNS kilograms))) (. .)))",
     };
 
     // the expected dependency answers (basic)
@@ -692,6 +699,21 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "neg(look-7, n't-6)\n" +
                 "advcl(long-2, look-7)\n" +
                 "advmod(look-7, down-8)\n",
+
+            "nsubj(weigh-2, Hippos-1)\n" +
+                    "root(ROOT-0, weigh-2)\n" +
+                    "quantmod(2,700-5, up-3)\n" +
+                    "mwe(up-3, to-4)\n" +
+                    "num(kilograms-6, 2,700-5)\n" +
+                    "dobj(weigh-2, kilograms-6)\n",
+
+            "nsubj(weigh-2, Hippos-1)\n" +
+                    "root(ROOT-0, weigh-2)\n" +
+                    "quantmod(2,700-5, up-3)\n" +
+                    "mwe(up-3, to-4)\n" +
+                    "num(kilograms-6, 2,700-5)\n" +
+                    "dobj(weigh-2, kilograms-6)\n",
+
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
@@ -715,6 +737,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
    * Test the various verb "to be" cases in statements, questions, and imperatives. Added as part of the SD reform
    * that abolished attr.
    */
+  @Test
   public void testToBeRelations() {
     // the trees to test
     String[] testTrees = {
@@ -986,7 +1009,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "cop(good-4, am-2)\n" +
                 "nsubj(good-4, I-3)\n" +
                 "root(ROOT-0, good-4)\n" +
-                "prep(good-4, at-5)\n"
+                "prep(good-4, at-5)\n",
     };
 
     // the expected dependency answers (noncollapsed)
@@ -1238,6 +1261,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
    *
    * Sentence examples from the manual to at least test each relation.
    */
+  @Test
   public void testBasicRelationsWithCopulaAsHead() {
     // the trees to test
     String[] testTrees = {
@@ -1335,11 +1359,12 @@ public class EnglishGrammaticalStructureTest extends TestCase {
     }
   }
 
-   /**
+  /**
    * Tests that we can extract the non-collapsed grammatical relations (basic + extra)
    * correctly from some hard-coded trees.
    *
    */
+  @Test
   public void testNonCollapsedRelations() {
     // the trees to test
     String[] testTrees = {
@@ -1396,6 +1421,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
    * Tests printing of the extra dependencies after the basic ones.
    *
    */
+  @Test
   public void testNonCollapsedSeparator() {
     // the trees to test
     String[] testTrees = {
@@ -1432,6 +1458,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
    * some hard-coded trees.
    *
    */
+  @Test
   public void testCollapsedRelations() {
     // the trees to test
     String[] testTrees = {
@@ -1545,6 +1572,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
    * some hard-coded trees.
    *
    */
+  @Test
   public void testCCProcessedRelations() {
     // the trees to test
     String[] testTrees = {
@@ -1799,6 +1827,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
   /**
    * Tests that the copy nodes are properly handled.
    */
+  @Test
   public void testCopyNodes() {
     // the trees to test
     String[] testTrees = {
