@@ -1,7 +1,6 @@
 package edu.stanford.nlp.util;
 
 import java.io.DataOutputStream;
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
@@ -129,12 +128,12 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * If the other object is not a {@code Pair}, it throws a
    * {@code ClassCastException}.
    *
-   * @param another the <code>Object</code> to be compared.
-   * @return the value <code>0</code> if the argument is a
+   * @param another the {@code Object} to be compared.
+   * @return the value {@code 0} if the argument is a
    *         {@code Pair} equal to this {@code Pair}; a value less than
-   *         <code>0</code> if the argument is a {@code Pair}
+   *         {@code 0} if the argument is a {@code Pair}
    *         greater than this {@code Pair}; and a value
-   *         greater than <code>0</code> if the argument is a
+   *         greater than {@code 0} if the argument is a
    *         {@code Pair} less than this {@code Pair}.
    * @throws ClassCastException if the argument is not a
    *                            {@code Pair}.
@@ -196,7 +195,6 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   /**
    * use serialVersionUID for cross version serialization compatibility
    */
-  @Serial
   private static final long serialVersionUID = 1360822168806852921L;
 
 
@@ -212,7 +210,6 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
       internStrings();
     }
 
-    @Serial
     protected Object readResolve() {
       internStrings();
       return this;
@@ -228,7 +225,6 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
     }
 
     // use serialVersionUID for cross version serialization compatibility
-    @Serial
     private static final long serialVersionUID = 1360822168806852922L;
 
   }
@@ -259,8 +255,7 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   /**
    * Compares a {@code Pair} to another {@code Pair} according to the first object of the pair only in decreasing order
    * This function will work providing
-   * the first element of the {@code Pair} is comparable, otherwise will throw a
-   * <code>ClassCastException</code>
+   * the first element of the {@code Pair} is comparable, otherwise will throw a {@code ClassCastException}
    * @author jonathanberant
    */
   public static class ByFirstReversePairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
@@ -275,8 +270,7 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   /**
    * Compares a {@code Pair} to another {@code Pair} according to the second object of the pair only
    * This function will work providing
-   * the first element of the {@code Pair} is comparable, otherwise will throw a
-   * <code>ClassCastException</code>
+   * the first element of the {@code Pair} is comparable, otherwise will throw a {@code ClassCastException}
    * @author jonathanberant
    */
   public static class BySecondPairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
@@ -291,8 +285,7 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   /**
    * Compares a {@code Pair} to another {@code Pair} according to the second object of the pair only in decreasing order
    * This function will work providing
-   * the first element of the {@code Pair} is comparable, otherwise will throw a
-   * <code>ClassCastException</code>
+   * the first element of the {@code Pair} is comparable, otherwise will throw a {@code ClassCastException}
    *
    * @author jonathanberant
    */
