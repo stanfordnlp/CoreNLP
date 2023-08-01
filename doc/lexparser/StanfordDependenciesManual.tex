@@ -39,7 +39,8 @@
 % Revised for the Stanford Parser v.\ 3.3 in December 2013
 %Revised for the Stanford Parser v.\ 3.5.1 in February 2015
 %Revised for the Stanford Parser v.\ 3.5.2 in April 2015
-Revised for the Stanford Parser v.\ 3.7.0+ in September 2016
+%Revised for the Stanford Parser v.\ 3.7.0+ in September 2016
+Revised for the Stanford CoreNLP/Parser v.\ 4.5.5 in August 2023
 }
 
 \begin{document}
@@ -48,7 +49,8 @@ Revised for the Stanford Parser v.\ 3.7.0+ in September 2016
 \textcolor{cardinal}{Please note that this manual describes the original Stanford
 Dependencies representation. As of version 3.5.2, the default representation
 output by the Stanford Parser and Stanford CoreNLP is the new Universal Dependencies (UD)
-representation, and we no longer actively develop the original Stanford Dependencies representation. For a description of the UD
+representation, support for the original Stanford Dependencies
+representation is in maintenance mode. For a description of the UD
 representation, take a look at the Universal Dependencies documentation at \textsf{http:/www.universaldependencies.org} and
 the discussion of the \textit{enhanced} and \textit{enhanced++} UD representations by \citet{schuster2016enhanced}.}
 
@@ -460,12 +462,15 @@ A passive nominal subject is a noun phrase which is the syntactic subject of a p
 
 \noindent\textbf{\emph{num}: numeric modifier}\\
 A numeric modifier of a noun is any number phrase that serves to
-modify the meaning of the noun with a quantity.
+modify the meaning of the noun with a quantity. As a bit of a weird
+special case, we also use \emph{num} for the items of a numbered list
+(regardless of whether arabic or roman numerals or letters).
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
 \>  ``Sam ate 3 sheep'' \> \>  \emph{num}(sheep, 3)\\
 \>  ``Sam spent forty dollars'' \> \>  \emph{num}(dollars, 40)\\
 \>  ``Sam spent \$ 40'' \> \>  \emph{num}(\$, 40)\\
+\>  ``(i) Assessment of general working capital'' \> \>  \emph{num}(Assessment, i)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{number}: element of compound number}\\

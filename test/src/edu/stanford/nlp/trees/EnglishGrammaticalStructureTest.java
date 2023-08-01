@@ -589,6 +589,7 @@ public class EnglishGrammaticalStructureTest {
         "(FRAG (ADVP (ADVP (RB So) (RB long)) (SBAR (IN as) (S (NP-SBJ (PRP you)) (VP (VBP do) (RB n't) (VP (VB look) (ADVP-DIR (RB down))))))) (. .))",
         "( (S (NP (NNS Hippos)) (VP (VBP weigh) (NP (QP (RP up) (IN to) (CD 2,700)) (NNS kilograms))) (. .)))",
         "( (S (NP (NNS Hippos)) (VP (VBP weigh) (NP (QP (RB up) (IN to) (CD 2,700)) (NNS kilograms))) (. .)))",
+        "( (S (NP (PRP I)) (VP (VBD purchased) (NP (QP (RP up) (IN to) (CD 192,000)) (JJ additional) (JJ ordinary) (NNS shares))) (. .)))",
     };
 
     // the expected dependency answers (basic)
@@ -713,6 +714,15 @@ public class EnglishGrammaticalStructureTest {
                     "mwe(up-3, to-4)\n" +
                     "num(kilograms-6, 2,700-5)\n" +
                     "dobj(weigh-2, kilograms-6)\n",
+
+            "nsubj(purchased-2, I-1)\n" +
+                    "root(ROOT-0, purchased-2)\n" +
+                    "quantmod(192,000-5, up-3)\n" +
+                    "mwe(up-3, to-4)\n" +
+                    "num(shares-8, 192,000-5)\n" +
+                    "amod(shares-8, additional-6)\n" +
+                    "amod(shares-8, ordinary-7)\n" +
+                    "dobj(purchased-2, shares-8)",
 
     };
 
