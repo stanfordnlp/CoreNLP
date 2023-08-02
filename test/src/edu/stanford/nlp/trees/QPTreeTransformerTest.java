@@ -31,8 +31,8 @@ public class QPTreeTransformerTest extends TestCase {
     String output = "(ROOT (S (NP (NP (DT a) (NN stake)) (PP (IN of) (NP (QP (XS (RB just) (IN under)) (CD 30)) (NN %))))))";
     runTest(input, output);
     // "up" should be RB but make sure it also files for RP
-    String input2 = "(ROOT (S (NP (NP (DT a) (NN stake)) (PP (IN of) (NP (QP (RP up) (IN t0) (CD 30)) (NN million))))))";
-    String output2 = "(ROOT (S (NP (NP (DT a) (NN stake)) (PP (IN of) (NP (QP (XS (RP up) (IN to)) (CD 30)) (NN %))))))";
+    String input2 = "(ROOT (S (NP (NP (DT a) (NN stake)) (PP (IN of) (NP (QP (RP up) (IN to) (CD 30)) (NN million))))))";
+    String output2 = "(ROOT (S (NP (NP (DT a) (NN stake)) (PP (IN of) (NP (QP (XSL (RP up) (IN to)) (CD 30)) (NN million))))))";
     runTest(input2, output2);
   }
 
