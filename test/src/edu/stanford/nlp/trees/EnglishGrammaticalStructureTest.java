@@ -722,7 +722,7 @@ public class EnglishGrammaticalStructureTest {
                     "num(shares-8, 192,000-5)\n" +
                     "amod(shares-8, additional-6)\n" +
                     "amod(shares-8, ordinary-7)\n" +
-                    "dobj(purchased-2, shares-8)",
+                    "dobj(purchased-2, shares-8)\n",
 
     };
 
