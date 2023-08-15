@@ -496,7 +496,7 @@ public class StanfordCoreNLPServer implements Runnable {
     // Add GET parameters as properties
     urlParams.entrySet().stream()
         .filter(entry ->
-            !"properties".equalsIgnoreCase(entry.getKey()) &&
+                !"properties".equalsIgnoreCase(entry.getKey()) &&
                 !"props".equalsIgnoreCase(entry.getKey()))
         .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
 
