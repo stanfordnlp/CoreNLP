@@ -249,14 +249,14 @@ nohup java -mx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer 1337 &
 
 The classpath must include all of the CoreNLP dependencies. The memory requirements of the server are the same as that of CoreNLP, though it will grow as you load more models (e.g., memory increases if you load both the PCFG and Shift-Reduce constituency parser models). A safe minimum is 4gb; 8gb is recommended if you can spare it.
 
-### Docker
+### Using the Server under Docker
 
 ```
-Docker repository: https://hub.docker.com/r/frnkenstien/corenlp
-docker pull frnkenstien/corenlp
+Docker repository: https://hub.docker.com/r/nlpbox/corenlp
+docker pull nlpbox/corenlp
 ```
 If running the server under docker, the container’s port 9000 has to be published to the host. Give a command like:
-`docker run -p 9000:9000 --name coreNLP --rm -i -t frnkenstien/corenlp`. If, when going to `localhost:9000/`, you see the error 
+`docker run -p 9000:9000 -itd --name coreNLP nlpbox/corenlp`. If, when going to `localhost:9000/`, you see the error
 `This site can’t be reached. localhost refused to connect`, then this is what you failed to do!
 
 ### Stopping the Server
