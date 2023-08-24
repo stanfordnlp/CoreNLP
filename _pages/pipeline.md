@@ -23,7 +23,7 @@ how to customize the annotators.
 You can immediately run a pipeline by issuing the following command:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -file input.txt
 ```
 
 The output will be stored in the file `input.txt.out`, and will by default contain a human readable presentation
@@ -38,7 +38,7 @@ Here is an example properties file stored at `example.props`:
 outputFormat = json
 
 # list of annotators to run
-annotators = tokenize,ssplit,pos
+annotators = tokenize,pos
 
 # customize the pos model
 pos.model = edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger
@@ -47,7 +47,7 @@ pos.model = edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tag
 Here is the command for running a pipeline with these configurations:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -props example.props -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -props example.props -file input.txt
 ```
 
 This will store JSON output in the file `input.txt.json`.
@@ -55,13 +55,13 @@ This will store JSON output in the file `input.txt.json`.
 Of course all of those properties could be specified at the command line as well:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos -pos.model edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger -outputFormat json -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos -pos.model edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger -outputFormat json -file input.txt
 ```
 
 If you want to run a non-English language pipeline, you can just specify the name of one of the CoreNLP supported languages:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -props french -file french-input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -props french -file french-input.txt
 ```
 
 ## Running A Pipeline In Java Code
@@ -85,7 +85,7 @@ public class PipelineExample {
         // set up pipeline properties
         Properties props = new Properties();
         // set the list of annotators to run
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
+        props.setProperty("annotators", "tokenize,pos,lemma,ner,depparse");
         // build pipeline
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
         // create a document object

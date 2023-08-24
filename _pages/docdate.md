@@ -23,12 +23,12 @@ in `ner` do not also use the standalone annotator.
 
 ```
 # as a standalone annotator
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP edu.stanford.nlp.pipeline.DocDateAnnotator -annotators tokenize,ssplit,docdate -docdate.useFixedDate 2019-01-01 -file example.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP edu.stanford.nlp.pipeline.DocDateAnnotator -annotators tokenize,docdate -docdate.useFixedDate 2019-01-01 -file example.txt
 ```
 
 ```
 # as a sub-annotator of ner
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.docdate.useFixedDate 2019-01-01 -file example.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.docdate.useFixedDate 2019-01-01 -file example.txt
 ```
 
 ## Options

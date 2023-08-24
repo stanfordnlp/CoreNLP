@@ -27,7 +27,7 @@ The English WikiDict contains 20948089 mappings from Strings to entities.
 ### Command Line
 
 ```
-java -Xmx16g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,entitylink -file example.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner,entitylink -file example.txt
 ```
 
 ## Options

@@ -22,7 +22,7 @@ Some uses of CoreNLP don’t need much time or space. It can just tokenize and s
 It can do this on the sample text while giving Java just 20MB of memory:
 
 ```bash
-java -mx20m -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -file James-Joyce-Ulysses-ch13.txt -outputFormat text
+java -mx20m -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize -file James-Joyce-Ulysses-ch13.txt -outputFormat text
 ```
 
 CoreNLP will probably report a speed around 50,000–100,000 tokens per second for running this command. (That’s actually well under its actual speed for doing just these two operations – the text isn’t long enough for the code to be warmed up, and I/O costs, etc. dominate. Likely its real speed on your computer is well over 200,000 tokens a second in this configuration.)
@@ -74,7 +74,7 @@ Because of different default annotator choices, if you you try to process this f
 But, in v.3.6, even if we turned off coreference altogether and ran with:
 
 ```bash
-java -cp "$STANFORD_CORENLP_v360_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,ssplit,pos,lemma,ner,parse" -file James-Joyce-Ulysses-ch13.txt -outputFormat json
+java -cp "$STANFORD_CORENLP_v360_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,pos,lemma,ner,parse" -file James-Joyce-Ulysses-ch13.txt -outputFormat json
 ```
 
 then the annotation speed was still only about 100 tokens per second, because the default parsing model of earlier versions (`englishPCFG.ser.gz`) was also very slow.
@@ -82,13 +82,13 @@ then the annotation speed was still only about 100 tokens per second, because th
 Returning to v.3.7.0 and continuing with turning annotators off, if all you need are parts of speech and named entities, you should run a pipeline like this:
 
 ```bash
-java -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,ssplit,pos,lemma,ner" -file James-Joyce-Ulysses-ch13.txt -outputFormat json
+java -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,pos,lemma,ner" -file James-Joyce-Ulysses-ch13.txt -outputFormat json
 ```
 
 and the annotation speed is about 1300 tokens per second – about 6 times faster. If really you only need 3 class PERSON, LOCATION, ORGANIZATION NER, then you could turn off more stuff like this:
 
 ```bash
-java -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,ner -ner.model edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz -ner.useSUTime false -ner.applyNumericClassifiers false -file James-Joyce-Ulysses-ch13.txt -outputFormat json
+java -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,ner -ner.model edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz -ner.useSUTime false -ner.applyNumericClassifiers false -file James-Joyce-Ulysses-ch13.txt -outputFormat json
 ```
 
 and the annotation speed is about 6500 tokens per second – another 5 times faster. **Limiting the number of annotators run can improve speed by orders of magnitude.**
@@ -109,19 +109,19 @@ For 2., the only thing you can do is to either remove annotators that you do not
 Currently, the largest models in the default pipeline are the neural networks for statistical coreference. The shift-reduce constituency parser also has very large models. If you run without them, you can annotate the sample document in 2GB of RAM:
 
 ```bash
-java -mx2g -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,ssplit,pos,lemma,ner,depparse" -file James-Joyce-Ulysses-ch13.txt -outputFormat text
+java -mx2g -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,pos,lemma,ner,depparse" -file James-Joyce-Ulysses-ch13.txt -outputFormat text
 ```
 
 But once you include coreference – here, we’ve explicitly listed the annotators, but these are the default options – then the system really needs 4GB of RAM for this document (and if you run constituency parsing and coreference on a large document, you can easily need 5–6GB of RAM).
 
 ```bash
-java -mx4g -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,ssplit,pos,lemma,ner,depparse,mention,coref" -file James-Joyce-Ulysses-ch13.txt -outputFormat text
+java -mx4g -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,pos,lemma,ner,depparse,mention,coref" -file James-Joyce-Ulysses-ch13.txt -outputFormat text
 ```
 
 In the other direction, if you turn off parsing as well, then 1GB of RAM is fine:
 
 ```bash
-java -mx1g -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,ssplit,pos,lemma,ner" -file James-Joyce-Ulysses-ch13.txt -outputFormat text
+java -mx1g -cp "$STANFORD_CORENLP_HOME/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators "tokenize,pos,lemma,ner" -file James-Joyce-Ulysses-ch13.txt -outputFormat text
 ```
 
 For 3., the classic problem case is parsing long sentences with dynamic programmed parsers like the traditional `englishPCFG.ser.gz` constituency parsing. This takes space proportional to the square of the longest sentence length, with a large constant factor. Parsing sentences that are hundreds of words long will take additional gigabytes of memory just for the parser data structures. The easiest fix for that is just to not parse super-long sentences. You can do that with a property like: `-parse.maxlen 70`. This can be a fine solution for something like web pages or newswire, where anything over 70 words is likely a table or list or something that isn’t a real sentence. However, it is unappealing for James Joyce: Several of the sentences in Chapter 13 are over 100 words but are well-formed, proper sentences. For example, here is one of the longer sentences in the chapter:

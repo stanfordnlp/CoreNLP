@@ -80,7 +80,7 @@ Other output formats include `conllu`, `json`, and `serialized`.
 The following command is an example of specifying `PTBTokenizer` options with the `tokenize.options` option:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize -tokenize.options "splitHyphenated=false,americanize=false" -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize -tokenize.options "splitHyphenated=false,americanize=false" -file input.txt
 ```
 
 ## Tokenizing From Java

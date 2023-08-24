@@ -11,19 +11,19 @@ parent: Usage
 
 Out-of-the-box, Stanford CoreNLP expects and processes English language text. But, Stanford CoreNLP was designed from the start to work with multiple human languages and it is careful about things like different character encodings. We have developed components for several major languages, and make language packs (jar files) available for some of them. The table below summarizes our current first party foreign language support. Other people have developed [models for other languages](#models-for-other-languages).
 
-| Annotator | ar | zh | en | fr | de | hu | it | es |
-| --------------- |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| Tokenize / Segment | ✔ | ✔  | ✔ | ✔  |     | ✔ | ✔ | ✔ |
-| Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ |  | ✔ | ✔  |
-| Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ | ✔  | ✔ |
-| Lemma |   |   | ✔ |   |   |    |  |  |
-| Named Entities |   | ✔  | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| Constituency Parsing | ✔ | ✔  | ✔ | ✔ |  |  | ✔  |  |
-| Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     | ✔ | ✔  |
-| Sentiment Analysis |    |    | ✔ |  |  |     |  |  |
-| Mention Detection |    | ✔  | ✔ |  |  |     |  |  |
-| Coreference |    | ✔  | ✔ |  |  |     |  |  |
-| Open IE |    |   | ✔ |  |  |     |  |  |
+| Annotator            | ar | zh | en | fr | de | hu | it | es |
+| ---------------      |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Tokenize / Segment   | ✔  | ✔  | ✔  | ✔  |    | ✔  | ✔  | ✔  |
+| Sentence Split       | ✔  | ✔  | ✔  | ✔  | ✔  |    | ✔  | ✔  |
+| Part of Speech       | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| Lemma                |    |    | ✔  |    |    |    |    |    |
+| Named Entities       |    | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| Constituency Parsing | ✔  | ✔  | ✔  | ✔  |    | ✔  | ✔  |    |
+| Dependency Parsing   |    | ✔  | ✔  | ✔  | ✔  |    | ✔  | ✔  |
+| Sentiment Analysis   |    |    | ✔  |    |    |    |    |    |
+| Mention Detection    |    | ✔  | ✔  |    |    |    |    |    |
+| Coreference          |    | ✔  | ✔  |    |    |    |    |    |
+| Open IE              |    |    | ✔  |    |    |    |    |    |
 
 #### Models
 
@@ -33,13 +33,13 @@ The jars for each language can be found here:
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-arabic.jar) | 4.4.0 |
-| Chinese | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-chinese.jar) | 4.4.0 |
-| French | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-french.jar) | 4.4.0 |
-| German | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-german.jar) | 4.4.0 |
-| Hungarian | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-hungarian.jar) | 4.4.0 |
-| Italian | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-italian.jar) | 4.4.0 |
-| Spanish | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.4.0-models-spanish.jar) | 4.4.0 |
+| Arabic  | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.4-models-arabic.jar) | 4.5.4 |
+| Chinese | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.4-models-chinese.jar) | 4.5.4 |
+| French | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.4-models-french.jar) | 4.5.4 |
+| German | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.4-models-german.jar) | 4.5.4 |
+| Hungarian | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.4-models-hungarian.jar) | 4.5.4 |
+| Italian | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.4-models-italian.jar) | 4.5.4 |
+| Spanish | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.4-models-spanish.jar) | 4.5.4 |
 
 #### Running pipelines
 
@@ -48,7 +48,7 @@ There are sets of default properties that can be used to run pipelines for every
 For instance, to run a Spanish pipeline, one could execute this command from the command line:
 
 ```sh
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -props spanish -file example.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -props spanish -file example.txt
 ```
 
 Or build and run a pipeline in Java in this manner:
@@ -111,7 +111,7 @@ The pattern is the same for the other supported languages.
 
 #### UD supported languages
 
-Currently French (UD 2.2), German (UD 2.2), and Spanish (AnCora UD 2.0) work off of the UD 2.0 tokenization standard. This means among other things that words are split into multiword tokens. For instance the French word `"des"` will be tokenized in some circumstances as `"de" "les"`. All tagging, parsing, and named entity recognition models rely on that tokenization standard, so it is necessary to use the `mwt` annotator which performs the multiword tokenization. For instance, in Spanish, the annotators required to run dependency parsing would be `tokenize,ssplit,mwt,pos,lemma,depparse`. The part of speech tags and dependency labels are from the UD 2.0 sets for each language.
+Currently French (UD 2.2), German (UD 2.2), and Spanish (AnCora UD 2.0) work off of the UD 2.0 tokenization standard. This means among other things that words are split into multiword tokens. For instance the French word `"des"` will be tokenized in some circumstances as `"de" "les"`. All tagging, parsing, and named entity recognition models rely on that tokenization standard, so it is necessary to use the `mwt` annotator which performs the multiword tokenization. For instance, in Spanish, the annotators required to run dependency parsing would be `tokenize,mwt,pos,lemma,depparse`. The part of speech tags and dependency labels are from the UD 2.0 sets for each language.
 
 #### Models for other languages
 

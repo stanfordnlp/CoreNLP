@@ -31,7 +31,7 @@ parses then you should look at the `parse` annotator.
 Here is an example command for training your own model.  In this example we will train a French dependency parser.
 
 ```bash
-java -Xmx12g edu.stanford.nlp.parser.nndep.DependencyParser -trainFile fr-ud-train.conllu -devFile fr-ud-dev.conllu -model new-french-UD-model.txt.gz -embedFile wiki.fr.vec -embeddingSize 300 -tlp edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack -cPOS
+java edu.stanford.nlp.parser.nndep.DependencyParser -trainFile fr-ud-train.conllu -devFile fr-ud-dev.conllu -model new-french-UD-model.txt.gz -embedFile wiki.fr.vec -embeddingSize 300 -tlp edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack -cPOS
 ```
 
 * UD train/dev/test data for a variety of languages can be found [here](http://universaldependencies.org/)

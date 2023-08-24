@@ -53,7 +53,7 @@ information.  Here is an example:
 With the default English models, no entities (and no proper nouns) are
 found:
 
-    % java edu.stanford.nlp.pipeline.StanfordCoreNLP -file lakers.txt -outputFormat conll -annotators tokenize,ssplit,pos,lemma,ner
+    % java edu.stanford.nlp.pipeline.StanfordCoreNLP -file lakers.txt -outputFormat conll -annotators tokenize,pos,lemma,ner
     % cat lakers.txt.conll 
     1	lonzo	lonzo	NN	O	_	_
     2	ball	ball	NN	O	_	_
@@ -70,7 +70,7 @@ found:
 However, Instead, if we  run truecasing prior to POS tagging and NER,
 then we get:
 
-    % java edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat conll -annotators tokenize,ssplit,truecase,pos,lemma,ner -file lakers.txt -truecase.overwriteText
+    % java edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat conll -annotators tokenize,truecase,pos,lemma,ner -file lakers.txt -truecase.overwriteText
     % cat lakers.txt.conll 
     1	Lonzo	Lonzo	NNP	PERSON	_	_
     2	ball	ball	NN	O	_	_

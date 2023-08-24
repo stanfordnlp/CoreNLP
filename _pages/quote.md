@@ -33,7 +33,7 @@ This can be deactivated by setting the `quote.attributeQuotes` property to `fals
 If you run this command:
 
 ```bash
-java -Xmx10g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,depparse,coref,quote -file quote-example.txt -outputFormat text
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner,depparse,coref,quote -file quote-example.txt -outputFormat text
 ```
 
 On this text `quote-example.txt`:

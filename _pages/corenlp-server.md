@@ -24,7 +24,7 @@ If you want to process non-English languages, use this command with the appropri
 
 ```bash
 # Run a server using Chinese properties
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -serverProperties StanfordCoreNLP-chinese.properties -port 9000 -timeout 15000
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -serverProperties StanfordCoreNLP-chinese.properties -port 9000 -timeout 15000
 ``` 
 
 Each language has a models jar which must also be on the CLASSPATH.  The most recently models jars for each language can be found [here](http://stanfordnlp.github.io/CoreNLP/download.html).  
@@ -36,13 +36,13 @@ If no value for `port` is provided, port 9000 will be used by default. You can t
 You should see a website similar to [corenlp.run](http://corenlp.run/), with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. (Note: *The first use will be slow*  to respond while models are loaded – it might take 30 seconds or so, but after that the server should run quite quickly.) You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with [wget](https://www.gnu.org/software/wget/). The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags:
 
 ```bash
-wget --post-data 'The quick brown fox jumped over the lazy dog.' 'localhost:9000/?properties={"annotators":"tokenize,ssplit,pos","outputFormat":"json"}' -O -
+wget --post-data 'The quick brown fox jumped over the lazy dog.' 'localhost:9000/?properties={"annotators":"tokenize,pos","outputFormat":"json"}' -O -
 ```
 
 Or if you have one of those fancy IPv6 stacks, then you can instead use:
 
 ```bash
-wget --post-data 'The quick brown fox jumped over the lazy dog.' 'http://[::]:9000/?properties={"annotators":"tokenize,ssplit,pos","outputFormat":"json"}' -O -
+wget --post-data 'The quick brown fox jumped over the lazy dog.' 'http://[::]:9000/?properties={"annotators":"tokenize,pos","outputFormat":"json"}' -O -
 ```
 
 Or if you only have or prefer [curl](https://curl.haxx.se/):
@@ -56,7 +56,7 @@ endpoint using the `requests` library:
 
 ```python
 import requests
-print(requests.post('http://[::]:9000/?properties={"annotators":"tokenize,ssplit,pos","outputFormat":"json"}', data = {'data':'The quick brown fox jumped over the lazy dog.'}).text)
+print(requests.post('http://[::]:9000/?properties={"annotators":"tokenize,pos","outputFormat":"json"}', data = {'data':'The quick brown fox jumped over the lazy dog.'}).text)
 ```
 
 The rest of this document: describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` annotator pipeline, and talks about administering the server. If you're using Python or another programming language, we don't suggest that you start with the minimal example above, but rather first look through [available other language APIs](other-languages.html) that use the CoreNLP server.
@@ -89,7 +89,7 @@ For example, the following command will tokenize the input text, run
 part of speech tagging, and output the result as JSON to standard out:
 
 ```bash
-wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"annotators": "tokenize,ssplit,pos", "outputFormat": "json"}' -O -
+wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"annotators": "tokenize,pos", "outputFormat": "json"}' -O -
 ```
 
 A common property to set is the output format of the API. The server supports all output formats provided by CoreNLP. These are listed below, along with their relevant properties:
@@ -117,7 +117,7 @@ The server also accepts input in a variety of formats. By default, it takes inpu
 A complete call to the server, taking as input a protobuf serialized document at path `/path/to/file.proto` and returning as a response a protobuf for the document annotated for part of speech and named entity tags (to the file `/path/to/annotated_file.proto` could be:
 
 ```bash
-wget --post-file /path/to/file.proto 'localhost:9000/?properties={"inputFormat": "serialized", "inputSerializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer", "annotators": "tokenize,ssplit,pos,lemma,ner", "outputFormat": "serialized", "serializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}' -O /path/to/annotated_file.proto
+wget --post-file /path/to/file.proto 'localhost:9000/?properties={"inputFormat": "serialized", "inputSerializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer", "annotators": "tokenize,pos,lemma,ner", "outputFormat": "serialized", "serializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}' -O /path/to/annotated_file.proto
 ```
 
 ### Query TokensRegex: `/tokensregex`
@@ -203,7 +203,7 @@ pipeline.annotate(document);
 You can also run the client from the command line, and get an interface similar to the command line usage for the local CoreNLP program. The following will annotate a file `input.txt` with part-of-speech, lemmas, named entities, constituency parses, and coreference:
 
 ```bash
-java -cp "*" -Xmx1g edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators tokenize,pos,lemma,ner,parse,dcoref -file input.txt
 ```
 
 > **NOTE**: Again, please do **not** make API calls against `http://corenlp.run`. It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#dedicated-server) section.
@@ -211,7 +211,7 @@ java -cp "*" -Xmx1g edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators 
 Once you have your own server(s) set up, you can run against them with a command like this:
 
 ```bash
-java edu.stanford.nlp.pipeline.StanfordCoreNLPClient -cp "*" -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt  -backends http://localhost:9000
+java edu.stanford.nlp.pipeline.StanfordCoreNLPClient -cp "*" -annotators tokenize,pos,lemma,ner,parse,dcoref -file input.txt  -backends http://localhost:9000
 ```
 
 You specify one or more back-end servers in a comma-separated list as the arguments of the `-backends` option. Each is specified as `host:port`.
@@ -222,7 +222,7 @@ If you have the French properties file and a file called `french.txt`
 in your current directory, then you should be able to successfully give a command like this:
 
 ```bash
-java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPClient -props StanfordCoreNLP-french.properties -annotators tokenize,ssplit,pos,depparse ile french.txt -outputFormat conllu -backends localhost:9000
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPClient -props StanfordCoreNLP-french.properties -annotators tokenize,pos,depparse ile french.txt -outputFormat conllu -backends localhost:9000
 ```
 
 ## Usage via other programming languages
@@ -274,7 +274,7 @@ If you start the server with `-server_id SERVER_NAME` it will store the shutdown
 You can restrict access to the server by requiring a username and password.
 
 ```bash
-java -Xmx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000 -username myUsername -password myPassword
+java edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000 -username myUsername -password myPassword
 ```
 
 Here is an example of making a request to the server, supplying a username and password.

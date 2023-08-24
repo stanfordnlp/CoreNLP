@@ -29,7 +29,7 @@ a tag. For instance, in the sentence `Marie was born in Paris.` the word `Marie`
 This command will apply part of speech tags to the input text:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos -file input.txt
 ```
 
 Other output formats include `conllu`, `conll`, `json`, and `serialized`.
@@ -37,13 +37,13 @@ Other output formats include `conllu`, `conll`, `json`, and `serialized`.
 This command will apply part of speech tags using a non-default model (e.g. the more powerful but slower bidirectional model):
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos -pos.model edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos -pos.model edu/stanford/nlp/models/pos-tagger/english-bidirectional-distsim.tagger -file input.txt
 ```
 
 If running on French, German, or Spanish, it is crucial to use the MWT annotator:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -props french -annotators tokenize,ssplit,mwt,pos -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -props french -annotators tokenize,mwt,pos -file input.txt
 ```
 
 ## Part Of Speech Tagging From Java
@@ -64,7 +64,7 @@ public class POSTaggingExample {
     // set up pipeline properties
     Properties props = new Properties();
     // set the list of annotators to run
-    props.setProperty("annotators", "tokenize,ssplit,pos");
+    props.setProperty("annotators", "tokenize,pos");
     // build pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     // create a document object

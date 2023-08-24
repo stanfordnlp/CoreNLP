@@ -43,6 +43,8 @@ And there are about 200 others – it’s not so hard to build a dockerfile! Her
 
 * [go-corenlp](https://github.com/hironobu-s/go-corenlp) is a Golang wrapper for CoreNLP by Hironobu Saito.
 
+* [corenlp-golang](https://github.com/genelet/coreNLP/) is another wrapper by Peter Bi written in 2022
+
 ### Java
 
 * [DKPro Core](https://dkpro.github.io/dkpro-core/) is a collection of NLP components, wrapped as **UIMA** components.

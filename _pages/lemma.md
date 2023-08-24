@@ -21,7 +21,7 @@ Lemmatization maps a word to its lemma (dictionary form). For instance, the word
 This command will find lemmas for the input text:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma -file input.txt
 ```
 
 Other output formats include `conllu`, `conll`, `json`, and `serialized`.
@@ -45,7 +45,7 @@ public class LemmatizingExample {
     // set up pipeline properties
     Properties props = new Properties();
     // set the list of annotators to run
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
+    props.setProperty("annotators", "tokenize,pos,lemma");
     // build pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     // create a document object

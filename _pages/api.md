@@ -41,7 +41,7 @@ public class BasicPipelineExample {
     // set up pipeline properties
     Properties props = new Properties();
     // set the list of annotators to run
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,kbp,quote");
+    props.setProperty("annotators", "tokenize,pos,lemma,ner,parse,depparse,coref,kbp,quote");
     // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
     props.setProperty("coref.algorithm", "neural");
     // build pipeline
@@ -197,7 +197,7 @@ values and build a Properties object:
 // build pipeline
 StanfordCoreNLP pipeline = new StanfordCoreNLP(
 	PropertiesUtils.asProperties(
-		"annotators", "tokenize,ssplit,pos,lemma,parse,natlog",
+		"annotators", "tokenize,pos,lemma,parse,natlog",
 		"ssplit.isOneSentence", "true",
 		"parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz",
 		"tokenize.language", "en"));

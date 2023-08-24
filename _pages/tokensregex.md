@@ -160,7 +160,7 @@ with TokensRegex rules.  This can be achieved with the `tokensregex` annotator.
 Here is an example command (see `basic_ner.rules` file below):
 
 ```bash
-java -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,tokensregex -tokensregex.rules basic_ner.rules -file example.txt -outputFormat text
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,tokensregex -tokensregex.rules basic_ner.rules -file example.txt -outputFormat text
 ```
 
 If you run this command, it will run the TokensRegex rules of `basic_ner.rules` as part of the pipeline when the `tokensregex` annotator runs.
@@ -189,7 +189,7 @@ public class TokensRegexAnnotatorDemo {
   public static void main(String[] args) throws ClassNotFoundException {
     // set properties
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,tokensregex");
+    props.setProperty("annotators", "tokenize,pos,lemma,tokensregex");
     props.setProperty("tokensregex.rules", "basic_ner.rules");
     props.setProperty("tokensregex.matchedExpressionsAnnotationKey",
         "edu.stanford.nlp.examples.TokensRegexAnnotatorDemo$MyMatchedExpressionAnnotation");
@@ -247,7 +247,7 @@ Later in this documentation there will be a section focusing on each of the rule
 
 The most common type of rule is the "tokens" rule.  This rule type searches for patterns over a list of tokens.
 
-Here is a simple example (Note: it is assumed that tokenize, ssplit, pos, and lemma have been run before the TokensRegex pipeline in this example)
+Here is a simple example (Note: it is assumed that tokenize, pos, and lemma have been run before the TokensRegex pipeline in this example)
 
 ```
 { ruleType: "tokens", pattern: ([{word:"I"}] [{word:/like|love/} & {tag:"VBP"}] ([{word:"pizza"}])), action: Annotate($1, ner, "FOOD"), result: "PIZZA" }
@@ -369,10 +369,10 @@ He works for apple inc in cupertino.
 And run this Java command:
 
 ```bash
-java -Xmx2g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos -rulesFiles basic_ner.rules -inputText basic_ner.txt
+java edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,pos -rulesFiles basic_ner.rules -inputText basic_ner.txt
 ```
 
-*Note*: in this command we are only running `tokenize,ssplit,pos` so the CoreLabels will have
+*Note*: in this command we are only running `tokenize,pos` so the CoreLabels will have
 “null” for the NER token unless our rules find patterns in the input sentences. Also remember that the
 Java code specifies to create sentences based on newlines, so the input file is interpreted as one-sentence-per-line.
 
@@ -491,7 +491,7 @@ ENV.defaults["stage"] = 3
 You can run this for yourself with this command:
 
 ```bash
-java -Xmx2g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos,lemma,ner -rulesFiles multi_step_ner.rules -inputText multi_step_ner.txt
+java edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,pos,lemma,ner -rulesFiles multi_step_ner.rules -inputText multi_step_ner.txt
 ```
 
 If you run it on this example file `multi_step_ner.txt`
@@ -589,7 +589,7 @@ Here is the rules file `basic_quote_extraction.rules`
 If you run this command:
 
 ```bash
-java -Xmx2g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos,lemma,ner -rulesFiles basic_quote_extraction.rules -inputText basic_quote_extraction.txt
+java edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,pos,lemma,ner -rulesFiles basic_quote_extraction.rules -inputText basic_quote_extraction.txt
 ```
 
 on this file `basic_quote_extraction.txt`
@@ -651,7 +651,7 @@ Here is the rules file `basic_relation.rules`
 If you run this command:
 
 ```bash
-java -Xmx4g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos,lemma,ner -rulesFiles basic_relation.rules -inputText basic_relation.txt
+java edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,pos,lemma,ner -rulesFiles basic_relation.rules -inputText basic_relation.txt
 ```
 
 on this example text `basic_relation.txt`
@@ -790,7 +790,7 @@ If you run on this example sentence: `math_expression.txt`
 With this command:
 
 ```bash
-java -Xmx2g edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,ssplit,pos,lemma,ner -rulesFiles math_expressions.rules -inputText math_expressions.txt 
+java edu.stanford.nlp.examples.TokensRegexDemo -annotators tokenize,pos,lemma,ner -rulesFiles math_expressions.rules -inputText math_expressions.txt
 ```
 
 You should get this output:

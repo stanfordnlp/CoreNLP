@@ -238,7 +238,7 @@ of TokensRegex rules.  A `TokensRegexAnnotator` sub-annotator will be called.  I
 Example command:
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.additional.tokensregex.rules example.rules -file example.txt -outputFormat text
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.additional.tokensregex.rules example.rules -file example.txt -outputFormat text
 ```
 
 You can learn more about TokensRegex rules [here](https://stanfordnlp.github.io/CoreNLP/tokensregex.html)
@@ -272,65 +272,65 @@ There a variety of ways to customize an NER pipeline.  Below are some example co
 
 ```bash
 # run default NER
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -file example.txt -outputFormat text
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -file example.txt -outputFormat text
 ```
 
 ```bash
 # only run rules based NER (numeric classifiers, SUTime, TokensRegexNER, TokensRegex)
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.rulesOnly -file example.txt 
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.rulesOnly -file example.txt 
 ```
 
 ```bash
 # only run statistical NER
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.statisticalOnly -file example.txt 
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.statisticalOnly -file example.txt 
 ```
 
 ```bash
 # shut off numeric classifiers
 # note that in this case ner no longer requires pos or lemma
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,ner -ner.applyNumericClassifiers false -file example.txt -outputFormat text
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ner -ner.applyNumericClassifiers false -file example.txt -outputFormat text
 ```
 
 ```bash
 # shut off SUTime
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.useSUTime false -file example.txt -outputFormat text
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.useSUTime false -file example.txt -outputFormat text
 ```
 
 ```bash
 # specify doc date for each document to be 2019-01-01
 # other options for setting doc date specified below
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.docdate.useFixedDate 2019-01-01 -file example.txt
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.docdate.useFixedDate 2019-01-01 -file example.txt
 ```
 
 ```bash
 # shut off fine grained NER
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.applyFineGrained false -file example.txt -outputFormat text
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.applyFineGrained false -file example.txt -outputFormat text
 ```
 
 ```bash
 # run fine-grained NER with a custom rules file
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.fine.regexner.mapping custom.rules -file example.txt -outputFormat text
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.fine.regexner.mapping custom.rules -file example.txt -outputFormat text
 ```
 
 ```bash
 # run fine-grained NER with two custom rules files
 # the first rules file caseless.rules should be case-insensitive, the second rules file uses default options
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.fine.regexner.mapping "ignorecase=true,caseless.rules;cased.rules" -file example.txt -outputFormat text
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.fine.regexner.mapping "ignorecase=true,caseless.rules;cased.rules" -file example.txt -outputFormat text
 ```
 
 ```bash
 # add additional rules to run after fine-grained NER
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.additional.regexner.mapping additional.rules -file example.txt -outputFormat text
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.additional.regexner.mapping additional.rules -file example.txt -outputFormat text
 ```
 
 ```bash
 # run tokens regex rules
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.additional.tokensregex.rules example.rules -file example.txt -outputFormat text
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.additional.tokensregex.rules example.rules -file example.txt -outputFormat text
 ```
 
 ```bash
 # don't build entity mentions
-java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -ner.buildEntityMentions false -file example.txt -outputFormat text
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,pos,lemma,ner -ner.buildEntityMentions false -file example.txt -outputFormat text
 ``` 
 
 ## Java API Example
@@ -348,7 +348,7 @@ public class NERPipelineDemo {
   public static void main(String[] args) {
     // set up pipeline properties
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    props.setProperty("annotators", "tokenize,pos,lemma,ner");
     // example customizations (these are commented out but you can uncomment them to see the results
 
     // disable fine grained ner
@@ -468,7 +468,7 @@ public class NERConfidenceExample {
     public static void main(String[] args) {
         String exampleText = "Joe Smith lives in California.";
         Properties props = new Properties();
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+        props.setProperty("annotators", "tokenize,pos,lemma,ner");
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
         CoreDocument document = new CoreDocument(exampleText);
         pipeline.annotate(document);
@@ -521,7 +521,7 @@ The standard training data sets used for PERSON/LOCATION/ORGANIZATION/MISC must 
 Here is the command for starting the training process (make sure your CLASSPATH is set up to include all of the Stanford CoreNLP jars):
 
 ```bash
-java -Xmx2g -cp "*" edu.stanford.nlp.ie.crf.CRFClassifier -prop ner.model.props
+java -cp "*" edu.stanford.nlp.ie.crf.CRFClassifier -prop ner.model.props
 ```
 
 The training process can be customized using a properties file.  Here is an example properties file for training an English model(ner.model.props):

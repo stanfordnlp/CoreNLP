@@ -50,7 +50,7 @@ This command will take in the text of the file `input.txt` (assumed to be French
 with MWT expansion applied.
 
 ```bash
-java -Xmx5g edu.stanford.nlp.pipeline.StanfordCoreNLP -props french -annotators tokenize,ssplit,mwt -file input.txt
+java edu.stanford.nlp.pipeline.StanfordCoreNLP -props french -annotators tokenize,mwt -file input.txt
 ```
 
 Other output formats include `conllu`, `conll`, `json`, and `serialized`.
@@ -73,7 +73,7 @@ public class MWTExpansionExample {
   public static void main(String[] args) {
     // set the list of annotators to run
     Properties props = StringUtils.argsToProperties("-props", "spanish");
-    props.setProperty("annotators", "tokenize,ssplit,mwt");
+    props.setProperty("annotators", "tokenize,mwt");
     // build pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     // create a document object
