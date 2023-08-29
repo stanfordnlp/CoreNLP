@@ -1488,7 +1488,7 @@ public class IOUtils  {
   }
 
   /**
-   * Get a input file stream (automatically gunzip/bunzip2 depending on file extension)
+   * Get a input file stream (automatically gunzip depending on file extension)
    * @param filename Name of file to open
    * @return Input stream that can be used to read from the file
    * @throws IOException if there are exceptions opening the file
@@ -1497,15 +1497,12 @@ public class IOUtils  {
     InputStream in = new FileInputStream(filename);
     if (filename.endsWith(".gz")) {
       in = new GZIPInputStream(in);
-    } else if (filename.endsWith(".bz2")) {
-      //in = new CBZip2InputStream(in);
-      in = getBZip2PipedInputStream(filename);
     }
     return in;
   }
 
   /**
-   * Get a output file stream (automatically gzip/bzip2 depending on file extension)
+   * Get a output file stream (automatically gzip depending on file extension)
    * @param filename Name of file to open
    * @return Output stream that can be used to write to the file
    * @throws IOException if there are exceptions opening the file
@@ -1514,9 +1511,6 @@ public class IOUtils  {
     OutputStream out = new FileOutputStream(filename);
     if (filename.endsWith(".gz")) {
       out = new GZIPOutputStream(out);
-    } else if (filename.endsWith(".bz2")) {
-      //out = new CBZip2OutputStream(out);
-      out = getBZip2PipedOutputStream(filename);
     }
     return out;
   }
@@ -1525,9 +1519,6 @@ public class IOUtils  {
     OutputStream out = new FileOutputStream(filename, append);
     if (filename.endsWith(".gz")) {
       out = new GZIPOutputStream(out);
-    } else if (filename.endsWith(".bz2")) {
-      //out = new CBZip2OutputStream(out);
-      out = getBZip2PipedOutputStream(filename);
     }
     return out;
   }
@@ -1582,22 +1573,6 @@ public class IOUtils  {
       encoding = defaultEncoding;
     }
     return new PrintWriter(new BufferedWriter(new OutputStreamWriter(out, encoding)), true);
-  }
-
-  public static InputStream getBZip2PipedInputStream(String filename) throws IOException {
-    String bzcat = System.getProperty("bzcat", "bzcat");
-    Runtime rt = Runtime.getRuntime();
-    String cmd = bzcat + " " + filename;
-    //log.info("getBZip2PipedInputStream: Running command: "+cmd);
-    Process p = rt.exec(cmd);
-    Writer errWriter = new BufferedWriter(new OutputStreamWriter(System.err));
-    StreamGobbler errGobbler = new StreamGobbler(p.getErrorStream(), errWriter);
-    errGobbler.start();
-    return p.getInputStream();
-  }
-
-  public static OutputStream getBZip2PipedOutputStream(String filename) throws IOException {
-    return new BZip2PipedOutputStream(filename);
   }
 
   private static final Pattern tab = Pattern.compile("\t");

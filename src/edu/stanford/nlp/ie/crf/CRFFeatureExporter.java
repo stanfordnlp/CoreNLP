@@ -18,8 +18,7 @@ import java.util.Properties;
 /**
  * Exports CRF features for use with other programs.
  * Usage: CRFFeatureExporter -prop crfClassifierPropFile -trainFile inputFile -exportFeatures outputFile
- * - Output file is automatically gzipped/b2zipped if ending in gz/bz2
- * - bzip2 requires that bzip2 is available via command line
+ * - Output file is automatically gzipped/b2zipped if ending in gz
  * - Currently exports features in a format that can be read by a modified crfsgd
  *   (crfsgd assumes features are gzipped)
  * TODO: Support other formats (like crfsuite)
