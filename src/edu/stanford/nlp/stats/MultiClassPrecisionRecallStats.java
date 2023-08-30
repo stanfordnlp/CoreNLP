@@ -71,6 +71,7 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
       labels.add(labelIndex.get(labelsArr[i]));
     }
 
+    // Handle the case when the dataset does not have all possible labels
     labelIndex = new HashIndex<>();
     labelIndex.addAll(data.labelIndex().objectsList());
     labelIndex.addAll(classifier.labels());
@@ -233,7 +234,7 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
     sb.append("--- PR Stats ---").append("\n");
     for (L label : labelIndex) {
       if (label == null || label.equals(negLabel)) { continue; }
-      sb.append("** ").append(label.toString()).append(" **\n");
+      sb.append("** ").append(label).append(" **\n");
       sb.append("\tPrec:   ").append(getPrecisionDescription(numDigits, label)).append("\n");
       sb.append("\tRecall: ").append(getRecallDescription(numDigits, label)).append("\n");
       sb.append("\tF1:     ").append(getF1Description(numDigits, label)).append("\n");
