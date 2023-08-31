@@ -78,7 +78,7 @@ public class NumberNormalizer {
 
   /***********************/
 
-  private static final Pattern numberTermPattern = Pattern.compile("(?i)(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|trillion|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|thirtieth|fortieth|fiftieth|sixtieth|seventieth|eightieth|ninetieth|hundred?th|thousandth|millionth|billionth|trillionth)");
+  private static final Pattern numberTermPattern = Pattern.compile("(?i)(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fourty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|trillion|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|thirtieth|fortieth|fiftieth|sixtieth|seventieth|eightieth|ninetieth|hundred?th|thousandth|millionth|billionth|trillionth)");
   private static final Pattern numberTermPattern2 = Pattern.compile("(?i)(" + numberTermPattern.pattern() + "(-" + numberTermPattern.pattern() + ")?)");
   private static final Pattern ordinalUnitPattern = Pattern.compile("(?i)(hundredth|thousandth|millionth)");
 
@@ -147,6 +147,7 @@ public class NumberNormalizer {
     word2NumMap.put("twenty", 20);
     word2NumMap.put("thirty",  30);
     word2NumMap.put("forty", 40);
+    word2NumMap.put("fourty", 40);
     word2NumMap.put("fifty", 50);
     word2NumMap.put("sixty",  60);
     word2NumMap.put("seventy", 70);
