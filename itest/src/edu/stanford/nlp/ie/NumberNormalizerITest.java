@@ -126,7 +126,8 @@ public class NumberNormalizerITest {
         // System.err.println("num is " + num.toShorterString());
       }
     }
-    assertFalse(expectedNumbers.hasNext());
+    assertFalse("expectedNumbers were left which didn't show up in the document", expectedNumbers.hasNext());
+    assertFalse("expectedTexts were left which didn't show up in the document", expectedTexts.hasNext());
   }
 
   @Test
