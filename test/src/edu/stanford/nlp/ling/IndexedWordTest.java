@@ -8,8 +8,6 @@ import org.junit.Test;
  *  @author Christopher Manning
  */
 public class IndexedWordTest {
-
-  @SuppressWarnings("UnnecessaryLocalVariable")
   @Test
   public void testIndexedWordComparisons() {
     CoreLabel cl = CoreLabel.wordFromString("fiddle");
