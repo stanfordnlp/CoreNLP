@@ -585,8 +585,8 @@
   # i.e. 3-months old, "four years", "four minutes"
   { pattern: ( ($NUM) /to|-/ ($NUM) [ "-" ]? ([ { temporal::IS_TIME_UNIT } ]) (?: [ "-" ]? /old/ )? ),
     result: Duration( $1, $2, $3) }
-  { pattern: ( ($NUM) [ "-" ]? ([ { temporal::IS_TIME_UNIT } ]) (?: [ "-" ]? /old/ )? ),
-	result: Duration( NIL, $1, $2 ) }
+  { pattern: ( ($NUM) [ "-" ]? ([ "(" ] $NUM [ ")" ])? ([ { temporal::IS_TIME_UNIT } ]) (?: [ "-" ]? /old/ )? ),
+	result: Duration( NIL, $1, $3 ) }
 
   # i.e. "a decade", "a few decades", NOT "a few hundred decades"
   { pattern: ( (?: /the/ /past|next|following|coming|last|first|final/ | /a|an/ )? (/couple/ /of/? ) ([ { temporal::IS_TIME_UNIT } ]) ),
