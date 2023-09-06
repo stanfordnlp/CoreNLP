@@ -46,35 +46,39 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   private static final boolean USE_NAME = System.getProperty("UDUseNameRelation") != null;
 
-  /*
+  /**
    * Options for "Enhanced" representation:
    *
-   * - Process multi-word prepositions: No
-   * - Add prepositions to relation labels: Yes
-   * - Add prepositions only to nmod relations: No
-   * - Add coordinating conjunctions to relation labels: Yes
-   * - Propagate dependents: Yes
-   * - Add "referent" relations: Yes
-   * - Add copy nodes for conjoined Ps and PPs: No
-   * - Turn quantificational modifiers into flat MWEs: No
-   * - Add relations between controlling subject and controlled verbs: Yes
+   * <ul>
+   * <li> Process multi-word prepositions: No
+   * <li> Add prepositions to relation labels: Yes
+   * <li> Add prepositions only to nmod relations: No
+   * <li> Add coordinating conjunctions to relation labels: Yes
+   * <li> Propagate dependents: Yes
+   * <li> Add "referent" relations: Yes
+   * <li> Add copy nodes for conjoined Ps and PPs: No
+   * <li> Turn quantificational modifiers into flat MWEs: No
+   * <li> Add relations between controlling subject and controlled verbs: Yes
+   * </ul>
    *
    */
   public static final EnhancementOptions ENHANCED_OPTIONS = new EnhancementOptions(false, true, false, true, true, true,
       false, false, true);
 
-  /*
+  /**
    * Options for "Enhanced++" representation:
    *
-   * - Process multi-word prepositions: Yes
-   * - Add prepositions to relation labels: Yes
-   * - Add prepositions only to nmod relations: No
-   * - Add coordinating conjunctions to relation labels: Yes
-   * - Propagate dependents: Yes
-   * - Add "referent" relations: Yes
-   * - Add copy nodes for conjoined Ps and PPs: Yes
-   * - Turn quantificational modifiers into flat MWEs: Yes
-   * - Add relations between controlling subject and controlled verbs: Yes
+   * <ul>
+   * <li> Process multi-word prepositions: Yes
+   * <li> Add prepositions to relation labels: Yes
+   * <li> Add prepositions only to nmod relations: No
+   * <li> Add coordinating conjunctions to relation labels: Yes
+   * <li> Propagate dependents: Yes
+   * <li> Add "referent" relations: Yes
+   * <li> Add copy nodes for conjoined Ps and PPs: Yes
+   * <li> Turn quantificational modifiers into flat MWEs: Yes
+   * <li> Add relations between controlling subject and controlled verbs: Yes
+   * </ul>
    *
    */
   public static final EnhancementOptions ENHANCED_PLUS_PLUS_OPTIONS = new EnhancementOptions(true, true, false, true, true, true,
@@ -82,20 +86,22 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
 
 
-  /*
+  /**
    * Options for "Collapsed" representation.
    * This representation is similar to the "collapsed" SD representation
    * without any "Extra" relations.
    *
-   * - Process multi-word prepositions: Yes
-   * - Add prepositions to relation labels: Yes
-   * - Add prepositions only to nmod relations: Yes
-   * - Add coordinating conjunctions to relation labels: Yes
-   * - Propagate dependents: No
-   * - Add "referent" relations: No
-   * - Add copy nodes for conjoined Ps and PPs: Yes
-   * - Turn quantificational modifiers into flat MWEs: No
-   * - Add relations between controlling subject and controlled verbs: No
+   * <ul>
+   * <li> Process multi-word prepositions: Yes
+   * <li> Add prepositions to relation labels: Yes
+   * <li> Add prepositions only to nmod relations: Yes
+   * <li> Add coordinating conjunctions to relation labels: Yes
+   * <li> Propagate dependents: No
+   * <li> Add "referent" relations: No
+   * <li> Add copy nodes for conjoined Ps and PPs: Yes
+   * <li> Turn quantificational modifiers into flat MWEs: No
+   * <li> Add relations between controlling subject and controlled verbs: No
+   * </ul>
    *
    */
   @Deprecated
