@@ -41,6 +41,10 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2023-09-06    4.5.5     Fix up some SD and UD conversion errors.  Add
+                        SceneGraph to the server.  Fix Tregex optional
+                        bug.  "fourty" and forty (40) days in SUTime.
+
 2023-03-15    4.5.4     Minor updates to Ssurgeon, include the
                         Morphology CLI
 
