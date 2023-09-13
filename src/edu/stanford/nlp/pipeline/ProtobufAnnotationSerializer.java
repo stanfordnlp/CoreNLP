@@ -2397,7 +2397,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         word.setIndex(in.getIndex());
       }
 
-      assert in.getIndex() == word.index();
       nodes.put(in.getIndex(), in.getCopyAnnotation(), word);
       graph.addVertex(word);
     }
@@ -2405,11 +2404,18 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // add all edges to the actual graph
     for(CoreNLPProtos.DependencyGraph.Edge ie: proto.getEdgeList()){
       IndexedWord source = nodes.get(ie.getSource(), ie.getSourceCopy());
-      assert(source != null);
+      if (source == null) {
+        throw new AssertionError("Source of a dependency was null!  Edge: " + ie);
+      }
       IndexedWord target = nodes.get(ie.getTarget(), ie.getTargetCopy());
-      assert(target != null);
+      if (target == null) {
+        throw new AssertionError("Target of a dependency was null!  Edge: " + ie);
+      }
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
+        if (!ie.hasDep()) {
+          throw new AssertionError("Protobuf dependency edge was null!  Edge: " + ie);
+        }
         assert ie.hasDep();
         GrammaticalRelation rel = GrammaticalRelation.valueOf(fromProto(ie.getLanguage()), ie.getDep());
         graph.addEdge(source, target, rel, 1.0, ie.hasIsExtra() && ie.getIsExtra());
