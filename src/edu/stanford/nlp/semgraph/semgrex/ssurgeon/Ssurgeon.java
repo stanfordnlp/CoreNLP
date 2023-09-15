@@ -173,13 +173,15 @@ import edu.stanford.nlp.util.logging.Redwood;
 5	clean	clean	VERB	VB	VerbForm=Inf	3	csubj	_	SpaceAfter=No
 6	.	.	PUNCT	.	_	5	punct	_	_
 </pre>
- *</p><p>
+ *<p>
  * We can update this with the following Semgrex/Ssurgeon pair:
  *<pre>
+{@code
 {}=source >nsubj {} >csubj=bad {}
 relabelNamedEdge -edge bad -reln advcl
- *</pre>
- *</p><p>
+}
+</pre>
+ *<p>
  * The result will be the {@code csubj} updated to {@code advcl}
  *</p><p>
  * For the most part, each of these operations is already bomb-proof,
@@ -199,7 +201,7 @@ relabelNamedEdge -edge bad -reln advcl
   addDep -gov antennae -reln dep -word blue
 }
 </pre>
- *</p><p>
+ *<p>
  * The following would not:
 <pre>
 {@code
@@ -756,7 +758,6 @@ public class Ssurgeon  {
   /**
    * Given the root Element for a SemgrexPattern (SSURGEON_ELEM_TAG), converts
    * it into its corresponding SemgrexPattern object.
-   * @throws Exception
    */
   @SuppressWarnings("unchecked")
   public static SsurgeonPattern ssurgeonPatternFromXML(Element elt) {
@@ -808,7 +809,6 @@ public class Ssurgeon  {
 
   /**
    * Constructs a {@code SsurgPred} structure from file, given the root element.
-   * @throws Exception
    */
   public static SsurgPred assemblePredFromXML(Element elt) {
     String eltName = elt.getTagName();
