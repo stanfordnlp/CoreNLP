@@ -1254,7 +1254,7 @@ public class SemanticGraph implements Serializable  {
    *
    * Example:
    *
-   * <pre>
+   * <pre>{@code
    *  -> need-3 (root)
    *    -> We-0 (nsubj)
    *    -> do-1 (aux)
@@ -1262,7 +1262,7 @@ public class SemanticGraph implements Serializable  {
    *    -> badges-6 (dobj)
    *      -> no-4 (det)
    *      -> stinking-5 (amod)
-   * </pre>
+   * }</pre>
    *
    * This is a quite ugly way to print a SemanticGraph.
    * You might instead want to try {@link #toString(OutputFormat)}.

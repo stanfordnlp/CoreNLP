@@ -448,7 +448,7 @@ public class StringUtils  {
    * Note that this follows Java split style, meaning leading spaces
    * will result in an empty string and trailing spaces will be cut off.
    * @param s String to split
-   * @return List<String> of split strings
+   * @return {@code List<String>} of split strings
    */
   public static List<String> split(String s) {
     return split(s, "\\s+");
@@ -463,7 +463,7 @@ public class StringUtils  {
    *
    * @param s String to split
    * @param separator Delimiter to use for splitting
-   * @return List<String> of split strings
+   * @return {@code List<String>} of split strings
    */
   public static List<String> splitKeepDelimiter(String s, String separator) {
     return split(s, String.format("((?<=(?:%1$s))|(?=(?:%1$s)))", separator));

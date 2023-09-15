@@ -39,7 +39,7 @@ public abstract class MapFactory<K,V> implements Serializable {
   public static final MapFactory CONCURRENT_MAP_FACTORY = new ConcurrentMapFactory();
 
   /** Return a MapFactory that returns a HashMap.
-   *  <i>Implementation note: This method uses the same trick as the methods
+   *  <i>Implementation note</i>: This method uses the same trick as the methods
    *  like emptyMap() introduced in the Collections class in JDK1.5 where
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
@@ -52,7 +52,7 @@ public abstract class MapFactory<K,V> implements Serializable {
   }
 
   /** Return a MapFactory that returns an IdentityHashMap.
-   *  <i>Implementation note: This method uses the same trick as the methods
+   *  <i>Implementation note</i>: This method uses the same trick as the methods
    *  like emptyMap() introduced in the Collections class in JDK1.5 where
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
@@ -65,7 +65,7 @@ public abstract class MapFactory<K,V> implements Serializable {
   }
 
   /** Return a MapFactory that returns a WeakHashMap.
-   *  <i>Implementation note: This method uses the same trick as the methods
+   *  <i>Implementation note</i>: This method uses the same trick as the methods
    *  like emptyMap() introduced in the Collections class in JDK1.5 where
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
@@ -78,7 +78,7 @@ public abstract class MapFactory<K,V> implements Serializable {
   }
 
   /** Return a MapFactory that returns a TreeMap.
-   *  <i>Implementation note: This method uses the same trick as the methods
+   *  <i>Implementation note</i>: This method uses the same trick as the methods
    *  like emptyMap() introduced in the Collections class in JDK1.5 where
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
@@ -98,7 +98,7 @@ public abstract class MapFactory<K,V> implements Serializable {
   }
 
   /** Return a MapFactory that returns an LinkedHashMap.
-   *  <i>Implementation note: This method uses the same trick as the methods
+   *  <i>Implementation note</i>: This method uses the same trick as the methods
    *  like emptyMap() introduced in the Collections class in JDK1.5 where
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
@@ -111,7 +111,7 @@ public abstract class MapFactory<K,V> implements Serializable {
   }
 
   /** Return a MapFactory that returns an ArrayMap.
-   *  <i>Implementation note: This method uses the same trick as the methods
+   *  <i>Implementation note</i>: This method uses the same trick as the methods
    *  like emptyMap() introduced in the Collections class in JDK1.5 where
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.

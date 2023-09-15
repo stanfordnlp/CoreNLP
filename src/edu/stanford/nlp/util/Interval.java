@@ -752,7 +752,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
    * @param flags flags to check
    * @param flag bit for flag of interest (is this flag set or not)
    * @param mask bitmask of bits to check
-   * @return true if flag is exclusively set for flags & mask
+   * @return true if flag is exclusively set for flags &and; mask
    */
   public static boolean checkFlagExclusiveSet(int flags, int flag, int mask)
   {

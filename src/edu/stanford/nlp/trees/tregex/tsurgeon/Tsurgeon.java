@@ -126,7 +126,7 @@ public class Tsurgeon  {
 
   /** Usage: java edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon [-s] -treeFile file-with-trees [-po matching-pattern operation] operation-file-1 operation-file-2 ... operation-file-n
    *
-   * <h4>Arguments:</h4>
+   * <h1>Arguments:</h1>
    *
    * Each argument should be the name of a transformation file that contains a list of pattern
    * and transformation operation list pairs.  That is, it is a sequence of pairs of a
@@ -152,7 +152,7 @@ public class Tsurgeon  {
    * </code>
    * </blockquote>
    *
-   * <h4>Options:</h4>
+   * <h1>Options:</h1>
    * <ul>
    *   <li>{@code -treeFile <filename>}  specify the name of the file that has the trees you want to transform.
    *   <li>{@code -po <matchPattern> <operation>}  Apply a single operation to every tree using the specified match pattern and the specified operation.  Use this option
@@ -166,7 +166,7 @@ public class Tsurgeon  {
    *   <li> {@code -trf <TreeReaderFactory-class-name>} use the specified {@link TreeReaderFactory} class to read trees from files.
    * </ul>
    *
-   * <h4>Legal operation syntax:</h4>
+   * <h1>Legal operation syntax:</h1>
    *
    * <ul>
    *
@@ -186,7 +186,7 @@ public class Tsurgeon  {
    * something that isn't a valid identifier without quoting <br>
    *
    * With this method, some replacement texts also require escaping.
-   * For example, {@code relabel nodeX /{/} works but you need to do
+   * For example, <code>relabel nodeX /{/</code> works but you need to do
    * {@code relabel nodeX /\\]/} in order to get a single close bracket.
    *
    * {@code relabel nodeX /^VB(.*)$/verb\\/$1/} - for regular

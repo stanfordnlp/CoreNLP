@@ -562,11 +562,11 @@ public class EnglishGrammaticalRelations {
    * or the preposition head of the PP.
    * <br>
    * Examples: <br>
-   * "We have no useful information on whether users are at risk" &arr;
+   * "We have no useful information on whether users are at risk" &rarr;
    * {@code pcomp}(on, are) <br>
-   * "They heard about you missing classes." &arr;
+   * "They heard about you missing classes." &rarr;
    * {@code pcomp}(about, missing) <br>
-   * It is warmer in Greece than in Italy &arr;
+   * It is warmer in Greece than in Italy &rarr;
    * {@code pcomp}(than, in)
    */
   public static final GrammaticalRelation PREPOSITIONAL_COMPLEMENT =

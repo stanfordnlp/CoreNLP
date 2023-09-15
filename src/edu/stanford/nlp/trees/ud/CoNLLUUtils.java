@@ -15,7 +15,7 @@ public class CoNLLUUtils {
      * and the feature values as values.
      *
      * @param featureString
-     * @return A HashMap<String,String> with the feature values.
+     * @return A {@code HashMap<String,String>} with the feature values.
      */
     public static HashMap<String,String> parseFeatures(String featureString) {
         HashMap<String, String> features = new LinkedHashMap<>();
@@ -69,7 +69,7 @@ public class CoNLLUUtils {
      * and the relation names as values.
      *
      * @param extraDepsString
-     * @return A HashMap<Integer,String> with the additional dependencies.
+     * @return A {@code HashMap<Integer,String>} with the additional dependencies.
      */
     public static HashMap<String,String> parseExtraDeps(String extraDepsString) {
         HashMap<String,String> extraDeps = new HashMap<>();

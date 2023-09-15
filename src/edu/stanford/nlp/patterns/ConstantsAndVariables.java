@@ -479,7 +479,7 @@ public class ConstantsAndVariables implements Serializable {
   public boolean fuzzyMatch = false;
 
   /**
-   * Ignore case when matching seed words. It's a map so something like {name->true,place->false}
+   * Ignore case when matching seed words. It's a map so something like {@code {name->true,place->false}}
    */
   @Option(name="ignoreCaseSeedMatch")
   public Map<String, String> ignoreCaseSeedMatch = new HashMap<>();

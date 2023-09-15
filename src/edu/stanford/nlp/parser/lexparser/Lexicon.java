@@ -73,7 +73,7 @@ public interface Lexicon extends Serializable {
    * @param featureSpec Additional word features like morphosyntactic information.
    * @return An Iterator over a List ofIntTaggedWords, which pair the word
    *                with possible taggings as integer pairs.  (Each can be
-   *                thought of as a <code>tag -&gt; word<code> rule.)
+   *                thought of as a {@code tag -> word} rule.)
    */
   Iterator<IntTaggedWord> ruleIteratorByWord(int word, int loc, String featureSpec);
 

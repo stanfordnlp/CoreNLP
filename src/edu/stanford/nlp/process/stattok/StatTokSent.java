@@ -31,12 +31,15 @@ import edu.stanford.nlp.util.StringUtils;
 
 /**
  * The statistical tokenizer implementation.
+ *<br>
  * It produces an UD compliant tokenization given a pre-trained UD model file,
  * and a file containing multi-word tokens that have to be treated with rules after tokenization.
+ *<br>
  * It reads raw text from CoreAnnotations.textAnnotation,
  * and returns sentences and tokens in the form:
- * List<List<CoreLabel>>
- * Each List<CoreLabel> object contains Tokens Annotation for a single sentence. 
+ * {@code List<List<CoreLabel>>}
+ *<br>
+ * Each {@code List<CoreLabel>} object contains Tokens Annotation for a single sentence.
  *
  * @author Alessandro Bondielli
 */
@@ -94,7 +97,7 @@ public class StatTokSent{
   /**
    * The file reader for multi-word tokens rules file
    * The reader accept the following formatting:
-   * <token>\t<part>,...,<part>
+   * {@code <token>\t<part>,...,<part>}
    */
   private Map<String, String[]> readMultiWordRules(String multiWordRulesFile) throws IOException {
     Map<String, String[]> multiWordRules = new HashMap<String, String[]>();
@@ -327,13 +330,13 @@ public class StatTokSent{
 
   /**
    * The core tokenization function called via the statistical tokenizer annotator. Given a text and window size as input, 
-   * returns a List<List<CoreLabel>> corresponding to sentences and tokens within each sentence.
-   * First, features are extracted for each character of the text, and the model is used to classify each character as:
-   * 	S: begin of sentence;
-   * 	T: begin of token;
-   * 	C: begin of part in a multi-word token;
-   * 	I: inside of a token;
-   * 	O: outside any token.
+   * returns a {@code List<List<CoreLabel>>} corresponding to sentences and tokens within each sentence.
+   * First, features are extracted for each character of the text, and the model is used to classify each character as: <br>
+   * 	S: begin of sentence; <br>
+   * 	T: begin of token; <br>
+   * 	C: begin of part in a multi-word token; <br>
+   * 	I: inside of a token; <br>
+   * 	O: outside any token. <br>
    * Given the classification, characters are joined in tokens.
    * For each sentence, tokens further analyzed to identify possibily misclassified multi-word tokens via rules, and indexed.
    */

@@ -209,7 +209,7 @@ public class BaseLexicon implements Lexicon  {
    *          make use of this position information.</i>
    * @return An Iterator over a List ofIntTaggedWords, which pair the word with
    *         possible taggings as integer pairs. (Each can be thought of as a
-   *         <code>tag -&gt; word<code> rule.)
+   *         {@code tag -> word} rule.)
    */
   public Iterator<IntTaggedWord> ruleIteratorByWord(String word, int loc) {
     return ruleIteratorByWord(wordIndex.addToIndex(word), loc, null);
