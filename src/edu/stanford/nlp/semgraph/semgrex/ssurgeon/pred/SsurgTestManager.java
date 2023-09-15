@@ -38,7 +38,6 @@ public class SsurgTestManager {
   /**
    * Given the id of the test, and the match name argument, returns a new instance
    * of the given NodeTest, otherwise throws an exception if not available.
-   * @throws Exception
    */
   public NodeTest getNodeTest(String id, String matchName) {
     try {
