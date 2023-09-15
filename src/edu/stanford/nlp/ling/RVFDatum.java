@@ -92,7 +92,7 @@ public class RVFDatum<L, F> implements Datum<L, F> {
 
   /**
    * Removes all currently assigned Labels for this Datum then adds the given
-   * Label. Calling <tt>setLabel(null)</tt> effectively clears all labels.
+   * Label. Calling <code>setLabel(null)</code> effectively clears all labels.
    */
   public void setLabel(L label) {
     this.label = label;

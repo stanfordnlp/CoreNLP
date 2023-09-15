@@ -152,8 +152,8 @@ public class ConstantsAndVariables implements Serializable {
 
   /**
    * If not null, write the output like
-   * "w1 w2 <label1> w3 <label2>w4</label2> </label1> w5 ... " if w3 w4 have
-   * label1 and w4 has label 2
+   * {@code "w1 w2 <label1> w3 <label2>w4</label2> </label1> w5 ... "} if {@code w3 w4} have
+   * {@code label1} and {@code w4} has {@code label2}
    */
   @Option(name = "markedOutputTextFile")
   String markedOutputTextFile = null;
@@ -329,7 +329,7 @@ public class ConstantsAndVariables implements Serializable {
   private boolean alreadySetUp = false;
 
   /**
-   * Cluster file, in which each line is word/phrase<tab>clusterid
+   * Cluster file, in which each line is {@code word/phrase<tab>clusterid}
    */
   @Option(name = "wordClassClusterFile")
   String wordClassClusterFile = null;
@@ -338,7 +338,7 @@ public class ConstantsAndVariables implements Serializable {
 
   /**
    * General cluster file, if you wanna use it somehow, in which each line is
-   * word/phrase<tab>clusterid
+   * {@code word/phrase<tab>clusterid}
    */
   @Option(name = "generalWordClassClusterFile")
   String generalWordClassClusterFile = null;

@@ -126,7 +126,7 @@ public class Tsurgeon  {
 
   /** Usage: java edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon [-s] -treeFile file-with-trees [-po matching-pattern operation] operation-file-1 operation-file-2 ... operation-file-n
    *
-   * <h1>Arguments:</h1>
+   * <strong>Arguments:</strong>
    *
    * Each argument should be the name of a transformation file that contains a list of pattern
    * and transformation operation list pairs.  That is, it is a sequence of pairs of a
@@ -152,7 +152,7 @@ public class Tsurgeon  {
    * </code>
    * </blockquote>
    *
-   * <h1>Options:</h1>
+   * <strong>Options:</strong>
    * <ul>
    *   <li>{@code -treeFile <filename>}  specify the name of the file that has the trees you want to transform.
    *   <li>{@code -po <matchPattern> <operation>}  Apply a single operation to every tree using the specified match pattern and the specified operation.  Use this option
@@ -166,7 +166,7 @@ public class Tsurgeon  {
    *   <li> {@code -trf <TreeReaderFactory-class-name>} use the specified {@link TreeReaderFactory} class to read trees from files.
    * </ul>
    *
-   * <h1>Legal operation syntax:</h1>
+   * <strong>Legal operation syntax:</strong>
    *
    * <ul>
    *
