@@ -57,11 +57,11 @@ public class Distributions {
   }
 
     /**
-   * Returns a new Distribution<K> with counts averaged from the two given Distributions.
-   * The average Distribution<K> will contain the union of keys in both
+   * Returns a new {@code Distribution<K>} with counts averaged from the two given Distributions.
+   * The average {@code Distribution<K>} will contain the union of keys in both
    * source Distributions, and each count will be the weighted average of the two source
    * counts for that key,  a missing count in one Distribution
-   * is treated as if it has probability equal to that returned by the probabilityOf() function.
+   * is treated as if it has probability equal to that returned by the {@code probabilityOf()} function.
    *
    * @return A new distribution with counts that are the mean of the resp. counts
    *         in the given distributions with the remaining probability mass adjusted accordingly.
