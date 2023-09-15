@@ -1140,7 +1140,8 @@ public class LambdaSolve  {
   /**
    * calculate the loss for Dom ranking
    * using the numbers in p.data.values to determine domination relationships in the graphs
-   * if values[x][y]> values[x][y'] then there is an edge (x,y)->(x,y')
+   *<br>
+   * if {@code values[x][y] > values[x][y']} then there is an edge {@code (x,y)->(x,y')}
    *
    * @return The loss
    */
