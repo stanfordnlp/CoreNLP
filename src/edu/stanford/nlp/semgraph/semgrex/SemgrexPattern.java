@@ -49,7 +49,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * For example, {@code {lemma:/^(?!boy).*$/} } will also match any
  * token with a lemma that isn't "boy".  Note, however, that if you
  * use this style, there needs to be some lemma attached to the token.
- *
+ * <br>
+ * The special case of an empty text can be tested for with an empty regex.
+ * For example, words marked with {@code SpaceAfter=no} will have a blank {@code after} attribute.
+ * {@code {after://}} will search for this.
  * <h3>Relations</h3>
  *
  * Relations are defined by a symbol representing the type of relationship and a
