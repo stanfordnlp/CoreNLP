@@ -205,7 +205,7 @@ relabelNamedEdge -edge bad -reln advcl
  * The following would not:
 <pre>
 {@code
-  {word:antennae}=antennae !> {word:blue}
+  {word:antennae}=antennae !&gt; {word:blue}
   addDep -gov antennae -reln dep -word blue
 }
 </pre>
