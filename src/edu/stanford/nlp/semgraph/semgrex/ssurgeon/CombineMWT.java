@@ -110,7 +110,7 @@ public class CombineMWT extends SsurgeonEdit {
           changed = true;
           vertex.set(CoreAnnotations.IsFirstWordOfMWTAnnotation.class, false);
         }
-      }          
+      }
     }
 
     return false;
