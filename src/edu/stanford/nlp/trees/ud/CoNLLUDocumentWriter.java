@@ -97,6 +97,15 @@ public class CoNLLUDocumentWriter {
             String lemma = token.getString(CoreAnnotations.LemmaAnnotation.class, "_");
             String relnName = reln == null ? "_" : reln.toString();
 
+            // don't use after() directly; it returns a default of ""
+            if (token.get(CoreAnnotations.AfterAnnotation.class) != null && token.after().equals("")) {
+              if (misc.equals("_")) {
+                misc = "SpaceAfter=No";
+              } else {
+                misc = misc + "|SpaceAfter=No";
+              }
+            }
+
             /* Root. */
             if (govIdx == null && basicSg.getRoots().contains(token)) {
                 govIdx = "0";

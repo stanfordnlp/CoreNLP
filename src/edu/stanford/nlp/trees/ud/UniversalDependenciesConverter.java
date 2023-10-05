@@ -14,6 +14,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 import java.lang.reflect.*;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -198,6 +199,26 @@ public class UniversalDependenciesConverter {
   }
 
   /**
+   * Break up a provided text input to match a tree's words,
+   * using the whitespace between the words to mark the AfterAnnotation.
+   * We assume a blank space at the end of the sentence
+   */
+  private static void addSpaceAfter(SemanticGraph sg, String text, int graphIdx) {
+    List<IndexedWord> tokens = sg.vertexListSorted();
+    int pos = tokens.get(0).word().length();
+    for (int i = 1; i < tokens.size(); ++i) {
+      String word = tokens.get(i).word();
+      int nextPos = text.indexOf(word, pos);
+      if (nextPos < 0) {
+        throw new RuntimeException("Cannot find word " + word + " in the text of sentence " + graphIdx + "\n" + text);
+      }
+      tokens.get(i-1).setAfter(text.substring(pos, nextPos));
+      pos = nextPos + word.length();
+    }
+    tokens.get(tokens.size() - 1).setAfter(" ");
+  }
+
+  /**
    * Converts a constituency tree to the English basic, enhanced, or
    * enhanced++ Universal dependencies representation, or an English basic
    * Universal dependencies tree to the enhanced or enhanced++ representation.
@@ -205,6 +226,7 @@ public class UniversalDependenciesConverter {
    * Command-line options:<br>
    * {@code -treeFile}: File with PTB-formatted constituency trees<br>
    * {@code -conlluFile}: File with basic dependency trees in CoNLL-U format<br>
+   * {@code -textFile}: A file with text to be used as a guide for SpaceAfter (optional)<br>
    * {@code -outputRepresentation}: "basic" (default), "enhanced", or "enhanced++"
    */
   public static void main(String[] args) {
@@ -234,15 +256,22 @@ public class UniversalDependenciesConverter {
       System.err.println("No input file specified!");
       System.err.println();
       System.err.printf("Usage: java %s [-treeFile trees.tree | -conlluFile deptrees.conllu]" +
-                        " [-addFeatures] [-replaceLemmata] [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
+                        " [-addFeatures] [-replaceLemmata] [-textFile trees.txt] [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
                         UniversalDependenciesConverter.class.getCanonicalName());
       return;
+    }
+
+    Iterator<String> textIterator = null;
+    String textFileName = props.getProperty("textFile");
+    if (textFileName != null) {
+      textIterator = IOUtils.readLines(textFileName).iterator();
     }
 
     UniversalDependenciesFeatureAnnotator featureAnnotator = (addFeatures) ? new UniversalDependenciesFeatureAnnotator() : null;
 
     CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
 
+    int graphIdx = 0;
     while (sgIterator.hasNext()) {
       Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
       SemanticGraph sg = sgs.first();
@@ -282,7 +311,19 @@ public class UniversalDependenciesConverter {
       } else if (outputRepresentation.equalsIgnoreCase("enhanced++")) {
         enhanced = convertBasicToEnhancedPlusPlus(sg);
       }
+      if (textIterator != null) {
+        String text = "";
+        while (text.equals("")) {
+          try {
+            text = textIterator.next().strip();
+          } catch (NoSuchElementException e) {
+            throw new RuntimeException("Processed " + graphIdx + " trees, but there are more trees and text is empty", e);
+          }
+        }
+        addSpaceAfter(sg, text, graphIdx);
+      }
       System.out.print(writer.printSemanticGraph(sg, enhanced));
+      ++graphIdx;
     }
 
   }
