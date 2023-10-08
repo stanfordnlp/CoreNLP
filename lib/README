@@ -338,19 +338,19 @@ LAST UPDATE: 2020-11-04
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------
-javax.servlet.jar
-ORIGINAL JAR NAME: servlet-api.jar
-VERSION: 3.0
-RELEASE DATE: ?
-SOURCE AVAILABLE: Yes. In: libsrc/tomcat/apache-tomcat-7.0.12-src.zip
-DESCRIPTION: Used by Tomcat and servlets.  Originally part of Java EE 6.
-URL: ?
+jakarta.servlet-api-4.0.4.jar
+ORIGINAL JAR NAME: jakarta.servlet-api-4.0.4.jar
+VERSION: 4.0.4
+RELEASE DATE: 2020
+SOURCE AVAILABLE: Yes. In: libsrc/jakarta.servlet-api-4.0.4-sources.jar
+DESCRIPTION: Used by servlets.  Replaces javax.servlet.jar
+URL: https://central.sonatype.com/artifact/jakarta.servlet/jakarta.servlet-api/4.0.4/versions
 
 USED BY: Our servlets
 Not needed by CoreNLP distributions
 
-LAST UPDATE: 2013
-LAST UPDATE BY: Spence Green
+LAST UPDATE: 2023
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------
 protobuf.jar
