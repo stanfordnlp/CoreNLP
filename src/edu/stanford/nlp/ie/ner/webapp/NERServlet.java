@@ -5,8 +5,10 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.*;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import edu.stanford.nlp.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
