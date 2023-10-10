@@ -315,7 +315,7 @@ public class UniversalDependenciesConverter {
         String text = "";
         while (text.equals("")) {
           try {
-            text = textIterator.next().strip();
+            text = textIterator.next().trim();
           } catch (NoSuchElementException e) {
             throw new RuntimeException("Processed " + graphIdx + " trees, but there are more trees and text is empty", e);
           }
