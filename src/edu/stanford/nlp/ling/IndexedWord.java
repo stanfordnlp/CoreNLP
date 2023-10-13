@@ -347,15 +347,15 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   }
 
   public void setEmptyIndex(int empty) {
-    label.set(CoreAnnotations.EmptyIndexAnnotation.class, empty);
+    label.setEmptyIndex(empty);
   }
 
   public int getEmptyIndex() {
-    Integer index = label.get(CoreAnnotations.EmptyIndexAnnotation.class);
-    if (index == null) {
-      return 0;
-    }
-    return index;
+    return label.getEmptyIndex();
+  }
+
+  public boolean hasEmptyIndex() {
+    return label.hasEmptyIndex();
   }
 
   public int copyCount() {

@@ -607,6 +607,36 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   }
 
   /**
+   * Similar to a copy node in IndexedWord, but not exactly,
+   * as the word can have its own attributes.
+   * Fairly common in enhanced graphs in UD
+   */
+  public int getEmptyIndex() {
+    Integer index = get(CoreAnnotations.EmptyIndexAnnotation.class);
+    if (index == null) {
+      return 0;
+    }
+    return index;
+  }
+
+  /**
+   * Similar to a copy node in IndexedWord, but not exactly,
+   * as the word can have its own attributes.
+   * Fairly common in enhanced graphs in UD
+   */
+  public void setEmptyIndex(int empty) {
+    set(CoreAnnotations.EmptyIndexAnnotation.class, empty);
+  }
+
+  /**
+   * Keeping track of this can save us a little effort when serializing CoreLabels
+   */
+  public boolean hasEmptyIndex() {
+    Integer index = get(CoreAnnotations.EmptyIndexAnnotation.class);
+    return index != null;
+  }
+
+  /**
    * {@inheritDoc}
    */
   @Override
