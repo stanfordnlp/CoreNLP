@@ -863,10 +863,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     for (IndexedWord node : graph.vertexSet()) {
       // Register node
       CoreNLPProtos.DependencyGraph.Node.Builder nodeBuilder = CoreNLPProtos.DependencyGraph.Node.newBuilder()
-          .setSentenceIndex(node.get(SentenceIndexAnnotation.class))
-          .setIndex(node.index());
+        .setSentenceIndex(node.get(SentenceIndexAnnotation.class))
+        .setIndex(node.index());
       if (node.copyCount() > 0) {
         nodeBuilder.setCopyAnnotation(node.copyCount());
+      }
+      if (node.getEmptyIndex() > 0) {
+        nodeBuilder.setEmptyIndex(node.getEmptyIndex());
       }
       builder.addNode(nodeBuilder.build());
       // Register root
@@ -881,14 +884,21 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Edges
     for (SemanticGraphEdge edge : graph.edgeIterable()) {
       // Set edge
-      builder.addEdge(CoreNLPProtos.DependencyGraph.Edge.newBuilder()
-          .setSource(edge.getSource().index())
-          .setTarget(edge.getTarget().index())
-          .setDep(edge.getRelation().toString())
-          .setIsExtra(edge.isExtra())
-          .setSourceCopy(edge.getSource().copyCount())
-          .setTargetCopy(edge.getTarget().copyCount())
-          .setLanguage(toProto(edge.getRelation().getLanguage())));
+      CoreNLPProtos.DependencyGraph.Edge.Builder edgeBuilder = CoreNLPProtos.DependencyGraph.Edge.newBuilder();
+      edgeBuilder.setSource(edge.getSource().index())
+        .setTarget(edge.getTarget().index())
+        .setDep(edge.getRelation().toString())
+        .setIsExtra(edge.isExtra())
+        .setSourceCopy(edge.getSource().copyCount())
+        .setTargetCopy(edge.getTarget().copyCount())
+        .setLanguage(toProto(edge.getRelation().getLanguage()));
+      if (edge.getSource().getEmptyIndex() > 0) {
+        edgeBuilder.setSourceEmpty(edge.getSource().getEmptyIndex());
+      }
+      if (edge.getTarget().getEmptyIndex() > 0) {
+        edgeBuilder.setTargetEmpty(edge.getTarget().getEmptyIndex());
+      }
+      builder.addEdge(edgeBuilder.build());
     }
     // Return
     return builder.build();
@@ -2395,11 +2405,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       min = in.getIndex() < min ? in.getIndex() : min;
       max = in.getIndex() > max ? in.getIndex() : max;
     }
-    // map from index, copy -> IndexedWord
-    // TODO: use emptyIndex as well
-    TwoDimensionalMap<Integer, Integer, IndexedWord> nodes = TwoDimensionalMap.hashMap();
-    // map from index -> CoreLabel
-    Map<Integer, CoreLabel> originalLabels = new HashMap<>();
+    // map from index, emptyIndex, copy -> IndexedWord
+    ThreeDimensionalMap<Integer, Integer, Integer, IndexedWord> nodes = new ThreeDimensionalMap<>();
+    // map from index, emptyIndex -> CoreLabel
+    TwoDimensionalMap<Integer, Integer, CoreLabel> originalLabels = TwoDimensionalMap.hashMap();
     // assume the code path which uses a Document doesn't use emptyIndex
     // alternatively, we could attach words with emptyIndex to the Document some other way
     if (!document.isPresent()) {
@@ -2410,11 +2419,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         if (tokenIndex == null) {
           tokenIndex = index;
         }
-        Integer emptyIndex = token.get(EmptyIndexAnnotation.class);
+        Integer emptyIndex = token.getEmptyIndex();
         if (emptyIndex == null) {
           emptyIndex = 0;
         }
-        originalLabels.put(tokenIndex, token);
+        originalLabels.put(tokenIndex, emptyIndex, token);
       }
     }
     for(CoreNLPProtos.DependencyGraph.Node in: proto.getNodeList()){
@@ -2422,8 +2431,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (document.isPresent()) {
         token = document.get().get(SentencesAnnotation.class).get(in.getSentenceIndex()).get(TokensAnnotation.class).get(in.getIndex() - 1); // token index starts at 1!
       } else {
-        // TODO: index based on emptyIndex as well
-        token = originalLabels.get(in.getIndex());
+        token = originalLabels.get(in.getIndex(), in.getEmptyIndex());
         if (token == null) {
           throw new FailedSerializationError("Could not find the token for index " + in.getIndex());
         }
@@ -2449,18 +2457,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         word.setIndex(in.getIndex());
       }
 
-      nodes.put(in.getIndex(), in.getCopyAnnotation(), word);
+      nodes.put(in.getIndex(), in.getEmptyIndex(), in.getCopyAnnotation(), word);
       graph.addVertex(word);
     }
 
     // add all edges to the actual graph
     for(CoreNLPProtos.DependencyGraph.Edge ie: proto.getEdgeList()){
-      // TODO: source and target should index on emptyIndex as well
-      IndexedWord source = nodes.get(ie.getSource(), ie.getSourceCopy());
+      IndexedWord source = nodes.get(ie.getSource(), ie.getSourceEmpty(), ie.getSourceCopy());
       if (source == null) {
         throw new FailedSerializationError("Source of a dependency was null!\nEdge: " + ie);
       }
-      IndexedWord target = nodes.get(ie.getTarget(), ie.getTargetCopy());
+      IndexedWord target = nodes.get(ie.getTarget(), ie.getTargetEmpty(), ie.getTargetCopy());
       if (target == null) {
         throw new FailedSerializationError("Target of a dependency was null!\nEdge: " + ie);
       }
@@ -2475,7 +2482,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
 
     if (proto.getRootCount() > 0) {
-      Collection<IndexedWord> roots = proto.getRootList().stream().map(rootI -> nodes.get(rootI, 0)).collect(Collectors.toList());
+      // assume empty nodes and copy nodes can't be the root
+      // this is actually not true: there are examples in the UD Estonian EWT treebank
+      // which have empty nodes as the root of the enhanced graph
+      Collection<IndexedWord> roots = proto.getRootList().stream().map(rootI -> nodes.get(rootI, 0, 0)).collect(Collectors.toList());
       graph.setRoots(roots);
     } else {
       // Roots were not saved away
