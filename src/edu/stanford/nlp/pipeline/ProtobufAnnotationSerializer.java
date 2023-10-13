@@ -2395,13 +2395,38 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       min = in.getIndex() < min ? in.getIndex() : min;
       max = in.getIndex() > max ? in.getIndex() : max;
     }
+    // map from index, copy -> IndexedWord
+    // TODO: use emptyIndex as well
     TwoDimensionalMap<Integer, Integer, IndexedWord> nodes = TwoDimensionalMap.hashMap();
+    // map from index -> CoreLabel
+    Map<Integer, CoreLabel> originalLabels = new HashMap<>();
+    // assume the code path which uses a Document doesn't use emptyIndex
+    // alternatively, we could attach words with emptyIndex to the Document some other way
+    if (!document.isPresent()) {
+      int index = 0;
+      for (CoreLabel token : sentence) {
+        ++index;  // indices should start at 1
+        Integer tokenIndex = token.get(IndexAnnotation.class);
+        if (tokenIndex == null) {
+          tokenIndex = index;
+        }
+        Integer emptyIndex = token.get(EmptyIndexAnnotation.class);
+        if (emptyIndex == null) {
+          emptyIndex = 0;
+        }
+        originalLabels.put(tokenIndex, token);
+      }
+    }
     for(CoreNLPProtos.DependencyGraph.Node in: proto.getNodeList()){
       CoreLabel token;
       if (document.isPresent()) {
         token = document.get().get(SentencesAnnotation.class).get(in.getSentenceIndex()).get(TokensAnnotation.class).get(in.getIndex() - 1); // token index starts at 1!
       } else {
-        token = sentence.get(in.getIndex() - 1); // index starts at 1!
+        // TODO: index based on emptyIndex as well
+        token = originalLabels.get(in.getIndex());
+        if (token == null) {
+          throw new FailedSerializationError("Could not find the token for index " + in.getIndex());
+        }
       }
       IndexedWord word;
       if (in.hasCopyAnnotation() && in.getCopyAnnotation() > 0) {
@@ -2430,6 +2455,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // add all edges to the actual graph
     for(CoreNLPProtos.DependencyGraph.Edge ie: proto.getEdgeList()){
+      // TODO: source and target should index on emptyIndex as well
       IndexedWord source = nodes.get(ie.getSource(), ie.getSourceCopy());
       if (source == null) {
         throw new FailedSerializationError("Source of a dependency was null!\nEdge: " + ie);
