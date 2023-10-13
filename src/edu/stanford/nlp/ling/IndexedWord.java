@@ -512,8 +512,8 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
    *
    * This compareTo method is based not by value elements like the word(),
    *  but on passage position. It puts NO_WORD elements first, and then orders
-   *  by document, sentence, and word index.  If these do not differ, it
-   *  returns equal.
+   *  by document, sentence, word index, and empty word index.
+   *  If these do not differ, it returns equal.
    *
    *  @param w The IndexedWord to compare with
    *  @return Whether this is less than w or not in the ordering
@@ -550,6 +550,9 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
 
     int indexComp = Integer.compare(index(), w.index());
     if (indexComp != 0) return indexComp;
+
+    int emptyIndexComp = Integer.compare(getEmptyIndex(), w.getEmptyIndex());
+    if (emptyIndexComp != 0) return emptyIndexComp;
 
     return Integer.compare(copyCount(), w.copyCount());
   }
