@@ -7,8 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import edu.stanford.nlp.trees.*;
-import junit.framework.TestCase;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.util.Generics;
 
@@ -16,11 +19,11 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author David McClosky
  */
-public class SemanticGraphTest extends TestCase {
+public class SemanticGraphTest {
 
   private SemanticGraph graph;
 
-  @Override
+  @Before
   public void setUp() {
     graph = makeGraph();
   }
@@ -39,14 +42,15 @@ public class SemanticGraphTest extends TestCase {
     return SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, GrammaticalStructure.Extras.MAXIMAL);
   }
 
+  @Test
   public void testRemoveVertex() {
     IndexedWord word = graph.getNodeByIndex(10);
-    assertTrue(graph.containsVertex(word));
+    Assert.assertTrue(graph.containsVertex(word));
 
     int numNodes = graph.vertexSet().size();
     graph.removeVertex(word);
-    assertEquals(graph.vertexSet().size(), numNodes - 1);
-    assertFalse(graph.containsVertex(word));
+    Assert.assertEquals(graph.vertexSet().size(), numNodes - 1);
+    Assert.assertFalse(graph.containsVertex(word));
 
     try {
       Set<IndexedWord> desc = graph.descendants(word);
@@ -56,6 +60,7 @@ public class SemanticGraphTest extends TestCase {
     }
   }
 
+  @Test
   public void testShortestPath() {
 
     //graph.prettyPrint();
@@ -72,84 +77,87 @@ public class SemanticGraphTest extends TestCase {
     List<SemanticGraphEdge> edges =
       graph.getShortestUndirectedPathEdges(word1, word2);
     // System.out.println("path: " + edges);
-    assertNotNull(edges);
+    Assert.assertNotNull(edges);
 
     List<IndexedWord> nodes =
       graph.getShortestUndirectedPathNodes(word1, word2);
     // System.out.println("path: " + nodes);
-    assertNotNull(nodes);
-    assertEquals(word1, nodes.get(0));
-    assertEquals(word2, nodes.get(nodes.size() - 1));
+    Assert.assertNotNull(nodes);
+    Assert.assertEquals(word1, nodes.get(0));
+    Assert.assertEquals(word2, nodes.get(nodes.size() - 1));
 
     edges = graph.getShortestUndirectedPathEdges(word1, word1);
     // System.out.println("path: " + edges);
-    assertNotNull(edges);
-    assertEquals(0, edges.size());
+    Assert.assertNotNull(edges);
+    Assert.assertEquals(0, edges.size());
 
     nodes = graph.getShortestUndirectedPathNodes(word1, word1);
     // System.out.println("path: " + nodes);
-    assertNotNull(nodes);
-    assertEquals(1, nodes.size());
-    assertEquals(word1, nodes.get(0));
+    Assert.assertNotNull(nodes);
+    Assert.assertEquals(1, nodes.size());
+    Assert.assertEquals(word1, nodes.get(0));
   }
 
+  @Test
   public void testGetCommonAncestor(){
     IndexedWord common = graph.getCommonAncestor(graph.getNodeByIndex(43), graph.getNodeByIndex(44));
-    assertEquals(45, common.index());
+    Assert.assertEquals(45, common.index());
 
     common = graph.getCommonAncestor(graph.getNodeByIndex(41), graph.getNodeByIndex(39));
-    assertEquals(41, common.index());
+    Assert.assertEquals(41, common.index());
 
     common = graph.getCommonAncestor(graph.getNodeByIndex(39), graph.getNodeByIndex(41));
-    assertEquals(41, common.index());
+    Assert.assertEquals(41, common.index());
 
     common = graph.getCommonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(42));
-    assertEquals(41, common.index());
+    Assert.assertEquals(41, common.index());
 
     // too far for this method
     common = graph.getCommonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(42));
-    assertEquals(null, common);
+    Assert.assertEquals(null, common);
 
     common = graph.getCommonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(10));
-    assertEquals(10, common.index());
+    Assert.assertEquals(10, common.index());
 
     common = graph.getCommonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(40));
-    assertEquals(40, common.index());
+    Assert.assertEquals(40, common.index());
 
     // a couple tests at the top of the graph
     common = graph.getCommonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(1));
-    assertEquals(10, common.index());
+    Assert.assertEquals(10, common.index());
 
     common = graph.getCommonAncestor(graph.getNodeByIndex(1), graph.getNodeByIndex(10));
-    assertEquals(10, common.index());
+    Assert.assertEquals(10, common.index());
   }
 
+  @Test
   public void testCommonAncestor(){
-    assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(43), graph.getNodeByIndex(44)));
+    Assert.assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(43), graph.getNodeByIndex(44)));
 
-    assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(41), graph.getNodeByIndex(39)));
+    Assert.assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(41), graph.getNodeByIndex(39)));
 
-    assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(39), graph.getNodeByIndex(41)));
+    Assert.assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(39), graph.getNodeByIndex(41)));
 
-    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(42)));
+    Assert.assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(42)));
 
-    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(42), graph.getNodeByIndex(40)));
+    Assert.assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(42), graph.getNodeByIndex(40)));
 
     // too far for this method
-    assertEquals(-1, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(42)));
-    // assertEquals(null, common);
+    Assert.assertEquals(-1, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(42)));
+    // Assert.assertEquals(null, common);
 
-    assertEquals(0, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(10)));
+    Assert.assertEquals(0, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(10)));
 
-    assertEquals(0, graph.commonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(40)));
-    // assertEquals(40, common.index());
+    Assert.assertEquals(0, graph.commonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(40)));
+    // Assert.assertEquals(40, common.index());
 
     // a couple tests at the top of the graph
-    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(1)));
+    Assert.assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(1)));
 
-    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(1), graph.getNodeByIndex(10)));
+    Assert.assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(1), graph.getNodeByIndex(10)));
   }
 
+  @Test
   public void testTopologicalSort() {
     SemanticGraph gr = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     verifyTopologicalSort(gr);
@@ -195,16 +203,17 @@ public class SemanticGraphTest extends TestCase {
     }
 
     for (IndexedWord parent : graph.vertexSet()) {
-      assertTrue(indices.containsKey(parent));
+      Assert.assertTrue(indices.containsKey(parent));
       int parentIndex = indices.get(parent);
       for (IndexedWord child : graph.getChildren(parent)) {
-        assertTrue(indices.containsKey(child));
+        Assert.assertTrue(indices.containsKey(child));
         int childIndex = indices.get(child);
-        assertTrue(parentIndex < childIndex);
+        Assert.assertTrue(parentIndex < childIndex);
       }
     }
   }
 
+  @Test
   public void testGetPathToRoot() {
     verifyPath(graph.getPathToRoot(graph.getNodeByIndex(1)), 4, 10);
     verifyPath(graph.getPathToRoot(graph.getNodeByIndex(10))); // empty path
@@ -212,12 +221,13 @@ public class SemanticGraphTest extends TestCase {
   }
 
   private static void verifyPath(List<IndexedWord> path, int ... expected) {
-    assertEquals(expected.length, path.size());
+    Assert.assertEquals(expected.length, path.size());
     for (int i = 0; i < expected.length; ++i) {
-      assertEquals(expected[i], path.get(i).index());
+      Assert.assertEquals(expected[i], path.get(i).index());
     }
   }
 
+  @Test
   public void testGetSiblings() {
     verifySet(graph.getSiblings(graph.getNodeByIndex(43)), 42, 44, 48);
     verifySet(graph.getSiblings(graph.getNodeByIndex(10))); // empty set
@@ -233,27 +243,29 @@ public class SemanticGraphTest extends TestCase {
     for (Integer index : expected) {
       expectedIndices.add(index);
     }
-    assertEquals(expectedIndices, results);
+    Assert.assertEquals(expectedIndices, results);
   }
 
+  @Test
   public void testIsAncestor() {
     //System.err.println(graph.toString(CoreLabel.VALUE_TAG_INDEX_FORMAT));
-    assertEquals(1, graph.isAncestor(graph.getNodeByIndex(42), graph.getNodeByIndex(45)));
-    assertEquals(2, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(37)));
-    assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(38)));
-    assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(10)));
-    assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(45), graph.getNodeByIndex(42)));
+    Assert.assertEquals(1, graph.isAncestor(graph.getNodeByIndex(42), graph.getNodeByIndex(45)));
+    Assert.assertEquals(2, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(37)));
+    Assert.assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(38)));
+    Assert.assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(10)));
+    Assert.assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(45), graph.getNodeByIndex(42)));
   }
 
+  @Test
   public void testHasChildren() {
     SemanticGraph gr = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
 
     List<IndexedWord> vertices = gr.vertexListSorted();
     for (IndexedWord word : vertices) {
       if (word.word().equals("ate") || word.word().equals("muffins")) {
-        assertTrue(gr.hasChildren(word));
+        Assert.assertTrue(gr.hasChildren(word));
       } else {
-        assertFalse(gr.hasChildren(word));
+        Assert.assertFalse(gr.hasChildren(word));
       }
     }
   }
@@ -261,14 +273,15 @@ public class SemanticGraphTest extends TestCase {
   /**
    * Test the vertices and edges of a very simple valueOf graph
    */
-   public void testValueOfSimple() {
+  @Test
+  public void testValueOfSimple() {
     SemanticGraph sg = SemanticGraph.valueOf("[A/foo obj> B/bar obj> C/foo nsubj> [D/bar obj> E/baz]]");
 
     List<IndexedWord> words = sg.vertexListSorted();
-    assertEquals(words.size(), 5);
+    Assert.assertEquals(words.size(), 5);
 
     for (int i = 0; i < 5; ++i) {
-      assertEquals(words.get(i).index(), i);
+      Assert.assertEquals(words.get(i).index(), i);
     }
     IndexedWord A = words.get(0);
     IndexedWord B = words.get(1);
@@ -276,45 +289,46 @@ public class SemanticGraphTest extends TestCase {
     IndexedWord D = words.get(3);
     IndexedWord E = words.get(4);
 
-    assertEquals(A.word(), "A");
-    assertEquals(A.tag(),  "foo");
-    assertEquals(B.word(), "B");
-    assertEquals(B.tag(),  "bar");
-    assertEquals(C.word(), "C");
-    assertEquals(C.tag(),  "foo");
-    assertEquals(D.word(), "D");
-    assertEquals(D.tag(),  "bar");
-    assertEquals(E.word(), "E");
-    assertEquals(E.tag(),  "baz");
+    Assert.assertEquals(A.word(), "A");
+    Assert.assertEquals(A.tag(),  "foo");
+    Assert.assertEquals(B.word(), "B");
+    Assert.assertEquals(B.tag(),  "bar");
+    Assert.assertEquals(C.word(), "C");
+    Assert.assertEquals(C.tag(),  "foo");
+    Assert.assertEquals(D.word(), "D");
+    Assert.assertEquals(D.tag(),  "bar");
+    Assert.assertEquals(E.word(), "E");
+    Assert.assertEquals(E.tag(),  "baz");
 
-    assertEquals(sg.getAllEdges(A, B).size(), 1);
-    assertEquals(sg.getParentsWithReln(B, "obj").size(), 1);
+    Assert.assertEquals(sg.getAllEdges(A, B).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(B, "obj").size(), 1);
 
-    assertEquals(sg.getAllEdges(A, C).size(), 1);
-    assertEquals(sg.getParentsWithReln(C, "obj").size(), 1);
+    Assert.assertEquals(sg.getAllEdges(A, C).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(C, "obj").size(), 1);
 
-    assertEquals(sg.getAllEdges(A, D).size(), 1);
-    assertEquals(sg.getParentsWithReln(D, "nsubj").size(), 1);
-    assertEquals(sg.getParentsWithReln(D, "obj").size(), 0);
-    assertEquals(sg.getParentsWithReln(D, "dep").size(), 0);
+    Assert.assertEquals(sg.getAllEdges(A, D).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(D, "nsubj").size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(D, "obj").size(), 0);
+    Assert.assertEquals(sg.getParentsWithReln(D, "dep").size(), 0);
 
-    assertEquals(sg.getAllEdges(A, E).size(), 0);
-    assertEquals(sg.getAllEdges(D, E).size(), 1);
-    assertEquals(sg.getParentsWithReln(E, "obj").size(), 1);
-    assertEquals(sg.getParentsWithReln(E, "dep").size(), 0);
+    Assert.assertEquals(sg.getAllEdges(A, E).size(), 0);
+    Assert.assertEquals(sg.getAllEdges(D, E).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(E, "obj").size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(E, "dep").size(), 0);
   }
 
   /**
    * Test that dashes as the word work as expected with indices
    */
+  @Test
   public void testValueOfDashes() {
     SemanticGraph sg = SemanticGraph.valueOf("[--3 obj> -/bar-1 obj> C-4 nsubj> [D-2 obj> E-0]]");
 
     List<IndexedWord> words = sg.vertexListSorted();
-    assertEquals(words.size(), 5);
+    Assert.assertEquals(words.size(), 5);
 
     for (int i = 0; i < 5; ++i) {
-      assertEquals(words.get(i).index(), i);
+      Assert.assertEquals(words.get(i).index(), i);
     }
     IndexedWord A = words.get(3);
     IndexedWord B = words.get(1);
@@ -322,26 +336,27 @@ public class SemanticGraphTest extends TestCase {
     IndexedWord D = words.get(2);
     IndexedWord E = words.get(0);
 
-    assertEquals(A.word(), "-");
-    assertEquals(B.word(), "-");
-    assertEquals(B.tag(),  "bar");
-    assertEquals(C.word(), "C");
-    assertEquals(D.word(), "D");
-    assertEquals(E.word(), "E");
+    Assert.assertEquals(A.word(), "-");
+    Assert.assertEquals(B.word(), "-");
+    Assert.assertEquals(B.tag(),  "bar");
+    Assert.assertEquals(C.word(), "C");
+    Assert.assertEquals(D.word(), "D");
+    Assert.assertEquals(E.word(), "E");
   }
 
   /**
    * Test the vertices and edges of a very simple valueOf graph with indices added
    */
+  @Test
   public void testValueOfIndices() {
     // test some with tags and some without
     SemanticGraph sg = SemanticGraph.valueOf("[A/foo-3 obj> B/bar-1 obj> C-4 nsubj> [D-2 obj> E-0]]");
 
     List<IndexedWord> words = sg.vertexListSorted();
-    assertEquals(words.size(), 5);
+    Assert.assertEquals(words.size(), 5);
 
     for (int i = 0; i < 5; ++i) {
-      assertEquals(words.get(i).index(), i);
+      Assert.assertEquals(words.get(i).index(), i);
     }
     IndexedWord A = words.get(3);
     IndexedWord B = words.get(1);
@@ -349,42 +364,43 @@ public class SemanticGraphTest extends TestCase {
     IndexedWord D = words.get(2);
     IndexedWord E = words.get(0);
 
-    assertEquals(A.word(), "A");
-    assertEquals(A.tag(),  "foo");
-    assertEquals(B.word(), "B");
-    assertEquals(B.tag(),  "bar");
-    assertEquals(C.word(), "C");
-    assertEquals(D.word(), "D");
-    assertEquals(E.word(), "E");
+    Assert.assertEquals(A.word(), "A");
+    Assert.assertEquals(A.tag(),  "foo");
+    Assert.assertEquals(B.word(), "B");
+    Assert.assertEquals(B.tag(),  "bar");
+    Assert.assertEquals(C.word(), "C");
+    Assert.assertEquals(D.word(), "D");
+    Assert.assertEquals(E.word(), "E");
 
-    assertEquals(sg.getAllEdges(A, B).size(), 1);
-    assertEquals(sg.getParentsWithReln(B, "obj").size(), 1);
+    Assert.assertEquals(sg.getAllEdges(A, B).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(B, "obj").size(), 1);
 
-    assertEquals(sg.getAllEdges(A, C).size(), 1);
-    assertEquals(sg.getParentsWithReln(C, "obj").size(), 1);
+    Assert.assertEquals(sg.getAllEdges(A, C).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(C, "obj").size(), 1);
 
-    assertEquals(sg.getAllEdges(A, D).size(), 1);
-    assertEquals(sg.getParentsWithReln(D, "nsubj").size(), 1);
-    assertEquals(sg.getParentsWithReln(D, "obj").size(), 0);
-    assertEquals(sg.getParentsWithReln(D, "dep").size(), 0);
+    Assert.assertEquals(sg.getAllEdges(A, D).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(D, "nsubj").size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(D, "obj").size(), 0);
+    Assert.assertEquals(sg.getParentsWithReln(D, "dep").size(), 0);
 
-    assertEquals(sg.getAllEdges(A, E).size(), 0);
-    assertEquals(sg.getAllEdges(D, E).size(), 1);
-    assertEquals(sg.getParentsWithReln(E, "obj").size(), 1);
-    assertEquals(sg.getParentsWithReln(E, "dep").size(), 0);
+    Assert.assertEquals(sg.getAllEdges(A, E).size(), 0);
+    Assert.assertEquals(sg.getAllEdges(D, E).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(E, "obj").size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(E, "dep").size(), 0);
   }
 
   /**
    * Test the vertices and edges if we reuse some indices in valueOf
    */
-   public void testValueOfReuseIndices() {
+  @Test
+  public void testValueOfReuseIndices() {
     SemanticGraph sg = SemanticGraph.valueOf("[A/foo-0 obj> B/bar-1 obj> C/foo-2 obj> -2 dep> B/bar-1 nsubj> [D/bar-3 obj> E/baz-4]]");
 
     List<IndexedWord> words = sg.vertexListSorted();
-    assertEquals(words.size(), 5);
+    Assert.assertEquals(words.size(), 5);
 
     for (int i = 0; i < 5; ++i) {
-      assertEquals(words.get(i).index(), i);
+      Assert.assertEquals(words.get(i).index(), i);
     }
     IndexedWord A = words.get(0);
     IndexedWord B = words.get(1);
@@ -392,33 +408,33 @@ public class SemanticGraphTest extends TestCase {
     IndexedWord D = words.get(3);
     IndexedWord E = words.get(4);
 
-    assertEquals(A.word(), "A");
-    assertEquals(A.tag(),  "foo");
-    assertEquals(B.word(), "B");
-    assertEquals(B.tag(),  "bar");
-    assertEquals(C.word(), "C");
-    assertEquals(C.tag(),  "foo");
-    assertEquals(D.word(), "D");
-    assertEquals(D.tag(),  "bar");
-    assertEquals(E.word(), "E");
-    assertEquals(E.tag(),  "baz");
+    Assert.assertEquals(A.word(), "A");
+    Assert.assertEquals(A.tag(),  "foo");
+    Assert.assertEquals(B.word(), "B");
+    Assert.assertEquals(B.tag(),  "bar");
+    Assert.assertEquals(C.word(), "C");
+    Assert.assertEquals(C.tag(),  "foo");
+    Assert.assertEquals(D.word(), "D");
+    Assert.assertEquals(D.tag(),  "bar");
+    Assert.assertEquals(E.word(), "E");
+    Assert.assertEquals(E.tag(),  "baz");
 
-    assertEquals(sg.getAllEdges(A, B).size(), 2);
-    assertEquals(sg.getParentsWithReln(B, "obj").size(), 1);
-    assertEquals(sg.getParentsWithReln(B, "dep").size(), 1);
+    Assert.assertEquals(sg.getAllEdges(A, B).size(), 2);
+    Assert.assertEquals(sg.getParentsWithReln(B, "obj").size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(B, "dep").size(), 1);
 
-    assertEquals(sg.getAllEdges(A, C).size(), 2);
-    assertEquals(sg.getParentsWithReln(C, "obj").size(), 1);
+    Assert.assertEquals(sg.getAllEdges(A, C).size(), 2);
+    Assert.assertEquals(sg.getParentsWithReln(C, "obj").size(), 1);
 
-    assertEquals(sg.getAllEdges(A, D).size(), 1);
-    assertEquals(sg.getParentsWithReln(D, "nsubj").size(), 1);
-    assertEquals(sg.getParentsWithReln(D, "obj").size(), 0);
-    assertEquals(sg.getParentsWithReln(D, "dep").size(), 0);
+    Assert.assertEquals(sg.getAllEdges(A, D).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(D, "nsubj").size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(D, "obj").size(), 0);
+    Assert.assertEquals(sg.getParentsWithReln(D, "dep").size(), 0);
 
-    assertEquals(sg.getAllEdges(A, E).size(), 0);
-    assertEquals(sg.getAllEdges(D, E).size(), 1);
-    assertEquals(sg.getParentsWithReln(E, "obj").size(), 1);
-    assertEquals(sg.getParentsWithReln(E, "dep").size(), 0);
+    Assert.assertEquals(sg.getAllEdges(A, E).size(), 0);
+    Assert.assertEquals(sg.getAllEdges(D, E).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(E, "obj").size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(E, "dep").size(), 0);
   }
 
 }
