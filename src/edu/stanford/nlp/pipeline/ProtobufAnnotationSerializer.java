@@ -243,8 +243,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A protocol buffer message corresponding to this CoreLabel
    */
   public CoreNLPProtos.Token toProto(CoreLabel coreLabel) {
+    return toProto(coreLabel, Collections.emptySet());
+  }
+
+  public CoreNLPProtos.Token toProto(CoreLabel coreLabel, Set<Class<?>> keysToSkip) {
     Set<Class<?>> keysToSerialize = new HashSet<>(coreLabel.keySetNotNull());
-    CoreNLPProtos.Token.Builder builder = toProtoBuilder(coreLabel, keysToSerialize);
+    CoreNLPProtos.Token.Builder builder = toProtoBuilder(coreLabel, keysToSerialize, keysToSkip);
     // Completeness check
     if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
       throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
@@ -263,14 +267,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param keysToSerialize A set tracking which keys have been saved. It's important to remove any keys added to the proto
    *                        from this set, as the code tracks annotations to ensure lossless serialization
    */
-  protected CoreNLPProtos.Token.Builder toProtoBuilder(CoreLabel coreLabel, Set<Class<?>> keysToSerialize) {
+  protected CoreNLPProtos.Token.Builder toProtoBuilder(CoreLabel coreLabel, Set<Class<?>> keysToSerialize, Set<Class<?>> keysToSkip) {
     CoreNLPProtos.Token.Builder builder = CoreNLPProtos.Token.newBuilder();
     Set<Class<?>> keySet = coreLabel.keySetNotNull();
+    for (Class<?> clazz : keysToSkip) {
+      keySet.remove(clazz);
+      keysToSerialize.remove(clazz);
+    }
     // Remove items serialized elsewhere from the required list
     keysToSerialize.remove(TextAnnotation.class);
     keysToSerialize.remove(SentenceIndexAnnotation.class);
     keysToSerialize.remove(DocIDAnnotation.class);
-    keysToSerialize.remove(IndexAnnotation.class);
     keysToSerialize.remove(ParagraphAnnotation.class);
     // Remove items populated by number normalizer
     keysToSerialize.remove(NumericCompositeObjectAnnotation.class);
@@ -291,6 +298,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setWord(coreLabel.word());
     // Optional fields
     if (keySet.contains(PartOfSpeechAnnotation.class)) { builder.setPos(coreLabel.tag()); keysToSerialize.remove(PartOfSpeechAnnotation.class); }
+    if (keySet.contains(IndexAnnotation.class)) { builder.setIndex(coreLabel.index()); keysToSerialize.remove(IndexAnnotation.class); }
+    if (keySet.contains(EmptyIndexAnnotation.class)) { builder.setEmptyIndex(coreLabel.getEmptyIndex()); keysToSerialize.remove(EmptyIndexAnnotation.class); }
     if (keySet.contains(ValueAnnotation.class)) { builder.setValue(coreLabel.value()); keysToSerialize.remove(ValueAnnotation.class); }
     if (keySet.contains(CategoryAnnotation.class)) { builder.setCategory(coreLabel.category()); keysToSerialize.remove(CategoryAnnotation.class); }
     if (keySet.contains(BeforeAnnotation.class)) { builder.setBefore(coreLabel.before()); keysToSerialize.remove(BeforeAnnotation.class); }
@@ -504,7 +513,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Tokens
     if (sentence.containsKey(TokensAnnotation.class)) {
-      for (CoreLabel tok : sentence.get(TokensAnnotation.class)) { builder.addToken(toProto(tok)); }
+      int tokenIndex = 0;
+      for (CoreLabel tok : sentence.get(TokensAnnotation.class)) {
+        ++tokenIndex;
+        if (tok.index() == tokenIndex) {
+          builder.addToken(toProto(tok, Collections.singleton(IndexAnnotation.class)));
+        } else {
+          builder.addToken(toProto(tok));
+        }
+      }
       keysToSerialize.remove(TokensAnnotation.class);
     }
     // Characters
@@ -1389,6 +1406,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     word.setWord(proto.getWord());
     // Optional fields
     if (proto.hasPos()) { word.setTag(proto.getPos()); }
+    // the index will be clobbered if the token was serialized as part of a document
+    // this is only going to be useful in cases where the token is serialized in some other manner
+    if (proto.hasIndex()) { word.setIndex(proto.getIndex()); }
+    if (proto.hasEmptyIndex()) { word.setEmptyIndex(proto.getEmptyIndex()); }
     if (proto.hasValue()) { word.setValue(proto.getValue()); }
     if (proto.hasCategory()) { word.setCategory(proto.getCategory()); }
     if (proto.hasBefore()) { word.setBefore(proto.getBefore()); }

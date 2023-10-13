@@ -241,8 +241,19 @@ message Token {
   //       string text           @see Document#text + character offsets
   //       uint32 sentenceIndex  @see Sentence#sentenceIndex
   //       string docID          @see Document#docID
-  //       uint32 index          @see implicit in Sentence
   //       uint32 paragraph      @see Sentence#paragraph
+
+  // Most serialized annotations will not have this
+  // Some code paths may not correctly process this if serialized,
+  // since many places will read the index off the position in a sentence
+  // In particular, deserializing a Document using ProtobufAnnotationSerializer
+  // will clobber any index value
+  // But Semgrex and Ssurgeon in particular need a way
+  // to pass around nodes where the node's index is not strictly 1, 2, 3, ...
+  // thanks to the empty nodes in UD treebanks such as
+  // English EWT or Estonian EWT (not related to each other)
+  optional uint32 index          = 79;
+  optional uint32 emptyIndex     = 80;
 
   extensions 100 to 255;
 }
