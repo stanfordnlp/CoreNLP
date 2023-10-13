@@ -1625,7 +1625,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *  @return A tagged, labeled yield.
    */
   public List<CoreLabel> taggedLabeledYield() {
-    return taggedLabeledYield(true);
+    return taggedLabeledYield(true, 0);
   }
 
 
@@ -1636,9 +1636,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *  @param tagValues use the tags for the values (otherwise use the leaf)
    *  @return A tagged, labeled yield.
    */
-  public List<CoreLabel> taggedLabeledYield(boolean tagValues) {
+  public List<CoreLabel> taggedLabeledYield(boolean tagValues, int initialIdx) {
     List<CoreLabel> ty = new ArrayList<>();
-    taggedLabeledYield(ty, 0, tagValues);
+    taggedLabeledYield(ty, initialIdx, tagValues);
     return ty;
   }
 

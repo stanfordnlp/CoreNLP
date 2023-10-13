@@ -32,7 +32,7 @@ public class ProcessDependencyConverterRequestTest {
       CoreNLPProtos.DependencyGraph responseGraph = response.getConversionsList().get(i).getGraph();
       CoreNLPProtos.FlattenedParseTree responseTree = response.getConversionsList().get(i).getTree();
       Tree tree = ProtobufAnnotationSerializer.fromProto(responseTree);
-      List<CoreLabel> sentence = tree.taggedLabeledYield(false);
+      List<CoreLabel> sentence = tree.taggedLabeledYield(false, 1);
 
       SemanticGraph expected = SemanticGraph.valueOf(expectedResults[i], i);
       SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(responseGraph, sentence, null);
@@ -53,7 +53,7 @@ public class ProcessDependencyConverterRequestTest {
   public void testOneTree() {
     CoreNLPProtos.DependencyConverterRequest request = buildRequest("(ROOT (S (NP (NNP Jennifer)) (VP (VBZ has) (NP (JJ nice) (NNS antennae)))))");
     CoreNLPProtos.DependencyConverterResponse response = ProcessDependencyConverterRequest.processRequest(request);
-    checkResults(response, "[has/VBZ-1 nsubj>Jennifer/NNP-0 obj>[antennae/NNS-3 amod>nice/JJ-2]]");
+    checkResults(response, "[has/VBZ-2 nsubj>Jennifer/NNP-1 obj>[antennae/NNS-4 amod>nice/JJ-3]]");
   }
 
   /** Test two trees turning into Dependencies */
@@ -63,8 +63,8 @@ public class ProcessDependencyConverterRequestTest {
                                                                     "(ROOT (S (NP (PRP She)) (VP (VBZ is) (ADJP (RB hella) (JJ basic)) (ADVP (RB though)))))");
     CoreNLPProtos.DependencyConverterResponse response = ProcessDependencyConverterRequest.processRequest(request);
     checkResults(response,
-                 "[has/VBZ-1 nsubj>Jennifer/NNP-0 obj>[antennae/NNS-3 amod>nice/JJ-2]]",
-                 "[basic/JJ-3 nsubj>She/PRP-0 cop>is/VBZ-1 advmod>hella/RB-2 advmod>though/RB-4]");
+                 "[has/VBZ-2 nsubj>Jennifer/NNP-1 obj>[antennae/NNS-4 amod>nice/JJ-3]]",
+                 "[basic/JJ-4 nsubj>She/PRP-1 cop>is/VBZ-2 advmod>hella/RB-3 advmod>though/RB-5]");
   }
 
 }
