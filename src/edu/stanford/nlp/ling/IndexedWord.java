@@ -402,6 +402,13 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
       return false;
     }
 
+    // compare empty word index
+    Integer myEmptyIndex = get(CoreAnnotations.EmptyIndexAnnotation.class);
+    Integer otherEmptyIndex = otherWord.get(CoreAnnotations.EmptyIndexAnnotation.class);
+    if ( ! Objects.equals(myEmptyIndex, otherEmptyIndex)) {
+      return false;
+    }
+
     if (copyCount() == 0 || otherWord.copyCount() != 0) {
       return false;
     }
