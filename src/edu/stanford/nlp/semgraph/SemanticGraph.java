@@ -20,6 +20,8 @@ import edu.stanford.nlp.util.MapFactory;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringParsingTask;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
@@ -1712,6 +1714,10 @@ public class SemanticGraph implements Serializable  {
    * <br>
    * Indices are represented by a dash separated number after the word:
    * {@code [ate-1 subj>Bill-2 ...}
+   * <br>
+   * An EmptyIndex for fake words such as in UD datasets is represented
+   * by a period separated number after the regular index
+   * {@code [ate-1 dobj>Bill-1.1 ...]}
    */
   public static SemanticGraph valueOf(String s, Language language, Integer sentIndex) {
     return (new SemanticGraphParsingTask(s, language, sentIndex)).parse();
@@ -1861,7 +1867,9 @@ public class SemanticGraph implements Serializable  {
 
   // ============================================================================
 
-  private static final Pattern WORD_AND_INDEX_PATTERN = Pattern.compile("(.*)-([0-9]+)");
+  // the chunk at the end captures an integer without the [.]
+  // if there is an emptyIndex attached to the node's index
+  private static final Pattern WORD_AND_INDEX_PATTERN = Pattern.compile("(.*)-([0-9]+)(?:(?:[.])([0-9]+))?");
 
   /**
    * This nested class is a helper for valueOf(). It represents the task of
@@ -1870,7 +1878,7 @@ public class SemanticGraph implements Serializable  {
   private static class SemanticGraphParsingTask extends StringParsingTask<SemanticGraph> {
 
     private SemanticGraph sg;
-    private Map<Integer, IndexedWord> indexesUsed = Generics.newHashMap();
+    private TwoDimensionalMap<Integer, Integer, IndexedWord> indexesUsed = TwoDimensionalMap.hashMap();
     private final Language language;
     private final Integer sentIndex;
 
@@ -1935,17 +1943,22 @@ public class SemanticGraph implements Serializable  {
 
     private IndexedWord makeVertex(String word) {
       Integer index; // initialized below
-      Pair<String, Integer> wordAndIndex = readWordAndIndex(word);
+      Integer emptyIndex = 0;
+      Triple<String, Integer, Integer> wordAndIndex = readWordAndIndex(word);
       if (wordAndIndex != null) {
         word = wordAndIndex.first();
         index = wordAndIndex.second();
+        emptyIndex = wordAndIndex.third();
       } else {
         index = getNextFreeIndex();
       }
-      if (indexesUsed.containsKey(index)) {
-        return indexesUsed.get(index);
+      if (indexesUsed.contains(index, emptyIndex)) {
+        return indexesUsed.get(index, emptyIndex);
       }
       IndexedWord ifl = new IndexedWord(null, sentIndex != null ? sentIndex : 0, index);
+      if (emptyIndex != 0) {
+        ifl.setEmptyIndex(emptyIndex);
+      }
       // log.info("SemanticGraphParsingTask>>> word = " + word);
       // log.info("SemanticGraphParsingTask>>> index = " + index);
       // log.info("SemanticGraphParsingTask>>> indexesUsed = " + indexesUsed);
@@ -1954,18 +1967,24 @@ public class SemanticGraph implements Serializable  {
       ifl.set(CoreAnnotations.ValueAnnotation.class, wordAndTag[0]);
       if (wordAndTag.length > 1)
         ifl.set(CoreAnnotations.PartOfSpeechAnnotation.class, wordAndTag[1]);
-      indexesUsed.put(index, ifl);
+      indexesUsed.put(index, emptyIndex, ifl);
       return ifl;
     }
 
-    private static Pair<String, Integer> readWordAndIndex(String word) {
+    private static Triple<String, Integer, Integer> readWordAndIndex(String word) {
       Matcher matcher = WORD_AND_INDEX_PATTERN.matcher(word);
       if (!matcher.matches()) {
         return null;
       } else {
         word = matcher.group(1);
         Integer index = Integer.valueOf(matcher.group(2));
-        return new Pair<>(word, index);
+        Integer emptyIndex;
+        if (matcher.group(3) != null) {
+          emptyIndex = Integer.valueOf(matcher.group(3));
+        } else {
+          emptyIndex = 0;
+        }
+        return new Triple<>(word, index, emptyIndex);
       }
     }
 

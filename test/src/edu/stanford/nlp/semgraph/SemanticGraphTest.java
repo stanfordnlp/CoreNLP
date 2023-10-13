@@ -390,6 +390,58 @@ public class SemanticGraphTest {
   }
 
   /**
+   * Test the vertices and edges of a very simple valueOf graph with indices added
+   */
+  @Test
+  public void testValueOfEmptyIndices() {
+    // test some with tags and some without
+    SemanticGraph sg = SemanticGraph.valueOf("[A/foo-2 obj> B/bar-1 obj> C-1.2 nsubj> [D-1.1 obj> E-0]]");
+
+    List<IndexedWord> words = sg.vertexListSorted();
+    Assert.assertEquals(words.size(), 5);
+    IndexedWord A = words.get(4);
+    IndexedWord B = words.get(1);
+    IndexedWord C = words.get(3);
+    IndexedWord D = words.get(2);
+    IndexedWord E = words.get(0);
+
+    Assert.assertEquals(A.word(), "A");
+    Assert.assertEquals(A.tag(),  "foo");
+    Assert.assertEquals(B.word(), "B");
+    Assert.assertEquals(B.tag(),  "bar");
+    Assert.assertEquals(C.word(), "C");
+    Assert.assertEquals(D.word(), "D");
+    Assert.assertEquals(E.word(), "E");
+
+    Assert.assertEquals(sg.getAllEdges(A, B).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(B, "obj").size(), 1);
+
+    Assert.assertEquals(sg.getAllEdges(A, C).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(C, "obj").size(), 1);
+
+    Assert.assertEquals(sg.getAllEdges(A, D).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(D, "nsubj").size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(D, "obj").size(), 0);
+    Assert.assertEquals(sg.getParentsWithReln(D, "dep").size(), 0);
+
+    Assert.assertEquals(sg.getAllEdges(A, E).size(), 0);
+    Assert.assertEquals(sg.getAllEdges(D, E).size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(E, "obj").size(), 1);
+    Assert.assertEquals(sg.getParentsWithReln(E, "dep").size(), 0);    
+
+    Assert.assertEquals(A.index(), 2);
+    Assert.assertEquals(A.getEmptyIndex(), 0);
+    Assert.assertEquals(B.index(), 1);
+    Assert.assertEquals(B.getEmptyIndex(), 0);
+    Assert.assertEquals(C.index(), 1);
+    Assert.assertEquals(C.getEmptyIndex(), 2);
+    Assert.assertEquals(D.index(), 1);
+    Assert.assertEquals(D.getEmptyIndex(), 1);
+    Assert.assertEquals(E.index(), 0);
+    Assert.assertEquals(E.getEmptyIndex(), 0);
+  }
+
+  /**
    * Test the vertices and edges if we reuse some indices in valueOf
    */
   @Test
