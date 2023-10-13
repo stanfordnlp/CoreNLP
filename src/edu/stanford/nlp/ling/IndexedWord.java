@@ -410,7 +410,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   }
 
   /**
-   * This .equals is dependent only on docID, sentenceIndex, and index.
+   * This .equals is dependent only on docID, sentenceIndex, emptyIndex, and index.
    * It doesn't consider the actual word value, but assumes that it is
    * validly represented by token position.
    * All IndexedWords that lack these fields will be regarded as equal.
@@ -463,7 +463,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
 
   private int cachedHashCode; // = 0;
   /**
-   * This hashCode uses only the docID, sentenceIndex, and index.
+   * This hashCode uses only the docID, sentenceIndex, emptyIndex, and index.
    * See compareTo for more info.
    */
   @Override
