@@ -155,6 +155,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     private LossySerializationException(String msg) { super(msg); }
   }
 
+  public static class FailedSerializationError extends RuntimeException {
+    private static final long serialVersionUID = 8142679843568354709L;
+
+    private FailedSerializationError(String msg) { super(msg); }
+  }
+
   /**
    * If true, serialization is guaranteed to be lossless or else a runtime exception is thrown
    * at serialization time.
@@ -2405,18 +2411,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     for(CoreNLPProtos.DependencyGraph.Edge ie: proto.getEdgeList()){
       IndexedWord source = nodes.get(ie.getSource(), ie.getSourceCopy());
       if (source == null) {
-        throw new AssertionError("Source of a dependency was null!  Edge: " + ie);
+        throw new FailedSerializationError("Source of a dependency was null!\nEdge: " + ie);
       }
       IndexedWord target = nodes.get(ie.getTarget(), ie.getTargetCopy());
       if (target == null) {
-        throw new AssertionError("Target of a dependency was null!  Edge: " + ie);
+        throw new FailedSerializationError("Target of a dependency was null!\nEdge: " + ie);
       }
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         if (!ie.hasDep()) {
-          throw new AssertionError("Protobuf dependency edge was null!  Edge: " + ie);
+          throw new FailedSerializationError("Protobuf dependency edge was null!\nEdge: " + ie);
         }
-        assert ie.hasDep();
         GrammaticalRelation rel = GrammaticalRelation.valueOf(fromProto(ie.getLanguage()), ie.getDep());
         graph.addEdge(source, target, rel, 1.0, ie.hasIsExtra() && ie.getIsExtra());
       }
