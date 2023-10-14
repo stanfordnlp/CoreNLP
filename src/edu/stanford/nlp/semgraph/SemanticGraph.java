@@ -1556,8 +1556,22 @@ public class SemanticGraph implements Serializable  {
       String dep = (edge.getTarget()).word();
       int depIdx = (edge.getTarget()).index();
       buf.append("  <dep type=\"").append(reln).append("\">\n");
-      buf.append("    <governor idx=\"").append(govIdx).append("\">").append(gov).append("</governor>\n");
-      buf.append("    <dependent idx=\"").append(depIdx).append("\">").append(dep).append("</dependent>\n");
+      buf.append("    <governor idx=\"").append(govIdx);
+      if (edge.getSource().hasEmptyIndex()) {
+        int emptyIdx = edge.getSource().getEmptyIndex();
+        if (emptyIdx != 0) {
+          buf.append("\" emptyIdx=\"").append(emptyIdx);
+        }
+      }
+      buf.append("\">").append(gov).append("</governor>\n");
+      buf.append("    <dependent idx=\"").append(depIdx);
+      if (edge.getTarget().hasEmptyIndex()) {
+        int emptyIdx = edge.getTarget().getEmptyIndex();
+        if (emptyIdx != 0) {
+          buf.append("\" emptyIdx=\"").append(emptyIdx);
+        }
+      }
+      buf.append("\">").append(dep).append("</dependent>\n");
       buf.append("  </dep>\n");
     }
     buf.append("</dependencies>\n");

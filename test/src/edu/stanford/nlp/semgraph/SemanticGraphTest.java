@@ -495,4 +495,71 @@ public class SemanticGraphTest {
     Assert.assertEquals(E.index(), 4);
   }
 
+  @Test
+  public void testXMLString() {
+    SemanticGraph sg = SemanticGraph.valueOf("[A/foo-0 obj> B/bar-1 obj> C/foo-2 obj> -2 dep> B/bar-1 nsubj> [D/bar-3 obj> E/baz-4]]");
+    String text = sg.toString(SemanticGraph.OutputFormat.XML);
+    String expected = ("<dependencies style=\"typed\">\n" +
+                       "  <dep type=\"dep\">\n" +
+                       "    <governor idx=\"0\">A</governor>\n" +
+                       "    <dependent idx=\"1\">B</dependent>\n" +
+                       "  </dep>\n" +
+                       "  <dep type=\"obj\">\n" +
+                       "    <governor idx=\"0\">A</governor>\n" +
+                       "    <dependent idx=\"1\">B</dependent>\n" +
+                       "  </dep>\n" +
+                       "  <dep type=\"obj\">\n" +
+                       "    <governor idx=\"0\">A</governor>\n" +
+                       "    <dependent idx=\"2\">C</dependent>\n" +
+                       "  </dep>\n" +
+                       "  <dep type=\"obj\">\n" +
+                       "    <governor idx=\"0\">A</governor>\n" +
+                       "    <dependent idx=\"2\">C</dependent>\n" +
+                       "  </dep>\n" +
+                       "  <dep type=\"nsubj\">\n" +
+                       "    <governor idx=\"0\">A</governor>\n" +
+                       "    <dependent idx=\"3\">D</dependent>\n" +
+                       "  </dep>\n" +
+                       "  <dep type=\"obj\">\n" +
+                       "    <governor idx=\"3\">D</governor>\n" +
+                       "    <dependent idx=\"4\">E</dependent>\n" +
+                       "  </dep>\n" +
+                       "</dependencies>\n");
+
+    Assert.assertEquals(text, expected);
+  }
+
+  @Test
+  public void testXMLStringWithEmpties() {
+    SemanticGraph sg = SemanticGraph.valueOf("[A/foo-0 obj> B/bar-1.1 obj> C/foo-2 obj> -2 dep> B/bar-1 nsubj> [D/bar-3 obj> E/baz-4]]");
+    String text = sg.toString(SemanticGraph.OutputFormat.XML);
+    String expected = ("<dependencies style=\"typed\">\n" +
+                       "  <dep type=\"dep\">\n" +
+                       "    <governor idx=\"0\">A</governor>\n" +
+                       "    <dependent idx=\"1\">B</dependent>\n" +
+                       "  </dep>\n" +
+                       "  <dep type=\"obj\">\n" +
+                       "    <governor idx=\"0\">A</governor>\n" +
+                       "    <dependent idx=\"1\" emptyIdx=\"1\">B</dependent>\n" +
+                       "  </dep>\n" +
+                       "  <dep type=\"obj\">\n" +
+                       "    <governor idx=\"0\">A</governor>\n" +
+                       "    <dependent idx=\"2\">C</dependent>\n" +
+                       "  </dep>\n" +
+                       "  <dep type=\"obj\">\n" +
+                       "    <governor idx=\"0\">A</governor>\n" +
+                       "    <dependent idx=\"2\">C</dependent>\n" +
+                       "  </dep>\n" +
+                       "  <dep type=\"nsubj\">\n" +
+                       "    <governor idx=\"0\">A</governor>\n" +
+                       "    <dependent idx=\"3\">D</dependent>\n" +
+                       "  </dep>\n" +
+                       "  <dep type=\"obj\">\n" +
+                       "    <governor idx=\"3\">D</governor>\n" +
+                       "    <dependent idx=\"4\">E</dependent>\n" +
+                       "  </dep>\n" +
+                       "</dependencies>\n");
+
+    Assert.assertEquals(text, expected);
+  }
 }
