@@ -19,16 +19,25 @@ public class ProtobufAnnotationSerializerTest {
   /** Test serializing a graph and deserializing it */
   @Test
   public void testDependencySerialization() {
-    checkGraphReversible("[A/foo-3 obj> B/bar-1 obj> C-4 nsubj> [D-2 obj> E-0]]");
+    checkGraphReversible("[A/foo-3 obj> B/bar-1 obj> C-4 nsubj> [D-2 obj> E-0]]", false);
   }
 
   /** Test that it still works if one of the nodes has an emptyIndex */
   @Test
   public void testDependencySerializationWithEmpty() {
-    checkGraphReversible("[A/foo-3 obj> B/bar-1 obj> C-4 nsubj> [D-1.1 obj> E-0]]");
+    checkGraphReversible("[A/foo-3 obj> B/bar-1 obj> C-4 nsubj> [D-1.1 obj> E-0]]", false);
   }
 
-  private void checkGraphReversible(String rawGraph) {
+  /**
+   * Test that the legacy version of passing around root information still works.
+   * After all, there may be old versions of software or old serialized graphs out there.
+   */
+  @Test
+  public void testDependencySerializationLegacyRoots() {
+    checkGraphReversible("[A/foo-3 obj> B/bar-1 obj> C-4 nsubj> [D-2 obj> E-0]]", true);
+  }
+
+  private void checkGraphReversible(String rawGraph, boolean legacyRoots) {
     ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
 
     // test some with tags and some without
@@ -39,6 +48,13 @@ public class ProtobufAnnotationSerializerTest {
     for (CoreNLPProtos.Token tokenProto : graphProto.getTokenList()) {
       CoreLabel nextToken = serializer.fromProto(tokenProto);
       labels.add(nextToken);
+    }
+
+    if (legacyRoots) {
+      CoreNLPProtos.DependencyGraph.Builder builder = CoreNLPProtos.DependencyGraph.newBuilder();
+      builder.mergeFrom(graphProto);
+      builder.clearRootNode();
+      graphProto = builder.build();
     }
 
     SemanticGraph unpacked = serializer.fromProto(graphProto, labels, null);

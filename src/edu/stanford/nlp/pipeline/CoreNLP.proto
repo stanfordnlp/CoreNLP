@@ -337,6 +337,10 @@ message DependencyGraph {
   // optional: if this graph message is not part of a larger context,
   // the tokens will help reconstruct the actual sentence
   repeated Token    token    = 4;
+  // The values in this field will index directly into the node list
+  // This is useful so that additional information such as emptyIndex
+  // can be considered without having to pass it around a second time
+  repeated uint32   rootNode = 5 [packed=true];
 }
 
 //

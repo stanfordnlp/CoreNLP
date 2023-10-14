@@ -857,8 +857,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   public CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph, boolean storeTokens) {
     CoreNLPProtos.DependencyGraph.Builder builder = CoreNLPProtos.DependencyGraph.newBuilder();
-    // Roots
-    Set<Integer> rootSet = graph.getRoots().stream().map(IndexedWord::index).collect(Collectors.toCollection(HashSet::new));
     // Nodes
     for (IndexedWord node : graph.vertexSet()) {
       // Register node
@@ -871,11 +869,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (node.getEmptyIndex() > 0) {
         nodeBuilder.setEmptyIndex(node.getEmptyIndex());
       }
-      builder.addNode(nodeBuilder.build());
-      // Register root
-      if (rootSet.contains(node.index())) {
+      // register roots
+      if (graph.isRoot(node)) {
+        builder.addRootNode(builder.getNodeList().size());
+        // use the legacy format for roots as well,
+        // so that old readers with can still read graphs
+        // that don't have empty nodes as roots
         builder.addRoot(node.index());
       }
+      builder.addNode(nodeBuilder.build());
       // Nodes, if we want to store them as tokens
       if (storeTokens) {
         builder.addToken(toProto(node.backingLabel()));
@@ -2405,6 +2407,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       min = in.getIndex() < min ? in.getIndex() : min;
       max = in.getIndex() > max ? in.getIndex() : max;
     }
+    // useful for keeping track of which nodes are roots
+    List<IndexedWord> orderedNodes = new ArrayList<>();
     // map from index, emptyIndex, copy -> IndexedWord
     ThreeDimensionalMap<Integer, Integer, Integer, IndexedWord> nodes = new ThreeDimensionalMap<>();
     // map from index, emptyIndex -> CoreLabel
@@ -2459,6 +2463,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
       nodes.put(in.getIndex(), in.getEmptyIndex(), in.getCopyAnnotation(), word);
       graph.addVertex(word);
+      orderedNodes.add(word);
     }
 
     // add all edges to the actual graph
@@ -2481,7 +2486,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
     }
 
-    if (proto.getRootCount() > 0) {
+    if (proto.getRootNodeCount() > 0) {
+      Collection<IndexedWord> roots = proto.getRootNodeList().stream().map(idx -> orderedNodes.get(idx)).collect(Collectors.toList());
+      graph.setRoots(roots);
+    } else if (proto.getRootCount() > 0) {
       // assume empty nodes and copy nodes can't be the root
       // this is actually not true: there are examples in the UD Estonian EWT treebank
       // which have empty nodes as the root of the enhanced graph
