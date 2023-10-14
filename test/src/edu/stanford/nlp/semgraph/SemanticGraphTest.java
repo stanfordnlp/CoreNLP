@@ -435,6 +435,12 @@ public class SemanticGraphTest {
     Assert.assertEquals(sg.getAllEdges(D, E).size(), 1);
     Assert.assertEquals(sg.getParentsWithReln(E, "obj").size(), 1);
     Assert.assertEquals(sg.getParentsWithReln(E, "dep").size(), 0);
+
+    Assert.assertEquals(A.index(), 0);
+    Assert.assertEquals(B.index(), 1);
+    Assert.assertEquals(C.index(), 2);
+    Assert.assertEquals(D.index(), 3);
+    Assert.assertEquals(E.index(), 4);
   }
 
 }
