@@ -52,15 +52,11 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
     xml.append("</ssurgeon-pattern-list>\n");
     List<SsurgeonPattern> patterns = inst.readFromString(xml.toString());
 
-    List<SemanticGraph> graphs = new ArrayList<>();
+    CoreNLPProtos.SsurgeonResponse.Builder responseBuilder = CoreNLPProtos.SsurgeonResponse.newBuilder();
     for (CoreNLPProtos.DependencyGraph inputGraph : request.getGraphList()) {
       List<CoreLabel> tokens = inputGraph.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
       SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(inputGraph, tokens, "ssurgeon");
-      graphs.add(graph);
-    }
 
-    CoreNLPProtos.SsurgeonResponse.Builder responseBuilder = CoreNLPProtos.SsurgeonResponse.newBuilder();
-    for (SemanticGraph graph : graphs) {
       SemanticGraph newGraph = graph;
       boolean isChanged = false;
       for (SsurgeonPattern pattern : patterns) {
