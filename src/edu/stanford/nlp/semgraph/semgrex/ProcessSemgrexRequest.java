@@ -88,7 +88,12 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
     for (CoreNLPProtos.SemgrexRequest.Dependencies sentence : request.getQueryList()) {
       CoreNLPProtos.SemgrexResponse.GraphResult.Builder graphResultBuilder = CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder();
 
-      List<CoreLabel> tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+      final List<CoreLabel> tokens;
+      if (sentence.getGraph().getTokenList().size() > 0) {
+        tokens = sentence.getGraph().getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+      } else {
+        tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+      }
       SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, "semgrex");
       int patternIdx = 0;
       for (SemgrexPattern pattern : patterns) {
