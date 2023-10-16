@@ -632,6 +632,14 @@ message Section {
 }
 
 
+// Allows for multiple graphs on top of the same words
+// This is especially useful for Semgrex and Ssurgeon
+// on UD datasets with basic & enhanced dependencies
+message RepeatedDependencies {
+  repeated Token             token       = 1;
+  repeated DependencyGraph   graph       = 2;
+}
+
 
 // A message for requesting a semgrex
 // Each sentence stores information about the tokens making up the
@@ -657,6 +665,12 @@ message SemgrexRequest {
 // You may want to send multiple semgrexes per query because
 // translating large numbers of dependency graphs to protobufs
 // will be expensive, so doing several queries at once will save time
+//
+// TODO: searching over multiple layers of dependencies of the same
+// sentence will not work unless we change the semantics of the
+// return values.  In particular, the root of the match
+// and the matchIndex of a NamedNode both are indices of the words,
+// whereas the words could be "empty" words or copy words
 message SemgrexResponse {
   message NamedNode {
     required string          name        = 1;
@@ -728,12 +742,14 @@ message SsurgeonRequest {
 
   repeated Ssurgeon          ssurgeon    = 1;
   repeated DependencyGraph   graph       = 2;
+  repeated RepeatedDependencies   multigraph  = 3;
 }
 
 message SsurgeonResponse {
   message SsurgeonResult {
     optional DependencyGraph graph      = 1;
     optional bool            changed    = 2;
+    optional RepeatedDependencies  multigraph  = 3;
   }
 
   repeated SsurgeonResult    result      = 1;

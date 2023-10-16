@@ -69,6 +69,32 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
       graphBuilder.setChanged(isChanged);
       responseBuilder.addResult(graphBuilder.build());
     }
+
+    for (CoreNLPProtos.RepeatedDependencies multigraph : request.getMultigraphList()) {
+      List<CoreLabel> tokens = multigraph.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+      List<SemanticGraph> graphs = new ArrayList<>();
+      for (CoreNLPProtos.DependencyGraph inputGraph : multigraph.getGraphList()) {
+        SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(inputGraph, tokens, "ssurgeon");
+        graphs.add(graph);
+      }
+
+      List<SemanticGraph> newGraphs = graphs;
+      boolean isChanged = false;
+      // TODO
+      //for (SsurgeonPattern pattern : patterns) {
+      //  Pair<SemanticGraph, Boolean> result = pattern.iterate(newGraph);
+      //  newGraph = result.first;
+      //  isChanged = isChanged || result.second;
+      //}
+
+      CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder graphBuilder = CoreNLPProtos.SsurgeonResponse.SsurgeonResult.newBuilder();
+      graphBuilder.setChanged(isChanged);
+      // TODO: is multigraphs the right format?
+      //for (SemanticGraph graph : newGraphs) {
+      //  graphBuilder.addMultigraph(serializer.toProto(graph, true));
+      //}
+      responseBuilder.addResult(graphBuilder.build());
+    }
     return responseBuilder.build();
   }
 
