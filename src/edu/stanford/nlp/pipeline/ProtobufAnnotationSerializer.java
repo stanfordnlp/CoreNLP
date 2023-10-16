@@ -2437,7 +2437,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       } else {
         token = originalLabels.get(in.getIndex(), in.getEmptyIndex());
         if (token == null) {
-          throw new FailedSerializationError("Could not find the token for index " + in.getIndex());
+          throw new FailedSerializationError("Could not find the token for index " + in.getIndex() + " empty " + in.getEmptyIndex() + "\n(" + originalLabels.size() + " known labels)");
         }
       }
       IndexedWord word;
