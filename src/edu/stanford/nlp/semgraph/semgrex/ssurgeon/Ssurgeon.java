@@ -83,6 +83,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code reattachNamedEdge -edge edgename -gov gov -dep dep}
  * <li> {@code addDep -gov node1 -reln depType -position where ...attributes...}
  * <li> {@code editNode -node node ...attributes...}
+ * <li> {@code combineMWT -node node -word word}
  * <li> {@code setRoots n1 (n2 n3 ...)}
  * <li> {@code mergeNodes n1 n2}
  * <li> {@code killAllIncomingEdges -node node}
