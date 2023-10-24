@@ -227,7 +227,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       */
       String name;
       String specific;
-      char separator = language == Language.UniversalEnglish ? ':' : '_';
+      char separator = (language == Language.UniversalEnglish || language == Language.Unknown) ? ':' : '_';
       int underscorePosition = s.indexOf(separator);
       if (underscorePosition > 0) {
         name = s.substring(0, underscorePosition);
