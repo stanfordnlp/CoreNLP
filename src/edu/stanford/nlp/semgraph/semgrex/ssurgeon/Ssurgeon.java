@@ -555,7 +555,7 @@ public class Ssurgeon  {
         return new DeleteLeaf(argsBox.nodes.get(0));
       } else if (command.equalsIgnoreCase(EditNode.LABEL)) {
         if (argsBox.nodes.size() != 1) {
-          throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes");
+          throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");
         }
         return new EditNode(argsBox.nodes.get(0), argsBox.annotations);
       } else if (command.equalsIgnoreCase(MergeNodes.LABEL)) {
