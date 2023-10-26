@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeMap;
 
 /**
  * Set of common annotations for {@link CoreMap}s. The classes
@@ -580,10 +581,10 @@ public class CoreAnnotations {
   /**
    * CoNLL-U dep parsing - List of morphological features
    */
-  public static class CoNLLUFeats implements CoreAnnotation<HashMap<String,String>> {
+  public static class CoNLLUFeats implements CoreAnnotation<TreeMap<String,String>> {
     @Override
-    public Class<HashMap<String,String>> getType() {
-      return ErasureUtils.uncheckedCast(HashMap.class);
+    public Class<TreeMap<String,String>> getType() {
+      return ErasureUtils.uncheckedCast(TreeMap.class);
     }
   }
 

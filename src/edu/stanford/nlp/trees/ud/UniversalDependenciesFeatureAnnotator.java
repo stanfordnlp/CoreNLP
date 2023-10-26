@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -51,8 +53,8 @@ public class UniversalDependenciesFeatureAnnotator  {
 
 
   private static final String FEATURE_MAP_FILE = "edu/stanford/nlp/models/ud/feature_map.txt";
-  private HashMap<String,HashMap<String,String>> posFeatureMap;
-  private HashMap<String,HashMap<String,String>> wordPosFeatureMap;
+  private HashMap<String,TreeMap<String,String>> posFeatureMap;
+  private Map<String,TreeMap<String,String>> wordPosFeatureMap;
 
   private final Morphology morphology = new Morphology();
 
@@ -390,10 +392,10 @@ public class UniversalDependenciesFeatureAnnotator  {
       String posTag = word.get(CoreAnnotations.PartOfSpeechAnnotation.class);
       String token = word.get(CoreAnnotations.TextAnnotation.class);
       Integer index = word.get(CoreAnnotations.IndexAnnotation.class);
-      HashMap<String, String> wordFeatures = word.get(CoreAnnotations.CoNLLUFeats.class);
+      TreeMap<String, String> wordFeatures = word.get(CoreAnnotations.CoNLLUFeats.class);
 
       if (wordFeatures == null) {
-        wordFeatures = new HashMap<>();
+        wordFeatures = new TreeMap<>();
         word.set(CoreAnnotations.CoNLLUFeats.class, wordFeatures);
       }
 
