@@ -25,6 +25,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Trees;
+import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
@@ -1453,7 +1454,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasSpan()) { word.set(SpanAnnotation.class, new IntPair(proto.getSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasSentiment()) { word.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     if (proto.hasQuotationIndex()) { word.set(QuotationIndexAnnotation.class, proto.getQuotationIndex()); }
-    if (proto.hasConllUFeatures()) { word.set(CoNLLUFeats.class, new TreeMap<>(fromProto(proto.getConllUFeatures()))); }
+    if (proto.hasConllUFeatures()) { word.set(CoNLLUFeats.class, new CoNLLUFeatures(fromProto(proto.getConllUFeatures()))); }
     if (proto.hasConllUMisc()) { word.set(CoNLLUMisc.class, proto.getConllUMisc()); }
     if (proto.hasCoarseTag()) { word.set(CoarseTagAnnotation.class, proto.getCoarseTag()); }
     if (proto.hasConllUTokenSpan()) { word.set(CoNLLUTokenSpanAnnotation.class, new IntPair(proto.getConllUTokenSpan().getBegin(), proto.getSpan().getEnd())); }

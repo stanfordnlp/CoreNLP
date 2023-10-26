@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 
-import edu.stanford.nlp.trees.ud.CoNLLUUtils;
+import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
@@ -201,7 +201,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
           } else if (valueClass == Boolean.class) {
             this.set(coreKeyClass, Boolean.parseBoolean(values[i]));
           } else if (coreKeyClass == CoreAnnotations.CoNLLUFeats.class) {
-            this.set(coreKeyClass, CoNLLUUtils.parseFeatures(values[i]));
+            this.set(coreKeyClass, new CoNLLUFeatures(values[i]));
           } else {
             throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: " +
                                                     "Can't handle " + valueClass + " (key " + key + ")");
@@ -254,7 +254,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
         } else if (valueClass == Boolean.class) {
           this.set(coreKeyClass, Boolean.parseBoolean(values[i]));
         } else if (coreKeyClass == CoreAnnotations.CoNLLUFeats.class) {
-          this.set(coreKeyClass, CoNLLUUtils.parseFeatures(values[i]));
+          this.set(coreKeyClass, new CoNLLUFeatures(values[i]));
         } else {
           throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: " +
                                                   "Can't handle " + valueClass + " (key " + coreKeyClass + ")");
