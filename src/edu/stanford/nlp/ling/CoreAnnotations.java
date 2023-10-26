@@ -563,7 +563,7 @@ public class CoreAnnotations {
   public static class CoNLLUTokenSpanAnnotation implements CoreAnnotation<IntPair> {
     @Override
     public Class<IntPair> getType() {
-      return ErasureUtils.uncheckedCast(Pair.class);
+      return IntPair.class;
     }
   }
 
@@ -573,7 +573,7 @@ public class CoreAnnotations {
   public static class CoNLLUSecondaryDepsAnnotation implements CoreAnnotation<HashMap<String,String>> {
     @Override
     public Class<HashMap<String,String>> getType() {
-      return ErasureUtils.uncheckedCast(Pair.class);
+      return ErasureUtils.uncheckedCast(HashMap.class);
     }
   }
 
