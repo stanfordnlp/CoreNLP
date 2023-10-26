@@ -1,6 +1,7 @@
 package edu.stanford.nlp.ling;
 
 import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
 import edu.stanford.nlp.util.*;
 
 import java.util.Calendar;
@@ -581,10 +582,10 @@ public class CoreAnnotations {
   /**
    * CoNLL-U dep parsing - List of morphological features
    */
-  public static class CoNLLUFeats implements CoreAnnotation<TreeMap<String,String>> {
+  public static class CoNLLUFeats implements CoreAnnotation<CoNLLUFeatures> {
     @Override
-    public Class<TreeMap<String,String>> getType() {
-      return ErasureUtils.uncheckedCast(TreeMap.class);
+    public Class<CoNLLUFeatures> getType() {
+      return CoNLLUFeatures.class;
     }
   }
 

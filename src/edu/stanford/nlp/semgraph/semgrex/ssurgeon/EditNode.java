@@ -9,7 +9,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
-import edu.stanford.nlp.trees.ud.CoNLLUUtils;
+import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
 
 /**
  * Edit an existing node to have new attributes.
@@ -34,7 +34,7 @@ public class EditNode extends SsurgeonEdit {
     this.nodeName = nodeName;
     this.attributes = new TreeMap<>(attributes);
     if (updateMorphoFeatures != null) {
-      this.updateMorphoFeatures = CoNLLUUtils.parseFeatures(updateMorphoFeatures);
+      this.updateMorphoFeatures = new CoNLLUFeatures(updateMorphoFeatures);
     } else {
       this.updateMorphoFeatures = Collections.emptyMap();
     }
@@ -63,7 +63,7 @@ public class EditNode extends SsurgeonEdit {
     if (this.updateMorphoFeatures.size() > 0) {
       buf.append(Ssurgeon.UPDATE_MORPHO_FEATURES);
       buf.append(" ");
-      buf.append(CoNLLUUtils.toFeatureString(this.updateMorphoFeatures));
+      buf.append(CoNLLUFeatures.toFeatureString(this.updateMorphoFeatures));
     }
 
     return buf.toString();
@@ -93,10 +93,10 @@ public class EditNode extends SsurgeonEdit {
     }
 
     for (String key : updateMorphoFeatures.keySet()) {
-      TreeMap<String, String> features = word.get(CoreAnnotations.CoNLLUFeats.class);
+      CoNLLUFeatures features = word.get(CoreAnnotations.CoNLLUFeats.class);
       if (features == null) {
         changed = true;
-        features = new TreeMap<>();
+        features = new CoNLLUFeatures();
         word.set(CoreAnnotations.CoNLLUFeats.class, features);
       }
 

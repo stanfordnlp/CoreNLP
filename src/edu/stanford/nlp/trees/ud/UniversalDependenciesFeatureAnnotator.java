@@ -53,8 +53,8 @@ public class UniversalDependenciesFeatureAnnotator  {
 
 
   private static final String FEATURE_MAP_FILE = "edu/stanford/nlp/models/ud/feature_map.txt";
-  private HashMap<String,TreeMap<String,String>> posFeatureMap;
-  private Map<String,TreeMap<String,String>> wordPosFeatureMap;
+  private HashMap<String,CoNLLUFeatures> posFeatureMap;
+  private Map<String,CoNLLUFeatures> wordPosFeatureMap;
 
   private final Morphology morphology = new Morphology();
 
@@ -78,9 +78,9 @@ public class UniversalDependenciesFeatureAnnotator  {
         if (parts.length < 3) continue;
 
         if (parts[0].equals("*")) {
-          posFeatureMap.put(parts[1], CoNLLUUtils.parseFeatures(parts[2]));
+          posFeatureMap.put(parts[1], new CoNLLUFeatures(parts[2]));
         } else {
-          wordPosFeatureMap.put(parts[0] + '_' + parts[1], CoNLLUUtils.parseFeatures(parts[2]));
+          wordPosFeatureMap.put(parts[0] + '_' + parts[1], new CoNLLUFeatures(parts[2]));
         }
       }
     } catch (IOException e) {
@@ -392,10 +392,10 @@ public class UniversalDependenciesFeatureAnnotator  {
       String posTag = word.get(CoreAnnotations.PartOfSpeechAnnotation.class);
       String token = word.get(CoreAnnotations.TextAnnotation.class);
       Integer index = word.get(CoreAnnotations.IndexAnnotation.class);
-      TreeMap<String, String> wordFeatures = word.get(CoreAnnotations.CoNLLUFeats.class);
+      CoNLLUFeatures wordFeatures = word.get(CoreAnnotations.CoNLLUFeats.class);
 
       if (wordFeatures == null) {
-        wordFeatures = new TreeMap<>();
+        wordFeatures = new CoNLLUFeatures();
         word.set(CoreAnnotations.CoNLLUFeats.class, wordFeatures);
       }
 

@@ -90,7 +90,7 @@ public class CoNLLUDocumentWriter {
 
             String additionalDepsString =  CoNLLUUtils.toExtraDepsString(enhancedDependencies);
             String word = token.word();
-            String featuresString = CoNLLUUtils.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
+            String featuresString = CoNLLUFeatures.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
             String pos = token.getString(CoreAnnotations.PartOfSpeechAnnotation.class, "_");
             String upos = token.getString(CoreAnnotations.CoarseTagAnnotation.class, "_");
             String misc = token.getString(CoreAnnotations.CoNLLUMisc.class, "_");
@@ -170,7 +170,7 @@ public class CoNLLUDocumentWriter {
           String upos = token.getString(CoreAnnotations.CoarseTagAnnotation.class, "_");
           String lemma = token.getString(CoreAnnotations.LemmaAnnotation.class, "_");
           String pos = token.getString(CoreAnnotations.PartOfSpeechAnnotation.class, "_");
-          String featuresString = CoNLLUUtils.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
+          String featuresString = CoNLLUFeatures.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
           String misc = token.getString(CoreAnnotations.CoNLLUMisc.class, "_");
           final String head;
           final String rel;

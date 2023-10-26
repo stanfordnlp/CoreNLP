@@ -10,60 +10,6 @@ import java.util.*;
 public class CoNLLUUtils {
 
     /**
-     * Parses the value of the feature column in a CoNLL-U file
-     * and returns them in a HashMap with the feature names as keys
-     * and the feature values as values.
-     *
-     * @param featureString
-     * @return A {@code HashMap<String,String>} with the feature values.
-     */
-    public static TreeMap<String,String> parseFeatures(String featureString) {
-        TreeMap<String, String> features = new TreeMap<>();
-        if (! featureString.equals("_")) {
-            String[] featValPairs = featureString.split("\\|");
-            for (String p : featValPairs) {
-                String[] featValPair = p.split("=");
-                features.put(featValPair[0], featValPair[1]);
-            }
-        }
-        return features;
-    }
-
-    /**
-     * Converts a feature HashMap to a feature string to be used
-     * in a CoNLL-U file.
-     *
-     * @return The feature string.
-     */
-    public static String toFeatureString(Map<String,String> features) {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        if (features != null) {
-            List<String> sortedKeys = new ArrayList<>(features.keySet());
-            Collections.sort(sortedKeys, new FeatureNameComparator());
-            for (String key : sortedKeys) {
-                if (!first) {
-                    sb.append("|");
-                } else {
-                    first = false;
-                }
-
-                sb.append(key)
-                        .append("=")
-                        .append(features.get(key));
-
-            }
-        }
-
-    /* Empty feature list. */
-        if (first) {
-            sb.append("_");
-        }
-
-        return sb.toString();
-    }
-
-    /**
      * Parses the value of the extra dependencies column in a CoNLL-U file
      * and returns them in a HashMap with the governor indices as keys
      * and the relation names as values.
@@ -117,14 +63,6 @@ public class CoNLLUUtils {
         return sb.toString();
     }
 
-
-    public static class FeatureNameComparator implements Comparator<String> {
-
-        @Override
-        public int compare(String featureName1, String featureName2) {
-            return featureName1.toLowerCase().compareTo(featureName2.toLowerCase());
-        }
-    }
 
     public static class DepIndexComparator implements Comparator<String> {
 
