@@ -1453,7 +1453,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasSpan()) { word.set(SpanAnnotation.class, new IntPair(proto.getSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasSentiment()) { word.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     if (proto.hasQuotationIndex()) { word.set(QuotationIndexAnnotation.class, proto.getQuotationIndex()); }
-    if (proto.hasConllUFeatures()) { word.set(CoNLLUFeats.class, fromProto(proto.getConllUFeatures())); }
+    if (proto.hasConllUFeatures()) { word.set(CoNLLUFeats.class, new TreeMap<>(fromProto(proto.getConllUFeatures()))); }
     if (proto.hasConllUMisc()) { word.set(CoNLLUMisc.class, proto.getConllUMisc()); }
     if (proto.hasCoarseTag()) { word.set(CoarseTagAnnotation.class, proto.getCoarseTag()); }
     if (proto.hasConllUTokenSpan()) { word.set(CoNLLUTokenSpanAnnotation.class, new IntPair(proto.getConllUTokenSpan().getBegin(), proto.getSpan().getEnd())); }

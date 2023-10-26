@@ -245,7 +245,7 @@ public class CoNLLUDocumentReader implements
 
 
         /* Parse features. */
-        HashMap<String, String> features = CoNLLUUtils.parseFeatures(bits[5]);
+        TreeMap<String, String> features = CoNLLUUtils.parseFeatures(bits[5]);
         word.set(CoreAnnotations.CoNLLUFeats.class, features);
 
 
@@ -268,7 +268,7 @@ public class CoNLLUDocumentReader implements
         word.setValue(bits[1]);
 
         /* Parse features. */
-        HashMap<String, String> features = CoNLLUUtils.parseFeatures(bits[5]);
+        TreeMap<String, String> features = CoNLLUUtils.parseFeatures(bits[5]);
         word.set(CoreAnnotations.CoNLLUFeats.class, features);
 
         /* Parse extra dependencies. */

@@ -1,7 +1,6 @@
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -94,10 +93,10 @@ public class EditNode extends SsurgeonEdit {
     }
 
     for (String key : updateMorphoFeatures.keySet()) {
-      HashMap<String, String> features = word.get(CoreAnnotations.CoNLLUFeats.class);
+      TreeMap<String, String> features = word.get(CoreAnnotations.CoNLLUFeats.class);
       if (features == null) {
         changed = true;
-        features = new HashMap<>();
+        features = new TreeMap<>();
         word.set(CoreAnnotations.CoNLLUFeats.class, features);
       }
 
