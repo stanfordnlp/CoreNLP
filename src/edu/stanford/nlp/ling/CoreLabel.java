@@ -759,6 +759,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       if (index != null) {
         buf.append('-').append((index).intValue());
       }
+      Integer emptyIndex = this.get(CoreAnnotations.EmptyIndexAnnotation.class);
+      if (emptyIndex != null && emptyIndex != 0) {
+        buf.append('.').append((emptyIndex).intValue());
+      }
       break;
     }
     case VALUE_TAG: {
@@ -779,6 +783,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       if (index != null) {
         buf.append('-').append((index).intValue());
       }
+      Integer emptyIndex = this.get(CoreAnnotations.EmptyIndexAnnotation.class);
+      if (emptyIndex != null && emptyIndex != 0) {
+        buf.append('.').append((emptyIndex).intValue());
+      }
       break;
     }
     case VALUE_INDEX_MAP: {
@@ -786,6 +794,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
       if (index != null) {
         buf.append('-').append((index).intValue());
+      }
+      Integer emptyIndex = this.get(CoreAnnotations.EmptyIndexAnnotation.class);
+      if (emptyIndex != null && emptyIndex != 0) {
+        buf.append('.').append((emptyIndex).intValue());
       }
       Map<String,Object> map2 = new TreeMap<>();
       for (Class key : this.keySet()) {
@@ -814,6 +826,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       if (index != null) {
         buf.append('-').append((index).intValue());
       }
+      Integer emptyIndex = this.get(CoreAnnotations.EmptyIndexAnnotation.class);
+      if (emptyIndex != null && emptyIndex != 0) {
+        buf.append('.').append((emptyIndex).intValue());
+      }
       break;
     }
     case VALUE_TAG_NER:{
@@ -832,6 +848,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
       if (index != null) {
         buf.append('-').append((index).intValue());
+      }
+      Integer emptyIndex = this.get(CoreAnnotations.EmptyIndexAnnotation.class);
+      if (emptyIndex != null && emptyIndex != 0) {
+        buf.append('.').append((emptyIndex).intValue());
       }
       break;
     case ALL:{
