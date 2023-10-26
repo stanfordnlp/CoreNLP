@@ -397,6 +397,7 @@ public class Ssurgeon  {
   public static final String WEIGHT_ARG = "-weight";
   public static final String NAME_ARG = "-name";
   public static final String POSITION_ARG = "-position";
+  public static final String UPDATE_MORPHO_FEATURES = "-updateMorphoFeatures";
 
 
   // args for Ssurgeon edits, allowing us to not
@@ -421,6 +422,8 @@ public class Ssurgeon  {
     public String name = null;
 
     public String position = null;
+
+    public String updateMorphoFeatures = null;
 
     public Map<String, String> annotations = new TreeMap<>();
   }
@@ -492,6 +495,9 @@ public class Ssurgeon  {
         case POSITION_ARG:
           argsBox.position = argsValue;
           break;
+        case UPDATE_MORPHO_FEATURES:
+          argsBox.updateMorphoFeatures = argsValue;
+          break;
         default:
           String key = argsKey.substring(1);
           Class<? extends CoreAnnotation<?>> annotation = AnnotationLookup.toCoreKey(key);
@@ -557,7 +563,7 @@ public class Ssurgeon  {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");
         }
-        return new EditNode(argsBox.nodes.get(0), argsBox.annotations);
+        return new EditNode(argsBox.nodes.get(0), argsBox.annotations, argsBox.updateMorphoFeatures);
       } else if (command.equalsIgnoreCase(MergeNodes.LABEL)) {
         if (argsBox.nodes.size() < 2) {
           throw new SsurgeonParseException("Cannot make a MergeNodes out of fewer than 2 nodes (got " + argsBox.nodes.size() + ")");

@@ -1,12 +1,16 @@
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.trees.ud.CoNLLUUtils;
 
 /**
  * Edit an existing node to have new attributes.
@@ -18,17 +22,23 @@ public class EditNode extends SsurgeonEdit {
 
   final String nodeName;
   final Map<String, String> attributes;
+  final Map<String, String> updateMorphoFeatures;
 
-  public EditNode(String nodeName, Map<String, String> attributes) {
+  public EditNode(String nodeName, Map<String, String> attributes, String updateMorphoFeatures) {
     if (nodeName == null) {
       throw new SsurgeonParseException("Cannot make an EditNode with no nodeName");
     }
-    if (attributes.size() == 0) {
-      throw new SsurgeonParseException("Cannot make an EditNode with no attributes");
+    if (attributes.size() == 0 && updateMorphoFeatures == null) {
+      throw new SsurgeonParseException("Cannot make an EditNode with no attributes or updated morphological features");
     }
     AddDep.checkIllegalAttributes(attributes);
     this.nodeName = nodeName;
     this.attributes = new TreeMap<>(attributes);
+    if (updateMorphoFeatures != null) {
+      this.updateMorphoFeatures = CoNLLUUtils.parseFeatures(updateMorphoFeatures);
+    } else {
+      this.updateMorphoFeatures = Collections.emptyMap();
+    }
   }
 
 
@@ -47,7 +57,14 @@ public class EditNode extends SsurgeonEdit {
       buf.append(key);
       buf.append(" ");
       buf.append(attributes.get(key));
+      // TODO: why the stray quote characters?
       buf.append("\"\t");
+    }
+
+    if (this.updateMorphoFeatures.size() > 0) {
+      buf.append(Ssurgeon.UPDATE_MORPHO_FEATURES);
+      buf.append(" ");
+      buf.append(CoNLLUUtils.toFeatureString(this.updateMorphoFeatures));
     }
 
     return buf.toString();
@@ -73,6 +90,21 @@ public class EditNode extends SsurgeonEdit {
           changed = true;
           word.set(key, otherV);
         }
+      }
+    }
+
+    for (String key : updateMorphoFeatures.keySet()) {
+      HashMap<String, String> features = word.get(CoreAnnotations.CoNLLUFeats.class);
+      if (features == null) {
+        changed = true;
+        features = new HashMap<>();
+        word.set(CoreAnnotations.CoNLLUFeats.class, features);
+      }
+
+      // this test will catch null, eg not yet assigned, features as well
+      if (!updateMorphoFeatures.get(key).equals(features.get(key))) {
+        changed = true;
+        features.put(key, updateMorphoFeatures.get(key));
       }
     }
 
