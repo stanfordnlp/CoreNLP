@@ -69,7 +69,7 @@ TOKEN:
 {
 	< RELATION: "<" | ">" | ">>" | "<<" | "<>" | "==" | "$+" | "$-" | "$++" | "$--" | "." | ".." | "-" | "--" | ">++" | ">--" | "<++" | "<--" >
 |	< ALIGNRELN: "@" >
-|	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}", "+", "-"])+ >
+|	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}", "+", "-", "*"])+ >
 |	< NUMBER: ( ["0"-"9"] )+ >
 |	< EMPTY: "#" >
 |	< ROOT: "$" >
@@ -209,6 +209,7 @@ SemgrexPattern Relation() : {
 	Token relnType = null;
 	Token numArg = null;
 	Token numArg2 = null;
+	Token graphNumber = null;
 	Token name = null;
 	Token edgeName = null;
 	SemgrexPattern node;
@@ -217,6 +218,7 @@ SemgrexPattern Relation() : {
 	(
 	( ( ( (numArg = identifier() ("," numArg2 = identifier())?)? rel = <RELATION>
 		(relnType = identifier() | relnType = <REGEX>)?)
+		(( ("*") graphNumber = <NUMBER> ) )?
 		(( ("~") name = identifier() ) )?
                 (( ("=") edgeName = identifier() ) )? )
 	  | (rel = <ALIGNRELN>))
