@@ -35,7 +35,7 @@ public class CoNLLUUtils {
      *
      * @return The feature string.
      */
-    public static String toFeatureString(HashMap<String,String> features) {
+    public static String toFeatureString(Map<String,String> features) {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         if (features != null) {
