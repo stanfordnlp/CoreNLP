@@ -15,6 +15,23 @@ import java.util.TreeMap;
  * which is necessary for the CoNLLU format
  */
 public class CoNLLUFeatures extends TreeMap<String, String> {
+  public static class LowercaseComparator implements Comparator<String> {
+    public int compare(String x, String y) {
+      if (x == null && y == null) {
+        return 0;
+      }
+      if (x == null) {
+        return -1;
+      }
+      if (y == null) {
+        return 1;
+      }
+      return x.compareToIgnoreCase(y);
+    }
+  }
+
+  static final LowercaseComparator comparator = new LowercaseComparator();
+
   /**
    * Parses the value of the feature column in a CoNLL-U file
    * and returns them in a HashMap with the feature names as keys
@@ -24,7 +41,7 @@ public class CoNLLUFeatures extends TreeMap<String, String> {
    * @return A {@code HashMap<String,String>} with the feature values.
    */
   public CoNLLUFeatures(String featureString) {
-    super();
+    super(comparator);
 
     if (!featureString.equals("_")) {
       String[] featValPairs = featureString.split("\\|");
@@ -36,11 +53,12 @@ public class CoNLLUFeatures extends TreeMap<String, String> {
   }
 
   public CoNLLUFeatures(Map<String, String> features) {
-    super(features);
+    super(comparator);
+    putAll(features);
   }
 
   public CoNLLUFeatures() {
-    super();
+    super(comparator);
   }
 
 
