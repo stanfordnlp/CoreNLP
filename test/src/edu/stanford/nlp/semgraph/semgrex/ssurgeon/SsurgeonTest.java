@@ -1397,6 +1397,57 @@ public class SsurgeonTest {
   }
 
   /**
+   * A couple tests of updating the morpho map on a word using EditNode
+   * <br>
+   * -updateMorphoFeatures should update w/o overwriting the whole map
+   */
+  @Test
+  public void readXMLEditNodeUpdateMorpho() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // This should add two morpho features to the word
+    // (and should not crash even though the word previously had no features)
+    String editPattern = String.join(newline,
+                                     "<ssurgeon-pattern-list>",
+                                     "  <ssurgeon-pattern>",
+                                     "    <uid>38</uid>",
+                                     "    <notes>Edit a node's morpho</notes>",
+                                     "    <semgrex>" + XMLUtils.escapeXML("{word:/antennae/}=word") + "</semgrex>",
+                                     "    <edit-list>EditNode -node word -updateMorphoFeatures a=b|c=d</edit-list>",
+                                     "  </ssurgeon-pattern>",
+                                     "</ssurgeon-pattern-list>");
+
+    List<SsurgeonPattern> patterns = inst.readFromString(editPattern);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern editSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> green-3]]");
+    SemanticGraph newSG = editSsurgeon.iterate(sg).first;
+    IndexedWord vertex = sg.getNodeByIndexSafe(4);
+    assertEquals("antennae", vertex.value());
+    assertEquals(vertex.get(CoreAnnotations.CoNLLUFeats.class).toString(), "a=b|c=d");
+
+    // This will add a third feature and update one of the existing features,
+    // leaving the other feature unchanged
+    editPattern = String.join(newline,
+                              "<ssurgeon-pattern-list>",
+                              "  <ssurgeon-pattern>",
+                              "    <uid>38</uid>",
+                              "    <notes>Edit a node's morpho</notes>",
+                              "    <semgrex>" + XMLUtils.escapeXML("{word:/antennae/}=word") + "</semgrex>",
+                              "    <edit-list>EditNode -node word -updateMorphoFeatures a=zzz|e=f</edit-list>",
+                              "  </ssurgeon-pattern>",
+                              "</ssurgeon-pattern-list>");
+
+    patterns = inst.readFromString(editPattern);
+    assertEquals(patterns.size(), 1);
+    editSsurgeon = patterns.get(0);
+
+    newSG = editSsurgeon.iterate(sg).first;
+    assertEquals(vertex.get(CoreAnnotations.CoNLLUFeats.class).toString(), "a=zzz|c=d|e=f");
+  }
+
+  /**
    * A couple tests of setting the morpho features on a word using EditNode
    */
   @Test
