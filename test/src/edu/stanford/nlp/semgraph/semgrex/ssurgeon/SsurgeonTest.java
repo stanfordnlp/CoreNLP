@@ -1396,6 +1396,72 @@ public class SsurgeonTest {
     assertEquals("blue", blueVertex.value());
   }
 
+  /**
+   * A couple tests of setting the morpho features on a word using EditNode
+   */
+  @Test
+  public void readXMLEditNodeMorpho() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    String editPattern = String.join(newline,
+                                     "<ssurgeon-pattern-list>",
+                                     "  <ssurgeon-pattern>",
+                                     "    <uid>38</uid>",
+                                     "    <notes>Edit a node's morpho</notes>",
+                                     "    <semgrex>" + XMLUtils.escapeXML("{word:/antennae/}=word") + "</semgrex>",
+                                     "    <edit-list>EditNode -node word -morphofeatures foo=asdf</edit-list>",
+                                     "  </ssurgeon-pattern>",
+                                     "</ssurgeon-pattern-list>");
+
+    List<SsurgeonPattern> patterns = inst.readFromString(editPattern);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern editSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> green-3]]");
+    IndexedWord vertex = sg.getNodeByIndexSafe(4);
+    assertEquals(vertex.get(CoreAnnotations.CoNLLUFeats.class), null);
+    assertEquals("antennae", vertex.value());
+    SemanticGraph newSG = editSsurgeon.iterate(sg).first;
+    IndexedWord newVertex = newSG.getNodeByIndexSafe(4);
+    assertSame(vertex, newVertex);
+    assertEquals(vertex.get(CoreAnnotations.CoNLLUFeats.class).toString(), "foo=asdf");
+
+    editPattern = String.join(newline,
+                              "<ssurgeon-pattern-list>",
+                              "  <ssurgeon-pattern>",
+                              "    <uid>38</uid>",
+                              "    <notes>Edit a node's morpho</notes>",
+                              "    <semgrex>" + XMLUtils.escapeXML("{word:/antennae/}=word") + "</semgrex>",
+                              "    <edit-list>EditNode -node word -morphofeatures bar=zzzz</edit-list>",
+                              "  </ssurgeon-pattern>",
+                              "</ssurgeon-pattern-list>");
+
+    patterns = inst.readFromString(editPattern);
+    assertEquals(patterns.size(), 1);
+    editSsurgeon = patterns.get(0);
+
+    newSG = editSsurgeon.iterate(newSG).first;
+    assertEquals(vertex.get(CoreAnnotations.CoNLLUFeats.class).toString(), "bar=zzzz");
+
+    editPattern = String.join(newline,
+                              "<ssurgeon-pattern-list>",
+                              "  <ssurgeon-pattern>",
+                              "    <uid>38</uid>",
+                              "    <notes>Edit a node's morpho</notes>",
+                              "    <semgrex>" + XMLUtils.escapeXML("{word:/antennae/}=word") + "</semgrex>",
+                              "    <edit-list>EditNode -node word -morphofeatures foo=asdf|bar=zzzz</edit-list>",
+                              "  </ssurgeon-pattern>",
+                              "</ssurgeon-pattern-list>");
+
+    patterns = inst.readFromString(editPattern);
+    assertEquals(patterns.size(), 1);
+    editSsurgeon = patterns.get(0);
+
+    newSG = editSsurgeon.iterate(newSG).first;
+    // eager test!  checking that the features are sorted
+    assertEquals(vertex.get(CoreAnnotations.CoNLLUFeats.class).toString(), "bar=zzzz|foo=asdf");
+    assertEquals(vertex.get(CoreAnnotations.CoNLLUFeats.class).size(), 2);
+  }
 
   /**
    * Put MWT annotations on a couple nodes using EditNode
