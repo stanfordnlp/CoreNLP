@@ -1449,7 +1449,7 @@ public class SsurgeonTest {
 
 
   /**
-   * Put MWT annotations on a couple nodes using EditNode
+   * Put MWT annotations on a couple nodes using CombineMWT
    */
   @Test
   public void readXMLCombineMWT() {
