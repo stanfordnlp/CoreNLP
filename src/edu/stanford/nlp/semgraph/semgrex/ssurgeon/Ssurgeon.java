@@ -398,6 +398,7 @@ public class Ssurgeon  {
   public static final String NAME_ARG = "-name";
   public static final String POSITION_ARG = "-position";
   public static final String UPDATE_MORPHO_FEATURES = "-updateMorphoFeatures";
+  public static final String UPDATE_MORPHO_FEATURES_LOWER = "-updatemorphofeatures";
 
 
   // args for Ssurgeon edits, allowing us to not
@@ -496,6 +497,7 @@ public class Ssurgeon  {
           argsBox.position = argsValue;
           break;
         case UPDATE_MORPHO_FEATURES:
+        case UPDATE_MORPHO_FEATURES_LOWER:
           argsBox.updateMorphoFeatures = argsValue;
           break;
         default:
