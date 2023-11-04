@@ -8,7 +8,7 @@ toc: false
 parent: Additional Tools
 ---
 
-Tregex, Tsurgeon and Semgrex
+# Tregex, Tsurgeon and Semgrex
 
 ### About
 
@@ -20,31 +20,37 @@ package which operates on dependency graphs (class `SemanticGraph`, called
 **semgrex**.
 
 **Tregex:** The best introduction to Tregex is the brief powerpoint tutorial
-for Tregex by Galen Andrew. The best way to learn to use Tregex is by working
-with the GUI (`TregexGUI`). It has help screens which summarize the syntax of
-Tregex. You can find brief documentation of Tregex's pattern language on the
-TregexPattern javadoc page, and, of course, you should also be very familiar
-with Java regular expression syntax. Tregex contains essentially the same
-functionality as TGrep2 (which had a superset of the functionality of the
-original tgrep), plus several extremely useful relations for natural language
-trees, for example "A is the lexical head of B", and "A and B share a (hand-
-specified) variable substring" (useful for finding nodes coindexed with each
-other). Because it does not create preprocessed indexed corpus files, it is
-however somewhat slower than TGrep2 when searching over large treebanks, but
-gains from being able to be run on any trees without requiring index
-construction. As a Java application, it is platform independent, and can be
-used programmatically in Java software. There is also both a graphical
-interface (also platform independent) and a command line interface through the
-`TregexPattern` main method. To launch the graphical interface double click
-the stanford-tregex.jar file.
+for [Tregex](tregex/The_Wonderful_World_of_Tregex.ppt) by Galen Andrew. The
+best way to learn to use Tregex is by working with the GUI (`TregexGUI`). It
+has help screens which summarize the syntax of Tregex. You can find brief
+documentation of Tregex's pattern language on [the TregexPattern javadoc
+page](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/tregex/TregexPattern.html),
+and, of course, you should also be very familiar with [Java regular expression
+syntax](http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html).
+Tregex contains essentially the same functionality as
+[TGrep2](http://tedlab.mit.edu/~dr/Tgrep2/) (which had a superset of the
+functionality of the original tgrep), plus several extremely useful relations
+for natural language trees, for example "A is the lexical head of B", and "A
+and B share a (hand-specified) variable substring" (useful for finding nodes
+coindexed with each other). Because it does not create preprocessed indexed
+corpus files, it is however somewhat slower than TGrep2 when searching over
+large treebanks, but gains from being able to be run on any trees without
+requiring index construction. As a Java application, it is platform
+independent, and can be used programmatically in Java software. There is also
+both a graphical interface (also platform independent) and a command line
+interface through the `TregexPattern` main method. To launch the graphical
+interface double click the stanford-tregex.jar file.
 
-**Tsurgeon:** A good introduction is the powerpoint slides for Tsurgeon by
-Marie-Catherine de Marneffe. Tsurgeon can be run from the command line and is
-also incorporated into the TregexGUI graphical interface. Its syntax is
-presented on the Tsurgeon javadoc page.
+**Tsurgeon:** A good introduction is [the powerpoint slides for
+Tsurgeon](tregex/Tsurgeon2.ppt) by Marie-Catherine de Marneffe. Tsurgeon can
+be run from the command line and is also incorporated into the TregexGUI
+graphical interface. Its syntax is presented on the [Tsurgeon javadoc
+page](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/tregex/tsurgeon/Tsurgeon.html).
 
-**Semgrex:** An included set of powerpoint slides and the  javadoc for
-`SemgrexPattern` provide an overview of this package.
+**Semgrex:** An included set of [powerpoint slides](Semgrex.ppt) and the [
+javadoc for
+`SemgrexPattern`](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/semgraph/semgrex/SemgrexPattern.html)
+provide an overview of this package.
 
 Tregex was written by Galen Andrew and Roger Levy. Tsurgeon was written by
 Roger Levy. The graphical interface for both was written by Anna Rafferty. A
@@ -55,21 +61,24 @@ on classes developed by others as part of the Stanford JavaNLP project.
 There is a paper describing Tregex and Tsurgeon. You're encouraged to cite it
 if you use Tregex or Tsurgeon.
 
-> Roger Levy and Galen Andrew. 2006. Tregex and Tsurgeon: tools for querying
-> and manipulating tree data structures. _5th International Conference on
-> Language Resources and Evaluation (LREC 2006)_.
+> Roger Levy and Galen Andrew. 2006. [Tregex and Tsurgeon: tools for querying
+> and manipulating tree data structures](/pubs/levy_andrew_lrec2006.pdf). _5th
+> International Conference on Language Resources and Evaluation (LREC 2006)_.
 
 Semgrex is very briefly described in this paper:
 
 > Nathanael Chambers, Daniel Cer, Trond Grenager, David Hall, Chloe Kiddon
 > Bill MacCartney, Marie-Catherine de Marneffe, Daniel Ramage Eric Yeh, and
-> Christopher D. Manning. 2007. Learning Alignments and Leveraging Natural
-> Logic. _Proceedings of the Workshop on Textual Entailment and Paraphrasing_
-> , pages 165–170,
+> Christopher D. Manning. 2007. [Learning Alignments and Leveraging Natural
+> Logic](http://www.aclweb.org/anthology/W07-1427). _Proceedings of the
+> Workshop on Textual Entailment and Paraphrasing_ , pages 165–170,
 
-Tregex, Tsurgeon, and Semgrex are **licensed under theGNU General Public
-License** (v2 or later). Note that this is the _full_ GPL, which allows many
-free uses. For distributors of proprietary software, commercial licensing is
+Tregex, Tsurgeon, and Semgrex are **licensed under the[GNU General Public
+License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Note that
+this is the _full_ GPL, which allows many free uses. For distributors of
+[proprietary software](http://www.gnu.org/licenses/gpl-
+faq.html#GPLInProprietarySystem), [commercial
+licensing](http://otlportal.stanford.edu/techfinder/technology/ID=24472) is
 available. Source is included. The package includes components for command-
 line invocation and a Java API.
 
@@ -77,16 +86,17 @@ line invocation and a Java API.
 
 ### Questions
 
-There is a tregex FAQ list (with answers!). Please send any other questions or
-feedback, or extensions and bugfixes to `parser-user@lists.stanford.edu`.  
+There is a [tregex FAQ list](tregex-faq.html) (with answers!). Please send any
+other questions or feedback, or extensions and bugfixes to [`parser-
+user@lists.stanford.edu`](mailto:parser-user@lists.stanford.edu).  
 
 ### Mailing Lists
 
 We have 3 mailing lists for the Tregex/Tsurgeon, all of which are shared with
 the Stanford Parser. Each is at `@lists.stanford.edu`:
 
-  1. `parser-user` This is the best list to post to in order to ask questions, make announcements, or for discussion among Tregex/Tsurgeon users. Join the list via this webpage or by emailing `parser-user-join@lists.stanford.edu`. (Leave the subject and message body empty.) You can also look at the list archives. 
-  2. `parser-announce` This list will be used only to announce new Tregex/Tsurgeon versions. So it will be very low volume (expect 1-3 message a year). Join the list via this webpage or by emailing `parser-announce-join@lists.stanford.edu`. (Leave the subject and message body empty.) 
+  1. `parser-user` This is the best list to post to in order to ask questions, make announcements, or for discussion among Tregex/Tsurgeon users. Join the list via [this webpage](https://mailman.stanford.edu/mailman/listinfo/parser-user) or by emailing `parser-user-join@lists.stanford.edu`. (Leave the subject and message body empty.) You can also [look at the list archives](https://mailman.stanford.edu/pipermail/parser-user/). 
+  2. `parser-announce` This list will be used only to announce new Tregex/Tsurgeon versions. So it will be very low volume (expect 1-3 message a year). Join the list via [this webpage](https://mailman.stanford.edu/mailman/listinfo/parser-announce) or by emailing `parser-announce-join@lists.stanford.edu`. (Leave the subject and message body empty.) 
   3. `parser-support` This list goes only to the Tregex/Tsurgeon maintainers. It's a good address for licensing questions, etc. **For general use and support questions, you're better off joining and using`parser-user`.** You cannot join `parser-support`, but you can mail questions to `parser-support@lists.stanford.edu`. 
 
   
@@ -110,62 +120,79 @@ The download is a 9 Mb zip file. It contains:
 
 ### Download
 
-**Download Tregex version 4.2.0** (source and executables for all platforms)  
+**[Download Tregex version 4.2.0](stanford-tregex-4.2.0.zip)** (source and
+executables for all platforms)  
   
-Download Tregex version 3.4 Mac OS X disk image (GUI packaged as Mac
-application; Java 1.7 runtime included)
+[Download Tregex version 3.4 Mac OS X disk image](stanford-
+tregex-2014-07-23.dmg) (GUI packaged as Mac application; Java 1.7 runtime
+included)
 
 ### Extensions: Packages by others using Tregex/Semgrex
 
-  * **Javascript (node.js):** semgrex: NodeJs wrapper for Stanford NLP Semgrex. [GitHub] 
+  * **Javascript (node.js):** [semgrex](https://www.npmjs.com/package/semgrex): NodeJs wrapper for Stanford NLP Semgrex. [[GitHub](https://github.com/koorchik/node-semgrex)] 
 
 ### Release history
 
-Version 4.2.0 | 2020-11-17| Update for compatibility  
+[Version 4.2.0](http://nlp.stanford.edu/software/stanford-tregex-4.2.0.zip) |
+2020-11-17| Update for compatibility  
 ---|---|---  
-Version 4.0.0 | 2020-04-19| Update for compatibility  
-Version 3.9.2 | 2018-10-16| Update for compatibility  
-Version 3.9.1 | 2018-02-27| Update for compatibility  
-Version 3.8.0 | 2017-06-09| Update for compatibility  
-Version 3.7.0 | 2016-10-31| Update for compatibility  
-Version 3.6.0 | 2015-12-09| Updated for compatibility  
-Version 3.5.2 | 2015-04-20| Update for compatibility  
-Version 3.5.1 | 2015-01-29| Update for compatibility  
-Version 3.5.0 | 2014-10-26| Upgrade to Java 8  
-Version 3.4.1 | 2014-08-27| Fix a thread safety issue in tsurgeon. _Last
-version to support Java 6 and Java 7._  
-Version 3.4 | 2014-06-16| Added a new tregex pattern, exact subtree, and
-improved efficiency for certain operations  
-Version 3.3.1 | 2014-01-04| Added a new tsurgeon operation, createSubtree  
-Version 3.3.0 | 2013-11-12| Add an option to get a TregexMatcher from a
-TregexPattern with a different HeadFinder  
-Version 3.2.0 | 2013-06-20| Fix minor bug in tsurgeon indexing  
-Version 2.0.6 | 2013-04-04| Updated for compatibility with other software
-releases  
-Version 2.0.5 | 2012-11-11| Minor efficiency improvements  
-Version 2.0.4 | 2012-07-09| Minor bug fixes  
-Version 2.0.3 | 2012-05-22| Updated to maintain compatibility with other
-Stanford software.  
-Version 2.0.2 | 2012-03-09| Regex matching efficiency improvement  
-Version 2.0.1 | 2012-01-06| Fix matchesAt, fix category heads. _Last version
-to support Java 5._  
-Version 2.0 | 2011-09-14| Introduces semgrex, which operates on
-SemanticGraphs.  
-Version 1.4.4 | 2011-06-19| Updated to maintain compatibility with other
-Stanford software.  
-Version 1.4.3 | 2011-05-15| Updated to maintain compatibility with other
-Stanford software.  
-Version 1.4.2 | 2011-04-20| Addition of tree difference display. Several
-bugfixes.  
-Version 1.4.1 | 2010-11-18 | Small fixes and improvements (multipattern
-Tsurgeon scripts, file and line numbers in sentence window, fixed GUI lock-up
-and tregex immediate domination path matching)  
-Version 1.4 | 2009-08-30| GUI slider for tree size, allow @ and __ in path
-constraints, incompatibly generalize Tsurgeon relabel command, bug fix for
-links and backreferences being used as named node, more memory/space efficient
-treebank reading  
-Version 1.3.2 | 2008-05-06| Additional features added to the graphical
-interface, which is now version 1.1: browse trees, better memory handling  
+[Version 4.0.0](stanford-tregex-4.0.0.zip) | 2020-04-19| Update for
+compatibility  
+[Version 3.9.2](stanford-tregex-2018-10-16.zip) | 2018-10-16| Update for
+compatibility  
+[Version 3.9.1](stanford-tregex-2018-02-27.zip) | 2018-02-27| Update for
+compatibility  
+[Version 3.8.0](stanford-tregex-2017-06-09.zip) | 2017-06-09| Update for
+compatibility  
+[Version 3.7.0](stanford-tregex-2016-10-31.zip) | 2016-10-31| Update for
+compatibility  
+[Version 3.6.0](stanford-tregex-2015-12-09.zip) | 2015-12-09| Updated for
+compatibility  
+[Version 3.5.2](stanford-tregex-2015-04-20.zip) | 2015-04-20| Update for
+compatibility  
+[Version 3.5.1](stanford-tregex-2015-01-29.zip) | 2015-01-29| Update for
+compatibility  
+[Version 3.5.0](stanford-tregex-2014-10-26.zip) | 2014-10-26| Upgrade to Java
+8  
+[Version 3.4.1](stanford-tregex-2014-08-27.zip) | 2014-08-27| Fix a thread
+safety issue in tsurgeon. _Last version to support Java 6 and Java 7._  
+[Version 3.4](stanford-tregex-2014-06-16.zip) | 2014-06-16| Added a new tregex
+pattern, exact subtree, and improved efficiency for certain operations  
+[Version 3.3.1](stanford-tregex-2014-01-04.zip) | 2014-01-04| Added a new
+tsurgeon operation, createSubtree  
+[Version 3.3.0](stanford-tregex-2013-11-12.zip) | 2013-11-12| Add an option to
+get a TregexMatcher from a TregexPattern with a different HeadFinder  
+[Version 3.2.0](stanford-tregex-2013-06-20.zip) | 2013-06-20| Fix minor bug in
+tsurgeon indexing  
+[Version 2.0.6](stanford-tregex-2013-04-04.zip) | 2013-04-04| Updated for
+compatibility with other software releases  
+[Version 2.0.5](stanford-tregex-2012-11-11.zip) | 2012-11-11| Minor efficiency
+improvements  
+[Version 2.0.4](stanford-tregex-2012-07-09.tgz) | 2012-07-09| Minor bug fixes  
+[Version 2.0.3](stanford-tregex-2012-05-22.tgz) | 2012-05-22| Updated to
+maintain compatibility with other Stanford software.  
+[Version 2.0.2](stanford-tregex-2012-03-09.tgz) | 2012-03-09| Regex matching
+efficiency improvement  
+[Version 2.0.1](stanford-tregex-2012-01-06.tgz) | 2012-01-06| Fix matchesAt,
+fix category heads. _Last version to support Java 5._  
+[Version 2.0](stanford-tregex-2011-09-14.tgz) | 2011-09-14| Introduces
+semgrex, which operates on SemanticGraphs.  
+[Version 1.4.4](stanford-tregex-2011-06-19.tgz) | 2011-06-19| Updated to
+maintain compatibility with other Stanford software.  
+[Version 1.4.3](stanford-tregex-2011-05-15.tgz) | 2011-05-15| Updated to
+maintain compatibility with other Stanford software.  
+[Version 1.4.2](stanford-tregex-2011-04-20.tgz) | 2011-04-20| Addition of tree
+difference display. Several bugfixes.  
+[Version 1.4.1](stanford-tregex-2010-11-18.tgz) | 2010-11-18 | Small fixes and
+improvements (multipattern Tsurgeon scripts, file and line numbers in sentence
+window, fixed GUI lock-up and tregex immediate domination path matching)  
+[Version 1.4](stanford-tregex-2009-08-30.tgz) | 2009-08-30| GUI slider for
+tree size, allow @ and __ in path constraints, incompatibly generalize
+Tsurgeon relabel command, bug fix for links and backreferences being used as
+named node, more memory/space efficient treebank reading  
+[Version 1.3.2](stanford-tregex-2008-05-08.tar.gz) | 2008-05-06| Additional
+features added to the graphical interface, which is now version 1.1: browse
+trees, better memory handling  
 Version 1.3.1| 2007-11-20| Additional features added to the graphical
 interface: better copy/paste and drag and drop support, capability to save
 matched sentences as well as matched trees, and can save files in different
@@ -178,10 +205,10 @@ Version 1.1| 2005-07-19 | Several new relations added; variable substring
 capability added too.  
 Version 1.0| 2005-02-17 | Initial release  
   
-# Software > Tregex, Tsurgeon and Semgrex
+# [Software](/software/) > Tregex, Tsurgeon and Semgrex
 
 About | Questions | Mailing lists | Contents | Download | Extensions | Release
-history | FAQ
+history | [FAQ](tregex-faq.html)
 
 ### About
 
@@ -193,31 +220,37 @@ package which operates on dependency graphs (class `SemanticGraph`, called
 **semgrex**.
 
 **Tregex:** The best introduction to Tregex is the brief powerpoint tutorial
-for Tregex by Galen Andrew. The best way to learn to use Tregex is by working
-with the GUI (`TregexGUI`). It has help screens which summarize the syntax of
-Tregex. You can find brief documentation of Tregex's pattern language on the
-TregexPattern javadoc page, and, of course, you should also be very familiar
-with Java regular expression syntax. Tregex contains essentially the same
-functionality as TGrep2 (which had a superset of the functionality of the
-original tgrep), plus several extremely useful relations for natural language
-trees, for example "A is the lexical head of B", and "A and B share a (hand-
-specified) variable substring" (useful for finding nodes coindexed with each
-other). Because it does not create preprocessed indexed corpus files, it is
-however somewhat slower than TGrep2 when searching over large treebanks, but
-gains from being able to be run on any trees without requiring index
-construction. As a Java application, it is platform independent, and can be
-used programmatically in Java software. There is also both a graphical
-interface (also platform independent) and a command line interface through the
-`TregexPattern` main method. To launch the graphical interface double click
-the stanford-tregex.jar file.
+for [Tregex](tregex/The_Wonderful_World_of_Tregex.ppt) by Galen Andrew. The
+best way to learn to use Tregex is by working with the GUI (`TregexGUI`). It
+has help screens which summarize the syntax of Tregex. You can find brief
+documentation of Tregex's pattern language on [the TregexPattern javadoc
+page](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/tregex/TregexPattern.html),
+and, of course, you should also be very familiar with [Java regular expression
+syntax](http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html).
+Tregex contains essentially the same functionality as
+[TGrep2](http://tedlab.mit.edu/~dr/Tgrep2/) (which had a superset of the
+functionality of the original tgrep), plus several extremely useful relations
+for natural language trees, for example "A is the lexical head of B", and "A
+and B share a (hand-specified) variable substring" (useful for finding nodes
+coindexed with each other). Because it does not create preprocessed indexed
+corpus files, it is however somewhat slower than TGrep2 when searching over
+large treebanks, but gains from being able to be run on any trees without
+requiring index construction. As a Java application, it is platform
+independent, and can be used programmatically in Java software. There is also
+both a graphical interface (also platform independent) and a command line
+interface through the `TregexPattern` main method. To launch the graphical
+interface double click the stanford-tregex.jar file.
 
-**Tsurgeon:** A good introduction is the powerpoint slides for Tsurgeon by
-Marie-Catherine de Marneffe. Tsurgeon can be run from the command line and is
-also incorporated into the TregexGUI graphical interface. Its syntax is
-presented on the Tsurgeon javadoc page.
+**Tsurgeon:** A good introduction is [the powerpoint slides for
+Tsurgeon](tregex/Tsurgeon2.ppt) by Marie-Catherine de Marneffe. Tsurgeon can
+be run from the command line and is also incorporated into the TregexGUI
+graphical interface. Its syntax is presented on the [Tsurgeon javadoc
+page](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/tregex/tsurgeon/Tsurgeon.html).
 
-**Semgrex:** An included set of powerpoint slides and the  javadoc for
-`SemgrexPattern` provide an overview of this package.
+**Semgrex:** An included set of [powerpoint slides](Semgrex.ppt) and the [
+javadoc for
+`SemgrexPattern`](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/semgraph/semgrex/SemgrexPattern.html)
+provide an overview of this package.
 
 Tregex was written by Galen Andrew and Roger Levy. Tsurgeon was written by
 Roger Levy. The graphical interface for both was written by Anna Rafferty. A
@@ -228,21 +261,24 @@ on classes developed by others as part of the Stanford JavaNLP project.
 There is a paper describing Tregex and Tsurgeon. You're encouraged to cite it
 if you use Tregex or Tsurgeon.
 
-> Roger Levy and Galen Andrew. 2006. Tregex and Tsurgeon: tools for querying
-> and manipulating tree data structures. _5th International Conference on
-> Language Resources and Evaluation (LREC 2006)_.
+> Roger Levy and Galen Andrew. 2006. [Tregex and Tsurgeon: tools for querying
+> and manipulating tree data structures](/pubs/levy_andrew_lrec2006.pdf). _5th
+> International Conference on Language Resources and Evaluation (LREC 2006)_.
 
 Semgrex is very briefly described in this paper:
 
 > Nathanael Chambers, Daniel Cer, Trond Grenager, David Hall, Chloe Kiddon
 > Bill MacCartney, Marie-Catherine de Marneffe, Daniel Ramage Eric Yeh, and
-> Christopher D. Manning. 2007. Learning Alignments and Leveraging Natural
-> Logic. _Proceedings of the Workshop on Textual Entailment and Paraphrasing_
-> , pages 165–170,
+> Christopher D. Manning. 2007. [Learning Alignments and Leveraging Natural
+> Logic](http://www.aclweb.org/anthology/W07-1427). _Proceedings of the
+> Workshop on Textual Entailment and Paraphrasing_ , pages 165–170,
 
-Tregex, Tsurgeon, and Semgrex are **licensed under theGNU General Public
-License** (v2 or later). Note that this is the _full_ GPL, which allows many
-free uses. For distributors of proprietary software, commercial licensing is
+Tregex, Tsurgeon, and Semgrex are **licensed under the[GNU General Public
+License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Note that
+this is the _full_ GPL, which allows many free uses. For distributors of
+[proprietary software](http://www.gnu.org/licenses/gpl-
+faq.html#GPLInProprietarySystem), [commercial
+licensing](http://otlportal.stanford.edu/techfinder/technology/ID=24472) is
 available. Source is included. The package includes components for command-
 line invocation and a Java API.
 
@@ -250,16 +286,17 @@ line invocation and a Java API.
 
 ### Questions
 
-There is a tregex FAQ list (with answers!). Please send any other questions or
-feedback, or extensions and bugfixes to `parser-user@lists.stanford.edu`.  
+There is a [tregex FAQ list](tregex-faq.html) (with answers!). Please send any
+other questions or feedback, or extensions and bugfixes to [`parser-
+user@lists.stanford.edu`](mailto:parser-user@lists.stanford.edu).  
 
 ### Mailing Lists
 
 We have 3 mailing lists for the Tregex/Tsurgeon, all of which are shared with
 the Stanford Parser. Each is at `@lists.stanford.edu`:
 
-  1. `parser-user` This is the best list to post to in order to ask questions, make announcements, or for discussion among Tregex/Tsurgeon users. Join the list via this webpage or by emailing `parser-user-join@lists.stanford.edu`. (Leave the subject and message body empty.) You can also look at the list archives. 
-  2. `parser-announce` This list will be used only to announce new Tregex/Tsurgeon versions. So it will be very low volume (expect 1-3 message a year). Join the list via this webpage or by emailing `parser-announce-join@lists.stanford.edu`. (Leave the subject and message body empty.) 
+  1. `parser-user` This is the best list to post to in order to ask questions, make announcements, or for discussion among Tregex/Tsurgeon users. Join the list via [this webpage](https://mailman.stanford.edu/mailman/listinfo/parser-user) or by emailing `parser-user-join@lists.stanford.edu`. (Leave the subject and message body empty.) You can also [look at the list archives](https://mailman.stanford.edu/pipermail/parser-user/). 
+  2. `parser-announce` This list will be used only to announce new Tregex/Tsurgeon versions. So it will be very low volume (expect 1-3 message a year). Join the list via [this webpage](https://mailman.stanford.edu/mailman/listinfo/parser-announce) or by emailing `parser-announce-join@lists.stanford.edu`. (Leave the subject and message body empty.) 
   3. `parser-support` This list goes only to the Tregex/Tsurgeon maintainers. It's a good address for licensing questions, etc. **For general use and support questions, you're better off joining and using`parser-user`.** You cannot join `parser-support`, but you can mail questions to `parser-support@lists.stanford.edu`. 
 
   
@@ -283,62 +320,79 @@ The download is a 9 Mb zip file. It contains:
 
 ### Download
 
-**Download Tregex version 4.2.0** (source and executables for all platforms)  
+**[Download Tregex version 4.2.0](stanford-tregex-4.2.0.zip)** (source and
+executables for all platforms)  
   
-Download Tregex version 3.4 Mac OS X disk image (GUI packaged as Mac
-application; Java 1.7 runtime included)
+[Download Tregex version 3.4 Mac OS X disk image](stanford-
+tregex-2014-07-23.dmg) (GUI packaged as Mac application; Java 1.7 runtime
+included)
 
 ### Extensions: Packages by others using Tregex/Semgrex
 
-  * **Javascript (node.js):** semgrex: NodeJs wrapper for Stanford NLP Semgrex. [GitHub] 
+  * **Javascript (node.js):** [semgrex](https://www.npmjs.com/package/semgrex): NodeJs wrapper for Stanford NLP Semgrex. [[GitHub](https://github.com/koorchik/node-semgrex)] 
 
 ### Release history
 
-Version 4.2.0 | 2020-11-17| Update for compatibility  
+[Version 4.2.0](http://nlp.stanford.edu/software/stanford-tregex-4.2.0.zip) |
+2020-11-17| Update for compatibility  
 ---|---|---  
-Version 4.0.0 | 2020-04-19| Update for compatibility  
-Version 3.9.2 | 2018-10-16| Update for compatibility  
-Version 3.9.1 | 2018-02-27| Update for compatibility  
-Version 3.8.0 | 2017-06-09| Update for compatibility  
-Version 3.7.0 | 2016-10-31| Update for compatibility  
-Version 3.6.0 | 2015-12-09| Updated for compatibility  
-Version 3.5.2 | 2015-04-20| Update for compatibility  
-Version 3.5.1 | 2015-01-29| Update for compatibility  
-Version 3.5.0 | 2014-10-26| Upgrade to Java 8  
-Version 3.4.1 | 2014-08-27| Fix a thread safety issue in tsurgeon. _Last
-version to support Java 6 and Java 7._  
-Version 3.4 | 2014-06-16| Added a new tregex pattern, exact subtree, and
-improved efficiency for certain operations  
-Version 3.3.1 | 2014-01-04| Added a new tsurgeon operation, createSubtree  
-Version 3.3.0 | 2013-11-12| Add an option to get a TregexMatcher from a
-TregexPattern with a different HeadFinder  
-Version 3.2.0 | 2013-06-20| Fix minor bug in tsurgeon indexing  
-Version 2.0.6 | 2013-04-04| Updated for compatibility with other software
-releases  
-Version 2.0.5 | 2012-11-11| Minor efficiency improvements  
-Version 2.0.4 | 2012-07-09| Minor bug fixes  
-Version 2.0.3 | 2012-05-22| Updated to maintain compatibility with other
-Stanford software.  
-Version 2.0.2 | 2012-03-09| Regex matching efficiency improvement  
-Version 2.0.1 | 2012-01-06| Fix matchesAt, fix category heads. _Last version
-to support Java 5._  
-Version 2.0 | 2011-09-14| Introduces semgrex, which operates on
-SemanticGraphs.  
-Version 1.4.4 | 2011-06-19| Updated to maintain compatibility with other
-Stanford software.  
-Version 1.4.3 | 2011-05-15| Updated to maintain compatibility with other
-Stanford software.  
-Version 1.4.2 | 2011-04-20| Addition of tree difference display. Several
-bugfixes.  
-Version 1.4.1 | 2010-11-18 | Small fixes and improvements (multipattern
-Tsurgeon scripts, file and line numbers in sentence window, fixed GUI lock-up
-and tregex immediate domination path matching)  
-Version 1.4 | 2009-08-30| GUI slider for tree size, allow @ and __ in path
-constraints, incompatibly generalize Tsurgeon relabel command, bug fix for
-links and backreferences being used as named node, more memory/space efficient
-treebank reading  
-Version 1.3.2 | 2008-05-06| Additional features added to the graphical
-interface, which is now version 1.1: browse trees, better memory handling  
+[Version 4.0.0](stanford-tregex-4.0.0.zip) | 2020-04-19| Update for
+compatibility  
+[Version 3.9.2](stanford-tregex-2018-10-16.zip) | 2018-10-16| Update for
+compatibility  
+[Version 3.9.1](stanford-tregex-2018-02-27.zip) | 2018-02-27| Update for
+compatibility  
+[Version 3.8.0](stanford-tregex-2017-06-09.zip) | 2017-06-09| Update for
+compatibility  
+[Version 3.7.0](stanford-tregex-2016-10-31.zip) | 2016-10-31| Update for
+compatibility  
+[Version 3.6.0](stanford-tregex-2015-12-09.zip) | 2015-12-09| Updated for
+compatibility  
+[Version 3.5.2](stanford-tregex-2015-04-20.zip) | 2015-04-20| Update for
+compatibility  
+[Version 3.5.1](stanford-tregex-2015-01-29.zip) | 2015-01-29| Update for
+compatibility  
+[Version 3.5.0](stanford-tregex-2014-10-26.zip) | 2014-10-26| Upgrade to Java
+8  
+[Version 3.4.1](stanford-tregex-2014-08-27.zip) | 2014-08-27| Fix a thread
+safety issue in tsurgeon. _Last version to support Java 6 and Java 7._  
+[Version 3.4](stanford-tregex-2014-06-16.zip) | 2014-06-16| Added a new tregex
+pattern, exact subtree, and improved efficiency for certain operations  
+[Version 3.3.1](stanford-tregex-2014-01-04.zip) | 2014-01-04| Added a new
+tsurgeon operation, createSubtree  
+[Version 3.3.0](stanford-tregex-2013-11-12.zip) | 2013-11-12| Add an option to
+get a TregexMatcher from a TregexPattern with a different HeadFinder  
+[Version 3.2.0](stanford-tregex-2013-06-20.zip) | 2013-06-20| Fix minor bug in
+tsurgeon indexing  
+[Version 2.0.6](stanford-tregex-2013-04-04.zip) | 2013-04-04| Updated for
+compatibility with other software releases  
+[Version 2.0.5](stanford-tregex-2012-11-11.zip) | 2012-11-11| Minor efficiency
+improvements  
+[Version 2.0.4](stanford-tregex-2012-07-09.tgz) | 2012-07-09| Minor bug fixes  
+[Version 2.0.3](stanford-tregex-2012-05-22.tgz) | 2012-05-22| Updated to
+maintain compatibility with other Stanford software.  
+[Version 2.0.2](stanford-tregex-2012-03-09.tgz) | 2012-03-09| Regex matching
+efficiency improvement  
+[Version 2.0.1](stanford-tregex-2012-01-06.tgz) | 2012-01-06| Fix matchesAt,
+fix category heads. _Last version to support Java 5._  
+[Version 2.0](stanford-tregex-2011-09-14.tgz) | 2011-09-14| Introduces
+semgrex, which operates on SemanticGraphs.  
+[Version 1.4.4](stanford-tregex-2011-06-19.tgz) | 2011-06-19| Updated to
+maintain compatibility with other Stanford software.  
+[Version 1.4.3](stanford-tregex-2011-05-15.tgz) | 2011-05-15| Updated to
+maintain compatibility with other Stanford software.  
+[Version 1.4.2](stanford-tregex-2011-04-20.tgz) | 2011-04-20| Addition of tree
+difference display. Several bugfixes.  
+[Version 1.4.1](stanford-tregex-2010-11-18.tgz) | 2010-11-18 | Small fixes and
+improvements (multipattern Tsurgeon scripts, file and line numbers in sentence
+window, fixed GUI lock-up and tregex immediate domination path matching)  
+[Version 1.4](stanford-tregex-2009-08-30.tgz) | 2009-08-30| GUI slider for
+tree size, allow @ and __ in path constraints, incompatibly generalize
+Tsurgeon relabel command, bug fix for links and backreferences being used as
+named node, more memory/space efficient treebank reading  
+[Version 1.3.2](stanford-tregex-2008-05-08.tar.gz) | 2008-05-06| Additional
+features added to the graphical interface, which is now version 1.1: browse
+trees, better memory handling  
 Version 1.3.1| 2007-11-20| Additional features added to the graphical
 interface: better copy/paste and drag and drop support, capability to save
 matched sentences as well as matched trees, and can save files in different
