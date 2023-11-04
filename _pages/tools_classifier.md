@@ -48,15 +48,14 @@ maintenance of these tools, we welcome gift funding.
 
 The download is a 9.6 MB zipped file. If you unpack that file, you should have
 everything needed, including example files and documentation. Start by reading
-the `README.txt` file. Send any questions or feedback to [`java-nlp-
-support@lists.stanford.edu`](mailto:java-nlp-support@lists.stanford.edu).
+the `README.txt` file. Send any questions or feedback to
+[`java-nlp-support@lists.stanford.edu`](mailto:java-nlp-support@lists.stanford.edu).
 
 ### Introduction
 
 An introduction to the classifier and some examples of its use are available
 on our [Wiki page](http://nlp.stanford.edu/wiki/Software/Classifier). You can
-also look at the [javadoc for
-ColumnDataClassifier](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/classify/ColumnDataClassifier.html).
+also look at the [javadoc for ColumnDataClassifier](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/classify/ColumnDataClassifier.html).
 
 ### Extensions: Packages by others using the Stanford Classifier
 
@@ -80,7 +79,6 @@ with other JavaNLP tools (with the exclusion of the parser). Each address is
 at `@lists.stanford.edu`:
 
   1. `java-nlp-user` This is the best list to post to in order to send feature requests, make announcements, or for discussion among JavaNLP users. (Please ask support questions on [Github](https://github.com/stanfordnlp/CoreNLP).)
-
 You have to subscribe to be able to use this list. Join the list via [this
 webpage](https://mailman.stanford.edu/mailman/listinfo/java-nlp-user) or by
 emailing `java-nlp-user-join@lists.stanford.edu`. (Leave the subject and
