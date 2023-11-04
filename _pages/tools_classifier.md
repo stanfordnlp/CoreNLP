@@ -36,8 +36,7 @@ suited to building models over text data, but it also supports numeric
 variables.
 
 **Licensing.** The Stanford Classifier is available for download, **licensed
-under the[GNU General Public
-License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Source is
+under the [GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Source is
 included. The Stanford Classifier code is dual licensed (in a similar manner
 to MySQL, etc.). Open source licensing is under the _full_ GPL, which allows
 many free uses. For distributors of [proprietary
@@ -63,12 +62,15 @@ ColumnDataClassifier](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/n
 
   * **JavaScript/npm:** Milos Bejda has written [stanford-classifier](https://www.npmjs.com/package/stanford-classifier) Nodejs wrapper. [Source](https://github.com/mbejda/Nodejs-Stanford-Classifier) on github. 
 
+### Availability
+
+The Stanford Classifier is included in the most recent versions of CoreNLP.
+
 ### Questions
 
-Have a support question? Please ask us on [Stack
-Overflow](http://stackoverflow.com) using the tag `stanford-nlp`.
+Have a support question, PR, or bug report?  Please post an issue [on our Github](https://github.com/stanfordnlp/CoreNLP)
 
-Feedback, questions, licensing issues, and bug reports / fixes can also be
+Feedback and licensing issues can also be
 sent to our mailing lists (see immediately below).
 
 ### Mailing Lists
@@ -77,21 +79,19 @@ We have 3 mailing lists for the Stanford Classifier all of which are shared
 with other JavaNLP tools (with the exclusion of the parser). Each address is
 at `@lists.stanford.edu`:
 
-  1. `java-nlp-user` This is the best list to post to in order to send feature requests, make announcements, or for discussion among JavaNLP users. (Please ask support questions on [Stack Overflow](http://stackoverflow.com) using the `stanford-nlp` tag.) 
+  1. `java-nlp-user` This is the best list to post to in order to send feature requests, make announcements, or for discussion among JavaNLP users. (Please ask support questions on [Github](https://github.com/stanfordnlp/CoreNLP).)
 
 You have to subscribe to be able to use this list. Join the list via [this
 webpage](https://mailman.stanford.edu/mailman/listinfo/java-nlp-user) or by
 emailing `java-nlp-user-join@lists.stanford.edu`. (Leave the subject and
-message body empty.) You can also [look at the list
-archives](https://mailman.stanford.edu/pipermail/java-nlp-user/).
+message body empty.) You can also [look at the list archives](https://mailman.stanford.edu/pipermail/java-nlp-user/).
 
   2. `java-nlp-announce` This list will be used only to announce new versions of Stanford JavaNLP tools. So it will be very low volume (expect 2-4 messages a year). Join the list via [this webpage](https://mailman.stanford.edu/mailman/listinfo/java-nlp-announce) or by emailing `java-nlp-announce-join@lists.stanford.edu`. (Leave the subject and message body empty.)
 
-  3. `java-nlp-support` This list goes only to the software maintainers. It's a good address for licensing questions, etc. **For general use and support questions, you're better off using Stack Overflow or joining and using`java-nlp-user`.** You cannot join `java-nlp-support`, but you can mail questions to `java-nlp-support@lists.stanford.edu`.
+  3. `java-nlp-support` This list goes only to the software maintainers. It's a good address for licensing questions, etc. **For general use and support questions, you're better off using Github or joining and using `java-nlp-user`.** You cannot join `java-nlp-support`, but you can mail questions to `java-nlp-support@lists.stanford.edu`.
 
   
-**[Download Stanford Classifier version 4.2.0](stanford-
-classifier-4.2.0.zip)**  
+**[Download Stanford Classifier version 4.2.0](stanford-classifier-4.2.0.zip)**  
 
 ### Release history
 
@@ -119,8 +119,7 @@ classifier-4.2.0.zip)**
 | <a href="stanford-classifier-2012-05-22.tgz">2.1.5</a> | 2012-05-22 | Updated for compatibility with other Stanford releases |
 | <a href="stanford-classifier-2012-03-09.tgz">2.1.4</a> | 2012-03-09 | Bugfix for svmlight format |
 | <a href="stanford-classifier-2011-12-22.tgz">2.1.3</a> | 2011-12-22 | Updated for compatibility with other Stanford releases |
-| <a href="stanford-classifier-2011-09-14.tar.gz">2.1.2</a> | 2011-09-14 | Change ColumnDataClassifier to be an object with API rather than
-      static methods; ColumnDataClassifier thread safe |
+| <a href="stanford-classifier-2011-09-14.tar.gz">2.1.2</a> | 2011-09-14 | Change ColumnDataClassifier to be an object with API rather than static methods; ColumnDataClassifier thread safe |
 | <a href="stanford-classifier-2011-06-19.tar.gz">2.1.1</a> | 2011-06-19 | Updated for compatibility with other Stanford releases |
 | <a href="stanford-classifier-2011-05-15.tar.gz">2.1</a> | 2011-05-15 | Updated with more documentation |
 | <a href="stanford-classifier-2007-08-15.tar.gz">2.0</a> | 2007-08-15 | New command line interface, substantial increase in options and features (updated on 2007-09-28 with a bug fix) |
