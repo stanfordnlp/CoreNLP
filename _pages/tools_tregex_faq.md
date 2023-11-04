@@ -10,15 +10,9 @@ parent: Additional Tools
 
 ## Tregex/Tsurgeon FAQ
 
-### Questions
-
-  1. Is there a User Guide?
-  2. What command-line options does Tregex have?
-  3. Tsurgeon has stopped responding/gone into an infinite loop. Is that a bug?
-
 ### Questions with answers
 
-  1. #### Is there a User Guide?
+Is there a User Guide?
 
 At present, no. There is:
 
@@ -27,15 +21,15 @@ At present, no. There is:
     * The GUI has help screens, available within the graphical interface by clicking on the Help buttons, which provide similar information on Tregex and Tsurgeon syntax, as does [this page](http://nlp.stanford.edu/~manning/courses/ling289/Tregex.html).
     * There are brief powerpoint tutorials for [Tregex](tregex/The_Wonderful_World_of_Tregex.ppt) (by Galen Andrew) and [Tsurgeon](tregex/Tsurgeon2.ppt) (by Marie-Catherine de Marneffe).
     * For `tregex`, you may also usefully consult user guides for `tgrep` and `tgrep2`, with which `tregex` is mainly compatible.
-  2. #### What command-line options does Tregex have?
+
+### What command-line options does Tregex have?
 
 Here are some details on the command-line options of Tregex, taken from the
 javadoc for the main method of `TregexPattern`:
 
 Usage:  
   
-` java edu.stanford.nlp.trees.tregex.TregexPattern [[-TCwfosnu] [-filter] [-h
-<node-name>]]* pattern filepath `
+`java edu.stanford.nlp.trees.tregex.TregexPattern [[-TCwfosnu] [-filter] [-h <node-name>]]* pattern filepath`
 
 Arguments:  
 
@@ -65,7 +59,7 @@ Options:
     * `-filter` causes this to act as a filter, reading tree input from stdin 
     * `-T` causes all trees to be printed as processed (for debugging purposes). Otherwise only matching nodes are printed. 
 
-  3. #### Tsurgeon has stopped responding/gone into an infinite loop. Is that a bug?
+### Tsurgeon has stopped responding/gone into an infinite loop. Is that a bug?
 
 Probably not (though you never know). Normally what this means is that you
 have written an infinite loop in your tree surgery script.
@@ -78,26 +72,32 @@ unfortunately, it also makes it very easy to write infinite loops in Tsurgeon,
 and this can confuse beginners. Here's a very simple example of how you can
 produce an infinite loop (you can come up with complex examples by yourself!):
 
-> ` /^VB/=haveaux < have|has|having|had  
->  
->  relabel haveaux /^(.*)$/$1-HAVE/ `
+```
+/^VB/=haveaux < have|has|having|had
+
+relabel haveaux /^(.*)$/$1-HAVE/
+```
 
 The first poor `haveaux` node that matches the pattern, say `(VBZ has)`, will
 get repeatedly relabeled as:
 
-> ` VBZ-HAVE  
->  VBZ-HAVE-HAVE  
->  VBZ-HAVE-HAVE-HAVE  
->  VBZ-HAVE-HAVE-HAVE-HAVE  
->  ... `
+```
+VBZ-HAVE  
+VBZ-HAVE-HAVE  
+VBZ-HAVE-HAVE-HAVE  
+VBZ-HAVE-HAVE-HAVE-HAVE  
+...
+```
 
 And you can see where that is heading. It is essential to write edits so that
 they will not apply to their own output forever. For this example, things can
 easily be fixed with the following changed script:
 
-> ` /^VB.?$/=haveaux < have|has|having|had  
->  
->  relabel haveaux /^(.*)$/$1-HAVE/ `
+```
+/^VB.?$/=haveaux < have|has|having|had  
+
+relabel haveaux /^(.*)$/$1-HAVE/
+```
 
 For other questions, feedback, extensions, or bugfixes, please join and post
 to the `parser-user@lists.stanford.edu` mailing list. Or you can send email to
