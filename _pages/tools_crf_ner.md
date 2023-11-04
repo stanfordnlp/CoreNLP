@@ -36,13 +36,12 @@ Klein, Christopher Manning, and Jenny Finkel. Much of the documentation and
 usability is due to Anna Rafferty. More recent code development has been done
 by various Stanford NLP Group members.
 
-Stanford NER is available for download, **licensed under the[GNU General
+Stanford NER is available for download, **licensed under the [GNU General
 Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later).
 Source is included. The package includes components for command-line
 invocation (look at the shell scripts and batch files included in the
 download), running as a server (look at `NERServer` in the sources jar file),
-and a Java API (look at the simple examples in the `[NERDemo.java](ner-
-example/NERDemo.java)` file included in the download, and then at the
+and a Java API (look at the simple examples in the `[NERDemo.java](ner-example/NERDemo.java)` file included in the download, and then at the
 javadocs). Stanford NER code is dual licensed (in a similar manner to MySQL,
 etc.). Open source licensing is under the _full_ GPL, which allows many free
 uses. For distributors of [proprietary
@@ -195,6 +194,10 @@ archives](https://mailman.stanford.edu/pipermail/java-nlp-user/).
   
 
 ### Download
+
+The Java NER toolkit is now included in recent distributions of CoreNLP.
+
+There are also previous standalone versions of the NER toolkit:
 
 **[Download Stanford Named Entity Recognizer version 4.2.0](stanford-
 ner-4.2.0.zip)**  
