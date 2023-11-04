@@ -22,9 +22,9 @@ technology that you're usually getting in various of the cloud-based machine
 learning APIs (Amazon, Google, ...) The classification method is described in:
 
 > Christopher Manning and Dan Klein. 2003. Optimization, Maxent Models, and
-> Conditional Estimation without Magic. Tutorial at HLT-NAACL 2003 and ACL
-> 2003. [[pdf slides]](/pubs/maxent-tutorial-slides.pdf) [[pdf
-> handouts]](/pubs/maxent-tutorial-slides-6.pdf)
+> Conditional Estimation without Magic. Tutorial at HLT-NAACL 2003 and ACL 2003.
+> [pdf slides](/pubs/maxent-tutorial-slides.pdf)
+> [pdf handouts](/pubs/maxent-tutorial-slides-6.pdf)
 
 Version 2 of the classifier was developed by Anna Rafferty, Alex Kleeman,
 Jenny Finkel, and Christopher Manning.
