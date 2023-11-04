@@ -1,8 +1,8 @@
 ---
 layout: page
-title: Tregex, Tsurgeon, and Semgrex
+title: Tregex and Tsurgeon FAQ
 keywords: tregex, tsurgeon, semgrex
-permalink: '/tools_tregex.html'
+permalink: '/tools_tregex_faq.html'
 nav_order: 7
 toc: false
 parent: Additional Tools
