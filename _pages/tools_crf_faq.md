@@ -1,8 +1,8 @@
 ---
 layout: page
-title: Named Entity Recognizer
+title: NER FAQ
 keywords: NER, CRF-NER, CRF
-permalink: '/tools_crf_ner.html'
+permalink: '/tools_crf_faq.html'
 nav_order: 10
 toc: true
 parent: Additional Tools
