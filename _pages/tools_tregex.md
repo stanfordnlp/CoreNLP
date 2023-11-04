@@ -4,11 +4,9 @@ title: Tregex, Tsurgeon, and Semgrex
 keywords: tregex, tsurgeon, semgrex
 permalink: '/tools_tregex.html'
 nav_order: 6
-toc: false
+toc: true
 parent: Additional Tools
 ---
-
-# Tregex, Tsurgeon and Semgrex
 
 ### About
 

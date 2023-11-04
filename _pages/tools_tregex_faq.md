@@ -4,11 +4,9 @@ title: Tregex and Tsurgeon FAQ
 keywords: tregex, tsurgeon, semgrex
 permalink: '/tools_tregex_faq.html'
 nav_order: 7
-toc: false
+toc: true
 parent: Additional Tools
 ---
-
-## Tregex/Tsurgeon FAQ
 
 ### Questions with answers
 

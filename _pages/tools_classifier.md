@@ -4,11 +4,9 @@ title: Classifier
 keywords: classifier
 permalink: '/tools_classifier.html'
 nav_order: 8
-toc: false
+toc: true
 parent: Additional Tools
 ---
-
-## Stanford Classifer
 
 A classifier is a machine learning tool that will take data items and place
 them into one of _k_ classes. A probabilistic classifier, like this one, can
