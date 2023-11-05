@@ -36,26 +36,26 @@ Arguments:
 
 Options:
 
-    * `-C` suppresses printing of matches, so only the number of matches is printed. 
-    * `-w` causes the whole of a tree that matches to be printed. 
-    * `-f` causes the filename to be printed. 
-    * `-i <filename>` causes the pattern to be matched to be read from `<filename>` rather than the command line. Don't specify a pattern when this option is used. 
-    * `-o` Specifies that each tree node can be reported only once as the root of a match (by default a node will be printed once for every _way_ the pattern matches). 
-    * `-s` causes trees to be printed all on one line (by default they are pretty printed). 
-    * `-n` causes the number of the tree in which the match was found to be printed before every match. 
-    * `-u` causes only the label of each matching node to be printed, not complete subtrees. 
-    * `-t` causes only the yield (terminal words) of the selected node to be printed (or the yield of the whole tree, if the `-w` option is used). 
-    * `-encoding <charset_encoding>` option allows specification of character encoding of trees. 
-    * `-h <node-handle>` If a `-h` option is given, the root tree node will not be printed. Instead, for each `node-handle` specified, the node matched and given that handle will be printed. Multiple nodes can be printed by using the `-h` option multiple times on a single command line. 
-    * `-hf <headfinder-class-name>` use the specified {@link HeadFinder} class to determine headship relations. 
-    * `-hfArg <string>` pass a string argument in to the {@link HeadFinder} class's constructor. `-hfArg` can be used multiple times to pass in multiple arguments. 
-    * `-trf <TreeReaderFactory-class-name>` use the specified {@link TreeReaderFactory} class to read trees from files. 
-    * `-v` print every tree that contains no matches of the specified pattern, but print no matches to the pattern. 
-    * `-x` Instead of the matched subtree, print the matched subtree's identifying number as defined in `tgrep2`:a unique identifier for the subtree and is in the form s:n, where s is an integer specifying the sentence number in the corpus (starting with 1), and n is an integer giving the order in which the node is encountered in a depth-first search starting with 1 at top node in the sentence tree. 
-    * `-extract <code> <tree-file>` extracts the subtree s:n specified by `code` from the specified `tree-file`. Overrides all other behavior of tregex. Can't specify multiple encodings etc. yet. 
-    * `-extractFile <code-file> <tree-file>` extracts every subtree specified by the subtree codes in `code-file`, which must appear exactly one per line, from the specified `tree-file`. Overrides all other behavior of tregex. Can't specify multiple encodings etc. yet. 
-    * `-filter` causes this to act as a filter, reading tree input from stdin 
-    * `-T` causes all trees to be printed as processed (for debugging purposes). Otherwise only matching nodes are printed. 
+- `-C` suppresses printing of matches, so only the number of matches is printed. 
+- `-w` causes the whole of a tree that matches to be printed. 
+- `-f` causes the filename to be printed. 
+- `-i <filename>` causes the pattern to be matched to be read from `<filename>` rather than the command line. Don't specify a pattern when this option is used. 
+- `-o` Specifies that each tree node can be reported only once as the root of a match (by default a node will be printed once for every _way_ the pattern matches). 
+- `-s` causes trees to be printed all on one line (by default they are pretty printed). 
+- `-n` causes the number of the tree in which the match was found to be printed before every match. 
+- `-u` causes only the label of each matching node to be printed, not complete subtrees. 
+- `-t` causes only the yield (terminal words) of the selected node to be printed (or the yield of the whole tree, if the `-w` option is used). 
+- `-encoding <charset_encoding>` option allows specification of character encoding of trees. 
+- `-h <node-handle>` If a `-h` option is given, the root tree node will not be printed. Instead, for each `node-handle` specified, the node matched and given that handle will be printed. Multiple nodes can be printed by using the `-h` option multiple times on a single command line. 
+- `-hf <headfinder-class-name>` use the specified {@link HeadFinder} class to determine headship relations. 
+- `-hfArg <string>` pass a string argument in to the {@link HeadFinder} class's constructor. `-hfArg` can be used multiple times to pass in multiple arguments. 
+- `-trf <TreeReaderFactory-class-name>` use the specified {@link TreeReaderFactory} class to read trees from files. 
+- `-v` print every tree that contains no matches of the specified pattern, but print no matches to the pattern. 
+- `-x` Instead of the matched subtree, print the matched subtree's identifying number as defined in `tgrep2`:a unique identifier for the subtree and is in the form s:n, where s is an integer specifying the sentence number in the corpus (starting with 1), and n is an integer giving the order in which the node is encountered in a depth-first search starting with 1 at top node in the sentence tree. 
+- `-extract <code> <tree-file>` extracts the subtree s:n specified by `code` from the specified `tree-file`. Overrides all other behavior of tregex. Can't specify multiple encodings etc. yet. 
+- `-extractFile <code-file> <tree-file>` extracts every subtree specified by the subtree codes in `code-file`, which must appear exactly one per line, from the specified `tree-file`. Overrides all other behavior of tregex. Can't specify multiple encodings etc. yet. 
+- `-filter` causes this to act as a filter, reading tree input from stdin 
+- `-T` causes all trees to be printed as processed (for debugging purposes). Otherwise only matching nodes are printed. 
 
 ### Tsurgeon has stopped responding/gone into an infinite loop. Is that a bug?
 
