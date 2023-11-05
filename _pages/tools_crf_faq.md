@@ -142,6 +142,7 @@ command:
 
 ```
 java -cp stanford-ner.jar edu.stanford.nlp.ie.crf.CRFClassifier -prop austen.prop
+```
 
 An NER model will then be serialized to the location specified in the
 properties file (`ner-model.ser.gz`) once the program has completed. To check
