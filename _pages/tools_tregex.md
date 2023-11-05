@@ -52,7 +52,7 @@ provide an overview of this package.
 Tregex was written by Galen Andrew and Roger Levy. Tsurgeon was written by
 Roger Levy. The graphical interface for both was written by Anna Rafferty. A
 lot of bug fixing and various extensions to both were done by John Bauer.
-Semgrex was written by Chloe Kiddon and John Bauer. Ssurgeon was written by Eric Yeh and John Bauer.  These programs also rely
+Semgrex was written by Chloé Kiddon and John Bauer. Ssurgeon was written by Eric Yeh and John Bauer.  These programs also rely
 on classes developed by others as part of the Stanford JavaNLP project.
 
 There is a paper describing Tregex and Tsurgeon. You're encouraged to cite it
@@ -64,7 +64,7 @@ if you use Tregex or Tsurgeon.
 
 Semgrex is very briefly described in this paper:
 
-> Nathanael Chambers, Daniel Cer, Trond Grenager, David Hall, Chloe Kiddon
+> Nathanael Chambers, Daniel Cer, Trond Grenager, David Hall, Chloé Kiddon
 > Bill MacCartney, Marie-Catherine de Marneffe, Daniel Ramage Eric Yeh, and
 > Christopher D. Manning. 2007. [Learning Alignments and Leveraging Natural
 > Logic](http://www.aclweb.org/anthology/W07-1427). _Proceedings of the
@@ -72,7 +72,7 @@ Semgrex is very briefly described in this paper:
 
 We published a more complete description of Semgrex and Ssurgeon at GURT 2023:
 
-> John Bauer, Chloè Kiddon, Eric Yeh, Alex Shan, and Christopher D. Manning. 2023.  [Semgrex and Ssurgeon, Searching and Manipulating Dependency Graphs](https://aclanthology.org/2023.tlt-1.7/)  _Proceedings of the 21st International Workshop on Treebanks and Linguistic Theories (TLT, GURT/SyntaxFest 2023)_
+> John Bauer, Chloé Kiddon, Eric Yeh, Alex Shan, and Christopher D. Manning. 2023.  [Semgrex and Ssurgeon, Searching and Manipulating Dependency Graphs](https://aclanthology.org/2023.tlt-1.7/)  _Proceedings of the 21st International Workshop on Treebanks and Linguistic Theories (TLT, GURT/SyntaxFest 2023)_
 
 
 Tregex, Tsurgeon, and Semgrex are **licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Note that
