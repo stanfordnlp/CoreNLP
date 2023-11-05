@@ -49,6 +49,8 @@ page](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/tregex/
 **Semgrex:** An included set of [powerpoint slides](Semgrex.ppt) and the [javadoc for `SemgrexPattern`](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/semgraph/semgrex/SemgrexPattern.html)
 provide an overview of this package.
 
+**Ssurgeon:** The [Javadoc](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/semgraph/semgrex/ssurgeon/Ssurgeon.html) page describes the basic opterations available for Ssurgeon.
+
 Tregex was written by Galen Andrew and Roger Levy. Tsurgeon was written by
 Roger Levy. The graphical interface for both was written by Anna Rafferty. A
 lot of bug fixing and various extensions to both were done by John Bauer.
@@ -72,7 +74,11 @@ Semgrex is very briefly described in this paper:
 
 We published a more complete description of Semgrex and Ssurgeon at GURT 2023:
 
-> John Bauer, Chloé Kiddon, Eric Yeh, Alex Shan, and Christopher D. Manning. 2023.  [Semgrex and Ssurgeon, Searching and Manipulating Dependency Graphs](https://aclanthology.org/2023.tlt-1.7/)  _Proceedings of the 21st International Workshop on Treebanks and Linguistic Theories (TLT, GURT/SyntaxFest 2023)_
+> John Bauer, Chloé Kiddon, Eric Yeh, Alex Shan, and Christopher
+> D. Manning. 2023.  [Semgrex and Ssurgeon, Searching and Manipulating
+> Dependency Graphs](https://aclanthology.org/2023.tlt-1.7/)
+> _Proceedings of the 21st International Workshop on Treebanks and
+> Linguistic Theories (TLT, GURT/SyntaxFest 2023)_
 
 
 Tregex, Tsurgeon, and Semgrex are **licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Note that
@@ -101,14 +107,20 @@ the Stanford Parser. Each is at `@lists.stanford.edu`:
   3. `parser-support` This list goes only to the Tregex/Tsurgeon maintainers. It's a good address for licensing questions, etc. **For general use and support questions, you're better off joining and using`parser-user`.** You cannot join `parser-support`, but you can mail questions to `parser-support@lists.stanford.edu`. 
 
   
+### Extensions: Packages by others using Tregex/Semgrex
+
+  * **Javascript (node.js):** [semgrex](https://www.npmjs.com/package/semgrex): NodeJs wrapper for Stanford NLP Semgrex. [[GitHub](https://github.com/koorchik/node-semgrex)] 
+
 
 ### Download
 
 Tregex, Tsurgeon, Semgrex, and Ssurgeon are all included in the latest CoreNLP releases.
 
+### Standalone Package
+
 Older versions were built as standalone packages, described here.
 
-### Contents
+#### Contents
 
 The download is a 9 Mb zip file. It contains:
 
@@ -130,10 +142,6 @@ executables for all platforms)
   
 [Download Tregex version 3.4 Mac OS X disk image](stanford-tregex-2014-07-23.dmg) (GUI packaged as Mac application; Java 1.7 runtime
 included)
-
-### Extensions: Packages by others using Tregex/Semgrex
-
-  * **Javascript (node.js):** [semgrex](https://www.npmjs.com/package/semgrex): NodeJs wrapper for Stanford NLP Semgrex. [[GitHub](https://github.com/koorchik/node-semgrex)] 
 
 ### Release history
 
