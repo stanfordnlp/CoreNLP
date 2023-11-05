@@ -356,32 +356,32 @@ models, see [CoreNLP](http://nlp.stanford.edu/software/corenlp.html).
 ### Release History
 
   
-Version| Date| Description  
----|---|---  
-[4.2.0](stanford-ner-4.2.0.zip) | 2020-11-17 | Update for compatibility  
-[4.0.0](stanford-ner-4.0.0.zip) | 2020-04-19 | Update to UDv2.0 tokenization  
-[3.9.2](stanford-ner-2018-10-16.zip) | 2018-10-16 | Updated for compatibility  
-[3.9.1](stanford-ner-2018-02-27.zip) | 2018-02-27 | KBP ner models for Chinese and Spanish  
-[3.8.0](stanford-ner-2017-06-09.zip) | 2017-06-09 | Updated for compatibility  
-[3.7.0](stanford-ner-2016-10-31.zip) | 2016-10-31 | Improvements to Chinese and German NER  
-[3.6.0](stanford-ner-2015-12-09.zip) | 2015-12-09 | Updated for compatibility  
-[3.5.2](stanford-ner-2015-04-20.zip) | 2015-04-20 | synch standalone and CoreNLP functionality  
-[3.5.1](stanford-ner-2015-01-29.zip) | 2015-01-29 | Substantial accuracy improvements  
-[3.5.0](stanford-ner-2014-10-26.zip) | 2014-10-26 | Upgrade to Java 8  
-[3.4.1](stanford-ner-2014-08-27.zip) | 2014-08-27 | Added Spanish models  
-[3.4](stanford-ner-2014-06-16.zip) | 2014-06-16 | Fix serialization of new models  
-[3.3.1](stanford-ner-2014-01-04.zip) | 2014-01-04 | Bugfix release  
-[3.3.0](stanford-ner-2013-11-12.zip) | 2013-11-12 | Updated for compatibility  
-[3.2.0](stanford-ner-2013-06-20.zip) | 2013-06-20 | Improved line by line handling  
-[1.2.8](stanford-ner-2013-04-04.zip) | 2013-04-04 | -nthreads option  
-[1.2.7](stanford-ner-2012-11-11.zip) | 2012-11-11 | Add Chinese model, include Wikipedia data in 3-class English model  
-[1.2.6](stanford-ner-2012-07-09.tgz) | 2012-07-09 | Minor bug fixes  
-[1.2.5](stanford-ner-2012-05-22.tgz) | 2012-05-22 | Fix encoding issue  
-[1.2.4](stanford-ner-2012-04-07.tgz) | 2012-04-07 | Caseless versions of models supported  
-[1.2.3](stanford-ner-2012-01-06.tgz) | 2012-01-06 | Minor bug fixes  
-[1.2.2](stanford-ner-2011-09-14.tgz) | 2011-09-14 | Improved thread safety  
-[1.2.1](stanford-ner-2011-06-19.tgz) | 2011-06-19 | Models reduced in size but on average improved in accuracy (improved distsim clusters)  
-[1.2](stanford-ner-2011-05-16.tgz) | 2011-05-16 | Normal download includes 3, 4, and 7 class models. Updated for compatibility with other software releases.  
-[1.1.1](stanford-ner-2009-01-16.tgz) | 2009-01-16 | Minor bug and usability fixes, and changed API (in particular the methods to classify and output tagged text)  
-[1.1](stanford-ner-2008-05-07.tgz) | 2008-05-07 | Additional feature flags, various code updates  
-[1.0](stanford-ner-2006-09-18.tar.gz) | 2006-09-18 | Initial release  
+|Version| Date| Description|
+|---|---|---|
+|[4.2.0](stanford-ner-4.2.0.zip) | 2020-11-17 | Update for compatibility|
+|[4.0.0](stanford-ner-4.0.0.zip) | 2020-04-19 | Update to UDv2.0 tokenization | 
+|[3.9.2](stanford-ner-2018-10-16.zip) | 2018-10-16 | Updated for compatibility | 
+|[3.9.1](stanford-ner-2018-02-27.zip) | 2018-02-27 | KBP ner models for Chinese and Spanish  |
+|[3.8.0](stanford-ner-2017-06-09.zip) | 2017-06-09 | Updated for compatibility  |
+|[3.7.0](stanford-ner-2016-10-31.zip) | 2016-10-31 | Improvements to Chinese and German NER  |
+|[3.6.0](stanford-ner-2015-12-09.zip) | 2015-12-09 | Updated for compatibility  |
+|[3.5.2](stanford-ner-2015-04-20.zip) | 2015-04-20 | synch standalone and CoreNLP functionality | 
+|[3.5.1](stanford-ner-2015-01-29.zip) | 2015-01-29 | Substantial accuracy improvements  |
+|[3.5.0](stanford-ner-2014-10-26.zip) | 2014-10-26 | Upgrade to Java 8  |
+|[3.4.1](stanford-ner-2014-08-27.zip) | 2014-08-27 | Added Spanish models  |
+|[3.4](stanford-ner-2014-06-16.zip) | 2014-06-16 | Fix serialization of new models | 
+|[3.3.1](stanford-ner-2014-01-04.zip) | 2014-01-04 | Bugfix release | 
+|[3.3.0](stanford-ner-2013-11-12.zip) | 2013-11-12 | Updated for compatibility  |
+|[3.2.0](stanford-ner-2013-06-20.zip) | 2013-06-20 | Improved line by line handling | 
+|[1.2.8](stanford-ner-2013-04-04.zip) | 2013-04-04 | -nthreads option  |
+|[1.2.7](stanford-ner-2012-11-11.zip) | 2012-11-11 | Add Chinese model, include Wikipedia data in 3-class English model  |
+|[1.2.6](stanford-ner-2012-07-09.tgz) | 2012-07-09 | Minor bug fixes|  
+|[1.2.5](stanford-ner-2012-05-22.tgz) | 2012-05-22 | Fix encoding issue  |
+|[1.2.4](stanford-ner-2012-04-07.tgz) | 2012-04-07 | Caseless versions of models supported|  
+|[1.2.3](stanford-ner-2012-01-06.tgz) | 2012-01-06 | Minor bug fixes  |
+|[1.2.2](stanford-ner-2011-09-14.tgz) | 2011-09-14 | Improved thread safety  |
+|[1.2.1](stanford-ner-2011-06-19.tgz) | 2011-06-19 | Models reduced in size but on average |improved in accuracy (improved distsim clusters)  |
+|[1.2](stanford-ner-2011-05-16.tgz) | 2011-05-16 | Normal download includes 3, 4, and 7 class models. Updated for compatibility with other software releases.  |
+|[1.1.1](stanford-ner-2009-01-16.tgz) | 2009-01-16 | Minor bug and usability fixes, and changed API (in particular the methods to classify and output tagged text)  |
+|[1.1](stanford-ner-2008-05-07.tgz) | 2008-05-07 | Additional feature flags, various code updates  |
+|[1.0](stanford-ner-2006-09-18.tar.gz) | 2006-09-18 | Initial release | 
