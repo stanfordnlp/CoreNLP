@@ -67,7 +67,7 @@ Semgrex is very briefly described in this paper:
 > Bill MacCartney, Marie-Catherine de Marneffe, Daniel Ramage Eric Yeh, and
 > Christopher D. Manning. 2007. [Learning Alignments and Leveraging Natural
 > Logic](http://www.aclweb.org/anthology/W07-1427). _Proceedings of the
-> Workshop on Textual Entailment and Paraphrasing_ , pages 165–170,
+> Workshop on Textual Entailment and Paraphrasing_ , pages 165–170.
 
 Tregex, Tsurgeon, and Semgrex are **licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Note that
 this is the _full_ GPL, which allows many free uses. For distributors of
