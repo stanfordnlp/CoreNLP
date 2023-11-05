@@ -8,7 +8,7 @@ toc: true
 parent: Additional Tools
 ---
 
-#### How can I train my own NER model?
+### How can I train my own NER model?
 
 The documentation for training your own classifier is somewhere between bad
 and non-existent. But nevertheless, everything you need is in the box, and you
@@ -92,43 +92,44 @@ but it is easier to use a _properties file_. Here is a simple properties file
 (pretty much like the one above!), but explanations for each line are in
 comments, specified by "#":
 
-> >     # location of the training file
->     trainFile = jane-austen-emma-ch1.tsv
->     # location where you would like to save (serialize) your
->     # classifier; adding .gz at the end automatically gzips the file,
->     # making it smaller, and faster to load
->     serializeTo = ner-model.ser.gz
->  
->     # structure of your training file; this tells the classifier that
->     # the word is in column 0 and the correct answer is in column 1
->     map = word=0,answer=1
->  
->     # This specifies the order of the CRF: order 1 means that features
->     # apply at most to a class pair of previous class and current class
->     # or current class and next class.
->     maxLeft=1
->  
->     # these are the features we'd like to train with
->     # some are discussed below, the rest can be
->     # understood by looking at NERFeatureFactory
->     useClassFeature=true
->     useWord=true
->     # word character ngrams will be included up to length 6 as prefixes
->     # and suffixes only
->     useNGrams=true
->     noMidNGrams=true
->     maxNGramLeng=6
->     usePrev=true
->     useNext=true
->     useDisjunctive=true
->     useSequences=true
->     usePrevSequences=true
->     # the last 4 properties deal with word shape features
->     useTypeSeqs=true
->     useTypeSeqs2=true
->     useTypeySequences=true
->     wordShape=chris2useLC
->  
+```
+# location of the training file
+trainFile = jane-austen-emma-ch1.tsv
+# location where you would like to save (serialize) your
+# classifier; adding .gz at the end automatically gzips the file,
+# making it smaller, and faster to load
+serializeTo = ner-model.ser.gz
+ 
+# structure of your training file; this tells the classifier that
+# the word is in column 0 and the correct answer is in column 1
+map = word=0,answer=1
+ 
+# This specifies the order of the CRF: order 1 means that features
+# apply at most to a class pair of previous class and current class
+# or current class and next class.
+maxLeft=1
+ 
+# these are the features we'd like to train with
+# some are discussed below, the rest can be
+# understood by looking at NERFeatureFactory
+useClassFeature=true
+useWord=true
+# word character ngrams will be included up to length 6 as prefixes
+# and suffixes only
+useNGrams=true
+noMidNGrams=true
+maxNGramLeng=6
+usePrev=true
+useNext=true
+useDisjunctive=true
+useSequences=true
+usePrevSequences=true
+# the last 4 properties deal with word shape features
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+wordShape=chris2useLC
+```
 
 Here is that properties file as a downloadable link: [`austen.prop`](ner-
 example/austen.prop).
@@ -213,26 +214,26 @@ George Brocklehurst wrote about [training a recipe ingredient NER
 system](https://robots.thoughtbot.com/named-entity-recognition) using roughly
 the recipe discussed here.
 
-#### How can I train an NER model using less memory?
+### How can I train an NER model using less memory?
 
 Here are some tips on memory usage for CRFClassifier:
 
-    1. Ultimately, if you have tons of features and lots of classes, you need to have lots of memory to train a CRFClassifier. We frequently train models that require several gigabytes of RAM and are used to typing `java -mx4g`.
-    2. You can decrease the memory of the limited-memory quasi-Newton optimizer (L-BFGS). The optimizer maintains a number of past guesses which are used to approximate the Hessian. Having more guesses makes the estimate more accurate, and optimization is faster, but the memory used by the system during optimization is linear in the number of guesses. This is specified by the parameter `qnSize`. The default is 25. Using 10 is perfectly adequate. If you're short of memory, things will still work with much smaller values, even just a value of 2.
-    3. Use the flag `saveFeatureIndexToDisk = true`. The feature names aren't actually needed while the core model estimation (optimization) code is run. This option saves them to a file before the optimizer runs, enabling the memory they use to be freed, and then loads the feature index from disk after optimization is finished.
-    4. Decrease the order of the CRF. We usually use just first order CRFs (`maxLeft=1` and no features that refer to the `answer` class more than one away - it's okay to refer to word features any distance away). While the code supports arbitrary order CRFs, building second, third, or fourth order CRFs will greatly increase memory usage and normally isn't necessary. Remember: `maxLeft` refers to the size of the class contexts that your features use (that is, it is one smaller than the clique size). A first order CRF can still look arbitrarily far to the left or right to get information about the observed data context.
-    5. Decrease the number of features generated. To see all the features generated, you can set the property `printFeatures` to `true`. CRFClassifier will then write (potentially huge) files in the current directory listing the features generated for each token position. Options that generate huge numbers of features include `useWordPairs` and `useNGrams` when `maxNGramLeng` is a large number.
-    6. Decrease the number of classes in your model. This may or may not be possible, depending on what your modeling requirements are. But time complexity is proportional to the number of classes raised to the clique size.
-    7. Use the `flag useObservedSequencesOnly=true`. This makes it so that you can only label adjacent words with label sequences that were seen next to each other in the training data. For some kinds of data this actually gives better accuracy, for other kinds it is worse. But unless the label sequence patterns are dense, it will reduce your memory usage.
-    8. Of course, shrinking the amount of training data will also reduce the memory needed, but isn't very desirable if you're trying to train the best classifier. You might consider throwing out sentences with no entities in them, though.
-    9. If you're concerned about runtime memory usage, some of the above items still apply (number of features and classes, useObservedSequencesOnly, and order of the CRF), but in addition, you can use the flag `featureDiffThresh`, for example `featureDiffThresh=0.05`. In training, CRFClassifier will train one model, drop all the features with weight (absolute value) beneath the given threshold, and then train a second model. Training thus takes longer, but the resulting model is smaller and faster at runtime, and usually has very similar performance for a reasonable threshold such as 0.05.
+1. Ultimately, if you have tons of features and lots of classes, you need to have lots of memory to train a CRFClassifier. We frequently train models that require several gigabytes of RAM and are used to typing `java -mx4g`.
+2. You can decrease the memory of the limited-memory quasi-Newton optimizer (L-BFGS). The optimizer maintains a number of past guesses which are used to approximate the Hessian. Having more guesses makes the estimate more accurate, and optimization is faster, but the memory used by the system during optimization is linear in the number of guesses. This is specified by the parameter `qnSize`. The default is 25. Using 10 is perfectly adequate. If you're short of memory, things will still work with much smaller values, even just a value of 2.
+3. Use the flag `saveFeatureIndexToDisk = true`. The feature names aren't actually needed while the core model estimation (optimization) code is run. This option saves them to a file before the optimizer runs, enabling the memory they use to be freed, and then loads the feature index from disk after optimization is finished.
+4. Decrease the order of the CRF. We usually use just first order CRFs (`maxLeft=1` and no features that refer to the `answer` class more than one away - it's okay to refer to word features any distance away). While the code supports arbitrary order CRFs, building second, third, or fourth order CRFs will greatly increase memory usage and normally isn't necessary. Remember: `maxLeft` refers to the size of the class contexts that your features use (that is, it is one smaller than the clique size). A first order CRF can still look arbitrarily far to the left or right to get information about the observed data context.
+5. Decrease the number of features generated. To see all the features generated, you can set the property `printFeatures` to `true`. CRFClassifier will then write (potentially huge) files in the current directory listing the features generated for each token position. Options that generate huge numbers of features include `useWordPairs` and `useNGrams` when `maxNGramLeng` is a large number.
+6. Decrease the number of classes in your model. This may or may not be possible, depending on what your modeling requirements are. But time complexity is proportional to the number of classes raised to the clique size.
+7. Use the `flag useObservedSequencesOnly=true`. This makes it so that you can only label adjacent words with label sequences that were seen next to each other in the training data. For some kinds of data this actually gives better accuracy, for other kinds it is worse. But unless the label sequence patterns are dense, it will reduce your memory usage.
+8. Of course, shrinking the amount of training data will also reduce the memory needed, but isn't very desirable if you're trying to train the best classifier. You might consider throwing out sentences with no entities in them, though.
+9. If you're concerned about runtime memory usage, some of the above items still apply (number of features and classes, useObservedSequencesOnly, and order of the CRF), but in addition, you can use the flag `featureDiffThresh`, for example `featureDiffThresh=0.05`. In training, CRFClassifier will train one model, drop all the features with weight (absolute value) beneath the given threshold, and then train a second model. Training thus takes longer, but the resulting model is smaller and faster at runtime, and usually has very similar performance for a reasonable threshold such as 0.05.
 
-#### How do I train one model from multiple files?
+### How do I train one model from multiple files?
 
 Instead of setting the `trainFile` property or flag, set the trainFileList
 property or flag. Use a comma separated list of files.
 
-#### What is the API for using CRFClassifier in a program?
+### What is the API for using CRFClassifier in a program?
 
 Typically you would load a classifier from disk with the
 `CRFClassifier.getClassifier()` method and then use it to classify some text.
@@ -255,7 +256,7 @@ versus tokenized. One of the versions of it may well do what you would like to
 see. Again, see `[NERDemo.java](ner-example/NERDemo.java)` for examples of the
 use of several (but not all) of these methods.
 
-#### Can I set up the Stanford NER system up to allow single-jar deployment rather than it having to load NER models from separate files?
+### Can I set up the Stanford NER system up to allow single-jar deployment rather than it having to load NER models from separate files?
 
 Yes! But you'll need to make your own custom jar file. If you insert into the
 jar file an NER model with name _myModel_ and you put it inside the jar file,
@@ -266,7 +267,7 @@ a command like:
 > ` java -mx500m -cp stanford-ner.jar edu.stanford.nlp.ie.crf.CRFClassifier
 > -loadClassifier classifiers/myModel -textFile sample.txt `
 
-#### For our Web 5.0 system, can I run Stanford NER as a server/service/servlet?
+### For our Web 5.0 system, can I run Stanford NER as a server/service/servlet?
 
 Yes, you can. You might look at `edu.stanford.nlp.ie.NERServer` as an example
 of having the CRFClassifier run on a socket and wait for text to annotate and
@@ -280,8 +281,7 @@ from inside the folder of the distribution:
 > edu.stanford.nlp.ie.NERServer -port 9191 -loadClassifier
 > classifiers/english.all.3class.distsim.crf.ser.gz &  
 >  # The server is now started, now separately open a client to it $ java -cp
-> stanford-ner-with-classifier.jar edu.stanford.nlp.ie.NERServer -port 9191
-> -client  
+> stanford-ner-with-classifier.jar edu.stanford.nlp.ie.NERServer -port 9191 -client  
 >  Input some text and press RETURN to NER tag it, or just RETURN to finish.  
 >  President Barack Obama met Fidel Castro at the United Nations in New York.  
 >  President/O Barack/PERSON Obama/PERSON met/O Fidel/PERSON Castro/PERSON
@@ -294,7 +294,7 @@ it out for you. Or if you don't want to do that, maybe look at [what Hat Doang
 did](https://github.com/dat/stanford-ner). An adaptation of that code now runs
 [our online demo](http://nlp.stanford.edu:8080/ner/).
 
-#### What options are available for formatting the output of the classifier?
+### What options are available for formatting the output of the classifier?
 
 At the command line, there are five choices available for determining the
 output format of Stanford NER. You can choose an `outputFormat` of: `xml`,
@@ -317,8 +317,8 @@ found, together with their character offset spans. You can also get out k-best
 entity labeling output and the probabilities assigned to different labels. See
 the examples in `[NERDemo.java](ner-example/NERDemo.java)`.
 
-    
-        $ cat PatrickYe.txt
+
+    $ cat PatrickYe.txt
     I complained to Microsoft about Bill Gates.
       They     told me to see the mayor of New York.
     $
@@ -366,7 +366,6 @@ the examples in `[NERDemo.java](ner-example/NERDemo.java)`.
     New York	LOCATION	.
     
     $
-    
 
 The last format, `tabbedEntities`, was custom-designed to be helpful for
 people who would like to dump the output into a spreadsheet and then to work
@@ -378,7 +377,7 @@ column contains all the text between recognized entities. You should be able
 to easily load this file into a spreadsheet, R, or a database, and then to do
 aggregation or queries over recognized entities.
 
-#### Why can't I reproduce the results of your CoNLL 2003 system? Or: How do I get better CoNLL 2003 English performance?
+### Why can't I reproduce the results of your CoNLL 2003 system? Or: How do I get better CoNLL 2003 English performance?
 
 The classifier used for the CoNLL 2003 shared task _isn't_ the same as the one
 we distribute. The former was a 3rd order CMM (MEMM) classifier, while the
@@ -402,7 +401,7 @@ the training data, while the second makes use of distributional similarity
 features trained on a larger data set. Also, these models are IOB2 classifiers
 unlike the IO classifiers which we distribute with the software.
 
-#### How do I get German NER working right? My characters are messed up.
+### How do I get German NER working right? My characters are messed up.
 
 This is almost always a character encoding issue. You need to know how your
 German text files are encoded (normally either one of the traditional 8-bit
@@ -414,23 +413,23 @@ its default, despite most of the rest of the OS using utf-8). You can override
 the encoding of read and written files with the `-inputEncoding` and
 `-outputEncoding` flags.
 
-#### What is the asymptotic memory growth of the classifier?
+### What is the asymptotic memory growth of the classifier?
 
 The asymptotic memory growth in number of states `S` depends on the order of
 the CRF. If the CRF is order `n`, then the memory growth will be `S^(n+1)`.
 
-#### Can an existing model be extended?
+### Can an existing model be extended?
 
 Unfortunately, no.
 
-#### Can you release the data used to build the publicly released models
+### Can you release the data used to build the publicly released models
 
 Unfortunately, no. The licenses that come with that data do not allow for
 redistribution. However, you can see the
 [models](http://nlp.stanford.edu/software/CRF-NER.html#Models) section of the
 NER page for a brief description of what the data sets were.
 
-#### Is the NER deterministic? Why do the results change for the same data?
+### Is the NER deterministic? Why do the results change for the same data?
 
 Yes, the underlying CRF is deterministic. If you apply the NER to the same
 sentence more than once, though, it is possible to get different answers the
@@ -446,14 +445,16 @@ upper, have not seen all lowercase".
 This feature can be turned off in recent versions with the flag
 `-useKnownLCWords false`
 
-#### How can I NER tag already tokenized text?
+### How can I NER tag already tokenized text?
 
 Use the following options:  
-  
-` -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer
--tokenizerOptions "tokenizeNLs=true" `
 
-#### What options are available for text input processing?
+```
+-tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer
+-tokenizerOptions "tokenizeNLs=true"
+```
+
+### What options are available for text input processing?
 
 Flags that may be useful for handling different types of text input are:
 
@@ -461,7 +462,7 @@ Flags that may be useful for handling different types of text input are:
     * `-tokenizerFactory CLASSNAME` Specify a class to do tokenization (which extends `TokenizerFactory`) 
     * `-tokenizerOptions "tokenizeNLs=true,quotes=ascii"` Give options to the tokenizer, such as the two example options here.
    
-#### Does the NER use part-of-speech tags?
+### Does the NER use part-of-speech tags?
 
 None of our current models use pos tags by default. This is largely because
 the features used by the [Stanford POS
@@ -473,7 +474,7 @@ However, it certainly is possible to train new models which do use POS tags.
 The training data would need to have an extra column with the tag information,
 and you would then add `tag=X` to the `map` parameter.
 
-#### How do you use gazettes with Stanford NER?
+### How do you use gazettes with Stanford NER?
 
 None of the models we release were trained with gazette features turned on.
 
@@ -495,9 +496,11 @@ feature in this case.
 
 The gazette files should be of the format  
   
-` CLASS1 this is an example  
-CLASS2 this is another example  
-... `
+```
+CLASS1 this is an example
+CLASS2 this is another example
+...
+```
 
 Although the most obvious way to use the gazettes is to have `CLASS1`,
 `CLASS2`, etc represent the classes the model is trained to recognize, that is
@@ -527,7 +530,7 @@ the provided gazette, you will note that `Captain Weston` is correctly
 identified all three times in the new model, whereas the original model does
 not label Captain correctly in all cases.
 
-#### Can Stanford NER be integrated with Solr?
+### Can Stanford NER be integrated with Solr?
 
 Yes. You could start from [this searchbox blog
 post](http://www.searchbox.com/named-entity-recognition-ner-in-solr/).
