@@ -14,11 +14,11 @@ Is there a User Guide?
 
 At present, no. There is:
 
-    * The information in the README-tregex.txt, README-tsurgeon.txt, and README-gui.txt files
-    * The information on patterns and programmatic use in the Javadocs. The `TregexPattern` and `Tsurgeon` class javadoc give relatively complete information on the pattern languages of these tools.
-    * The GUI has help screens, available within the graphical interface by clicking on the Help buttons, which provide similar information on Tregex and Tsurgeon syntax, as does [this page](http://nlp.stanford.edu/~manning/courses/ling289/Tregex.html).
-    * There are brief powerpoint tutorials for [Tregex](tregex/The_Wonderful_World_of_Tregex.ppt) (by Galen Andrew) and [Tsurgeon](tregex/Tsurgeon2.ppt) (by Marie-Catherine de Marneffe).
-    * For `tregex`, you may also usefully consult user guides for `tgrep` and `tgrep2`, with which `tregex` is mainly compatible.
+* The information in the README-tregex.txt, README-tsurgeon.txt, and README-gui.txt files
+* The information on patterns and programmatic use in the Javadocs. The `TregexPattern` and `Tsurgeon` class javadoc give relatively complete information on the pattern languages of these tools.
+* The GUI has help screens, available within the graphical interface by clicking on the Help buttons, which provide similar information on Tregex and Tsurgeon syntax, as does [this page](http://nlp.stanford.edu/~manning/courses/ling289/Tregex.html).
+* There are brief powerpoint tutorials for [Tregex](tregex/The_Wonderful_World_of_Tregex.ppt) (by Galen Andrew) and [Tsurgeon](tregex/Tsurgeon2.ppt) (by Marie-Catherine de Marneffe).
+* For `tregex`, you may also usefully consult user guides for `tgrep` and `tgrep2`, with which `tregex` is mainly compatible.
 
 ### What command-line options does Tregex have?
 
@@ -31,8 +31,8 @@ Usage:
 
 Arguments:  
 
-    * `pattern`: the tree pattern which optionally names some set of nodes (i.e., gives it the "handle") `=name` (for some arbitrary string "name") 
-    * `filepath`: the path to files with trees. If this is a directory, there will be recursive descent and the pattern will be run on all files beneath the specified directory. 
+- `pattern`: the tree pattern which optionally names some set of nodes (i.e., gives it the "handle") `=name` (for some arbitrary string "name") 
+- `filepath`: the path to files with trees. If this is a directory, there will be recursive descent and the pattern will be run on all files beneath the specified directory. 
 
 Options:
 
