@@ -31,26 +31,27 @@ source code to answer some questions....
 
 Here's a sample NER properties file:
 
-> >     trainFile = training-data.col
->     serializeTo = ner-model.ser.gz
->     map = word=0,answer=1
->  
->     useClassFeature=true
->     useWord=true
->     useNGrams=true
->     noMidNGrams=true
->     maxNGramLeng=6
->     usePrev=true
->     useNext=true
->     useSequences=true
->     usePrevSequences=true
->     maxLeft=1
->     useTypeSeqs=true
->     useTypeSeqs2=true
->     useTypeySequences=true
->     wordShape=chris2useLC
->     useDisjunctive=true
->  
+```
+trainFile = training-data.col
+serializeTo = ner-model.ser.gz
+map = word=0,answer=1
+
+useClassFeature=true
+useWord=true
+useNGrams=true
+noMidNGrams=true
+maxNGramLeng=6
+usePrev=true
+useNext=true
+useSequences=true
+usePrevSequences=true
+maxLeft=1
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+wordShape=chris2useLC
+useDisjunctive=true
+```
 
 The rest of this answer gives a simple, but complete example of training an
 NER classifier. Suppose we want to build an NER system for Jane Austen novels.
@@ -58,8 +59,9 @@ We might train it on [chapter 1 of _Emma_](ner-example/jane-austen-emma-
 ch1.txt). Download that file. You can convert it to one token per line with
 our tokenizer (included in the box) with the following command:
 
-> ` java -cp stanford-ner.jar edu.stanford.nlp.process.PTBTokenizer jane-
-> austen-emma-ch1.txt > jane-austen-emma-ch1.tok `
+```
+java -cp stanford-ner.jar edu.stanford.nlp.process.PTBTokenizer jane-austen-emma-ch1.txt > jane-austen-emma-ch1.tok
+```
 
 We then need to make training data where we label the entities. There are
 various annotation tools available, or you could do this by hand in a text
@@ -68,8 +70,9 @@ default label is "O" in our software, though you can specify it via the
 `backgroundSymbol` property) and then to hand-label the real entities in a
 text editor. The first step can be done with Perl using this command:
 
-> ` perl -ne 'chomp; print "$_\tO\n"' jane-austen-emma-ch1.tok > jane-austen-
-> emma-ch1.tsv `
+```
+perl -ne 'chomp; print "$_\tO\n"' jane-austen-emma-ch1.tok > jane-austen-emma-ch1.tsv
+```
 
 and if you don't want to do the second, you can skip to downloading [our input
 file](ner-example/jane-austen-emma-ch1.tsv). We have marked only one entity
@@ -137,15 +140,16 @@ example/austen.prop).
 Once you have such a properties file, you can train a classifier with the
 command:
 
-` java -cp stanford-ner.jar edu.stanford.nlp.ie.crf.CRFClassifier -prop
-austen.prop `
+```
+java -cp stanford-ner.jar edu.stanford.nlp.ie.crf.CRFClassifier -prop austen.prop
 
 An NER model will then be serialized to the location specified in the
 properties file (`ner-model.ser.gz`) once the program has completed. To check
 how well it works, you can run the test command:
 
-> ` java -cp stanford-ner.jar edu.stanford.nlp.ie.crf.CRFClassifier
-> -loadClassifier ner-model.ser.gz -testFile jane-austen-emma-ch2.tsv `
+```
+java -cp stanford-ner.jar edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier ner-model.ser.gz -testFile jane-austen-emma-ch2.tsv
+```
 
 In the output, the first column is the input tokens, the second column is the
 correct (gold) answers, and the third column is the answer guessed by the
@@ -264,8 +268,9 @@ say under the `/classifiers/` path (anything works!) as
 `/classifiers/myModel`, then you can load it when running from a jar file with
 a command like:
 
-> ` java -mx500m -cp stanford-ner.jar edu.stanford.nlp.ie.crf.CRFClassifier
-> -loadClassifier classifiers/myModel -textFile sample.txt `
+```
+java -mx500m -cp stanford-ner.jar edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/myModel -textFile sample.txt
+```
 
 ### For our Web 5.0 system, can I run Stanford NER as a server/service/servlet?
 
@@ -274,19 +279,18 @@ of having the CRFClassifier run on a socket and wait for text to annotate and
 then returning the results. Here's a complete Unix/Linux/Mac OS X example, run
 from inside the folder of the distribution:
 
-> ` $ cp stanford-ner.jar stanford-ner-with-classifier.jar  
->  $ jar -uf stanford-ner-with-classifier.jar
-> classifiers/english.all.3class.distsim.crf.ser.gz  
->  $ java -mx500m -cp stanford-ner-with-classifier.jar
-> edu.stanford.nlp.ie.NERServer -port 9191 -loadClassifier
-> classifiers/english.all.3class.distsim.crf.ser.gz &  
->  # The server is now started, now separately open a client to it $ java -cp
-> stanford-ner-with-classifier.jar edu.stanford.nlp.ie.NERServer -port 9191 -client  
->  Input some text and press RETURN to NER tag it, or just RETURN to finish.  
->  President Barack Obama met Fidel Castro at the United Nations in New York.  
->  President/O Barack/PERSON Obama/PERSON met/O Fidel/PERSON Castro/PERSON
-> at/O the/O United/ORGANIZATION Nations/ORGANIZATION in/O New/LOCATION
-> York/LOCATION ./O `
+```
+$ cp stanford-ner.jar stanford-ner-with-classifier.jar  
+$ jar -uf stanford-ner-with-classifier.jar classifiers/english.all.3class.distsim.crf.ser.gz  
+$ java -mx500m -cp stanford-ner-with-classifier.jar edu.stanford.nlp.ie.NERServer -port 9191 -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz &  
+# The server is now started, now separately open a client to it
+$ java -cp stanford-ner-with-classifier.jar edu.stanford.nlp.ie.NERServer -port 9191 -client  
+# Input some text and press RETURN to NER tag it, or just RETURN to finish.  
+  President Barack Obama met Fidel Castro at the United Nations in New York.  
+  President/O Barack/PERSON Obama/PERSON met/O Fidel/PERSON Castro/PERSON
+ at/O the/O United/ORGANIZATION Nations/ORGANIZATION in/O New/LOCATION
+ York/LOCATION ./O `
+ ```
 
 With a bit of work, we're sure you can adapt that example to work in a REST,
 SOAP, AJAX, or whatever system. If not, pay us a lot of money, and we'll work
