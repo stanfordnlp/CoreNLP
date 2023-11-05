@@ -21,8 +21,8 @@ learning APIs (Amazon, Google, ...) The classification method is described in:
 
 > Christopher Manning and Dan Klein. 2003. Optimization, Maxent Models, and
 > Conditional Estimation without Magic. Tutorial at HLT-NAACL 2003 and ACL 2003.
-> [pdf slides](/pubs/maxent-tutorial-slides.pdf)
-> [pdf handouts](/pubs/maxent-tutorial-slides-6.pdf)
+> [pdf slides](https://nlp.stanford.edu/pubs/maxent-tutorial-slides.pdf)
+> [pdf handouts](https://nlp.stanford.edu/pubs/maxent-tutorial-slides-6.pdf)
 
 Version 2 of the classifier was developed by Anna Rafferty, Alex Kleeman,
 Jenny Finkel, and Christopher Manning.
@@ -57,7 +57,7 @@ also look at the [javadoc for ColumnDataClassifier](http://nlp.stanford.edu/nlp/
 
 ### Extensions: Packages by others using the Stanford Classifier
 
-  * **JavaScript/npm:** Milos Bejda has written [stanford-classifier](https://www.npmjs.com/package/stanford-classifier) Nodejs wrapper. [Source](https://github.com/mbejda/Nodejs-Stanford-Classifier) on github. 
+- **JavaScript/npm:** Milos Bejda has written [stanford-classifier](https://www.npmjs.com/package/stanford-classifier) Nodejs wrapper. [Source](https://github.com/mbejda/Nodejs-Stanford-Classifier) on github. 
 
 ### Availability
 
