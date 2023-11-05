@@ -15,7 +15,8 @@ relationships and regular expression matches on nodes (the name is short for
 "tree regular expressions"). Tregex comes with **Tsurgeon** , a tree
 transformation language. Also included from version 2.0 on is a similar
 package which operates on dependency graphs (class `SemanticGraph`, called
-**semgrex**.
+**semgrex**.  Recent versions of CoreNLP include a dependency graph editor
+based on Semgrex called **Ssurgeon**.
 
 **Tregex:** The best introduction to Tregex is the brief powerpoint tutorial
 for [Tregex](tregex/The_Wonderful_World_of_Tregex.ppt) by Galen Andrew. The
@@ -51,7 +52,7 @@ provide an overview of this package.
 Tregex was written by Galen Andrew and Roger Levy. Tsurgeon was written by
 Roger Levy. The graphical interface for both was written by Anna Rafferty. A
 lot of bug fixing and various extensions to both were done by John Bauer.
-Semgrex was written by Chloe Kiddon and John Bauer. These programs also rely
+Semgrex was written by Chloe Kiddon and John Bauer. Ssurgeon was written by Eric Yeh and John Bauer.  These programs also rely
 on classes developed by others as part of the Stanford JavaNLP project.
 
 There is a paper describing Tregex and Tsurgeon. You're encouraged to cite it
@@ -68,6 +69,11 @@ Semgrex is very briefly described in this paper:
 > Christopher D. Manning. 2007. [Learning Alignments and Leveraging Natural
 > Logic](http://www.aclweb.org/anthology/W07-1427). _Proceedings of the
 > Workshop on Textual Entailment and Paraphrasing_ , pages 165–170.
+
+We published a more complete description of Semgrex and Ssurgeon at GURT 2023:
+
+> John Bauer, Chloè Kiddon, Eric Yeh, Alex Shan, and Christopher D. Manning. 2023.  [Semgrex and Ssurgeon, Searching and Manipulating Dependency Graphs](https://aclanthology.org/2023.tlt-1.7/)  _Proceedings of the 21st International Workshop on Treebanks and Linguistic Theories (TLT, GURT/SyntaxFest 2023)_
+
 
 Tregex, Tsurgeon, and Semgrex are **licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Note that
 this is the _full_ GPL, which allows many free uses. For distributors of
