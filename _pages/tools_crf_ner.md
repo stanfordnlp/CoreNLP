@@ -110,27 +110,29 @@ OS/shell.) The supplied `ner.bat` and `ner.sh` should work to allow you to tag
 a single file, when running from inside the Stanford NER folder. For example,
 for Windows:
 
-> ner file
+```
+ner <filename>
+```
 
 This corresponds to the full command:
 
-> `java -mx600m -cp "*;lib\*" edu.stanford.nlp.ie.crf.CRFClassifier
-> -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -textFile
-> sample.txt`
+```
+java -mx600m -cp "*;lib\*" edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -textFile sample.txt
+```
 
 Or on Unix/Linux you should be able to parse the test file in the distribution
 directory with the command:
 
-> `java -mx600m -cp "*:lib/*" edu.stanford.nlp.ie.crf.CRFClassifier
-> -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -textFile
-> sample.txt`
+```
+java -mx600m -cp "*:lib/*" edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -textFile sample.txt
+```
 
 Here's an output option that will print out entities and their class to the
 first two columns of a tab-separated columns output file:
 
-> `java -mx600m -cp "*;lib/*" edu.stanford.nlp.ie.crf.CRFClassifier
-> -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz
-> -outputFormat tabbedEntities -textFile sample.txt > sample.tsv`
+```
+java -mx600m -cp "*;lib/*" edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -outputFormat tabbedEntities -textFile sample.txt > sample.tsv
+```
 
 #### Full Stanford NER functionality
 
@@ -143,9 +145,9 @@ and time patterns with the rule-based NER of SUTime.
 To use NERClassifierCombiner at the command-line, the jars in lib directory
 and stanford-ner.jar must be in the CLASSPATH. Here is an example command:
 
-> `java -mx1g -cp "*:lib/*" edu.stanford.nlp.ie.NERClassifierCombiner
-> -textFile sample.txt -ner.model
-> classifiers/english.all.3class.distsim.crf.ser.gz,classifiers/english.conll.4class.distsim.crf.ser.gz,classifiers/english.muc.7class.distsim.crf.ser.gz`
+```
+java -mx1g -cp "*:lib/*" edu.stanford.nlp.ie.NERClassifierCombiner -textFile sample.txt -ner.model classifiers/english.all.3class.distsim.crf.ser.gz,classifiers/english.conll.4class.distsim.crf.ser.gz,classifiers/english.muc.7class.distsim.crf.ser.gz
+```
 
 The one difference you should see from above is that _Sunday_ is now
 recognized as a DATE.
@@ -165,12 +167,9 @@ Stanford NER can also be set up to run as a server listening on a socket.
 
 You can look at a Powerpoint Introduction to NER and the Stanford NER package
 [[ppt](jenny-ner-2007.ppt)] [[pdf](jenny-ner-2007.pdf)]. There is also a list
-of [Frequently Asked Questions](crf-faq.html) (FAQ), with answers! This
+of [Frequently Asked Questions](tools_crf_faq.md) (FAQ), with answers! This
 includes some information on training models. Further documentation is
 provided in the included `README.txt` and in the javadocs.
-
-Have a support question? Ask us on [Stack Overflow](http://stackoverflow.com)
-using the tag `stanford-nlp`.
 
 Feedback and bug reports / fixes can be sent to our mailing lists.
 
@@ -181,7 +180,6 @@ are shared with other JavaNLP tools (with the exclusion of the parser). Each
 address is at `@lists.stanford.edu`:
 
   1. `java-nlp-user` This is the best list to post to in order to send feature requests, make announcements, or for discussion among JavaNLP users. (Please ask support questions on [Stack Overflow](http://stackoverflow.com) using the `stanford-nlp` tag.) 
-
 You have to subscribe to be able to use this list. Join the list via [this
 webpage](https://mailman.stanford.edu/mailman/listinfo/java-nlp-user) or by
 emailing `java-nlp-user-join@lists.stanford.edu`. (Leave the subject and
