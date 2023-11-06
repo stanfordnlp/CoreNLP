@@ -23,12 +23,11 @@ into a scene graph as described in the paper:
 > Language (VL15)_. [[bib](https://nlp.stanford.edu/pubs/schuster-krishna-
 > chang-feifei-manning-vl15.bib)]
 
-The system requires Java 1.8+ to be installed, and it requires Stanford
-[CoreNLP](https://stanfordnlp.github.io/CoreNLP/) 3.6.0. We recommend running
-the system with at least 2gb of memory. (i.e., `java -mx2g`).
 
-The system is **licensed under the[GNU General Public
-License](https://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Source is
+The system requires Java 1.8+ to be installed.  The current version of SceneGraph is included in [Stanford CoreNLP](https://stanfordnlp.github.io/CoreNLP/).
+
+
+The system is **licensed under the [GNU General Public License](https://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Source is
 included. The package includes components for command-line invocation, and a
 Java API.
 
@@ -37,14 +36,15 @@ Java API.
 To run the code, you need the CoreNLP jar and the CoreNLP models jar as well
 as the Scene Graph Parser jar in your classpath.
 
-This version is updated to work with CoreNLP 4.2.0 [Download the latest
-CoreNLP distribution](https://stanfordnlp.github.io/CoreNLP)  
----  
+### Older versions
+
+This version is updated to work with [CoreNLP 4.2.0](http://nlp.stanford.edu/software/stanford-corenlp-4.2.0.zip):
 [Download the Scene Graph Parser](/projects/scenegraph/scenegraph-2.0.jar)
 [0.2 MB]  
-This is the original version [Download the 3.6.0 CoreNLP
-distribution](/software/stanford-corenlp-full-2015-12-09.zip) [404 MB]  
----  
+
+
+
+This is the original version, which works with [CoreNLP 3.6.0](http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip) [404 MB]  
 [Download the Scene Graph Parser](/projects/scenegraph/scenegraph-1.0.jar)
 [0.2 MB]  
 The source code for the Scene Graph Parser is included in the jar file.  
@@ -144,28 +144,18 @@ console.
 
   
 
-### Questions
-
-  
-
 ### Support
 
-We recommend asking questions on StackOverflow, using the [ `stanford-nlp`
-tag](https://stackoverflow.com/questions/tagged/stanford-nlp).  
-In addition, we have 3 mailing lists that you can write to, all of which are
-shared with other JavaNLP tools (with the exclusion of the parser). Each
-address is at `@lists.stanford.edu`:
-
-  1. `java-nlp-user` This is the best list to post to in order to send feature requests, make announcements, or for discussion among JavaNLP users. (Please ask support questions on [Stack Overflow](https://stackoverflow.com) using the `stanford-nlp` tag.) 
-
+1. `java-nlp-user` This is the best list to post to in order to send feature requests, make announcements, or for discussion among JavaNLP users. (Please ask support questions on [Stack Overflow](https://stackoverflow.com) using the `stanford-nlp` tag.) 
 You have to subscribe to be able to use this list. Join the list via [this
 webpage](https://mailman.stanford.edu/mailman/listinfo/java-nlp-user) or by
 emailing `java-nlp-user-join@lists.stanford.edu`. (Leave the subject and
 message body empty.) You can also [look at the list
 archives](https://mailman.stanford.edu/pipermail/java-nlp-user/).
 
-  2. `java-nlp-announce` This list will be used only to announce new versions of Stanford JavaNLP tools. So it will be very low volume (expect 1-3 messages a year). Join the list via [this webpage](https://mailman.stanford.edu/mailman/listinfo/java-nlp-announce) or by emailing `java-nlp-announce-join@lists.stanford.edu`. (Leave the subject and message body empty.) 
-  3. `java-nlp-support` This list goes only to the software maintainers. It's a good address for licensing questions, etc. **For general use and support questions, you're better off joining and using`java-nlp-user`.** You cannot join `java-nlp-support`, but you can mail questions to `java-nlp-support@lists.stanford.edu`. 
+2. `java-nlp-announce` This list will be used only to announce new versions of Stanford JavaNLP tools. So it will be very low volume (expect 1-3 messages a year). Join the list via [this webpage](https://mailman.stanford.edu/mailman/listinfo/java-nlp-announce) or by emailing `java-nlp-announce-join@lists.stanford.edu`. (Leave the subject and message body empty.)
+
+3. `java-nlp-support` This list goes only to the software maintainers. It's a good address for licensing questions, etc. **For general use and support questions, you're better off joining and using`java-nlp-user`.** You cannot join `java-nlp-support`, but you can mail questions to `java-nlp-support@lists.stanford.edu`. 
 
 < !-- RELEASE HISTORY -- >  
 
