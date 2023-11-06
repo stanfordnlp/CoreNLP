@@ -41,8 +41,8 @@ Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later).
 Source is included. The package includes components for command-line
 invocation (look at the shell scripts and batch files included in the
 download), running as a server (look at `NERServer` in the sources jar file),
-and a Java API (look at the simple examples in the `[NERDemo.java](ner-example/NERDemo.java)` file included in the download, and then at the
-javadocs). Stanford NER code is dual licensed (in a similar manner to MySQL,
+and a Java API (look at the simple examples in the `[NERDemo.java](https://github.com/stanfordnlp/CoreNLP/blob/main/src/edu/stanford/nlp/ie/demo/NERDemo.java)` file included in the download, and then at the
+[javadocs](https://nlp.stanford.edu/nlp/javadoc/javanlp/)). Stanford NER code is dual licensed (in a similar manner to MySQL,
 etc.). Open source licensing is under the _full_ GPL, which allows many free
 uses. For distributors of [proprietary
 software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem),
@@ -80,10 +80,10 @@ classifiers](http://nlp.stanford.edu:8080/ner/) or [Stanford NER as part of
 Stanford CoreNLP](http://corenlp.run/) on the web, to understand what Stanford
 NER is and whether it will be useful to you.
 
-To use the software on your computer, [download the zip file](http://nlp.stanford.edu/software/CRF-NER.html#Download). You then unzip
-the file by either double-clicing on the zip file, using a program for
-unpacking zip files, or by using the `unzip` command. This shord create a
-`stanford-ner` folder. There is no installation procedure, you should be able
+To use the software on your computer, [download the main CoreNLP package](https://stanfordnlp.github.io/CoreNLP/). You then unzip
+the file by either double-clicking on the zip file, using a program for
+unpacking zip files, or by using the `unzip` command. This should create a
+`stanford-corenlp` folder. There is no installation procedure, you should be able
 to run Stanford NER from that folder. Normally, Stanford NER is run from the
 command line (i.e., shell or terminal). Current releases of Stanford NER
 require Java 1.8 or later. Either make sure you have or get [Java 8](http://java.com/) or consider running an earlier version of the software
@@ -166,7 +166,7 @@ Stanford NER can also be set up to run as a server listening on a socket.
 ### Questions
 
 You can look at a Powerpoint Introduction to NER and the Stanford NER package
-[[ppt](jenny-ner-2007.ppt)] [[pdf](jenny-ner-2007.pdf)]. There is also a list
+[[ppt](https://nlp.stanford.edu/software/jenny-ner-2007.ppt)] [[pdf](https://nlp.stanford.edu/software/jenny-ner-2007.pdf)]. There is also a list
 of [Frequently Asked Questions](tools_crf_faq.md) (FAQ), with answers! This
 includes some information on training models. Further documentation is
 provided in the included `README.txt` and in the javadocs.
@@ -264,9 +264,6 @@ Also available are caseless versions of these models, better for use on texts
 that are mainly lower or upper case, rather than follow the conventions of
 standard English
 
-[CoreNLP models jars download
-page](https://stanfordnlp.github.io/CoreNLP/index.html#download)  
-
 **Important note:** There was a problem with the v3.6.0 English Caseless NER
 model. See [this page](http://stanfordnlp.github.io/CoreNLP/caseless.html).
 
@@ -275,7 +272,7 @@ model. See [this page](http://stanfordnlp.github.io/CoreNLP/caseless.html).
 #### German
 
 A German NER model is available, based on work by Manaal Faruqui and Sebastian
-Padó. You can find it in the CoreNLP German models jar. For citation and other
+PadÃ³. You can find it in the CoreNLP German models jar. For citation and other
 information relating to the German classifiers, please see [ Sebastian Pado's
 German NER page](http://www.nlpado.de/~sebastian/software/ner_german.html)
 (but the models there are now many years old; you should use the better models
@@ -292,9 +289,6 @@ for NER](https://dh3.hypotheses.org/886) with [materials
 available](https://github.com/MarieFlueh/Workshop-NER-fuer-
 GeisteswissenschaftlerInnen).
 
-[CoreNLP models jars download
-page](https://stanfordnlp.github.io/CoreNLP/index.html#download)  
-
 Here are a couple of commands using these models, two sample files, and a
 couple of notes. Running on TSV files: the models were saved with options for
 testing on German CoNLL NER files. While the models use just the surface word
@@ -306,18 +300,15 @@ ASCII quotes and BIO entity tags. Also, be careful of the text encoding: The
 default is Unicode; use `-encoding iso-8859-15` if the text is in 8-bit
 encoding.  
 
-> TSV mini test file: [`german-ner.tsv`](german-ner.tsv) — Text mini test
-> file: [`german-ner.txt`](german-ner.txt)  
->
->  
->  
->     java -cp "*" edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier
-> edu/stanford/nlp/models/ner/german.conll.hgc_175m_600.crf.ser.gz -testFile
-> german-ner.tsv
->     java -cp "*" edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier
-> edu/stanford/nlp/models/ner/german.conll.hgc_175m_600.crf.ser.gz
-> -tokenizerOptions latexQuotes=false -textFile german-ner.txt
->  
+TSV mini test file: [`german-ner.tsv`](https://nlp.stanford.edu/software/german-ner.tsv) —
+Text mini test file: [`german-ner.txt`](https://nlp.stanford.edu/software/german-ner.txt)
+
+  
+
+```
+java -cp "*" edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier edu/stanford/nlp/models/ner/german.conll.hgc_175m_600.crf.ser.gz -testFile german-ner.tsv
+java -cp "*" edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier edu/stanford/nlp/models/ner/german.conll.hgc_175m_600.crf.ser.gz -tokenizerOptions latexQuotes=false -textFile german-ner.txt
+```
 
   
 
@@ -325,9 +316,6 @@ encoding.
 
 From version 3.4.1 forward, we have a Spanish model available for NER. It is
 included in the Spanish corenlp models jar.
-
-[CoreNLP models jars download
-page](https://stanfordnlp.github.io/CoreNLP/index.html#download)  
 
 #### Chinese
 
@@ -337,9 +325,6 @@ one without. These are designed to be run on _word-segmented Chinese_. So, if
 you want to use these on normal Chinese text, you will first need to run
 [Stanford Word Segmenter](http://nlp.stanford.edu/software/segmenter.html) or
 some other Chinese word segmenter, and then run NER on the output of that!
-
-[CoreNLP models jars download
-page](https://stanfordnlp.github.io/CoreNLP/index.html#download)  
 
 ### Online Demo
 
@@ -356,30 +341,30 @@ models, see [CoreNLP](http://nlp.stanford.edu/software/corenlp.html).
   
 |Version| Date| Description|
 |---|---|---|
-|[4.2.0](stanford-ner-4.2.0.zip) | 2020-11-17 | Update for compatibility|
-|[4.0.0](stanford-ner-4.0.0.zip) | 2020-04-19 | Update to UDv2.0 tokenization | 
-|[3.9.2](stanford-ner-2018-10-16.zip) | 2018-10-16 | Updated for compatibility | 
-|[3.9.1](stanford-ner-2018-02-27.zip) | 2018-02-27 | KBP ner models for Chinese and Spanish  |
-|[3.8.0](stanford-ner-2017-06-09.zip) | 2017-06-09 | Updated for compatibility  |
-|[3.7.0](stanford-ner-2016-10-31.zip) | 2016-10-31 | Improvements to Chinese and German NER  |
-|[3.6.0](stanford-ner-2015-12-09.zip) | 2015-12-09 | Updated for compatibility  |
-|[3.5.2](stanford-ner-2015-04-20.zip) | 2015-04-20 | synch standalone and CoreNLP functionality | 
-|[3.5.1](stanford-ner-2015-01-29.zip) | 2015-01-29 | Substantial accuracy improvements  |
-|[3.5.0](stanford-ner-2014-10-26.zip) | 2014-10-26 | Upgrade to Java 8  |
-|[3.4.1](stanford-ner-2014-08-27.zip) | 2014-08-27 | Added Spanish models  |
-|[3.4](stanford-ner-2014-06-16.zip) | 2014-06-16 | Fix serialization of new models | 
-|[3.3.1](stanford-ner-2014-01-04.zip) | 2014-01-04 | Bugfix release | 
-|[3.3.0](stanford-ner-2013-11-12.zip) | 2013-11-12 | Updated for compatibility  |
-|[3.2.0](stanford-ner-2013-06-20.zip) | 2013-06-20 | Improved line by line handling | 
-|[1.2.8](stanford-ner-2013-04-04.zip) | 2013-04-04 | -nthreads option  |
-|[1.2.7](stanford-ner-2012-11-11.zip) | 2012-11-11 | Add Chinese model, include Wikipedia data in 3-class English model  |
-|[1.2.6](stanford-ner-2012-07-09.tgz) | 2012-07-09 | Minor bug fixes|  
-|[1.2.5](stanford-ner-2012-05-22.tgz) | 2012-05-22 | Fix encoding issue  |
-|[1.2.4](stanford-ner-2012-04-07.tgz) | 2012-04-07 | Caseless versions of models supported|  
-|[1.2.3](stanford-ner-2012-01-06.tgz) | 2012-01-06 | Minor bug fixes  |
-|[1.2.2](stanford-ner-2011-09-14.tgz) | 2011-09-14 | Improved thread safety  |
-|[1.2.1](stanford-ner-2011-06-19.tgz) | 2011-06-19 | Models reduced in size but on average |improved in accuracy (improved distsim clusters)  |
-|[1.2](stanford-ner-2011-05-16.tgz) | 2011-05-16 | Normal download includes 3, 4, and 7 class models. Updated for compatibility with other software releases.  |
-|[1.1.1](stanford-ner-2009-01-16.tgz) | 2009-01-16 | Minor bug and usability fixes, and changed API (in particular the methods to classify and output tagged text)  |
-|[1.1](stanford-ner-2008-05-07.tgz) | 2008-05-07 | Additional feature flags, various code updates  |
-|[1.0](stanford-ner-2006-09-18.tar.gz) | 2006-09-18 | Initial release | 
+|[4.2.0](https://nlp.stanford.edu/software/stanford-ner-4.2.0.zip) | 2020-11-17 | Update for compatibility|
+|[4.0.0](https://nlp.stanford.edu/software/stanford-ner-4.0.0.zip) | 2020-04-19 | Update to UDv2.0 tokenization | 
+|[3.9.2](https://nlp.stanford.edu/software/stanford-ner-2018-10-16.zip) | 2018-10-16 | Updated for compatibility | 
+|[3.9.1](https://nlp.stanford.edu/software/stanford-ner-2018-02-27.zip) | 2018-02-27 | KBP ner models for Chinese and Spanish  |
+|[3.8.0](https://nlp.stanford.edu/software/stanford-ner-2017-06-09.zip) | 2017-06-09 | Updated for compatibility  |
+|[3.7.0](https://nlp.stanford.edu/software/stanford-ner-2016-10-31.zip) | 2016-10-31 | Improvements to Chinese and German NER  |
+|[3.6.0](https://nlp.stanford.edu/software/stanford-ner-2015-12-09.zip) | 2015-12-09 | Updated for compatibility  |
+|[3.5.2](https://nlp.stanford.edu/software/stanford-ner-2015-04-20.zip) | 2015-04-20 | synch standalone and CoreNLP functionality | 
+|[3.5.1](https://nlp.stanford.edu/software/stanford-ner-2015-01-29.zip) | 2015-01-29 | Substantial accuracy improvements  |
+|[3.5.0](https://nlp.stanford.edu/software/stanford-ner-2014-10-26.zip) | 2014-10-26 | Upgrade to Java 8  |
+|[3.4.1](https://nlp.stanford.edu/software/stanford-ner-2014-08-27.zip) | 2014-08-27 | Added Spanish models  |
+|[3.4](https://nlp.stanford.edu/software/stanford-ner-2014-06-16.zip) | 2014-06-16 | Fix serialization of new models | 
+|[3.3.1](https://nlp.stanford.edu/software/stanford-ner-2014-01-04.zip) | 2014-01-04 | Bugfix release | 
+|[3.3.0](https://nlp.stanford.edu/software/stanford-ner-2013-11-12.zip) | 2013-11-12 | Updated for compatibility  |
+|[3.2.0](https://nlp.stanford.edu/software/stanford-ner-2013-06-20.zip) | 2013-06-20 | Improved line by line handling | 
+|[1.2.8](https://nlp.stanford.edu/software/stanford-ner-2013-04-04.zip) | 2013-04-04 | -nthreads option  |
+|[1.2.7](https://nlp.stanford.edu/software/stanford-ner-2012-11-11.zip) | 2012-11-11 | Add Chinese model, include Wikipedia data in 3-class English model  |
+|[1.2.6](https://nlp.stanford.edu/software/stanford-ner-2012-07-09.tgz) | 2012-07-09 | Minor bug fixes|  
+|[1.2.5](https://nlp.stanford.edu/software/stanford-ner-2012-05-22.tgz) | 2012-05-22 | Fix encoding issue  |
+|[1.2.4](https://nlp.stanford.edu/software/stanford-ner-2012-04-07.tgz) | 2012-04-07 | Caseless versions of models supported|  
+|[1.2.3](https://nlp.stanford.edu/software/stanford-ner-2012-01-06.tgz) | 2012-01-06 | Minor bug fixes  |
+|[1.2.2](https://nlp.stanford.edu/software/stanford-ner-2011-09-14.tgz) | 2011-09-14 | Improved thread safety  |
+|[1.2.1](https://nlp.stanford.edu/software/stanford-ner-2011-06-19.tgz) | 2011-06-19 | Models reduced in size but on average |improved in accuracy (improved distsim clusters)  |
+|[1.2](https://nlp.stanford.edu/software/stanford-ner-2011-05-16.tgz) | 2011-05-16 | Normal download includes 3, 4, and 7 class models. Updated for compatibility with other software releases.  |
+|[1.1.1](https://nlp.stanford.edu/software/stanford-ner-2009-01-16.tgz) | 2009-01-16 | Minor bug and usability fixes, and changed API (in particular the methods to classify and output tagged text)  |
+|[1.1](https://nlp.stanford.edu/software/stanford-ner-2008-05-07.tgz) | 2008-05-07 | Additional feature flags, various code updates  |
+|[1.0](https://nlp.stanford.edu/software/stanford-ner-2006-09-18.tar.gz) | 2006-09-18 | Initial release | 
