@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Tregex and Tsurgeon FAQ
-keywords: tregex, tsurgeon, semgrex
+keywords: tregex, tsurgeon, semgrex, ssurgeon
 permalink: '/tools_tregex_faq.html'
 nav_order: 7
 toc: true

@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Tregex, Tsurgeon, and Semgrex
-keywords: tregex, tsurgeon, semgrex
+title: Tregex, Tsurgeon, Semgrex, and Ssurgeon
+keywords: tregex, tsurgeon, semgrex, ssurgeon
 permalink: '/tools_tregex.html'
 nav_order: 6
 toc: true
@@ -81,7 +81,7 @@ We published a more complete description of Semgrex and Ssurgeon at GURT 2023:
 > Linguistic Theories (TLT, GURT/SyntaxFest 2023)_
 
 
-Tregex, Tsurgeon, and Semgrex are **licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Note that
+Tregex, Tsurgeon, Semgrex, and Ssurgoen are **licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later). Note that
 this is the _full_ GPL, which allows many free uses. For distributors of
 [proprietary software](http://www.gnu.org/licenses/gpl-
 faq.html#GPLInProprietarySystem), [commercial
