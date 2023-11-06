@@ -524,8 +524,7 @@ tokensregex tools included in Stanford CoreNLP. The CRF NER is not guaranteed
 to accept all words in the gazette as part of the expected class, and it may
 also accept words outside the gazette as part of the class.
 
-An example of how to use the gazette is presented in [`austen.gaz.prop`](ner-
-example/austen.gaz.prop) and [`austen.gaz.txt`](ner-example/austen.gaz.txt).
+An example of how to use the gazette is presented in [`austen.gaz.prop`](https://nlp.stanford.edu/software/ner-example/austen.gaz.prop) and [`austen.gaz.txt`](https://nlp.stanford.edu/software/ner-example/austen.gaz.txt).
 Note that both entries in the first and second chapters show up in
 austen.gaz.txt; otherwise, the gazette would not help recognize names that had
 not shown up anywhere in the training data. If you train the NER model with
@@ -541,6 +540,5 @@ post](http://www.searchbox.com/named-entity-recognition-ner-in-solr/).
 You can discuss other topics with Stanford NER developers and users by
 [joining the `java-nlp-user` mailing
 list](https://mailman.stanford.edu/mailman/listinfo/java-nlp-user) (via a
-webpage). Or you can send other questions and feedback to [`java-nlp-
-support@lists.stanford.edu`](mailto:java-nlp-support@lists.stanford.edu).
+webpage). Or you can send other questions and feedback to [`java-nlp-support@lists.stanford.edu`](mailto:java-nlp-support@lists.stanford.edu).
 
