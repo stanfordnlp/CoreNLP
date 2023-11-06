@@ -55,8 +55,8 @@ useDisjunctive=true
 
 The rest of this answer gives a simple, but complete example of training an
 NER classifier. Suppose we want to build an NER system for Jane Austen novels.
-We might train it on [chapter 1 of _Emma_](ner-example/jane-austen-emma-
-ch1.txt). Download that file. You can convert it to one token per line with
+We might train it on [chapter 1 of _Emma_](https://nlp.stanford.edu/software/ner-example/jane-austen-emma-ch1.txt).
+Download that file. You can convert it to one token per line with
 our tokenizer (included in the box) with the following command:
 
 ```
@@ -75,7 +75,7 @@ perl -ne 'chomp; print "$_\tO\n"' jane-austen-emma-ch1.tok > jane-austen-emma-ch
 ```
 
 and if you don't want to do the second, you can skip to downloading [our input
-file](ner-example/jane-austen-emma-ch1.tsv). We have marked only one entity
+file](https://nlp.stanford.edu/software/ner-example/jane-austen-emma-ch1.tsv). We have marked only one entity
 type, PERS for person name, but you could easily add a second entity type such
 as LOC for location, to this data. The training file parser isn't very
 forgiving: You should make sure each line consists of solely content fields
@@ -86,9 +86,8 @@ shouldn't be too large, or you waste a lot of memory and risk numerical
 problems.
 
 You will then also want some test data to see how well the system is doing.
-You can download the text of [chapter 2 of _Emma_](ner-example/jane-austen-
-emma-ch2.txt) and [the gold standard annotated version of chapter 2](ner-
-example/jane-austen-emma-ch2.tsv).
+You can download the text of [chapter 2 of _Emma_](https://nlp.stanford.edu/software/ner-example/jane-austen-emma-ch1.txt)
+and [the gold standard annotated version of chapter 2](https://nlp.stanford.edu/software/ner-example/jane-austen-emma-ch2.tsv).
 
 Stanford NER CRF allows all properties to be specified on the command line,
 but it is easier to use a _properties file_. Here is a simple properties file
@@ -134,8 +133,7 @@ useTypeySequences=true
 wordShape=chris2useLC
 ```
 
-Here is that properties file as a downloadable link: [`austen.prop`](ner-
-example/austen.prop).
+Here is that properties file as a downloadable link: [`austen.prop`](https://nlp.stanford.edu/software/ner-example/austen.prop).
 
 Once you have such a properties file, you can train a classifier with the
 command:
@@ -431,7 +429,7 @@ Unfortunately, no.
 
 Unfortunately, no. The licenses that come with that data do not allow for
 redistribution. However, you can see the
-[models](http://nlp.stanford.edu/software/CRF-NER.html#Models) section of the
+[models](tools_crf_ner.md#models) section of the
 NER page for a brief description of what the data sets were.
 
 ### Is the NER deterministic? Why do the results change for the same data?
