@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Parser FAQ
+title: Arabic Parser FAQ
 keywords: lexparser, parser
 permalink: '/tools_parser_arabic_faq.html'
 nav_order: 14
@@ -8,7 +8,7 @@ toc: true
 parent: Additional Tools
 ---
 
-## Stanford Arabic Parser [IAQ](http://norvig.com/java-iaq.html)
+### Stanford Arabic Parser [IAQ](http://norvig.com/java-iaq.html)
 
 The grey "GALE ROSETTA" notes are only for people involved in that project;
 they don't apply to regular users.
@@ -16,9 +16,7 @@ they don't apply to regular users.
 Much of the information here is also applicable to the Arabic part of speech
 tagger, such as discussion of word segmentation and tag sets.
 
-### Questions with answers
-
-#### What tokenization of Arabic does the parser assume?
+### What tokenization of Arabic does the parser assume?
 
 The parser assumes precisely the tokenization of Arabic used in the [Penn
 Arabic Treebank](http://www.ircs.upenn.edu/arabic/) (ATB). _You must provide
@@ -46,7 +44,7 @@ There are some tools available that can do the necessary clitic segmentation:
     * [`http://www1.ccls.columbia.edu/~mdiab/`](http://www1.ccls.columbia.edu/~mdiab/)
     * [`http://www.spencegreen.com/2011/01/19/howto-basic-arabic-preprocessing-for-nlp/`](http://www.spencegreen.com/2011/01/19/howto-basic-arabic-preprocessing-for-nlp/)
 
-#### What character encoding do you assume?
+### What character encoding do you assume?
 
 The present release provides a grammar (`arabicFactored.ser.gz`) for real
 Arabic (`arabicFactored.ser.gz`), for which the default encoding is UTF-8, but
@@ -58,7 +56,7 @@ ASCII](http://www.ldc.upenn.edu/myl/morph/buckwalter.html) (either
 `atb3FactoredBuckwalter.ser.gz`, depending on the parser release). They may
 return if there is interest.)
 
-#### What characters are encoded?
+### What characters are encoded?
 
 The parsers are trained on unvocalized Arabic. One grammar
 (`atbP3FactoredBuckwalter.ser.gz` or `atb3FactoredBuckwalter.ser.gz`) is
@@ -74,7 +72,7 @@ normalize text in this way, because words are recognized simply based on
 string identity. [GALE ROSETTA: This is precisely the mapping that the IBM
 `ar_normalize_v5.pl` script does for you.]
 
-#### What POS tag set does the parser use?
+### What POS tag set does the parser use?
 
 The parser uses an "augmented Bies" tag set. The so-called "Bies mapping" maps
 down the full morphological analyses from the Buckwalter analyzer that appear
@@ -96,14 +94,14 @@ conversion-to-PennPOS-forrelease.lisp), included with recent ATB releases.
 This revised version now includes a few new tags that are not in the English
 PTB tag set (NOUN_QUANT, ADJ_NUM, and VN). We also include them now.
 
-#### What phrasal category set does the parser use?
+### What phrasal category set does the parser use?
 
 The set used in the Penn Arabic Treebank. See [the original Penn Arabic
 Treebank Guidelines](http://www.ircs.upenn.edu/arabic/Jan03release/guidelines-
 TB-1-28-03.htm), or, better, the up-to-date [Penn Arabic Treebank
 Guidelines](http://projects.ldc.upenn.edu/ArabicTreebank/).
 
-#### What's not in the box?
+### What's not in the box?
 
 The parser download does not include components for normalizing or segmenting
 Arabic text. You might look at the [Stanford Word
@@ -117,7 +115,7 @@ script that does the appropriate normalization. Their segmenter marks
 proclitics and enclitics with '#' and '+'. These need to be removed for
 parsing, but we do provide an escaper which does this.]
 
-#### What data are the parsers trained on?
+### What data are the parsers trained on?
 
 Two of the 3 grammars (`arabicFactored.ser.gz` and
 `arabicFactoredBuckwalter.ser.gz`) are trained on the training data of the
@@ -129,7 +127,7 @@ sentence-by-sentence through the trees, you put 8 sentences in training, 1 in
 development, and then 1 in test, and then repeat.) This is the data split that
 has been used at UPenn (see S. Kulick et al., TLT 2006).
 
-#### How well do the parsers work?
+### How well do the parsers work?
 
 The table below shows the parser's performance on the development test data
 sets, as defined above. Here, "factF1" is the Parseval F1 of Labeled Precision
@@ -151,7 +149,7 @@ annotation in the ATB).
     atb3FactoredBuckwalter.ser.gz  75.76    83.08   14.41   68.09   77.75   95.91    951
     
 
-#### Can you give me some examples of how to use the parser for Arabic?
+### Can you give me some examples of how to use the parser for Arabic?
 
 Sure! These parsing examples are for the 3 test files supplied with the
 parser. They assume you are sitting in the root directory of the parser
@@ -208,7 +206,7 @@ and "#" marks mentioned earlier.]
     Parsed 8 words in 1 sentences (5.87 wds/sec; 0.73 sents/sec).
     
 
-#### Can you get dependencies output from the Arabic parser?
+### Can you get dependencies output from the Arabic parser?
 
 You can ask for dependencies output, with the `-outputFormat dependencies`
 option. At present, there is no typed dependencies (grammatical relations)
@@ -218,7 +216,7 @@ dependencies output may appear to be reversed, because dependencies are being
 displayed right-to-left (depending on the bidi support of your terminal
 program). But they are correct, really.)
 
-#### Where does the Arabic-specific source code live?
+### Where does the Arabic-specific source code live?
 
 Much of the Arabic-specific code, including the `ArabicHeadFinder` and the
 `ArabicTreebankLanguagePack` is defined inside the

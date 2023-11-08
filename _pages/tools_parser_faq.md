@@ -8,9 +8,7 @@ toc: true
 parent: Additional Tools
 ---
 
-### Questions with answers
-
-#### Where are the parser models?
+### Where are the parser models?
 
 In recent distributions, the models are included in a jar file inside the
 parser distribution. For example, in the 2012-11-12 distribution, the models
@@ -37,7 +35,7 @@ If you are encountering a FileNotFoundException or similar error when loading
 models, the first thing to check is that the classpath is set up as described
 here.
 
-#### Is there technical documentation for the parser?
+### Is there technical documentation for the parser?
 
 There is considerable Javadoc documentation included in the `javadoc/`
 directory of the distribution. You should start by looking at the javadoc for
@@ -48,13 +46,13 @@ under development and is not necessarily consistent with the released version
 of the parser.) If you're interested in the theory and algorithms behind how
 the parser works, look at the research papers listed.
 
-#### How do I use the API?
+### How do I use the API?
 
 A brief demo program included with the download will demonstrate how to load
 the tool and start processing text. When using this demo program, be sure to
 include all of the appropriate jar files in the classpath.
 
-#### What is the inventory of tags, phrasal categories, and typed dependencies in your parser?
+### What is the inventory of tags, phrasal categories, and typed dependencies in your parser?
 
 For part-of-speech tags and phrasal categories, this depends on the language
 and treebank on which the parser was trained (and was decided by the treebank
@@ -88,7 +86,7 @@ and
 [ChineseGrammaticalRelations](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations.html)
 classes.
 
-#### Can I train the parser?
+### Can I train the parser?
 
 Yes, you can train a parser. You will need a collection of syntactically
 annotated data such as the [Penn
@@ -107,7 +105,7 @@ specific features. Start by trying to train a plain PCFG on the data, and then
 look at the `TreebankLangParserParams` class for how to do language-specific
 processing.
 
-#### How do I train the RNN parser?
+### How do I train the RNN parser?
 
 Training the RNN parser is a two step process. First, because the RNN parser
 uses the parsings of a simpler PCFG parser to train, it is useful to precache
@@ -147,7 +145,7 @@ models](http://nlp.stanford.edu/software/parser-faq.html#weaker) actually make
 better underlying PCFG models. Command lines for the PCFG models we use for
 English and Chinese can be found in makeSerialized.csh
 
-#### Why do I get the exception "null head found for tree" after training my own parser model?
+### Why do I get the exception "null head found for tree" after training my own parser model?
 
 The default HeadFinder is written specifically for the PTB. If you train a
 parser on trees that use a different set of productions, the default
@@ -156,13 +154,13 @@ easiest way to get around this problem is to use LeftHeadFinder instead. You
 can also get a slight performance increase by writing a custom HeadFinder for
 your treebank and using that instead.
 
-#### How do I force the parser to use my sentence delimitations? I want to give the parser a list of sentences, one per line, to parse.
+### How do I force the parser to use my sentence delimitations? I want to give the parser a list of sentences, one per line, to parse.
 
 Use the ` -sentences ` option. If you want to give the parser one sentence per
 line, include the option `-sentences newline` in your invocation of
 `LexicalizedParser`.
 
-#### Can the parser work as a filter (read from stdin and parse to stdout)?
+### Can the parser work as a filter (read from stdin and parse to stdout)?
 
 Yes. The parser treats a filename as `-` as meaning to read from stdin and by
 default writes to stdout (this can be changed with the `-writeOutputFiles`
@@ -170,7 +168,7 @@ option). Note: the tokenizer uses lookahead, so you will either need to close
 the input to get the last sentence parsed, or use another option like
 `-sentences newline`.
 
-#### How can I provide the correct tokenization of my sentence to the parser?
+### How can I provide the correct tokenization of my sentence to the parser?
 
 From the commandline, if you give the option `-tokenized`, then the parser
 will assume white-space separated tokens, and use your tokenization as is. Of
@@ -197,7 +195,7 @@ or you may be able to use of classes in the `process` package, such as
 `DocumentPreprocessor` and `PTBTokenizer` for tokenization, much as the main
 method of the parser does. Or you may want to use your own tokenizer.
 
-#### Can I give the parser part-of-speech (POS) tagged input and force the parser to use those tags?
+### Can I give the parser part-of-speech (POS) tagged input and force the parser to use those tags?
 
 Yes, you can. However, for good results, you should make sure that you provide
 correctly tokenized input and use exactly the correct tag names. (That is, the
@@ -252,7 +250,7 @@ write. Here's an example that very manually makes the `List` in question:
 >     parse.pennPrint();
 >  
 
-#### What other on the chosen parse constraints are possible?
+### What other on the chosen parse constraints are possible?
 
 There are other constraints which can be added, but they have to be added
 programmatically. Look at the LexicalizedParserQuery object, which you can get
@@ -272,11 +270,11 @@ though, you should not use this part of the feature and simply use ".*".
 
 See the existing Javadoc for more information on this.
 
-#### Is it possible to pre-annotate the corpus with phrasal boundaries and labels which the parser has to use?
+### Is it possible to pre-annotate the corpus with phrasal boundaries and labels which the parser has to use?
 
 Not yet, but in the future, very possibly.
 
-#### Can I obtain multiple parse trees for a single input sentence?
+### Can I obtain multiple parse trees for a single input sentence?
 
 Yes, for the PCFG parser (only). With a PCFG parser, you can give the option
 `-printPCFGkBest _n_` and it will print the _n_ highest-scoring parses for a
@@ -285,7 +283,7 @@ dependencies in the usual way via the `-outputFormat` option, and each
 receives a score (log probability). The _k_ best parses are extracted
 efficiently using the algorithm of Huang and Chiang (2005).
 
-#### I don't [understand/like/agree with] the parse tree that is assigned to my sentence. Can you [explain/fix] it?
+### I don't [understand/like/agree with] the parse tree that is assigned to my sentence. Can you [explain/fix] it?
 
 This may be because the parser chose an incorrect structure for your sentence,
 or because the phrase structure annotation conventions used for training the
@@ -296,7 +294,7 @@ parser made a mistake. While our goal is to improve the parser when we can, we
 can't fix individual examples. The parser is just choosing the highest
 probability analysis according to its grammar.
 
-#### Why does the parser accept incorrect/ungrammatical sentences?
+### Why does the parser accept incorrect/ungrammatical sentences?
 
 This parser is in the space of modern statistical parsers whose goal is to
 give the most likely sentence analysis to a list of words. It does not attempt
@@ -313,7 +311,7 @@ depends on other factors like the length of the sentence, the rarity of the
 words in the sentence, and whether word dependencies in the sentence being
 tested were seen in the training data or not.
 
-#### How much memory do I need to parse long sentences?
+### How much memory do I need to parse long sentences?
 
 The parser uses considerable amounts of memory. If you see a
 `java.lang.OutOfMemoryError`, you either need to give the parser more memory
@@ -338,7 +336,7 @@ Length| PCFG| Factored
 50| 125 MB| 600 MB  
 100| 350 MB| 2100 MB  
 
-#### What does an UnsupportedClassVersionError mean?
+### What does an UnsupportedClassVersionError mean?
 
 If you see the error:
 
@@ -351,7 +349,7 @@ it means that you don't have a recent enough version of Java installed. If
 then you don't have Java 8 installed. Etc. You should upgrade at
 <http://www.oracle.com/technetwork/java/javase/downloads/>.
 
-#### How can I obtain just the results of the POS tagger for each word in a sentence?
+### How can I obtain just the results of the POS tagger for each word in a sentence?
 
 You can use the `-outputFormat wordsAndTags` option. Note: if you want to tag
 a lot of text, it'd be much faster to use a dedicated POS tagger (such as
@@ -361,7 +359,7 @@ option has the parser parse the sentences and just not print the other
 information. There isn't a separate included tagger; the parser does POS
 tagging as part of parsing.
 
-#### Can I just get your typed dependencies (grammatical relations) output from the trees produced by another parser?
+### Can I just get your typed dependencies (grammatical relations) output from the trees produced by another parser?
 
 Yes, you can. You can use the main method of `EnglishGrammaticalStructure`
 (for English, or the corresponding class for Chinese). You can give it options
@@ -393,7 +391,7 @@ See the javadoc for the main method of
 edu.stanford.nlp.trees.GrammaticalStructure.java for more information on how
 to extract dependencies using this tool.
 
-#### How can something be the subject of another thing when neither is a verb? I tried the sentence _Jill is a teacher_ and the parser created a _nsubj_ dependency between _teacher_ and _Jill_. Is that a mistake or have I not understood what _nsubj_ is?
+### How can something be the subject of another thing when neither is a verb? I tried the sentence _Jill is a teacher_ and the parser created a _nsubj_ dependency between _teacher_ and _Jill_. Is that a mistake or have I not understood what _nsubj_ is?
 
 This is an element of the dependency analysis we adopted. It's not
 uncontroversial, and it could have been done differently, but we'll try to
@@ -419,7 +417,7 @@ the best thing to do for several reasons:
     3. Connection to logical representations: If you were to translate these sentences into a simple predicate logic form, you would presumably use **busy(jill)** and **teacher(jill)**. The treatment of the adjective or noun as the predicate in a predicate logic form parallels what we do in our grammatical relations representation. 
     4. Similarity of representation across constructions. While the dependency still differs, both the attributive ( _the white daisy_ ) and predicative ( _the daisy is white_ ) use of adjectives yields a direct link between the adjective ( _white_ ) and the noun ( _daisy_ ): _amod(daisy, white)_ and _nsubj(white, daisy)_. 
 
-#### Can I just use your tokenizers for other purposes?
+### Can I just use your tokenizers for other purposes?
 
 Yes, you can. Various tokenizers are included. The one used for English is
 called PTBTokenizer. It is a hand-written rule-based (FSM) tokenizer, but is
@@ -432,7 +430,7 @@ as follows:
 There are several options, including one for batch-processing lots of files;
 see the Javadoc documentation of the `main` method of `PTBTokenizer`.
 
-#### How can I parse my gigabytes of text more quickly?
+### How can I parse my gigabytes of text more quickly?
 
 Parsing speed depends strongly on the distribution of sentence lengths \- and
 on your machine, etc. As one data point, using englishPCFG and a 2.8 GHz Intel
@@ -460,7 +458,7 @@ multiple parsing processes on one machine. Around 2009, we parsed large
 volumes of text at a rate of about 1,000,000 sentences a day by distributing
 the work over 6 dual core/dual processor machines.
 
-#### Can you give me some help in getting started parsing Chinese?
+### Can you give me some help in getting started parsing Chinese?
 
 Sure!! These instructions concentrate on parsing from the command line, since
 you need to use that to be able to set most options. But you can also use the
@@ -662,12 +660,12 @@ relations (typed dependencies) output. For instance:
 >     Parsed 10 words in 1 sentences (7.10 wds/sec; 0.71 sents/sec).
 >  
 
-#### Can you give me some help in getting started parsing Arabic?
+### Can you give me some help in getting started parsing Arabic?
 
 Sure! See the [Stanford Arabic Parser
 IAQ](https://nlp.stanford.edu/software/parser-arabic-faq.html).
 
-#### Can I just use the parser as a vanilla PCFG parser?
+### Can I just use the parser as a vanilla PCFG parser?
 
 There are many kinds of 'vanilla', but, providing your treebank is in Penn
 Treebank format, then, yes, this is easy to do. You can train and test the
@@ -700,7 +698,7 @@ unknown words. The `-scTags` option ensures that true values for P(w|t) are
 used. Naturally, such a parser will be unable to parse any sentence with
 unknown words in it.
 
-#### What about other versions of weaker models?
+### What about other versions of weaker models?
 
 The [2003 unlexicalized parsing
 paper](http://nlp.stanford.edu/~manning/papers/unlexicalized-parsing.pdf)
@@ -721,7 +719,7 @@ faster, simpler model suitable for the RNN parser:
 
 `-chineseFactored -PCFG -hMarkov 1 -nomarkNPconj -compactGrammar 0`
 
-#### Can you give me complete documentation of command-line options/public APIs/included grammars/ParserDemo/...?
+### Can you give me complete documentation of command-line options/public APIs/included grammars/ParserDemo/...?
 
 At present, we don't have any documentation beyond what you get in the
 download and what's on this page. If _you_ would like to help by producing
@@ -765,7 +763,7 @@ Stanford Parser, but doesn't work without adaptation with the Stanford CoreNLP
 release of the parser (and will probably need adaptation with 1.7.x releases
 of the parser).
 
-#### What output formats can I get with the `-outputFormat` and `-outputFormatOptions` options?
+### What output formats can I get with the `-outputFormat` and `-outputFormatOptions` options?
 
 You can give the options `-outputFormat typedDependencies` or `-outputFormat
 typedDependenciesCollapsed` to get typed dependencies (or grammatical
@@ -778,7 +776,7 @@ A common option that people want for `-outputFormatOptions` is to get
 punctuation tokens and dependencies when they are not printed by default. You
 do that with `-outputFormatOptions includePunctuationDependencies`.
 
-#### Can I have the parser run as a filter (that is, parse stuff typed in)?
+### Can I have the parser run as a filter (that is, parse stuff typed in)?
 
 Yes, you use a filename of a single dash/minus character: -. E.g.,
 
@@ -792,7 +790,7 @@ For example, in bash you could use the command:
 > edu.stanford.nlp.parser.lexparser.LexicalizedParser englishPCFG.ser.gz - 2>
 > /dev/null `
 
-#### Can you explain the different parsers? How can the PCFG parser produce typed dependency parses? Why if I use the getBestDependencyParse() method do I get `null` or an untyped dependency parse?
+### Can you explain the different parsers? How can the PCFG parser produce typed dependency parses? Why if I use the getBestDependencyParse() method do I get `null` or an untyped dependency parse?
 
 This answer is specific to English. It mostly applies to other languages
 although some components are missing in some languages. The file
@@ -828,7 +826,7 @@ Stanford Dependencies. See the [Stanford
 Dependencies](https://nlp.stanford.edu/software/stanford-dependencies.html)
 page for more information.)
 
-#### What are the training sets for the different parser models?
+### What are the training sets for the different parser models?
 
 For Chinese (and Arabic, German, and "WSJ"), you can look at the included file
 makeSerialized.csh , and easily see exactly what files the models are trained
@@ -855,7 +853,7 @@ The Stanford-written trees are licensed under [Creative Commons Attribution
 However, this list is likely to change in future releases, and this FAQ
 question isn't always fully up to date....
 
-#### How can I adjust the tokenization of words, such as turning off the Americanization of spelling?
+### How can I adjust the tokenization of words, such as turning off the Americanization of spelling?
 
 By default, the tokenizer used by the English parser (`PTBTokenizer`) performs
 various normalizations so as to make the input closer to the normalized form
@@ -889,13 +887,13 @@ tokenization will mean that variant token forms will be treated via the
 general unknown word handling. Often, that works out okay, but, overall,
 results won't be quite as good.
 
-#### Can I use the parser with Jython?
+### Can I use the parser with Jython?
 
 Absolutely. You can find a helpful tuturial here:
 [`http://blog.gnucom.cc/2010/using-the-stanford-parser-with-
 jython/`](http://blog.gnucom.cc/2010/using-the-stanford-parser-with-jython/).
 
-#### What character encoding does the parser assume/use?
+### What character encoding does the parser assume/use?
 
 The default character encoding depends on the language that you are parsing.
 It is defined in the appropriate TreebankLanguagePack class. That is, it will
@@ -917,7 +915,7 @@ the correct encoding option on the command line, for example:
 (Or, when used within a program, it is your job to open files with the right
 kind of Reader/Writer.)
 
-#### What do you recommend for parsing tweets? Do you have a caseless parsing model?
+### What do you recommend for parsing tweets? Do you have a caseless parsing model?
 
 We now (v2.0.1+) distribute a caseless English model, which should work better
 for texts, tweets, and similar things. It's named:
@@ -960,12 +958,12 @@ So try something like this:
 This parse isn't quite correct (it messes up the hashtag at the end), but the
 caseless model does correctly parse "Channing Tatum" as a proper name.
 
-#### How do you get a SemanticGraph from a Tree?
+### How do you get a SemanticGraph from a Tree?
 
 The easiest way is to use the conversion methods in ParserAnnotatorUtils,
 which is included in the latest versions of the parser (since 2.0.3).
 
-#### Why is the parser output different from the CoreNLP output?
+### Why is the parser output different from the CoreNLP output?
 
 For some sentences the parse tree output by the standalone parser and the tree
 output by the CoreNLP pipeline can be different. The reason for this is that
@@ -981,7 +979,7 @@ updating the list of annotators:
     
         -annotators "tokenize,ssplit,parse,lemma,ner,dcoref"
 
-#### How can I get original Stanford Dependencies instead of Universal Dependencies?
+### How can I get original Stanford Dependencies instead of Universal Dependencies?
 
 If you run the parser or the dependency converter from the command line, then
 just add the option `-originalDependencies` to your command.
@@ -1020,7 +1018,7 @@ have now eliminated.)
                                         boolean originalDependencies)
     
 
-#### Can I get hold of the PCFG grammar for your PCFG models?
+### Can I get hold of the PCFG grammar for your PCFG models?
 
 Yes, you can. You use a command like this to get it in a text file:
 
@@ -1035,7 +1033,7 @@ However, there are a few caveats:
     3. It includes the kind of state refinement introduced in the Klein and Manning (2003) paper. 
     4. The grammar includes word class based signatures for unknown words, and to fully use the grammar, you have to map unknown words on to those signatures. 
 
-#### How can I get the missing punctuation in my dependency output?
+### How can I get the missing punctuation in my dependency output?
 
 If your dependency output is missing punctuation tokens, you can get them by
 adding the flag:
