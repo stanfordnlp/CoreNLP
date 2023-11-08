@@ -8,8 +8,6 @@ toc: true
 parent: Additional Tools
 ---
 
-## Questions with answers
-
 ### How can I retrain the Chinese Segmenter?
 
 In general you need four things in order to retrain the Chinese Segmenter. You
