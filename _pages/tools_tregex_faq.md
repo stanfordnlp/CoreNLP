@@ -8,9 +8,7 @@ toc: true
 parent: Additional Tools
 ---
 
-### Questions with answers
-
-Is there a User Guide?
+### Is there a User Guide?
 
 At present, no. There is:
 
