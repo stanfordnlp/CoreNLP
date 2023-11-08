@@ -2,7 +2,7 @@
 layout: page
 title: Parser FAQ
 keywords: lexparser, parser
-permalink: '/tools_parser_faq.html'
+permalink: '/tools_parser_arabic_faq.html'
 nav_order: 14
 toc: true
 parent: Additional Tools
