@@ -227,7 +227,8 @@ public class UniversalDependenciesConverter {
    * {@code -treeFile}: File with PTB-formatted constituency trees<br>
    * {@code -conlluFile}: File with basic dependency trees in CoNLL-U format<br>
    * {@code -textFile}: A file with text to be used as a guide for SpaceAfter (optional)<br>
-   * {@code -outputRepresentation}: "basic" (default), "enhanced", or "enhanced++"
+   * {@code -outputRepresentation}: "basic" (default), "enhanced", or "enhanced++"<br>
+   * {@code -combineMWTs}: "False" (default), "True" marks things like it's as MWT
    */
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args);
@@ -236,6 +237,7 @@ public class UniversalDependenciesConverter {
     String conlluFileName = props.getProperty("conlluFile");
     String outputRepresentation = props.getProperty("outputRepresentation", "basic");
     boolean addFeatures = PropertiesUtils.getBool(props, "addFeatures", false);
+    boolean combineMWTs = PropertiesUtils.getBool(props, "combineMWTs", false);
     boolean replaceLemmata = PropertiesUtils.getBool(props, "replaceLemmata", false);
 
     Iterator<Pair<SemanticGraph, SemanticGraph>> sgIterator; // = null;
@@ -268,6 +270,7 @@ public class UniversalDependenciesConverter {
     }
 
     UniversalDependenciesFeatureAnnotator featureAnnotator = (addFeatures) ? new UniversalDependenciesFeatureAnnotator() : null;
+    EnglishMWTCombiner mwtCombiner = (combineMWTs) ? new EnglishMWTCombiner() : null;
 
     CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
 
@@ -289,6 +292,10 @@ public class UniversalDependenciesConverter {
 
         if (featureAnnotator != null) {
           featureAnnotator.addFeatures(sg, tree, false, false);
+        }
+
+        if (mwtCombiner != null) {
+          sg = mwtCombiner.combineMWTs(sg);
         }
       } else {
         if (replaceLemmata) {

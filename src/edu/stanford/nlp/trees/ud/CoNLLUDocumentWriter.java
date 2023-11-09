@@ -48,6 +48,8 @@ public class CoNLLUDocumentWriter {
             /* Check for multiword tokens. */
             if (token.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class)) {
                 printSpan(sb, token);
+            } else if (token.containsKey(CoreAnnotations.IsFirstWordOfMWTAnnotation.class) && token.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class)) {
+              printMWT(sb, tokenSg, token);
             }
 
             /* Try to find main governor and additional dependencies. */
@@ -147,6 +149,30 @@ public class CoNLLUDocumentWriter {
           String range = String.format("%d-%d", tokenSpan.getSource(), tokenSpan.getTarget());
           sb.append(String.format("%s\t%s\t_\t_\t_\t_\t_\t_\t_\t_%n", range, token.originalText()));
       }
+  }
+
+  public static void printMWT(StringBuilder sb, SemanticGraph graph, IndexedWord token) {
+      int startIndex = token.index();
+      int endIndex = startIndex;
+      // advance endIndex until we reach the end of the sentence, the start of the next MWT,
+      // or a word which isn't part of any MWT
+      IndexedWord nextVertex;
+      while ((nextVertex = graph.getNodeByIndex(endIndex+1)) != null) {
+          if (nextVertex.containsKey(CoreAnnotations.IsFirstWordOfMWTAnnotation.class) &&
+              nextVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class)) {
+              break;
+          }
+          if (!nextVertex.containsKey(CoreAnnotations.IsMultiWordTokenAnnotation.class) ||
+              !nextVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class)) {
+              break;
+          }
+          ++endIndex;
+      }
+      if (startIndex == endIndex) {
+          return;
+      }
+      String range = String.format("%d-%d", startIndex, endIndex);
+      sb.append(String.format("%s\t%s\t_\t_\t_\t_\t_\t_\t_\t_%n", range, token.get(CoreAnnotations.MWTTokenTextAnnotation.class)));
   }
 
   /**
