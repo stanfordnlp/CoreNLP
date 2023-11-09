@@ -40,6 +40,12 @@ public class EnglishMWTCombiner {
                              "    <semgrex>" + XMLUtils.escapeXML("{}=first . {word:/'/;cpos:PART}=second") + "</semgrex>",
                              "    <edit-list>CombineMWT -node first -node second</edit-list>",
                              "  </ssurgeon-pattern>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>5</uid>",
+                             "    <notes>Edit a node's MWT for 'tis and 'twas</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/'[tT]/}=first . {word:/(?i)is|was/}=second") + "</semgrex>",
+                             "    <edit-list>CombineMWT -node first -node second</edit-list>",
+                             "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
     List<SsurgeonPattern> patterns = inst.readFromString(mwt);
     for (SsurgeonPattern editSsurgeon : patterns) {
