@@ -79,6 +79,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td>A $- B <td>B is a left immediate sibling of A, i.e. A and B have the same parent and A.index() == B.index() + 1
  * <tr><td>A $++ B <td>B is a right sibling of A, i.e. A and B have the same parent and {@code A.index() < B.index()}
  * <tr><td>A $-- B <td>B is a left sibling of A, i.e. A and B have the same parent and {@code A.index() > B.index()}
+ * <tr><td>A &lt;++ B <td>B is a right governor of A
+ * <tr><td>A &lt;-- B <td>B is a left governor of A
+ * <tr><td>A &lt;++ B <td>B is a right dependent of A
+ * <tr><td>A &lt;-- B <td>B is a left dependent of A
  * <tr><td>A @ B <td>A is aligned to B (this is only used when you have two dependency graphs which are aligned)
  * <caption>Currently supported node relations</caption>
  * </table>
