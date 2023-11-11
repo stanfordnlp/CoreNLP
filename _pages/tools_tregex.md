@@ -19,7 +19,7 @@ package which operates on dependency graphs (class `SemanticGraph`, called
 based on Semgrex called **Ssurgeon**.
 
 **Tregex:** The best introduction to Tregex is the brief powerpoint tutorial
-for [Tregex](assets/ppt/The_Wonderful_World_of_Tregex.ppt) by Galen Andrew. The
+for [Tregex](https://nlp.stanford.edu/software/tregex/The_Wonderful_World_of_Tregex.ppt) by Galen Andrew. The
 best way to learn to use Tregex is by working with the GUI (`TregexGUI`). It
 has help screens which summarize the syntax of Tregex. You can find brief
 documentation of Tregex's pattern language on [the TregexPattern javadoc
@@ -41,12 +41,12 @@ interface through the `TregexPattern` main method. To launch the graphical
 interface double click the stanford-tregex.jar file.
 
 **Tsurgeon:** A good introduction is [the powerpoint slides for
-Tsurgeon](assets/ppt/Tsurgeon2.ppt) by Marie-Catherine de Marneffe. Tsurgeon can
+Tsurgeon](https://nlp.stanford.edu/software/tregex/Tsurgeon2.ppt) by Marie-Catherine de Marneffe. Tsurgeon can
 be run from the command line and is also incorporated into the TregexGUI
 graphical interface. Its syntax is presented on the [Tsurgeon javadoc
 page](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/tregex/tsurgeon/Tsurgeon.html).
 
-**Semgrex:** An included set of [powerpoint slides](assets/images/Semgrex.ppt) and the [javadoc for `SemgrexPattern`](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/semgraph/semgrex/SemgrexPattern.html)
+**Semgrex:** An included set of [powerpoint slides](https://nlp.stanford.edu/software/tregex/Semgrex.ppt) and the [javadoc for `SemgrexPattern`](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/semgraph/semgrex/SemgrexPattern.html)
 provide an overview of this package.
 
 **Ssurgeon:** The [Javadoc](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/semgraph/semgrex/ssurgeon/Ssurgeon.html) page describes the basic opterations available for Ssurgeon.
