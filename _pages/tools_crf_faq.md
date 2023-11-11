@@ -240,7 +240,7 @@ property or flag. Use a comma separated list of files.
 
 Typically you would load a classifier from disk with the
 `CRFClassifier.getClassifier()` method and then use it to classify some text.
-See the example `[NERDemo.java](ner-example/NERDemo.java)` file included in
+See the example `[NERDemo.java](https://github.com/stanfordnlp/CoreNLP/blob/main/src/edu/stanford/nlp/ie/demo/NERDemo.java)` file included in
 the Stanford NER download. The two most flexible classification methods to
 call are called `classify()`. These return a `List<CoreLabel>`, or a list of
 those, and take the same type or a String, respectively. A `CoreLabel` has
@@ -256,7 +256,7 @@ offsets. The method `classifyToString(String, String, boolean)` will return
 you a String with NER-classified text in one of several formats (plain text or
 XML) with or without token normalization and the preservation of spacing
 versus tokenized. One of the versions of it may well do what you would like to
-see. Again, see `[NERDemo.java](ner-example/NERDemo.java)` for examples of the
+see. Again, see `[NERDemo.java](https://github.com/stanfordnlp/CoreNLP/blob/main/src/edu/stanford/nlp/ie/demo/NERDemo.java)` for examples of the
 use of several (but not all) of these methods.
 
 ### Can I set up the Stanford NER system up to allow single-jar deployment rather than it having to load NER models from separate files?
@@ -318,7 +318,7 @@ them out however your heart desires! Another popular choice is the method
 `classifyToCharacterOffsets(String)` which returns a List of just the entities
 found, together with their character offset spans. You can also get out k-best
 entity labeling output and the probabilities assigned to different labels. See
-the examples in `[NERDemo.java](ner-example/NERDemo.java)`.
+the examples in `[NERDemo.java](https://github.com/stanfordnlp/CoreNLP/blob/main/src/edu/stanford/nlp/ie/demo/NERDemo.java)`.
 
 
     $ cat PatrickYe.txt
@@ -468,8 +468,7 @@ Flags that may be useful for handling different types of text input are:
 ### Does the NER use part-of-speech tags?
 
 None of our current models use pos tags by default. This is largely because
-the features used by the [Stanford POS
-tagger](http://nlp.stanford.edu/software/tagger.html) are very similar to
+the features used by the [Stanford POS tagger](tools_pos_tagger.md) are very similar to
 those used in the NER system, so there is very little benefit to using POS
 tags.
 
@@ -541,4 +540,5 @@ You can discuss other topics with Stanford NER developers and users by
 [joining the `java-nlp-user` mailing
 list](https://mailman.stanford.edu/mailman/listinfo/java-nlp-user) (via a
 webpage). Or you can send other questions and feedback to [`java-nlp-support@lists.stanford.edu`](mailto:java-nlp-support@lists.stanford.edu).
+Filing issues [on our git repo](https://github.com/stanfordnlp/CoreNLP/) is probably the most effective way to reach us.
 
