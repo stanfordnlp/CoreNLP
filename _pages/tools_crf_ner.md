@@ -322,7 +322,7 @@ We also provide Chinese models built from the Ontonotes Chinese named entity
 data. There are two models, one using distributional similarity clusters and
 one without. These are designed to be run on _word-segmented Chinese_. So, if
 you want to use these on normal Chinese text, you will first need to run
-[Stanford Word Segmenter](http://nlp.stanford.edu/software/segmenter.html) or
+[Stanford Word Segmenter](tools_segmenter.md) or
 some other Chinese word segmenter, and then run NER on the output of that!
 
 ### Online Demo
