@@ -147,37 +147,37 @@ included)
 
 | Version | Date | Description |
 |---|---|---|
-| <a href="http://nlp.stanford.edu/software/stanford-tregex-4.2.0.zip">Version 4.2.0</a> | 2020-11-17 | Update for compatibility |
-| <a href="stanford-tregex-4.0.0.zip">Version 4.0.0</a> | 2020-04-19 | Update for compatibility |
-| <a href="stanford-tregex-2018-10-16.zip">Version 3.9.2</a> | 2018-10-16 | Update for compatibility |
-| <a href="stanford-tregex-2018-02-27.zip">Version 3.9.1</a> | 2018-02-27 | Update for compatibility |
-| <a href="stanford-tregex-2017-06-09.zip">Version 3.8.0</a> | 2017-06-09 | Update for compatibility |
-| <a href="stanford-tregex-2016-10-31.zip">Version 3.7.0</a> | 2016-10-31 | Update for compatibility |
-| <a href="stanford-tregex-2015-12-09.zip">Version 3.6.0</a> | 2015-12-09 | Updated for compatibility |
-| <a href="stanford-tregex-2015-04-20.zip">Version 3.5.2</a> | 2015-04-20 | Update for compatibility |
-| <a href="stanford-tregex-2015-01-29.zip">Version 3.5.1</a> | 2015-01-29 | Update for compatibility |
-| <a href="stanford-tregex-2014-10-26.zip">Version 3.5.0</a> | 2014-10-26 | Upgrade to Java 8 |
-| <a href="stanford-tregex-2014-08-27.zip">Version 3.4.1</a> | 2014-08-27 | Fix a thread safety issue in tsurgeon. Last version to support Java 6 and Java 7. |
-| <a href="stanford-tregex-2014-06-16.zip">Version 3.4</a> | 2014-06-16 | Added a new tregex pattern, exact subtree, and improved efficiency for certain operations |
-| <a href="stanford-tregex-2014-01-04.zip">Version 3.3.1</a> | 2014-01-04 | Added a new tsurgeon operation, createSubtree |
-| <a href="stanford-tregex-2013-11-12.zip">Version 3.3.0</a> | 2013-11-12 | Add an option to get a TregexMatcher from a TregexPattern with a different HeadFinder |
-| <a href="stanford-tregex-2013-06-20.zip">Version 3.2.0</a> | 2013-06-20 | Fix minor bug in tsurgeon indexing |
-| <a href="stanford-tregex-2013-04-04.zip">Version 2.0.6</a> | 2013-04-04 | Updated for compatibility with other software releases |
-| <a href="stanford-tregex-2012-11-11.zip">Version 2.0.5</a> | 2012-11-11 | Minor efficiency improvements |
-| <a href="stanford-tregex-2012-07-09.tgz">Version 2.0.4</a> | 2012-07-09 | Minor bug fixes |
-| <a href="stanford-tregex-2012-05-22.tgz">Version 2.0.3</a> | 2012-05-22 | Updated to maintain compatibility with other Stanford software. |
-| <a href="stanford-tregex-2012-03-09.tgz">Version 2.0.2</a> | 2012-03-09 | Regex matching efficiency improvement |
-| <a href="stanford-tregex-2012-01-06.tgz">Version 2.0.1</a> | 2012-01-06 | Fix matchesAt, fix category heads. Last version to support Java 5. |
-| <a href="stanford-tregex-2011-09-14.tgz">Version 2.0</a> | 2011-09-14 | Introduces semgrex, which operates on SemanticGraphs. |
-| <a href="stanford-tregex-2011-06-19.tgz">Version 1.4.4</a> | 2011-06-19 | Updated to maintain compatibility with other Stanford software. |
-| <a href="stanford-tregex-2011-05-15.tgz">Version 1.4.3</a> | 2011-05-15 | Updated to maintain compatibility with other Stanford software. |
-| <a href="stanford-tregex-2011-04-20.tgz">Version 1.4.2</a> | 2011-04-20 | Addition of tree difference display.  Several bugfixes. |
-| <a href="stanford-tregex-2010-11-18.tgz">Version 1.4.1</a> | 2010-11-18 | Small fixes and improvements (multipattern Tsurgeon scripts, file and line numbers in sentence window, fixed GUI lock-up and tregex immediate domination path matching) |
-| <a href="stanford-tregex-2009-08-30.tgz">Version 1.4</a> | 2009-08-30 | GUI slider for tree size, allow @ and __ in path constraints, incompatibly generalize Tsurgeon relabel command, bug fix for links and backreferences being used as named node, more memory/space efficient treebank reading |
-| <a href="stanford-tregex-2008-05-08.tar.gz">Version 1.3.2</a> | 2008-05-06 | Additional features added to the graphical interface, which is now version 1.1: browse trees, better memory handling |
-| Version 1.3.1 | 2007-11-20 | Additional features added to the graphical interface: better copy/paste and drag and drop support, capability to save matched sentences as well as matched trees, and can save files in different encodings |
-| Version 1.3 | 2007-09-20 | Various bug fixes and improvements; additional Tsurgeon operations; and added a graphical interface |
-| Version 1.2 | 2005-11-23 | Bundled in Tsurgeon. |
-| Version 1.1.1 | 2005-09-15 | Fixed bugs: 1) in variable groups; 2) in number of reported matches for "<" relation |
-| Version 1.1 | 2005-07-19 | Several new relations added; variable substring capability added too. |
-| Version 1.0 | 2005-02-17 | Initial release |
+| <a href="http://nlp.stanford.edu/software/stanford-tregex-4.2.0.zip">4.2.0</a> | 2020&#8209;11&#8209;17 | Update for compatibility |
+| <a href="stanford-tregex-4.0.0.zip">4.0.0</a> | 2020&#8209;04&#8209;19 | Update for compatibility |
+| <a href="stanford-tregex-2018-10-16.zip">3.9.2</a> | 2018&#8209;10&#8209;16 | Update for compatibility |
+| <a href="stanford-tregex-2018-02-27.zip">3.9.1</a> | 2018&#8209;02&#8209;27 | Update for compatibility |
+| <a href="stanford-tregex-2017-06-09.zip">3.8.0</a> | 2017&#8209;06&#8209;09 | Update for compatibility |
+| <a href="stanford-tregex-2016-10-31.zip">3.7.0</a> | 2016&#8209;10&#8209;31 | Update for compatibility |
+| <a href="stanford-tregex-2015-12-09.zip">3.6.0</a> | 2015&#8209;12&#8209;09 | Updated for compatibility |
+| <a href="stanford-tregex-2015-04-20.zip">3.5.2</a> | 2015&#8209;04&#8209;20 | Update for compatibility |
+| <a href="stanford-tregex-2015-01-29.zip">3.5.1</a> | 2015&#8209;01&#8209;29 | Update for compatibility |
+| <a href="stanford-tregex-2014-10-26.zip">3.5.0</a> | 2014&#8209;10&#8209;26 | Upgrade to Java 8 |
+| <a href="stanford-tregex-2014-08-27.zip">3.4.1</a> | 2014&#8209;08&#8209;27 | Fix a thread safety issue in tsurgeon. Last version to support Java 6 and Java 7. |
+| <a href="stanford-tregex-2014-06-16.zip">3.4</a> | 2014&#8209;06&#8209;16 | Added a new tregex pattern, exact subtree, and improved efficiency for certain operations |
+| <a href="stanford-tregex-2014-01-04.zip">3.3.1</a> | 2014&#8209;01&#8209;04 | Added a new tsurgeon operation, createSubtree |
+| <a href="stanford-tregex-2013-11-12.zip">3.3.0</a> | 2013&#8209;11&#8209;12 | Add an option to get a TregexMatcher from a TregexPattern with a different HeadFinder |
+| <a href="stanford-tregex-2013-06-20.zip">3.2.0</a> | 2013&#8209;06&#8209;20 | Fix minor bug in tsurgeon indexing |
+| <a href="stanford-tregex-2013-04-04.zip">2.0.6</a> | 2013&#8209;04&#8209;04 | Updated for compatibility with other software releases |
+| <a href="stanford-tregex-2012-11-11.zip">2.0.5</a> | 2012&#8209;11&#8209;11 | Minor efficiency improvements |
+| <a href="stanford-tregex-2012-07-09.tgz">2.0.4</a> | 2012&#8209;07&#8209;09 | Minor bug fixes |
+| <a href="stanford-tregex-2012-05-22.tgz">2.0.3</a> | 2012&#8209;05&#8209;22 | Updated to maintain compatibility with other Stanford software. |
+| <a href="stanford-tregex-2012-03-09.tgz">2.0.2</a> | 2012&#8209;03&#8209;09 | Regex matching efficiency improvement |
+| <a href="stanford-tregex-2012-01-06.tgz">2.0.1</a> | 2012&#8209;01&#8209;06 | Fix matchesAt, fix category heads. Last version to support Java 5. |
+| <a href="stanford-tregex-2011-09-14.tgz">2.0</a> | 2011&#8209;09&#8209;14 | Introduces semgrex, which operates on SemanticGraphs. |
+| <a href="stanford-tregex-2011-06-19.tgz">1.4.4</a> | 2011&#8209;06&#8209;19 | Updated to maintain compatibility with other Stanford software. |
+| <a href="stanford-tregex-2011-05-15.tgz">1.4.3</a> | 2011&#8209;05&#8209;15 | Updated to maintain compatibility with other Stanford software. |
+| <a href="stanford-tregex-2011-04-20.tgz">1.4.2</a> | 2011&#8209;04&#8209;20 | Addition of tree difference display.  Several bugfixes. |
+| <a href="stanford-tregex-2010-11-18.tgz">1.4.1</a> | 2010&#8209;11&#8209;18 | Small fixes and improvements (multipattern Tsurgeon scripts, file and line numbers in sentence window, fixed GUI lock-up and tregex immediate domination path matching) |
+| <a href="stanford-tregex-2009-08-30.tgz">1.4</a> | 2009&#8209;08&#8209;30 | GUI slider for tree size, allow @ and __ in path constraints, incompatibly generalize Tsurgeon relabel command, bug fix for links and backreferences being used as named node, more memory/space efficient treebank reading |
+| <a href="stanford-tregex-2008-05-08.tar.gz">1.3.2</a> | 2008&#8209;05&#8209;06 | Additional features added to the graphical interface, which is now version 1.1: browse trees, better memory handling |
+| 1.3.1 | 2007&#8209;11&#8209;20 | Additional features added to the graphical interface: better copy/paste and drag and drop support, capability to save matched sentences as well as matched trees, and can save files in different encodings |
+| 1.3 | 2007&#8209;09&#8209;20 | Various bug fixes and improvements; additional Tsurgeon operations; and added a graphical interface |
+| 1.2 | 2005&#8209;11&#8209;23 | Bundled in Tsurgeon. |
+| 1.1.1 | 2005&#8209;09&#8209;15 | Fixed bugs: 1) in variable groups; 2) in number of reported matches for "<" relation |
+| 1.1 | 2005&#8209;07&#8209;19 | Several new relations added; variable substring capability added too. |
+| 1.0 | 2005&#8209;02&#8209;17 | Initial release |
