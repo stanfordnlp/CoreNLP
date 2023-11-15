@@ -8,7 +8,7 @@ toc: true
 parent: Additional Tools
 ---
 
-## About
+### About
 
 A natural language parser is a program that works out the grammatical
 **structure of sentences** , for instance, which groups of words go together
@@ -49,7 +49,7 @@ also been used for other languages, such as Italian, Bulgarian, and
 Portuguese.
 
 The parser provides [Universal Dependencies (v1) and Stanford
-Dependencies](stanford-dependencies.html) output as well as phrase structure
+Dependencies](https://nlp.stanford.edu/software/stanford-dependencies.html) output as well as phrase structure
 trees. Typed dependencies are otherwise known **grammatical relations**. This
 style of output is available only for English and Chinese. For more details,
 please refer to the [Stanford Dependencies webpage](stanford-
@@ -62,13 +62,13 @@ to update to it.).
 #### Shift-reduce constituency parser
 
 As of version 3.4 in 2014, the parser includes the code necessary to run a
-[shift reduce parser](srparser.html), a much faster constituent parser with
+[shift reduce parser](tools_srparser.md), a much faster constituent parser with
 competitive accuracy. Models for this parser are linked below.
 
 #### Neural-network dependency parser
 
 In version 3.5.0 (October 2014) we released a [high-performance dependency
-parser](nndep.html) powered by a neural network. The parser outputs typed
+parser](pytorch-depparse.md) powered by a neural network. The parser outputs typed
 dependency parses for English and Chinese. The models for this parser are
 included in the general Stanford Parser models package.
 
@@ -116,7 +116,7 @@ commercial license, then you need a license to both the Stanford Parser and
 the Stanford POS tagger. Or you can get the whole bundle of Stanford CoreNLP.)
 If you don't need a commercial license, but would like to support maintenance
 of these tools, we welcome gift funding: use [this
-form](http://giving.stanford.edu/goto/writeingift) and write "Stanford NLP
+form](http://giving.stanford.edu/) and write "Stanford NLP
 Group open source software" in the Special Instructions.
 
 ### Citing the Stanford Parser
@@ -140,11 +140,9 @@ version of the parser being used!
 > _Proceedings of ACL 2013_
 
 > _For the Shift-Reduce Constituency parser (starting at version 3.2):_  
->  This parser was written by John Bauer. You can thank him and cite the web
-> page describing it:
-> [`https://nlp.stanford.edu/software/srparser.html`](https://nlp.stanford.edu/software/srparser.html).
-> You can also cite the original research papers of others mentioned on that
-> page.
+>  This parser was written by John Bauer. You can thank him and [cite the web
+> page describing it](tools_srparser.md)
+> You can also cite the original research papers of others mentioned on that page.
 
 > _For the PCFG parser (which also does POS tagging):_  
 >  Dan Klein and Christopher D. Manning. 2003. [Accurate Unlexicalized
@@ -186,25 +184,25 @@ version of the parser being used!
 
 > _For the Chinese Parser:_  
 >  Roger Levy and Christopher D. Manning. 2003\. [Is it harder to parse
-> Chinese, or the Chinese Treebank?](/pubs/acl2003-chinese.pdf) _ACL 2003_ ,
+> Chinese, or the Chinese Treebank?](http://nlp.stanford.edu/pubs/acl2003-chinese.pdf) _ACL 2003_ ,
 > pp. 439-446.
 
 > _For the Chinese Stanford Dependencies:_  
 >  Pi-Chuan Chang, Huihsin Tseng, Dan Jurafsky, and Christopher D. Manning.
 > 2009\. [Discriminative Reordering with Chinese Grammatical Relations
-> Features](/pubs/ssst09-chang.pdf). In _Proceedings of the Third Workshop on
+> Features](http://nlp.stanford.edu/pubs/ssst09-chang.pdf). In _Proceedings of the Third Workshop on
 > Syntax and Structure in Statistical Translation_.
 
 > _For the Arabic parser:_  
 >  Spence Green and Christopher D. Manning. 2010\. [Better Arabic Parsing:
-> Baselines, Evaluations, and Analysis](/pubs/coling2010-arabic.pdf). In
+> Baselines, Evaluations, and Analysis](http://nlp.stanford.edu/pubs/coling2010-arabic.pdf). In
 > _COLING 2010_.
 
 > _For the French parser:_  
 >  Spence Green, Marie-Catherine de Marneffe, John Bauer, and Christopher D.
 > Manning. 2010\. [Multiword Expression Identification with Tree Substitution
 > Grammars: A Parsing _tour de force_ with
-> French.](/pubs/green+demarneffe+bauer+manning.emnlp11.pdf). In _EMNLP 2011_.
+> French.](http://nlp.stanford.edu/pubs/green+demarneffe+bauer+manning.emnlp11.pdf). In _EMNLP 2011_.
 
 > _For the Spanish parser:_  
 >  Most of the work on Spanish was by Jon Gauthier. There is no published
@@ -215,26 +213,21 @@ version of the parser being used!
 
   1. If you're new to parsing, you can start by running the GUI to try out the parser. Scripts are included for linux (lexparser-gui.sh) and Windows (lexparser-gui.bat). 
   2. Take a look at the Javadoc `lexparser` package documentation and `LexicalizedParser` class documentation. (Point your web browser at the `index.html` file in the included `javadoc` directory and navigate to those items.)
-  3. Look at the [parser FAQ](parser-faq.html) for answers to common questions.
+  3. Look at the [parser FAQ](tools_parser_faq.md) for answers to common questions.
   4. If none of that helps, please see [our email guidelines](email.html) for instructions on how to reach us for further assistance.
 
   
 
 ### Download
 
-**[Download Stanford Parser version 4.2.0](stanford-parser-4.2.0.zip)**  
-  
-The standard download includes models for Arabic, Chinese, English, French,
+[The standard CoreNLP download](index.md) includes the code for the lexicalized parser and all of its siblings described above.
+
+This standard download includes models for Arabic, Chinese, English, French,
 German, and Spanish. There are additional models we do not release with the
 standalone parser, including shift-reduce models, that can be found in the
-models jars for each language. Below are links to those jars.  
-  
-**[Arabic Models](stanford-corenlp-4.2.0-models-arabic.jar)** **[Chinese
-Models](stanford-corenlp-4.2.0-models-chinese.jar)** **[English
-Models](stanford-corenlp-4.2.0-models-english.jar)** **[French
-Models](stanford-corenlp-4.2.0-models-french.jar)** **[German
-Models](stanford-corenlp-4.2.0-models-german.jar)** **[Spanish
-Models](stanford-corenlp-4.2.0-models-spanish.jar)**  
+models jars for each language.
+
+Older versions are linked below.
 
 ### Extensions: Packages by others using the parser
 
@@ -271,8 +264,8 @@ Models](stanford-corenlp-4.2.0-models-spanish.jar)**
 ### Release history
 
   
-|  |  |  |
-|---|---|---|
+| Version | Date | Description | Models |
+|---|---|---|---|
 | <a href="stanford-parser-4.2.0.zip">Version 4.2.0</a> | 2020-11-17 | Retrain English models with treebank fixes | <a href="stanford-corenlp-4.2.0-models-arabic.jar">arabic  </a> <a href="stanford-corenlp-4.2.0-models-chinese.jar">chinese  </a> <a href="stanford-corenlp-4.2.0-models-english.jar">english  </a> <a href="stanford-corenlp-4.2.0-models-french.jar">french  </a> <a href="stanford-corenlp-4.2.0-models-german.jar">german  </a> <a href="stanford-corenlp-4.2.0-models-spanish.jar">spanish</a> |
 | <a href="stanford-parser-4.0.0.zip">Version 4.0.0</a> | 2020-05-22 | Model tokenization updated to UDv2.0 | <a href="stanford-corenlp-4.0.0-models-arabic.jar">arabic  </a> <a href="stanford-corenlp-4.0.0-models-chinese.jar">chinese  </a> <a href="stanford-corenlp-4.0.0-models-english.jar">english  </a> <a href="stanford-corenlp-4.0.0-models-french.jar">french  </a> <a href="stanford-corenlp-4.0.0-models-german.jar">german  </a> <a href="stanford-corenlp-4.0.0-models-spanish.jar">spanish</a> |
 | <a href="stanford-parser-full-2018-10-17.zip">Version 3.9.2</a> | 2018-10-17 | Updated for compatibility | <a href="stanford-arabic-corenlp-2018-10-05-models.jar">arabic  </a> <a href="stanford-chinese-corenlp-2018-10-05-models.jar">chinese  </a> <a href="stanford-english-corenlp-2018-10-05-models.jar">english  </a> <a href="stanford-french-corenlp-2018-10-05-models.jar">french  </a> <a href="stanford-german-corenlp-2018-10-05-models.jar">german  </a> <a href="stanford-spanish-corenlp-2018-10-05-models.jar">spanish</a> |
