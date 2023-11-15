@@ -94,34 +94,33 @@ There is a standalone distribution of the classifier which has not been updated 
 **[Download Stanford Classifier version 4.2.0](stanford-classifier-4.2.0.zip)**  
 
 | Version | Date | Description |
-|---|---|---|
-|  |
-| <a href="stanford-classifier-4.2.0.zip">4.2.0</a> | 2020-11-17 | Update for compatibility |
-| <a href="stanford-classifier-4.0.0.zip">4.0.0</a> | 2020-04-19 | Update for compatibility |
-| <a href="stanford-classifier-2018-10-16.zip">3.9.2</a> | 2018-10-16 | Updated for compatibility |
-| <a href="stanford-classifier-2018-02-27.zip">3.9.1</a> | 2018-02-27 | Updated for compatibility |
-| <a href="stanford-classifier-2017-06-09.zip">3.8.0</a> | 2017-06-09 | Updated for compatibility |
-| <a href="stanford-classifier-2016-10-31.zip">3.7.0</a> | 2016-10-31 | Update for compatibility |
-| <a href="stanford-classifier-2015-12-09.zip">3.6.0</a> | 2015-12-09 | Updated for compatibility |
-| <a href="stanford-classifier-2015-04-20.zip">3.5.2</a> | 2015-04-20 | Updated for compatibility |
-| <a href="stanford-classifier-2015-01-29.zip">3.5.1</a> | 2015-01-29 | New input / output format options; support for GloVe word vector features |
-| <a href="stanford-classifier-2014-10-26.zip">3.5.0</a> | 2014-10-26 | Upgrade to Java 8 |
-| <a href="stanford-classifier-2014-08-27.zip">3.4.1</a> | 2014-08-27 | Updated for compatibility with other Stanford releases |
-| <a href="stanford-classifier-2014-06-16.zip">3.4</a> | 2014-06-16 | Updated for compatibility with other Stanford releases |
-| <a href="stanford-classifier-2014-01-04.zip">3.3.1</a> | 2014-01-04 | Bugfix release |
-| <a href="stanford-classifier-2013-11-12.zip">3.3.0</a> | 2013-11-12 | Updated for compatibility with other Stanford releases |
-| <a href="stanford-classifier-2013-06-20.zip">3.2.0</a> | 2013-06-20 | Updated for compatibility with other Stanford releases |
-| <a href="stanford-classifier-2013-04-04.tgz">2.1.8</a> | 2013-04-04 | Updated for compatibility with other Stanford releases |
-| <a href="stanford-classifier-2012-11-11.zip">2.1.7</a> | 2012-11-11 | Pair of word features added |
-| <a href="stanford-classifier-2012-07-09.tgz">2.1.6</a> | 2012-07-09 | Minor bug fixes |
-| <a href="stanford-classifier-2012-05-22.tgz">2.1.5</a> | 2012-05-22 | Updated for compatibility with other Stanford releases |
-| <a href="stanford-classifier-2012-03-09.tgz">2.1.4</a> | 2012-03-09 | Bugfix for svmlight format |
-| <a href="stanford-classifier-2011-12-22.tgz">2.1.3</a> | 2011-12-22 | Updated for compatibility with other Stanford releases |
-| <a href="stanford-classifier-2011-09-14.tar.gz">2.1.2</a> | 2011-09-14 | Change ColumnDataClassifier to be an object with API rather than static methods; ColumnDataClassifier thread safe |
-| <a href="stanford-classifier-2011-06-19.tar.gz">2.1.1</a> | 2011-06-19 | Updated for compatibility with other Stanford releases |
-| <a href="stanford-classifier-2011-05-15.tar.gz">2.1</a> | 2011-05-15 | Updated with more documentation |
-| <a href="stanford-classifier-2007-08-15.tar.gz">2.0</a> | 2007-08-15 | New command line interface, substantial increase in options and features (updated on 2007-09-28 with a bug fix) |
-| 1.0 | 2003-05-26 | Initial release |
+|:---:|---|---|
+| <a href="stanford-classifier-4.2.0.zip">4.2.0</a>         | 2020&#8209;11&#8209;17 | Update for compatibility |
+| <a href="stanford-classifier-4.0.0.zip">4.0.0</a>         | 2020&#8209;04&#8209;19 | Update for compatibility |
+| <a href="stanford-classifier-2018-10-16.zip">3.9.2</a>    | 2018&#8209;10&#8209;16 | Updated for compatibility |
+| <a href="stanford-classifier-2018-02-27.zip">3.9.1</a>    | 2018&#8209;02&#8209;27 | Updated for compatibility |
+| <a href="stanford-classifier-2017-06-09.zip">3.8.0</a>    | 2017&#8209;06&#8209;09 | Updated for compatibility |
+| <a href="stanford-classifier-2016-10-31.zip">3.7.0</a>    | 2016&#8209;10&#8209;31 | Update for compatibility |
+| <a href="stanford-classifier-2015-12-09.zip">3.6.0</a>    | 2015&#8209;12&#8209;09 | Updated for compatibility |
+| <a href="stanford-classifier-2015-04-20.zip">3.5.2</a>    | 2015&#8209;04&#8209;20 | Updated for compatibility |
+| <a href="stanford-classifier-2015-01-29.zip">3.5.1</a>    | 2015&#8209;01&#8209;29 | New input / output format options; support for GloVe word vector features |
+| <a href="stanford-classifier-2014-10-26.zip">3.5.0</a>    | 2014&#8209;10&#8209;26 | Upgrade to Java 8 |
+| <a href="stanford-classifier-2014-08-27.zip">3.4.1</a>    | 2014&#8209;08&#8209;27 | Updated for compatibility with other Stanford releases |
+| <a href="stanford-classifier-2014-06-16.zip">3.4</a>      | 2014&#8209;06&#8209;16 | Updated for compatibility with other Stanford releases |
+| <a href="stanford-classifier-2014-01-04.zip">3.3.1</a>    | 2014&#8209;01&#8209;04 | Bugfix release |
+| <a href="stanford-classifier-2013-11-12.zip">3.3.0</a>    | 2013&#8209;11&#8209;12 | Updated for compatibility with other Stanford releases |
+| <a href="stanford-classifier-2013-06-20.zip">3.2.0</a>    | 2013&#8209;06&#8209;20 | Updated for compatibility with other Stanford releases |
+| <a href="stanford-classifier-2013-04-04.tgz">2.1.8</a>    | 2013&#8209;04&#8209;04 | Updated for compatibility with other Stanford releases |
+| <a href="stanford-classifier-2012-11-11.zip">2.1.7</a>    | 2012&#8209;11&#8209;11 | Pair of word features added |
+| <a href="stanford-classifier-2012-07-09.tgz">2.1.6</a>    | 2012&#8209;07&#8209;09 | Minor bug fixes |
+| <a href="stanford-classifier-2012-05-22.tgz">2.1.5</a>    | 2012&#8209;05&#8209;22 | Updated for compatibility with other Stanford releases |
+| <a href="stanford-classifier-2012-03-09.tgz">2.1.4</a>    | 2012&#8209;03&#8209;09 | Bugfix for svmlight format |
+| <a href="stanford-classifier-2011-12-22.tgz">2.1.3</a>    | 2011&#8209;12&#8209;22 | Updated for compatibility with other Stanford releases |
+| <a href="stanford-classifier-2011-09-14.tar.gz">2.1.2</a> | 2011&#8209;09&#8209;14 | Change ColumnDataClassifier to be an object with API rather than static methods; ColumnDataClassifier thread safe |
+| <a href="stanford-classifier-2011-06-19.tar.gz">2.1.1</a> | 2011&#8209;06&#8209;19 | Updated for compatibility with other Stanford releases |
+| <a href="stanford-classifier-2011-05-15.tar.gz">2.1</a>   | 2011&#8209;05&#8209;15 | Updated with more documentation |
+| <a href="stanford-classifier-2007-08-15.tar.gz">2.0</a>   | 2007&#8209;08&#8209;15 | New command line interface, substantial increase in options and features (updated on 2007-09-28 with a bug fix) |
+| 1.0 | 2003&#8209;05&#8209;26 | Initial release |
 
   
 
