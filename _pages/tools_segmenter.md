@@ -55,8 +55,7 @@ implementation of the CRF-based Chinese Word Segmenter described in:
 
 Two models with two different segmentation standards are included: [ Chinese
 Penn Treebank standard](http://www.cis.upenn.edu/~chinese/segguide.3rd.ch.pdf)
-and [ Peking University
-standard](http://sighan.cs.uchicago.edu/bakeoff2005/data/pku_spec.pdf).
+and [ Peking University standard](http://sighan.cs.uchicago.edu/bakeoff2005/data/pku_spec.pdf).
 
 On May 21, 2008, we released a version that makes use of lexicon features.
 With external lexicon features, the segmenter segments more consistently and
@@ -78,35 +77,30 @@ now also available.
 ### Tutorials
 
   * Michelle Fullwood wrote [a nice tutorial on segmenting and parsing Chinese](http://michelleful.github.io/code-blog/2015/09/10/parsing-chinese-with-stanford/) with the Stanford NLP tools.
-  * [This page](http://www.linguisticsweb.org/doku.php?id=linguisticsweb:tutorials:linguistics_tutorials:automaticannotation:stanford_word_segmenter) from linguisticsweb has a few Windows examples (but text is a bit sparse). 
+  * [This page](https://www.linguisticsweb.org/doku.php?id=linguisticsweb:tutorials:automaticannotation:stanford_word_segmenter) from linguisticsweb has a few Windows examples (but text is a bit sparse). 
 
 ### Download
 
-The segmenter is available for download, **licensed under the[GNU General
-Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later).
+The Chinese and Arabic versions of CoreNLP use the segmenter for tokenization,
+and the segmenter package is available in all recent versions of CoreNLP.
+Bugfixes are primarily released through CoreNLP.
+
+Previous versions of the segmenter are also available for download,
+**licensed under the[GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html)** (v2 or later).
 Source is included. The package includes components for command-line
 invocation and a Java API. The segmenter code is dual licensed (in a similar
 manner to MySQL, etc.). Open source licensing is under the _full_ GPL, which
 allows many free uses. For distributors of [proprietary
 software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem),
-[commercial
-licensing](http://otlportal.stanford.edu/techfinder/technology/ID=27276) is
-available. If you don't need a commercial license, but would like to support
+[commercial licensing](http://otlportal.stanford.edu/techfinder/technology/ID=27276)
+is available. If you don't need a commercial license, but would like to support
 maintenance of these tools, we welcome gift funding.
 
 The download is a zipped file consisting of model files, compiled code, and
 source files. If you unpack the tar file, you should have everything needed.
 Simple scripts are included to invoke the segmenter.
 
-[Download Stanford Word Segmenter version 4.2.0](stanford-segmenter-4.2.0.zip)
-
-### Questions
-
-Have a support question? Please ask us on [Stack
-Overflow](http://stackoverflow.com) using the tag `stanford-nlp`.
-
-Feedback, questions, licensing issues, and bug reports / fixes can also be
-sent to our mailing lists (see immediately below).
+[Download Stanford Word Segmenter version 4.2.0](https://nlp.stanford.edu/software/stanford-segmenter-4.2.0.zip)
 
 ### Mailing Lists
 
@@ -140,29 +134,29 @@ archives](https://mailman.stanford.edu/pipermail/java-nlp-user/).
   
 Version| Date| Description  
 ---|---|---  
-[4.2.0](stanford-segmenter-4.2.0.zip) | 2020-11-17 | Update for compatibility  
-[4.0.0](stanford-segmenter-4.0.0.zip) | 2020-04-19 | New Chinese segmenter trained off of CTB 9.0  
-[3.9.2](stanford-segmenter-2018-10-16.zip) | 2018-10-16 | Updated for compatibility  
-[3.9.1](stanford-segmenter-2018-02-27.zip) | 2018-02-27 | Updated for compatibility  
-[3.8.0](stanford-segmenter-2017-06-09.zip) | 2017-06-09 | Update for compatibility  
-[3.7.0](stanford-segmenter-2016-10-31.zip) | 2016-10-31 | Update for compatibility  
-[3.6.0](stanford-segmenter-2015-12-09.zip) | 2015-12-09 | Updated for compatibility  
-[3.5.2](stanford-segmenter-2015-04-20.zip) | 2015-04-20 | Updated for compatibility  
-[3.5.1](stanford-segmenter-2015-01-29.zip) | 2015-01-29 | Updated for compatibility  
-[3.5.0](stanford-segmenter-2014-10-26.zip) | 2014-10-26 | Upgrade to Java 8  
-[3.4.1](stanford-segmenter-2014-08-27.zip) | 2014-08-27 | Updated for compatibility  
-[3.4](stanford-segmenter-2014-06-16.zip) | 2014-06-16 | Updated Arabic model  
-[3.3.1](stanford-segmenter-2014-01-04.zip) | 2014-01-04 | Bugfix release  
-[3.3.0](stanford-segmenter-2013-11-12.zip) | 2013-11-12 | Updated for compatibility  
-[3.2.0](stanford-segmenter-2013-06-20.zip) | 2013-06-20 | Improved line by line handling  
-[1.6.8](stanford-segmenter-2013-04-04.zip) | 2013-04-04 | ctb7 model, -nthreads option  
-[1.6.7](stanford-segmenter-2012-11-11.zip) | 2012-11-11 | Bugfixes for both Arabic and Chinese, Chinese segmenter can now load data from a jar file  
-[1.6.6](stanford-segmenter-2012-07-09.tgz) | 2012-07-09 | Improved Arabic model  
-[1.6.5](stanford-segmenter-2012-05-22.tar.gz) | 2012-05-22 | Fixed encoding problems, supports stdin for Chinese segmenter  
-[1.6.4](stanford-segmenter-2012-05-07.tar.gz) | 2012-05-07 | Included Arabic model  
-[1.6.3](stanford-chinese-segmenter-2012-01-08.tar.gz) | 2012-01-08 | Minor bug fixes  
-[1.6.2](stanford-chinese-segmenter-2011-09-14.tar.gz) | 2011-09-14 | Improved thread safety  
-[1.6.1](stanford-chinese-segmenter-2011-06-19.tar.gz) | 2011-06-19 | Fixed empty document bug when training new models  
-[1.6](stanford-chinese-segmenter-2011-05-15.tar.gz) | 2011-05-15 | Models updated to be slightly more accurate; code correctly released so it now builds; updated for compatibility with other Stanford releases |
-[1.5](stanford-chinese-segmenter-2008-05-21.tar.gz) | 2008-05-21 | (with external lexicon features; able to output k-best segmentations)  
+[4.2.0](https://nlp.stanford.edu/software/stanford-segmenter-4.2.0.zip) | 2020-11-17 | Update for compatibility  
+[4.0.0](https://nlp.stanford.edu/software/stanford-segmenter-4.0.0.zip) | 2020-04-19 | New Chinese segmenter trained off of CTB 9.0  
+[3.9.2](https://nlp.stanford.edu/software/stanford-segmenter-2018-10-16.zip) | 2018-10-16 | Updated for compatibility  
+[3.9.1](https://nlp.stanford.edu/software/stanford-segmenter-2018-02-27.zip) | 2018-02-27 | Updated for compatibility  
+[3.8.0](https://nlp.stanford.edu/software/stanford-segmenter-2017-06-09.zip) | 2017-06-09 | Update for compatibility  
+[3.7.0](https://nlp.stanford.edu/software/stanford-segmenter-2016-10-31.zip) | 2016-10-31 | Update for compatibility  
+[3.6.0](https://nlp.stanford.edu/software/stanford-segmenter-2015-12-09.zip) | 2015-12-09 | Updated for compatibility  
+[3.5.2](https://nlp.stanford.edu/software/stanford-segmenter-2015-04-20.zip) | 2015-04-20 | Updated for compatibility  
+[3.5.1](https://nlp.stanford.edu/software/stanford-segmenter-2015-01-29.zip) | 2015-01-29 | Updated for compatibility  
+[3.5.0](https://nlp.stanford.edu/software/stanford-segmenter-2014-10-26.zip) | 2014-10-26 | Upgrade to Java 8  
+[3.4.1](https://nlp.stanford.edu/software/stanford-segmenter-2014-08-27.zip) | 2014-08-27 | Updated for compatibility  
+[3.4](https://nlp.stanford.edu/software/stanford-segmenter-2014-06-16.zip) | 2014-06-16 | Updated Arabic model  
+[3.3.1](https://nlp.stanford.edu/software/stanford-segmenter-2014-01-04.zip) | 2014-01-04 | Bugfix release  
+[3.3.0](https://nlp.stanford.edu/software/stanford-segmenter-2013-11-12.zip) | 2013-11-12 | Updated for compatibility  
+[3.2.0](https://nlp.stanford.edu/software/stanford-segmenter-2013-06-20.zip) | 2013-06-20 | Improved line by line handling  
+[1.6.8](https://nlp.stanford.edu/software/stanford-segmenter-2013-04-04.zip) | 2013-04-04 | ctb7 model, -nthreads option  
+[1.6.7](https://nlp.stanford.edu/software/stanford-segmenter-2012-11-11.zip) | 2012-11-11 | Bugfixes for both Arabic and Chinese, Chinese segmenter can now load data from a jar file  
+[1.6.6](https://nlp.stanford.edu/software/stanford-segmenter-2012-07-09.tgz) | 2012-07-09 | Improved Arabic model  
+[1.6.5](https://nlp.stanford.edu/software/stanford-segmenter-2012-05-22.tar.gz) | 2012-05-22 | Fixed encoding problems, supports stdin for Chinese segmenter  
+[1.6.4](https://nlp.stanford.edu/software/stanford-segmenter-2012-05-07.tar.gz) | 2012-05-07 | Included Arabic model  
+[1.6.3](https://nlp.stanford.edu/software/stanford-chinese-segmenter-2012-01-08.tar.gz) | 2012-01-08 | Minor bug fixes  
+[1.6.2](https://nlp.stanford.edu/software/stanford-chinese-segmenter-2011-09-14.tar.gz) | 2011-09-14 | Improved thread safety  
+[1.6.1](https://nlp.stanford.edu/software/stanford-chinese-segmenter-2011-06-19.tar.gz) | 2011-06-19 | Fixed empty document bug when training new models  
+[1.6](https://nlp.stanford.edu/software/stanford-chinese-segmenter-2011-05-15.tar.gz) | 2011-05-15 | Models updated to be slightly more accurate; code correctly released so it now builds; updated for compatibility with other Stanford releases |
+[1.5](https://nlp.stanford.edu/software/stanford-chinese-segmenter-2008-05-21.tar.gz) | 2008-05-21 | (with external lexicon features; able to output k-best segmentations)  
 [1.0](StanfordChineseSegmenter-2006-05-11.tar.gz) | 2006-05-11 | Initial release  
