@@ -296,14 +296,10 @@ Older versions are linked below.
 | <a href="stanford-parser-2010-07-09.tgz">Version 1.6.3</a> | 2010-07-09 | Improvements to English Stanford Dependencies and question parsing, minor bug fixes |
 | <a href="stanford-parser-2010-02-26.tgz">Version 1.6.2</a> | 2010-02-26 | Improvements to Arabic parser models, and to English and Chinese Stanford Dependencies |
 | <a href="stanford-parser-2008-10-26.tgz">Version 1.6.1</a> | 2008-10-26 | Slightly improved Arabic and German parsing, and Stanford Dependencies |
-| <a href="stanford-parser-2007-08-19.tar.gz">Version 1.6</a> | 2007-08-19 | Added Arabic, k-best PCCFG parsing; improved English grammatical
-      relations |
-| <a href="StanfordParser-2006-06-11.tar.gz">Version 1.5.1</a> | 2006-06-11 | Improved English and Chinese grammatical relations; 
-      fixed UTF-8 handling |
-| <a href="StanfordParser-2005-07-21.tar.gz">Version 1.5</a> | 2005-07-21 | Added grammatical relations output;
-      fixed bugs introduced in 1.4 |
-| <a href="StanfordParser-1.4.tar.gz">Version 1.4</a> | 2004-03-24 | Made PCFG faster again (by FSA minimization);
-          added German support |
+| <a href="stanford-parser-2007-08-19.tar.gz">Version 1.6</a> | 2007-08-19 | Added Arabic, k-best PCCFG parsing; improved English grammatical relations |
+| <a href="StanfordParser-2006-06-11.tar.gz">Version 1.5.1</a> | 2006-06-11 | Improved English and Chinese grammatical relations; fixed UTF-8 handling |
+| <a href="StanfordParser-2005-07-21.tar.gz">Version 1.5</a> | 2005-07-21 | Added grammatical relations output; fixed bugs introduced in 1.4 |
+| <a href="StanfordParser-1.4.tar.gz">Version 1.4</a> | 2004-03-24 | Made PCFG faster again (by FSA minimization); added German support |
 | <a href="StanfordParser-1.3.tar.gz">Version 1.3</a> | 2003-09-06 | Made parser over twice as fast; added tokenization options |
 | Version 1.2 | 2003-07-20 | Halved PCFG memory usage; added support for Chinese |
 | Version 1.1 | 2003-03-25 | Improved parsing speed; included GUI, improved PCFG grammar |
