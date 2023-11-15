@@ -145,8 +145,8 @@ included)
 
 ### Release history
 
-| Version | Date | Description |
-|---|---|---|
+| Version   | Date | Description |
+|:---------:|:----:|-------------|
 | <a href="http://nlp.stanford.edu/software/stanford-tregex-4.2.0.zip">4.2.0</a> | 2020&#8209;11&#8209;17 | Update for compatibility |
 | <a href="stanford-tregex-4.0.0.zip">4.0.0</a> | 2020&#8209;04&#8209;19 | Update for compatibility |
 | <a href="stanford-tregex-2018-10-16.zip">3.9.2</a> | 2018&#8209;10&#8209;16 | Update for compatibility |
