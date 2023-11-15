@@ -163,6 +163,6 @@ archives](https://mailman.stanford.edu/pipermail/java-nlp-user/).
 
   
 | Version| Date| Description| Resources  |
-| ---|---|---|---  |
+|:---:|:---:|---|---  |
 | 3.6.0 | 2015-12-09 | First release |  [code](/projects/naturalli/stanford-openie-3.6.0.jar) / [models](/projects/naturalli/stanford-openie-models-3.6.0.jar) / [source](/projects/naturalli/stanford-openie-src-3.6.0.jar) |
 
