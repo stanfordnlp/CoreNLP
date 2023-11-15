@@ -18,20 +18,32 @@ be able to read the models from that jar file.
 
 Again using January 2014 version 3.3.1 as an example, you would not make your
 classpath  
-` -cp stanford-parser-3.3.1.jar `  
+```
+-cp stanford-parser-3.3.1.jar
+```
+
 Instead, you would make it  
 Windows:  
-` -cp stanford-parser-3.3.1.jar;stanford-parser-3.3.1-models.jar `  
+```
+-cp stanford-parser-3.3.1.jar;stanford-parser-3.3.1-models.jar
+```
+
 *nix:   
-` -cp stanford-parser-3.3.1.jar:stanford-parser-3.3.1-models.jar `
+```
+-cp stanford-parser-3.3.1.jar:stanford-parser-3.3.1-models.jar
+```
 
 In order to see exactly which models are available, you can use  
-` jar tvf stanford-parser-3.3.1-models.jar `  
+```
+jar tvf stanford-parser-3.3.1-models.jar
+```
 This will show you that to access the Arabic Factored model, for example, you
 would use the path  
-` edu/stanford/nlp/models/lexparser/arabicFactored.ser.gz `
+```
+edu/stanford/nlp/models/lexparser/arabicFactored.ser.gz
+```
 
-If you are encountering a FileNotFoundException or similar error when loading
+If you are encountering a `FileNotFoundException` or similar error when loading
 models, the first thing to check is that the classpath is set up as described
 here.
 
@@ -60,10 +72,10 @@ producers not us). The parser can be used for English, Chinese, Arabic, or
 German (among other languages). For part of speech and phrasal categories,
 here are relevant links:
 
-    * English: the [Penn Treebank site](http://www.cis.upenn.edu/~treebank/). There is an [online copy of its documentation](http://catalog.ldc.upenn.edu/docs/LDC99T42/); in particular, see TAGGUID1.PDF (POS tagging guide) and PRSGUID1.PDF (phrase structure bracketing guide) and a (slightly dated) [introductory article](http://aclweb.org/anthology-new/J/J93/J93-2004.pdf). You might find it more convenient to use other simpler listings such as the [AMALGAM project page](http://www.comp.leeds.ac.uk/amalgam/tagsets/upenn.html) or [this page at MIT](http://web.mit.edu/6.863/www/PennTreebankTags.html). 
-    * Chinese: the [Penn Chinese Treebank](http://www.cis.upenn.edu/~chinese/)
-    * German: the [NEGRA](http://www.coli.uni-saarland.de/projects/sfb378/negra-corpus/) corpus 
-    * French: the [French Treebank](http://www.llf.cnrs.fr/Gens/Abeille/French-Treebank-fr.php)
+- English: the [Penn Treebank site](http://www.cis.upenn.edu/~treebank/). There is an [online copy of its documentation](http://catalog.ldc.upenn.edu/docs/LDC99T42/); in particular, see TAGGUID1.PDF (POS tagging guide) and PRSGUID1.PDF (phrase structure bracketing guide) and a (slightly dated) [introductory article](http://aclweb.org/anthology-new/J/J93/J93-2004.pdf). You might find it more convenient to use other simpler listings such as the [AMALGAM project page](http://www.comp.leeds.ac.uk/amalgam/tagsets/upenn.html) or [this page at MIT](http://web.mit.edu/6.863/www/PennTreebankTags.html). 
+- Chinese: the [Penn Chinese Treebank](http://www.cis.upenn.edu/~chinese/)
+- German: the [NEGRA](http://www.coli.uni-saarland.de/projects/sfb378/negra-corpus/) corpus 
+- French: the [French Treebank](http://www.llf.cnrs.fr/Gens/Abeille/French-Treebank-fr.php)
 
 Please read the documentation for each of these corpora to learn about their
 tagsets and phrasal categories. You can often also find additional
@@ -71,8 +83,7 @@ documentation resources by doing web searches.
 
 We defined or were involved in defining the typed dependency (grammatical
 relations) output available for English and Chinese. For English, the parser
-by default now produces [Universal
-Dependencies](http://universaldependencies.github.io/docs/), which are
+by default now produces [Universal Dependencies](http://universaldependencies.github.io/docs/), which are
 extensively documented on that page. You can also have it produce the prior
 Stanford Dependencies representation. For this, and for the Chinese
 dependencies, you can find links to documentation on the [Stanford
@@ -89,13 +100,10 @@ classes.
 ### Can I train the parser?
 
 Yes, you can train a parser. You will need a collection of syntactically
-annotated data such as the [Penn
-Treebank](http://www.cis.upenn.edu/~treebank/home.html) to train the parser.
+annotated data such as the [Penn Treebank](http://www.cis.upenn.edu/~treebank/home.html) to train the parser.
 If they are not in the same format as currently supported Treebanks, you may
 need to write classes to read in the trees, etc. Read the Javadocs for the
-[main method of the `LexicalizedParser`
-class](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/parser/lexparser/LexicalizedParser.html#main-
-java.lang.String:A-), particularly the `-train` option to find out about the
+[main method of the `LexicalizedParser` class](http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/parser/lexparser/LexicalizedParser.html#main-java.lang.String:A-), particularly the `-train` option to find out about the
 command options for training parsers. The supplied file `makeSerialized.csh`
 shows exactly what options we used to train the parsers that are included in
 the distribution. If you want to train the parser on a new language and/or
@@ -115,20 +123,19 @@ a compressed file of parsed trees.
 
 An example command line for this process, with some of the most useful flags,
 is  
-` java -mx4g edu.stanford.nlp.parser.dvparser.CacheParseHypotheses -model
-/path/to/pcfg/pcfg.ser.gz -treebank /path/to/wsj 200-2199 -output
-cached.wsj.ser.gz -numThreads 6 `
+
+```
+java -mx4g edu.stanford.nlp.parser.dvparser.CacheParseHypotheses -model /path/to/pcfg/pcfg.ser.gz -treebank /path/to/wsj 200-2199 -output cached.wsj.ser.gz -numThreads 6
+```
 
 It is then necessary to run the DVParser module to create a new serialized
 model. An example of this command line is  
-` java -mx12g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees
-/path/to/cached.wsj.ser.gz -train -testTreebank /path/to/wsj 2200-2219
--debugOutputFrequency 500 -trainingThreads 8 -parser /path/to/pcfg/pcfg.ser.gz
--dvIterations 40 -dvBatchSize 25 -wordVectorFile /path/to/embedding -model
-/scr/nlp/data/dvparser/wsj/train/averaged/averaged.ser.gz `
 
-For an explanation of the various options, run `java
-edu.stanford.nlp.parser.dvparser.DVParser` with no flags.
+```
+java -mx12g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees /path/to/cached.wsj.ser.gz -train -testTreebank /path/to/wsj 2200-2219 -debugOutputFrequency 500 -trainingThreads 8 -parser /path/to/pcfg/pcfg.ser.gz -dvIterations 40 -dvBatchSize 25 -wordVectorFile /path/to/embedding -model /scr/nlp/data/dvparser/wsj/train/averaged/averaged.ser.gz
+```
+
+For an explanation of the various options, run `java edu.stanford.nlp.parser.dvparser.DVParser` with no flags.
 
 The memory requirements of the parser is not actually that high, but the more
 threads added with `-trainingThreads`, the more memory will be required to
@@ -140,8 +147,7 @@ to with `-testTreebank`. When the model is finished training, or when you want
 to test one of the intermediate models, you can run it using the standard
 `LexicalizedParser` commands.
 
-In our experiments, we found that [simpler PCFG
-models](http://nlp.stanford.edu/software/parser-faq.html#weaker) actually make
+In our experiments, we found that [simpler PCFG models](tools_parser_faq.md#what-about-other-versions-of-weaker-models) actually make
 better underlying PCFG models. Command lines for the PCFG models we use for
 English and Chinese can be found in makeSerialized.csh
 
@@ -156,7 +162,7 @@ your treebank and using that instead.
 
 ### How do I force the parser to use my sentence delimitations? I want to give the parser a list of sentences, one per line, to parse.
 
-Use the ` -sentences ` option. If you want to give the parser one sentence per
+Use the `-sentences` option. If you want to give the parser one sentence per
 line, include the option `-sentences newline` in your invocation of
 `LexicalizedParser`.
 
@@ -179,7 +185,9 @@ tokenized but does not escape characters the way the Penn Treebank does (e.g.,
 turning parentheses into `-LRB-` and `-RRB-`). In this case, you can use the
 `-tokenized` option but also add the flag:
 
-> ` -escaper edu.stanford.nlp.process.PTBEscapingProcessor `
+```
+-escaper edu.stanford.nlp.process.PTBEscapingProcessor
+```
 
 (Note: the original Penn Treebank through the 1999 release also putt a
 backslash in front of forward slashes and asterisks - presumably a holdover
@@ -206,21 +214,18 @@ Read the Javadocs for the main method of the LexicalizedParser class. The
 relevant options are `-sentences` (see above), `-tokenized`,
 `-tokenizerFactory`, `-tokenizerMethod`, and `-tagSeparator`. If, for example,
 you want to denote a POS tag by appending `/POS` on a word, you would include
-the options `-tokenized -tagSeparator / -tokenizerFactory
-edu.stanford.nlp.process.WhitespaceTokenizer -tokenizerMethod
-newCoreLabelTokenizerFactory ` in your invocation of `LexicalizedParser`. You
-could then give the parser input such as:
+the options `-tokenized -tagSeparator / -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer -tokenizerMethod newCoreLabelTokenizerFactory`
+in your invocation of `LexicalizedParser`. You could then give the parser input such as:
 
-> `The/DT quick/JJ brown/JJ fox/NN jumped/VBD over/IN the/DT lazy/JJ dog/NN
-> ./. `
+```
+The/DT quick/JJ brown/JJ fox/NN jumped/VBD over/IN the/DT lazy/JJ dog/NN ./.
+```
 
 with the command:
 
-> `java -mx1g -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser
-> -sentences newline -tokenized -tagSeparator / -tokenizerFactory
-> edu.stanford.nlp.process.WhitespaceTokenizer -tokenizerMethod
-> newCoreLabelTokenizerFactory
-> edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz fox.txt `
+```
+java -mx1g -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser -sentences newline -tokenized -tagSeparator / -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer -tokenizerMethod newCoreLabelTokenizerFactory edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz fox.txt
+```
 
 Partially-tagged input (only indicating the POS of some words) is also OK.
 
@@ -237,18 +242,19 @@ Tagger](https://nlp.stanford.edu/software/tagger.html), which produces either
 list will pass the tags to the parser. Or you can do this with code that you
 write. Here's an example that very manually makes the `List` in question:
 
-> >     // set up grammar and options as appropriate
->     LexicalizedParser lp = LexicalizedParser.loadModel(grammar, options);
->     String[] sent3 = { "It", "can", "can", "it", "." };
->     // Parser gets tag of second "can" wrong without help  
->     String[] tag3 = { "PRP", "MD", "VB", "PRP", "." };  
->     List sentence3 = new ArrayList();
->     for (int i = 0; i < sent3.length; i++) {
->       sentence3.add(new TaggedWord(sent3[i], tag3[i]));
->     }
->     Tree parse = lp.parse(sentence3);
->     parse.pennPrint();
->  
+```java
+// set up grammar and options as appropriate
+LexicalizedParser lp = LexicalizedParser.loadModel(grammar, options);
+String[] sent3 = { "It", "can", "can", "it", "." };
+// Parser gets tag of second "can" wrong without help  
+String[] tag3 = { "PRP", "MD", "VB", "PRP", "." };  
+List sentence3 = new ArrayList();
+for (int i = 0; i < sent3.length; i++) {
+  sentence3.add(new TaggedWord(sent3[i], tag3[i]));
+}
+Tree parse = lp.parse(sentence3);
+parse.pennPrint();
+```
 
 ### What other on the chosen parse constraints are possible?
 
