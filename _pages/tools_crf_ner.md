@@ -197,8 +197,7 @@ The Java NER toolkit is now included in recent distributions of CoreNLP.
 
 There are also previous standalone versions of the NER toolkit:
 
-**[Download Stanford Named Entity Recognizer version 4.2.0](stanford-
-ner-4.2.0.zip)**  
+**[Download Stanford Named Entity Recognizer version 4.2.0](https://nlp.stanford.edu/software/stanford-ner-4.2.0.zip)**  
 
 The download is a 151M zipped file (mainly consisting of classifier data
 objects). If you unpack that file, you should have everything needed for
@@ -273,7 +272,7 @@ model. See [this page](http://stanfordnlp.github.io/CoreNLP/caseless.html).
 
 A German NER model is available, based on work by Manaal Faruqui and Sebastian
 PadÃ³. You can find it in the CoreNLP German models jar. For citation and other
-information relating to the German classifiers, please see [ Sebastian Pado's
+information relating to the German classifiers, please see [Sebastian Pado's
 German NER page](http://www.nlpado.de/~sebastian/software/ner_german.html)
 (but the models there are now many years old; you should use the better models
 that we have!). It is a 4 class IOB1 classifier (see, e.g., [Memory-Based

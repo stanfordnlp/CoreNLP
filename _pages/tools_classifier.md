@@ -87,9 +87,11 @@ message body empty.) You can also [look at the list archives](https://mailman.st
   3. `java-nlp-support` This list goes only to the software maintainers. It's a good address for licensing questions, etc. **For general use and support questions, you're better off using Github or joining and using `java-nlp-user`.** You cannot join `java-nlp-support`, but you can mail questions to `java-nlp-support@lists.stanford.edu`.
 
   
-**[Download Stanford Classifier version 4.2.0](stanford-classifier-4.2.0.zip)**  
-
 ### Release history
+
+There is a standalone distribution of the classifier which has not been updated in some time.
+
+**[Download Stanford Classifier version 4.2.0](stanford-classifier-4.2.0.zip)**  
 
 | Version | Date | Description |
 |---|---|---|
