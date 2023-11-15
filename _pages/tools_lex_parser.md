@@ -419,6 +419,6 @@ representation. All of these are different views of the output of the parser.
 
 This output was generated with the command:
 
-> ` java -mx200m edu.stanford.nlp.parser.lexparser.LexicalizedParser
-> -retainTMPSubcategories -outputFormat "wordsAndTags,penn,typedDependencies"
-> englishPCFG.ser.gz mumbai.txt `
+```
+java -mx200m edu.stanford.nlp.parser.lexparser.LexicalizedParser -retainTMPSubcategories -outputFormat "wordsAndTags,penn,typedDependencies" englishPCFG.ser.gz mumbai.txt
+```
