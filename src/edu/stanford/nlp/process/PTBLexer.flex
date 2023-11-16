@@ -1129,7 +1129,7 @@ CP1252_MISC_SYMBOL = [\u0086\u0087\u0089\u0095\u0098\u0099]
                         }
 
 /* Special case to get ca., fig. or Prop. before numbers */
-<YyNotTokenizePerLine>{ABBREV3}/{SPACENL}?{DIGIT}   {
+<YyNotTokenizePerLine>{ABBREV3}/{SPACENL}?{HASHES}?{DIGIT}   {
                           return processAbbrev3();
                         }
 <YyTokenizePerLine>{ABBREV3}/{SPACE}?{DIGIT}   {
