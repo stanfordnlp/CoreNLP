@@ -259,20 +259,20 @@ parse.pennPrint();
 ### What other on the chosen parse constraints are possible?
 
 There are other constraints which can be added, but they have to be added
-programmatically. Look at the LexicalizedParserQuery object, which you can get
-from LexicalizedParser.parseQuery(). There is a call, setConstraints, which
-you can make before using the LexicalizedParserQuery to run the parser.
+programmatically. Look at the `LexicalizedParserQuery` object, which you can get
+from `LexicalizedParser.parseQuery()`. There is a call, `setConstraints`, which
+you can make before using the `LexicalizedParserQuery` to run the parser.
 
 If you add a ParserConstraint object spanning a set of words, the parser will
 only produce parse trees which include that span of words as a constituent. In
-general, you will want to use ".*" as the state accepted by this constraint.
+general, you will want to use `".*"` as the state accepted by this constraint.
 
-It is also possible to specify constraints such as "NN|JJ" to enforce that the
-parser uses either an NN or JJ, for example, but unfortunately there is a
+It is also possible to specify constraints such as `"NN|JJ"` to enforce that the
+parser uses either an `NN` or `JJ`, for example, but unfortunately there is a
 subtle and complicated bug in the code that enforces that. If you do try to
 use this, most of the parsers use vertical markovization, which means you will
-need to make the constraints "JJ|JJ[^a-zA-Z].*" instead of "JJ". In general,
-though, you should not use this part of the feature and simply use ".*".
+need to make the constraints `"JJ|JJ[^a-zA-Z].*"` instead of `"JJ"`. In general,
+though, you should not use this part of the feature and simply use `".*"`.
 
 See the existing Javadoc for more information on this.
 
@@ -283,10 +283,10 @@ Not yet, but in the future, very possibly.
 ### Can I obtain multiple parse trees for a single input sentence?
 
 Yes, for the PCFG parser (only). With a PCFG parser, you can give the option
-`-printPCFGkBest _n_` and it will print the _n_ highest-scoring parses for a
+`-printPCFGkBest n` and it will print the `n` highest-scoring parses for a
 sentence. They can be printed either as phrase structure trees or as typed
 dependencies in the usual way via the `-outputFormat` option, and each
-receives a score (log probability). The _k_ best parses are extracted
+receives a score (log probability). The `k` best parses are extracted
 efficiently using the algorithm of Huang and Chiang (2005).
 
 ### I don't [understand/like/agree with] the parse tree that is assigned to my sentence. Can you [explain/fix] it?
@@ -299,6 +299,11 @@ model that you're using, which are referenced above. Or it may be because the
 parser made a mistake. While our goal is to improve the parser when we can, we
 can't fix individual examples. The parser is just choosing the highest
 probability analysis according to its grammar.
+
+Having said that, we have actually built
+[a small treebank of handparsed text](https://github.com/stanfordnlp/handparsed-treebank).
+If you have specific examples to analyze, we can add more trees to
+that dataset.
 
 ### Why does the parser accept incorrect/ungrammatical sentences?
 
@@ -326,11 +331,11 @@ the command line by using the `-mx` flag, for example `-mx500m`.)
 
 Memory usage by the parser depends on a number of factors:
 
-    * Memory usage expands roughly with the square of the sentence length. You may wish to set a `-maxLength` and to skip long sentences.
-    * The factored parser requires several times as much memory as just running the PCFG parser, since it runs 3 parsers.
-    * The command-line version of the parser currently loads the whole of an input file into memory before parsing any of it. If your file is extremely large, splitting it into multiple files and parsing them sequentially will reduce memory usage.
-    * A 64-bit application requires more memory than a 32-bit application (Java uses lots of pointers).
-    * A larger grammar or POS tag set requires more memory than a smaller one.
+- Memory usage expands roughly with the square of the sentence length. You may wish to set a `-maxLength` and to skip long sentences.
+- The factored parser requires several times as much memory as just running the PCFG parser, since it runs 3 parsers.
+- The command-line version of the parser currently loads the whole of an input file into memory before parsing any of it. If your file is extremely large, splitting it into multiple files and parsing them sequentially will reduce memory usage.
+- A 64-bit application requires more memory than a 32-bit application (Java uses lots of pointers).
+- A larger grammar or POS tag set requires more memory than a smaller one.
 
 Below are some statistics for 32-bit operation with the supplied englishPCFG
 and englishFactoredGrammars. We have parsed sentences as long as 234 words,
@@ -346,9 +351,9 @@ Length| PCFG| Factored
 
 If you see the error:
 
-> ` Exception in thread "main" java.lang.UnsupportedClassVersionError:
-> edu/stanford/nlp/parser/lexparser/LexicalizedParser (Unsupported major.minor
-> version xy.z) `
+```
+Exception in thread "main" java.lang.UnsupportedClassVersionError: edu/stanford/nlp/parser/lexparser/LexicalizedParser (Unsupported major.minor version xy.z)
+```
 
 it means that you don't have a recent enough version of Java installed. If
 "xy.z" is "49.0", then you don't have Java 5 installed. If "xy.z" is "52.0",
@@ -359,8 +364,7 @@ then you don't have Java 8 installed. Etc. You should upgrade at
 
 You can use the `-outputFormat wordsAndTags` option. Note: if you want to tag
 a lot of text, it'd be much faster to use a dedicated POS tagger (such as
-[ours](https://nlp.stanford.edu/software/tagger.html) or [someone
-else's](https://nlp.stanford.edu/links/statnlp.html#Taggers)), since this
+[ours](tools_pos_tagger.md) or [someone else's](https://nlp.stanford.edu/links/statnlp.html#Taggers)), since this
 option has the parser parse the sentences and just not print the other
 information. There isn't a separate included tagger; the parser does POS
 tagging as part of parsing.
@@ -373,11 +377,11 @@ like `-treeFile` to read in trees, and, say, `-collapsed` to output
 `typedDependenciesCollapsed`. For example, this command (with appropriate
 paths) will convert a Penn Treebank file to uncollapsed typed dependencies:
 
-> ` java -cp stanford-parser.jar
-> edu.stanford.nlp.trees.EnglishGrammaticalStructure -treeFile
-> wsj/02/wsj_0201.mrg -basic `
+```
+java -cp stanford-parser.jar edu.stanford.nlp.trees.EnglishGrammaticalStructure -treeFile wsj/02/wsj_0201.mrg -basic
+```
 
-Also, here is [a sample Java class](TypedDependenciesDemo.java) that you can
+Also, here is [a sample Java class](https://nlp.stanford.edu/software/TypedDependenciesDemo.java) that you can
 download that converts from an input file of trees to typed dependencies.
 
 _Fine print:_ There is one subtlety. The conversion code generally expects
@@ -386,7 +390,7 @@ empty elements. This generally corresponds to the output of the Stanford,
 Charniak or Collins/Bikel parsers. The exception is that it gets value from
 the `-TMP` annotation on bare temporal NPs in order to recognize them as
 having temporal function (`tmod`). (It also allows a `-ADV` annotation on
-NPs.) Without the temporal annotation, some simple temporals like _today_ will
+`NP`s.) Without the temporal annotation, some simple temporals like _today_ will
 still be recognized, but a bare temporal like _last week_ in _I left last
 week_ will be tagged as an object (`dobj`). With the Stanford parser, you can
 get marking of temporal NPs in the tree output by giving the option
@@ -394,7 +398,7 @@ get marking of temporal NPs in the tree output by giving the option
 `setOptionFlags(String[])` method of the parser.
 
 See the javadoc for the main method of
-edu.stanford.nlp.trees.GrammaticalStructure.java for more information on how
+`edu.stanford.nlp.trees.GrammaticalStructure.java` for more information on how
 to extract dependencies using this tool.
 
 ### How can something be the subject of another thing when neither is a verb? I tried the sentence _Jill is a teacher_ and the parser created a _nsubj_ dependency between _teacher_ and _Jill_. Is that a mistake or have I not understood what _nsubj_ is?
@@ -413,25 +417,27 @@ What then when the main predicate is an adjective or a noun? That is,
 sentences like _Jill is busy_ or _Jill is a teacher_. We continue to regard
 the adjective or noun as the predicate of which the subject is the argument,
 rather than changing and now regarding the copular verb _is_ as the head and
-_busy/teacher_ as a complement. That is, we produce **nsubj(busy, Jill)** and
-**nsubj(teacher, Jill)**. This frequently seems to confuse people, because the
+_busy/teacher_ as a complement. That is, we produce `nsubj(busy, Jill)` and
+`nsubj(teacher, Jill)`. This frequently seems to confuse people, because the
 main predicate of the clause is now not a verb. But we believe that this is
 the best thing to do for several reasons:
 
-    1. Consistency of treatment of auxiliary/copula between English periphrastic verb forms and adjectival/nominal predications. 
-    2. Crosslinguistic generalization of the grammatical relations system: many other languages sometimes or always do not use a copular verb when using an adjective or noun predicate. That is, they will just say _Jill busy_. 
-    3. Connection to logical representations: If you were to translate these sentences into a simple predicate logic form, you would presumably use **busy(jill)** and **teacher(jill)**. The treatment of the adjective or noun as the predicate in a predicate logic form parallels what we do in our grammatical relations representation. 
-    4. Similarity of representation across constructions. While the dependency still differs, both the attributive ( _the white daisy_ ) and predicative ( _the daisy is white_ ) use of adjectives yields a direct link between the adjective ( _white_ ) and the noun ( _daisy_ ): _amod(daisy, white)_ and _nsubj(white, daisy)_. 
+1. Consistency of treatment of auxiliary/copula between English periphrastic verb forms and adjectival/nominal predications. 
+2. Crosslinguistic generalization of the grammatical relations system: many other languages sometimes or always do not use a copular verb when using an adjective or noun predicate. That is, they will just say _Jill busy_. 
+3. Connection to logical representations: If you were to translate these sentences into a simple predicate logic form, you would presumably use **busy(jill)** and **teacher(jill)**. The treatment of the adjective or noun as the predicate in a predicate logic form parallels what we do in our grammatical relations representation. 
+4. Similarity of representation across constructions. While the dependency still differs, both the attributive ( _the white daisy_ ) and predicative ( _the daisy is white_ ) use of adjectives yields a direct link between the adjective ( _white_ ) and the noun ( _daisy_ ): _amod(daisy, white)_ and _nsubj(white, daisy)_. 
 
 ### Can I just use your tokenizers for other purposes?
 
 Yes, you can. Various tokenizers are included. The one used for English is
-called PTBTokenizer. It is a hand-written rule-based (FSM) tokenizer, but is
+called `PTBTokenizer`. It is a hand-written rule-based (FSM) tokenizer, but is
 quite accurate over newswire-style text. Because it is rule-based it is quite
 fast (about 100,000 tokens per second on an Intel box in 2007). You can use it
 as follows:
 
-` java edu.stanford.nlp.process.PTBTokenizer _inputFile_ > _outputFile_ `
+```
+java edu.stanford.nlp.process.PTBTokenizer _inputFile_ > _outputFile_
+```
 
 There are several options, including one for batch-processing lots of files;
 see the Javadoc documentation of the `main` method of `PTBTokenizer`.
@@ -455,8 +461,8 @@ The main tool remaining is to run multiple parsers at once in parallel. If you
 have a machine with enough memory and multiple cores, you can very usefully
 run several parsing threads at once. You can do this from the command-line
 with the `-nthreads k` option, where _k_ is the number of parsing threads you
-want. While multiple LexicalizedparserQuery threads share the same grammar
-(LexicalizedParser), the memory space savings aren't huge, as most of the
+want. While multiple `LexicalizedparserQuery` threads share the same grammar
+(`LexicalizedParser`), the memory space savings aren't huge, as most of the
 memory goes to the transient data structures used in chart parsing. So, if you
 are running lots of parsing threads concurrently, you will need to give a lot
 of memory to the JVM. You can of course also just use multiple machines or
@@ -481,8 +487,7 @@ use. They are:
 
 | PCFG| Factored| Factored, segmenting  
 ---|---|---|---  
-Xinhua (mainland, newswire) | `xinhuaPCFG.ser.gz` | `xinhuaFactored.ser.gz` |
-`xinhuaFactoredSegmenting.ser.gz`  
+Xinhua (mainland, newswire) | `xinhuaPCFG.ser.gz` | `xinhuaFactored.ser.gz` | `xinhuaFactoredSegmenting.ser.gz`  
 Mixed Chinese | `chinesePCFG.ser.gz` | `chineseFactored.ser.gz`  
   
 The PCFG parsers are smaller and faster. But the Factored parser is
@@ -513,69 +518,67 @@ separately also need to work out what character set your computer supports for
 display. If that is different to the encoding of the file, you will need to
 convert the encoding for display. If any of this encoding stuff is wrong, then
 you are likely to see gibberish. Here are example commands for parsing two of
-the test files, one in UTF-8 and one in GB18030. The (Linux) computer that
-this is being run on is set up to work with UTF-8 (and this webpage is also in
-UTF-8), so for the case of GB18030, the output is piped through the Unix
+the test files, one in `UTF-8` and one in `GB18030`. The (Linux) computer that
+this is being run on is set up to work with `UTF-8` (and this webpage is also in
+`UTF-8`), so for the case of `GB18030`, the output is piped through the Unix
 `iconv` utility for display.
 
-> >     $ java -server -mx500m
-> edu.stanford.nlp.parser.lexparser.LexicalizedParser -encoding utf-8
-> /u/nlp/data/lexparser/chineseFactored.ser.gz chinese-onesent-utf8.txt
->     Loading parser from serialized file
-> /u/nlp/data/lexparser/chineseFactored.ser.gz ... done [20.7 sec].
->     Parsing file: chinese-onesent-utf8.txt with 2 sentences.
->     Parsing [sent. 1 len. 8]: 俄国 希望 伊朗 没有 制造 核武器 计划 。
->     (ROOT
->       (IP
->         (NP (NR 俄国))
->         (VP (VV 希望)
->           (IP
->             (NP (NR 伊朗))
->             (VP (VE 没有)
->               (NP (NN 制造) (NN 核武器) (NN 计划)))))
->         (PU 。)))
->  
->     Parsing [sent. 2 len. 6]: 他 在 学校 里 学习 。
->     (ROOT
->       (IP
->         (NP (PN 他))
->         (VP
->           (PP (P 在)
->             (LCP
->               (NP (NN 学校))
->               (LC 里)))
->           (VP (VV 学习)))
->         (PU 。)))
->  
->     Parsed file: chinese-onesent-utf8.txt [2 sentences].
->     Parsed 14 words in 2 sentences (6.55 wds/sec; 0.94 sents/sec).
->  
+```
+$ java -server -mx500m
+edu.stanford.nlp.parser.lexparser.LexicalizedParser -encoding utf-8 /u/nlp/data/lexparser/chineseFactored.ser.gz chinese-onesent-utf8.txt
 
-> >     $ java -mx500m -cp stanford-parser.jar
-> edu.stanford.nlp.parser.lexparser.LexicalizedParser chineseFactored.ser.gz
-> chinese-onesent |& iconv -f gb18030 -t utf-8
->     Loading parser from serialized file chineseFactored.ser.gz ... done
-> [13.3 sec].
->     Parsing file: chinese-onesent with 1 sentences.
->     Parsing [sent. 1 len. 10]: 他 和 我 在 学校 里 常 打 桌球 。
->     (ROOT
->       (IP
->         (NP (PN 他)
->           (CC 和)
->           (PN 我))
->         (VP
->           (PP (P 在)
->             (LCP
->               (NP (NN 学校))
->               (LC 里)))
->           (ADVP (AD 常))
->           (VP (VV 打)
->             (NP (NN 桌球))))
->         (PU 。)))
->  
->     Parsed file: chinese-onesent [1 sentences].
->     Parsed 10 words in 1 sentences (10.78 wds/sec; 1.08 sents/sec).
->  
+Loading parser from serialized file /u/nlp/data/lexparser/chineseFactored.ser.gz ... done [20.7 sec].
+Parsing file: chinese-onesent-utf8.txt with 2 sentences.
+Parsing [sent. 1 len. 8]: 俄国 希望 伊朗 没有 制造 核武器 计划 。
+(ROOT
+  (IP
+    (NP (NR 俄国))
+    (VP (VV 希望)
+      (IP
+        (NP (NR 伊朗))
+        (VP (VE 没有)
+          (NP (NN 制造) (NN 核武器) (NN 计划)))))
+    (PU 。)))
+
+Parsing [sent. 2 len. 6]: 他 在 学校 里 学习 。
+(ROOT
+  (IP
+    (NP (PN 他))
+    (VP
+      (PP (P 在)
+        (LCP
+          (NP (NN 学校))
+          (LC 里)))
+      (VP (VV 学习)))
+    (PU 。)))
+
+Parsed file: chinese-onesent-utf8.txt [2 sentences].
+Parsed 14 words in 2 sentences (6.55 wds/sec; 0.94 sents/sec).
+```
+
+```
+$ java -mx500m -cp stanford-parser.jar edu.stanford.nlp.parser.lexparser.LexicalizedParser chineseFactored.ser.gz chinese-onesent |& iconv -f gb18030 -t utf-8
+Loading parser from serialized file chineseFactored.ser.gz ... done [13.3 sec].
+Parsing file: chinese-onesent with 1 sentences.
+Parsing [sent. 1 len. 10]: 他 和 我 在 学校 里 常 打 桌球 。
+(ROOT
+  (IP
+    (NP (PN 他)
+      (CC 和)
+      (PN 我))
+    (VP
+      (PP (P 在)
+        (LCP
+          (NP (NN 学校))
+          (LC 里)))
+      (ADVP (AD 常))
+      (VP (VV 打)
+        (NP (NN 桌球))))
+    (PU 。)))
+
+Parsed file: chinese-onesent [1 sentences].
+Parsed 10 words in 1 sentences (10.78 wds/sec; 1.08 sents/sec).
+```
 
 **Normalization:** As well as the character set, there are also issues of
 "normalization" for characters: for instance, basic Latin letters can appear
@@ -588,11 +591,9 @@ as fullwidth letters_. The parser does provide an escaper that will do this
 mapping for you on input. You can invoke it with the `-escaper` flag, by using
 a command like the following (which also shows output being sent to a file):
 
-> >     $ java -mx500m -cp stanford-parser.jar
-> edu.stanford.nlp.parser.lexparser.LexicalizedParser -escaper
-> edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper -sentences
-> newline chineseFactored.ser.gz chinese-onesent > chinese-onesent.stp
->  
+```
+$ java -mx500m -cp stanford-parser.jar edu.stanford.nlp.parser.lexparser.LexicalizedParser -escaper edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper -sentences newline chineseFactored.ser.gz chinese-onesent > chinese-onesent.stp
+```
 
 **Word segmentation:** Chinese is not normally written with spaces between
 words. But the examples shown above were all parsing text that had already
@@ -616,60 +617,53 @@ performance _isn't_ as good as the Stanford CRF word segmenter mentioned
 above.) To use it, you use the `-segmentMarkov` option or a grammar trained
 with this option. For example:
 
-> >     $ iconv -f gb18030 -t utf8 < chinese-onesent-unseg.txt
->     他在学校学习。
->     $ java -mx500m -cp stanford-parser.jar
-> edu.stanford.nlp.parser.lexparser.LexicalizedParser
-> xinhuaFactoredSegmenting.ser.gz chinese-onesent-unseg.txt | & iconv -f
-> gb18030 -t utf-8
->     Loading parser from serialized file xinhuaFactoredSegmenting.ser.gz ...
-> done [6.8 sec].
->     Parsing file: chinese-onesent-unseg.txt with 1 sentences.
->     Parsing [sent. 1 len. 5]: 他 在 学校 学习 。
->     Trying recovery parse...
->     Sentence couldn't be parsed by grammar.... falling back to PCFG parse.
->     (ROOT
->       (IP
->         (NP (PN 他))
->         (VP
->           (PP (P 在)
->             (NP (NN 学校)))
->           (VP (VV 学习)))
->         (PU 。)))
->  
->     Parsed file: chinese-onesent-unseg.txt [1 sentences].
->     Parsed 5 words in 1 sentences (6.08 wds/sec; 1.22 sents/sec).
->       1 sentences were parsed by fallback to PCFG.
->  
+```
+$ iconv -f gb18030 -t utf8 < chinese-onesent-unseg.txt
+ 他在学校学习。
+$ java -mx500m -cp stanford-parser.jar edu.stanford.nlp.parser.lexparser.LexicalizedParser xinhuaFactoredSegmenting.ser.gz chinese-onesent-unseg.txt | & iconv -f gb18030 -t utf-8
+Loading parser from serialized file xinhuaFactoredSegmenting.ser.gz ... done [6.8 sec].
+Parsing file: chinese-onesent-unseg.txt with 1 sentences.
+Parsing [sent. 1 len. 5]: 他 在 学校 学习 。
+Trying recovery parse...
+Sentence couldn't be parsed by grammar.... falling back to PCFG parse.
+(ROOT
+  (IP
+    (NP (PN 他))
+    (VP
+      (PP (P 在)
+        (NP (NN 学校)))
+      (VP (VV 学习)))
+    (PU 。)))
+
+Parsed file: chinese-onesent-unseg.txt [1 sentences].
+Parsed 5 words in 1 sentences (6.08 wds/sec; 1.22 sents/sec).
+  1 sentences were parsed by fallback to PCFG.
+```
 
 **Grammatical relations:** The Chinese parser also supports grammatical
 relations (typed dependencies) output. For instance:
 
-> >     $ java -mx500m -cp stanford-parser.jar
-> edu.stanford.nlp.parser.lexparser.LexicalizedParser -outputFormat
-> typedDependencies xinhuaFactored.ser.gz chinese-onesent | & iconv -f gb18030
-> -t utf-8
->     Loading parser from serialized file xinhuaFactored.ser.gz ... done [4.9
-> sec].
->     Parsing file: chinese-onesent with 1 sentences.
->     Parsing [sent. 1 len. 10]: 他 和 我 在 学校 里 常 打 桌球 。
->     conj(我-3, 他-1)
->     cc(我-3, 和-2)
->     nsubj(打-8, 我-3)
->     prep(打-8, 在-4)
->     lobj(里-6, 学校-5)
->     plmod(在-4, 里-6)
->     advmod(打-8, 常-7)
->     dobj(打-8, 桌球-9)
->  
->     Parsed file: chinese-onesent [1 sentences].
->     Parsed 10 words in 1 sentences (7.10 wds/sec; 0.71 sents/sec).
->  
+```
+$ java -mx500m -cp stanford-parser.jar edu.stanford.nlp.parser.lexparser.LexicalizedParser -outputFormat typedDependencies xinhuaFactored.ser.gz chinese-onesent | & iconv -f gb18030 -t utf-8
+Loading parser from serialized file xinhuaFactored.ser.gz ... done [4.9 sec].
+Parsing file: chinese-onesent with 1 sentences.
+Parsing [sent. 1 len. 10]: 他 和 我 在 学校 里 常 打 桌球 。
+conj(我-3, 他-1)
+cc(我-3, 和-2)
+nsubj(打-8, 我-3)
+prep(打-8, 在-4)
+lobj(里-6, 学校-5)
+plmod(在-4, 里-6)
+advmod(打-8, 常-7)
+dobj(打-8, 桌球-9)
+
+Parsed file: chinese-onesent [1 sentences].
+Parsed 10 words in 1 sentences (7.10 wds/sec; 0.71 sents/sec).
+```
 
 ### Can you give me some help in getting started parsing Arabic?
 
-Sure! See the [Stanford Arabic Parser
-IAQ](https://nlp.stanford.edu/software/parser-arabic-faq.html).
+Sure! See the [Stanford Arabic Parser IAQ](https://nlp.stanford.edu/software/parser-arabic-faq.html).
 
 ### Can I just use the parser as a vanilla PCFG parser?
 
