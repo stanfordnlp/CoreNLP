@@ -663,7 +663,7 @@ Parsed 10 words in 1 sentences (7.10 wds/sec; 0.71 sents/sec).
 
 ### Can you give me some help in getting started parsing Arabic?
 
-Sure! See the [Stanford Arabic Parser IAQ](https://nlp.stanford.edu/software/parser-arabic-faq.html).
+Sure! See the [Stanford Arabic Parser FAQ](https://nlp.stanford.edu/software/parser-arabic-faq.html).
 
 ### Can I just use the parser as a vanilla PCFG parser?
 
