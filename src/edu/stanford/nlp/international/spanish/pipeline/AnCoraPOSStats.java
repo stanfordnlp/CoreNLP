@@ -54,8 +54,7 @@ public class AnCoraPOSStats  {
       // Tree reading will implicitly perform tree normalization for us
       while ((t = tr.readTree()) != null) {
         // Update tagger with this tree
-        List<CoreLabel> yield = t.taggedLabeledYield();
-        for (CoreLabel leafLabel : yield) {
+        for (CoreLabel leafLabel : t.taggedLabeledYield()) {
           if (leafLabel.tag().equals(SpanishTreeNormalizer.MW_TAG))
             continue;
 
