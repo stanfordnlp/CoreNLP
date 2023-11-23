@@ -100,8 +100,7 @@ public class CountTrees  {
         pw.println(SentenceUtils.listToString(tree.preTerminalYield()));
       
       } else if (printTnT) {
-        List<CoreLabel> yield = tree.taggedLabeledYield();
-        for (CoreLabel label : yield) {
+        for (CoreLabel label : tree.taggedLabeledYield()) {
           pw.printf("%s\t%s%n", label.word(), label.tag());
         }
         pw.println();
