@@ -83,6 +83,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code reattachNamedEdge -edge edgename -gov gov -dep dep}
  * <li> {@code addDep -gov node1 -reln depType -position where ...attributes...}
  * <li> {@code editNode -node node ...attributes...}
+ * <li> {@code lemmatize -node node}
  * <li> {@code combineMWT -node node -word word}
  * <li> {@code setRoots n1 (n2 n3 ...)}
  * <li> {@code mergeNodes n1 n2}
@@ -136,6 +137,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  *   {@code -morphofeatures ...} will set the features to be exactly as written.  TODO: if anyone
  *   needs the ability to add or remove features without resetting the entire features map,
  *   please file an issue on github.
+ *</p><p>
+ * {@code lemmatize} will put a lemma on a word.
+ * {@code -node} is the node to edit.
+ *   This only works on English text.
  *</p><p>
  * {@code combineMWT} will add MWT attributes to a sequence of two or more words.
  * {@code -node} (repeated) is the nodes to edit.
@@ -566,6 +571,11 @@ public class Ssurgeon  {
           throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");
         }
         return new EditNode(argsBox.nodes.get(0), argsBox.annotations, argsBox.updateMorphoFeatures);
+      } else if (command.equalsIgnoreCase(Lemmatize.LABEL)) {
+        if (argsBox.nodes.size() != 1) {
+          throw new SsurgeonParseException("Cannot make a Lemmatize out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");
+        }
+        return new Lemmatize(argsBox.nodes.get(0), language);
       } else if (command.equalsIgnoreCase(MergeNodes.LABEL)) {
         if (argsBox.nodes.size() < 2) {
           throw new SsurgeonParseException("Cannot make a MergeNodes out of fewer than 2 nodes (got " + argsBox.nodes.size() + ")");

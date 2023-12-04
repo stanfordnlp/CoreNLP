@@ -1362,6 +1362,61 @@ public class SsurgeonTest {
 
 
   /**
+   * Check that the edit which puts a lemma on a node redoes the lemma on the nodes it targets
+   */
+  @Test
+  public void readXMLLemmatize() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // use "dep" as the dependency so as to be language-agnostic in this test
+    String lemma = String.join(newline,
+                               "<ssurgeon-pattern-list>",
+                               "  <ssurgeon-pattern>",
+                               "    <uid>38</uid>",
+                               "    <notes>Edit a node</notes>",
+                               "    <semgrex>" + XMLUtils.escapeXML("!{lemma:/.+/}=nolemma") + "</semgrex>",
+                               "    <edit-list>lemmatize -node nolemma</edit-list>",
+                               "  </ssurgeon-pattern>",
+                               "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(lemma);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern lemmatizeSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[has/VBZ-2 nsubj> Jennifer/NNP-1 obj> [antennae/NNS-4 dep> green/JJ-3]]");
+    for (IndexedWord word : sg.vertexSet()) {
+      assertNull(word.lemma());
+    }
+    SemanticGraph newSG = lemmatizeSsurgeon.iterate(sg).first;
+    String[] expectedLemmas = {"Jennifer", "have", "green", "antenna"};
+    for (IndexedWord word : newSG.vertexSet()) {
+      assertEquals(expectedLemmas[word.index() - 1], word.lemma());
+    }
+
+    // this version would bomb if lemmatize were not bomb-proof
+    lemma = String.join(newline,
+                        "<ssurgeon-pattern-list>",
+                        "  <ssurgeon-pattern>",
+                        "    <uid>38</uid>",
+                        "    <notes>Edit a node</notes>",
+                        "    <semgrex>" + XMLUtils.escapeXML("{}=nolemma") + "</semgrex>",
+                        "    <edit-list>lemmatize -node nolemma</edit-list>",
+                        "  </ssurgeon-pattern>",
+                        "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(lemma);
+    assertEquals(patterns.size(), 1);
+    lemmatizeSsurgeon = patterns.get(0);
+
+    sg = SemanticGraph.valueOf("[has/VBZ-2 nsubj> Jennifer/NNP-1 obj> [antennae/NNS-4 dep> green/JJ-3]]");
+    for (IndexedWord word : sg.vertexSet()) {
+      assertNull(word.lemma());
+    }
+    newSG = lemmatizeSsurgeon.iterate(sg).first;
+    for (IndexedWord word : newSG.vertexSet()) {
+      assertEquals(expectedLemmas[word.index() - 1], word.lemma());
+    }
+  }
+
+  /*
    * Check that a basic edit script works as expected
    */
   @Test
