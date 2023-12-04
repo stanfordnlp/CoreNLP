@@ -449,8 +449,6 @@ public final class CORSFilter implements Filter {
      *            The {@link HttpServletResponse} object.
      * @param filterChain
      *            The {@link FilterChain} object.
-     * @throws IOException
-     * @throws ServletException
      */
     public void handleInvalidCORS(final HttpServletRequest request,
             final HttpServletResponse response, final FilterChain filterChain) {
