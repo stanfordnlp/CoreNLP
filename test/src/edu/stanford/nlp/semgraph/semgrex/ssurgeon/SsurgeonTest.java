@@ -1362,7 +1362,7 @@ public class SsurgeonTest {
 
 
   /**
-   * Check that adding a word to the start of a sentence works as expected
+   * Check that a basic edit script works as expected
    */
   @Test
   public void readXMLEditNode() {
@@ -1388,8 +1388,7 @@ public class SsurgeonTest {
     SemanticGraph newSG = editSsurgeon.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
     assertEquals(expected, newSG);
-    // the Ssurgeon we just created should not put a tag on the word
-    // but it SHOULD put blue at the start of the sentence
+    // this ssurgeon will fix the color of the antennae
     blueVertex = newSG.getNodeByIndexSafe(3);
     assertNotNull(blueVertex);
     assertNull(blueVertex.tag());
