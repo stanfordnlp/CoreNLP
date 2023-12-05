@@ -2113,6 +2113,10 @@ S_ENDING_DEMONYMS = "Afghan"|"Afghani"|"African"|"Albanian"|"Alexandrine"|"Alger
 /* remove commas from numbers, eg 5,000 -> 5000 */
 <scan>({DIGIT}|",")+([.]{DIGIT}+)?/_CD          { return(yytext().replaceAll(",", "")); }
 
+/* an unusual exception - don't want to get 'eld' */
+<scan>"elder"/_JJR    { return(stem(5, "old", "")); }
+<scan>"eldest"/_JJS    { return(stem(5, "old", "")); }
+
 <scan>"worse"/_JJR    { return(stem(5, "bad", "")); }
 <scan>"worst"/_JJS    { return(stem(5, "bad", "")); }
 <scan>"worse"/_RBR    { return(stem(5, "badly", "")); }
