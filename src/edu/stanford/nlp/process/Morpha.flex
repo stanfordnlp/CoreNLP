@@ -49,13 +49,15 @@ import edu.stanford.nlp.util.logging.Redwood;
   /** A list of verbs that have doubling of consonants
    *  this list can be rebuilt with the main method in process.Morphology!
    * the verb stem list lives in "/u/nlp/data/morph/verbstem.list"
+   *<br>
+   * Removed appal and enrol - use American instead of English lemma for those words
    */
   private static final String[] verbStems = { "abat",
     "abet", "abhor", "abut", "accur", "acquit",
     "adlib", "admit", "aerobat", "aerosol", "agendaset",
-    "allot", "alot", "anagram", "annul", "appal",
+    "allot", "alot", "anagram", "annul",
     "apparel", "armbar", "aver", "babysit", "airdrop",
-    "appal", "blackleg", "bobsled", "bur", "chum",
+    "blackleg", "bobsled", "bur", "chum",
     "confab", "counterplot", "curet", "dib", "backdrop",
     "backfil", "backflip", "backlog", "backpedal", "backslap",
     "backstab", "bag", "balfun", "ballot", "ban",
@@ -67,7 +69,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     "bevel", "bewig", "bib", "bid", "billet",
     "bin", "bip", "bit", "bitmap", "blab",
     "blag", "blam", "blan", "blat", "bles",
-    "blim", "blip", "blob", "bloodlet", "blot",
+    "blim", "blip", "blob", "blog", "bloodlet", "blot",
     "blub", "blur", "bob", "bodypop", "bog",
     "booby-trap", "boobytrap", "booksel", "bootleg", "bop",
     "bot", "bowel", "bracket", "brag", "brig",
@@ -102,13 +104,13 @@ import edu.stanford.nlp.util.logging.Redwood;
     "disembowel", "dishevel", "disinter", "dispel", "disprefer",
     "distil", "dog", "dognap", "don", "doorstep",
     "dot", "dowel", "drag", "drat", "driftnet",
-    "distil", "egotrip", "enrol", "enthral", "extol",
+    "distil", "egotrip", "enthral", "extol",
     "fulfil", "gaffe", "golliwog", "idyl", "inspan",
     "drip", "drivel", "drop", "drub", "drug",
     "drum", "dub", "duel", "dun", "dybbuk",
     "earwig", "eavesdrop", "ecolabel", "eitherspigot", "electroblot",
     "embed", "emit", "empanel", "enamel", "endlabel",
-    "endtrim", "enrol", "enthral", "entrammel", "entrap",
+    "endtrim", "enthral", "entrammel", "entrap",
     "enwrap", "equal", "equip", "estop", "exaggerat",
     "excel", "expel", "extol", "fag", "fan",
     "farewel", "fat", "featherbed", "feget", "fet",
@@ -277,7 +279,7 @@ import edu.stanford.nlp.util.logging.Redwood;
     "wet", "wham", "whet", "whip", "whir",
     "whiteskin", "whiz", "whup", "wildcat", "win",
     "windmil", "wit", "woodchop", "woodcut", "wor",
-    "worship", "wrap", "will", "wiretap", "yen",
+    "worship", "wrap", "will", "wiretap", "xfer", "yen",
     "yak", "yap", "yarnspin", "yip", "yodel",
     "zag", "zap", "zig", "zig-zag", "zigzag",
     "zip", "ztrip" };
@@ -456,7 +458,7 @@ CXY = [bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]
 CXY2 = "bb"|"cc"|"dd"|"ff"|"gg"|"hh"|"jj"|"kk"|"ll"|"mm"|"nn"|"pp"|"qq"|"rr"|"ss"|"tt"|"vv"|"ww"|"xx"|"zz"
 S2 = "ss"|"zz"
 S = [sxzSXZ]|([csCS]"h")
-PRE = "be"|"ex"|"in"|"mis"|"pre"|"pro"|"re"
+PRE = "be"|"de"|"ex"|"in"|"mis"|"pre"|"pro"|"re"
 EDING = "ed"|"ing"
 ESEDING = "es"|"ed"|"ing"
 G = [^ \t\r\n\u2028\u2029\u000B\u000C\u0085_]
