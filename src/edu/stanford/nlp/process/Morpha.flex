@@ -669,6 +669,8 @@ S_ENDING_DEMONYMS = "Afghan"|"Afghani"|"African"|"Albanian"|"Alexandrine"|"Alger
 <verb,any>"clung"  { return(stem(3,"ing","ed")); }        /* en */
 <verb,any>"countersank"  { return(stem(3,"ink","ed")); }
 <verb,any>"countersunk"  { return(stem(3,"ink","en")); }
+<verb,any>"cowritten"  { return(stem(3,"e","en")); }
+<verb,any>"cowrote"  { return(stem(3,"ite","ed")); }
 <verb,any>"crept"  { return(stem(3,"eep","ed")); }        /* en */
 <verb,any>"crossbred"  { return(stem(3,"reed","ed")); }   /* en */
 <verb,any>"curettes"  { return(stem(3,"","s")); }
