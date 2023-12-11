@@ -90,6 +90,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static String blockList = null;
   @ArgumentParser.Option(name="stanford", gloss="If true, do special options (domain blockList, timeout modifications) for public Stanford server")
   protected boolean stanford = false;
+  @ArgumentParser.Option(name="srparser", gloss="If true, use the srparser by default if possible.  Should save speed & memory on large queries")
+  protected boolean srparser = false;
 
   /** List of server specific properties **/
   private static final List<String> serverSpecificProperties = ArgumentParser.listOptions(StanfordCoreNLPServer.class);
@@ -521,6 +523,13 @@ public class StanfordCoreNLPServer implements Runnable {
           // don't enforce requirements for non-English
           if (!LanguageInfo.getLanguageFromString(language).equals(LanguageInfo.HumanLanguage.ENGLISH))
               props.setProperty("enforceRequirements", "false");
+          // check if the server is set to use the srparser, and if so,
+          // set the parse.model to be srparser.model
+          // also, check properties for the srparser.model prop
+          // perhaps some languages don't have a default set for that
+          if (srparser && languageSpecificProperties.containsKey("srparser.model")) {
+            props.setProperty("parse.model", languageSpecificProperties.getProperty("srparser.model"));
+          }
         } catch (IOException e) {
           err("Failure to load language specific properties: " + languagePropertiesFile + " for " + language);
         }
