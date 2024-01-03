@@ -26,7 +26,7 @@ import java.util.function.Predicate;
 public class TreePrint  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TreePrint.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TreePrint.class);
 
   // TODO: Add support for makeCopulaHead as an outputFormatOption here.
 
@@ -693,12 +693,12 @@ public class TreePrint  {
       for (TypedDependency dep : deps) {
         sortedDeps.add(new NamedDependency(dep.gov(), dep.dep(), dep.reln().toString()));
       }
-      Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
+      sortedDeps.sort(Dependencies.dependencyIndexComparator());
       return sortedDeps;
     } else {
       Set<Dependency<Label, Label, Object>> depsSet = tree.mapDependencies(filter, hf, "root");
       List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<>(depsSet);
-      Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
+      sortedDeps.sort(Dependencies.dependencyIndexComparator());
       return sortedDeps;
     }
   }
