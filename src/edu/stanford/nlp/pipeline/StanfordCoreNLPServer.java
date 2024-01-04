@@ -161,7 +161,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * Create a new Stanford CoreNLP Server, with the default parameters.
    *
-   * @throws IOException Thrown if we could not write the shutdown key to the a file.
+   * @throws IOException Thrown if we could not write the shutdown key to a file.
    */
   public StanfordCoreNLPServer() throws IOException {
     this(null);
@@ -171,7 +171,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * Create a new Stanford CoreNLP Server with the default parameters and
    * pass in properties (server_id, ...).
    *
-   * @throws IOException Thrown if we could not write the shutdown key to the a file.
+   * @throws IOException Thrown if we could not write the shutdown key to a file.
    */
   public StanfordCoreNLPServer(Properties props) throws IOException {
     // set up default IO properties
@@ -203,8 +203,8 @@ public class StanfordCoreNLPServer implements Runnable {
     // log server's default properties
     TreeSet<String> defaultPropertyKeys = new TreeSet<>(this.defaultProps.stringPropertyNames());
     log("Server default properties:\n\t\t\t(Note: unspecified annotator properties are English defaults)\n" +
-        String.join("\n", defaultPropertyKeys.stream().map(
-            k -> String.format("\t\t\t%s = %s", k, this.defaultProps.get(k))).collect(Collectors.toList())));
+            defaultPropertyKeys.stream().map(
+                k -> String.format("\t\t\t%s = %s", k, this.defaultProps.get(k))).collect(Collectors.joining("\n")));
 
     this.serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
     this.corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
@@ -256,9 +256,9 @@ public class StanfordCoreNLPServer implements Runnable {
    *
    * @return A map of (key, value) pairs corresponding to the request parameters.
    *
-   * @throws UnsupportedEncodingException Thrown if we could not decode the URL with utf8.
+   * @throws IllegalStateException Thrown if we could not decode the URL with utf8.
    */
-  private static Map<String, String> getURLParams(URI uri) throws UnsupportedEncodingException {
+  private static Map<String, String> getURLParams(URI uri) {
     String query = uri.getRawQuery();
     if (query != null) {
       try {
@@ -485,9 +485,9 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // Load the default properties if resetDefault is false
     // If resetDefault is true, ignore server properties this server was started with,
-    // with the exception of the keys in serverIOProperties (i.e. don't reset IO properties)
+    // except the keys in serverIOProperties (i.e., don't reset IO properties)
     Properties props = new Properties();
-    if (!urlParams.getOrDefault("resetDefault", "false").toLowerCase().equals("true"))
+    if ( ! urlParams.getOrDefault("resetDefault", "false").equalsIgnoreCase("true"))
       defaultProps.forEach((key1, value) -> props.setProperty(key1.toString(), value.toString()));
     else {
       // if resetDefault is called, still maintain the serverIO properties (e.g. inputFormat, outputFormat, prettyPrint)
@@ -521,8 +521,9 @@ public class StanfordCoreNLPServer implements Runnable {
           languageSpecificProperties.load(is);
           PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
           // don't enforce requirements for non-English
-          if (!LanguageInfo.getLanguageFromString(language).equals(LanguageInfo.HumanLanguage.ENGLISH))
-              props.setProperty("enforceRequirements", "false");
+          if ( ! LanguageInfo.HumanLanguage.ENGLISH.equals(LanguageInfo.getLanguageFromString(language))) {
+            props.setProperty("enforceRequirements", "false");
+          }
           // check if the server is set to use the srparser, and if so,
           // set the parse.model to be srparser.model
           // also, check properties for the srparser.model prop
@@ -800,7 +801,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
 
   /**
-   * Sending the appropriate shutdown key will gracefully shutdown the server.
+   * Sending the appropriate shutdown key will gracefully shut down the server.
    * This key is, by default, saved into the local file /tmp/corenlp.shutdown on the
    * machine the server was run from.
    */
@@ -1120,7 +1121,7 @@ public class StanfordCoreNLPServer implements Runnable {
           String pattern = params.get("pattern");
           // (get whether to filter / find)
           String filterStr = params.getOrDefault("filter", "false");
-          final boolean filter = filterStr.trim().isEmpty() || "true".equalsIgnoreCase(filterStr.toLowerCase());
+          final boolean filter = filterStr.trim().isEmpty() || "true".equalsIgnoreCase(filterStr);
           // (create the matcher)
           final TokenSequencePattern regex = TokenSequencePattern.compile(pattern);
 
@@ -1248,10 +1249,10 @@ public class StanfordCoreNLPServer implements Runnable {
           String pattern = params.get("pattern");
           // (get whether to filter / find)
           String filterStr = params.getOrDefault("filter", "false");
-          final boolean filter = filterStr.trim().isEmpty() || "true".equalsIgnoreCase(filterStr.toLowerCase());
+          final boolean filter = filterStr.trim().isEmpty() || "true".equalsIgnoreCase(filterStr);
           // (in case of find, get whether to only keep unique matches)
           String uniqueStr = params.getOrDefault("unique", "false");
-          final boolean unique = uniqueStr.trim().isEmpty() || "true".equalsIgnoreCase(uniqueStr.toLowerCase());
+          final boolean unique = uniqueStr.trim().isEmpty() || "true".equalsIgnoreCase(uniqueStr);
           // (create the matcher)
           final SemgrexPattern regex = SemgrexPattern.compile(pattern);
           final SemanticGraphCoreAnnotations.DependenciesType dependenciesType =
@@ -1501,8 +1502,10 @@ public class StanfordCoreNLPServer implements Runnable {
     /**
      * Create a new SceneGraphHandler.
      * <br>
-     * It's not clear what a callback would do with this, since there's no Annotation at the end of a SceneGraph call, so we just skip it
-     * @param callback The callback to call when annotation has finished.
+     * It's not clear what a callback would do with this, since there's no Annotation at the end of a SceneGraph call,
+     * so we just skip it.
+     *
+     * @param authenticator The callback to call when annotation has finished.
      */
     public SceneGraphHandler(Predicate<Properties> authenticator) {
       this.authenticator = authenticator;
