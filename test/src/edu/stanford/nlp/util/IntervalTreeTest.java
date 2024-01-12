@@ -160,4 +160,76 @@ public class IntervalTreeTest extends TestCase {
     }
     assertFalse("No more items", iterator.hasNext());
   }
+
+  public void testSizeOne() {
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
+    tree.add(Interval.toInterval(0, 1));
+    assertEquals(tree.size(), 1);
+    tree.remove(Interval.toInterval(0, 1));
+    assertEquals(tree.size(), 0);
+  }
+
+  public void testSizeTwoDeleteLeft() {
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
+    tree.add(Interval.toInterval(0, 1));
+    assertEquals(tree.size(), 1);
+
+    tree.add(Interval.toInterval(2, 5));
+    assertEquals(tree.size(), 2);
+    assertEquals(tree.root().maxEnd.intValue(), 5);
+
+    tree.remove(Interval.toInterval(0, 1));
+    assertEquals(tree.size(), 1);
+    assertEquals(tree.root().maxEnd.intValue(), 5);
+
+    // new tree, insert in opposite order
+    tree = new IntervalTree<>();
+    tree.add(Interval.toInterval(2, 5));
+    assertEquals(tree.size(), 1);
+    assertEquals(tree.root().maxEnd.intValue(), 5);
+
+    tree.add(Interval.toInterval(0, 1));
+    assertEquals(tree.size(), 2);
+    assertEquals(tree.root().maxEnd.intValue(), 5);
+
+    tree.remove(Interval.toInterval(0, 1));
+    assertEquals(tree.size(), 1);
+    assertEquals(tree.root().maxEnd.intValue(), 5);
+  }
+
+  public void testSizeTwoDeleteRight() {
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
+    tree.add(Interval.toInterval(0, 1));
+    assertEquals(tree.size(), 1);
+    assertEquals(tree.root().maxEnd.intValue(), 1);
+
+    tree.add(Interval.toInterval(2, 5));
+    assertEquals(tree.size(), 2);
+    assertEquals(tree.root().maxEnd.intValue(), 5);
+
+    tree.remove(Interval.toInterval(2, 5));
+    assertEquals(tree.size(), 1);
+    assertEquals(tree.root().maxEnd.intValue(), 1);
+
+    tree.remove(Interval.toInterval(0, 1));
+    assertEquals(tree.size(), 0);
+
+    // new tree, insert in opposite order
+    tree = new IntervalTree<>();
+    tree.add(Interval.toInterval(2, 5));
+    assertEquals(tree.size(), 1);
+    assertEquals(tree.root().maxEnd.intValue(), 5);
+
+    tree.add(Interval.toInterval(0, 1));
+    assertEquals(tree.size(), 2);
+    assertEquals(tree.root().maxEnd.intValue(), 5);
+
+    tree.remove(Interval.toInterval(2, 5));
+    assertEquals(tree.size(), 1);
+    assertEquals(tree.root().maxEnd.intValue(), 1);
+
+    tree.remove(Interval.toInterval(0, 1));
+    assertEquals(tree.size(), 0);
+
+  }
 }

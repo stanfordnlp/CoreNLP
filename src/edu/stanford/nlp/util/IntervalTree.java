@@ -18,6 +18,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   private static final boolean debug = false;
 
   private TreeNode<E,T> root = new TreeNode<>();
+  TreeNode<E, T> root() { return root; }
 
   // Tree node
   public static class TreeNode<E extends Comparable<E>, T extends HasInterval<E>> {
@@ -40,6 +41,10 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
       right = null;
 //      parent = null;
     }
+
+    public String toString() {
+      return "TreeNode(value=" + value + ", size=" + size + ", maxEnd=" + maxEnd + ")";
+    }    
   }
 
   @Override
@@ -237,8 +242,9 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
         node.value = node.left.value;
         node.size = node.left.size;
         node.maxEnd = node.left.maxEnd;
-        node.left = node.left.left;
+        // Don't overwrite the left child before getting all of its values!
         node.right = node.left.right;
+        node.left = node.left.left;
         if (node.left != null) node.left.parent = node;
         if (node.right != null) node.right.parent = node;
       } else {
@@ -270,7 +276,18 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
         }
         boolean res = remove(node.left, target);
         if (res) {
-          node.maxEnd = Interval.max(node.maxEnd, node.left.maxEnd);
+          node.maxEnd = node.value.getInterval().getEnd();
+          if (node.right != null) {
+            node.maxEnd = Interval.max(node.maxEnd, node.right.maxEnd);
+          }
+          if (node.left != null) {
+            if (node.left.size == 0) {
+              // got called clear() in a pathway which could have been left or right
+              node.left = null;
+            } else {
+              node.maxEnd = Interval.max(node.maxEnd, node.left.maxEnd);
+            }
+          }
           node.size--;
         }
         return res;
@@ -281,7 +298,18 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
         }
         boolean res = remove(node.right, target);
         if (res) {
-          node.maxEnd = Interval.max(node.maxEnd, node.right.maxEnd);
+          node.maxEnd = node.value.getInterval().getEnd();
+          if (node.left != null) {
+            node.maxEnd = Interval.max(node.maxEnd, node.left.maxEnd);
+          }
+          if (node.right != null) {
+            if (node.right.size == 0) {
+              // got called clear() in a pathway which could have been left or right
+              node.right = null;
+            } else {
+              node.maxEnd = Interval.max(node.maxEnd, node.right.maxEnd);
+            }
+          }
           node.size--;
         }
         return res;
