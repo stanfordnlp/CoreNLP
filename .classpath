@@ -23,10 +23,10 @@
 	<classpathentry exported="true" kind="lib" path="lib/protobuf-java-3.25.5.jar" sourcepath="libsrc/protobuf-java-3.25.5-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jakarta.json-1.1.6.jar" sourcepath="libsrc/jakarta.json-1.1.6-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-core-7.7.3.jar" sourcepath="libsrc/lucene-core-7.7.3-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-demo-7.7.3.jar" sourcepath="libsrc/lucene-demo-7.7.3-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-analyzers-common-7.7.3.jar" sourcepath="lucene-analyzers-common-7.7.3-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-queryparser-7.7.3.jar" sourcepath="lucene-queryparser-7.7.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-core-9.9.2.jar" sourcepath="libsrc/lucene-core-9.9.2-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-demo-9.9.2.jar" sourcepath="libsrc/lucene-demo-9.9.2-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-analysis-common-9.9.2.jar" sourcepath="lucene-analysis-common-9.9.2-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-queryparser-9.9.2.jar" sourcepath="lucene-queryparser-9.9.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api.jar" sourcepath="libsrc/slf4j-api-1.7.12-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-simple.jar" sourcepath="libsrc/slf4j-simple-1.7.12-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javax.activation-api-1.2.0.jar" sourcepath="libsrc/javax.activation-api-1.2.0-sources.jar"/>
