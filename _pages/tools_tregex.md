@@ -94,23 +94,12 @@ line invocation and a Java API.
 ### Questions
 
 There is a [tregex FAQ list](tools_tregex_faq.md) (with answers!). Please send any
-other questions or feedback, or extensions and bugfixes to [`parser-
-user@lists.stanford.edu`](mailto:parser-user@lists.stanford.edu).  
-
-### Mailing Lists
-
-We have 3 mailing lists for the Tregex/Tsurgeon, all of which are shared with
-the Stanford Parser. Each is at `@lists.stanford.edu`:
-
-  1. `parser-user` This is the best list to post to in order to ask questions, make announcements, or for discussion among Tregex/Tsurgeon users. Join the list via [this webpage](https://mailman.stanford.edu/mailman/listinfo/parser-user) or by emailing `parser-user-join@lists.stanford.edu`. (Leave the subject and message body empty.) You can also [look at the list archives](https://mailman.stanford.edu/pipermail/parser-user/). 
-  2. `parser-announce` This list will be used only to announce new Tregex/Tsurgeon versions. So it will be very low volume (expect 1-3 message a year). Join the list via [this webpage](https://mailman.stanford.edu/mailman/listinfo/parser-announce) or by emailing `parser-announce-join@lists.stanford.edu`. (Leave the subject and message body empty.) 
-  3. `parser-support` This list goes only to the Tregex/Tsurgeon maintainers. It's a good address for licensing questions, etc. **For general use and support questions, you're better off joining and using`parser-user`.** You cannot join `parser-support`, but you can mail questions to `parser-support@lists.stanford.edu`. 
-
+other questions or feedback, or extensions and bugfixes [to our Github](https://github.com/stanfordnlp/CoreNLP)
   
 ### Extensions: Packages by others using Tregex/Semgrex
 
-  * **Javascript (node.js):** [semgrex](https://www.npmjs.com/package/semgrex): NodeJs wrapper for Stanford NLP Semgrex. [[GitHub](https://github.com/koorchik/node-semgrex)] 
-
+  * **Javascript (node.js):** [semgrex](https://www.npmjs.com/package/semgrex): NodeJs wrapper for Stanford NLP Semgrex. [[GitHub](https://github.com/koorchik/node-semgrex)]
+  * Python interface to tsurgeon, semgrex, and ssurgeon [integrated into Stanza](https://stanfordnlp.github.io/stanza/semgrex.html), officially supported by Stanford CoreNLP
 
 ### Download
 
