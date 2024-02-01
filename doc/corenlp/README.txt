@@ -41,6 +41,8 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2024-01-31    4.5.6     Minor lemmatizer and tokenizer fixes
+
 2023-09-06    4.5.5     Fix up some SD and UD conversion errors.  Add
                         SceneGraph to the server.  Fix Tregex optional
                         bug.  "fourty" and forty (40) days in SUTime.
