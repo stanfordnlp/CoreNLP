@@ -92259,6 +92259,35 @@ public final class CoreNLPProtos {
      * @return The kbestF1.
      */
     double getKbestF1();
+
+    /**
+     * <pre>
+     * keep track of the individual tree F1 scores
+     * </pre>
+     *
+     * <code>repeated double treeF1 = 3;</code>
+     * @return A list containing the treeF1.
+     */
+    java.util.List<java.lang.Double> getTreeF1List();
+    /**
+     * <pre>
+     * keep track of the individual tree F1 scores
+     * </pre>
+     *
+     * <code>repeated double treeF1 = 3;</code>
+     * @return The count of treeF1.
+     */
+    int getTreeF1Count();
+    /**
+     * <pre>
+     * keep track of the individual tree F1 scores
+     * </pre>
+     *
+     * <code>repeated double treeF1 = 3;</code>
+     * @param index The index of the element to return.
+     * @return The treeF1 at the given index.
+     */
+    double getTreeF1(int index);
   }
   /**
    * Protobuf type {@code edu.stanford.nlp.pipeline.EvaluateParserResponse}
@@ -92273,6 +92302,7 @@ public final class CoreNLPProtos {
       super(builder);
     }
     private EvaluateParserResponse() {
+      treeF1_ = emptyDoubleList();
     }
 
     @java.lang.Override
@@ -92339,6 +92369,45 @@ public final class CoreNLPProtos {
       return kbestF1_;
     }
 
+    public static final int TREEF1_FIELD_NUMBER = 3;
+    private com.google.protobuf.Internal.DoubleList treeF1_;
+    /**
+     * <pre>
+     * keep track of the individual tree F1 scores
+     * </pre>
+     *
+     * <code>repeated double treeF1 = 3;</code>
+     * @return A list containing the treeF1.
+     */
+    @java.lang.Override
+    public java.util.List<java.lang.Double>
+        getTreeF1List() {
+      return treeF1_;
+    }
+    /**
+     * <pre>
+     * keep track of the individual tree F1 scores
+     * </pre>
+     *
+     * <code>repeated double treeF1 = 3;</code>
+     * @return The count of treeF1.
+     */
+    public int getTreeF1Count() {
+      return treeF1_.size();
+    }
+    /**
+     * <pre>
+     * keep track of the individual tree F1 scores
+     * </pre>
+     *
+     * <code>repeated double treeF1 = 3;</code>
+     * @param index The index of the element to return.
+     * @return The treeF1 at the given index.
+     */
+    public double getTreeF1(int index) {
+      return treeF1_.getDouble(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -92363,6 +92432,9 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeDouble(2, kbestF1_);
       }
+      for (int i = 0; i < treeF1_.size(); i++) {
+        output.writeDouble(3, treeF1_.getDouble(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -92379,6 +92451,12 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, kbestF1_);
+      }
+      {
+        int dataSize = 0;
+        dataSize = 8 * getTreeF1List().size();
+        size += dataSize;
+        size += 1 * getTreeF1List().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -92407,6 +92485,8 @@ public final class CoreNLPProtos {
             != java.lang.Double.doubleToLongBits(
                 other.getKbestF1())) return false;
       }
+      if (!getTreeF1List()
+          .equals(other.getTreeF1List())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -92427,6 +92507,10 @@ public final class CoreNLPProtos {
         hash = (37 * hash) + KBESTF1_FIELD_NUMBER;
         hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getKbestF1()));
+      }
+      if (getTreeF1Count() > 0) {
+        hash = (37 * hash) + TREEF1_FIELD_NUMBER;
+        hash = (53 * hash) + getTreeF1List().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -92560,6 +92644,8 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         kbestF1_ = 0D;
         bitField0_ = (bitField0_ & ~0x00000002);
+        treeF1_ = emptyDoubleList();
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -92596,6 +92682,11 @@ public final class CoreNLPProtos {
           result.kbestF1_ = kbestF1_;
           to_bitField0_ |= 0x00000002;
         }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          treeF1_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.treeF1_ = treeF1_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -92651,6 +92742,16 @@ public final class CoreNLPProtos {
         if (other.hasKbestF1()) {
           setKbestF1(other.getKbestF1());
         }
+        if (!other.treeF1_.isEmpty()) {
+          if (treeF1_.isEmpty()) {
+            treeF1_ = other.treeF1_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensureTreeF1IsMutable();
+            treeF1_.addAll(other.treeF1_);
+          }
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -92690,6 +92791,22 @@ public final class CoreNLPProtos {
                 bitField0_ |= 0x00000002;
                 break;
               } // case 17
+              case 25: {
+                double v = input.readDouble();
+                ensureTreeF1IsMutable();
+                treeF1_.addDouble(v);
+                break;
+              } // case 25
+              case 26: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureTreeF1IsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  treeF1_.addDouble(input.readDouble());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 26
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -92781,6 +92898,113 @@ public final class CoreNLPProtos {
       public Builder clearKbestF1() {
         bitField0_ = (bitField0_ & ~0x00000002);
         kbestF1_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.Internal.DoubleList treeF1_ = emptyDoubleList();
+      private void ensureTreeF1IsMutable() {
+        if (!((bitField0_ & 0x00000004) != 0)) {
+          treeF1_ = mutableCopy(treeF1_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+      /**
+       * <pre>
+       * keep track of the individual tree F1 scores
+       * </pre>
+       *
+       * <code>repeated double treeF1 = 3;</code>
+       * @return A list containing the treeF1.
+       */
+      public java.util.List<java.lang.Double>
+          getTreeF1List() {
+        return ((bitField0_ & 0x00000004) != 0) ?
+                 java.util.Collections.unmodifiableList(treeF1_) : treeF1_;
+      }
+      /**
+       * <pre>
+       * keep track of the individual tree F1 scores
+       * </pre>
+       *
+       * <code>repeated double treeF1 = 3;</code>
+       * @return The count of treeF1.
+       */
+      public int getTreeF1Count() {
+        return treeF1_.size();
+      }
+      /**
+       * <pre>
+       * keep track of the individual tree F1 scores
+       * </pre>
+       *
+       * <code>repeated double treeF1 = 3;</code>
+       * @param index The index of the element to return.
+       * @return The treeF1 at the given index.
+       */
+      public double getTreeF1(int index) {
+        return treeF1_.getDouble(index);
+      }
+      /**
+       * <pre>
+       * keep track of the individual tree F1 scores
+       * </pre>
+       *
+       * <code>repeated double treeF1 = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The treeF1 to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTreeF1(
+          int index, double value) {
+        ensureTreeF1IsMutable();
+        treeF1_.setDouble(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * keep track of the individual tree F1 scores
+       * </pre>
+       *
+       * <code>repeated double treeF1 = 3;</code>
+       * @param value The treeF1 to add.
+       * @return This builder for chaining.
+       */
+      public Builder addTreeF1(double value) {
+        ensureTreeF1IsMutable();
+        treeF1_.addDouble(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * keep track of the individual tree F1 scores
+       * </pre>
+       *
+       * <code>repeated double treeF1 = 3;</code>
+       * @param values The treeF1 to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllTreeF1(
+          java.lang.Iterable<? extends java.lang.Double> values) {
+        ensureTreeF1IsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, treeF1_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * keep track of the individual tree F1 scores
+       * </pre>
+       *
+       * <code>repeated double treeF1 = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTreeF1() {
+        treeF1_ = emptyDoubleList();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -101951,44 +102175,44 @@ public final class CoreNLPProtos {
       "est.ParseResult\032\214\001\n\013ParseResult\022;\n\004gold\030" +
       "\001 \002(\0132-.edu.stanford.nlp.pipeline.Flatte" +
       "nedParseTree\022@\n\tpredicted\030\002 \003(\0132-.edu.st" +
-      "anford.nlp.pipeline.FlattenedParseTree\"5" +
+      "anford.nlp.pipeline.FlattenedParseTree\"E" +
       "\n\026EvaluateParserResponse\022\n\n\002f1\030\001 \002(\001\022\017\n\007" +
-      "kbestF1\030\002 \001(\001\"\310\001\n\017TsurgeonRequest\022H\n\nope" +
-      "rations\030\001 \003(\01324.edu.stanford.nlp.pipelin" +
-      "e.TsurgeonRequest.Operation\022<\n\005trees\030\002 \003" +
-      "(\0132-.edu.stanford.nlp.pipeline.Flattened" +
-      "ParseTree\032-\n\tOperation\022\016\n\006tregex\030\001 \002(\t\022\020" +
-      "\n\010tsurgeon\030\002 \003(\t\"P\n\020TsurgeonResponse\022<\n\005" +
-      "trees\030\001 \003(\0132-.edu.stanford.nlp.pipeline." +
-      "FlattenedParseTree\"\205\001\n\021MorphologyRequest" +
-      "\022F\n\005words\030\001 \003(\01327.edu.stanford.nlp.pipel" +
-      "ine.MorphologyRequest.TaggedWord\032(\n\nTagg" +
-      "edWord\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022M" +
-      "orphologyResponse\022I\n\005words\030\001 \003(\0132:.edu.s" +
-      "tanford.nlp.pipeline.MorphologyResponse." +
-      "WordTagLemma\0329\n\014WordTagLemma\022\014\n\004word\030\001 \002" +
-      "(\t\022\014\n\004xpos\030\002 \001(\t\022\r\n\005lemma\030\003 \002(\t\"Z\n\032Depen" +
-      "dencyConverterRequest\022<\n\005trees\030\001 \003(\0132-.e" +
-      "du.stanford.nlp.pipeline.FlattenedParseT" +
-      "ree\"\220\002\n\033DependencyConverterResponse\022`\n\013c" +
-      "onversions\030\001 \003(\0132K.edu.stanford.nlp.pipe" +
-      "line.DependencyConverterResponse.Depende" +
-      "ncyConversion\032\216\001\n\024DependencyConversion\0229" +
-      "\n\005graph\030\001 \002(\0132*.edu.stanford.nlp.pipelin" +
-      "e.DependencyGraph\022;\n\004tree\030\002 \001(\0132-.edu.st" +
-      "anford.nlp.pipeline.FlattenedParseTree*\243" +
-      "\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Ara" +
-      "bic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006Germa" +
-      "n\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010" +
-      "\022\024\n\020UniversalEnglish\020\t\022\024\n\020UniversalChine" +
-      "se\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021" +
-      "\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_P" +
-      "OSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Natur" +
-      "alLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORW" +
-      "ARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002" +
-      "\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER" +
-      "\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp" +
-      ".pipelineB\rCoreNLPProtos"
+      "kbestF1\030\002 \001(\001\022\016\n\006treeF1\030\003 \003(\001\"\310\001\n\017Tsurge" +
+      "onRequest\022H\n\noperations\030\001 \003(\01324.edu.stan" +
+      "ford.nlp.pipeline.TsurgeonRequest.Operat" +
+      "ion\022<\n\005trees\030\002 \003(\0132-.edu.stanford.nlp.pi" +
+      "peline.FlattenedParseTree\032-\n\tOperation\022\016" +
+      "\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P\n\020Tsur" +
+      "geonResponse\022<\n\005trees\030\001 \003(\0132-.edu.stanfo" +
+      "rd.nlp.pipeline.FlattenedParseTree\"\205\001\n\021M" +
+      "orphologyRequest\022F\n\005words\030\001 \003(\01327.edu.st" +
+      "anford.nlp.pipeline.MorphologyRequest.Ta" +
+      "ggedWord\032(\n\nTaggedWord\022\014\n\004word\030\001 \002(\t\022\014\n\004" +
+      "xpos\030\002 \001(\t\"\232\001\n\022MorphologyResponse\022I\n\005wor" +
+      "ds\030\001 \003(\0132:.edu.stanford.nlp.pipeline.Mor" +
+      "phologyResponse.WordTagLemma\0329\n\014WordTagL" +
+      "emma\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\022\r\n\005lemm" +
+      "a\030\003 \002(\t\"Z\n\032DependencyConverterRequest\022<\n" +
+      "\005trees\030\001 \003(\0132-.edu.stanford.nlp.pipeline" +
+      ".FlattenedParseTree\"\220\002\n\033DependencyConver" +
+      "terResponse\022`\n\013conversions\030\001 \003(\0132K.edu.s" +
+      "tanford.nlp.pipeline.DependencyConverter" +
+      "Response.DependencyConversion\032\216\001\n\024Depend" +
+      "encyConversion\0229\n\005graph\030\001 \002(\0132*.edu.stan" +
+      "ford.nlp.pipeline.DependencyGraph\022;\n\004tre" +
+      "e\030\002 \001(\0132-.edu.stanford.nlp.pipeline.Flat" +
+      "tenedParseTree*\243\001\n\010Language\022\013\n\007Unknown\020\000" +
+      "\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007En" +
+      "glish\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebre" +
+      "w\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglish\020\t\022\024" +
+      "\n\020UniversalChinese\020\n*h\n\tSentiment\022\023\n\017STR" +
+      "ONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEU" +
+      "TRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_POSI" +
+      "TIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013EQUIV" +
+      "ALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REVE" +
+      "RSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERN" +
+      "ATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031" +
+      "edu.stanford.nlp.pipelineB\rCoreNLPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -102293,7 +102517,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_EvaluateParserResponse_descriptor,
-        new java.lang.String[] { "F1", "KbestF1", });
+        new java.lang.String[] { "F1", "KbestF1", "TreeF1", });
     internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_descriptor =
       getDescriptor().getMessageTypes().get(33);
     internal_static_edu_stanford_nlp_pipeline_TsurgeonRequest_fieldAccessorTable = new

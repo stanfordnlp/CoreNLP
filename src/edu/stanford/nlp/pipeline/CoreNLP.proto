@@ -813,6 +813,8 @@ message EvaluateParserRequest {
 message EvaluateParserResponse {
   required double              f1             = 1;
   optional double              kbestF1        = 2;
+  // keep track of the individual tree F1 scores
+  repeated double              treeF1         = 3;
 }
 
 
