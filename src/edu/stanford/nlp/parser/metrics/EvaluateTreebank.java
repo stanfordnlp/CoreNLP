@@ -648,6 +648,12 @@ public class EvaluateTreebank  {
     }
   }
 
+  /**
+   * Wrapper for a dataset which was already parsed, such as that passed in to EvaluateExternalParser.
+   * <br>
+   * Using this and the EvaluationDataset in general allows for scoring already known results and
+   * the results of a parser on raw text with the same codepaths
+   */
   public static class PreparsedEvaluationDataset implements EvaluationDataset {
     List<Pair<ParserQuery, Tree>> testTreebank;
 
