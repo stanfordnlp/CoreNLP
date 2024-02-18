@@ -91,6 +91,8 @@ public class EvaluateTreebank  {
   AbstractEval.ScoreEval factLL = null;
   AbstractEval kGoodLB = null;
 
+  List<Double> factLBHistory = null;
+
   BestOfTopKEval pcfgTopK = null;
   private final List<BestOfTopKEval> topKEvals = new ArrayList<>();
 
@@ -182,6 +184,7 @@ public class EvaluateTreebank  {
     }
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factLB"))) {
       factLB = new Evalb("factor LP/LR", runningAverages);
+      factLBHistory = new ArrayList<>();
     }
     if (op.testOptions.evals.getProperty("factChildSpecific") != null) {
       String filter = op.testOptions.evals.getProperty("factChildSpecific");
@@ -266,6 +269,10 @@ public class EvaluateTreebank  {
 
   public boolean hasPCFGTopKF1() {
     return pcfgTopK != null;
+  }
+
+  public List<Double> getF1History() {
+    return Collections.unmodifiableList(factLBHistory);
   }
 
   /**
@@ -524,6 +531,7 @@ public class EvaluateTreebank  {
         //Factored parser (1best) eval
         if (factLB != null) {
           factLB.evaluate(treeFact, transGoldTree, pwErr);
+          factLBHistory.add(factLB.getLastF1());
         }
         if (factChildSpecific != null) {
           factChildSpecific.evaluate(treeFact, transGoldTree, pwErr);

@@ -94,11 +94,16 @@ public class EvaluateExternalParser extends ProcessProtobufRequest {
   }
 
 
-  public CoreNLPProtos.EvaluateParserResponse buildResponse(double f1, Double kbestF1)  {
+  public CoreNLPProtos.EvaluateParserResponse buildResponse(double f1, Double kbestF1, List<Double> f1History)  {
     CoreNLPProtos.EvaluateParserResponse.Builder responseBuilder = CoreNLPProtos.EvaluateParserResponse.newBuilder();
     responseBuilder.setF1(f1);
     if (kbestF1 != null) {
       responseBuilder.setKbestF1(kbestF1);
+    }
+    if (f1History != null) {
+      for (Double treeF1 : f1History) {
+        responseBuilder.addTreeF1(treeF1);
+      }
     }
     CoreNLPProtos.EvaluateParserResponse response = responseBuilder.build();
     return response;
@@ -116,7 +121,8 @@ public class EvaluateExternalParser extends ProcessProtobufRequest {
     if (evaluator.hasPCFGTopKF1()) {
       kbestF1 = evaluator.getPCFGTopKF1();
     }
-    return buildResponse(f1, kbestF1);
+    List<Double> f1History = evaluator.getF1History();
+    return buildResponse(f1, kbestF1, f1History);
   }
 
   public CoreNLPProtos.EvaluateParserResponse processRequest(CoreNLPProtos.EvaluateParserRequest parses) throws IOException {
