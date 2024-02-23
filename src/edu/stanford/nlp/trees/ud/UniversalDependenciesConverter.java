@@ -329,6 +329,7 @@ public class UniversalDependenciesConverter {
         }
         addSpaceAfter(sg, text, graphIdx);
       }
+      System.out.println("# sent_id = " + graphIdx);
       System.out.print(writer.printSemanticGraph(sg, enhanced));
       ++graphIdx;
     }
