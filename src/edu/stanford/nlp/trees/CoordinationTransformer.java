@@ -674,7 +674,7 @@ public class CoordinationTransformer implements TreeTransformer  {
     TregexPattern.compile("@SBAR < ((IN|RB=node1 < /^(?i)as$/) $+ (IN=node2 < /^(?i)if$/))"), //as if
     TregexPattern.compile("@PP < ((JJ|RB=node1 < /^(?i)prior$/) $+ (TO|IN=node2 < /^(?i)to$/))"), //prior to
     TregexPattern.compile("@PP < ((IN=node1 < /^(?i)as$/) $+ (TO|IN=node2 < /^(?i)to$/))"), //as to
-    TregexPattern.compile("@ADVP < ((RB|NN=node1 < /^(?i)kind$/) $+ (IN|RB=node2 < /^(?i)of$/))"), //kind of
+    TregexPattern.compile("@ADVP < ((RB|NN=node1 < /^(?i)kind|sort$/) $+ (IN|RB=node2 < /^(?i)of$/))"), //kind of, sort of
     TregexPattern.compile("@SBAR < ((IN|RB=node1 < /^(?i)whether$/) $+ (CC=node2 < /^(?i)or$/ $+ (RB=node3 < /^(?i)not$/)))"), //whether or not
     TregexPattern.compile("@CONJP < ((IN=node1 < /^(?i)as$/) $+ (VBN=node2 < /^(?i)opposed$/ $+ (TO|IN=node3 < /^(?i)to$/)))"), //as opposed to
     TregexPattern.compile("@ADVP|CONJP < ((VB|RB|VBD=node1 < /^(?i)let$/) $+ (RB|JJ=node2 < /^(?i)alone$/))"), //let alone
