@@ -1238,7 +1238,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation FLAT_EXPRESSION =
     new GrammaticalRelation(Language.UniversalEnglish, "flat", "flat expression",
         MODIFIER, "FLAT", tregexCompiler,
-            "FLAT < (IN|FW=target)");
+            "FLAT < (IN|FW|NN=target)");
 
   /**
    * The "determiner" grammatical relation.
