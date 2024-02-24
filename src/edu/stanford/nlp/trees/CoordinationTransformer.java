@@ -105,6 +105,11 @@ public class CoordinationTransformer implements TreeTransformer  {
         log.info("After MWETransform:               " + t);
       }
 
+      t = MWFlatTransform(t);
+      if (VERBOSE) {
+        log.info("After MWFlatTransform:            " + t);
+      }
+
       t = prepCCTransform(t);
       if (VERBOSE) {
         log.info("After prepCCTransform:               " + t);
@@ -688,7 +693,6 @@ public class CoordinationTransformer implements TreeTransformer  {
     TregexPattern.compile("@QP|XS < ((JJR|RBR||RB|RP|IN=node1 < /^(?i)(up)$/) $+ (IN|TO=node2 < /^(?i)to$/))"), // up to
     TregexPattern.compile("@QP < ((JJR|RBR|RB|RP|IN=node1 < /^(?i)up$/) $+ (IN|TO=node2 < /^(?i)to$/))"), //up to
     TregexPattern.compile("@S|SQ|VP|ADVP|PP < (@ADVP < ((IN|RB=node1 < /^(?i)at$/) $+ (JJS|RBS=node2 < /^(?i)least$/)) !$+ (RB < /(?i)(once|twice)/))"), //at least
-
   };
   
   private static final TsurgeonPattern MWE_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1 node2] [if exists node3 move node3 $- node2]");
@@ -727,7 +731,20 @@ public class CoordinationTransformer implements TreeTransformer  {
     return t;
   }
 
-  
+  private static final TregexPattern[] MW_FLAT_PATTERNS = {
+    TregexPattern.compile("@NP|ADVP <... {(__=node1 < /^(?i)en$/); (__=node2 < /^(?i)masse$/)}"), // en masse, which is tagged in different ways in PTB
+  };
+
+  private static final TsurgeonPattern MW_FLAT_OPERATION = Tsurgeon.parseOperation("[createSubtree FLAT node1 node2] [if exists node3 move node3 $- node2]");
+
+  public static Tree MWFlatTransform(Tree t) {
+    for (TregexPattern p : MW_FLAT_PATTERNS) {
+      Tsurgeon.processPattern(p, MW_FLAT_OPERATION, t);
+    }
+
+    return t;
+  }
+
   private static final TregexPattern FLAT_PREP_CC_PATTERN = TregexPattern.compile("PP <, (/^(IN|TO)$/=p1 $+ (CC=cc $+ /^(IN|TO)$/=p2))");
   private static final TsurgeonPattern FLAT_PREP_CC_OPERATION = Tsurgeon.parseOperation("[createSubtree PCONJP p1 cc] [move p2 $- cc]");
   

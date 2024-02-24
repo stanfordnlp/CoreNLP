@@ -1235,6 +1235,11 @@ public class UniversalEnglishGrammaticalRelations {
         MODIFIER, "MWE", tregexCompiler,
             "MWE < (IN|TO|RB|NP|NN|JJ|VB|CC|VBZ|VBD|ADVP|PP|JJS|RBS=target)");
 
+  public static final GrammaticalRelation FLAT_EXPRESSION =
+    new GrammaticalRelation(Language.UniversalEnglish, "flat", "flat expression",
+        MODIFIER, "FLAT", tregexCompiler,
+            "FLAT < (IN|FW=target)");
+
   /**
    * The "determiner" grammatical relation.
    * <br>
@@ -1613,6 +1618,7 @@ public class UniversalEnglishGrammaticalRelations {
             ADVERBIAL_MODIFIER,
             NEGATION_MODIFIER,
             MULTI_WORD_EXPRESSION,
+            FLAT_EXPRESSION,
             DETERMINER,
             PREDETERMINER,
             PRECONJUNCT,

@@ -164,6 +164,7 @@ public abstract class GrammaticalStructure implements Serializable  {
     // avoiding a wasteful copy of the labels.
     Trees.setLeafLabels(treeGraph, t.yield());
     Trees.setLeafTagsIfUnset(treeGraph);
+    //System.out.println(treeGraph.toPrettyString(2));
     if (transformer != null) {
       Tree transformed = transformer.transformTree(treeGraph);
       if (!(transformed instanceof TreeGraphNode)) {
@@ -173,6 +174,7 @@ public abstract class GrammaticalStructure implements Serializable  {
     } else {
       this.root = treeGraph;
     }
+    //System.out.println(this.root.toPrettyString(2));
     indexNodes(this.root);
     // add head word and tag to phrase nodes
     if (hf == null) {

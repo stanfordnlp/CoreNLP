@@ -194,6 +194,7 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
 
     // Special constituent for multi-word expressions
     nonTerminalInfo.put("MWE", new String[][]{{"left"}});
+    nonTerminalInfo.put("FLAT", new String[][]{{"left"}});
 
     nonTerminalInfo.put("PCONJP", new String[][]{{"left"}});
 
