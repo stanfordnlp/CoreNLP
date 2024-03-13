@@ -46,6 +46,14 @@ public class EnglishMWTCombiner {
                              "    <semgrex>" + XMLUtils.escapeXML("{word:/'[tT]/}=first . {word:/(?i)is|was/}=second") + "</semgrex>",
                              "    <edit-list>CombineMWT -node first -node second</edit-list>",
                              "  </ssurgeon-pattern>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>6</uid>",
+                             "    <notes>Edit a node's MWT for dinna</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/(?i)din/}=first . {word:/(?i)na/}=second") + "</semgrex>",
+                             "    <edit-list>CombineMWT -node first -node second</edit-list>",
+                             "    <edit-list>EditNode -node first -lemma do</edit-list>",
+                             "    <edit-list>EditNode -node second -lemma not</edit-list>",
+                             "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
     List<SsurgeonPattern> patterns = inst.readFromString(mwt);
     for (SsurgeonPattern editSsurgeon : patterns) {
