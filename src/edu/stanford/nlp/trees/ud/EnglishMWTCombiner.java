@@ -30,7 +30,7 @@ public class EnglishMWTCombiner {
                              "  </ssurgeon-pattern>",
                              "  <ssurgeon-pattern>",
                              "    <uid>3</uid>",
-                             "    <notes>Edit a node's MWT for cannot</notes>",
+                             "    <notes>Edit a node's MWT for wanna/gonna</notes>",
                              "    <semgrex>" + XMLUtils.escapeXML("{word:/(?i)wan|gon/;after://}=first . {word:/(?i)na/}=second") + "</semgrex>",
                              "    <edit-list>CombineMWT -node first -node second</edit-list>",
                              "  </ssurgeon-pattern>",
