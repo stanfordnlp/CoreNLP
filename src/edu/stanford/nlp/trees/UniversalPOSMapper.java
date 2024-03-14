@@ -139,237 +139,47 @@ public class UniversalPOSMapper  {
                                 Tsurgeon.parseOperation("relabel target " + newOp[1])));
 
     }
-    String newLine = System.lineSeparator();
-    String rawPattern = String.join(newLine,
-                                    // ------------------------------
-                                    // 1 to 1 mappings
-                                    // ------------------------------
-                                    // CC -> CCONJ
-                                    "CC=target <... {/.*/}",
-                                    "",
-                                    "relabel target CCONJ",
-                                    "",
 
-                                    // CD -> NUM
-                                    "CD=target <... {/.*/}",
-                                    "",
-                                    "relabel target NUM",
-                                    "",
 
-                                    // EX -> PRON
-                                    "EX=target <... {/.*/}",
-                                    "",
-                                    "relabel target PRON",
-                                    "",
+    String [][] one2oneMappings = new String [][] {
+      {"CC", "CCONJ"},
+      {"CD", "NUM"},
+      {"EX", "PRON"},
+      {"FW", "X"},
+      {"/^JJ.*$/", "ADJ"},
+      {"LS", "X"},
+      {"MD", "AUX"},
+      {"NNS", "NOUN"},
+      {"NNP", "PROPN"},
+      {"NNPS", "PROPN"},
+      {"PDT", "DET"},
+      {"POS", "PART"},
+      {"PRP", "PRON"},
+      {"/^PRP[$]$/", "PRON"},
+      {"RBR", "ADV"},
+      {"RBS", "ADV"},
+      {"RP", "ADP"},
+      {"UH", "INTJ"},
+      {"WP", "PRON"},
+      {"/^WP[$]$/", "PRON"},
+      {"WRB", "ADV"},
+      {"/^``$/", "PUNCT"},
+      {"/^''$/", "PUNCT"},
+      {"/^[()]$/", "PUNCT"},
+      {"/^-[RL]RB-$/", "PUNCT"},
+      {"/^[,.:]$/", "PUNCT"},
+      {"HYPH", "PUNCT"},
+      // Also note that there is a no-op rule of SYM -> SYM!
+      {"/^[#$]$/", "SYM"},
+      {"ADD", "X"},
+      {"AFX", "X"},
+      {"GW", "X"},
+      {"XX", "X"},
+    };
+    for (String[] newOp : one2oneMappings) {
+      operations.add(new Pair<>(TregexPattern.compile(newOp[0] + "=target <: __"),
+                                Tsurgeon.parseOperation("relabel target " + newOp[1])));
 
-                                    // FW -> X
-                                    "FW=target <... {/.*/}",
-                                    "",
-                                    "relabel target X",
-                                    "",
-
-                                    // JJ.* -> ADJ
-                                    "/^JJ.*$/=target < __",
-                                    "",
-                                    "relabel target ADJ",
-                                    "",
-
-                                    // LS -> X
-                                    "LS=target <... {/.*/}",
-                                    "",
-                                    "relabel target X",
-                                    "",
-
-                                    // MD -> AUX
-                                    "MD=target <... {/.*/}",
-                                    "",
-                                    "relabel target AUX",
-                                    "",
-
-                                    // NNS -> NOUN
-                                    "NNS=target <... {/.*/}",
-                                    "",
-                                    "relabel target NOUN",
-                                    "",
-
-                                    // NNP -> PROPN
-                                    "NNP=target <... {/.*/}",
-                                    "",
-                                    "relabel target PROPN",
-                                    "",
-
-                                    // NNPS -> PROPN
-                                    "NNPS=target <... {/.*/}",
-                                    "",
-                                    "relabel target PROPN",
-                                    "",
-
-                                    // PDT -> DET
-                                    "PDT=target <... {/.*/}",
-                                    "",
-                                    "relabel target DET",
-                                    "",
-
-                                    // POS -> PART
-                                    "POS=target <... {/.*/}",
-                                    "",
-                                    "relabel target PART",
-                                    "",
-
-                                    // PRP -> PRON
-                                    "PRP=target <... {/.*/}",
-                                    "",
-                                    "relabel target PRON",
-                                    "",
-
-                                    // PRP$ -> PRON
-                                    "/^PRP\\$$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target PRON",
-                                    "",
-
-                                    // RBR -> ADV
-                                    "RBR=target <... {/.*/}",
-                                    "",
-                                    "relabel target ADV",
-                                    "",
-
-                                    // RBS -> ADV
-                                    "RBS=target <... {/.*/}",
-                                    "",
-                                    "relabel target ADV",
-                                    "",
-
-                                    // RP -> ADP
-                                    "RP=target <... {/.*/}",
-                                    "",
-                                    "relabel target ADP",
-                                    "",
-
-                                    // UH -> INTJ
-                                    "UH=target <... {/.*/}",
-                                    "",
-                                    "relabel target INTJ",
-                                    "",
-
-                                    // WP -> PRON
-                                    "WP=target <... {/.*/}",
-                                    "",
-                                    "relabel target PRON",
-                                    "",
-
-                                    // WP$ -> PRON
-                                    "/^WP\\$$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target PRON",
-                                    "",
-
-                                    // WRB -> ADV
-                                    "WRB=target <... {/.*/}",
-                                    "",
-                                    "relabel target ADV",
-                                    "",
-
-                                    // `` -> PUNCT
-                                    "/^``$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target PUNCT",
-                                    "",
-
-                                    // '' -> PUNCT
-                                    "/^''$/=target < __",
-                                    "",
-                                    "relabel target PUNCT",
-                                    "",
-
-                                    // ( -> PUNCT
-                                    "/^\\($/=target <... {/.*/}",
-                                    "",
-                                    "relabel target PUNCT",
-                                    "",
-
-                                    // ) -> PUNCT
-                                    "/^\\)$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target PUNCT",
-                                    "",
-
-                                    // -LRB- -> PUNCT
-                                    "/^-LRB-$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target PUNCT",
-                                    "",
-
-                                    // -RRB- -> PUNCT
-                                    "/^-RRB-$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target PUNCT",
-                                    "",
-
-                                    // , -> PUNCT
-                                    "/^,$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target PUNCT",
-                                    "",
-
-                                    // . -> PUNCT
-                                    "/^\\.$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target PUNCT",
-                                    "",
-
-                                    // : -> PUNCT
-                                    "/^:$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target PUNCT",
-                                    "",
-
-                                    // HYPH -> PUNCT
-                                    "HYPH=target <... {/.*/}",
-                                    "",
-                                    "relabel target PUNCT",
-                                    "",
-
-                                    // # -> SYM
-                                    "/^#$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target SYM",
-                                    "",
-
-                                    // $ -> SYM.  Also note that there is a no-op rule of SYM -> SYM!
-                                    "/^\\$$/=target <... {/.*/}",
-                                    "",
-                                    "relabel target SYM",
-                                    "",
-
-                                    // ADD -> X
-                                    "ADD=target <... {/.*/}",
-                                    "",
-                                    "relabel target X",
-                                    "",
-
-                                    // AFX -> X
-                                    "AFX=target <... {/.*/}",
-                                    "",
-                                    "relabel target X",
-                                    "",
-
-                                    // GW -> X
-                                    "GW=target <... {/.*/}",
-                                    "",
-                                    "relabel target X",
-                                    "",
-
-                                    // XX -> X
-                                    "XX=target <... {/.*/}",
-                                    "",
-                                    "relabel target X");
-    StringReader reader = new StringReader(rawPattern);
-    try (BufferedReader buffered = new BufferedReader(reader)) {
-      List<Pair<TregexPattern, TsurgeonPattern>> newOperations = Tsurgeon.getOperationsFromReader(buffered, new TregexPatternCompiler());
-      operations.addAll(newOperations);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
     }
     loaded = true;
   }
