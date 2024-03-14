@@ -33,7 +33,7 @@ class TregexParser {
   // keep track of which variables we've seen, so that we can reject
   // some nonsense patterns such as ones that reset variables or link
   // to variables that haven't been set
-  private Set<String> knownVariables = Generics.newHashSet();
+  Set<String> knownVariables = Generics.newHashSet();
 
   public TregexParser(java.io.Reader stream,
                       Function<String, String> basicCatFunction,

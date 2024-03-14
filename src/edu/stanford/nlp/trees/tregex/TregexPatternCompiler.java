@@ -138,6 +138,7 @@ public class TregexPatternCompiler {
       TregexParser parser = new TregexParser(new StringReader(tregex + '\n'),
                                              basicCatFunction, headFinder);
       pattern = parser.Root();
+      pattern.setKnownVariables(parser.knownVariables);
     } catch (TokenMgrError tme) {
       throw new TregexParseException("Could not parse " + tregex, tme);
     } catch (ParseException e) {

@@ -361,6 +361,7 @@ public abstract class TregexPattern implements Serializable  {
   private boolean neg; // = false;
   private boolean opt; // = false;
   private String patternString;
+  private Set<String> knownVariables;
 
   void negate() {
     neg = true;
@@ -482,6 +483,15 @@ public abstract class TregexPattern implements Serializable  {
   /** Only used by the TregexPatternCompiler to set the pattern. Pseudo-final. */
   void setPatternString(String patternString) {
     this.patternString = patternString;
+  }
+
+  /** Only used by the TregexPatternCompiler to track the known variables in the tregex (and only at the root). Pseudo-final. */
+  void setKnownVariables(Set<String> knownVariables) {
+    this.knownVariables = knownVariables;
+  }
+
+  public Set<String> knownVariables() {
+    return Collections.unmodifiableSet(knownVariables);
   }
 
   /**
