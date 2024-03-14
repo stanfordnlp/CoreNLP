@@ -28,8 +28,8 @@ public class EnglishMWTCombinerTest {
   public static final String expectedWANNA = String.join(newline,
                                                          "1	I	_	_	_	_	2	nsubj	_	_",
                                                          "2-3	wanna	_	_	_	_	_	_	_	_",
-                                                         "2	wan	_	_	_	_	0	root	_	SpaceAfter=No",
-                                                         "3	na	_	_	_	_	4	mark	_	_",
+                                                         "2	wan	want	_	_	_	0	root	_	SpaceAfter=No",
+                                                         "3	na	to	_	_	_	4	mark	_	_",
                                                          "4	fix	_	_	_	_	2	xcomp	_	_",
                                                          "5	this	_	_	_	_	4	obj	_	_");
 
