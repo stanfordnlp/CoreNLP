@@ -42,7 +42,7 @@ public class CoNLLUOutputterITest {
         String expected = "1\tCoNLL\tconll\tNOUN\tNN\tNumber=Sing\t3\tcompound\t3:compound\tSpaceAfter=No\n" +
             "2\t-\t-\tPUNCT\tHYPH\t_\t3\tpunct\t3:punct\tSpaceAfter=No\n" +
             "3\tU\tu\tNOUN\tNN\tNumber=Sing\t5\tnsubj\t5:nsubj\t_\n" +
-            "4\tis\tbe\tVERB\tVBZ\tMood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin\t5\tcop\t5:cop\t_\n" +
+            "4\tis\tbe\tAUX\tVBZ\tMood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin\t5\tcop\t5:cop\t_\n" +
             "5\tneat\tneat\tADJ\tJJ\tDegree=Pos\t0\troot\t0:root\tSpaceAfter=No\n" +
             "6\t.\t.\tPUNCT\t.\t_\t5\tpunct\t5:punct\t_\n" +
             "\n" +
