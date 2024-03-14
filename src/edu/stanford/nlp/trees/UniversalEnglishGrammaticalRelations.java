@@ -150,7 +150,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation AUX_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "aux", "auxiliary",
         DEPENDENT, "VP|SQ|SINV|CONJP", tregexCompiler,
-        "VP < VP < (/^(?:MD|VB.*|AUXG?|POS)$/=target)",
+        "VP=root < VP < (/^(?:MD|VB.*|AUXG?|POS)$/=target) : (=root !<<# =target)",
         "SQ|SINV < (/^(?:VB|MD|AUX)/=target $++ /^(?:VP|ADJP)/)",
         // add handling of tricky VP fronting cases...
         "SINV < (VP=target < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ") $-- (VP < VBG))");
