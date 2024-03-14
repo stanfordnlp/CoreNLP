@@ -42,6 +42,8 @@ public class UniversalPOSMapper  {
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(UniversalPOSMapper.class);
 
+  private static final boolean DEBUG = System.getProperty("UniversalPOSMapper", null) != null;
+
   @SuppressWarnings("WeakerAccess")
   public static final String DEFAULT_TSURGEON_FILE = "edu/stanford/nlp/models/upos/ENUniversalPOS.tsurgeon";
 
@@ -86,6 +88,9 @@ public class UniversalPOSMapper  {
       } else {
         newTregex = pattern.pattern() + ": (=target == /^(?:VB)/)";
         newTsurgeon = "relabel target AUX";
+      }
+      if (DEBUG) {
+        System.err.println(newTregex + "\n  " + newTsurgeon);
       }
       operations.add(new Pair<>(TregexPattern.compile(newTregex),
                                 Tsurgeon.parseOperation(newTsurgeon)));
