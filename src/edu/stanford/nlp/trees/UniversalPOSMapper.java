@@ -57,12 +57,20 @@ public class UniversalPOSMapper  {
     // Context-sensitive mappings
     // ------------------------------
 
-    String [][] contextMappings = new String [][] {
+    String [][] toContextMappings = new String [][] {
       // TO -> PART (in CONJP phrases)
       { "@CONJP < TO=target < VB",                 "PART", },
       { "@VP < @VP < (/^TO$/=target <... {/.*/})", "PART", },
       { "@VP <: (/^TO$/=target <... {/.*/})",      "PART", },
       { "TO=target <... {/.*/}",                   "ADP", },   // otherwise TO -> ADP
+    };
+    for (String[] newOp : toContextMappings) {
+      operations.add(new Pair<>(TregexPattern.compile(newOp[0]),
+                                Tsurgeon.parseOperation("relabel target " + newOp[1])));
+
+    }
+
+    String [][] otherContextMappings = new String [][] {
       // Don't do this, we are now treating these as copular constructions
       // VB.* -> AUX (for passives where main verb is part of an ADJP)
       // @VP < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|get|got|getting|gets|gotten)$/ ) < (@ADJP [ < VBN|VBD | < (@VP|ADJP < VBN|VBD) < CC ] )
@@ -134,7 +142,7 @@ public class UniversalPOSMapper  {
       // WDT -> DET
       { "WDT=target <... {/.*/}", "DET" },
     };
-    for (String[] newOp : contextMappings) {
+    for (String[] newOp : otherContextMappings) {
       operations.add(new Pair<>(TregexPattern.compile(newOp[0]),
                                 Tsurgeon.parseOperation("relabel target " + newOp[1])));
 
