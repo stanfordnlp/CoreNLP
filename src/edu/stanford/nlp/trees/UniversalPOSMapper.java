@@ -57,82 +57,82 @@ public class UniversalPOSMapper  {
     // Context-sensitive mappings
     // ------------------------------
 
-    // TO -> PART (in CONJP phrases)
     String [][] contextMappings = new String [][] {
-        { "@CONJP < TO=target < VB",                 "PART", },
-        { "@VP < @VP < (/^TO$/=target <... {/.*/})", "PART", },
-        { "@VP <: (/^TO$/=target <... {/.*/})",      "PART", },
-        { "TO=target <... {/.*/}",                   "ADP", },   // otherwise TO -> ADP
-        // Don't do this, we are now treating these as copular constructions
-        // VB.* -> AUX (for passives where main verb is part of an ADJP)
-        // @VP < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|get|got|getting|gets|gotten)$/ ) < (@ADJP [ < VBN|VBD | < (@VP|ADJP < VBN|VBD) < CC ] )
-        //relabel target AUX",
+      // TO -> PART (in CONJP phrases)
+      { "@CONJP < TO=target < VB",                 "PART", },
+      { "@VP < @VP < (/^TO$/=target <... {/.*/})", "PART", },
+      { "@VP <: (/^TO$/=target <... {/.*/})",      "PART", },
+      { "TO=target <... {/.*/}",                   "ADP", },   // otherwise TO -> ADP
+      // Don't do this, we are now treating these as copular constructions
+      // VB.* -> AUX (for passives where main verb is part of an ADJP)
+      // @VP < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|get|got|getting|gets|gotten)$/ ) < (@ADJP [ < VBN|VBD | < (@VP|ADJP < VBN|VBD) < CC ] )
+      //relabel target AUX",
 
-        // VB.* -> AUX (for cases with fronted main VPs)
-        { "@SINV < (@VP < (/^VB/=target <  /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ ) $-- (@VP < VBD|VBN))",
-          "AUX", },
-        // VB.* -> AUX (another, rarer case of fronted VPs)
-        { "@SINV < (@VP < (@VP < (/^VB/=target <  /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ )) $-- (@VP < VBD|VBN))",
-          "AUX", },
+      // VB.* -> AUX (for cases with fronted main VPs)
+      { "@SINV < (@VP < (/^VB/=target <  /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ ) $-- (@VP < VBD|VBN))",
+        "AUX", },
+      // VB.* -> AUX (another, rarer case of fronted VPs)
+      { "@SINV < (@VP < (@VP < (/^VB/=target <  /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ )) $-- (@VP < VBD|VBN))",
+        "AUX", },
 
-        // VB.* -> AUX (passive, case 2)
-        //"%SQ|SINV < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ $++ (VP < VBD|VBN))",
-        //"%relabel target AUX",
-        // VB.* -> AUX (active, case 1)
-        { "VP < VP < (/^VB.*$/=target <: /^(?i:will|have|can|would|do|is|was|be|are|has|could|should|did|been|may|were|had|'ll|'ve|does|am|might|ca|'m|being|'s|must|'d|'re|wo|shall|get|ve|s|got|r|m|getting|having|d|re|ll|wilt|v|of|my|nt|gets|du|wud|woud|with|willl|wil|wase|shoul|shal|`s|ould|-ll|most|made|hvae|hav|cold|as|art|ai|ar|a)$/)",
-          "AUX", },
+      // VB.* -> AUX (passive, case 2)
+      //"%SQ|SINV < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ $++ (VP < VBD|VBN))",
+      //"%relabel target AUX",
+      // VB.* -> AUX (active, case 1)
+      { "VP < VP < (/^VB.*$/=target <: /^(?i:will|have|can|would|do|is|was|be|are|has|could|should|did|been|may|were|had|'ll|'ve|does|am|might|ca|'m|being|'s|must|'d|'re|wo|shall|get|ve|s|got|r|m|getting|having|d|re|ll|wilt|v|of|my|nt|gets|du|wud|woud|with|willl|wil|wase|shoul|shal|`s|ould|-ll|most|made|hvae|hav|cold|as|art|ai|ar|a)$/)",
+        "AUX", },
 
-        // VB -> AUX (active, case 2)
-        { "@SQ|SINV < (/^VB/=target $++ /^(?:VP)/ <... {/.*/})", "AUX" },
+      // VB -> AUX (active, case 2)
+      { "@SQ|SINV < (/^VB/=target $++ /^(?:VP)/ <... {/.*/})", "AUX" },
 
-        // otherwise, VB.* -> VERB
-        { "/^VB.*/=target <... {/.*/}", "VERB", },
+      // otherwise, VB.* -> VERB
+      { "/^VB.*/=target <... {/.*/}", "VERB", },
 
-        // IN -> SCONJ (subordinating conjunctions)
-        { "/^SBAR(-[^ ]+)?$/ < (IN=target $++ @S|FRAG|SBAR|SINV <... {/.*/})", "SCONJ", },
+      // IN -> SCONJ (subordinating conjunctions)
+      { "/^SBAR(-[^ ]+)?$/ < (IN=target $++ @S|FRAG|SBAR|SINV <... {/.*/})", "SCONJ", },
 
-        // IN -> SCONJ (subordinating conjunctions II)
-        { "@PP < (IN=target $+ @SBAR|S)", "SCONJ" },
+      // IN -> SCONJ (subordinating conjunctions II)
+      { "@PP < (IN=target $+ @SBAR|S)", "SCONJ" },
 
-        // IN -> ADP (otherwise)
-        { "IN=target < __", "ADP" },
+      // IN -> ADP (otherwise)
+      { "IN=target < __", "ADP" },
 
-        // NN -> SYM (in case of the percent sign)
-        { "NN=target <... {/[%]/}", "SYM" },
+      // NN -> SYM (in case of the percent sign)
+      { "NN=target <... {/[%]/}", "SYM" },
 
-        // fused det-noun pronouns -> PRON
-        { "NN=target < (/^(?i:(somebody|something|someone|anybody|anything|anyone|everybody|everything|everyone|nobody|nothing))$/)",
-          "PRON" },
+      // fused det-noun pronouns -> PRON
+      { "NN=target < (/^(?i:(somebody|something|someone|anybody|anything|anyone|everybody|everything|everyone|nobody|nothing))$/)",
+        "PRON" },
 
-        // NN -> NOUN (otherwise)
-        { "NN=target <... {/.*/}", "NOUN" },
+      // NN -> NOUN (otherwise)
+      { "NN=target <... {/.*/}", "NOUN" },
 
-        // NFP -> PUNCT (in case of possibly repeated hyphens, asterisks or tildes)
-        { "NFP=target <... {/^(~+|\\*+|\\-+)$/}", "PUNCT", },
+      // NFP -> PUNCT (in case of possibly repeated hyphens, asterisks or tildes)
+      { "NFP=target <... {/^(~+|\\*+|\\-+)$/}", "PUNCT", },
 
-        // NFP -> SYM (otherwise)
-        { "NFP=target <... {/.*/}", "SYM" },
+      // NFP -> SYM (otherwise)
+      { "NFP=target <... {/.*/}", "SYM" },
 
-        // RB -> PART when it is verbal negation (not or its reductions)
-        { "@VP|SINV|SQ|FRAG|ADVP < (RB=target < /^(?i:not|n't|nt|t|n)$/)", "PART" },
+      // RB -> PART when it is verbal negation (not or its reductions)
+      { "@VP|SINV|SQ|FRAG|ADVP < (RB=target < /^(?i:not|n't|nt|t|n)$/)", "PART" },
 
-        // Otherwise RB -> ADV
-        { "RB=target <... {/.*/}", "ADV" },
+      // Otherwise RB -> ADV
+      { "RB=target <... {/.*/}", "ADV" },
 
-        // DT -> PRON (pronominal this/that/these/those)
-        { "@NP <: (DT=target < /^(?i:th(is|at|ose|ese))$/)", "PRON", },
+      // DT -> PRON (pronominal this/that/these/those)
+      { "@NP <: (DT=target < /^(?i:th(is|at|ose|ese))$/)", "PRON", },
 
-        // DT -> DET
-        { "DT=target < __", "DET" },
+      // DT -> DET
+      { "DT=target < __", "DET" },
 
-        // WDT -> PRON (pronominal that/which)
-        { "@WHNP|NP <: (WDT=target < /^(?i:(that|which))$/)", "PRON" },
+      // WDT -> PRON (pronominal that/which)
+      { "@WHNP|NP <: (WDT=target < /^(?i:(that|which))$/)", "PRON" },
 
-        // WDT->SCONJ (incorrectly tagged subordinating conjunctions)
-        { "@SBAR < (WDT=target < /^(?i:(that|which))$/)", "SCONJ" },
+      // WDT->SCONJ (incorrectly tagged subordinating conjunctions)
+      { "@SBAR < (WDT=target < /^(?i:(that|which))$/)", "SCONJ" },
 
-        // WDT -> DET
-        { "WDT=target <... {/.*/}", "DET" },
+      // WDT -> DET
+      { "WDT=target <... {/.*/}", "DET" },
     };
     for (String[] newOp : contextMappings) {
       operations.add(new Pair<>(TregexPattern.compile(newOp[0]),
