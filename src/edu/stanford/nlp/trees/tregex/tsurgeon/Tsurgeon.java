@@ -613,7 +613,13 @@ public class Tsurgeon  {
           matchedOnTree = true;
           t = tsm.evaluate(t,m);
           if (t == null) {
+            if (DEBUG) {
+              log.info("  Matched, but t == null!");
+            }
             return null;
+          }
+          if (DEBUG) {
+            log.info("  Matched!  Update: " + t);
           }
           m = op.first().matcher(t);
         }
