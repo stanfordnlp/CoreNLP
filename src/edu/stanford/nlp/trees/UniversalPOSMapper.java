@@ -70,30 +70,30 @@ public class UniversalPOSMapper  {
 
     }
 
+    List<TregexPattern> auxPatterns = new ArrayList<>();
+    auxPatterns.addAll(UniversalEnglishGrammaticalRelations.AUX_MODIFIER.targetPatterns());
+    auxPatterns.addAll(UniversalEnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER.targetPatterns());
+    auxPatterns.addAll(UniversalEnglishGrammaticalRelations.COPULA.targetPatterns());
+    for (TregexPattern pattern : auxPatterns) {
+      // note that the original patterns capture both VB and AUX...
+      // if we capture AUX here, infinite loop!
+      // also, we don't relabel POS, since that would be a really weird UPOS/XPOS combination
+      final String newTregex;
+      final String newTsurgeon;
+      if (pattern.knownVariables().contains("aux")) {
+        newTregex = pattern.pattern() + ": (=aux == /^(?:VB)/)";
+        newTsurgeon = "relabel aux AUX";
+      } else {
+        newTregex = pattern.pattern() + ": (=target == /^(?:VB)/)";
+        newTsurgeon = "relabel target AUX";
+      }
+      operations.add(new Pair<>(TregexPattern.compile(newTregex),
+                                Tsurgeon.parseOperation(newTsurgeon)));
+    }
+
     String [][] otherContextMappings = new String [][] {
-      // Don't do this, we are now treating these as copular constructions
-      // VB.* -> AUX (for passives where main verb is part of an ADJP)
-      // @VP < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|get|got|getting|gets|gotten)$/ ) < (@ADJP [ < VBN|VBD | < (@VP|ADJP < VBN|VBD) < CC ] )
-      //relabel target AUX",
-
-      // VB.* -> AUX (for cases with fronted main VPs)
-      { "@SINV < (@VP < (/^VB/=target <  /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ ) $-- (@VP < VBD|VBN))",
-        "AUX", },
-      // VB.* -> AUX (another, rarer case of fronted VPs)
-      { "@SINV < (@VP < (@VP < (/^VB/=target <  /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ )) $-- (@VP < VBD|VBN))",
-        "AUX", },
-
-      // VB.* -> AUX (passive, case 2)
-      //"%SQ|SINV < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ $++ (VP < VBD|VBN))",
-      //"%relabel target AUX",
-      // VB.* -> AUX (active, case 1)
-      { "VP < VP < (/^VB.*$/=target <: /^(?i:will|have|can|would|do|is|was|be|are|has|could|should|did|been|may|were|had|'ll|'ve|does|am|might|ca|'m|being|'s|must|'d|'re|wo|shall|get|ve|s|got|r|m|getting|having|d|re|ll|wilt|v|of|my|nt|gets|du|wud|woud|with|willl|wil|wase|shoul|shal|`s|ould|-ll|most|made|hvae|hav|cold|as|art|ai|ar|a)$/)",
-        "AUX", },
-
-      // VB -> AUX (active, case 2)
-      { "@SQ|SINV < (/^VB/=target $++ /^(?:VP)/ <... {/.*/})", "AUX" },
-
-      // otherwise, VB.* -> VERB
+      // this will capture all verbs not found by the AUX_MODIFIER, AUX_PASSIVE_MODIFIER, and COPULA expressions above
+      // VB.* -> VERB
       { "/^VB.*/=target <... {/.*/}", "VERB", },
 
       // IN -> SCONJ (subordinating conjunctions)

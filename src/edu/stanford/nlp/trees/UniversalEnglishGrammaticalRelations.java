@@ -139,6 +139,13 @@ public class UniversalEnglishGrammaticalRelations {
    * <br>
    * Example: <br>
    * "Reagan has died" &rarr; {@code aux}(died, has)
+   * <br>
+   * For any pattern in AUX_MODIFIER, AUX_PASSIVE_MODIFIER, and COPULA
+   * where the target is not the verb itself, but rather the enclosing
+   * constituent, there is a tregex named variable:
+   *   =aux
+   * Please make sure to maintain this.  Those tags are used in
+   * UniversalPOSMapper to update the tags
    */
   public static final GrammaticalRelation AUX_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "aux", "auxiliary",
@@ -146,7 +153,7 @@ public class UniversalEnglishGrammaticalRelations {
         "VP < VP < (/^(?:MD|VB.*|AUXG?|POS)$/=target)",
         "SQ|SINV < (/^(?:VB|MD|AUX)/=target $++ /^(?:VP|ADJP)/)",
         // add handling of tricky VP fronting cases...
-        "SINV < (VP=target < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ") $-- (VP < VBG))");
+        "SINV < (VP=target < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ") $-- (VP < VBG))");
 
 
   /**
@@ -156,6 +163,8 @@ public class UniversalEnglishGrammaticalRelations {
     *
     * Example: <br>
     * "Kennedy has been killed" &rarr; {@code auxpass}(killed, been)
+    * <br>
+    * See AUX_MODIFIER for an explanation of the =aux named nodes
     */
   public static final GrammaticalRelation AUX_PASSIVE_MODIFIER =
      new GrammaticalRelation(Language.UniversalEnglish, "aux:pass", "passive auxiliary",
@@ -163,8 +172,8 @@ public class UniversalEnglishGrammaticalRelations {
          "VP < (/^(?:VB|AUX|POS)/=target < " + passiveAuxWordRegex + " ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )",
          "SQ|SINV < (/^(?:VB|AUX|POS)/=target < " + beAuxiliaryRegex + " $++ (VP < VBD|VBN))",
          // add handling of tricky VP fronting cases...
-         "SINV < (VP=target < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ") $-- (VP < VBD|VBN))",
-         "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ")) $-- (VP < VBD|VBN))");
+         "SINV < (VP=target < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ") $-- (VP < VBD|VBN))",
+         "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ")) $-- (VP < VBD|VBN))");
 
   /**
    * The "copula" grammatical relation.  A copula is the relation between
@@ -173,6 +182,8 @@ public class UniversalEnglishGrammaticalRelations {
    * Examples: <br>
    * "Bill is big" &rarr; {@code cop}(big, is) <br>
    * "Bill is an honest man" &rarr; {@code cop}(man, is)
+   * <br>
+   * See AUX_MODIFIER for an explanation of the =aux named nodes
    */
   public static final GrammaticalRelation COPULA =
     new GrammaticalRelation(Language.UniversalEnglish, "cop", "copula",
@@ -182,7 +193,7 @@ public class UniversalEnglishGrammaticalRelations {
         // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
         "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
         // "Such a great idea this was"
-        "SINV <# (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))");
+        "SINV <# (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/=aux < " + copularWordRegex + "))))");
 
   /**
    * The "conjunct" grammatical relation.  A conjunct is the relation between

@@ -362,6 +362,10 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     children.add(child);
   }
 
+  public List<TregexPattern> targetPatterns() {
+    return Collections.unmodifiableList(targetPatterns);
+  }
+
   /** Given a {@code Tree} node {@code t}, attempts to
    *  return a list of nodes to which node {@code t} has this
    *  grammatical relation, with {@code t} as the governor.
