@@ -58,6 +58,7 @@ public class UniversalPOSMapper  {
   public static void load() {
     transformer = new DependencyTreeTransformer();
 
+    TregexPatternCompiler compiler = new TregexPatternCompiler(new UniversalSemanticHeadFinder(true));
     operations = new ArrayList<>();
     // ------------------------------
     // Context-sensitive mappings
@@ -71,7 +72,7 @@ public class UniversalPOSMapper  {
       { "TO=target <... {/.*/}",                   "ADP", },   // otherwise TO -> ADP
     };
     for (String[] newOp : toContextMappings) {
-      operations.add(new Pair<>(TregexPattern.compile(newOp[0]),
+      operations.add(new Pair<>(compiler.compile(newOp[0]),
                                 Tsurgeon.parseOperation("relabel target " + newOp[1])));
 
     }
@@ -96,7 +97,7 @@ public class UniversalPOSMapper  {
       if (DEBUG) {
         System.err.println(newTregex + "\n  " + newTsurgeon);
       }
-      operations.add(new Pair<>(TregexPattern.compile(newTregex),
+      operations.add(new Pair<>(compiler.compile(newTregex),
                                 Tsurgeon.parseOperation(newTsurgeon)));
     }
 
@@ -152,7 +153,7 @@ public class UniversalPOSMapper  {
       { "WDT=target <... {/.*/}", "DET" },
     };
     for (String[] newOp : otherContextMappings) {
-      operations.add(new Pair<>(TregexPattern.compile(newOp[0]),
+      operations.add(new Pair<>(compiler.compile(newOp[0]),
                                 Tsurgeon.parseOperation("relabel target " + newOp[1])));
 
     }
@@ -194,7 +195,7 @@ public class UniversalPOSMapper  {
       {"XX", "X"},
     };
     for (String[] newOp : one2oneMappings) {
-      operations.add(new Pair<>(TregexPattern.compile(newOp[0] + "=target <: __"),
+      operations.add(new Pair<>(compiler.compile(newOp[0] + "=target <: __"),
                                 Tsurgeon.parseOperation("relabel target " + newOp[1])));
 
     }
