@@ -51,9 +51,13 @@ public class UniversalPOSMapper  {
 
   private static List<Pair<TregexPattern, TsurgeonPattern>> operations; // = null;
 
+  private static TreeTransformer transformer;
+
   private UniversalPOSMapper() {} // static methods
 
   public static void load() {
+    transformer = new DependencyTreeTransformer();
+
     operations = new ArrayList<>();
     // ------------------------------
     // Context-sensitive mappings
@@ -206,7 +210,9 @@ public class UniversalPOSMapper  {
       return t;
     }
 
-    return Tsurgeon.processPatternsOnTree(operations, t.deepCopy());
+    t = t.deepCopy();
+    t = transformer.transformTree(t);
+    return Tsurgeon.processPatternsOnTree(operations, t);
   }
 
 }
