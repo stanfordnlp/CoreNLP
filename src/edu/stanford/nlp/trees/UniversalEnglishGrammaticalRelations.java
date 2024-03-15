@@ -260,7 +260,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation COORDINATION =
     new GrammaticalRelation(Language.UniversalEnglish, "cc", "coordination",
         DEPENDENT, ".*", tregexCompiler,
-            "__ ([ < (CC=target !< /^(?i:either|neither|both)$/ ) | < (CONJP=target !< (RB < /^(?i:not)$/ $+ (RB|JJ < /^(?i:only|just|merely)$/))) ] [!> /PP/ | !>2 NP])");
+            "/^(?!MWE).*$/ ([ < (CC=target !< /^(?i:either|neither|both)$/ ) | < (CONJP=target !< (RB < /^(?i:not)$/ $+ (RB|JJ < /^(?i:only|just|merely)$/))) ] [!> /PP/ | !>2 NP])");
 
 
   /**
