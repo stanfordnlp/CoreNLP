@@ -426,7 +426,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
              '\n') +
 
      // these ones are also VBD in practice (though in principle ambiguous)
-     ("@S < (@VP < (VB < let|cut|bid| )) < (/^NP-SBJ/ !< /^-NONE-$/) > (__ !> __)\n" +
+     ("@S < (@VP < (VB=bad < let|cut|bid| )) < (/^NP-SBJ/ !< /^-NONE-$/) > (__ !> __)\n" +
       "relabel bad VBD\n" +
              '\n') +
 
