@@ -19,7 +19,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *  You can use this class from {@link edu.stanford.nlp.trees.Treebanks} via a command like: <p>
  *  {@code java edu.stanford.nlp.trees.Treebanks -correct -pennPrint LDC99T42-Treebank3/parsed/mrg/wsj 200-2199 > train-fixed}
  */
-public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
+public class EnglishPTBTreebankCorrector implements TreeTransformer, TreebankTransformer  {
 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(EnglishPTBTreebankCorrector.class);
@@ -100,6 +100,11 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     }
   }
 
+  @Override
+  public Tree transformTree(Tree t) {
+    return Tsurgeon.processPatternsOnTree(ops, t);
+  }
+
   /** Fix all the English Penn Treebank errors, or at least some of them (!).
    */
   @Override
@@ -107,7 +112,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
     MemoryTreebank mtb = new MemoryTreebank(tb.treeReaderFactory(),
                                             tb.encoding());
     for (Tree t : tb) {
-      mtb.add(Tsurgeon.processPatternsOnTree(ops, t));
+      mtb.add(transformTree(t));
     }
     return mtb;
   }
