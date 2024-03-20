@@ -6,6 +6,7 @@ import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.treebank.EnglishPTBTreebankCorrector;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
@@ -229,6 +230,7 @@ public class UniversalDependenciesConverter {
    * {@code -textFile}: A file with text to be used as a guide for SpaceAfter (optional)<br>
    * {@code -outputRepresentation}: "basic" (default), "enhanced", or "enhanced++"<br>
    * {@code -combineMWTs}: "False" (default), "True" marks things like it's as MWT
+   * {@code -correctPTB}: "False" (default), "True" runs the PTB Corrector over the trees
    */
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args);
@@ -239,6 +241,7 @@ public class UniversalDependenciesConverter {
     boolean addFeatures = PropertiesUtils.getBool(props, "addFeatures", false);
     boolean combineMWTs = PropertiesUtils.getBool(props, "combineMWTs", false);
     boolean replaceLemmata = PropertiesUtils.getBool(props, "replaceLemmata", false);
+    boolean correctPTB = PropertiesUtils.getBool(props, "correctPTB", false);
 
     Iterator<Pair<SemanticGraph, SemanticGraph>> sgIterator; // = null;
 
@@ -258,7 +261,7 @@ public class UniversalDependenciesConverter {
       System.err.println("No input file specified!");
       System.err.println();
       System.err.printf("Usage: java %s [-treeFile trees.tree | -conlluFile deptrees.conllu]" +
-                        " [-addFeatures] [-replaceLemmata] [-textFile trees.txt] [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
+                        " [-addFeatures] [-replaceLemmata] [-correctPTB] [-textFile trees.txt] [-outputRepresentation basic|enhanced|enhanced++ (default: basic)]%n",
                         UniversalDependenciesConverter.class.getCanonicalName());
       return;
     }
@@ -271,6 +274,7 @@ public class UniversalDependenciesConverter {
 
     UniversalDependenciesFeatureAnnotator featureAnnotator = (addFeatures) ? new UniversalDependenciesFeatureAnnotator() : null;
     EnglishMWTCombiner mwtCombiner = (combineMWTs) ? new EnglishMWTCombiner() : null;
+    EnglishPTBTreebankCorrector ptbCorrector = (correctPTB) ? new EnglishPTBTreebankCorrector() : null;
 
     CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
 
@@ -282,6 +286,9 @@ public class UniversalDependenciesConverter {
       if (treeFileName != null) {
         //add UPOS tags
         Tree tree = ((TreeToSemanticGraphIterator) sgIterator).getCurrentTree();
+        if (ptbCorrector != null) {
+          tree = ptbCorrector.transformTree(tree);
+        }
         Tree uposTree = UniversalPOSMapper.mapTree(tree);
         List<Label> uposLabels = uposTree.preTerminalYield();
         for (IndexedWord token: sg.vertexListSorted()) {
