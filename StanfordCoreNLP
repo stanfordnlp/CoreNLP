@@ -1,0 +1,13 @@
+This is an example Of Maven project with Stanford CoreNLP as a dependency.
+
+Make sure to set the RAM with this command Also:
+
+export MAVEN_OPTS="-Xmx14000m"
+
+You can build the project with this command:
+
+mvn compile - Command For Building Project
+
+You can run example demos with a command As like this:
+
+mvn exec:java -Dexec.mainClass="edu.stanford.nlp.StanfordCoreNLPEnglishTestApp" 
