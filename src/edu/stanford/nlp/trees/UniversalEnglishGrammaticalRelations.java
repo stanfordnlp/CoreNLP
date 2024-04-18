@@ -575,7 +575,14 @@ public class UniversalEnglishGrammaticalRelations {
             "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )",
             // New ones to pick up some more "say" patterns (2019); avoid S-ADV descendants
             "VP < (/^V/ < " + sayVerbRegex + ") < (S|S-CLF|S-TTL|SQ=target <+(S) (VP < /^VB[DZP]$/))",
-            "@S < /^S-TPC/=target < VP"
+            "@S < /^S-TPC/=target < VP",
+            // detect fronted VPs, eg
+            //   "not finding this ccomp is bad, he said"
+            // eliminate VP !< SBAR to avoid detecting
+            //   "he was debugging and (VP saying (SBAR he wanted to find the ccomp))"
+            // eliminate S !< (VP < (/^VB[GN]/ !$-- /^V/)) to avoid detecting
+            //   (S (NP Rick Lynch) (S (VP (VBG referring to ...))) (VP says ...))
+            "S < (S=target $++ (VP < (/^V/ < " + sayVerbRegex + ") !< SBAR) !< (VP < (/^VB[GN]/ !$-- /^V/)))"
           );
 
 
