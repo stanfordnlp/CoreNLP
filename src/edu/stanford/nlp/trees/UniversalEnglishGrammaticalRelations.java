@@ -881,11 +881,6 @@ public class UniversalEnglishGrammaticalRelations {
    * the meaning of the NP.  Also, the enumeration of lists have
    * this relation to the head of the list item.
    * <br>
-   * Also, the enumeration of lists have this relation to the head of
-   * the list item.  For that, we allow the list of constituents which
-   * have a list under them in any of the training data, as the parser
-   * will likely not produce anything else anyway.
-   * <br>
    * PTB: PP NP X S FRAG <br>
    * EWT: SQ SBARQ SINV SBAR NML VP <br>
    * Craft: PRN <br>
@@ -905,9 +900,7 @@ public class UniversalEnglishGrammaticalRelations {
             // Note that the earlier tregexes are usually enough to cover those phrases, such as when
             // the QP is by itself in an ADJP or NP, but sometimes it can have other siblings such
             // as in the phrase "$ 100 million or more".  In that case, this next expression is needed.
-            "QP < QP=target < /^[$]$/",
-            // Lists are treated as nummod in UD_English-EWT
-            "PP|NP|X|S|FRAG|SQ|SBARQ|SINV|SBAR|NML|VP|PRN|ADJP < LST=target");
+            "QP < QP=target < /^[$]$/");
 
 
   /**
@@ -1019,12 +1012,19 @@ public class UniversalEnglishGrammaticalRelations {
    * define this to include: interjections (oh, uh-huh, Welcome), fillers (um, ah),
    * and discourse markers (well, like, actually, but not: you know).
    * We also use it for emoticons.
+   * <br>
+   * Also, the enumeration of lists have this relation to the head of
+   * the list item.  For that, we allow the list of constituents which
+   * have a list under them in any of the training data, as the parser
+   * will likely not produce anything else anyway.
    */
    public static final GrammaticalRelation DISCOURSE_ELEMENT =
     new GrammaticalRelation(Language.UniversalEnglish, "discourse", "discourse element",
         MODIFIER, ".*", tregexCompiler,
             "__ < (NFP=target [ < " + WESTERN_SMILEY + " | < " + ASIAN_SMILEY + " ] )",
-            "__ [ < INTJ=target | < (PRN=target <1 /^(?:,|-LRB-)$/ <2 INTJ [ !<3 __ | <3 /^(?:,|-RRB-)$/ ] ) ]");
+            "__ [ < INTJ=target | < (PRN=target <1 /^(?:,|-LRB-)$/ <2 INTJ [ !<3 __ | <3 /^(?:,|-RRB-)$/ ] ) ]",
+            // Lists are treated as discourse in UD_English-EWT as of 2.14
+            "PP|NP|X|S|FRAG|SQ|SBARQ|SINV|SBAR|NML|VP|PRN|ADJP < LST=target");
 
 
   /**
