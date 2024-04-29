@@ -71,6 +71,14 @@ public class CoordinationTransformer implements TreeTransformer  {
     qp = new QPTreeTransformer(performMWETransformation);
   }
 
+  public void debugLine(String prefix, Tree t) {
+    if (t instanceof TreeGraphNode) {
+      log.info(prefix + ((TreeGraphNode) t).toOneLineString());
+    } else {
+      log.info(prefix + t);
+    }
+  }
+
   /**
    * Transforms t if it contains a coordination in a flat structure (CCtransform)
    * and transforms UCP (UCPtransform).
@@ -81,19 +89,19 @@ public class CoordinationTransformer implements TreeTransformer  {
   @Override
   public Tree transformTree(Tree t) {
     if (VERBOSE) {
-      log.info("Input to CoordinationTransformer: " + t);
+      debugLine("Input to CoordinationTransformer: ", t);
     }
 
     if (performMWETransformation) {
       t = gappingTransform(t);
       if (VERBOSE) {
-        log.info("After       t = gappingTransform(t);\n:  " + t);
+        debugLine("After t = gappingTransform(t);:   ", t);
       }
     }
 
     t = tn.transformTree(t);
     if (VERBOSE) {
-      log.info("After DependencyTreeTransformer:  " + t);
+      debugLine("After DependencyTreeTransformer:  ", t);
     }
     if (t == null) {
       return t;
@@ -102,59 +110,59 @@ public class CoordinationTransformer implements TreeTransformer  {
     if (performMWETransformation) {
       t = MWETransform(t);
       if (VERBOSE) {
-        log.info("After MWETransform:               " + t);
+        debugLine("After MWETransform:               ", t);
       }
 
       t = MWFlatTransform(t);
       if (VERBOSE) {
-        log.info("After MWFlatTransform:            " + t);
+        debugLine("After MWFlatTransform:            ", t);
       }
 
       t = prepCCTransform(t);
       if (VERBOSE) {
-        log.info("After prepCCTransform:               " + t);
+        debugLine("After prepCCTransform:            ", t);
       }
     }
 
     t = UCPtransform(t);
     if (VERBOSE) {
-      log.info("After UCPTransformer:             " + t);
+      debugLine("After UCPTransformer:             ", t);
     }
     t = CCtransform(t);
     if (VERBOSE) {
-      log.info("After CCTransformer:              " + t);
+      debugLine("After CCTransformer:              ", t);
     }
     t = qp.transformTree(t);
     if (VERBOSE) {
-      log.info("After QPTreeTransformer:          " + t);
+      debugLine("After QPTreeTransformer:          ", t);
     }
     t = SQflatten(t);
     if (VERBOSE) {
-      log.info("After SQ flattening:              " + t);
+      debugLine("After SQ flattening:              ", t);
     }
     t = dates.transformTree(t);
     if (VERBOSE) {
-      log.info("After DateTreeTransformer:        " + t);
+      debugLine("After DateTreeTransformer:        ", t);
     }
     t = removeXOverX(t);
     if (VERBOSE) {
-      log.info("After removeXoverX:               " + t);
+      debugLine("After removeXoverX:               ", t);
     }
     t = combineConjp(t);
     if (VERBOSE) {
-      log.info("After combineConjp:               " + t);
+      debugLine("After combineConjp:               ", t);
     }
     t = moveRB(t);
     if (VERBOSE) {
-      log.info("After moveRB:                     " + t);
+      debugLine("After moveRB:                     ", t);
     }
     t = changeSbarToPP(t);
     if (VERBOSE) {
-      log.info("After changeSbarToPP:             " + t);
+      debugLine("After changeSbarToPP:             ", t);
     }
     t = rearrangeNowThat(t);
     if (VERBOSE) {
-      log.info("After rearrangeNowThat:           " + t);
+      debugLine("After rearrangeNowThat:           ", t);
     }
 
     return t;
