@@ -100,12 +100,25 @@ public class QPTreeTransformer implements TreeTransformer {
   private static final TsurgeonPattern splitMoneyTsurgeon =
     Tsurgeon.parseOperation("createSubtree QP left right");
 
+  // This fixes a very rare subset of parses
+  // such as "(NP (QP just about all) the losses) ..."
+  // in fact, that's the only example in ptb3-revised
+  // because of previous MWE combinations, we may already get
+  //     "(NP (QP at least a) day)"
+  //  -> "(NP (QP (ADVP at least) a) day)"
+  // and therefore the flattenAdvmodTsurgeon will also find that parse
+  private static final TregexPattern groupADVPTregex =
+    TregexPattern.compile("NP < (QP <1 RB=first <2 RB=second <3 (DT !$+ __) $++ /^N/)");
+
+  private static final TsurgeonPattern groupADVPTsurgeon =
+    Tsurgeon.parseOperation("createSubtree ADVP first second");
+
   // Remove QP in a structure such as
   //   (NP (QP nearly_RB all_DT) stuff_NN)
   // so that the converter can attach both `nearly` and `all` to `stuff`
   // not using a nummod, either, which is kind of annoying
   private static final TregexPattern flattenAdvmodTregex =
-    TregexPattern.compile("NP < (QP=remove <1 RB <2 (DT !$+ __) $++ /^N/)");
+    TregexPattern.compile("NP < (QP=remove <1 ADVP|RB <2 (DT !$+ __) $++ /^N/)");
 
   private static final TsurgeonPattern flattenAdvmodTsurgeon =
     Tsurgeon.parseOperation("excise remove remove");
@@ -131,6 +144,7 @@ public class QPTreeTransformer implements TreeTransformer {
     }
     t = Tsurgeon.processPattern(splitCCTregex, splitCCTsurgeon, t);
     t = Tsurgeon.processPattern(splitMoneyTregex, splitMoneyTsurgeon, t);
+    t = Tsurgeon.processPattern(groupADVPTregex, groupADVPTsurgeon, t);
     t = Tsurgeon.processPattern(flattenAdvmodTregex, flattenAdvmodTsurgeon, t);
     return t;
   }
