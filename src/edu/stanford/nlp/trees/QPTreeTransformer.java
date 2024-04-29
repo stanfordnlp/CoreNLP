@@ -100,6 +100,16 @@ public class QPTreeTransformer implements TreeTransformer {
   private static final TsurgeonPattern splitMoneyTsurgeon =
     Tsurgeon.parseOperation("createSubtree QP left right");
 
+  // Remove QP in a structure such as
+  //   (NP (QP nearly_RB all_DT) stuff_NN)
+  // so that the converter can attach both `nearly` and `all` to `stuff`
+  // not using a nummod, either, which is kind of annoying
+  private static final TregexPattern flattenAdvmodTregex =
+    TregexPattern.compile("NP < (QP=remove <1 RB <2 (DT !$+ __) $++ /^N/)");
+
+  private static final TsurgeonPattern flattenAdvmodTsurgeon =
+    Tsurgeon.parseOperation("excise remove remove");
+
   /**
    * Transforms t if it contains one of the following QP structure:
    * <ul>
@@ -121,6 +131,7 @@ public class QPTreeTransformer implements TreeTransformer {
     }
     t = Tsurgeon.processPattern(splitCCTregex, splitCCTsurgeon, t);
     t = Tsurgeon.processPattern(splitMoneyTregex, splitMoneyTsurgeon, t);
+    t = Tsurgeon.processPattern(flattenAdvmodTregex, flattenAdvmodTsurgeon, t);
     return t;
   }
 
