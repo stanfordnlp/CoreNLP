@@ -2,6 +2,7 @@ package edu.stanford.nlp.trees;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A TreeTransformer that applies component TreeTransformers in order.
@@ -19,6 +20,10 @@ public class CompositeTreeTransformer implements TreeTransformer {
 
   public CompositeTreeTransformer(List<TreeTransformer> tt) {
     transformers.addAll(tt);
+  }
+
+  public CompositeTreeTransformer(TreeTransformer ... tt) {
+    transformers.addAll(Arrays.asList(tt));
   }
 
   public void addTransformer(TreeTransformer tt) {
