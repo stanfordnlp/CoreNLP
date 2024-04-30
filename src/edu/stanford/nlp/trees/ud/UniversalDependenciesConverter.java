@@ -288,6 +288,12 @@ public class UniversalDependenciesConverter {
         Tree tree = ((TreeToSemanticGraphIterator) sgIterator).getCurrentTree();
         if (ptbCorrector != null) {
           tree = ptbCorrector.transformTree(tree);
+          List<Label> xposLabels = tree.preTerminalYield();
+          for (IndexedWord token: sg.vertexListSorted()) {
+            int idx = token.index() - 1;
+            String xposTag = xposLabels.get(idx).value();
+            token.set(CoreAnnotations.PartOfSpeechAnnotation.class, xposTag);
+          }
         }
         Tree uposTree = UniversalPOSMapper.mapTree(tree);
         List<Label> uposLabels = uposTree.preTerminalYield();
