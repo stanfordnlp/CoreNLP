@@ -90,8 +90,11 @@ public class UniversalDependenciesConverter {
     private Iterator<Tree> treeIterator;
     private Tree currentTree; // = null;
 
-    public TreeToSemanticGraphIterator(Iterator<Tree> treeIterator) {
+    private TreeTransformer corrector; // = null;
+
+    public TreeToSemanticGraphIterator(Iterator<Tree> treeIterator, TreeTransformer corrector) {
       this.treeIterator = treeIterator;
+      this.corrector = corrector;
     }
 
     @Override
@@ -102,6 +105,25 @@ public class UniversalDependenciesConverter {
     @Override
     public Pair<SemanticGraph, SemanticGraph> next() {
       Tree t = treeIterator.next();
+      if (corrector != null) {
+        t = corrector.transformTree(t);
+        // The corrector uses tsurgeon, with two limitations:
+        //   - adjoin nodes don't set word(), just set value()
+        //   - rearranging tags doesn't update the tag() of a leaf
+        List<Tree> preterminals = Trees.preTerminals(t);
+        for (Tree preterminal : preterminals) {
+          assert preterminal.children().length == 1;
+          Tree leaf = preterminal.children()[0];
+          if (!(leaf.label() instanceof CoreLabel)) {
+            throw new RuntimeException("These should all be CoreLabels!");
+          }
+          CoreLabel leafWord = (CoreLabel) leaf.label();
+          if (leafWord.word() == null && leafWord.value() != null) {
+            leafWord.setWord(leafWord.value());
+          }
+          leafWord.setTag(preterminal.value());
+        }
+      }
       currentTree = t;
       return new Pair<>(convertTreeToBasic(t), null);
     }
@@ -246,10 +268,15 @@ public class UniversalDependenciesConverter {
     Iterator<Pair<SemanticGraph, SemanticGraph>> sgIterator; // = null;
 
     if (treeFileName != null) {
-      MemoryTreebank tb = new MemoryTreebank(new NPTmpRetainingTreeNormalizer(0, false, 1, false, true));
+      NPTmpRetainingTreeNormalizer normalizer = new NPTmpRetainingTreeNormalizer(0, false, 1, false, true);
+      MemoryTreebank tb = new MemoryTreebank(normalizer);
       tb.loadPath(treeFileName);
       Iterator<Tree> treeIterator = tb.iterator();
-      sgIterator = new TreeToSemanticGraphIterator(treeIterator);
+      TreeTransformer ptbCorrector = null;
+      if (correctPTB) {
+        ptbCorrector = new CompositeTreeTransformer(new EnglishPTBTreebankCorrector(), normalizer);
+      }
+      sgIterator = new TreeToSemanticGraphIterator(treeIterator, ptbCorrector);
     } else if (conlluFileName != null) {
       CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
       try {
@@ -274,27 +301,17 @@ public class UniversalDependenciesConverter {
 
     UniversalDependenciesFeatureAnnotator featureAnnotator = (addFeatures) ? new UniversalDependenciesFeatureAnnotator() : null;
     EnglishMWTCombiner mwtCombiner = (combineMWTs) ? new EnglishMWTCombiner() : null;
-    EnglishPTBTreebankCorrector ptbCorrector = (correctPTB) ? new EnglishPTBTreebankCorrector() : null;
 
     CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
 
     int graphIdx = 0;
     while (sgIterator.hasNext()) {
-      Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
+      final Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
       SemanticGraph sg = sgs.first();
 
       if (treeFileName != null) {
         //add UPOS tags
         Tree tree = ((TreeToSemanticGraphIterator) sgIterator).getCurrentTree();
-        if (ptbCorrector != null) {
-          tree = ptbCorrector.transformTree(tree);
-          List<Label> xposLabels = tree.preTerminalYield();
-          for (IndexedWord token: sg.vertexListSorted()) {
-            int idx = token.index() - 1;
-            String xposTag = xposLabels.get(idx).value();
-            token.set(CoreAnnotations.PartOfSpeechAnnotation.class, xposTag);
-          }
-        }
         Tree uposTree = UniversalPOSMapper.mapTree(tree);
         List<Label> uposLabels = uposTree.preTerminalYield();
         for (IndexedWord token: sg.vertexListSorted()) {
