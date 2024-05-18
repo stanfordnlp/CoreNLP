@@ -430,6 +430,26 @@ public class TsurgeonTest extends TestCase {
             "(barfoo (curlew 0) (avocet 1))");
   }
 
+  /**
+   * Test relabeling a tree from icepahc
+   *
+   * The goal is to check that removing the lemmas and combining detached words both work as expected
+   */
+  public void testRelabelICE() {
+    String treeText = "( (IP-MAT (NP-SBJ (PRO-N Það-það)) (BEPI er-vera) (ADVP (ADV eiginlega-eiginlega)) (ADJP (NEG ekki-ekki) (ADJ-N hægt-hægur)) (IP-INF (TO að-að) (VB lýsa-lýsa)) (NP-OB1 (N-D tilfinningu$-tilfinning) (D-D $nni-hinn)) (IP-INF (TO að-að) (VB fá-fá)) (IP-INF (TO að-að) (VB taka-taka)) (NP-OB1 (N-A þátt-þáttur)) (PP (P í-í) (NP (D-D þessu-þessi))) (, ,-,) (VBPI segir-segja) (NP-SBJ (NPR-N Sverrir-sverrir) (NPR-N Ingi-ingi)) (. .-.)))";
+
+    String relabeledTreeText = "( (IP-MAT (NP-SBJ (PRO-N Það)) (BEPI er) (ADVP (ADV eiginlega)) (ADJP (NEG ekki) (ADJ-N hægt)) (IP-INF (TO að) (VB lýsa)) (NP-OB1 (N-D tilfinningu$) (D-D $nni)) (IP-INF (TO að) (VB fá)) (IP-INF (TO að) (VB taka)) (NP-OB1 (N-A þátt)) (PP (P í) (NP (D-D þessu))) (, ,) (VBPI segir) (NP-SBJ (NPR-N Sverrir) (NPR-N Ingi)) (. .)))";
+
+    TregexPattern tregex = TregexPattern.compile("/^(.+)-.+$/#1%form=word !< __");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("relabel word /^(.+)-.+$/%{form}/");
+    runTest(tregex, tsurgeon, treeText, relabeledTreeText);
+
+    tregex = TregexPattern.compile("/^N-/ < /^([^$]+)[$]$/#1%noun=noun $+ (/^D-/ < /^[$]([^$]+)$/#1%det=det)");
+    tsurgeon = Tsurgeon.parseOperation("relabel noun /^.+$/%{noun}%{det}/");
+    runTest(tregex, tsurgeon, relabeledTreeText,
+            "( (IP-MAT (NP-SBJ (PRO-N Það)) (BEPI er) (ADVP (ADV eiginlega)) (ADJP (NEG ekki) (ADJ-N hægt)) (IP-INF (TO að) (VB lýsa)) (NP-OB1 (N-D tilfinningunni) (D-D $nni)) (IP-INF (TO að) (VB fá)) (IP-INF (TO að) (VB taka)) (NP-OB1 (N-A þátt)) (PP (P í) (NP (D-D þessu))) (, ,) (VBPI segir) (NP-SBJ (NPR-N Sverrir) (NPR-N Ingi)) (. .)))");
+  }
+
   public void testReplaceNode() {
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("replace foo blah");
     TregexPattern tregex = TregexPattern.compile("B=foo : C=blah");
