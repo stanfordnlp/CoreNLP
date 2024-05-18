@@ -88,7 +88,7 @@ public class EnglishPatterns {
    *  which is a direct speech ccomp. For example: "He concedes: ``This is a difficult market.''"
    */
   public static final String sayVerbRegex =
-    "/^(?i:say|says|said|saying|(?:add|boast|counsel|explain|inform|interject|recall|remark|respond|proclaim|report|claim|shout|whisper|yell)(?:s|ed|ing)?|(?:advis|announc|acknowledg|conced|conclud|decid|declar|observ|stat|not|inton)(?:e|es|ed|ing)|(?:confess)(?:es|ed|ing)?|(?:agree)(?:s|d|ing)?|reply|replied|replies|replying|admit|admits|admitted|admitting|hold|holds|holding|held|write|writes|writing|wrote|tell|tells|telling|told|quipped|quip|quips|quipping|think|thinks|thinking|thought)$/";
+    "/^(?i:say|says|said|saying|(?:add|boast|claim|counsel|explain|inform|interject|proclaim|recall|remark|report|respond|shout|whisper|yell)(?:s|ed|ing)?|(?:advis|announc|acknowledg|conced|conclud|decid|declar|inton|not|observ|stat)(?:e|es|ed|ing)|(?:confess)(?:es|ed|ing)?|(?:agree)(?:s|d|ing)?|reply|replied|replies|replying|admit|admits|admitted|admitting|hold|holds|holding|held|write|writes|writing|wrote|tell|tells|telling|told|quipped|quip|quips|quipping|think|thinks|thinking|thought)$/";
 
 
   // TODO: is there some better pattern to look for? We do not have tag information at this point
