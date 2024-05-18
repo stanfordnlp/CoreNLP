@@ -156,7 +156,11 @@ class RelabelNode extends TsurgeonPattern {
             label.append(Matcher.quoteReplacement(tregex.getVariableString(name)));
           } else if (nodePattern.matcher(chunk).matches()) {
             String name = chunk.substring(2, chunk.length() - 1);
-            label.append(Matcher.quoteReplacement(tregex.getNode(name).value()));
+            Tree node = tregex.getNode(name);
+            if (node == null) {
+              throw new NullPointerException("Node name " + name + " does not exist in the searched tree");
+            }
+            label.append(Matcher.quoteReplacement(node.value()));
           } else {
             label.append(chunk);
           }
