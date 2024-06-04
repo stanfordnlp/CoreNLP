@@ -19,6 +19,9 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.BenchmarkingHelper;
 import edu.stanford.nlp.util.StringUtils;
 
+import java.net.URL;
+
+
 /**
  * Run the dcoref system using the exact properties we distribute as
  * an example.  Check that the output does not change markedly from expected.
@@ -54,6 +57,10 @@ public class ChineseCorefBenchmarkSlowITest {
     Properties props = StringUtils.argsToProperties(corefArgs);
     System.err.println("Running coref with arguments:");
     System.err.println(props);
+    if (props.getProperty("coref.scorer").startsWith("/u/scr/nlp")) {
+      URL url = ClassLoader.getSystemResource("edu/stanford/nlp/coref/hybrid/properties/zh-dcoref-conll.properties");
+      throw new RuntimeException("Why is this not working???  " + url);
+    }
 
     HybridCorefSystem.runCoref(corefArgs);
 
