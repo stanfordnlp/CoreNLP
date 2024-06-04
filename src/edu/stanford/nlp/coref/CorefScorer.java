@@ -18,8 +18,19 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Kevin Clark
  */
 public class CorefScorer {
-  public static String getEvalSummary(String evalScript,
-      String goldFile, String predictFile) throws IOException {
+  public static class ScorerMissingException extends RuntimeException {
+    private static final long serialVersionUID = 13589668547630427L;
+
+    public ScorerMissingException(String s) {
+      super(s);
+    }
+  }
+
+  public static String getEvalSummary(String evalScript, String goldFile, String predictFile) throws IOException {
+    File evalFile = new File(evalScript);
+    if (!evalFile.exists()) {
+      throw new ScorerMissingException(evalScript);
+    }
     ProcessBuilder process = new ProcessBuilder(evalScript, "all", goldFile, predictFile, "none");
     StringOutputStream errSos = new StringOutputStream();
     StringOutputStream outSos = new StringOutputStream();

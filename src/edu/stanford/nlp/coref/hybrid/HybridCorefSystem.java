@@ -185,10 +185,16 @@ public class HybridCorefSystem implements CorefAlgorithm {
 
     // scoring
     if (HybridCorefProperties.doScore(props)) {
-      String summary = CorefScorer.getEvalSummary(CorefProperties.getScorerPath(props), goldOutput, beforeCorefOutput);
+      String scorerPath = CorefProperties.getScorerPath(props);
+      String summary;
+      try {
+        summary = CorefScorer.getEvalSummary(scorerPath, goldOutput, beforeCorefOutput);
+      } catch (CorefScorer.ScorerMissingException e) {
+        throw new RuntimeException("Missing scorer!  Properties were:\n" + props);
+      }
       CorefScorer.printScoreSummary(summary, logger, false);
 
-      summary = CorefScorer.getEvalSummary(CorefProperties.getScorerPath(props), goldOutput, afterCorefOutput);
+      summary = CorefScorer.getEvalSummary(scorerPath, goldOutput, afterCorefOutput);
       CorefScorer.printScoreSummary(summary, logger, true);
       CorefScorer.printFinalConllScore(summary, logger);
     }
