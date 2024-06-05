@@ -285,7 +285,7 @@ public class EnglishGrammaticalStructureTest {
                 "aux(excluded-7, will-5)\n" +
                 "auxpass(excluded-7, be-6)\n" + "root(ROOT-0, excluded-7)\n",
         "advmod(excluded-2, Also-1)\n" + "root(ROOT-0, excluded-2)\n" +
-                "aux(be-4, will-3)\n" +     // should really be aux(excluded-2, will-3) but impossible at present without reconstructing topicalized VP semantic head
+                "aux(excluded-2, will-3)\n" +
                 "auxpass(excluded-2, be-4)\n" +
                 "nsubjpass(excluded-2, investments-5)\n" +
                 "prep(investments-5, in-6)\n" +
