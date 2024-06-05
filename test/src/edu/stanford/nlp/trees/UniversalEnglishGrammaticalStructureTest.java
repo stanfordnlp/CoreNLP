@@ -580,7 +580,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
           "( (SINV (ADVP (RB Also)) (VP (VBN excluded)) (VP (MD will) (VP (VB be))) (NP (NP (NNS investments)) (PP (IN in) (NP (NNP South) (NNP Africa)))) (. .)))",
           "advmod(excluded-2, Also-1)\n" +
            "root(ROOT-0, excluded-2)\n" +
-           "aux(be-4, will-3)\n" + // should really be aux(excluded-2, will-3) but impossible at present without reconstructing topicalized VP semantic head
+           "aux(excluded-2, will-3)\n" +
            "aux:pass(excluded-2, be-4)\n" +
            "nsubj:pass(excluded-2, investments-5)\n" +
            "case(Africa-8, in-6)\n" +

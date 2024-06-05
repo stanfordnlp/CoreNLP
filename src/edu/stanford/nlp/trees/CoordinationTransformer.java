@@ -164,7 +164,10 @@ public class CoordinationTransformer implements TreeTransformer  {
     if (VERBOSE) {
       debugLine("After rearrangeNowThat:           ", t);
     }
-
+    t = mergeYodaVerbs(t);
+    if (VERBOSE) {
+      debugLine("After mergeYodaVerbs:             ", t);
+    }
     return t;
   }
 
@@ -181,6 +184,19 @@ public class CoordinationTransformer implements TreeTransformer  {
     return Tsurgeon.processPattern(rearrangeNowThatTregex, rearrangeNowThatTsurgeon, t);
   }
 
+
+  private static final TregexPattern mergeYodaVerbsTregex =
+    TregexPattern.compile("VP=home < VBN=vbn $+ (VP=willbe <... {(__=will < will|have|has) ; (VP < (__=be << be|been))})");
+
+  private static final TsurgeonPattern mergeYodaVerbsTsurgeon =
+    Tsurgeon.parseOperation("[createSubtree VP vbn] [move will >-1 home] [move be >-1 home] [prune willbe]");
+
+  private static Tree mergeYodaVerbs(Tree t) {
+    if (t == null) {
+      return t;
+    }
+    return Tsurgeon.processPattern(mergeYodaVerbsTregex, mergeYodaVerbsTsurgeon, t);
+  }
 
   private static final TregexPattern changeSbarToPPTregex =
     TregexPattern.compile("NP < (NP $++ (SBAR=sbar < (IN < /^(?i:after|before|until|since|during)$/ $++ S)))");
