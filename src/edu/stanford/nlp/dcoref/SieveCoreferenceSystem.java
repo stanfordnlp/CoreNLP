@@ -347,13 +347,13 @@ public class SieveCoreferenceSystem  {
     MentionExtractor mentionExtractor;
     if (props.containsKey(Constants.MUC_PROP)){
       mentionExtractor = new MUCMentionExtractor(corefSystem.dictionaries, props,
-          corefSystem.semantics, corefSystem.singletonPredictor);
+                                                 corefSystem.semantics, corefSystem.singletonPredictor);
     } else if(props.containsKey(Constants.ACE2004_PROP) || props.containsKey(Constants.ACE2005_PROP)) {
       mentionExtractor = new ACEMentionExtractor(corefSystem.dictionaries, props,
-          corefSystem.semantics, corefSystem.singletonPredictor);
+                                                 corefSystem.semantics, corefSystem.singletonPredictor);
     } else if (props.containsKey(Constants.CONLL2011_PROP)) {
       mentionExtractor = new CoNLLMentionExtractor(corefSystem.dictionaries, props,
-          corefSystem.semantics, corefSystem.singletonPredictor);
+                                                   corefSystem.semantics, corefSystem.singletonPredictor);
     } else {
       throw new RuntimeException("No input file specified!");
     }

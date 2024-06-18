@@ -49,15 +49,14 @@ public class DcorefBenchmarkSlowITest {
     System.err.println("Current dir using System:" +currentDir);
 
     String[] corefArgs = { "-props", "edu/stanford/nlp/dcoref/coref.properties",
-            '-' + Constants.LOG_PROP, baseLogFile,
-            '-' + Constants.CONLL_OUTPUT_PROP, WORK_DIR_FILE.toString() };
+                           '-' + Constants.LOG_PROP, baseLogFile,
+                           '-' + Constants.CONLL_OUTPUT_PROP, WORK_DIR_FILE.toString() };
 
     Properties props = StringUtils.argsToProperties(corefArgs);
-    System.err.println("Running dcoref with properties:");
-    System.err.println(props);
+    System.err.println("Running dcoref with properties:\n" + props);
 
     String logFile = SieveCoreferenceSystem.initializeAndRunCoref(props);
-    System.err.println(logFile);
+    System.err.println("LOG FILE: " + logFile);
 
     String actualResults = IOUtils.slurpFile(logFile);
     return actualResults;
