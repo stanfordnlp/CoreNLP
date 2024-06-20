@@ -12,12 +12,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.openjdk.jmh.annotations.*;
 
 /** @author KellenSunderland (public domain contribution) */
+@State(Scope.Benchmark)
 public class ChineseStringUtilsTest extends TestCase {
 
   private static final Integer SEGMENT_ATTEMPTS_PER_THREAD = 100;
-  private static final Integer THREADS = 8;
+  @Param({"2", "4", "8", "16", "32", "64", "128"})
+  private static Integer THREADS;
 
   /**
    * A small test with stubbed data that is meant to expose multithreading initialization errors
@@ -29,6 +32,7 @@ public class ChineseStringUtilsTest extends TestCase {
    * @throws Exception Various exceptions including Interrupted, all of which should be handled by
    *                   failing the test.
    */
+  @Benchmark
   public void testMultithreadedCombineSegmentedSentence() throws Exception {
     SeqClassifierFlags flags = createTestFlags();
     List<CoreLabel> labels = createTestTokens();

@@ -2,13 +2,21 @@
 // Stanford CoreNLP build specification for 
 // Gradle.
 //
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'application'
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'application'
+    id "me.champeau.jmh" version "0.7.2"
+}
+
+// Define repositories
+repositories {
+    mavenCentral()
+}
 
 // Gradle java plugin
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 21
+targetCompatibility = 21
 compileJava.options.encoding = 'UTF-8'
 
 version = '4.5.8'
@@ -21,24 +29,21 @@ jar {
     manifest {
         attributes 'Implementation-Title': 'Stanford CoreNLP',
                    'Implementation-Version': version,
-		   'Main-Class': 'edu.stanford.nlp.pipeline.StanfordCoreNLP'
-    }
-}
-
-uploadArchives {
-    repositories {
-       flatDir {
-           dirs 'repos'
-       }
+                   'Main-Class': 'edu.stanford.nlp.pipeline.StanfordCoreNLP'
     }
 }
 
 // Add src-extra build target
 sourceSets {
-  main {
-    java.srcDirs = ['src/']
-    resources.srcDirs = ['src/']
-  }
+    main {
+        java.srcDirs = ['src/']
+        resources.srcDirs = ['src/']
+    }
+    jmh {
+        java {
+            srcDir 'test/src'
+        }
+    }
 }
 
 task listDeps {
@@ -48,22 +53,42 @@ task listDeps {
 }
 
 dependencies {
-  compile fileTree(dir: 'lib', include: '*.jar')
-  testCompile fileTree(dir: 'liblocal', include: '*.jar')
+    implementation fileTree(dir: 'lib', include: '*.jar')
+    testImplementation fileTree(dir: 'liblocal', include: '*.jar')
+    
+    // JMH dependencies
+    jmh 'org.openjdk.jmh:jmh-core:1.35'
+    jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.35'
+    jmh sourceSets.main.output
 }
 
 // Eclipse plugin setup
 eclipse {
-  classpath {
-    defaultOutputDir = file('bin/')
-    file {
-      beforeMerged { classpath ->
-        classpath.entries.removeAll { entry -> entry.kind == 'lib' }
-      }
+    classpath {
+        defaultOutputDir = file('bin/')
+        file {
+            beforeMerged { classpath ->
+                classpath.entries.removeAll { entry -> entry.kind == 'lib' }
+            }
+        }
     }
-  }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.2'
+// JMH configuration
+jmh {
+    includes = ['.*']
+    benchmarkMode = ['avgt', 'thrpt']
+    fork = 1
+    timeUnit = 'ms'
+    resultFormat = 'CSV'
+    resultsFile = file("jmh-results.csv")
+    humanOutputFile = file("jmh-results.txt")
+    failOnError = true
+    warmupIterations = 1
 }
+
+
+wrapper {
+    gradleVersion = '8.6'
+}
+
