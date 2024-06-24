@@ -28,7 +28,7 @@ public class GermanTokenizerPostProcessor extends CoreLabelProcessor {
       tok.containsKey(CoreAnnotations.AfterAnnotation.class) && tok.after().equals("");
 
   public HashSet<String> ordinalPredictingWords = new HashSet<>(Arrays.asList(
-      "Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember",
+      "Januar","Jänner","Februar","Feber","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember",
       "Jahrhundert"));
 
   public HashSet<String> germanAbbreviations = new HashSet<>(Arrays.asList(
