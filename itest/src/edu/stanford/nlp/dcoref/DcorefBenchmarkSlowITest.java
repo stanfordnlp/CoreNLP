@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -128,6 +129,14 @@ public class DcorefBenchmarkSlowITest {
       if (m7.matches()) {
         results.setCount(CONLL_SCORE, Double.parseDouble(m7.group(1)));
       }
+    }
+
+    if (results.keySet().isEmpty()) {
+      List<String> lines = StringUtils.split(resultsString, "\\R");
+      int start = Math.max(0, lines.size() - 20);
+      lines = lines.subList(start, lines.size() - start);
+      String tail = StringUtils.join(lines, "\n");
+      throw new RuntimeException("Coref output did not have any results in it!  The end of the log is as follows:\n" + tail);
     }
 
     return results;
