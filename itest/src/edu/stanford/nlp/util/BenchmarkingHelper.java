@@ -22,9 +22,9 @@ public class BenchmarkingHelper {
   }
 
   public static void benchmarkResults(Counter<String> results,
-                               Counter<String> lowResults,
-                               Counter<String> highResults,
-                               Counter<String> expectedResults) {
+                                      Counter<String> lowResults,
+                                      Counter<String> highResults,
+                                      Counter<String> expectedResults) {
     if (results.keySet().isEmpty()) {
       fail("There are no results to benchmark!");
     }
