@@ -134,7 +134,7 @@ public class DcorefBenchmarkSlowITest {
     if (results.keySet().isEmpty()) {
       List<String> lines = StringUtils.split(resultsString, "\\R");
       int start = Math.max(0, lines.size() - 20);
-      lines = lines.subList(start, lines.size() - start);
+      lines = lines.subList(start, lines.size());
       String tail = StringUtils.join(lines, "\n");
       throw new RuntimeException("Coref output did not have any results in it!  The end of the log is as follows:\n" + tail);
     }
