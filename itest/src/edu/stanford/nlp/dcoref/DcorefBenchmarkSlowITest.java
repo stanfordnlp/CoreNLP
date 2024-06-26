@@ -32,7 +32,7 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public class DcorefBenchmarkSlowITest {
 
-  private static String runCorefTest(boolean deleteOnExit) throws Exception {
+  private static Counter<String> runCorefTest(boolean deleteOnExit) throws Exception {
     final File WORK_DIR_FILE = File.createTempFile("DcorefBenchmarkTest", "");
     if ( ! (WORK_DIR_FILE.delete() && WORK_DIR_FILE.mkdir())) {
       throw new RuntimeIOException("Couldn't create temp directory " + WORK_DIR_FILE);
@@ -60,7 +60,7 @@ public class DcorefBenchmarkSlowITest {
     System.err.println("LOG FILE: " + logFile);
 
     String actualResults = IOUtils.slurpFile(logFile);
-    return actualResults;
+    return getCorefResults(actualResults);
   }
 
 
@@ -145,7 +145,7 @@ public class DcorefBenchmarkSlowITest {
 
   @Test
   public void testDcoref() throws Exception {
-    Counter<String> results = getCorefResults(runCorefTest(true));
+    Counter<String> results = runCorefTest(true);
 
     Counter<String> lowResults = new ClassicCounter<>();
     Counter<String> highResults = new ClassicCounter<>();
