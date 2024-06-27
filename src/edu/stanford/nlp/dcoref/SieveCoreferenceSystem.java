@@ -384,11 +384,7 @@ public class SieveCoreferenceSystem  {
       corefSystem.optimizeSieveOrdering(mentionExtractor, props, timeStamp);
     }
 
-    try {
-      runAndScoreCoref(corefSystem, mentionExtractor, props, timeStamp);
-    } catch (Exception ex) {
-      logger.log(Level.SEVERE, "ERROR in running coreference", ex);
-    }
+    runAndScoreCoref(corefSystem, mentionExtractor, props, timeStamp);
     logger.info("done");
     String endTimeStamp = Calendar.getInstance().getTime().toString().replaceAll("\\s", "-");
     logger.fine(endTimeStamp);
