@@ -55,7 +55,7 @@ public class AddDep extends SsurgeonEdit {
     this.relation = relation;
     this.govNodeName = govNodeName;
     this.position = position;
-    this.weight = 0;
+    this.weight = weight;
   }
 
   /**
@@ -83,8 +83,10 @@ public class AddDep extends SsurgeonEdit {
       buf.write("\"\t");
     }
 
-    buf.write(Ssurgeon.WEIGHT_ARG);buf.write(" ");
-    buf.write(String.valueOf(weight));
+    if (this.weight != 0.0) {
+      buf.write(Ssurgeon.WEIGHT_ARG);buf.write(" ");
+      buf.write(String.valueOf(weight));
+    }
     return buf.toString();
   }
 
