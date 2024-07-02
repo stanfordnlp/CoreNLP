@@ -17,6 +17,21 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  * stuck to each of the words.  We can separate that out by using two
  * regex, one which matches the " in a group, one which matches the
  * rest of the word without the "
+ * <br>
+ * Aside from the text and the dependency, the new node is rather bare bones.
+ * Adding the -name argument allows for specifying a comma-separate list
+ * of names which can be used to insert the new nodes into the SemgrexMatcher
+ * as named nodes.  This will allow for further edits in the same edit step.
+ * This list should be 0 indexed.
+ * <br>
+ * For example, this will split "foobar" and put the pos ADJ on the first word
+ * <pre>
+ * semgrex:
+ *   {word:/foobar/}=split
+ * ssurgeon:
+ *   splitWord -node split -regex ^(foo)bar$ -regex ^foo(bar)$ -reln dep -headIndex 1 -name 0=asdf
+ *   editNode -node asdf -pos ADJ
+ * </pre>
  *
  * @author John Bauer
  */
@@ -27,8 +42,9 @@ public class SplitWord extends SsurgeonEdit {
   final List<Pattern> nodeRegex;
   final int headIndex;
   final GrammaticalRelation relation;
+  final Map<Integer, String> nodeNames;
 
-  public SplitWord(String node, List<String> nodeRegex, Integer headIndex, GrammaticalRelation relation) {
+  public SplitWord(String node, List<String> nodeRegex, Integer headIndex, GrammaticalRelation relation, String nodeNames) {
     if (node == null) {
       throw new SsurgeonParseException("SplitWord expected -node with the name of the matched node to split");
     }
@@ -54,6 +70,24 @@ public class SplitWord extends SsurgeonEdit {
       throw new SsurgeonParseException("SplitWord expected a -reln to represent the dependency to use for the new words");
     }
     this.relation = relation;
+
+    if (nodeNames != null) {
+      String[] namePieces = nodeNames.split(",");
+      this.nodeNames = new HashMap<>();
+      for (String namePiece : namePieces) {
+        String[] pieces = namePiece.split("=", 2);
+        if (pieces.length < 2) {
+          throw new SsurgeonParseException("SplitWord got a -name parameter which did not have a number for one of the names.  Should look like 0=foo,1=bar");
+        }
+        int idx = Integer.valueOf(pieces[0]);
+        if (idx >= this.nodeRegex.size()) {
+          throw new SsurgeonParseException("SplitWord got an index in -name which was larger than the largest possible split piece, " + idx + " (this is 0-indexed)");
+        }
+        this.nodeNames.put(idx, pieces[1]);
+      }
+    } else {
+      this.nodeNames = Collections.emptyMap();
+    }
   }
 
   @Override
@@ -114,8 +148,12 @@ public class SplitWord extends SsurgeonEdit {
     matchedNode.setValue(words.get(headIndex));
 
     for (int i = 0; i < nodeRegex.size(); ++i) {
-      if (i == headIndex)
+      if (i == headIndex) {
+        if (nodeNames.containsKey(i)) {
+          sm.putNode(nodeNames.get(i), matchedNode);
+        }
         continue;
+      }
 
       // otherwise, add a word with the appropriate index,
       // then connect it to matchedNode
@@ -129,7 +167,12 @@ public class SplitWord extends SsurgeonEdit {
 
       sg.addVertex(newNode);
       sg.addEdge(matchedNode, newNode, relation, 0.0, false);
+
+      if (nodeNames.containsKey(i)) {
+        sm.putNode(nodeNames.get(i), newNode);
+      }
     }
+
     return true;
   }
 }

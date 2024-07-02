@@ -2007,6 +2007,44 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test splitWord, which should split a word into pieces based on regex matches, with the head at position 1
+   */
+  @Test
+  public void readXMLSplitTwoWordsNamed() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Test splitting a word into two pieces with the head at the start</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/foobar/}=split") + "</semgrex>",
+                             "    <edit-list>splitWord -node split -regex ^(foo)bar$ -regex ^foo(bar)$ -reln dep -headIndex 1 -name 0=asdf</edit-list>",
+                             "    <edit-list>editNode -node asdf -pos ADJ</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[example-3 det> the-1 amod> foobar-2]");
+    SemanticGraph newSg = pattern.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[example-4 det> the-1 amod> [bar-3 dep> foo-2]]");
+    assertEquals(newSg, expected);
+
+    boolean found = false;
+    for (IndexedWord word : newSg.vertexSet()) {
+      if (word.index() == 2) {
+        assertEquals("ADJ", word.get(CoreAnnotations.PartOfSpeechAnnotation.class));
+        found = true;
+      } else {
+        assertEquals(null, word.get(CoreAnnotations.PartOfSpeechAnnotation.class));
+      }
+    }
+    assertTrue(found);
+  }
+
+  /**
    * Test splitWord, which should split a word into pieces based on regex matches, with three pieces
    */
   @Test

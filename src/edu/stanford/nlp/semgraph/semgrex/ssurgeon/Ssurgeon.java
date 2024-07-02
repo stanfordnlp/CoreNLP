@@ -625,7 +625,7 @@ public class Ssurgeon  {
         return new CombineMWT(argsBox.nodes, argsBox.annotations.get("word"));
       } else if (command.equalsIgnoreCase(SplitWord.LABEL)) {
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
-        return new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln);
+        return new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln, argsBox.name);
       }
       throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: command '"+command+"' is not supported");
     } catch (SsurgeonParseException e) {
