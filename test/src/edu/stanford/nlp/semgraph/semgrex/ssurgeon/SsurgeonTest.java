@@ -1955,6 +1955,84 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test splitWord, which should split a word into pieces based on regex matches, with the head at position 0
+   */
+  @Test
+  public void readXMLSplitTwoWords() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Test splitting a word into two pieces with the head at the start</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/foobar/}=split") + "</semgrex>",
+                             "    <edit-list>splitWord -node split -regex ^(foo)bar$ -regex ^foo(bar)$ -reln dep -headIndex 0</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[example-3 det> the-1 amod> foobar-2]");
+    SemanticGraph newSg = pattern.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[example-4 det> the-1 amod> [foo-2 dep> bar-3]]");
+    assertEquals(newSg, expected);
+  }
+
+  /**
+   * Test splitWord, which should split a word into pieces based on regex matches, with the head at position 1
+   */
+  @Test
+  public void readXMLSplitTwoWordsAfter() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Test splitting a word into two pieces with the head at the start</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/foobar/}=split") + "</semgrex>",
+                             "    <edit-list>splitWord -node split -regex ^(foo)bar$ -regex ^foo(bar)$ -reln dep -headIndex 1</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[example-3 det> the-1 amod> foobar-2]");
+    SemanticGraph newSg = pattern.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[example-4 det> the-1 amod> [bar-3 dep> foo-2]]");
+    assertEquals(newSg, expected);
+  }
+
+  /**
+   * Test splitWord, which should split a word into pieces based on regex matches, with three pieces
+   */
+  @Test
+  public void readXMLSplitThreeWords() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Test splitting a word into two pieces with the head at the start</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/foobarbaz/}=split") + "</semgrex>",
+                             "    <edit-list>splitWord -node split -regex ^(foo)barbaz$ -regex ^foo(bar)baz$ -regex ^foobar(baz)$ -reln dep -headIndex 1</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[example-3 det> the-1 amod> foobarbaz-2]");
+    SemanticGraph newSg = pattern.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[example-5 det> the-1 amod> [bar-3 dep> foo-2 dep>baz-4]]");
+    assertEquals(newSg, expected);
+  }
+
+  /**
    * Simple test of an Ssurgeon edit script.  This instances a simple semantic graph,
    * a semgrex pattern, and then the resulting actions over the named nodes in the
    * semgrex match.

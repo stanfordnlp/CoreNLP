@@ -85,6 +85,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code editNode -node node ...attributes...}
  * <li> {@code lemmatize -node node}
  * <li> {@code combineMWT -node node -word word}
+ * <li> {@code splitWord -node node -headIndex idx -reln depType -regex w1 -regex w2 ...}
  * <li> {@code setRoots n1 (n2 n3 ...)}
  * <li> {@code mergeNodes n1 n2}
  * <li> {@code killAllIncomingEdges -node node}
@@ -145,6 +146,12 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code combineMWT} will add MWT attributes to a sequence of two or more words.
  * {@code -node} (repeated) is the nodes to edit.
  * {@code -word} is the optional text to use for the new MWT.  If not set, the words will be concatenated.
+ *</p><p>
+ * {@code splitWord} will split a single word into multiple pieces from the text of the current word
+ * {@code -node} is the node to split.
+ * {@code -headIndex} is the index (counting from 0) of the word piece to make the head.
+ * {@code -reln} is the name of the dependency type to use.  pieces other than the head will connect using this relation
+ * {@code -regex} regex must match the matched node.  all matching groups will be concatenated to form a new word.  need at least 2 to split a word
  *</p><p>
  * {@code setRoots} sets the roots of the sentence to a new root.
  * {@code n1, n2, ...} are the names of the nodes from the Semgrex to use as the root(s).
@@ -397,9 +404,12 @@ public class Ssurgeon  {
   public static final String DEP_NODENAME_ARG = "-dep";
   public static final String EDGE_NAME_ARG = "-edge";
   public static final String NODENAME_ARG = "-node";
+  public static final String REGEX_ARG = "-regex";
   public static final String RELN_ARG = "-reln";
   public static final String NODE_PROTO_ARG = "-nodearg";
   public static final String WEIGHT_ARG = "-weight";
+  public static final String HEAD_INDEX_ARG = "-headIndex";
+  public static final String HEAD_INDEX_LOWER_ARG = "-headindex";
   public static final String NAME_ARG = "-name";
   public static final String POSITION_ARG = "-position";
   public static final String UPDATE_MORPHO_FEATURES = "-updateMorphoFeatures";
@@ -420,6 +430,8 @@ public class Ssurgeon  {
 
     public List<String> nodes = new ArrayList<>();
 
+    public List<String> regex = new ArrayList<>();
+
     // below are string representations of the intended values
     public String nodeString = null;
 
@@ -430,6 +442,8 @@ public class Ssurgeon  {
     public String position = null;
 
     public String updateMorphoFeatures = null;
+
+    public Integer headIndex = null;
 
     public Map<String, String> annotations = new TreeMap<>();
   }
@@ -489,11 +503,18 @@ public class Ssurgeon  {
         case NODENAME_ARG:
           argsBox.nodes.add(argsValue);
           break;
+        case REGEX_ARG:
+          argsBox.regex.add(argsValue);
+          break;
         case NODE_PROTO_ARG:
           argsBox.nodeString = argsValue;
           break;
         case WEIGHT_ARG:
           argsBox.weight = Double.valueOf(argsValue);
+          break;
+        case HEAD_INDEX_ARG:
+        case HEAD_INDEX_LOWER_ARG:
+          argsBox.headIndex = Integer.valueOf(argsValue);
           break;
         case NAME_ARG:
           argsBox.name = argsValue;
@@ -602,6 +623,9 @@ public class Ssurgeon  {
         return new KillAllIncomingEdges(argsBox.nodes.get(0));
       } else if (command.equalsIgnoreCase(CombineMWT.LABEL)) {
         return new CombineMWT(argsBox.nodes, argsBox.annotations.get("word"));
+      } else if (command.equalsIgnoreCase(SplitWord.LABEL)) {
+        GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
+        return new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln);
       }
       throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: command '"+command+"' is not supported");
     } catch (SsurgeonParseException e) {
