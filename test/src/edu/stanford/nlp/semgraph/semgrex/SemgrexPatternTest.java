@@ -11,7 +11,6 @@ import junit.framework.TestCase;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.patterns.PatternsAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.*;
@@ -138,14 +137,21 @@ public class SemgrexPatternTest extends TestCase {
       throw new RuntimeException("failed!");
   }
 
+  private static class PatternLabelAnnotation implements CoreAnnotation<String> {
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
   public void testEnv() throws IOException {
     SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass>Hughes/NNP auxpass>was/VBD nmod:to>Gracia/NNP]");
-    h.getFirstRoot().set(PatternsAnnotations.PatternLabel1.class,"YES");
+    h.getFirstRoot().set(PatternLabelAnnotation.class,"YES");
     //SemanticGraph t = SemanticGraph
     //  .valueOf("[loved/VBD\nnsubj:Hughes/NNP\ndobj:[wife/NN poss:his/PRP$ appos:Gracia/NNP]\nconj_and:[obsessed/JJ\ncop:was/VBD\nadvmod:absolutely/RB\nprep_with:[Elicia/NN poss:his/PRP$ amod:little/JJ nn:daughter/NN]]]");
     String macro = "macro WORD = married";
     Env env = new Env();
-    env.bind("pattern1",PatternsAnnotations.PatternLabel1.class);
+    env.bind("pattern1",PatternLabelAnnotation.class);
     String pattern = "({pattern1:YES}=parent >>nsubjpass {}=node)";
     List<SemgrexPattern> pats = SemgrexBatchParser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)), env);
     SemgrexPattern pat3 = pats.get(0);
