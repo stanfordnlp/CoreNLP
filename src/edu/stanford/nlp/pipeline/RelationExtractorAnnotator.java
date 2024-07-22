@@ -1,5 +1,4 @@
 package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -20,18 +19,19 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Annotating relations between entities produced by the NER system. 
- * @author Sonal Gupta (sonalg@stanford.edu)
  *
+ * @author Sonal Gupta (sonalg@stanford.edu)
  */
 
 public class RelationExtractorAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(RelationExtractorAnnotator.class);
-  MachineReading mr;
+  private static final Redwood.RedwoodChannels log = Redwood.channels(RelationExtractorAnnotator.class);
+  private final MachineReading mr;
   private static boolean verbose = false;
 
   static boolean getVerbose(Properties props) {
@@ -128,8 +128,8 @@ public class RelationExtractorAnnotator implements Annotator  {
     )));
   }
 
-  public static void main(String[] args){
-    try{
+  public static void main(String[] args) {
+    try {
       Properties props = StringUtils.argsToProperties(args);
       props.setProperty("annotators", "tokenize,ssplit,lemma,pos,parse,ner");
       StanfordCoreNLP pipeline = new StanfordCoreNLP();
