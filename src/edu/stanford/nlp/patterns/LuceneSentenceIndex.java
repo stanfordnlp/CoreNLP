@@ -6,7 +6,6 @@ import edu.stanford.nlp.patterns.surface.Token;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.LuceneFieldType;
 import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.ArgumentParser.Option;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -18,7 +17,6 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 
 import java.io.*;
 

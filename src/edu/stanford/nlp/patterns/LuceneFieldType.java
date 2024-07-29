@@ -1,4 +1,4 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.patterns;
 
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.index.IndexOptions;

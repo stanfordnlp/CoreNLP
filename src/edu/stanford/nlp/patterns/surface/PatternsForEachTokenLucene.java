@@ -4,7 +4,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.ArgumentParser.Option;
-import edu.stanford.nlp.util.LuceneFieldType;
+import edu.stanford.nlp.patterns.LuceneFieldType;
 import edu.stanford.nlp.util.logging.Redwood;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
@@ -16,7 +16,6 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.NIOFSDirectory;
-import org.apache.lucene.util.Version;
 
 import java.io.*;
 import java.util.*;

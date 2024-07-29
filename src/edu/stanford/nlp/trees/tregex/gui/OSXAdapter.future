@@ -1,0 +1,127 @@
+package edu.stanford.nlp.trees.tregex.gui;
+
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowListener;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+
+/**
+ * Class to do macOS-specific things for TregexGUI. This was initially written to use the (pre-2014, OS X)
+ * {@code com.apple.eawt.*} library (AppleJavaExtensions.jar), but now uses the Java 9+ methods in
+ * the {@code java.awt.Desktop} class. However, rather than calling them directly, we do things via
+ * reflection, so that the CoreNLP code still compiles and runs under Java 8 (except for this macOS-specific
+ * code for {@code TregexGUI}.
+ *
+ * @author rafferty
+ * @author Christopher Manning
+ */
+public class OSXAdapter {
+
+  private static OSXAdapter adapter;
+  private static Desktop desktop;
+  private static TregexGUI mainApp;
+  
+  private OSXAdapter (TregexGUI inApp) {
+    mainApp = inApp;
+  }
+  
+  // implemented handler methods.  These are basically hooks into existing 
+  // functionality from the main app, as if it came over from another platform.
+  public static void handleAbout() {
+    if (mainApp != null) {
+      mainApp.about();
+    } else {
+      throw new IllegalStateException("handleAbout: TregexGUI instance detached from listener");
+    }
+  }
+
+  public static void handlePreferences() {
+    if (mainApp != null) {
+      mainApp.doPreferences();
+    } else {
+      throw new IllegalStateException("handlePreferences: TregexGUI instance detached from listener");
+    }
+  }
+
+  public static void handleQuit() {
+    if (mainApp != null) {
+      /*  
+      / You MUST setHandled(false) if you want to delay or cancel the quit.
+      / This is important for cross-platform development -- have a universal quit
+      / routine that chooses whether or not to quit, so the functionality is identical
+      / on all platforms.  This example simply cancels the AppleEvent-based quit and
+      / defers to that universal method.
+      */
+      TregexGUI.doQuit();
+    } else {
+      throw new IllegalStateException("handleQuit: TregexGUI instance detached from listener");
+    }
+  }
+  
+  
+  /** The main entry-point for this class. This is the only method
+   *  that needs to be called at runtime, and it can easily be done using reflection.
+   */
+  public static void registerMacOSXApplication(TregexGUI inApp) {
+    System.err.println("The registerMacOSXApplication method was called!!!");
+    try {
+    desktop = Desktop.getDesktop();
+
+    Class<?> aboutEventInterface = Class.forName("java.awt.desktop.AboutEvent");
+    Object aboutEvent = aboutEventInterface.getDeclaredConstructor().newInstance();
+    Class<?> aboutHandler = Class.forName("java.awt.desktop.AboutHandler");
+    Object aboutHandlerInstance = Proxy.newProxyInstance(aboutHandler.getClassLoader(), new Class<?>[]{aboutHandler}, new InvocationHandler() {
+      @Override
+      public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+        //Handle the invocations
+        if (method.getName().equals("handleAbout")) {
+          OSXAdapter.handleAbout();
+          return null;
+        }
+        else return null;
+      }
+    });
+    Method setAboutMethod = Desktop.class.getMethod("setAboutHandler", aboutHandler);
+    setAboutMethod.invoke(aboutHandlerInstance, aboutHandlerInstance);
+    } catch (ClassNotFoundException cnfe) {
+      // ignore
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
+    } catch (InstantiationException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      e.printStackTrace();
+    }
+    /*
+    WindowListener windowListener = new WindowAdapter() { };
+    Object oo = new Object();
+    windowListener.windowActivated(oo);
+
+    Object x = new Object();
+    desktop.setPreferencesHandler(x);
+
+    // desktop.setAboutHandler(e -> handleAbout());
+    Class<?> aboutEvent = Proxy.newProxyInstance(OSXAdapter.class.getClassLoader(),
+            new Class[] { Foo.class },
+            handler);
+
+    Class<?>[] defArgs = { Class.forName("java.awt.desktop.AboutHandler")};
+    Method registerMethod = osxAdapter.getDeclaredMethod("registerMacOSXApplication", defArgs);
+    if (registerMethod != null) {
+      Object[] args = { this };
+      registerMethod.invoke(osxAdapter, args);
+    }
+
+    desktop.setPreferencesHandler(e -> handlePreferences());
+    desktop.setQuitHandler((e,r) -> handleQuit());
+    */
+  }
+
+}
