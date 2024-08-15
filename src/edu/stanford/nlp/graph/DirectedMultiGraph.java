@@ -571,20 +571,22 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     }
 
     private void primeIterator() {
-      if (edgeIterator != null && edgeIterator.hasNext()) {
-        hasNext = true;  // technically, we shouldn't need to put this here, but let's be safe
-      } else if (connectionIterator != null && connectionIterator.hasNext()) {
-        Map.Entry<V, List<E>> nextConnection = connectionIterator.next();
-        edgeIterator = nextConnection.getValue().iterator();
-        currentTarget = nextConnection.getKey();
-        primeIterator();
-      } else if (vertexIterator != null && vertexIterator.hasNext()) {
-        Map.Entry<V, Map<V, List<E>>> nextVertex = vertexIterator.next();
-        connectionIterator = nextVertex.getValue().entrySet().iterator();
-        currentSource = nextVertex.getKey();
-        primeIterator();
-      } else {
-        hasNext = false;
+      while (true) {
+        if (edgeIterator != null && edgeIterator.hasNext()) {
+          hasNext = true;  // technically, we shouldn't need to put this here, but let's be safe
+          return;
+        } else if (connectionIterator != null && connectionIterator.hasNext()) {
+          Map.Entry<V, List<E>> nextConnection = connectionIterator.next();
+          edgeIterator = nextConnection.getValue().iterator();
+          currentTarget = nextConnection.getKey();
+        } else if (vertexIterator != null && vertexIterator.hasNext()) {
+          Map.Entry<V, Map<V, List<E>>> nextVertex = vertexIterator.next();
+          connectionIterator = nextVertex.getValue().entrySet().iterator();
+          currentSource = nextVertex.getKey();
+        } else {
+          hasNext = false;
+          return;
+        }
       }
     }
 
