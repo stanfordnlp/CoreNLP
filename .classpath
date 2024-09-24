@@ -20,7 +20,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/joda-time.jar" sourcepath="libsrc/joda-time-2.10.5-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jollyday-0.4.9.jar" sourcepath="libsrc/jollyday-0.4.9-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang3-3.1.jar" sourcepath="libsrc/commons-lang3-3.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/protobuf-java-3.19.6.jar" sourcepath="libsrc/protobuf-java-3.19.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/protobuf-java-3.25.5.jar" sourcepath="libsrc/protobuf-java-3.25.5-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javax.json.jar" sourcepath="libsrc/javax.json-api-1.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lucene-core-7.5.0.jar" sourcepath="libsrc/lucene-core-7.5.0-sources.jar"/>
