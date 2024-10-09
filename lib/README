@@ -377,13 +377,13 @@ LAST UPDATE: 2024-10-08
 LAST UPDATE BY: John Bauer. Originally added by Sonal Gupta
 
 -----------------------------------------------------------------------
-lucene-analyzers-common-7.5.0.jar
-lucene-core-7.5.0.jar
-lucene-demo-7.5.0.jar
-lucene-queryparser-7.5.0.jar
+lucene-analyzers-common-7.7.3.jar
+lucene-core-7.7.3.jar
+lucene-demo-7.7.3.jar
+lucene-queryparser-7.7.3.jar
 ORIGINAL JAR NAME: n/a
-VERSION: 7.5.0
-RELEASE DATE: 24 Sep 2018
+VERSION: 7.7.3
+RELEASE DATE: 2020-04-24
 SOURCE AVAILABLE: yes
 DESCRIPTION: "Apache Lucene is a high-performance, full-featured text
 search engine library written entirely in Java. It is a technology
@@ -393,8 +393,8 @@ in has version number, as before. Broken into several Jars in this version."
 URL: http://lucene.apache.org/
 USED BY: patterns.surface
 
-LAST UPDATE: 2018-11-11
-LAST UPDATE BY: Melvin Johnson Premkumar
+LAST UPDATE: 2024-10-08
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------
 slf4j-api.jar
