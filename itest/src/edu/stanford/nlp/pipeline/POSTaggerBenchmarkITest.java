@@ -75,7 +75,7 @@ public class POSTaggerBenchmarkITest extends TestCase {
   public void testGermanTestPOS()  throws IOException {
     runPOSTest("edu/stanford/nlp/models/pos-tagger/german-ud.tagger",
             String.format("format=TSV,wordColumn=1,tagColumn=3,%s/depparser/nn/models-4.0.0/data/clean/de_gsd-ud-test.conllu.clean", TestPaths.testHome()),
-            92.84);
+            94.5);
   }
 
   public void testSpanishDevPOS()  throws IOException {
@@ -100,7 +100,8 @@ public class POSTaggerBenchmarkITest extends TestCase {
     System.err.println(dataPath);
     System.err.println(testClassifier.tagAccuracy());
     System.err.println(expectedTokenAccuracy);
-    assertTrue(testClassifier.tagAccuracy() >= expectedTokenAccuracy);
+    assertTrue("Expected accuracy " + expectedTokenAccuracy + " but got " + testClassifier.tagAccuracy(),
+               testClassifier.tagAccuracy() >= expectedTokenAccuracy);
   }
 
 }
