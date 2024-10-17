@@ -537,6 +537,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
       log.info("Retagging with tagger model: " + op.testOptions.taggerSerializedFile);
       log.info("Known tags in the tagger model: " + tagger.tagSet());
       redoTags(binarizedTrees, tagger, nThreads);
+      log.info("Tags in training set: " + Trees.uniqueTags(binarizedTrees));
       retagTimer.done("Retagging");
     }
 

@@ -186,6 +186,27 @@ public class Trees {
     }
   }
 
+  public static Set<String> uniqueTags(List<Tree> trees) {
+    Set<String> allTags = new HashSet<>();
+    for (Tree tree : trees) {
+      uniqueTags(tree, allTags);
+    }
+    return allTags;
+  }
+
+  public static Set<String> uniqueTags(Tree tree) {
+    List<Label> labels = tree.preTerminalYield();
+    return uniqueTags(tree, new HashSet<>());
+  }
+
+  public static Set<String> uniqueTags(Tree tree, Set<String> tags) {
+    List<Label> labels = tree.preTerminalYield();
+    for (Label label : labels) {
+      tags.add(label.value());
+    }
+    return tags;
+  }
+
 
   /**
    * returns the labels of the leaves in a Tree in the order that they're found.
