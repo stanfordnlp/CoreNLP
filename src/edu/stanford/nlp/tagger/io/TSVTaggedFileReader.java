@@ -16,6 +16,8 @@ public class TSVTaggedFileReader implements TaggedFileReader {
   private final String filename;
   private final int wordColumn, tagColumn;
   private final boolean usesComments;
+  // if in a conllu file from UD used directly, might want to skip MWT
+  private final boolean skipMWT;
   private List<TaggedWord> next; // = null;
   private int linesRead; // = 0;
 
@@ -36,6 +38,7 @@ public class TSVTaggedFileReader implements TaggedFileReader {
     tagColumn = ((record.tagColumn == null) ?
                  DEFAULT_TAG_COLUMN : record.tagColumn);
     usesComments = record.usesComments;
+    skipMWT = record.skipMWT;
     primeNext();
   }
 
@@ -85,9 +88,11 @@ public class TSVTaggedFileReader implements TaggedFileReader {
           throw new IllegalArgumentException("File " + filename + " line #" +
                                              linesRead + " too short");
         }
-        String word = pieces[wordColumn];
-        String tag = pieces[tagColumn];
-        next.add(new TaggedWord(word, tag));
+        if (!(skipMWT && pieces[0].matches("[0-9]+-[0-9]+"))) {
+          String word = pieces[wordColumn];
+          String tag = pieces[tagColumn];
+          next.add(new TaggedWord(word, tag));
+        }
       }
       try {
         line = reader.readLine();

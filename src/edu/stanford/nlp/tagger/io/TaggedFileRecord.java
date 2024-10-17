@@ -38,6 +38,7 @@ public class TaggedFileRecord {
   final Integer tagColumn;
   final TreeReaderFactory trf;
   final boolean usesComments;
+  final boolean skipMWT;
 
   private TaggedFileRecord(String file, Format format,
                            String encoding, String tagSeparator,
@@ -47,7 +48,7 @@ public class TaggedFileRecord {
                            NumberRangesFileFilter treeRange,
                            Predicate<Tree> treeFilter,
                            Integer wordColumn, Integer tagColumn,
-                           boolean usesComments) {
+                           boolean usesComments, boolean skipMWT) {
     this.file = file;
     this.format = format;
     this.encoding = encoding;
@@ -60,6 +61,7 @@ public class TaggedFileRecord {
     this.tagColumn = tagColumn;
     this.trf = trf;
     this.usesComments = usesComments;
+    this.skipMWT = skipMWT;
   }
 
   public static final String FORMAT = "format";
@@ -73,6 +75,7 @@ public class TaggedFileRecord {
   public static final String TAG_COLUMN = "tagColumn";
   public static final String TREE_READER = "trf";
   public static final String COMMENTS = "comments";
+  public static final String SKIP_MWT = "skipMWT";
 
   public String toString() {
     StringBuilder s = new StringBuilder();
@@ -106,6 +109,9 @@ public class TaggedFileRecord {
     }
     if (usesComments) {
       s.append("," + COMMENTS + "=true");
+    }
+    if (skipMWT) {
+      s.append("," + SKIP_MWT + "=true");
     }
     return s.toString();
   }
@@ -142,7 +148,7 @@ public class TaggedFileRecord {
       return new TaggedFileRecord(description, Format.TEXT,
                                   getEncoding(config),
                                   getTagSeparator(config),
-                                  null, null, null, null, null, null, null, false);
+                                  null, null, null, null, null, null, null, false, false);
     }
 
     String[] args = new String[pieces.length - 1];
@@ -158,6 +164,7 @@ public class TaggedFileRecord {
     Predicate<Tree> treeFilter = null;
     Integer wordColumn = null, tagColumn = null;
     boolean comments = false;
+    boolean skipMWT = false;
 
     for (String arg : args) {
       String[] argPieces = arg.split("=", 2);
@@ -188,6 +195,8 @@ public class TaggedFileRecord {
         tagColumn = Integer.valueOf(argPieces[1]);
       } else if (argPieces[0].equalsIgnoreCase(COMMENTS)) {
         comments = Boolean.valueOf(argPieces[1]);
+      } else if (argPieces[0].equalsIgnoreCase(SKIP_MWT)) {
+        skipMWT = Boolean.valueOf(argPieces[1]);
       } else {
         throw new IllegalArgumentException("TaggedFileRecord argument " +
                                            argPieces[0] + " is unknown");
@@ -195,7 +204,7 @@ public class TaggedFileRecord {
     }
     return new TaggedFileRecord(file, format, encoding, tagSeparator,
                                 treeTransformer, treeNormalizer, trf, treeRange,
-                                treeFilter, wordColumn, tagColumn, comments);
+                                treeFilter, wordColumn, tagColumn, comments, skipMWT);
   }
 
   public static String getEncoding(Properties config) {
