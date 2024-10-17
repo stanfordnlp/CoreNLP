@@ -358,6 +358,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     return tags.getTag(index);
   }
 
+  @Override
   public Set<String> tagSet() {
     return tags.tagSet();
   }

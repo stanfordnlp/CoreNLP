@@ -1,6 +1,7 @@
 package edu.stanford.nlp.tagger.common;
 
 import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
@@ -23,6 +24,8 @@ public abstract class Tagger implements Function<List<? extends HasWord>,List<Ta
 
   @Override
   public abstract List<TaggedWord> apply(List<? extends HasWord> in);
+
+  public abstract Set<String> tagSet();
 
   public static Tagger loadModel(String path) {
     // TODO: we can avoid ReflectionLoading if we instead use the
