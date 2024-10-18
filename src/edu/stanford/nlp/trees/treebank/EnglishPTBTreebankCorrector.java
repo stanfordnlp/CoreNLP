@@ -1166,6 +1166,15 @@ public class EnglishPTBTreebankCorrector implements TreeTransformer, TreebankTra
 
     "") +
 
+    // for structures such as "over a year", "about a decade", etc
+    ("NP < (QP <1 IN=bad <2 (DT !$+ __) $+ /^N/)\n" +
+     "relabel bad RB\n" +
+     "\n") +
+
+    // for structures such as "just over a decade"
+    ("NP < (QP <1 (RB < just) <2 IN=bad <3 (DT !$+ __) $+ /^N/)\n" +
+     "relabel bad RB\n" +
+     "\n") +
 
     ("@QP < (IN|JJ|RBR|RP=bad < about)\n" +
     "relabel bad RB\n" +

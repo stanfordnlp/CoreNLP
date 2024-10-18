@@ -666,17 +666,30 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     StringBuilder s = new StringBuilder();
     s.append("{\n");
     s.append("Vertices:\n");
+
+    List<String> lines = new ArrayList<>();
     for (V vertex : outgoingEdges.keySet()) {
-      s.append("  ").append(vertex).append('\n');
+      lines.add("  " + vertex + '\n');
     }
+    Collections.sort(lines);
+    for (String line : lines) {
+      s.append(line);
+    }
+
     s.append("Edges:\n");
+    lines = new ArrayList<>();
     for (V source : outgoingEdges.keySet()) {
       for (V dest : outgoingEdges.get(source).keySet()) {
         for (E edge : outgoingEdges.get(source).get(dest)) {
-          s.append("  ").append(source).append(" -> ").append(dest).append(" : ").append(edge).append('\n');
+          lines.add("  " + source + " -> " + dest + " : " + edge + "\n");
         }
       }
     }
+    Collections.sort(lines);
+    for (String line : lines) {
+      s.append(line);
+    }
+
     s.append('}');
     return s.toString();
   }

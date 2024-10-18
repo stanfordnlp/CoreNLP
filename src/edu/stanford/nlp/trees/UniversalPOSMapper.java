@@ -165,7 +165,7 @@ public class UniversalPOSMapper  {
       {"EX", "PRON"},
       {"FW", "X"},
       {"/^JJ.*$/", "ADJ"},
-      {"LS", "X"},
+      {"LS", "NUM"},
       {"MD", "AUX"},
       {"NNS", "NOUN"},
       {"NNP", "PROPN"},
