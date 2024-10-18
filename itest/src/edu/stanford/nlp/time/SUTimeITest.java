@@ -23,7 +23,8 @@ public class SUTimeITest extends TestCase {
       if (pipeline == null) {
         pipeline = new AnnotationPipeline();
         pipeline.addAnnotator(new TokenizerAnnotator(false, "en", "splitHyphenated=false"));
-        pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
+        // WTS not needed - is now built in to the tokenizer
+        //pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         pipeline.addAnnotator(new POSTaggerAnnotator(DefaultPaths.DEFAULT_POS_MODEL, false));
         //pipeline.addAnnotator(new NumberAnnotator(false));
         //pipeline.addAnnotator(new QuantifiableEntityNormalizingAnnotator(false, false));
