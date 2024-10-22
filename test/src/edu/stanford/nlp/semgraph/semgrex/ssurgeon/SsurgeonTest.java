@@ -1133,6 +1133,50 @@ public class SsurgeonTest {
     assertEquals(".prof", prof.lemma());
   }
 
+  /**
+   * A simple test sent to us from a user (unbelievably, ssurgeon apparently has users)
+   */
+  @Test
+  public void readXMLMergeNodesIceCream() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // demostrate merging with the order ice, cream -> icecream
+    String merge = String.join(newline,
+                               "<ssurgeon-pattern-list>",
+                               "  <ssurgeon-pattern>",
+                               "    <uid>38</uid>",
+                               "    <notes>Merge two nodes that should not have been split</notes>",
+                               "    <semgrex>" + XMLUtils.escapeXML("{}=gov >obj ({word:cream}=node1 >compound {word:ice}=node2)") + "</semgrex>",
+                               "    <edit-list>mergeNodes -node node2 -node node1</edit-list>",
+                               "  </ssurgeon-pattern>",
+                               "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern mergeSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[likes-3 nsubj> [child-2 det> The-1] obj> [cream-5 compound> ice-4]", Language.UniversalEnglish);
+    SemanticGraph newSG = mergeSsurgeon.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[likes-3 nsubj> [child-2 det> The-1] obj> icecream-4]", Language.UniversalEnglish);
+    assertEquals(expected, newSG);
+
+    merge = String.join(newline,
+                        "<ssurgeon-pattern-list>",
+                        "  <ssurgeon-pattern>",
+                        "    <uid>38</uid>",
+                        "    <notes>Merge two nodes that should not have been split</notes>",
+                        "    <semgrex>" + XMLUtils.escapeXML("{}=gov >obj ({word:cream}=node1 >compound {word:ice}=node2)") + "</semgrex>",
+                        "    <edit-list>mergeNodes -node node1 -node node2</edit-list>",
+                        "  </ssurgeon-pattern>",
+                        "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(merge);
+    assertEquals(patterns.size(), 1);
+    mergeSsurgeon = patterns.get(0);
+
+    sg = SemanticGraph.valueOf("[likes-3 nsubj> [child-2 det> The-1] obj> [cream-5 compound> ice-4]", Language.UniversalEnglish);
+    newSG = mergeSsurgeon.iterate(sg).first;
+    expected = SemanticGraph.valueOf("[likes-3 nsubj> [child-2 det> The-1] obj> icecream-4]", Language.UniversalEnglish);
+    assertEquals(expected, newSG);
+  }
 
   /**
    * Test a basic case of two nodes that should be merged
