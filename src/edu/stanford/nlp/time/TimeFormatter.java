@@ -14,6 +14,7 @@ import org.joda.time.format.*;
 
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.time.Year;
 import java.util.*;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -628,8 +629,9 @@ public class TimeFormatter {
     }
 
     private static void updateTimeZoneNames(Locale locale) {
-      long time1 = new SUTime.IsoDate(2013,1,1).getJodaTimeInstant().getMillis();
-      long time2 = new SUTime.IsoDate(2013,6,1).getJodaTimeInstant().getMillis();
+      int year = Year.now().getValue();
+      long time1 = new SUTime.IsoDate(year,1,1).getJodaTimeInstant().getMillis();
+      long time2 = new SUTime.IsoDate(year,6,1).getJodaTimeInstant().getMillis();
       CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<>();
       for (DateTimeZone dtz:TimeZoneIdComponent.timeZonesById.values()) {
         // standard timezones
