@@ -342,7 +342,7 @@ public class SUTimeITest extends TestCase {
         "ISO datetime is 2004-03-04T18:32:56 Eastern Standard Time.\n" +
         "Time is 4:30pm Mountain Time.\n" +        // not recognized ?
         "Time is 9:30 am Pacific Time.\n" +
-        "ISO time is T13:23:42 MDT.\n" +
+        "ISO time is T13:23:42 America/Denver.\n" +
         "It is 8:43 PST on 6/12/2008.\n" +
         "It is 6:53:32 PDT on 7-16-2010.\n" +
         "ISO partial datetime 2008-05-16T09 Beijing Time.\n" +
@@ -362,7 +362,7 @@ public class SUTimeITest extends TestCase {
         Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"2004-03-04T18:32:56-0500\" type=\"TIME\">2004-03-04T18:32:56 Eastern Standard Time</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t3\" value=\"T16:30\" type=\"TIME\">4:30pm</TIMEX3>"), // TODO: Mountain Time
         Timex.fromXml("<TIMEX3 tid=\"t4\" value=\"T09:30\" type=\"TIME\">9:30 am</TIMEX3>"),// TODO:  Pacific Time
-        Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"T13:23:42-0700\" type=\"TIME\">T13:23:42 MDT</TIMEX3>"),
+        Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"T13:23:42-0700\" type=\"TIME\">T13:23:42 America/Denver</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"2008-06-12T08:43-0800\" type=\"TIME\">8:43 PST on 6/12/2008</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"2010-07-16T06:53:32-0800\" type=\"TIME\">6:53:32 PDT on 7-16-2010</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t8\" value=\"2008-05-16T09\" type=\"TIME\">2008-05-16T09</TIMEX3>"),  // TODO: Beijing Time
@@ -382,7 +382,7 @@ public class SUTimeITest extends TestCase {
         Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"2004-03-04T18:32:56-0500\" type=\"TIME\">2004-03-04T18:32:56 Eastern Standard Time</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t3\" value=\"2010-02-17T16:30\" type=\"TIME\">4:30pm</TIMEX3>"), // TODO: Mountain Time
         Timex.fromXml("<TIMEX3 tid=\"t4\" value=\"2010-02-17T09:30\" type=\"TIME\">9:30 am</TIMEX3>"),// TODO:  Pacific Time
-        Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"2010-02-17T13:23:42-0700\" type=\"TIME\">T13:23:42 MDT</TIMEX3>"),
+        Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"2010-02-17T13:23:42-0700\" type=\"TIME\">T13:23:42 America/Denver</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"2008-06-12T08:43-0800\" type=\"TIME\">8:43 PST on 6/12/2008</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"2010-07-16T06:53:32-0800\" type=\"TIME\">6:53:32 PDT on 7-16-2010</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t8\" value=\"2008-05-16T09\" type=\"TIME\">2008-05-16T09</TIMEX3>"),  // TODO: Beijing Time
