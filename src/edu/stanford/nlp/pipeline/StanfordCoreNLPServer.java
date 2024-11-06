@@ -910,17 +910,21 @@ public class StanfordCoreNLPServer implements Runnable {
 
     private final FileHandler homepage;
 
+    private final String contextRoot;
+
     /**
      * Create a handler for accepting annotation requests.
      * @param props The properties file to use as the default if none were sent by the client.
      */
     public CoreNLPHandler(Properties props, Predicate<Properties> authenticator,
                           Consumer<FinishedRequest> callback,
-                          FileHandler homepage) {
+                          FileHandler homepage,
+                          String contextRoot) {
       this.defaultProps = props;
       this.callback = callback;
       this.authenticator = authenticator;
       this.homepage = homepage;
+      this.contextRoot = contextRoot;
     }
 
     /**
@@ -961,6 +965,14 @@ public class StanfordCoreNLPServer implements Runnable {
       }
       setHttpExchangeResponseHeaders(httpExchange);
 
+      if (!this.contextRoot.equals(httpExchange.getRequestURI().getRawPath())) {
+        String response = "URI " + httpExchange.getRequestURI().getRawPath() + " not handled";
+        httpExchange.getResponseHeaders().add("Content-type", "text/plain");
+        httpExchange.sendResponseHeaders(HTTP_NOT_FOUND, response.length());
+        httpExchange.getResponseBody().write(response.getBytes());
+        httpExchange.close();
+        return;
+      }
       // Get sentence.
       Properties props;
       Annotation ann;
@@ -1739,7 +1751,7 @@ public class StanfordCoreNLPServer implements Runnable {
       if (contextRoot.isEmpty()) {
         contextRoot = "/";
       }
-      withAuth(server.createContext(contextRoot, new CoreNLPHandler(defaultProps, authenticator, callback, homepage)), basicAuth);
+      withAuth(server.createContext(contextRoot, new CoreNLPHandler(defaultProps, authenticator, callback, homepage, contextRoot)), basicAuth);
       withAuth(server.createContext(uriContext+"/tokensregex", new TokensRegexHandler(authenticator, callback)), basicAuth);
       withAuth(server.createContext(uriContext+"/semgrex", new SemgrexHandler(authenticator, callback)), basicAuth);
       withAuth(server.createContext(uriContext+"/tregex", new TregexHandler(authenticator, callback)), basicAuth);
