@@ -1230,6 +1230,10 @@ public class EnglishPTBTreebankCorrector implements TreeTransformer, TreebankTra
     "relabel bad VBN\n" +
             '\n') +
 
+    // First, second, third are treated as LS in PTB
+    // but in UD EWT, GUM, etc they are treated as RB
+    ("@ADVP <: LS=bad\n" +
+     "relabel bad RB\n\n") +
 
     ("@SBAR < (DT|WDT|NN|NNP|RB=bad < that|because|while|Though|Whether)\n" +
     "relabel bad IN\n" +
