@@ -8,19 +8,19 @@ var serverAddress = '';
 var bratLocation = 'https://nlp.stanford.edu/js/brat/';
 head.js(
   // External libraries
-  bratLocation + '/client/lib/jquery.svg.min.js',
-  bratLocation + '/client/lib/jquery.svgdom.min.js',
+  './jquery.svg.min.js',
+  './jquery.svgdom.min.js',
 
   // brat helper modules
-  bratLocation + '/client/src/configuration.js',
-  bratLocation + '/client/src/util.js',
-  bratLocation + '/client/src/annotation_log.js',
-  bratLocation + '/client/lib/webfont.js',
+  './configuration.js',
+  './util.js',
+  './annotation_log.js',
+  './webfont.js',
 
   // brat modules
-  bratLocation + '/client/src/dispatcher.js',
-  bratLocation + '/client/src/url_monitor.js',
-  bratLocation + '/client/src/visualizer.js',
+  './dispatcher.js',
+  './url_monitor.js',
+  './visualizer.js',
 
   // parse viewer
   './corenlp-parseviewer.js'

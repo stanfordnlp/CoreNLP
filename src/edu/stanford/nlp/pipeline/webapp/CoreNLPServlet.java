@@ -188,7 +188,7 @@ public class CoreNLPServlet extends HttpServlet {
 
       // Include the Javascript libraries necessary to run brat.
       out.println("<script type=\"text/javascript\" src=\"" + bratLocation +
-          "/client/lib/head.load.min.js\"></script>");
+          "head.load.min.js\"></script>");
       // Main Javascript that hooks into all that we have introduced so far.
       out.println("<script type=\"text/javascript\" src=\"brat.js\"></script>");
 
