@@ -134,6 +134,9 @@ public class UniversalPOSMapper  {
       // RB -> PART when it is verbal negation (not or its reductions)
       { "@VP|SINV|SQ|FRAG|ADVP < (RB=target < /^(?i:not|n't|nt|t|n)$/)", "PART" },
 
+      // "not" as part of a phrase such as "not only", "not just", etc is tagged as PART in UD
+      { "@ADVP|CONJP <1 (RB=target < /^(?i:not|n't|nt|t|n)$/) <2 (__ < only|just|merely|even) !<3 __", "PART" },
+
       // Otherwise RB -> ADV
       { "RB=target <... {/.*/}", "ADV" },
 

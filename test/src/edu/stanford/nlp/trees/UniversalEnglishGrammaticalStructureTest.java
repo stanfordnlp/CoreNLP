@@ -522,8 +522,8 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
           "( (S (NP (PRP I)) (VP (VBP like) (NP (CONJP (RB not) (RB only)) (NP (NNS cats)) (CONJP (CC but) (RB also)) (NP (NN dogs)))) (. .)))",
           "nsubj(like-2, I-1)\n" +
            "root(ROOT-0, like-2)\n" +
-           "advmod(only-4, not-3)\n" +
-           "cc:preconj(cats-5, only-4)\n" +
+           "advmod(cats-5, not-3)\n" +
+           "advmod(cats-5, only-4)\n" +
            "obj(like-2, cats-5)\n" +
            "cc(dogs-8, but-6)\n" +
            "advmod(dogs-8, also-7)\n" +
@@ -2497,8 +2497,8 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
               "( (S (NP (PRP I)) (VP (VBP like) (NP (CONJP (RB not) (RB only)) (NP (NNS cats)) (CONJP (CC but) (RB also)) (NP (NN dogs)))) (. .)))",
               "nsubj(like-2, I-1)\n" +
                "root(ROOT-0, like-2)\n" +
-               "advmod(only-4, not-3)\n" +
-               "cc:preconj(cats-5, only-4)\n" +
+               "advmod(cats-5, not-3)\n" +
+               "advmod(cats-5, only-4)\n" +
                "obj(like-2, cats-5)\n" +
                "cc(dogs-8, but-6)\n" +
                "advmod(dogs-8, also-7)\n" +
@@ -2510,8 +2510,8 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
                "nsubj(flew-2', Fred-1)\n" +
                "root(ROOT-0, flew-2)\n" +
                "conj:and(flew-2, flew-2')\n" +
-               "advmod(only-4, not-3)\n" +
-               "cc:preconj(Greece-6, only-4)\n" +
+               "advmod(Greece-6, not-3)\n" +
+               "advmod(Greece-6, only-4)\n" +
                "case(Greece-6, to-5)\n" +
                "obl:to(flew-2, Greece-6)\n" +
                "cc(flew-2', but-7)\n" +
