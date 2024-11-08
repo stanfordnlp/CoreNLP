@@ -728,6 +728,13 @@ public class CoordinationTransformer implements TreeTransformer  {
   private static final TregexPattern BUT_ALSO_PATTERN = TregexPattern.compile("CONJP=conjp < (CC=cc < but) < (RB=rb < also) ?$+ (__=nextNode < (__ < __))");
   private static final TsurgeonPattern BUT_ALSO_OPERATION = Tsurgeon.parseOperation("[move cc $- conjp] [move rb $- cc] [if exists nextNode move rb >1 nextNode] [createSubtree ADVP rb] [delete conjp]");
 
+  /*
+   * "not only" is not a MWE, so break up the CONJP similar to "but also".
+   * compensate for some JJ tagged "only" in this expression
+   */
+  private static final TregexPattern NOT_ONLY_PATTERN = TregexPattern.compile("CONJP|ADVP=conjp < (RB=not < /^(?i)not$/) < (RB|JJ=only < /^(?i)only|just|merely|even$/) ?$+ (__=nextNode < (__ < __))");
+  private static final TsurgeonPattern NOT_ONLY_OPERATION = Tsurgeon.parseOperation("[move not $- conjp] [move only $- not] [if exists nextNode move only >1 nextNode] [if exists nextNode move not >1 nextNode] [createSubtree ADVP not] [createSubtree ADVP only] [delete conjp]");
+
   /* at least / at most / at best / at worst / ... should be treated as if "at"
      was a preposition and the RBS was a noun. Assumes that the MWE "at least"
      has already been extracted. */
@@ -749,6 +756,7 @@ public class CoordinationTransformer implements TreeTransformer  {
     
     Tsurgeon.processPattern(ACCORDING_TO_PATTERN, ACCORDING_TO_OPERATION, t);
     Tsurgeon.processPattern(BUT_ALSO_PATTERN, BUT_ALSO_OPERATION, t);
+    Tsurgeon.processPattern(NOT_ONLY_PATTERN, NOT_ONLY_OPERATION, t);
     Tsurgeon.processPattern(AT_RBS_PATTERN, AT_RBS_OPERATION, t);
     Tsurgeon.processPattern(AT_ALL_PATTERN, AT_ALL_OPERATION, t);
 

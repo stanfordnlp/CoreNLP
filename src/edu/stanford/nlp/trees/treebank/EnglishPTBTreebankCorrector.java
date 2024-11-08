@@ -168,6 +168,16 @@ public class EnglishPTBTreebankCorrector implements TreeTransformer, TreebankTra
     "adjoin (NP NN@) newnp\n" +
             '\n') +
 
+    // Fix not_RB only_JJ, which should generally be not_RB only_RB
+    // and put it under a CONJP instead of an ADVP
+    ("ADVP|CONJP <1 (__ < /^(?i:not)$/) <2 (JJ=bad < only|just|merely|even) !<3 __\n" +
+     "relabel bad RB\n" +
+     '\n') +
+
+    ("ADVP=bad <1 (__ < /^(?i:not)$/) <2 (RB < only|just|merely|even) !<3 __\n" +
+     "relabel bad CONJP\n" +
+     '\n') +
+
     // Fix some cases of 'as well as' not made into a CONJP unit
     // There are a few other weird cases that should also be reviewed with the tregex
     // well|Well|WELL , as|AS|As . as|AS|As !>(__ > @CONJP)
