@@ -191,6 +191,10 @@ public class CoordinationTransformer implements TreeTransformer  {
   private static final TsurgeonPattern mergeYodaVerbsTsurgeon =
     Tsurgeon.parseOperation("[createSubtree VP vbn] [move will >-1 home] [move be >-1 home] [prune willbe]");
 
+  /**
+   * Text such as "Also excluded will be ---" should have similar dependencies to "--- also will be excluded".
+   * Rearranging the verbs with these tsurgeon makes the headfinder more accurate on that type of sentence.
+   */
   private static Tree mergeYodaVerbs(Tree t) {
     if (t == null) {
       return t;
