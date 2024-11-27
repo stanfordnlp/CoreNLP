@@ -429,8 +429,9 @@ public class PropertiesUtils {
   public static String getSignature(String name, Properties properties) {
     String[] prefixes = new String[]{(name != null && !name.isEmpty())? name + '.' : ""};
     // TODO(gabor) This is a hack, as tokenize and ssplit depend on each other so heavily
-    if ("tokenize".equals(name) || "ssplit".equals(name)) {
-      prefixes = new String[]{"tokenize", "ssplit"};
+    // the tokenize annotator also uses segment properties to determine which model to use, etc
+    if ("tokenize".equals(name) || "ssplit".equals(name) || "segment".equals(name)) {
+      prefixes = new String[]{"tokenize", "ssplit", "segment"};
     }
     // TODO [chris 2017]: Another hack. Traditionally, we have called the cleanxml properties clean!
     if ("clean".equals(name) || "cleanxml".equals(name)) {
