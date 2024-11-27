@@ -374,6 +374,25 @@ The server has different default properties than the regular CoreNLP pipeline. T
   * The default annotators do not include the `parse` annotator. This is primarily for efficiency. The annotators enabled by default are: `-annotators tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie`.
   * As a necessary consequence of not having the `parse` annotator, the default coref mention detector is changed to use dependency parsers: `-coref.md.type dep`.
 
+### Double Escaping
+
+When passing in properties as part of a request using wget or
+something similar, it is necessary to escape special characters in the
+request.  The properties in the URL must be escaped, and then to
+handle strings which may need quotes escaping if the properties are
+sent in an map, a second round of escaping and unescaping occurs.
+
+For historic reasons, both rounds use URL encoding and decoding, even
+though it may be more intuitive to use json encoding for the map
+itself.  In particular, this means that `+` in a property map needs to
+be escaped as `%252B` as opposed to `%2B`.  This is most relevant for
+the Arabic pipeline, where the model name has `+` in it, and thus
+needs to be escaped as follows:
+
+```
+wget --post-file testinput.txt 'http://localhost:9000/?properties=%7B%22annotators%22%3A%22tokenize%2Cssplit%22%2C%22outputFormat%22%3A%22json%22%2C%22segment.model%22%3A%22edu%2Fstanford%2Fnlp%2Fmodels%2Fsegmenter%2Farabic%2Farabic-segmenter-atb%252Bbn%252Barztrain.ser.gz%22%2C%22ssplit.boundaryTokenRegex%22%3A%22%5B.%5D%7C%5B%21%3F%5D%252B%7C%5B%21%5C%5Cu%30%36%31F%5D%252B%22%2C%22timeout%22%3A%22%35%30%30%30%30%30%22%2C%22tokenize.language%22%3A%22ar%22%7D' -O /tmp/corenlp-tmp28puKVo --
+```
+
 ### Undocumented Features
 
 Well, I guess they're documented now:
