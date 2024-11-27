@@ -393,6 +393,12 @@ needs to be escaped as follows:
 wget --post-file testinput.txt 'http://localhost:9000/?properties=%7B%22annotators%22%3A%22tokenize%2Cssplit%22%2C%22outputFormat%22%3A%22json%22%2C%22segment.model%22%3A%22edu%2Fstanford%2Fnlp%2Fmodels%2Fsegmenter%2Farabic%2Farabic-segmenter-atb%252Bbn%252Barztrain.ser.gz%22%2C%22ssplit.boundaryTokenRegex%22%3A%22%5B.%5D%7C%5B%21%3F%5D%252B%7C%5B%21%5C%5Cu%30%36%31F%5D%252B%22%2C%22timeout%22%3A%22%35%30%30%30%30%30%22%2C%22tokenize.language%22%3A%22ar%22%7D' -O /tmp/corenlp-tmp28puKVo --
 ```
 
+A similar query can be done with single escaping, with `+` becoming `%2B`, if the `+` are not embedded in a properties map:
+
+```
+wget --post-file foo.txt "http://localhost:9000?annotators=tokenize,ssplit&tokenize.language=ar&segment.model=edu/stanford/nlp/models/segmenter/arabic/arabic-segmenter-atb%2Bbn%2Barztrain.ser.gz&ssplit.boundaryTokenRegex=[.]|[!?]%2B|[!\\u061F]%2B"
+```
+
 ### Undocumented Features
 
 Well, I guess they're documented now:
