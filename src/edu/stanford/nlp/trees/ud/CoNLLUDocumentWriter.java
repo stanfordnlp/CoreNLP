@@ -101,10 +101,20 @@ public class CoNLLUDocumentWriter {
 
             // don't use after() directly; it returns a default of ""
             if (token.get(CoreAnnotations.AfterAnnotation.class) != null && token.after().equals("")) {
-              if (misc.equals("_")) {
-                misc = "SpaceAfter=No";
-              } else {
-                misc = misc + "|SpaceAfter=No";
+              IndexedWord nextVertex = tokenSg.getNodeByIndex(token.index() + 1);
+              // the next word needs to exist and be part of the same MWT
+              // and either this word is the start of the MWT
+              //   or this word is the middle of the same MWT as the next word
+              // if that is true, we will skip the SpaceAfter annotation
+              boolean inMWT = ((nextVertex != null && isMWTbutNotStart(nextVertex)) &&
+                               ((token.containsKey(CoreAnnotations.IsFirstWordOfMWTAnnotation.class) && token.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class)) ||
+                                (isMWTbutNotStart(token))));
+              if (!inMWT) {
+                if (misc.equals("_")) {
+                  misc = "SpaceAfter=No";
+                } else {
+                  misc = misc + "|SpaceAfter=No";
+                }
               }
             }
 
@@ -151,6 +161,21 @@ public class CoNLLUDocumentWriter {
       }
   }
 
+  /**
+   * Is the word part of an MWT, but not the start?
+   */
+  public static boolean isMWTbutNotStart(IndexedWord nextVertex) {
+    if (nextVertex.containsKey(CoreAnnotations.IsFirstWordOfMWTAnnotation.class) &&
+        nextVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class)) {
+      return false;
+    }
+    if (!nextVertex.containsKey(CoreAnnotations.IsMultiWordTokenAnnotation.class) ||
+        !nextVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class)) {
+      return false;
+    }
+    return true;
+  }
+
   public static void printMWT(StringBuilder sb, SemanticGraph graph, IndexedWord token) {
       int startIndex = token.index();
       int endIndex = startIndex;
@@ -158,12 +183,7 @@ public class CoNLLUDocumentWriter {
       // or a word which isn't part of any MWT
       IndexedWord nextVertex;
       while ((nextVertex = graph.getNodeByIndex(endIndex+1)) != null) {
-          if (nextVertex.containsKey(CoreAnnotations.IsFirstWordOfMWTAnnotation.class) &&
-              nextVertex.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class)) {
-              break;
-          }
-          if (!nextVertex.containsKey(CoreAnnotations.IsMultiWordTokenAnnotation.class) ||
-              !nextVertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class)) {
+          if (!isMWTbutNotStart(nextVertex)) {
               break;
           }
           ++endIndex;
