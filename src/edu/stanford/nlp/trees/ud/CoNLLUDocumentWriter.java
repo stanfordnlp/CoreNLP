@@ -101,7 +101,7 @@ public class CoNLLUDocumentWriter {
 
             // don't use after() directly; it returns a default of ""
             if (token.get(CoreAnnotations.AfterAnnotation.class) != null && token.after().equals("")) {
-              IndexedWord nextVertex = tokenSg.getNodeByIndex(token.index() + 1);
+              IndexedWord nextVertex = tokenSg.getNodeByIndexSafe(token.index() + 1);
               // the next word needs to exist and be part of the same MWT
               // and either this word is the start of the MWT
               //   or this word is the middle of the same MWT as the next word
@@ -182,7 +182,7 @@ public class CoNLLUDocumentWriter {
       // advance endIndex until we reach the end of the sentence, the start of the next MWT,
       // or a word which isn't part of any MWT
       IndexedWord nextVertex;
-      while ((nextVertex = graph.getNodeByIndex(endIndex+1)) != null) {
+      while ((nextVertex = graph.getNodeByIndexSafe(endIndex+1)) != null) {
           if (!isMWTbutNotStart(nextVertex)) {
               break;
           }
