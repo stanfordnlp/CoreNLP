@@ -10,7 +10,7 @@ public class EnglishMWTCombinerTest {
   static final String newline = System.getProperty("line.separator");
   public static final String expectedITS = String.join(newline,
                                                        "1-2	it's	_	_	_	_	_	_	_	_",
-                                                       "1	it	_	_	_	_	4	nsubj	_	SpaceAfter=No",
+                                                       "1	it	_	_	_	_	4	nsubj	_	_",
                                                        "2	's	_	_	_	_	4	cop	_	_",
                                                        "3	yours	_	_	_	_	4	advmod	_	_",
                                                        "4	yours	_	_	_	_	0	root	_	_",
@@ -19,7 +19,7 @@ public class EnglishMWTCombinerTest {
   public static final String expectedCANNOT = String.join(newline,
                                                           "1	I	_	_	_	_	4	nsubj	_	_",
                                                           "2-3	CANNOT	_	_	_	_	_	_	_	_",
-                                                          "2	CAN	_	_	_	_	4	aux	_	SpaceAfter=No",
+                                                          "2	CAN	_	_	_	_	4	aux	_	_",
                                                           "3	NOT	_	_	_	_	4	advmod	_	_",
                                                           "4	believe	_	_	_	_	0	root	_	_",
                                                           "5	it	_	_	_	_	4	obj	_	_",
@@ -28,7 +28,7 @@ public class EnglishMWTCombinerTest {
   public static final String expectedWANNA = String.join(newline,
                                                          "1	I	_	_	_	_	2	nsubj	_	_",
                                                          "2-3	wanna	_	_	_	_	_	_	_	_",
-                                                         "2	wan	want	_	_	_	0	root	_	SpaceAfter=No",
+                                                         "2	wan	want	_	_	_	0	root	_	_",
                                                          "3	na	to	_	_	_	4	mark	_	_",
                                                          "4	fix	_	_	_	_	2	xcomp	_	_",
                                                          "5	this	_	_	_	_	4	obj	_	_");
