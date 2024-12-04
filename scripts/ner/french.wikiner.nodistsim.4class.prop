@@ -1,0 +1,45 @@
+trainFileList = /home/john/stanza/data/ner/fr_wikinergold.train.bioes
+testFiles = /home/john/stanza/data/ner/fr_wikinergold.dev.bioes
+serializeTo = french-wikiner-4class.crf.ser.gz
+
+useDistSim = false
+
+map = word=0,answer=1
+
+useTitle = true
+useClassFeature=true
+useWord=true
+useNGrams=true
+noMidNGrams=true
+usePrev=true
+useNext=true
+useLongSequences=true
+useSequences=true
+usePrevSequences=true
+maxLeft=1
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+useOccurrencePatterns=true
+useLastRealWord=true
+useNextRealWord=true
+normalize=true
+wordShape=dan2uselC
+useDisjunctive=true
+disjunctionWidth=5
+#useDisjunctiveShapeInteraction=true
+
+type=crf
+
+saveFeatureIndexToDisk = true
+
+readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
+
+useObservedSequencesOnly=true
+
+sigma = 1
+useQN = true
+QNsize = 25
+
+# makes it go faster
+featureDiffThresh=0.05
