@@ -126,7 +126,7 @@
 
     <dependency>
       <groupId>org.glassfish</groupId>
-      <artifactId>javax.json</artifactId>
+      <artifactId>jakarta.json</artifactId>
       <version>1.1.6</version>
     </dependency>
 
