@@ -10,9 +10,14 @@ parent: Usage
 Below are interfaces and packages for running Stanford CoreNLP from other languages or within other packages. They have been written by many other people (thanks!). In general you should contact these people directly if you have problems with these packages.
 
 ### C#/F#/.NET
-* [Stanford CoreNLP for .NET](http://sergey-tihon.github.io/Stanford.NLP.NET/StanfordCoreNLP.html) by Sergey Tihon.  See also: [NuGet page](https://www.nuget.org/packages/Stanford.NLP.CoreNLP/).
 
+* [Stanford.NLP for .NET](https://sergey-tihon.github.io/Stanford.NLP.NET/) by [Sergey Tihon](https://sergeytihon.com/) uses standard CoreNLP JARs with [IKVM.Maven.Sdk](https://github.com/ikvmnet/ikvm-maven). This makes .NET DLLs. It is now aging with support only up through Java 8. But that works for CoreNLP through the lates version 4.x.y release.
 * [CoreNLPClient.Net](https://github.com/AMArostegui/CoreNLPClient.Net)  .NET reimplementation of the Stanza client by [Antonio Miras](https://github.com/AMArostegui)
+
+#### Previously
+
+* [Stanford.NLP.CoreNLP for .NET](https://www.nuget.org/packages/Stanford.NLP.CoreNLP/) is now legacy.
+
 
 ### Clojure
 
@@ -43,13 +48,13 @@ Note on running the CoreNLP server under docker: The container’s port 9000 has
 
 * [go-corenlp](https://github.com/hironobu-s/go-corenlp) is a Golang wrapper for CoreNLP by Hironobu Saito.
 
-* [corenlp-golang](https://github.com/genelet/coreNLP/) is another wrapper by Peter Bi written in 2022
+* [corenlp-golang](https://github.com/genelet/coreNLP/) is another wrapper by Peter Bi written in 2022.
 
 ### Java
 
 * [DKPro Core](https://dkpro.github.io/dkpro-core/) is a collection of NLP components, wrapped as **UIMA** components.
 It includes the Stanford CoreNLP components, and there is a [tutorial](https://dkpro.github.io/dkpro-core/java/recipes/stanfordnlp/) on how to use them in the [DKPro Core documentation](https://dkpro.github.io/dkpro-core/documentation/).
-DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well-maintained and our recommended way of using Stanford CoreNLP within UIMA. DKPro Core was principally developed by Richard Eckart de Castilho at the Ubiquitous Processing Lab (UKP) at the Technische Universität Darmstadt.
+DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well-maintained and our recommended way of using Stanford CoreNLP within UIMA. DKPro Core is principally developed by Richard Eckart de Castilho at the Ubiquitous Processing Lab (UKP) at the Technische Universität Darmstadt.
 * [cleartk-stanford-corenlp](https://github.com/ClearTK/cleartk/tree/master/cleartk-stanford-corenlp) is a **UIMA** wrapper for Stanford CoreNLP built by Steven Bethard in the context of the [ClearTK](http://cleartk.github.io/cleartk/) toolkit.
 * A [**Vert.x** module for acccessing Stanford CoreNLP](https://github.com/jonnywray/mod-stanford-corenlp) by Jonny Wray.
 * [Wrapper for each of Stanford's Chinese tools](https://github.com/guokr/stan-cn-nlp) by Mingli Yuan.
