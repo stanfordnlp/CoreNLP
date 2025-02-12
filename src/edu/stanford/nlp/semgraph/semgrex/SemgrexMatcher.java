@@ -58,7 +58,7 @@ public abstract class SemgrexMatcher  {
     this.namesToEdges = namesToEdges;
     this.variableStrings = variableStrings;
   }
-  
+
   SemgrexMatcher(SemanticGraph sg,
                  IndexedWord node,
                  Map<String, IndexedWord> namesToNodes,
