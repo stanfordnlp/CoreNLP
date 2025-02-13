@@ -38,6 +38,7 @@ abstract class GraphRelation implements Serializable {
 
   final String name;
   final String edgeName;
+  final int graphNumber;
 
   //"<" | ">" | ">>" | "<<" | "<#" | ">#" | ":" | "@">
 
@@ -54,11 +55,12 @@ abstract class GraphRelation implements Serializable {
    */
   abstract Iterator<IndexedWord> searchNodeIterator(IndexedWord node, SemanticGraph sg);
 
-  private GraphRelation(String symbol, String type, String name, String edgeName) {
+  private GraphRelation(String symbol, String type, String name, String edgeName, int graphNumber) {
     this.symbol = symbol;
     this.type   = getPattern(type);
     this.rawType = type;
     this.edgeName = edgeName;
+    this.graphNumber = graphNumber;
     if (name != null && edgeName != null && !name.equals(edgeName)) {
       throw new SemgrexParseException("GraphRelation had both = and ~ set, but the names were different!  " + this.toString());
     }
@@ -69,16 +71,16 @@ abstract class GraphRelation implements Serializable {
     }
   }
 
-  private GraphRelation(String symbol, String type, String name) {
-    this(symbol, type, name, null);
+  private GraphRelation(String symbol, String type, String name, int graphNumber) {
+    this(symbol, type, name, null, graphNumber);
   }
 
-  private GraphRelation(String symbol, String type) {
-    this(symbol, type, null);
+  private GraphRelation(String symbol, String type, int graphNumber) {
+    this(symbol, type, null, graphNumber);
   }
 
-  private GraphRelation(String symbol) {
-    this(symbol, null);
+  private GraphRelation(String symbol, int graphNumber) {
+    this(symbol, null, graphNumber);
   }
 
   @Override
@@ -116,7 +118,7 @@ abstract class GraphRelation implements Serializable {
     private boolean hypToText;
 
     ALIGNMENT() {
-      super("@", "");
+      super("@", "", 0);
       hypToText = true;
     }
 
@@ -195,7 +197,7 @@ abstract class GraphRelation implements Serializable {
 
   // ROOT graph relation: "Root" ================================================
 
-  static final GraphRelation ROOT = new GraphRelation("", "") {
+  static final GraphRelation ROOT = new GraphRelation("", "", 0) {
       @Override
       boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
         return l1 == l2;
@@ -214,7 +216,7 @@ abstract class GraphRelation implements Serializable {
       private static final long serialVersionUID = 4710135995247390313L;
   };
 
-  static final GraphRelation ITERATOR = new GraphRelation(":", "") {
+  static final GraphRelation ITERATOR = new GraphRelation(":", "", 0) {
       @Override
       boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
         return true;
@@ -231,7 +233,7 @@ abstract class GraphRelation implements Serializable {
 
   // ALIGNED_ROOT graph relation: "AlignRoot" ===================================
 
-  static final GraphRelation ALIGNED_ROOT = new GraphRelation("AlignRoot", "") {
+  static final GraphRelation ALIGNED_ROOT = new GraphRelation("AlignRoot", "", 0) {
       @Override
       boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
         return l1 == l2;
@@ -255,8 +257,8 @@ abstract class GraphRelation implements Serializable {
   // GOVERNOR graph relation: ">" ===============================================
 
   static private class GOVERNOR extends GraphRelation {
-    GOVERNOR(String reln, String name, String edgeName) {
-      super(">", reln, name, edgeName);
+    GOVERNOR(String reln, String name, String edgeName, int graphNumber) {
+      super(">", reln, name, edgeName, graphNumber);
     }
 
     @Override
@@ -306,8 +308,8 @@ abstract class GraphRelation implements Serializable {
   };
 
   static private class GOVERNOR_RIGHT extends GraphRelation {
-    GOVERNOR_RIGHT(String reln, String name, String edgeName) {
-      super(">++", reln, name, edgeName);
+    GOVERNOR_RIGHT(String reln, String name, String edgeName, int graphNumber) {
+      super(">++", reln, name, edgeName, graphNumber);
     }
 
 
@@ -361,8 +363,8 @@ abstract class GraphRelation implements Serializable {
   }
 
   static private class GOVERNOR_LEFT extends GraphRelation {
-    GOVERNOR_LEFT(String reln, String name, String edgeName) {
-      super(">--", reln, name, edgeName);
+    GOVERNOR_LEFT(String reln, String name, String edgeName, int graphNumber) {
+      super(">--", reln, name, edgeName, graphNumber);
     }
 
 
@@ -418,8 +420,8 @@ abstract class GraphRelation implements Serializable {
   // DEPENDENT graph relation: "<" ===============================================
 
   static private class DEPENDENT extends GraphRelation {
-    DEPENDENT(String reln, String name, String edgeName) {
-      super("<", reln, name, edgeName);
+    DEPENDENT(String reln, String name, String edgeName, int graphNumber) {
+      super("<", reln, name, edgeName, graphNumber);
     }
 
     @Override
@@ -470,8 +472,8 @@ abstract class GraphRelation implements Serializable {
 
 
   static private class DEPENDENT_RIGHT extends GraphRelation {
-    DEPENDENT_RIGHT(String reln, String name, String edgeName) {
-      super("<++", reln, name, edgeName);
+    DEPENDENT_RIGHT(String reln, String name, String edgeName, int graphNumber) {
+      super("<++", reln, name, edgeName, graphNumber);
     }
 
     @Override
@@ -527,8 +529,8 @@ abstract class GraphRelation implements Serializable {
 
 
   static private class DEPENDENT_LEFT extends GraphRelation {
-    DEPENDENT_LEFT(String reln, String name, String edgeName) {
-      super("<--", reln, name, edgeName);
+    DEPENDENT_LEFT(String reln, String name, String edgeName, int graphNumber) {
+      super("<--", reln, name, edgeName, graphNumber);
     }
 
     @Override
@@ -588,8 +590,8 @@ abstract class GraphRelation implements Serializable {
     final int startDepth, endDepth;
 
     LIMITED_GRANDPARENT(String reln, String name,
-                        int startDepth, int endDepth) {
-      super(startDepth + "," + endDepth + ">>", reln, name);
+                        int startDepth, int endDepth, int graphNumber) {
+      super(startDepth + "," + endDepth + ">>", reln, name, graphNumber);
       this.startDepth = startDepth;
       this.endDepth = endDepth;
     }
@@ -729,8 +731,8 @@ abstract class GraphRelation implements Serializable {
    * so that is gotten through abstract methods
    */
   static private abstract class GRANDSOMETHING extends GraphRelation {
-    GRANDSOMETHING(String symbol, String reln, String name) {
-      super(symbol, reln, name);
+    GRANDSOMETHING(String symbol, String reln, String name, int graphNumber) {
+      super(symbol, reln, name, graphNumber);
     }
 
     abstract List<Pair<GrammaticalRelation, IndexedWord>> getNeighborPairs(SemanticGraph sg, IndexedWord node);
@@ -825,8 +827,8 @@ abstract class GraphRelation implements Serializable {
   // GRANDPARENT graph relation: ">>" ===========================================
 
   static private class GRANDPARENT extends GRANDSOMETHING {
-    GRANDPARENT(String reln, String name) {
-      super(">>", reln, name);
+    GRANDPARENT(String reln, String name, int graphNumber) {
+      super(">>", reln, name, graphNumber);
     }
 
     @Override
@@ -851,8 +853,8 @@ abstract class GraphRelation implements Serializable {
   // GRANDKID graph relation: "<<" ==============================================
 
   static private class GRANDKID extends GRANDSOMETHING {
-    GRANDKID(String reln, String name) {
-      super("<<", reln, name);
+    GRANDKID(String reln, String name, int graphNumber) {
+      super("<<", reln, name, graphNumber);
     }
 
     @Override
@@ -879,8 +881,8 @@ abstract class GraphRelation implements Serializable {
     final int startDepth, endDepth;
 
     LIMITED_GRANDKID(String reln, String name,
-                        int startDepth, int endDepth) {
-      super(startDepth + "," + endDepth + "<<", reln, name);
+                     int startDepth, int endDepth, int graphNumber) {
+      super(startDepth + "," + endDepth + "<<", reln, name, graphNumber);
       this.startDepth = startDepth;
       this.endDepth = endDepth;
     }
@@ -1091,8 +1093,8 @@ abstract class GraphRelation implements Serializable {
   }
 
   static private class EQUALS extends GraphRelation {
-    EQUALS(String reln, String name) {
-      super("==", reln, name);
+    EQUALS(String reln, String name, int graphNumber) {
+      super("==", reln, name, graphNumber);
     }
 
     @Override
@@ -1130,8 +1132,8 @@ abstract class GraphRelation implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    SIBLING_RELATION(String symbol, String reln, String name) {
-      super(symbol, reln, name);
+    SIBLING_RELATION(String symbol, String reln, String name, int graphNumber) {
+      super(symbol, reln, name, graphNumber);
     }
 
     abstract boolean satisfiesOrder(IndexedWord l1, IndexedWord l2);
@@ -1187,8 +1189,8 @@ abstract class GraphRelation implements Serializable {
 
   static private class RIGHT_IMMEDIATE_SIBLING extends SIBLING_RELATION {
 
-    RIGHT_IMMEDIATE_SIBLING(String reln, String name) {
-      super("$+", reln, name);
+    RIGHT_IMMEDIATE_SIBLING(String reln, String name, int graphNumber) {
+      super("$+", reln, name, graphNumber);
     }
 
     private static final long serialVersionUID = 1L;
@@ -1200,8 +1202,8 @@ abstract class GraphRelation implements Serializable {
 
   static private class LEFT_IMMEDIATE_SIBLING extends SIBLING_RELATION {
 
-    LEFT_IMMEDIATE_SIBLING(String reln, String name) {
-      super("$-", reln, name);
+    LEFT_IMMEDIATE_SIBLING(String reln, String name, int graphNumber) {
+      super("$-", reln, name, graphNumber);
     }
 
     private static final long serialVersionUID = 1L;
@@ -1213,8 +1215,8 @@ abstract class GraphRelation implements Serializable {
 
   static private class RIGHT_SIBLING extends SIBLING_RELATION {
 
-    RIGHT_SIBLING(String reln, String name) {
-      super("$++", reln, name);
+    RIGHT_SIBLING(String reln, String name, int graphNumber) {
+      super("$++", reln, name, graphNumber);
     }
 
     private static final long serialVersionUID = 1L;
@@ -1226,8 +1228,8 @@ abstract class GraphRelation implements Serializable {
 
   static private class LEFT_SIBLING extends SIBLING_RELATION {
 
-    LEFT_SIBLING(String reln, String name) {
-      super("$--", reln, name);
+    LEFT_SIBLING(String reln, String name, int graphNumber) {
+      super("$--", reln, name, graphNumber);
     }
 
     private static final long serialVersionUID = 1L;
@@ -1241,8 +1243,8 @@ abstract class GraphRelation implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    ADJACENT_RIGHT(String reln, String name) {
-      super(".", reln, name);
+    ADJACENT_RIGHT(String reln, String name, int graphNumber) {
+      super(".", reln, name, graphNumber);
     }
 
 
@@ -1291,8 +1293,8 @@ abstract class GraphRelation implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    ADJACENT_LEFT(String reln, String name) {
-      super("-", reln, name);
+    ADJACENT_LEFT(String reln, String name, int graphNumber) {
+      super("-", reln, name, graphNumber);
     }
 
 
@@ -1341,8 +1343,8 @@ abstract class GraphRelation implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    RIGHT(String reln, String name) {
-      super("..", reln, name);
+    RIGHT(String reln, String name, int graphNumber) {
+      super("..", reln, name, graphNumber);
     }
 
 
@@ -1390,8 +1392,8 @@ abstract class GraphRelation implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    LEFT(String reln, String name) {
-      super("--", reln, name);
+    LEFT(String reln, String name, int graphNumber) {
+      super("--", reln, name, graphNumber);
     }
 
 
@@ -1453,7 +1455,8 @@ abstract class GraphRelation implements Serializable {
   public static GraphRelation getRelation(String reln,
                                           String type,
                                           String name,
-                                          String edgeName) throws ParseException {
+                                          String edgeName,
+                                          int graphNumber) throws ParseException {
     if (reln == null && type == null)
       return null;
     if (!isKnownRelation(reln)) {
@@ -1461,46 +1464,46 @@ abstract class GraphRelation implements Serializable {
     }
     switch (reln) {
       case ">":
-        return new GOVERNOR(type, name, edgeName);
+        return new GOVERNOR(type, name, edgeName, graphNumber);
       case ">++":
-        return new GOVERNOR_RIGHT(type, name, edgeName);
+        return new GOVERNOR_RIGHT(type, name, edgeName, graphNumber);
       case ">--":
-        return new GOVERNOR_LEFT(type, name, edgeName);
+        return new GOVERNOR_LEFT(type, name, edgeName, graphNumber);
       case "<":
-        return new DEPENDENT(type, name, edgeName);
+        return new DEPENDENT(type, name, edgeName, graphNumber);
       case "<++":
-        return new DEPENDENT_RIGHT(type, name, edgeName);
+        return new DEPENDENT_RIGHT(type, name, edgeName, graphNumber);
       case "<--":
-        return new DEPENDENT_LEFT(type, name, edgeName);
+        return new DEPENDENT_LEFT(type, name, edgeName, graphNumber);
       case "<>":
-        return new CONNECTED(type, name, edgeName);
+        return new CONNECTED(type, name, edgeName, graphNumber);
     }
     if (edgeName != null) {
       throw new ParseException("Relation " + reln + " does not allow for named edges");
     }
     switch (reln) {
       case ">>":
-        return new GRANDPARENT(type, name);
+        return new GRANDPARENT(type, name, graphNumber);
       case "<<":
-        return new GRANDKID(type, name);
+        return new GRANDKID(type, name, graphNumber);
       case "==":
-        return new EQUALS(type, name);
+        return new EQUALS(type, name, graphNumber);
       case "$+":
-        return new RIGHT_IMMEDIATE_SIBLING(type, name);
+        return new RIGHT_IMMEDIATE_SIBLING(type, name, graphNumber);
       case "$-":
-        return new LEFT_IMMEDIATE_SIBLING(type, name);
+        return new LEFT_IMMEDIATE_SIBLING(type, name, graphNumber);
       case "$++":
-        return new RIGHT_SIBLING(type, name);
+        return new RIGHT_SIBLING(type, name, graphNumber);
       case "$--":
-        return new LEFT_SIBLING(type, name);
+        return new LEFT_SIBLING(type, name, graphNumber);
       case ".":
-        return new ADJACENT_RIGHT(type, name);
+        return new ADJACENT_RIGHT(type, name, graphNumber);
       case "..":
-        return new RIGHT(type, name);
+        return new RIGHT(type, name, graphNumber);
       case "-":
-        return new ADJACENT_LEFT(type, name);
+        return new ADJACENT_LEFT(type, name, graphNumber);
       case "--":
-        return new LEFT(type, name);
+        return new LEFT(type, name, graphNumber);
       case "@":
         return new ALIGNMENT();
       default:
@@ -1514,16 +1517,17 @@ abstract class GraphRelation implements Serializable {
                                           String type,
                                           int num,
                                           String name,
-                                          String edgeName) throws ParseException {
+                                          String edgeName,
+                                          int graphNumber) throws ParseException {
     if (edgeName != null) {
       throw new ParseException("Relation " + reln + " does not allow for named edges");
     }
     if (reln == null && type == null)
       return null;
     if (reln.equals(">>"))
-      return new LIMITED_GRANDPARENT(type, name, num, num);
+      return new LIMITED_GRANDPARENT(type, name, num, num, graphNumber);
     else if (reln.equals("<<"))
-      return new LIMITED_GRANDKID(type, name, num, num);
+      return new LIMITED_GRANDKID(type, name, num, num, graphNumber);
     else if (isKnownRelation(reln))
       throw new ParseException("Relation " + reln +
                                " does not use numeric arguments");
@@ -1536,16 +1540,17 @@ abstract class GraphRelation implements Serializable {
                                           String type,
                                           int num, int num2,
                                           String name,
-                                          String edgeName) throws ParseException {
+                                          String edgeName,
+                                          int graphNumber) throws ParseException {
     if (edgeName != null) {
       throw new ParseException("Relation " + reln + " does not allow for named edges");
     }
     if (reln == null && type == null)
       return null;
     if (reln.equals(">>"))
-      return new LIMITED_GRANDPARENT(type, name, num, num2);
+      return new LIMITED_GRANDPARENT(type, name, num, num2, graphNumber);
     else if (reln.equals("<<"))
-      return new LIMITED_GRANDKID(type, name, num, num2);
+      return new LIMITED_GRANDKID(type, name, num, num2, graphNumber);
     else if (isKnownRelation(reln))
       throw new ParseException("Relation " + reln +
                                " does not use numeric arguments");
