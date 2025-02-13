@@ -304,8 +304,7 @@ NodePattern Description(GraphRelation r) : {
             }
 	  )?
 	)
-  	{ pat = new NodePattern(r, underNodeNegation, attributes.attributes(), attributes.root(), attributes.empty(), name != null ? name.image : null);
-	   if (link) pat.makeLink();
+  	{ pat = new NodePattern(r, underNodeNegation, attributes.attributes(), attributes.root(), attributes.empty(), link, name != null ? name.image : null);
 	  return pat;
 	}
 }

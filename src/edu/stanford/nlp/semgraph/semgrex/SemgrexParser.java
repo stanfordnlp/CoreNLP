@@ -615,8 +615,7 @@ String nodeName = name.image;
       jj_la1[27] = jj_gen;
       ;
     }
-pat = new NodePattern(r, underNodeNegation, attributes.attributes(), attributes.root(), attributes.empty(), name != null ? name.image : null);
-           if (link) pat.makeLink();
+pat = new NodePattern(r, underNodeNegation, attributes.attributes(), attributes.root(), attributes.empty(), link, name != null ? name.image : null);
           {if ("" != null) return pat;}
     throw new Error("Missing return statement in function");
 }

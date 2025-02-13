@@ -33,7 +33,7 @@ public class NodePattern extends SemgrexPattern  {
    */
   private final Map<String, Pair<Object, Object>> attributes;
   private final boolean isRoot;
-  private boolean isLink;
+  private final boolean isLink;
   private final boolean isEmpty;
   private final String name;
   private String descString;
@@ -44,18 +44,19 @@ public class NodePattern extends SemgrexPattern  {
 
   public NodePattern(GraphRelation r, boolean negDesc,
                      Map<String, String> attrs,
-                     boolean root, boolean empty, String name) {
-    this(r, negDesc, attrs, root, empty, name,
+                     boolean root, boolean empty, boolean isLink, String name) {
+    this(r, negDesc, attrs, root, empty, isLink, name,
             new ArrayList<>(0));
   }
 
   // TODO: there is no capacity for named variable groups in the parser right now
   public NodePattern(GraphRelation r, boolean negDesc,
                      Map<String, String> attrs,
-                     boolean root, boolean empty, String name,
+                     boolean root, boolean empty, boolean isLink, String name,
                      List<Pair<Integer, String>> variableGroups) {
     this.reln = r;
     this.negDesc = negDesc;
+    this.isLink = isLink;
     // order the attributes so that the pattern stays the same when
     // printing a compiled pattern
     attributes = new LinkedHashMap<>();
@@ -191,10 +192,6 @@ public class NodePattern extends SemgrexPattern  {
     // System.out.println("matches");
     // System.out.println("");
     return !negDesc;
-  }
-
-  public void makeLink() {
-    isLink = true;
   }
 
   public boolean isRoot() {
