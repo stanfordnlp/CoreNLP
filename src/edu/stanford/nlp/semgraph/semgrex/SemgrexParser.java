@@ -390,20 +390,23 @@ if (numArg == null && numArg2 == null) {
             reln = GraphRelation.getRelation(rel != null ? rel.image : null,
                                              relnType != null ? relnType.image : null,
                                              name != null ? name.image : null,
-                                             edgeName != null ? edgeName.image : null);
+                                             edgeName != null ? edgeName.image : null,
+                                             graphNumber != null ? Integer.parseInt(graphNumber.image) : 0);
           } else if (numArg2 == null) {
             reln = GraphRelation.getRelation(rel != null ? rel.image : null,
                                              relnType != null ? relnType.image : null,
                                              Integer.parseInt(numArg.image),
                                              name != null ? name.image : null,
-                                             edgeName != null ? edgeName.image : null);
+                                             edgeName != null ? edgeName.image : null,
+                                             graphNumber != null ? Integer.parseInt(graphNumber.image) : 0);
           } else {
             reln = GraphRelation.getRelation(rel != null ? rel.image : null,
                                              relnType != null ? relnType.image : null,
                                              Integer.parseInt(numArg.image),
                                              Integer.parseInt(numArg2.image),
                                              name != null ? name.image : null,
-                                             edgeName != null ? edgeName.image : null);
+                                             edgeName != null ? edgeName.image : null,
+                                             graphNumber != null ? Integer.parseInt(graphNumber.image) : 0);
           }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 15:
