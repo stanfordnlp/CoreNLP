@@ -3,7 +3,6 @@ package edu.stanford.nlp.semgraph.semgrex;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -13,6 +12,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class NodePattern extends SemgrexPattern  {
@@ -31,7 +31,7 @@ public class NodePattern extends SemgrexPattern  {
    *  value.
    *  Otherwise, the type will be a Pattern, and you must use Pattern.matches().
    */
-  private final Map<String, Pair<Object, Object>> attributes;
+  private final List<Attribute> attributes;
   private final boolean isRoot;
   private final boolean isLink;
   private final boolean isEmpty;
@@ -43,7 +43,7 @@ public class NodePattern extends SemgrexPattern  {
   private List<Pair<Integer, String>> variableGroups;
 
   public NodePattern(GraphRelation r, boolean negDesc,
-                     Map<String, String> attrs,
+                     List<Triple<String, String, Boolean>> attrs,
                      boolean root, boolean empty, boolean isLink, String name) {
     this(r, negDesc, attrs, root, empty, isLink, name,
             new ArrayList<>(0));
@@ -51,7 +51,7 @@ public class NodePattern extends SemgrexPattern  {
 
   // TODO: there is no capacity for named variable groups in the parser right now
   public NodePattern(GraphRelation r, boolean negDesc,
-                     Map<String, String> attrs,
+                     List<Triple<String, String, Boolean>> attrs,
                      boolean root, boolean empty, boolean isLink, String name,
                      List<Pair<Integer, String>> variableGroups) {
     this.reln = r;
@@ -59,17 +59,18 @@ public class NodePattern extends SemgrexPattern  {
     this.isLink = isLink;
     // order the attributes so that the pattern stays the same when
     // printing a compiled pattern
-    attributes = new LinkedHashMap<>();
+    attributes = new ArrayList<>();
     descString = "{";
-    for (Map.Entry<String, String> entry : attrs.entrySet()) {
+    for (Triple<String, String, Boolean> entry : attrs) {
       if (!descString.equals("{"))
         descString += ";";
-      String key = entry.getKey();
-      String value = entry.getValue();
+      String key = entry.first();
+      String value = entry.second();
+      boolean negated = entry.third();
 
       // Add the attributes for this key
       if (value.equals("__")) {
-        attributes.put(key, Pair.makePair(true, true));
+        attributes.add(new Attribute(key, true, true, negated));
       } else if (value.matches("/.*/")) {
         boolean isRegexp = false;
         for (int i = 1; i < value.length() - 1; ++i) {
@@ -81,34 +82,24 @@ public class NodePattern extends SemgrexPattern  {
         }
         String patternContent = value.substring(1, value.length() - 1);
         if (isRegexp) {
-          attributes.put(key, Pair.makePair(
-              Pattern.compile(patternContent),
-              Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE))
-          );
+          attributes.add(new Attribute(key,
+                                       Pattern.compile(patternContent),
+                                       Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE),
+                                       negated));
         } else {
-          attributes.put(key, Pair.makePair(patternContent, patternContent));
+          attributes.add(new Attribute(key, patternContent, patternContent, negated));
         }
       } else { // raw description
-        attributes.put(key, Pair.makePair(value, value));
+        attributes.add(new Attribute(key, value, value, negated));
       }
 
-
-
-//      if (value.equals("__")) {
-//        attributes.put(key, Pair.makePair(Pattern.compile(".*"), Pattern.compile(".*", Pattern.CASE_INSENSITIVE)));
-//      } else if (value.matches("/.*/")) {
-//        attributes.put(key, Pair.makePair(
-//            Pattern.compile(value.substring(1, value.length() - 1)),
-//            Pattern.compile(value.substring(1, value.length() - 1), Pattern.CASE_INSENSITIVE))
-//        );
-//      } else { // raw description
-//        attributes.put(key, Pair.makePair(
-//            Pattern.compile("^(" + value + ")$"),
-//            Pattern.compile("^(" + value + ")$", Pattern.CASE_INSENSITIVE))
-//        );
-//      }
-      descString += (key + ':' + value);
+      if (negated) {
+        descString += (key + "!:" + value);
+      } else {
+        descString += (key + ':' + value);
+      }
     }
+
     if (root) {
       if (!descString.equals("{"))
         descString += ";";
@@ -145,8 +136,8 @@ public class NodePattern extends SemgrexPattern  {
       return (negDesc ? !node.equals(IndexedWord.NO_WORD) : node.equals(IndexedWord.NO_WORD));
 
     // log.info("Attributes are: " + attributes);
-    for (Map.Entry<String, Pair<Object, Object>> attr : attributes.entrySet()) {
-      String key = attr.getKey();
+    for (Attribute attr : attributes) {
+      String key = attr.key;
       // System.out.println(key);
       String nodeValue;
       // if (key.equals("idx"))
@@ -167,7 +158,7 @@ public class NodePattern extends SemgrexPattern  {
         return negDesc;
 
       // Get the node pattern
-      Object toMatch = ignoreCase ? attr.getValue().second : attr.getValue().first;
+      Object toMatch = ignoreCase ? attr.caseless : attr.cased;
       boolean matches;
       if (toMatch instanceof Boolean) {
         matches = ((Boolean) toMatch);
@@ -181,6 +172,9 @@ public class NodePattern extends SemgrexPattern  {
         matches = ((Pattern) toMatch).matcher(nodeValue).matches();
       } else {
         throw new IllegalStateException("Unknown matcher type: " + toMatch + " (of class + " + toMatch.getClass() + ")");
+      }
+      if (attr.negated) {
+        matches = !matches;
       }
 
       if (!matches) {
