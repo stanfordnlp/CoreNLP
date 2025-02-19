@@ -215,6 +215,13 @@ public class SemgrexTest extends TestCase {
             "Bill");
   }
 
+  public void testNegatedRegex() {
+    runTest("{word!:/Bill/}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
+            "ate", "blueberry", "muffins");
+    runTest("{word!:/.*i.*/}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
+            "ate", "blueberry");
+  }
+
   public void testReferencedRegex() {
     runTest("{word:/Bill/}", "[ate subj>Bill obj>[bill det>the]]",
             "Bill");

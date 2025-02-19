@@ -1,7 +1,11 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import edu.stanford.nlp.util.Triple;
 
 /**
  * Stores attributes for a Semgrex NodePattern.
@@ -18,12 +22,14 @@ import java.util.Map;
 public class NodeAttributes {
   private boolean root;
   private boolean empty;
-  private Map<String, String> attributes;
+  private List<Triple<String, String, Boolean>> attributes;
+  private Set<String> positiveAttributes;
 
   public NodeAttributes() {
     root = false;
     empty = false;
-    attributes = new LinkedHashMap<>();
+    attributes = new ArrayList<>();
+    positiveAttributes = new HashSet<>();
   }
 
   public void setRoot(boolean root) {
@@ -42,14 +48,17 @@ public class NodeAttributes {
     return empty;
   }
 
-  public void setAttribute(String key, String value) {
-    if (attributes.containsKey(key)) {
+  public void setAttribute(String key, String value, boolean negated) {
+    if (positiveAttributes.contains(key)) {
       throw new SemgrexParseException("Duplicate attribute " + key + " found in semgrex expression");
     }
-    attributes.put(key, value);
+    if (!negated) {
+      positiveAttributes.add(key);
+    }
+    attributes.add(new Triple(key, value, negated));
   }
 
-  public Map<String, String> attributes() {
+  public List<Triple<String, String, Boolean>> attributes() {
     return attributes;
   }
 }
