@@ -32,14 +32,14 @@ neural network which accepts word embedding inputs, as described in the paper:
 
 This parser supports English (with [Universal
 Dependencies](http://universaldependencies.github.com/docs/), [Stanford
-Dependencies](stanford-dependencies.html) and CoNLL Dependencies) and Chinese
+Dependencies](https://nlp.stanford.edu/software/stanford-dependencies.html) and CoNLL Dependencies) and Chinese
 (with CoNLL Dependencies). Future versions of the software will support other
 languages.
 
 ### How transition-based parsing works
 
 For a quick introduction to the standard approach to transition-based
-dependency parsing, see [ Joakim Nivre's EACL 2014
+dependency parsing, see [Joakim Nivre's EACL 2014
 tutorial](http://stp.lingfil.uu.se/~nivre/docs/eacl3.pdf).
 
 This parser builds a parse by performing a linear-time scan over the words of
@@ -80,24 +80,20 @@ adaptive gradient descent (AdaGrad) with hidden unit dropout.
 
 You may download either of the following packages:
 
-  * [The Stanford Parser](lex-parser.html) and the [Stanford POS Tagger](tagger.html); or 
-  * all of [Stanford CoreNLP](corenlp.html), which contains the parser, the tagger, and other things which you may or may not need. 
+  * [The Stanford Parser](tools_lex_parser.md) and the [Stanford POS Tagger](tools_pos_tagger.md); or 
+  * all of [Stanford CoreNLP](download.md), which contains the parser, the tagger, and other things which you may or may not need. 
 
 ### Models
 
 Trained models for use with this parser are included in either of the
 packages. The list of models currently distributed is:
 
-> ` edu/stanford/nlp/models/parser/nndep/english_UD.gz ( **default** ,
-> English, [Universal
-> Dependencies](http://universaldependencies.github.com/docs/))  
->  edu/stanford/nlp/models/parser/nndep/english_SD.gz (English, [Stanford
-> Dependencies](stanford-dependencies.html))  
->  edu/stanford/nlp/models/parser/nndep/PTB_CoNLL_params.txt.gz (English,
-> [CoNLL Dependencies](http://nlp.cs.lth.se/software/treebank_converter/))  
->  edu/stanford/nlp/models/parser/nndep/CTB_CoNLL_params.txt.gz (Chinese,
-> [CoNLL
-> Dependencies](http://stp.lingfil.uu.se/~nivre/research/Penn2Malt.html)) `
+- edu/stanford/nlp/models/parser/nndep/english_UD.gz ( **default**, English, [Universal Dependencies](http://universaldependencies.github.com/docs/))  
+- edu/stanford/nlp/models/parser/nndep/english_SD.gz (English, [Stanford Dependencies](https://nlp.stanford.edu/software/stanford-dependencies.html))
+- edu/stanford/nlp/models/parser/nndep/PTB_CoNLL_params.txt.gz (English, [CoNLL Dependencies](http://nlp.cs.lth.se/software/treebank_converter/))  
+- edu/stanford/nlp/models/parser/nndep/CTB_CoNLL_params.txt.gz (Chinese, [CoNLL Dependencies](http://stp.lingfil.uu.se/~nivre/research/Penn2Malt.html))
+
+(TODO: this list is probably out of date)
 
 Note that these models were trained with an earlier Matlab version of the
 code, and your results training with the Java code may be slightly worse.
@@ -116,11 +112,11 @@ annotator.
 
 If you want to use the transition-based parser from the command line, invoke
 StanfordCoreNLP with the `depparse` annotator. This annotator has dependencies
-on the `tokenize`, `ssplit`, and `pos` annotators. An example invocation
+on the `tokenize` and `pos` annotators. An example invocation
 follows (assuming CoreNLP is on your classpath):
 
 > `java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators
-> tokenize,ssplit,pos,depparse -file <INPUT_FILE>`
+> tokenize,pos,depparse -file <INPUT_FILE>`
 
 #### Direct access (with Stanford Parser or CoreNLP)
 
@@ -131,11 +127,10 @@ this package currently still reads and writes CoNLL-X files, _not_ CoNLL-U
 files.
 
 The main program to use is the class
-[`edu.stanford.nlp.parser.nndep.DependencyParser`](http://nlp.stanford.edu/nlp/javadoc/javanlp-3.5.0/edu/stanford/nlp/parser/nndep/DependencyParser.html).
-The Javadoc for this class' [main
-method](http://nlp.stanford.edu/nlp/javadoc/javanlp-3.5.0/edu/stanford/nlp/parser/nndep/DependencyParser.html#main-
-java.lang.String:A-) describes all possible options in details. Some usage
-examples follow:
+[`edu.stanford.nlp.parser.nndep.DependencyParser`](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/parser/nndep/DependencyParser.html).
+The Javadoc for this class'
+[main method](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/parser/nndep/DependencyParser.html#main-java.lang.String:A-)
+describes all possible options in details. Some usage examples follow:
 
   * **Parse raw text from a file:**
 
@@ -156,28 +151,14 @@ examples follow:
 
 The options for specifying files to the parser at training and test time are:
 
-Option| Required for training| Required for testing / parsing| Description  
+Option | Required for training | Required for testing / parsing | Description  
 ---|---|---|---  
-`‑devFile`| Optional| No| Path to a development-set treebank in [CoNLL-X
-format](http://ilk.uvt.nl/conll/#dataformat). If provided, the dev set
-performance is monitored during training.  
-`‑embedFile`| Optional (recommended!)| No| A word embedding file, containing
-distributed representations of English words. Each line of the provided file
-should contain a single word followed by the elements of the corresponding
-word embedding (space-delimited). It is not absolutely necessary that all
-words in the treebank be covered by this embedding file, though the parser's
-performance will generally improve if you are able to provide better
-embeddings for more words.  
-`‑model`| Yes| Yes| Path to a model file. If the path ends in `.gz`, the model
-will be read as a Gzipped model file. During training, we write to this path;
-at test time we read a pre-trained model from this path.  
-`‑textFile`| No| Yes (or `testFile`)| Path to a plaintext file containing
-sentences to be parsed.  
-`‑testFile`| No| Yes (or `textFile`)| Path to a test-set treebank in [CoNLL-X
-format](http://ilk.uvt.nl/conll/#dataformat) for final evaluation of the
-parser.  
-`‑trainFile`| Yes| No| Path to a training treebank in [CoNLL-X
-format.](http://ilk.uvt.nl/conll/#dataformat)  
+`‑devFile` | Optional | No | Path to a development-set treebank in [CoNLL-X format](http://ilk.uvt.nl/conll/#dataformat). If provided, the dev set performance is monitored during training.  
+`‑embedFile` | Optional (recommended!) | No | A word embedding file, containing distributed representations of English words. Each line of the provided file should contain a single word followed by the elements of the corresponding word embedding (space-delimited). It is not absolutely necessary that all words in the treebank be covered by this embedding file, though the parser's performance will generally improve if you are able to provide better embeddings for more words.  
+`‑model` | Yes | Yes | Path to a model file. If the path ends in `.gz`, the model will be read as a Gzipped model file. During training, we write to this path; at test time we read a pre-trained model from this path.  
+`‑textFile` | No | Yes (or `testFile`) | Path to a plaintext file containing sentences to be parsed.  
+`‑testFile` | No | Yes (or `textFile`) | Path to a test-set treebank in [CoNLL-X format](http://ilk.uvt.nl/conll/#dataformat) for final evaluation of the parser.  
+`‑trainFile` | Yes | No | Path to a training treebank in [CoNLL-X format.](http://ilk.uvt.nl/conll/#dataformat)  
   
 ### Programmatic access
 
@@ -191,13 +172,11 @@ included in the source of the Stanford Parser and the source of CoreNLP.
 #### Java API
 
 The parser exposes an API for both training and testing. You can find more
-information in [our
-Javadoc](http://nlp.stanford.edu/nlp/javadoc/javanlp-3.5.0/edu/stanford/nlp/parser/nndep/DependencyParser.html).
+information in [our Javadoc](https://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/parser/nndep/DependencyParser.html).
 
 ### Training your own parser
 
-You can train a new dependency parser using your own data in the [
-CoNLL-X](http://ilk.uvt.nl/conll/#dataformat) data format. (Many dependency
+You can train a new dependency parser using your own data in the [CoNLL-X](http://ilk.uvt.nl/conll/#dataformat) data format. (Many dependency
 treebanks are provided in this format by default; even if not, conversion is
 often trivial.)
 
@@ -221,14 +200,11 @@ parser on your classpath:
 On the Stanford NLP machines, training data is available in
 `/u/nlp/data/depparser/nn/data`:
 
-> `java edu.stanford.nlp.parser.nndep.DependencyParser \  
->  -trainFile
-> /u/nlp/data/depparser/nn/data/dependency_treebanks/PTB_Stanford/train.conll
-> \  
->  -devFile
-> /u/nlp/data/depparser/nn/data/dependency_treebanks/PTB_Stanford/dev.conll \  
+> `java edu.stanford.nlp.parser.nndep.DependencyParser  -trainFile
+>  /u/nlp/data/depparser/nn/data/dependency_treebanks/PTB_Stanford/train.conll
+>  -devFile /u/nlp/data/depparser/nn/data/dependency_treebanks/PTB_Stanford/dev.conll
 >  -embedFile /u/nlp/data/depparser/nn/data/embeddings/en-cw.txt
-> -embeddingSize 50 \  
+>  -embeddingSize 50
 >  -model nndep.model.txt.gz`
 
 #### Training models for other languages
@@ -264,40 +240,21 @@ can probably get away with using the default English `TreebankLanguagePack`,
 
 #### Additional training options
 
-Option| Default| Description  
+Option | Default | Description  
 ---|---|---  
-`-adaAlpha`| 0.01| Global learning rate for AdaGrad training.  
-`-adaEps`| 1e-6| Epsilon value added to the denominator of AdaGrad update
-expression for numerical stability.  
-`-batchSize`| 10000| Size of mini-batch used for training.  
-`-dropProb`| 0.5| Dropout probability. For each training example we randomly
-choose some amount of units to disable in the neural network classifier. This
-parameter controls the proportion of units "dropped out."  
-`-embeddingSize`| 50| Dimensionality of word embeddings provided.  
-`-evalPerIter`| 100| Run full UAS (unlabeled attachment score) evaluation on
-the development set every time we finish this number of iterations.  
-`-hiddenSize`| 200| Dimensionality of hidden layer in neural network
-classifier.  
-`-initRange`| 0.01| Bounds of range within which weight matrix elements should
-be initialized. Each element is drawn from a uniform distribution over the
-range `[-initRange, initRange]`.  
-`-maxIter`| 20000| Number of training iterations to complete before stopping
-and saving the final model.  
-`-numPreComputed`| 100000| The parser pre-computes hidden-layer unit
-activations for particular inputs words at both training and testing time in
-order to speed up feedforward computation in the neural network. This
-parameter determines how many words for which we should compute hidden-layer
-activations.  
-`-regParameter`| 1e-8| Regularization parameter for training.  
-`-trainingThreads`| 1| Number of threads to use during training. Note that
-depending on training batch size, it may be unwise to simply choose the
-maximum amount of threads for your machine. On our 16-core test machines: a
-batch size of 10,000 runs fastest with around 6 threads; a batch size of
-100,000 runs best with around 10 threads.  
-`-wordCutOff`| 1| The parser can optionally ignore rare words by simply
-choosing an arbitrary "unknown" feature representation for words that appear
-with frequency less than _n_ in the corpus. This _n_ is controlled by the
-`wordCutOff` parameter.  
+`-adaAlpha` | 0.01 | Global learning rate for AdaGrad training.  
+`-adaEps` | 1e-6 | Epsilon value added to the denominator of AdaGrad update expression for numerical stability.  
+`-batchSize` | 10000 | Size of mini-batch used for training.  
+`-dropProb` | 0.5 | Dropout probability. For each training example we randomly choose some amount of units to disable in the neural network classifier. This parameter controls the proportion of units "dropped out."  
+`-embeddingSize` | 50 | Dimensionality of word embeddings provided.  
+`-evalPerIter` | 100 | Run full UAS (unlabeled attachment score) evaluation on the development set every time we finish this number of iterations.  
+`-hiddenSize` | 200 | Dimensionality of hidden layer in neural network classifier.  
+`-initRange` | 0.01 | Bounds of range within which weight matrix elements should be initialized. Each element is drawn from a uniform distribution over the range `[-initRange, initRange]`.  
+`-maxIter` | 20000 | Number of training iterations to complete before stopping and saving the final model.  
+`-numPreComputed` | 100000 | The parser pre-computes hidden-layer unit activations for particular inputs words at both training and testing time in order to speed up feedforward computation in the neural network. This parameter determines how many words for which we should compute hidden-layer activations.  
+`-regParameter` | 1e-8 | Regularization parameter for training.  
+`-trainingThreads` | 1 | Number of threads to use during training. Note that depending on training batch size, it may be unwise to simply choose the maximum amount of threads for your machine. On our 16-core test machines: a batch size of 10,000 runs fastest with around 6 threads; a batch size of 100,000 runs best with around 10 threads.  
+`-wordCutOff` | 1 | The parser can optionally ignore rare words by simply choosing an arbitrary "unknown" feature representation for words that appear with frequency less than _n_ in the corpus. This _n_ is controlled by the `wordCutOff` parameter.  
   
 #### Runtime parsing options
 
