@@ -7,6 +7,11 @@ import edu.stanford.nlp.util.*;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Load a CoNLL-U file, retag it using the specified tagger, and output back to stdout
+ *
+ * @author Jason Bolton
+ */
 public class CoNLLUTagUpdater {
 
   public static MaxentTagger maxentTagger;
@@ -19,9 +24,14 @@ public class CoNLLUTagUpdater {
     System.err.println("Reading in docs...");
     List<Annotation> docs = reader.readCoNLLUFile(filePath);
     System.err.println("Done.");
+
     System.err.println("Tagging docs...");
     String taggerPath = props.getProperty("tagger");
     maxentTagger = new MaxentTagger(taggerPath);
+
+    // output each doc to stdout
+    // multiple documents could occur if the reader splits the conll-u file
+    // at a #newdoc comment
     for (Annotation doc : docs) {
       CoreDocument coreDoc = new CoreDocument(doc);
       for (CoreSentence sentence : coreDoc.sentences()) {
