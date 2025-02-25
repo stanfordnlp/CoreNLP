@@ -180,6 +180,12 @@ You can train a new dependency parser using your own data in the [CoNLL-X](http:
 treebanks are provided in this format by default; even if not, conversion is
 often trivial.)
 
+#### Python Version
+
+There is now a Python package which uses torch to simplify parser training.  It should also be faster, given the GPU capabilities.
+
+https://github.com/stanfordnlp/nn-depparser
+
 #### Basic guidelines
 
 To train a new English model, you need the following pieces of data:
