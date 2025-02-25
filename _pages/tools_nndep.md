@@ -17,7 +17,9 @@ arrow from the word _moving_ to the word _faster_ indicates that _faster_
 modifies _moving_ , and the label _advmod_ assigned to the arrow describes the
 exact nature of the dependency.
 
-![](/static/img/nndep-example.png)
+<p align="center">
+   <img src="assets/images/nndep-example.png">
+</p>
 
 We have built a **super-fast** transition-based parser which produces typed
 dependency parses of natural language sentences. The parser is powered by a
