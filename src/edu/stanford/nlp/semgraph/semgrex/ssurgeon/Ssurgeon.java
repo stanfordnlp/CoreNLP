@@ -135,8 +135,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code editNode} will edit the attributes of a word.
  * {@code -node} is the node to edit.
  * {@code ...attributes...} are the attributes to change, same as with {@code addDep}
- *   {@code -morphofeatures ...} will set the features to be exactly as written.  TODO: if anyone
- *   needs the ability to add or remove features without resetting the entire features map,
+ *   {@code -morphofeatures ...} will set the features to be exactly as written.
+ *   {@code -updateMorphoFeatures ...} will edit or add the features without overwriting existing features.
+ *   TODO: if anyone needs the ability to remove features without resetting the entire features map,
  *   please file an issue on github.
  *</p><p>
  * {@code lemmatize} will put a lemma on a word.
