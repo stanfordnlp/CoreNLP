@@ -580,7 +580,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * CoNLL-U dep parsing - List of morphological features
+   * CoNLL-U dep parsing - Map of morphological features
    */
   public static class CoNLLUFeats implements CoreAnnotation<CoNLLUFeatures> {
     @Override
