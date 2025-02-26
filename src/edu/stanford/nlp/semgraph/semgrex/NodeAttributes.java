@@ -22,6 +22,7 @@ import edu.stanford.nlp.util.Triple;
 public class NodeAttributes {
   private boolean root;
   private boolean empty;
+  // String, String, Boolean: key, value, negated
   private List<Triple<String, String, Boolean>> attributes;
   private Set<String> positiveAttributes;
 
