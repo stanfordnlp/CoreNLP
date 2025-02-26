@@ -43,25 +43,23 @@ public class NodePattern extends SemgrexPattern  {
   private List<Pair<Integer, String>> variableGroups;
 
   public NodePattern(GraphRelation r, boolean negDesc,
-                     List<Triple<String, String, Boolean>> attrs,
-                     boolean root, boolean empty, boolean isLink, String name) {
-    this(r, negDesc, attrs, root, empty, isLink, name,
+                     NodeAttributes attrs, boolean isLink, String name) {
+    this(r, negDesc, attrs, isLink, name,
             new ArrayList<>(0));
   }
 
   // TODO: there is no capacity for named variable groups in the parser right now
   public NodePattern(GraphRelation r, boolean negDesc,
-                     List<Triple<String, String, Boolean>> attrs,
-                     boolean root, boolean empty, boolean isLink, String name,
+                     NodeAttributes attrs, boolean isLink, String name,
                      List<Pair<Integer, String>> variableGroups) {
     this.reln = r;
     this.negDesc = negDesc;
     this.isLink = isLink;
     // order the attributes so that the pattern stays the same when
     // printing a compiled pattern
-    attributes = new ArrayList<>();
+    this.attributes = new ArrayList<>();
     descString = "{";
-    for (Triple<String, String, Boolean> entry : attrs) {
+    for (Triple<String, String, Boolean> entry : attrs.attributes()) {
       if (!descString.equals("{"))
         descString += ";";
       String key = entry.first();
@@ -100,12 +98,12 @@ public class NodePattern extends SemgrexPattern  {
       }
     }
 
-    if (root) {
+    if (attrs.root()) {
       if (!descString.equals("{"))
         descString += ";";
       descString += "$";
     }
-    if (empty) {
+    if (attrs.empty()) {
       if (!descString.equals("{"))
         descString += ";";
       descString += "#";
@@ -114,8 +112,8 @@ public class NodePattern extends SemgrexPattern  {
 
     this.name = name;
     this.child = null;
-    this.isRoot = root;
-    this.isEmpty = empty;
+    this.isRoot = attrs.root();
+    this.isEmpty = attrs.empty();
 
     this.variableGroups = Collections.unmodifiableList(variableGroups);
   }

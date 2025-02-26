@@ -1,6 +1,7 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,6 +61,6 @@ public class NodeAttributes {
   }
 
   public List<Triple<String, String, Boolean>> attributes() {
-    return attributes;
+    return Collections.unmodifiableList(attributes);
   }
 }

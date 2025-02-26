@@ -632,7 +632,7 @@ String nodeName = name.image;
       jj_la1[28] = jj_gen;
       ;
     }
-pat = new NodePattern(r, underNodeNegation, attributes.attributes(), attributes.root(), attributes.empty(), link, name != null ? name.image : null);
+pat = new NodePattern(r, underNodeNegation, attributes, link, name != null ? name.image : null);
           {if ("" != null) return pat;}
     throw new Error("Missing return statement in function");
 }
