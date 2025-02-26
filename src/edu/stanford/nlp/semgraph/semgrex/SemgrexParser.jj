@@ -271,16 +271,27 @@ SemgrexPattern Child(GraphRelation r) : {
 
 void AddAttribute(NodeAttributes attributes) : {
 	Token attr = null;
+	Token key = null;
 	Token value = null;
         Token attrType = null;
 } {
-        ((attr = <IDENTIFIER> (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>) )
-         {
-           if (attr != null && value != null) {
-             boolean negated = attrType.image.equals("!:");
-             attributes.setAttribute(attr.image, value.image, negated);
-           }
-         })
+        (attr = <IDENTIFIER>
+           (( (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>) {
+             if (attr != null && value != null) {
+               boolean negated = attrType.image.equals("!:");
+               attributes.setAttribute(attr.image, value.image, negated);
+             }
+           }) 
+           |
+           (attrType = "@") (key = <IDENTIFIER>) "=" (value = <IDENTIFIER> | value = <REGEX>)
+           {
+             if (attr == null || key == null || value == null) {
+               throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +
+                                               " key=" + key + " value=" + value);
+             }
+             attributes.addContains(attr.image, key.image, value.image);
+           })
+        )
 	|
 	( attr = <ROOT> { attributes.setRoot(true); } )
 	|

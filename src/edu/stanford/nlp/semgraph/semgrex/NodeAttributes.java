@@ -26,12 +26,20 @@ public class NodeAttributes {
   // String, String, Boolean: key, value, negated
   private List<Triple<String, String, Boolean>> attributes;
   private Set<String> positiveAttributes;
+  // Some annotations, especially morpho freatures (CoreAnnotations.CoNLLUFeats)
+  // are represented by Maps.  In some cases it will be easier to search
+  // for individual elements of that map rather than turn the map into a string
+  // and search on its contents that way.  This is especially true since there
+  // is no guarantee the map will be in a consistent order.
+  // String, String, String: node attribute for a map (such as CoNLLUFeats), key in that map, value to match
+  private List<Triple<String, String, String>> contains;
 
   public NodeAttributes() {
     root = false;
     empty = false;
     attributes = new ArrayList<>();
     positiveAttributes = new HashSet<>();
+    contains = new ArrayList<>();
   }
 
   public void setRoot(boolean root) {
@@ -60,7 +68,15 @@ public class NodeAttributes {
     attributes.add(new Triple(key, value, negated));
   }
 
+  public void addContains(String annotation, String key, String value) {
+    contains.add(new Triple(annotation, key, value));
+  }
+
   public List<Triple<String, String, Boolean>> attributes() {
     return Collections.unmodifiableList(attributes);
+  }
+
+  public List<Triple<String, String, String>> contains() {
+    return Collections.unmodifiableList(contains);
   }
 }
