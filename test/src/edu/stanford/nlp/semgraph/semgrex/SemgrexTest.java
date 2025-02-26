@@ -7,10 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
@@ -220,6 +222,31 @@ public class SemgrexTest extends TestCase {
             "ate", "blueberry", "muffins");
     runTest("{word!:/.*i.*/}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
             "ate", "blueberry");
+  }
+
+  public void testBrokenContainsExpression() {
+    try {
+      // word is a String, not a Map, so this should throw a parse exception
+      SemgrexPattern pattern = SemgrexPattern.compile("{word@foo=bar}");
+      throw new AssertionError("Expected a SemgrexParseException");
+    } catch (SemgrexParseException e) {
+      // good
+    }
+  }
+
+  public void testContainsExpression() {
+    // morphofeatures is a Map, so this should work
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures@foo=bar}");
+    SemanticGraph graph = makeComplicatedGraph();
+    Set<IndexedWord> vertices = graph.vertexSet();
+    for (IndexedWord iw : vertices) {
+      if (iw.value().equals("D") || iw.value().equals("F")) {
+        CoNLLUFeatures feats = new CoNLLUFeatures();
+        feats.put("foo", "bar");
+        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
+      }
+    }
+    runTest(pattern, graph, "D", "F");
   }
 
   public void testReferencedRegex() {
