@@ -249,6 +249,29 @@ public class SemgrexTest extends TestCase {
     runTest(pattern, graph, "D", "F");
   }
 
+  public void testContainsRegexExpression() {
+    // morphofeatures is a Map, so this should work
+    SemanticGraph graph = makeComplicatedGraph();
+    Set<IndexedWord> vertices = graph.vertexSet();
+    for (IndexedWord iw : vertices) {
+      if (iw.value().equals("B") || iw.value().equals("D") || iw.value().equals("F")) {
+        CoNLLUFeatures feats = new CoNLLUFeatures();
+        feats.put("foo", "bar" + iw.value());
+        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
+      }
+    }
+
+    // test a positive regex
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures@foo=/bar[BD]/}");
+    runTest(pattern, graph, "B", "D");
+
+    // test a negative regex
+    // should match both the ones that don't have features
+    // and the ones that have a non-matching feature
+    pattern = SemgrexPattern.compile("{morphofeatures!@foo=/bar[BD]/}");
+    runTest(pattern, graph, "A", "C", "E", "F", "G", "H", "I", "J");
+  }
+
   public void testReferencedRegex() {
     runTest("{word:/Bill/}", "[ate subj>Bill obj>[bill det>the]]",
             "Bill");
