@@ -25,10 +25,10 @@ public class NodePattern extends SemgrexPattern  {
   private final GraphRelation reln;
   private final boolean negDesc;
   /**
-   *  A hash map from a key to a pair (case_sensitive_pattern, case_insensitive_pattern)
+   *  A list of Attribute - key, case_sensitive_pattern, case_insensitive_pattern, negated
+   *
    *  If the type of the entry is a String, then string comparison is safe.
-   *  If the type is a Boolean, it will always either match or not match corresponding to the Boolean
-   *  value.
+   *  If the type is a Boolean, it will always either match or not match corresponding to the Boolean value.
    *  Otherwise, the type will be a Pattern, and you must use Pattern.matches().
    */
   private final List<Attribute> attributes;
