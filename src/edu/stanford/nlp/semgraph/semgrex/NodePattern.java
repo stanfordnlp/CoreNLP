@@ -118,6 +118,35 @@ public class NodePattern extends SemgrexPattern  {
     this.variableGroups = Collections.unmodifiableList(variableGroups);
   }
 
+  private boolean checkMatch(Attribute attr, boolean ignoreCase, String nodeValue) {
+    if (nodeValue == null) {
+      // treat non-existent attributes has having matched a negated expression
+      // so for example, `cpos!:NUM` matches not having a cpos at all
+      return attr.negated;
+    }
+
+    // Get the node pattern
+    Object toMatch = ignoreCase ? attr.caseless : attr.cased;
+    boolean matches;
+    if (toMatch instanceof Boolean) {
+      matches = ((Boolean) toMatch);
+    } else if (toMatch instanceof String) {
+      if (ignoreCase) {
+        matches = nodeValue.equalsIgnoreCase(toMatch.toString());
+      } else {
+        matches = nodeValue.equals(toMatch.toString());
+      }
+    } else if (toMatch instanceof Pattern) {
+      matches = ((Pattern) toMatch).matcher(nodeValue).matches();
+    } else {
+      throw new IllegalStateException("Unknown matcher type: " + toMatch + " (of class + " + toMatch.getClass() + ")");
+    }
+    if (attr.negated) {
+      matches = !matches;
+    }
+    return matches;
+  }
+
   @SuppressWarnings("unchecked")
   public boolean nodeAttrMatch(IndexedWord node, final SemanticGraph sg, boolean ignoreCase) {
     // System.out.println(node.word());
@@ -152,29 +181,8 @@ public class NodePattern extends SemgrexPattern  {
         nodeValue = value.toString();
       // }
       // System.out.println(nodeValue);
-      if (nodeValue == null)
-        return negDesc;
 
-      // Get the node pattern
-      Object toMatch = ignoreCase ? attr.caseless : attr.cased;
-      boolean matches;
-      if (toMatch instanceof Boolean) {
-        matches = ((Boolean) toMatch);
-      } else if (toMatch instanceof String) {
-        if (ignoreCase) {
-          matches = nodeValue.equalsIgnoreCase(toMatch.toString());
-        } else {
-          matches = nodeValue.equals(toMatch.toString());
-        }
-      } else if (toMatch instanceof Pattern) {
-        matches = ((Pattern) toMatch).matcher(nodeValue).matches();
-      } else {
-        throw new IllegalStateException("Unknown matcher type: " + toMatch + " (of class + " + toMatch.getClass() + ")");
-      }
-      if (attr.negated) {
-        matches = !matches;
-      }
-
+      boolean matches = checkMatch(attr, ignoreCase, nodeValue);
       if (!matches) {
         // System.out.println("doesn't match");
         // System.out.println("");
