@@ -13,6 +13,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Quadruple;
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -91,10 +92,11 @@ public class NodePattern extends SemgrexPattern  {
       }
     }
 
-    for (Triple<String, String, String> entry : attrs.contains()) {
+    for (Quadruple<String, String, String, Boolean> entry : attrs.contains()) {
       String annotation = entry.first();
       String key = entry.second();
       String value = entry.third();
+      boolean negated = entry.fourth();
 
       Class<?> clazz = AnnotationLookup.getValueType(AnnotationLookup.toCoreKey(annotation));
       boolean isMap = clazz != null && Map.class.isAssignableFrom(clazz);
@@ -105,17 +107,18 @@ public class NodePattern extends SemgrexPattern  {
       final Attribute attr;
       // Add the attributes for this key
       if (value.equals("__")) {
-        attr = new Attribute(key, true, true, false);
+        attr = new Attribute(key, true, true, negated);
       } else if (value.matches("/.*/")) {
-        attr = buildRegexAttribute(key, value, false);
+        attr = buildRegexAttribute(key, value, negated);
       } else { // raw description
-        attr = new Attribute(key, value, value, false);
+        attr = new Attribute(key, value, value, negated);
       }
       partialAttributes.add(new Pair<>(annotation, attr));
 
       if (!descString.equals("{"))
         descString += ";";
-      descString += (annotation + "@" + key + "=" + value);
+      String separator = negated ? "!=" : "=";
+      descString += (annotation + "@" + key + separator + value);
     }
 
     if (attrs.root()) {
@@ -239,17 +242,19 @@ public class NodePattern extends SemgrexPattern  {
 
       Class clazz = Env.lookupAnnotationKey(env, annotation);
       Object rawmap = node.get(clazz);
-      // if the map is null, it can't possibly match...
+      final String nodeValue;
       if (rawmap == null) {
-        return negDesc;
-      }
-      if (!(rawmap instanceof Map))
-        throw new RuntimeException("Can only use partial attributes with Maps... this should have been checked at creation time!");
-      Map<String, ?> map = (Map) rawmap;
+        nodeValue = null;
+      } else {
+        if (!(rawmap instanceof Map))
+          throw new RuntimeException("Can only use partial attributes with Maps... this should have been checked at creation time!");
+        Map<String, ?> map = (Map) rawmap;
 
-      // TODO: allow for regex match on the keys?
-      Object value = map.get(attr.key);
-      final String nodeValue = (value == null) ? null : value.toString();
+        // TODO: allow for regex match on the keys?
+        Object value = map.get(attr.key);
+        nodeValue = (value == null) ? null : value.toString();
+      }
+
       boolean matches = checkMatch(attr, ignoreCase, nodeValue);
       if (!matches) {
         return negDesc;

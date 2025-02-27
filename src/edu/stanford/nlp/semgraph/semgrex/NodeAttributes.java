@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import edu.stanford.nlp.util.Quadruple;
 import edu.stanford.nlp.util.Triple;
 
 /**
@@ -31,8 +32,8 @@ public class NodeAttributes {
   // for individual elements of that map rather than turn the map into a string
   // and search on its contents that way.  This is especially true since there
   // is no guarantee the map will be in a consistent order.
-  // String, String, String: node attribute for a map (such as CoNLLUFeats), key in that map, value to match
-  private List<Triple<String, String, String>> contains;
+  // String, String, String, Boolean: node attribute for a map (such as CoNLLUFeats), key in that map, value to match, negated?
+  private List<Quadruple<String, String, String, Boolean>> contains;
 
   public NodeAttributes() {
     root = false;
@@ -68,15 +69,15 @@ public class NodeAttributes {
     attributes.add(new Triple(key, value, negated));
   }
 
-  public void addContains(String annotation, String key, String value) {
-    contains.add(new Triple(annotation, key, value));
+  public void addContains(String annotation, String key, String value, Boolean negated) {
+    contains.add(new Quadruple(annotation, key, value, negated));
   }
 
   public List<Triple<String, String, Boolean>> attributes() {
     return Collections.unmodifiableList(attributes);
   }
 
-  public List<Triple<String, String, String>> contains() {
+  public List<Quadruple<String, String, String, Boolean>> contains() {
     return Collections.unmodifiableList(contains);
   }
 }
