@@ -137,11 +137,11 @@ public class SplitWord extends SsurgeonEdit {
 
     // move all words down by nodeRegex.size() - 1
     // then move the original word down by headIndex
-    AddDep.moveNodes(sg, sm, x -> (x > matchedIndex), x -> x+nodeRegex.size() - 1, true);
+    SsurgeonUtils.moveNodes(sg, sm, x -> (x > matchedIndex), x -> x+nodeRegex.size() - 1, true);
     // the head node has its word replaced, and its index & links need
     // to be rearranged, but none of the links are added or removed
     if (headIndex > 0) {
-      AddDep.moveNode(sg, sm, matchedNode, matchedIndex + headIndex);
+      SsurgeonUtils.moveNode(sg, sm, matchedNode, matchedIndex + headIndex);
     }
     matchedNode = sm.getNode(node);
     matchedNode.setWord(words.get(headIndex));

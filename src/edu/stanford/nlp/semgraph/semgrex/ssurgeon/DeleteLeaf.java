@@ -44,7 +44,7 @@ public class DeleteLeaf extends SsurgeonEdit {
     boolean deletedNode = sg.removeVertex(tgtNode);
     // renumber the indices
     if (deletedNode) {
-      AddDep.moveNodes(sg, sm, x -> (x >= deletedIndex), x -> x-1, false);
+      SsurgeonUtils.moveNodes(sg, sm, x -> (x >= deletedIndex), x -> x-1, false);
     }
     return deletedEdge || deletedNode;
   }

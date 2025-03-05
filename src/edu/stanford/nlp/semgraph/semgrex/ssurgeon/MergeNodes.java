@@ -161,7 +161,7 @@ public class MergeNodes extends SsurgeonEdit {
     }
 
     // reindex everyone
-    AddDep.moveNodes(sg, sm, x -> (x >= dep.index()), x -> x-1, false);
+    SsurgeonUtils.moveNodes(sg, sm, x -> (x >= dep.index()), x -> x-1, false);
 
     return true;
   }

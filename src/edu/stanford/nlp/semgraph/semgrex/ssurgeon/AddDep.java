@@ -2,16 +2,12 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import java.io.StringWriter;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
-import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 
 /**
@@ -90,72 +86,6 @@ public class AddDep extends SsurgeonEdit {
     return buf.toString();
   }
 
-  // TODO: make the updating of named nodes & edges faster,
-  // possibly by building a cache from node/edge to name?
-  public static void moveNode(SemanticGraph sg, SemgrexMatcher sm, IndexedWord word, int newIndex) {
-    List<SemanticGraphEdge> outgoing = sg.outgoingEdgeList(word);
-    List<SemanticGraphEdge> incoming = sg.incomingEdgeList(word);
-    boolean isRoot = sg.isRoot(word);
-    sg.removeVertex(word);
-
-    IndexedWord newWord = new IndexedWord(word.backingLabel());
-    newWord.setIndex(newIndex);
-
-    // could be more expensive than necessary if we move multiple roots,
-    // but the expectation is there is usually only the 1 root
-    if (isRoot) {
-      Set<IndexedWord> newRoots = new HashSet<>(sg.getRoots());
-      newRoots.remove(word);
-      newRoots.add(newWord);
-      sg.setRoots(newRoots);
-    }
-
-    for (String name : sm.getNodeNames()) {
-      if (sm.getNode(name) == word) {
-        sm.putNode(name, newWord);
-      }
-    }
-
-    for (SemanticGraphEdge oldEdge : outgoing) {
-      SemanticGraphEdge newEdge = new SemanticGraphEdge(newWord, oldEdge.getTarget(), oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
-
-      for (String name : sm.getEdgeNames()) {
-        if (sm.getEdge(name) == oldEdge) {
-          sm.putNamedEdge(name, newEdge);
-        }
-      }
-
-      sg.addEdge(newEdge);
-    }
-
-    for (SemanticGraphEdge oldEdge : incoming) {
-      SemanticGraphEdge newEdge = new SemanticGraphEdge(oldEdge.getSource(), newWord, oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
-
-      for (String name : sm.getEdgeNames()) {
-        if (sm.getEdge(name) == oldEdge) {
-          sm.putNamedEdge(name, newEdge);
-        }
-      }
-
-      sg.addEdge(newEdge);
-    }
-  }
-
-  /**
-   * reverse: operate in reverse order, highest index to first.  You want true if moving indices up, false if moving indices down
-   */
-  public static void moveNodes(SemanticGraph sg, SemgrexMatcher sm, Function<Integer, Boolean> shouldMove, Function<Integer, Integer> destination, boolean reverse) {
-    // iterate first, then move, so that we don't screw up the graph while iterating
-    List<IndexedWord> toMove = sg.vertexSet().stream().filter(x -> shouldMove.apply(x.index())).collect(Collectors.toList());
-    Collections.sort(toMove);
-    if (reverse) {
-      Collections.reverse(toMove);
-    }
-    for (IndexedWord word : toMove) {
-      moveNode(sg, sm, word, destination.apply(word.index()));
-    }
-  }
-
   /**
    * TODO: bombproof if this gov, dep, and reln already exist.
    */
@@ -210,8 +140,8 @@ public class AddDep extends SsurgeonEdit {
     if (position != null && !position.equals("+")) {
       // the payoff for tempIndex == maxIndex + 2:
       // everything will be moved one higher, unless it's the new node
-      moveNodes(sg, sm, x -> (x >= newIndex && x != tempIndex), x -> x+1, true);
-      moveNode(sg, sm, newNode, newIndex);
+      SsurgeonUtils.moveNodes(sg, sm, x -> (x >= newIndex && x != tempIndex), x -> x+1, true);
+      SsurgeonUtils.moveNode(sg, sm, newNode, newIndex);
     }
 
     return true;
