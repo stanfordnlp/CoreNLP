@@ -2089,6 +2089,48 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test splitWord, which should split a word into pieces based on regex matches, with the head at position 1
+   */
+  @Test
+  public void readXMLReindexGraph() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Reindex all nodes to have a base index of 1</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{$}") + "</semgrex>",
+                             "    <edit-list>reindexGraph</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[example-5 det> the-2 amod> foobar-4]");
+    SemanticGraph newSg = pattern.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[example-3 det> the-1 amod> foobar-2]");
+
+    Map<String, Integer> expectedIndices = new HashMap<String, Integer>() {{
+        put("example", 3);
+        put("the", 1);
+        put("foobar", 2);
+      }};
+    // iterate & assert the indices separately so that if something goes wrong,
+    // it is clear what the error is
+    // the indices are supposed to be remapped to be 1, 2, 3
+    for (IndexedWord vertex : newSg.vertexSet()) {
+      assertTrue(expectedIndices.containsKey(vertex.word()));
+      int index = vertex.index();
+      int expectedIndex = expectedIndices.get(vertex.word());
+      assertEquals(index, expectedIndex);
+    }
+
+    assertEquals(newSg, expected);
+  }
+
+  /**
    * Test splitWord, which should split a word into pieces based on regex matches, with three pieces
    */
   @Test

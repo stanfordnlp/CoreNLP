@@ -92,6 +92,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code delete -node node}
  * <li> {@code deleteLeaf -node node}
  * <li> {@code killNonRootedNodes}
+ * <li> {@code reindexGraph}
  * </ul>
  *
  *<p>
@@ -177,7 +178,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * If the node is not a leaf (no outgoing edges), it will not be deleted.
  *</p><p>
  * {@code killNonRootedNodes} searches the graph and deletes all nodes which have no path to a root.
- *</p>
+ *</p><p>
+ * {@code reindexGraph} reindexes the graph from 1 in case there are gaps or the node indices start later than 1.  (Warning: does not work for first index less than 1)
+ *</P>
  *<p>
  * A practical example comes from the {@code UD_English-Pronouns}
  * dataset, where some words had both {@code nsubj} and {@code csubj}
@@ -627,6 +630,8 @@ public class Ssurgeon  {
       } else if (command.equalsIgnoreCase(SplitWord.LABEL)) {
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
         return new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln, argsBox.name);
+      } else if (command.equalsIgnoreCase(ReindexGraph.LABEL)) {
+        return new ReindexGraph();
       }
       throw new SsurgeonParseException("Error in SsurgeonEdit.parseEditLine: command '"+command+"' is not supported");
     } catch (SsurgeonParseException e) {
