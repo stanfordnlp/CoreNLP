@@ -117,8 +117,10 @@ public class NodePattern extends SemgrexPattern  {
 
       if (!descString.equals("{"))
         descString += ";";
-      String separator = negated ? "!=" : "=";
-      descString += (annotation + "@" + key + separator + value);
+      String separator = negated ? "!:" : ":";
+      // TODO: the descString might look nicer if multiple contains
+      // for the same attribute were collapsed into the same map
+      descString += (annotation + ":{" + key + ":" + value + "}");
     }
 
     if (attrs.root()) {

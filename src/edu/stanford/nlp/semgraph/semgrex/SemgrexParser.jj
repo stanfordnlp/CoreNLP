@@ -274,24 +274,36 @@ void AddAttribute(NodeAttributes attributes) : {
 	Token key = null;
 	Token value = null;
         Token attrType = null;
+        boolean negated = false;
 } {
         (attr = <IDENTIFIER>
            (( (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>) {
              if (attr != null && value != null) {
-               boolean negated = attrType.image.equals("!:");
+               negated = attrType.image.equals("!:");
                attributes.setAttribute(attr.image, value.image, negated);
              }
            }) 
            |
-           (attrType = "@" | attrType = "!@") (key = <IDENTIFIER>) "=" (value = <IDENTIFIER> | value = <REGEX>)
+           ( ":{"
+           ((key = <IDENTIFIER>) (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>)
            {
              if (attr == null || key == null || value == null) {
                throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +
                                                " key=" + key + " value=" + value);
              }
-             boolean negated = attrType.image.equals("!@");
+             negated = attrType.image.equals("!:");
              attributes.addContains(attr.image, key.image, value.image, negated);
            })
+           ( ";" (key = <IDENTIFIER>) (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>)
+           {
+             if (attr == null || key == null || value == null) {
+               throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +
+                                               " key=" + key + " value=" + value);
+             }
+             negated = attrType.image.equals("!:");
+             attributes.addContains(attr.image, key.image, value.image, negated);
+           })*
+           "}" ))
         )
 	|
 	( attr = <ROOT> { attributes.setRoot(true); } )
