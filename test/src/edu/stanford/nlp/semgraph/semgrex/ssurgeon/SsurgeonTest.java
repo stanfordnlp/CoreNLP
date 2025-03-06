@@ -2294,5 +2294,7 @@ public class SsurgeonTest {
   @Test
   public void annotationNamesTest() {
     assertNull(AnnotationLookup.toCoreKey(Ssurgeon.REMOVE));
+    assertNull(AnnotationLookup.toCoreKey(Ssurgeon.UPDATE_MORPHO_FEATURES));
+    assertNull(AnnotationLookup.toCoreKey(Ssurgeon.UPDATE_MORPHO_FEATURES_LOWER));
   }
 }
