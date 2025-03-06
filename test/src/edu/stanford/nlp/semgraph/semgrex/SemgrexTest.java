@@ -227,7 +227,7 @@ public class SemgrexTest extends TestCase {
   public void testBrokenContainsExpression() {
     try {
       // word is a String, not a Map, so this should throw a parse exception
-      SemgrexPattern pattern = SemgrexPattern.compile("{word@foo=bar}");
+      SemgrexPattern pattern = SemgrexPattern.compile("{word{foo=bar}}");
       throw new AssertionError("Expected a SemgrexParseException");
     } catch (SemgrexParseException e) {
       // good
@@ -236,7 +236,7 @@ public class SemgrexTest extends TestCase {
 
   public void testContainsExpression() {
     // morphofeatures is a Map, so this should work
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures@foo=bar}");
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:bar}}");
     SemanticGraph graph = makeComplicatedGraph();
     Set<IndexedWord> vertices = graph.vertexSet();
     for (IndexedWord iw : vertices) {
@@ -262,14 +262,36 @@ public class SemgrexTest extends TestCase {
     }
 
     // test a positive regex
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures@foo=/bar[BD]/}");
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:/bar[BD]/}}");
     runTest(pattern, graph, "B", "D");
 
     // test a negative regex
     // should match both the ones that don't have features
     // and the ones that have a non-matching feature
-    pattern = SemgrexPattern.compile("{morphofeatures!@foo=/bar[BD]/}");
+    pattern = SemgrexPattern.compile("{morphofeatures:{foo!:/bar[BD]/}}");
     runTest(pattern, graph, "A", "C", "E", "F", "G", "H", "I", "J");
+  }
+
+  public void testDoubleContainsExpression() {
+    // morphofeatures is a Map, so this should work
+    SemanticGraph graph = makeComplicatedGraph();
+    Set<IndexedWord> vertices = graph.vertexSet();
+    for (IndexedWord iw : vertices) {
+      if (iw.value().equals("B") || iw.value().equals("D") || iw.value().equals("F")) {
+        CoNLLUFeatures feats = new CoNLLUFeatures();
+        feats.put("foo", "bar");
+        feats.put("name", iw.value());
+        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
+      }
+    }
+
+    // test a positive regex
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:/bar/;name:/[BD]/}}");
+    runTest(pattern, graph, "B", "D");
+
+    // test one positive, one negative regex
+    pattern = SemgrexPattern.compile("{morphofeatures:{foo:/bar/;name!:/[BD]/}}");
+    runTest(pattern, graph, "F");
   }
 
   public void testReferencedRegex() {
