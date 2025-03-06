@@ -418,6 +418,7 @@ public class Ssurgeon  {
   public static final String POSITION_ARG = "-position";
   public static final String UPDATE_MORPHO_FEATURES = "-updateMorphoFeatures";
   public static final String UPDATE_MORPHO_FEATURES_LOWER = "-updatemorphofeatures";
+  public static final String REMOVE = "-remove";
 
 
   // args for Ssurgeon edits, allowing us to not
@@ -450,6 +451,8 @@ public class Ssurgeon  {
     public Integer headIndex = null;
 
     public Map<String, String> annotations = new TreeMap<>();
+
+    public List<String> remove = new ArrayList<>();
   }
 
   /**
@@ -530,6 +533,9 @@ public class Ssurgeon  {
         case UPDATE_MORPHO_FEATURES_LOWER:
           argsBox.updateMorphoFeatures = argsValue;
           break;
+        case REMOVE:
+          argsBox.remove.add(argsValue);
+          break;
         default:
           String key = argsKey.substring(1);
           Class<? extends CoreAnnotation<?>> annotation = AnnotationLookup.toCoreKey(key);
@@ -595,7 +601,7 @@ public class Ssurgeon  {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");
         }
-        return new EditNode(argsBox.nodes.get(0), argsBox.annotations, argsBox.updateMorphoFeatures);
+        return new EditNode(argsBox.nodes.get(0), argsBox.annotations, argsBox.updateMorphoFeatures, argsBox.remove);
       } else if (command.equalsIgnoreCase(Lemmatize.LABEL)) {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make a Lemmatize out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");

@@ -1495,6 +1495,93 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test that trying to build an EditNode with an illegal removed attribute fails
+   */
+  @Test
+  public void readXMLEditNodeIllegalRemove() {
+    // sanity check that the key we will use does not actually mean anything
+    String missingKey = "zzzzzz";
+    assertNull(AnnotationLookup.toCoreKey(missingKey));
+
+    try {
+      Ssurgeon inst = Ssurgeon.inst();
+      String remove = String.join(newline,
+                                  "<ssurgeon-pattern-list>",
+                                  "  <ssurgeon-pattern>",
+                                  "    <uid>38</uid>",
+                                  "    <notes>Edit a node</notes>",
+                                  "    <semgrex>" + XMLUtils.escapeXML("{word:blue}=blue") + "</semgrex>",
+                                  "    <edit-list>EditNode -node blue -remove " + missingKey + "</edit-list>",
+                                  "  </ssurgeon-pattern>",
+                                  "</ssurgeon-pattern-list>");
+      inst.readFromString(remove);
+      throw new AssertionError("Expected a parse exception!");
+    } catch(SsurgeonParseException e) {
+      // yay
+    }
+  }
+
+  /**
+   * Check that we can add and remove lemmas using EditNode
+   *
+   * Specially testing that the remove functionality works
+   */
+  @Test
+  public void readXMLEditNodeRemove() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // use "dep" as the dependency so as to be language-agnostic in this test
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Edit a node</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:blue}=blue") + "</semgrex>",
+                             "    <edit-list>EditNode -node blue -lemma blue</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern editSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
+    IndexedWord blueVertex = sg.getNodeByIndexSafe(3);
+    assertEquals("blue", blueVertex.value());
+    assertNull(blueVertex.lemma());
+
+    SemanticGraph newSG = editSsurgeon.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]");
+    assertEquals(expected, newSG);
+    // this ssurgeon will fix the color of the antennae
+    blueVertex = newSG.getNodeByIndexSafe(3);
+    assertNotNull(blueVertex);
+    assertNull(blueVertex.tag());
+    assertEquals("blue", blueVertex.value());
+    assertEquals("blue", blueVertex.lemma());
+
+    String remove = String.join(newline,
+                                "<ssurgeon-pattern-list>",
+                                "  <ssurgeon-pattern>",
+                                "    <uid>38</uid>",
+                                "    <notes>Edit a node</notes>",
+                                "    <semgrex>" + XMLUtils.escapeXML("{word:blue}=blue") + "</semgrex>",
+                                "    <edit-list>EditNode -node blue -remove lemma</edit-list>",
+                                "  </ssurgeon-pattern>",
+                                "</ssurgeon-pattern-list>");
+    patterns = inst.readFromString(remove);
+    assertEquals(patterns.size(), 1);
+    editSsurgeon = patterns.get(0);
+
+    SemanticGraph noLemmaSG = editSsurgeon.iterate(newSG).first;
+    assertEquals(expected, noLemmaSG);
+    blueVertex = noLemmaSG.getNodeByIndexSafe(3);
+    assertNotNull(blueVertex);
+    assertNull(blueVertex.tag());
+    assertEquals("blue", blueVertex.value());
+    assertNull(blueVertex.lemma());
+  }
+
+  /**
    * A couple tests of updating the morpho map on a word using EditNode
    * <br>
    * -updateMorphoFeatures should update w/o overwriting the whole map
@@ -2199,5 +2286,13 @@ public class SsurgeonTest {
       System.out.println("Modified = "+newSg.toCompactString());
     String firstGraphString = newSgs.iterator().next().toCompactString().trim();
     assertEquals("[bartender nsubj>Joe det>the cop>is]", firstGraphString);
+  }
+
+  /**
+   * Test that a couple fields used in Ssurgeon don't conflict with annotation keys in AnnotationLookup
+   */
+  @Test
+  public void annotationNamesTest() {
+    assertNull(AnnotationLookup.toCoreKey(Ssurgeon.REMOVE));
   }
 }
