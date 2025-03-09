@@ -53,6 +53,16 @@ import edu.stanford.nlp.util.logging.Redwood;
  * The special case of an empty text can be tested for with an empty regex.
  * For example, words marked with {@code SpaceAfter=no} will have a blank {@code after} attribute.
  * {@code {after://}} will search for this.
+ * <br>
+ * It is now also possible to negate individual attributes in Semgrex with {@code !:}
+ * For example, this expression will search for a NOUN which is not "boy":
+ * {@code {lemma!:boy;pos:NOUN}}
+ * <br>
+ * Attributes which are maps, in particular the morphological
+ * features, can be searched by writing a map, such as
+ * {@code {morphofeatures:{Tense:Past;Person!:3}}}
+ * This expression will
+ * search for words which are past tense but are not in 3rd person.
  * <h3>Relations</h3>
  *
  * Relations are defined by a symbol representing the type of relationship and a

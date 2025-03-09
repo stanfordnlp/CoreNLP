@@ -140,6 +140,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *   {@code -updateMorphoFeatures ...} will edit or add the features without overwriting existing features.
  *   TODO: if anyone needs the ability to remove features without resetting the entire features map,
  *   please file an issue on github.
+ *   {@code -remove ...} will remove the attribute entirely, such as doing {@code -remove lemma} to remove the lemma.
  *</p><p>
  * {@code lemmatize} will put a lemma on a word.
  * {@code -node} is the node to edit.
