@@ -1435,8 +1435,19 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
         throw new IllegalArgumentException("Expected HasTags, got " +
                                            hw.getClass());
       }
+      sb.append(word);
+      sb.append('\t');
+      if (outputLemmas) {
+        if (!(hw instanceof HasLemma)) {
+          throw new IllegalArgumentException("Expected HasLemma with the outputLemmas set, but got class " + hw.getClass());
+        }
+        String lemma = ((HasLemma) hw).lemma();
+        sb.append(lemma);
+        sb.append("\t");
+      }
       String tag = ((HasTag) hw).tag();
-      sb.append(word).append('\t').append(tag).append('\n');
+      sb.append(tag);
+      sb.append('\n');
     }
     sb.append('\n');
     return sb.toString();
