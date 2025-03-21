@@ -227,11 +227,16 @@ public class SemgrexTest extends TestCase {
   public void testBrokenContainsExpression() {
     try {
       // word is a String, not a Map, so this should throw a parse exception
-      SemgrexPattern pattern = SemgrexPattern.compile("{word{foo=bar}}");
+      SemgrexPattern pattern = SemgrexPattern.compile("{word:{foo:bar}}");
       throw new AssertionError("Expected a SemgrexParseException");
     } catch (SemgrexParseException e) {
       // good
     }
+
+    // this one should work.  we run it here to verify the test was
+    // valid, as opposed to getting a SemgrexParseException because
+    // this wasn't even following proper contains syntax
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:bar}}");
   }
 
   public void testContainsExpression() {
