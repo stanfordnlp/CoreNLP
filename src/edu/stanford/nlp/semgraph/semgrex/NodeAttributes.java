@@ -12,7 +12,7 @@ import edu.stanford.nlp.util.Triple;
 /**
  * Stores attributes for a Semgrex NodePattern.
  *<br>
- * Refactored out of the parser itself for a couple reason:
+ * Refactored out of the parser itself for a couple reasons:
  *<ul>
  *<li> Allows combining isRoot ($) with node restrictions (word:foo)
  *<li> Can pass this object around, allowing for more refactoring in the semgrex parser
@@ -60,10 +60,10 @@ public class NodeAttributes {
   }
 
   public void setAttribute(String key, String value, boolean negated) {
-    if (positiveAttributes.contains(key)) {
-      throw new SemgrexParseException("Duplicate attribute " + key + " found in semgrex expression");
-    }
     if (!negated) {
+      if (positiveAttributes.contains(key)) {
+        throw new SemgrexParseException("Duplicate attribute " + key + " found in semgrex expression");
+      }
       positiveAttributes.add(key);
     }
     attributes.add(new Triple(key, value, negated));

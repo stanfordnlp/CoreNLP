@@ -1207,6 +1207,34 @@ public class SemgrexTest extends TestCase {
     }
   }
 
+  public void testDuplicateConstraints() {
+    // There should be an exception if the same attribute shows up
+    // twice as a positive attribute
+    // Although it isn't clear that's necessary,
+    // since both portions could be regex which match different things
+    try {
+      String pattern = "{word:foo;word:bar}";
+      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+      throw new RuntimeException("This expression is now illegal");
+    } catch (SemgrexParseException e) {
+      // yay
+    }
+
+    // this should parse since negative constraints which
+    // match positive constraints are allowed
+    String pattern = "{word:/.*i.*/;word!:/.*m.*/}";
+    SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+    runTest(pattern,
+            "[ate/NN subj>Bill/NN obj>[muffins compound>blueberry]]",
+            "Bill/NN");
+
+    pattern = "{word:/.*i.*/;word!:/.*z.*/}";
+    semgrex = SemgrexPattern.compile(pattern);
+    runTest(pattern,
+            "[ate/NN subj>Bill/NN obj>[muffins compound>blueberry]]",
+            "Bill/NN", "muffins");
+  }
+
   public void testAdjacent() {
     // test using a colon expression so that the targeted nodes
     // are the nodes which show up
