@@ -333,7 +333,10 @@ public class StanfordCoreNLPServer implements Runnable {
         return annotation;
       case "serialized":
         String inputSerializerName = props.getProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
-        AnnotationSerializer serializer = MetaClass.create(inputSerializerName).createInstance();
+        if (!inputSerializerName.equals(ProtobufAnnotationSerializer.class.getName())) {
+          throw new IOException("Specifying an inputSerializer other than ProtobufAnnotationSerializer is now deprecated for security reasons.  See https://github.com/stanfordnlp/CoreNLP/security/advisories/GHSA-wv35-hv9v-526p  If you have need for a different class, please post about your use case on the CoreNLP github.");
+        }
+        AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
         Pair<Annotation, InputStream> pair = serializer.read(httpExchange.getRequestBody());
         return pair.first;
       default:
