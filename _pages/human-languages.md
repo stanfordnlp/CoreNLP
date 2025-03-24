@@ -33,13 +33,13 @@ The jars for each language can be found here:
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
-| Arabic  | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.8-models-arabic.jar) | 4.5.8 |
-| Chinese | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.8-models-chinese.jar) | 4.5.8 |
-| French | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.8-models-french.jar) | 4.5.8 |
-| German | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.8-models-german.jar) | 4.5.8 |
-| Hungarian | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.8-models-hungarian.jar) | 4.5.8 |
-| Italian | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.8-models-italian.jar) | 4.5.8 |
-| Spanish | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.8-models-spanish.jar) | 4.5.8 |
+| Arabic  | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-arabic.jar) | 4.5.9 |
+| Chinese | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-chinese.jar) | 4.5.9 |
+| French | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-french.jar) | 4.5.9 |
+| German | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-german.jar) | 4.5.9 |
+| Hungarian | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-hungarian.jar) | 4.5.9 |
+| Italian | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-italian.jar) | 4.5.9 |
+| Spanish | [download](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-spanish.jar) | 4.5.9 |
 
 #### Running pipelines
 
