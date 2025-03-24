@@ -41,6 +41,9 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2025-03-23    4.5.9     Additional Semgrex / SSurgeon features and a
+                        security patch recommended for deserialization
+
 2024-12-11    4.5.8     Update paths to reflect an internal file 
                         server dying.  Add brat demo files to distrib 
                         to reduce dependencies on nlp.stanford.edu.  
