@@ -156,7 +156,7 @@ and write "Stanford NLP Group open source software" in the Special Instructions.
 
 If you&rsquo;re just running the CoreNLP pipeline, please cite this CoreNLP paper:
 
-> Manning, Christopher D., Mihai Surdeanu, John Bauer, Jenny Finkel, Steven J. Bethard, and David McClosky. 2014. [The Stanford CoreNLP Natural Language Processing Toolkit](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf) In *Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics: System Demonstrations*, pp. 55-60. \[[pdf](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.bib)\]
+> Manning, Christopher D., Mihai Surdeanu, John Bauer, Jenny Finkel, Steven J. Bethard, and David McClosky. 2014. [The Stanford CoreNLP Natural Language Processing Toolkit](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf) In *Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics: System Demonstrations*, pp. 55-60. \[[pdf](https://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf)\] \[[bib](https://nlp.stanford.edu/pubs/StanfordCoreNlp2014.bib)\]
 
 If you&rsquo;re dealing in depth with particular annotators,
 you&rsquo;re also encouraged to cite the papers that cover individual
