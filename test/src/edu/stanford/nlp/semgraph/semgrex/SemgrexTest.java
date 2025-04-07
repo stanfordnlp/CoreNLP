@@ -254,6 +254,78 @@ public class SemgrexTest extends TestCase {
     runTest(pattern, graph, "D", "F");
   }
 
+  public void testContainsRegexKeyExpression() {
+    // morphofeatures is a Map, so this should work
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/foo/:bar}}");
+    SemanticGraph graph = makeComplicatedGraph();
+    Set<IndexedWord> vertices = graph.vertexSet();
+    for (IndexedWord iw : vertices) {
+      if (iw.value().equals("D") || iw.value().equals("F")) {
+        CoNLLUFeatures feats = new CoNLLUFeatures();
+        feats.put("foo", "bar");
+        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
+      }
+    }
+    runTest(pattern, graph, "D", "F");
+  }
+
+  public void testContainsRegexKeyPartialMatchExpression() {
+    // morphofeatures is a Map, so this should work
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/.*o.*/:bar}}");
+    SemanticGraph graph = makeComplicatedGraph();
+    Set<IndexedWord> vertices = graph.vertexSet();
+    for (IndexedWord iw : vertices) {
+      if (iw.value().equals("D") || iw.value().equals("F")) {
+        CoNLLUFeatures feats = new CoNLLUFeatures();
+        feats.put("foo", "bar");
+        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
+      }
+    }
+    runTest(pattern, graph, "D", "F");
+  }
+
+  public void testContainsRegexKeyMultipleMatchExpression() {
+    // morphofeatures is a Map, so this should work
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/.*o.*/:bar}}");
+    SemanticGraph graph = makeComplicatedGraph();
+    Set<IndexedWord> vertices = graph.vertexSet();
+    for (IndexedWord iw : vertices) {
+      if (iw.value().equals("D") || iw.value().equals("F")) {
+        CoNLLUFeatures feats = new CoNLLUFeatures();
+        feats.put("zoo", "car");
+        feats.put("foo", "bar");
+        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
+      }
+      if (iw.value().equals("C") || iw.value().equals("E")) {
+        CoNLLUFeatures feats = new CoNLLUFeatures();
+        feats.put("zoo", "car");
+        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
+      }
+    }
+    runTest(pattern, graph, "D", "F");
+  }
+
+  public void testContainsRegexKeyNegatedMatchExpression() {
+    // morphofeatures is a Map, so this should work
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/.*o.*/!:bar}}");
+    SemanticGraph graph = makeComplicatedGraph();
+    Set<IndexedWord> vertices = graph.vertexSet();
+    for (IndexedWord iw : vertices) {
+      if (iw.value().equals("D") || iw.value().equals("F")) {
+        CoNLLUFeatures feats = new CoNLLUFeatures();
+        feats.put("zoo", "car");
+        feats.put("foo", "bar");
+        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
+      }
+      if (iw.value().equals("C") || iw.value().equals("E")) {
+        CoNLLUFeatures feats = new CoNLLUFeatures();
+        feats.put("zoo", "car");
+        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
+      }
+    }
+    runTest(pattern, graph, "A", "B", "C", "E", "G", "H", "I", "J");
+  }
+
   public void testContainsRegexExpression() {
     // morphofeatures is a Map, so this should work
     SemanticGraph graph = makeComplicatedGraph();

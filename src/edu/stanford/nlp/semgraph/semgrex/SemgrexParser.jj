@@ -285,7 +285,7 @@ void AddAttribute(NodeAttributes attributes) : {
            }) 
            |
            ( ":{"
-           ((key = <IDENTIFIER>) (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>)
+           ((key = <IDENTIFIER> | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>)
            {
              if (attr == null || key == null || value == null) {
                throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +
@@ -294,7 +294,7 @@ void AddAttribute(NodeAttributes attributes) : {
              negated = attrType.image.equals("!:");
              attributes.addContains(attr.image, key.image, value.image, negated);
            })
-           ( ";" (key = <IDENTIFIER>) (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>)
+           ( ";" (key = <IDENTIFIER> | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>)
            {
              if (attr == null || key == null || value == null) {
                throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +

@@ -39,6 +39,7 @@ public class NodePattern extends SemgrexPattern  {
    * and only partial matches are necessary
    */
   private final List<Pair<String, Attribute>> partialAttributes;
+  private final List<RegexPartialAttribute> regexPartialAttributes;
   private final boolean isRoot;
   private final boolean isLink;
   private final boolean isEmpty;
@@ -67,6 +68,7 @@ public class NodePattern extends SemgrexPattern  {
     this.attributes = new ArrayList<>();
     // same with partial attributes
     this.partialAttributes = new ArrayList<>();
+    this.regexPartialAttributes = new ArrayList<>();
 
     descString = "{";
     for (Triple<String, String, Boolean> entry : attrs.attributes()) {
@@ -105,15 +107,21 @@ public class NodePattern extends SemgrexPattern  {
       }
 
       final Attribute attr;
-      // Add the attributes for this key
-      if (value.equals("__")) {
-        attr = new Attribute(key, true, true, negated);
-      } else if (value.matches("/.*/")) {
-        attr = buildRegexAttribute(key, value, negated);
-      } else { // raw description
-        attr = new Attribute(key, value, value, negated);
+      if (key.equals("__")) {
+        regexPartialAttributes.add(new RegexPartialAttribute(annotation, "/.*/", value, negated));
+      } else if (key.matches("/.*/")) {
+        regexPartialAttributes.add(new RegexPartialAttribute(annotation, key, value, negated));
+      } else {
+        // Add the attributes for this key
+        if (value.equals("__")) {
+          attr = new Attribute(key, true, true, negated);
+        } else if (value.matches("/.*/")) {
+          attr = buildRegexAttribute(key, value, negated);
+        } else { // raw description
+          attr = new Attribute(key, value, value, negated);
+        }
+        partialAttributes.add(new Pair<>(annotation, attr));
       }
-      partialAttributes.add(new Pair<>(annotation, attr));
 
       if (!descString.equals("{"))
         descString += ";";
@@ -258,6 +266,22 @@ public class NodePattern extends SemgrexPattern  {
       }
 
       boolean matches = checkMatch(attr, ignoreCase, nodeValue);
+      if (!matches) {
+        return negDesc;
+      }
+    }
+    for (RegexPartialAttribute partialAttribute : regexPartialAttributes) {
+      Class clazz = Env.lookupAnnotationKey(env, partialAttribute.annotation);
+      Object rawmap = node.get(clazz);
+      final Map<?, ?> map;
+      if (rawmap == null) {
+        map = null;
+      } else {
+        if (!(rawmap instanceof Map))
+          throw new RuntimeException("Can only use partial attributes with Maps... this should have been checked at creation time!");
+        map = (Map) rawmap;
+      }
+      boolean matches = partialAttribute.checkMatches(map, ignoreCase);
       if (!matches) {
         return negDesc;
       }
