@@ -138,8 +138,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code ...attributes...} are the attributes to change, same as with {@code addDep}
  *   {@code -morphofeatures ...} will set the features to be exactly as written.
  *   {@code -updateMorphoFeatures ...} will edit or add the features without overwriting existing features.
- *   TODO: if anyone needs the ability to remove features without resetting the entire features map,
- *   please file an issue on github.
+ *   {@code -removeMorphoFeatures ...} will remove this one morpho feature.
  *   {@code -remove ...} will remove the attribute entirely, such as doing {@code -remove lemma} to remove the lemma.
  *</p><p>
  * {@code lemmatize} will put a lemma on a word.
@@ -230,6 +229,18 @@ relabelNamedEdge -edge bad -reln advcl
   addDep -gov antennae -reln dep -word blue
 }
 </pre>
+ * Some patterns which leave the node in the same format will bomb because of the way the dirty bit works.  For example:
+<pre>
+{@code
+{word:/pattern/;cpos:VERB;morphofeatures:{VerbForm:Inf}}=word
+EditNode -node word -remove morphofeatures
+EditNode -node word -updatemorphofeatures Aspect=Imp -updatemorphofeatures VerbForm=Inf
+}
+</pre>
+ * Here, the end result will be the same after at most one iteration through the loop,
+ * but {@code -remove morphofeatures} sets the dirty bit and does not go away
+ * when {@code -updatemorphofeatures} puts back the deleted features.
+ * TODO: this one at least can be fixed
  *
  * @author Eric Yeh
  */
@@ -420,6 +431,7 @@ public class Ssurgeon  {
   public static final String UPDATE_MORPHO_FEATURES = "-updateMorphoFeatures";
   public static final String UPDATE_MORPHO_FEATURES_LOWER = "-updatemorphofeatures";
   public static final String REMOVE = "-remove";
+  public static final String REMOVE_MORPHO_FEATURES = "-removeMorphoFeatures";
 
 
   // args for Ssurgeon edits, allowing us to not
@@ -454,6 +466,8 @@ public class Ssurgeon  {
     public Map<String, String> annotations = new TreeMap<>();
 
     public List<String> remove = new ArrayList<>();
+
+    public List<String> removeMorphoFeatures = new ArrayList<>();
   }
 
   /**
@@ -537,6 +551,9 @@ public class Ssurgeon  {
         case REMOVE:
           argsBox.remove.add(argsValue);
           break;
+        case REMOVE_MORPHO_FEATURES:
+          argsBox.removeMorphoFeatures.add(argsValue);
+          break;
         default:
           String key = argsKey.substring(1);
           Class<? extends CoreAnnotation<?>> annotation = AnnotationLookup.toCoreKey(key);
@@ -602,7 +619,7 @@ public class Ssurgeon  {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");
         }
-        return new EditNode(argsBox.nodes.get(0), argsBox.annotations, argsBox.updateMorphoFeatures, argsBox.remove);
+        return new EditNode(argsBox.nodes.get(0), argsBox.annotations, argsBox.updateMorphoFeatures, argsBox.remove, argsBox.removeMorphoFeatures);
       } else if (command.equalsIgnoreCase(Lemmatize.LABEL)) {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make a Lemmatize out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");

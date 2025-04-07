@@ -25,10 +25,11 @@ public class EditNode extends SsurgeonEdit {
 
   final String nodeName;
   final List<String> removedAttributes;
+  final List<String> removedMorpho;
   final Map<String, String> attributes;
   final Map<String, String> updateMorphoFeatures;
 
-  public EditNode(String nodeName, Map<String, String> attributes, String updateMorphoFeatures, List<String> removedAttributes) {
+  public EditNode(String nodeName, Map<String, String> attributes, String updateMorphoFeatures, List<String> removedAttributes, List<String> removedMorpho) {
     if (nodeName == null) {
       throw new SsurgeonParseException("Cannot make an EditNode with no nodeName");
     }
@@ -49,6 +50,7 @@ public class EditNode extends SsurgeonEdit {
         throw new SsurgeonParseException("Unknown attribute |" + attr + "| when building an EditNode operation");
       }
     }
+    this.removedMorpho = new ArrayList<>(removedMorpho);
   }
 
 
@@ -75,6 +77,13 @@ public class EditNode extends SsurgeonEdit {
       buf.append(Ssurgeon.UPDATE_MORPHO_FEATURES);
       buf.append(" ");
       buf.append(CoNLLUFeatures.toFeatureString(this.updateMorphoFeatures));
+    }
+
+    for (String remove : removedMorpho) {
+      buf.append(" ");
+      buf.append(Ssurgeon.REMOVE_MORPHO_FEATURES);
+      buf.append(" ");
+      buf.append(remove);
     }
 
     return buf.toString();
@@ -115,6 +124,17 @@ public class EditNode extends SsurgeonEdit {
       if (!updateMorphoFeatures.get(key).equals(features.get(key))) {
         changed = true;
         features.put(key, updateMorphoFeatures.get(key));
+      }
+    }
+
+    for (String key : removedMorpho) {
+      CoNLLUFeatures features = word.get(CoreAnnotations.CoNLLUFeats.class);
+      if (features == null) {
+        continue;
+      }
+      if (features.get(key) != null) {
+        changed = true;
+        features.remove(key);
       }
     }
 
