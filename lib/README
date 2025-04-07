@@ -373,7 +373,7 @@ RELEASE DATE: 2019-08-20
 SOURCE AVAILABLE: Yes
 DESCRIPTION: Json processing tool (RI, which has the API also) available with Java EE 7.
 URL: https://jsonp.java.net/ It has two jars, API and RI. This is the RI one.
-USED BY: patterns.surface
+USED BY: patterns.surface, coref, pipeline, scenegraph
 LAST UPDATE: 2024-10-08
 LAST UPDATE BY: John Bauer. Originally added by Sonal Gupta
 
