@@ -2112,6 +2112,32 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test a splitWord which will split words based on exact pieces
+   */
+  @Test
+  public void readXMLSplitTwoWordsExact() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Test splitting a word into two pieces with the head at the start</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/foobar/}=split") + "</semgrex>",
+                             "    <edit-list>splitWord -node split -exact foo -exact bar -reln dep -headIndex 0</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[example-3 det> the-1 amod> foobar-2]");
+    SemanticGraph newSg = pattern.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[example-4 det> the-1 amod> [foo-2 dep> bar-3]]");
+    assertEquals(newSg, expected);
+  }
+
+  /**
    * Test splitWord, which should split a word into pieces based on regex matches, with the head at position 1
    */
   @Test

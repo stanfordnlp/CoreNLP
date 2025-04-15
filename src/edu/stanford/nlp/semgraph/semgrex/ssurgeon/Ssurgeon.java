@@ -421,6 +421,7 @@ public class Ssurgeon  {
   public static final String EDGE_NAME_ARG = "-edge";
   public static final String NODENAME_ARG = "-node";
   public static final String REGEX_ARG = "-regex";
+  public static final String EXACT_ARG = "-exact";
   public static final String RELN_ARG = "-reln";
   public static final String NODE_PROTO_ARG = "-nodearg";
   public static final String WEIGHT_ARG = "-weight";
@@ -449,6 +450,8 @@ public class Ssurgeon  {
     public List<String> nodes = new ArrayList<>();
 
     public List<String> regex = new ArrayList<>();
+
+    public List<String> exact = new ArrayList<>();
 
     // below are string representations of the intended values
     public String nodeString = null;
@@ -527,6 +530,9 @@ public class Ssurgeon  {
           break;
         case REGEX_ARG:
           argsBox.regex.add(argsValue);
+          break;
+        case EXACT_ARG:
+          argsBox.exact.add(argsValue);
           break;
         case NODE_PROTO_ARG:
           argsBox.nodeString = argsValue;
@@ -653,7 +659,14 @@ public class Ssurgeon  {
         return new CombineMWT(argsBox.nodes, argsBox.annotations.get("word"));
       } else if (command.equalsIgnoreCase(SplitWord.LABEL)) {
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
-        return new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln, argsBox.name);
+        if (argsBox.regex.size() > 0 && argsBox.exact.size() > 0) {
+          throw new SsurgeonParseException("Found both regex and exact in the splits for splitWord");
+        }
+        if (argsBox.regex.size() > 0) {
+          return new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln, argsBox.name, false);
+        } else {
+          return new SplitWord(argsBox.nodes.get(0), argsBox.exact, argsBox.headIndex, reln, argsBox.name, true);
+        }
       } else if (command.equalsIgnoreCase(ReindexGraph.LABEL)) {
         return new ReindexGraph();
       }

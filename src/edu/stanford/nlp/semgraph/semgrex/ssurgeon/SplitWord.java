@@ -40,25 +40,32 @@ public class SplitWord extends SsurgeonEdit {
 
   final String node;
   final List<Pattern> nodeRegex;
+  final List<String> exactPieces;
   final int headIndex;
   final GrammaticalRelation relation;
   final Map<Integer, String> nodeNames;
 
-  public SplitWord(String node, List<String> nodeRegex, Integer headIndex, GrammaticalRelation relation, String nodeNames) {
+  public SplitWord(String node, List<String> nodePieces, Integer headIndex, GrammaticalRelation relation, String nodeNames, boolean exactSplit) {
     if (node == null) {
       throw new SsurgeonParseException("SplitWord expected -node with the name of the matched node to split");
     }
     this.node = node;
 
-    if (nodeRegex == null || nodeRegex.size() == 0) {
-      throw new SsurgeonParseException("SplitWord expected -regex with regex to determine which pieces to split the word into");
+    if (nodePieces == null || nodePieces.size() == 0) {
+      throw new SsurgeonParseException("SplitWord expected -exact or -regex with regex to determine which pieces to split the word into");
     }
-    if (nodeRegex.size() == 1) {
-      throw new SsurgeonParseException("SplitWord expected at least two -regex");
+    if (nodePieces.size() == 1) {
+      throw new SsurgeonParseException("SplitWord expected at least two -exact or -regex");
     }
-    this.nodeRegex = new ArrayList<>();
-    for (int i = 0; i < nodeRegex.size(); ++i) {
-      this.nodeRegex.add(Pattern.compile(nodeRegex.get(i)));
+    if (exactSplit) {
+      this.exactPieces = new ArrayList<>(nodePieces);
+      this.nodeRegex = null;
+    } else {
+      this.nodeRegex = new ArrayList<>();
+      for (int i = 0; i < nodePieces.size(); ++i) {
+        this.nodeRegex.add(Pattern.compile(nodePieces.get(i)));
+      }
+      this.exactPieces = null;
     }
 
     if (headIndex == null) {
@@ -80,7 +87,7 @@ public class SplitWord extends SsurgeonEdit {
           throw new SsurgeonParseException("SplitWord got a -name parameter which did not have a number for one of the names.  Should look like 0=foo,1=bar");
         }
         int idx = Integer.valueOf(pieces[0]);
-        if (idx >= this.nodeRegex.size()) {
+        if (idx >= nodePieces.size()) {
           throw new SsurgeonParseException("SplitWord got an index in -name which was larger than the largest possible split piece, " + idx + " (this is 0-indexed)");
         }
         this.nodeNames.put(idx, pieces[1]);
@@ -96,8 +103,14 @@ public class SplitWord extends SsurgeonEdit {
     buf.write(LABEL);
     buf.write("\t");
     buf.write("-node " + node + "\t");
-    for (Pattern regex : nodeRegex) {
-      buf.write("-regex " + regex + "\t");
+    if (nodeRegex != null) {
+      for (Pattern regex : nodeRegex) {
+        buf.write("-regex " + regex + "\t");
+      }
+    } else {
+      for (String piece : exactPieces) {
+        buf.write("-exact " + piece + "\t");
+      }
     }
     buf.write("-reln " + relation.toString() + "\t");
     buf.write("-headIndex " + headIndex);
@@ -113,22 +126,27 @@ public class SplitWord extends SsurgeonEdit {
     //
     // each new word created will be the concatenation of all of the
     // matching groups from this pattern
-    List<String> words = new ArrayList<>();
-    for (int i = 0; i < nodeRegex.size(); ++i) {
-      Matcher regexMatcher = nodeRegex.get(i).matcher(origWord);
-      if (!regexMatcher.matches()) {
-        return false;
-      }
+    List<String> words;
+    if (exactPieces != null) {
+      words = new ArrayList<>(exactPieces);
+    } else {
+      words = new ArrayList<>();
+      for (int i = 0; i < nodeRegex.size(); ++i) {
+        Matcher regexMatcher = nodeRegex.get(i).matcher(origWord);
+        if (!regexMatcher.matches()) {
+          return false;
+        }
 
-      StringBuilder newWordBuilder = new StringBuilder();
-      for (int j = 0; j < regexMatcher.groupCount(); ++j) {
-        newWordBuilder.append(regexMatcher.group(j+1));
+        StringBuilder newWordBuilder = new StringBuilder();
+        for (int j = 0; j < regexMatcher.groupCount(); ++j) {
+          newWordBuilder.append(regexMatcher.group(j+1));
+        }
+        String newWord = newWordBuilder.toString();
+        if (newWord.length() == 0) {
+          return false;
+        }
+        words.add(newWord);
       }
-      String newWord = newWordBuilder.toString();
-      if (newWord.length() == 0) {
-        return false;
-      }
-      words.add(newWord);
     }
 
     int matchedIndex = matchedNode.index();
@@ -137,7 +155,7 @@ public class SplitWord extends SsurgeonEdit {
 
     // move all words down by nodeRegex.size() - 1
     // then move the original word down by headIndex
-    SsurgeonUtils.moveNodes(sg, sm, x -> (x > matchedIndex), x -> x+nodeRegex.size() - 1, true);
+    SsurgeonUtils.moveNodes(sg, sm, x -> (x > matchedIndex), x -> x+words.size() - 1, true);
     // the head node has its word replaced, and its index & links need
     // to be rearranged, but none of the links are added or removed
     if (headIndex > 0) {
@@ -147,7 +165,8 @@ public class SplitWord extends SsurgeonEdit {
     matchedNode.setWord(words.get(headIndex));
     matchedNode.setValue(words.get(headIndex));
 
-    for (int i = 0; i < nodeRegex.size(); ++i) {
+    // TODO: update SpaceAfter in a reasonable manner
+    for (int i = 0; i < words.size(); ++i) {
       if (i == headIndex) {
         if (nodeNames.containsKey(i)) {
           sm.putNode(nodeNames.get(i), matchedNode);
