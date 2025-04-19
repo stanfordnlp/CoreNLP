@@ -118,6 +118,18 @@ public class SemgrexTest extends TestCase {
             "ate", "ate", "muffins");
   }
 
+  public void testConnected() {
+    // the root should connect to all its children
+    runTest("{} <> {word:ate}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
+            "Bill", "muffins");
+    // a node in the middle should connect to both its children and its parent
+    runTest("{} <> {word:muffins}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
+            "ate", "blueberry");
+    // a leaf should connect to its parent
+    runTest("{} <> {word:blueberry}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
+            "muffins");
+  }
+
   public void testMultipleAttributes() {
     runTest("{} >> {word:Bill}",
             "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]",

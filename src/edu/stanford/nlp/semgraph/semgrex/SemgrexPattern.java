@@ -80,6 +80,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td>A &gt;&gt;reln B <td>A is the governor of a relation reln in a chain to B following {@code gov->dep} paths
  * <tr><td>{@code A x,y<<reln B} <td>A is the dependent of a relation reln in a chain to B following {@code dep->gov} paths between distances of x and y
  * <tr><td>{@code A x,y>>reln B} <td>A is the governor of a relation reln in a chain to B following {@code gov->dep} paths between distances of x and y
+ * <tr><td>A &lt;&gt;reln B <td> A is connected (either dependent or governor) via relation reln with B
  * <tr><td>A == B <td>A and B are the same nodes in the same graph
  * <tr><td>A . B <td>A immediately precedes B, i.e. A.index() == B.index() - 1
  * <tr><td>A - B <td>A immediately succeeds B, i.e. A.index() == B.index() + 1
