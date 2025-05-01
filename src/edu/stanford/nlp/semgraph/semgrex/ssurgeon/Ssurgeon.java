@@ -96,85 +96,85 @@ import edu.stanford.nlp.util.logging.Redwood;
  * </ul>
  *
  *<p>
- * {@code addEdge} adds a new edge between two existing nodes.
- * {@code -gov} and {@code -dep} will be nodes matched by the Semgrex pattern.
+ * {@code addEdge} adds a new edge between two existing nodes. <br>
+ * {@code -gov} and {@code -dep} will be nodes matched by the Semgrex pattern. <br>
  * {@code -reln} is the name of the dependency type to add.
  *</p><p>
- * {@code relabelNamedEdge} changes the dependency type of a named edge.
- * {@code edge} is the name of the edge in the Semgrex pattern.
+ * {@code relabelNamedEdge} changes the dependency type of a named edge. <br>
+ * {@code edge} is the name of the edge in the Semgrex pattern. <br>
  * {@code -reln} is the name of the dependency type to use.
  *</p><p>
- * {@code removeEdge} deletes an edge based on its description.
- * {@code -gov} is the governor to delete, a named node from the Semgrex pattern.
- * {@code -dep} is the dependent to delete, a named node from the Semgrex pattern.
- * {@code -reln} is the name of the dependency to delete.
+ * {@code removeEdge} deletes an edge based on its description. <br>
+ * {@code -gov} is the governor to delete, a named node from the Semgrex pattern. <br>
+ * {@code -dep} is the dependent to delete, a named node from the Semgrex pattern. <br>
+ * {@code -reln} is the name of the dependency to delete. <br>
  * If {@code -gov} or {@code -dep} are left empty, then all (matching) edges to or from the
  * remaining argument will be deleted.
  *</p><p>
- * {@code removeNamedEdge} deletes an edge based on its name.
+ * {@code removeNamedEdge} deletes an edge based on its name. <br>
  * {@code edge} is the name of the edge in the Semgrex pattern.
  *</p><p>
- * {@code reattachNamedEdge} changes an edge's gov and/or dep based on its name.
- * {@code edge} is the name of the edge in the Semgrex pattern.
- * {@code -gov} is the governor to attach to, a named node from the Semgrex pattern.  If left blank, no edit.
- * {@code -dep} is the dependent to attach to, a named node from the Semgrex pattern.  If left blank, no edit.
+ * {@code reattachNamedEdge} changes an edge's gov and/or dep based on its name. <br>
+ * {@code edge} is the name of the edge in the Semgrex pattern. <br>
+ * {@code -gov} is the governor to attach to, a named node from the Semgrex pattern.  If left blank, no edit. <br>
+ * {@code -dep} is the dependent to attach to, a named node from the Semgrex pattern.  If left blank, no edit. <br>
  * At least one of {@code -gov} or {@code -dep} must be set.
  *</p><p>
- * {@code addDep} adds a word and a dependency arc to the dependency graph.
- * {@code -gov} is the governor to attach to, a named node from the Semgrex pattern.
- * {@code -reln} is the name of the dependency type to use.
+ * {@code addDep} adds a word and a dependency arc to the dependency graph. <br>
+ * {@code -gov} is the governor to attach to, a named node from the Semgrex pattern. <br>
+ * {@code -reln} is the name of the dependency type to use. <br>
  * {@code -position} is where in the sentence the word should go.  {@code -} will be the first word of the sentence,
  *   {@code +} will be the last word of the sentence, and {@code -node} or {@code +node} will be before or after the
- *   named node.
+ *   named node. <br>
  * {@code ...attributes...} means any attributes which can be set from a string or numerical value
  *   eg {@code -text ...} sets the text of the word
  *   {@code -pos ...} sets the xpos of the word, {@code -cpos ...} sets the upos of the word, etc.
- *   You cannot set the index of a word this way; an exception will be thrown.
- *   To put whitespace in an attribute, you can quote it.
+ *   You cannot set the index of a word this way; an exception will be thrown. <br>
+ *   To put whitespace in an attribute, you can quote it. <br>
  *   So, for example, a Vietnamese word can be set as {@code -word "xin chào"}
  *</p><p>
- * {@code editNode} will edit the attributes of a word.
- * {@code -node} is the node to edit.
- * {@code ...attributes...} are the attributes to change, same as with {@code addDep}
- *   {@code -morphofeatures ...} will set the features to be exactly as written.
- *   {@code -updateMorphoFeatures ...} will edit or add the features without overwriting existing features.
- *   {@code -removeMorphoFeatures ...} will remove this one morpho feature.
+ * {@code editNode} will edit the attributes of a word. <br>
+ * {@code -node} is the node to edit. <br>
+ * {@code ...attributes...} are the attributes to change, same as with {@code addDep} <br>
+ *   {@code -morphofeatures ...} will set the features to be exactly as written. <br>
+ *   {@code -updateMorphoFeatures ...} will edit or add the features without overwriting existing features. <br>
+ *   {@code -removeMorphoFeatures ...} will remove this one morpho feature. <br>
  *   {@code -remove ...} will remove the attribute entirely, such as doing {@code -remove lemma} to remove the lemma.
  *</p><p>
- * {@code lemmatize} will put a lemma on a word.
- * {@code -node} is the node to edit.
+ * {@code lemmatize} will put a lemma on a word. <br>
+ * {@code -node} is the node to edit. <br>
  *   This only works on English text.
  *</p><p>
- * {@code combineMWT} will add MWT attributes to a sequence of two or more words.
- * {@code -node} (repeated) is the nodes to edit.
+ * {@code combineMWT} will add MWT attributes to a sequence of two or more words. <br>
+ * {@code -node} (repeated) is the nodes to edit. <br>
  * {@code -word} is the optional text to use for the new MWT.  If not set, the words will be concatenated.
  *</p><p>
- * {@code splitWord} will split a single word into multiple pieces from the text of the current word
- * {@code -node} is the node to split.
- * {@code -headIndex} is the index (counting from 0) of the word piece to make the head.
- * {@code -reln} is the name of the dependency type to use.  pieces other than the head will connect using this relation
+ * {@code splitWord} will split a single word into multiple pieces from the text of the current word <br>
+ * {@code -node} is the node to split. <br>
+ * {@code -headIndex} is the index (counting from 0) of the word piece to make the head. <br>
+ * {@code -reln} is the name of the dependency type to use.  pieces other than the head will connect using this relation <br>
  * {@code -regex} regex must match the matched node.  all matching groups will be concatenated to form a new word.  need at least 2 to split a word
  *</p><p>
- * {@code setRoots} sets the roots of the sentence to a new root.
- * {@code n1, n2, ...} are the names of the nodes from the Semgrex to use as the root(s).
+ * {@code setRoots} sets the roots of the sentence to a new root. <br>
+ * {@code n1, n2, ...} are the names of the nodes from the Semgrex to use as the root(s). <br>
  * This is best done in conjunction with other operations which actually manipulate the structure
  * of the graph, or the new root will weirdly have dependents and the graph will be incorrect.
  *</p><p>
- * {@code mergeNodes} will merge n1 and n2, assuming they are  mergeable.
+ * {@code mergeNodes} will merge n1 and n2, assuming they are mergeable. <br>
  * The nodes can be merged if one of the nodes is the head of a phrase
  * and the other node depends on the head.  TODO: can make it process
  * more than two nodes at once.
  *</p><p>
- * {@code killAllIncomingEdges} deletes all edges to a node.
- * {@code -node} is the node to edit.
+ * {@code killAllIncomingEdges} deletes all edges to a node. <br>
+ * {@code -node} is the node to edit. <br>
  * Note that this is the same as {@code removeEdge} with only the dependent set.
  *</p><p>
- * {@code delete} deletes all nodes reachable from a specific node.
- * {@code -node} is the node to delete.
+ * {@code delete} deletes all nodes reachable from a specific node. <br>
+ * {@code -node} is the node to delete. <br>
  * You will only want to do this after separating the node from the parts of the graph you want to keep.
  *</p><p>
- * {@code deleteLeaf} deletes a node as long as it is a leaf.
- * {@code -node} is the node to delete.
+ * {@code deleteLeaf} deletes a node as long as it is a leaf. <br>
+ * {@code -node} is the node to delete. <br>
  * If the node is not a leaf (no outgoing edges), it will not be deleted.
  *</p><p>
  * {@code killNonRootedNodes} searches the graph and deletes all nodes which have no path to a root.
