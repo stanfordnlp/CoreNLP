@@ -33,8 +33,8 @@ public class EditNode extends SsurgeonEdit {
     if (nodeName == null) {
       throw new SsurgeonParseException("Cannot make an EditNode with no nodeName");
     }
-    if (attributes.size() == 0 && updateMorphoFeatures == null && removedAttributes.size() == 0) {
-      throw new SsurgeonParseException("Cannot make an EditNode with no updated attributes, removed attributes, or updated morphological features");
+    if (attributes.size() == 0 && updateMorphoFeatures == null && removedAttributes.size() == 0 && removedMorpho.size() == 0) {
+      throw new SsurgeonParseException("Cannot make an EditNode with no updated attributes, removed attributes, or updated/removed morphological features");
     }
     AddDep.checkIllegalAttributes(attributes);
     this.nodeName = nodeName;
