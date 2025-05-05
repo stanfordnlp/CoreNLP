@@ -433,6 +433,7 @@ public class Ssurgeon  {
   public static final String UPDATE_MORPHO_FEATURES_LOWER = "-updatemorphofeatures";
   public static final String REMOVE = "-remove";
   public static final String REMOVE_MORPHO_FEATURES = "-removeMorphoFeatures";
+  public static final String REMOVE_MORPHO_FEATURES_LOWER = "-removemorphofeatures";
 
 
   // args for Ssurgeon edits, allowing us to not
@@ -558,6 +559,7 @@ public class Ssurgeon  {
           argsBox.remove.add(argsValue);
           break;
         case REMOVE_MORPHO_FEATURES:
+        case REMOVE_MORPHO_FEATURES_LOWER:
           argsBox.removeMorphoFeatures.add(argsValue);
           break;
         default:
