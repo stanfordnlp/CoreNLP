@@ -2085,6 +2085,36 @@ public class SsurgeonTest {
     assertEquals(newSg, expected);
   }
 
+  @Test
+  public void readXMLSetPhraseHead() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Test resetting a phrase's internal and external links</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:John}=n1 . {word:Bauer}=n2") + "</semgrex>",
+                             "    <edit-list>SetPhraseHead -node n1 -node n2 -headIndex 0 -reln flat</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    // test where the new phrase is not the root
+    SemanticGraph sg = SemanticGraph.valueOf("[works-4 obl> [Stanford-6 case> at-5] nsubj> [Bauer-3 flat> John-2 nmod> Earl-1]]");
+    SemanticGraph newSg = pattern.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[works-4 obl> [Stanford-6 case> at-5] nsubj> [John-2 flat> Bauer-3 nmod> Earl-1]]");
+    assertEquals(newSg, expected);
+
+    // test where the new phrase IS the root
+    sg = SemanticGraph.valueOf("[Bauer-5 flat> John-4 cop> is-3 nsubj> [programmer-2 det> The-1]]");
+    newSg = pattern.iterate(sg).first;
+    expected = SemanticGraph.valueOf("[John-4 flat> Bauer-5 cop> is-3 nsubj> [programmer-2 det> The-1]]");
+    assertEquals(newSg, expected);
+  }
+
   /**
    * Test splitWord, which should split a word into pieces based on regex matches, with the head at position 0
    */

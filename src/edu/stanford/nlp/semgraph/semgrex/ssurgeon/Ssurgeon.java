@@ -149,6 +149,19 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -node} (repeated) is the nodes to edit. <br>
  * {@code -word} is the optional text to use for the new MWT.  If not set, the words will be concatenated.
  *</p><p>
+ * {@code setPhraseHead} will set a new head for a sequence of nodes.<br>
+ * {@code -node} for each node to include in the phrase. <br>
+ * {@code -headIndex} is the index (counting from 0) of the node to make the head. <br>
+ * {@code -reln} is the name of the dependency type to use to connect the other words in the phrase to the new head <br>
+ * {@code -weight} is the weight to give the new edges (probably not particularly important) <br>
+ * The words must already be in a phrase for this to work.  This is
+ * detected by making sure each node has its parent within the phrase,
+ * except for the head word, which can either be the root or have the
+ * one edge that goes out from the phrase. <br>
+ * This operation reconnects the head of the phrase to the same node that was previously the parent of the phrase. <br>
+ * All edges that previously went to a different word in the phrase are now pointed to the new head of the phrase. <br>
+ * Some of these behaviors are optional.  If you happen to need a different behavior, please file an issue on github.
+ *</p><p>
  * {@code splitWord} will split a single word into multiple pieces from the text of the current word <br>
  * {@code -node} is the node to split. <br>
  * {@code -headIndex} is the index (counting from 0) of the word piece to make the head. <br>
@@ -659,6 +672,9 @@ public class Ssurgeon  {
         return new KillAllIncomingEdges(argsBox.nodes.get(0));
       } else if (command.equalsIgnoreCase(CombineMWT.LABEL)) {
         return new CombineMWT(argsBox.nodes, argsBox.annotations.get("word"));
+      } else if (command.equalsIgnoreCase(SetPhraseHead.LABEL)) {
+        GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
+        return new SetPhraseHead(argsBox.nodes, argsBox.headIndex, reln, argsBox.weight);
       } else if (command.equalsIgnoreCase(SplitWord.LABEL)) {
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
         if (argsBox.regex.size() > 0 && argsBox.exact.size() > 0) {
