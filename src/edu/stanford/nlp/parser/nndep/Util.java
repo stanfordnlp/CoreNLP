@@ -135,7 +135,7 @@ public class Util  {
     return input.subList(0, subsetSize);
   }
 
-  // TODO replace with GrammaticalStructure#readCoNLLGrammaticalStructureCollection
+  // TODO replace with GrammaticalStructure#readCoNLLXGrammaticalStructureCollection
   public static void loadConllFile(String inFile, List<CoreMap> sents, List<DependencyTree> trees, boolean unlabeled, boolean cPOS)
   {
     CoreLabelTokenFactory tf = new CoreLabelTokenFactory(false);
