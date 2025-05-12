@@ -164,6 +164,7 @@ public class CoNLLUReader {
       else if (TOKEN_LINE.matcher(line).matches())
         tokenLines.add(line);
       else
+        // TODO: this is ignoring "empty" tokens
         return true;
       return false;
     }
