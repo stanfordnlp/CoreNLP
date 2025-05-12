@@ -185,6 +185,9 @@ public class CoNLLUDocumentReader implements
             }
           } else {
             for (String extraGovIdxStr : extraDeps.keySet()) {
+              // TODO: use an exact parse instead of Double.parseDouble?
+              // can maybe avoid a linear search in getToken
+              // effectively trying to get rid of pseudoPosition entirely
               double extraGovIdx = Double.parseDouble(extraGovIdxStr);
               Pair<IndexedWord, GrammaticalRelation> govReln = getGovAndReln(extraGovIdx, word,
                   extraDeps.get(extraGovIdxStr), sortedTokens);
