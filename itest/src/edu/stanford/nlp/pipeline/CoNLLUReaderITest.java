@@ -42,6 +42,9 @@ public class CoNLLUReaderITest {
     for (CoreLabel token : goldDocument.get(CoreAnnotations.TokensAnnotation.class)) {
       token.remove(CoreAnnotations.ParentAnnotation.class);
     }
+    for (CoreLabel token : readInDocument.get(CoreAnnotations.TokensAnnotation.class)) {
+      token.remove(CoreAnnotations.CoNLLUFeats.class);
+    }
     // compare gold vs. read in
     // compare document text
     assertEquals(goldDocument.get(CoreAnnotations.TextAnnotation.class),

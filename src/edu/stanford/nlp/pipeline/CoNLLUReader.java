@@ -4,6 +4,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.semgraph.*;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
 import edu.stanford.nlp.util.*;
 
 import java.io.*;
@@ -29,6 +30,7 @@ public class CoNLLUReader {
   public static final int CoNLLU_LemmaField = 2;
   public static final int CoNLLU_UPOSField = 3;
   public static final int CoNLLU_XPOSField = 4;
+  public static final int CoNLLU_FeaturesField = 5;
   public static final int CoNLLU_GovField = 6;
   public static final int CoNLLU_RelnField = 7;
   public static final int CoNLLU_MiscField = 9;
@@ -304,10 +306,21 @@ public class CoNLLUReader {
       cl.setValue(fields.get(CoNLLU_WordField));
       cl.setOriginalText(fields.get(CoNLLU_WordField));
       cl.setIsNewline(false);
+
       if (!fields.get(CoNLLU_LemmaField).equals("_"))
         cl.setLemma(fields.get(CoNLLU_LemmaField));
+
       if (!fields.get(CoNLLU_UPOSField).equals("_"))
         cl.setTag(fields.get(CoNLLU_UPOSField));
+
+      //final String xpos = fields.get(CoNLLU_XPOSField);
+      //if (!xpos.equals("_"))
+      //  cl.setTag(xpos);
+
+      if (!fields.get(CoNLLU_FeaturesField).equals("_")) {
+        CoNLLUFeatures features = new CoNLLUFeatures(fields.get(CoNLLU_FeaturesField));
+        cl.set(CoreAnnotations.CoNLLUFeats.class, features);
+      }
       for (int extraColumnIdx = 10; extraColumnIdx < columnCount && extraColumnIdx < fields.size();
            extraColumnIdx++) {
         cl.set(extraColumns.get(extraColumnIdx), fields.get(extraColumnIdx));
