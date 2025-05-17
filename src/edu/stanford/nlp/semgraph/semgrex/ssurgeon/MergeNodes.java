@@ -142,6 +142,9 @@ public class MergeNodes extends SsurgeonEdit {
       newLabel.setBefore(right.before());
     }
 
+    // find the head, and replace all the existing annotations on the head
+    // with the new annotations (including word and lemma)
+    // from the newly built CoreLabel
     for (IndexedWord vertex : sg.vertexSet()) {
       if (vertex.index() == head.index()) {
         for (Class key : newLabel.keySet()) {
@@ -151,6 +154,7 @@ public class MergeNodes extends SsurgeonEdit {
       }
     }
 
+    // delete the dependency
     // copy the list so that deletion doesn't hurt the iterator
     // TODO: super fancy would be implementing iterator.remove()
     // on the Set returned by the SemanticGraph
