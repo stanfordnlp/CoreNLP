@@ -152,7 +152,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
     //Map<String, List<CoreLabel>> sents = null;
     TopDocs tp = searcher.search(query, Integer.MAX_VALUE);
     Set<String> sentids = new HashSet<>();
-    if (tp.totalHits > 0) {
+    if (tp.totalHits.value > 0) {
       for (ScoreDoc s : tp.scoreDocs) {
         int docId = s.doc;
         Document d = searcher.doc(docId);

@@ -249,7 +249,7 @@ public class PatternsForEachTokenLucene<E extends Pattern> extends PatternsForEa
     try {
       TermQuery query = new TermQuery(new Term("sentid", sentId));
       TopDocs tp = searcher.search(query,1);
-      if (tp.totalHits > 0) {
+      if (tp.totalHits.value > 0) {
         for (ScoreDoc s : tp.scoreDocs) {
           int docId = s.doc;
           Document d = searcher.doc(docId);
