@@ -25,6 +25,10 @@ public class CoNLLUReader {
    **/
   // TODO: we should handle field 8, DEPS, for an enhanced dependencies
   // doing that requires processing the empty nodes somehow
+  // TODO: read sent_id?
+  // TODO: read comments in general
+  // TODO: MWT should have after/before set to ""
+  // TODO: reconsider the newline as the after on the last word
   public static final int CoNLLU_IndexField = 0;
   public static final int CoNLLU_WordField = 1;
   public static final int CoNLLU_LemmaField = 2;
@@ -275,7 +279,7 @@ public class CoNLLUReader {
       if (sentenceIdx > 0) {
         // for now we're treating a CoNLL-U document as sentences separated by newline
         // so every sentence after the first should have a newline as the previous character
-        sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).setBefore("\n");
+        sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).setBefore(System.lineSeparator());
       }
       for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
         token.set(CoreAnnotations.TokenBeginAnnotation.class, documentIdx);
@@ -382,7 +386,7 @@ public class CoNLLUReader {
       coreLabels.add(cl);
     }
     // the last token should have a newline after
-    coreLabels.get(coreLabels.size() - 1).setAfter("\n");
+    coreLabels.get(coreLabels.size() - 1).setAfter(System.lineSeparator());
     // set before
     coreLabels.get(0).setBefore("");
     for (int i = 1 ; i < coreLabels.size() ; i++) {
