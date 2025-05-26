@@ -19,7 +19,7 @@ public class CoNLLUReaderITest {
 
   public String exampleDocument = "Pero la existencia de dos recién nacidos en la misma caja sólo podía deberse a un " +
       "descuido de fábrica.\nDe allí las rebajas.\n";
-  public String examplePath = String.format("%s/stanford-corenlp/testing/data/conllu/es-example.conllu", TestPaths.testHome());
+  public String examplePath = String.format("edu/stanford/nlp/pipeline/es-example.conllu");
   public StanfordCoreNLP pipeline;
   public Annotation goldDocument;
   public Annotation readInDocument;

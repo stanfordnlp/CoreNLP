@@ -1,0 +1,35 @@
+# sent_id = dev-s48
+# text = Pero la existencia de dos recién nacidos en la misma caja sólo podía deberse a un descuido de fábrica.
+# orig_file_sentence 001#48
+1	Pero	pero	CCONJ	CCONJ	_	14	advmod	_	_
+2	la	la	DET	DET	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	3	det	_	_
+3	existencia	existencia	NOUN	NOUN	Gender=Fem|Number=Sing	14	nsubj	_	_
+4	de	de	ADP	ADP	AdpType=Prep	5	case	_	_
+5	dos	dos	NUM	NUM	Number=Plur|NumType=Card	3	nummod	_	_
+6	recién	recién	ADV	ADV	_	7	advmod	_	_
+7	nacidos	nacidos	ADJ	ADJ	Gender=Masc|Number=Plur|VerbForm=Part	5	amod	_	_
+8	en	en	ADP	ADP	AdpType=Prep	11	case	_	_
+9	la	la	DET	DET	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	11	det	_	_
+10	misma	misma	DET	DET	Gender=Fem|Number=Sing|PronType=Ind	9	det	_	_
+11	caja	caja	NOUN	NOUN	Gender=Fem|Number=Sing	3	nmod	_	_
+12	sólo	sólo	ADV	ADV	_	14	advmod	_	_
+13	podía	podía	AUX	AUX	Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin	14	aux	_	_
+14-15	deberse	_	_	_	_	_	_	_	_
+14	deber	deber	VERB	VERB	VerbForm=Inf	0	root	_	_
+15	se	se	PRON	PRON	Person=3	14	obj	_	_
+16	a	a	ADP	ADP	AdpType=Prep	18	case	_	_
+17	un	un	DET	DET	Definite=Ind|Gender=Masc|Number=Sing|PronType=Art	18	det	_	_
+18	descuido	descuido	NOUN	NOUN	Gender=Masc|Number=Sing	14	obj	_	_
+19	de	de	ADP	ADP	AdpType=Prep	20	case	_	_
+20	fábrica	fábrica	NOUN	NOUN	Gender=Fem|Number=Sing	18	nmod	_	SpaceAfter=No
+21	.	.	PUNCT	PUNCT	PunctType=Peri	14	punct	_	_
+
+# sent_id = dev-s49
+# text = De allí las rebajas.
+# orig_file_sentence 001#49
+1	De	de	ADP	ADP	AdpType=Prep	2	case	_	_
+2	allí	allí	ADV	ADV	_	4	advmod	_	_
+3	las	las	DET	DET	Definite=Def|Gender=Fem|Number=Plur|PronType=Art	4	det	_	_
+4	rebajas	rebajas	NOUN	NOUN	Gender=Fem|Number=Plur	0	root	_	SpaceAfter=No
+5	.	.	PUNCT	PUNCT	PunctType=Peri	4	punct	_	_
+
