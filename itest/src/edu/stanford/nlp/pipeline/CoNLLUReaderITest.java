@@ -5,8 +5,13 @@ import edu.stanford.nlp.semgraph.*;
 import edu.stanford.nlp.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.junit.Before;
@@ -24,53 +29,278 @@ public class CoNLLUReaderITest {
   public Annotation goldDocument;
   public Annotation readInDocument;
 
-  @Before
-  public void setUp() throws IOException {
-    // set up the pipeline
-    Properties props = LanguageInfo.getLanguageProperties("spanish");
-    props.put("annotators", "tokenize,ssplit,mwt,pos,lemma,depparse");
-    pipeline = new StanfordCoreNLP(props);
-  }
+  static final String[] EXPECTED_SENTENCE_TEXT = {
+    "Pero la existencia de dos recién nacidos en la misma caja sólo podía deberse a un descuido de fábrica.",
+    "De allí las rebajas."
+  };
+  static final String EXPECTED_TEXT = String.join(System.lineSeparator(), EXPECTED_SENTENCE_TEXT) + System.lineSeparator();
+
+  static final String[][] EXPECTED_WORD_TEXT = {
+    {"Pero", "la", "existencia", "de", "dos", "recién", "nacidos", "en", "la", "misma", "caja", "sólo", "podía", "deber", "se", "a", "un", "descuido", "de", "fábrica", "."},
+    {"De", "allí", "las", "rebajas", "."},
+  };
+
+  static final String[][] EXPECTED_LEMMA_TEXT = {
+    {"pero", "el", "existencia", "de", "dos", "recién", "nacido", "en", "el", "mismo", "caja", "sólo", "poder", "deber", "él", "a", "uno", "descuido", "de", "fábrica", "."},
+    {"de", "allí", "el", "rebaja", "."},
+  };
+
+  static final String[][] EXPECTED_CPOS = {
+    {"CCONJ", "DET", "NOUN", "ADP", "NUM", "ADV", "ADJ", "ADP", "DET", "DET", "NOUN", "ADV", "AUX", "VERB", "PRON", "ADP", "DET", "NOUN", "ADP", "NOUN", "PUNCT"},
+    {"ADP", "ADV", "DET", "NOUN", "PUNCT"},
+  };
+
+  static final String[][] EXPECTED_FEATS = {
+    {
+      null,
+      "Definite=Def|Gender=Fem|Number=Sing|PronType=Art",
+      "Gender=Fem|Number=Sing",
+      null,
+      "Number=Plur|NumForm=Word|NumType=Card",
+      null,
+      "Gender=Masc|Number=Plur|VerbForm=Part",
+      null,
+      "Definite=Def|Gender=Fem|Number=Sing|PronType=Art",
+      "Gender=Fem|Number=Sing|PronType=Dem",
+      "Gender=Fem|Number=Sing",
+      null,
+      "Mood=Ind|Number=Sing|Person=3|Tense=Imp|VerbForm=Fin",
+      "VerbForm=Inf",
+      "Case=Acc|Person=3|PrepCase=Npr|PronType=Prs|Reflex=Yes",
+      null,
+      "Definite=Ind|Gender=Masc|Number=Sing|PronType=Art",
+      "Gender=Masc|Number=Sing",
+      null,
+      "Gender=Fem|Number=Sing",
+      "PunctType=Peri",
+    },
+    {
+      null,
+      null,
+      "Definite=Def|Gender=Fem|Number=Plur|PronType=Art",
+      "Gender=Fem|Number=Plur",
+      "PunctType=Peri",
+    }
+  };
+
+  static final String[][] EXPECTED_RELNS = {
+    { "advmod", "det", "nsubj", "case", "nummod", "advmod", "amod", "case", "det", "det", "nmod", "advmod", "aux", "root",
+      "expl:pv", "case", "det", "obl:arg", "case", "nmod", "punct" },
+    { "case", "advmod", "det", "root", "punct" },
+  };
+  static final int[][] EXPECTED_HEADS = {
+    { 14, 3, 14, 7, 7, 7, 3, 11, 11, 9, 3, 14, 14, 0, 14, 18, 18, 14, 20, 18, 14 },
+    { 2, 4, 4, 0, 4 },
+  };
 
   @Test
   public void testReadingInCoNLLUFile() throws ClassNotFoundException, IOException {
-    goldDocument = pipeline.process(exampleDocument);
     readInDocument = new CoNLLUReader(new Properties()).readCoNLLUFile(examplePath).get(0);
-    // make some changes for sake of comparison
-    // remove AfterAnnotation from read in
-    // remove ParentAnnotation from gold
-    for (CoreLabel token : goldDocument.get(CoreAnnotations.TokensAnnotation.class)) {
-      token.remove(CoreAnnotations.ParentAnnotation.class);
+
+    assertTrue(readInDocument.containsKey(CoreAnnotations.TextAnnotation.class));
+    assertTrue(readInDocument.containsKey(CoreAnnotations.TokensAnnotation.class));
+    assertTrue(readInDocument.containsKey(CoreAnnotations.SentencesAnnotation.class));
+    assertEquals(3, readInDocument.keySet().size());
+
+    // Compare text of the document and its sentences
+    assertEquals(EXPECTED_TEXT, readInDocument.get(CoreAnnotations.TextAnnotation.class));
+    List<CoreMap> sentences = readInDocument.get(CoreAnnotations.SentencesAnnotation.class);
+    assertEquals(EXPECTED_SENTENCE_TEXT.length, sentences.size());
+    for (int i = 0; i < EXPECTED_SENTENCE_TEXT.length; ++i) {
+      assertEquals(EXPECTED_SENTENCE_TEXT[i], sentences.get(i).get(CoreAnnotations.TextAnnotation.class));
     }
-    for (CoreLabel token : readInDocument.get(CoreAnnotations.TokensAnnotation.class)) {
-      token.remove(CoreAnnotations.CoNLLUFeats.class);
+
+    // Compare sentence ids
+    // Check number of keys on each sentence
+    for (int i = 0; i < sentences.size(); ++i) {
+      assertEquals(Integer.valueOf(i), sentences.get(i).get(CoreAnnotations.SentenceIndexAnnotation.class));
+      assertEquals(4, sentences.get(i).keySet().size());
     }
-    // compare gold vs. read in
-    // compare document text
-    assertEquals(goldDocument.get(CoreAnnotations.TextAnnotation.class),
-        readInDocument.get(CoreAnnotations.TextAnnotation.class));
-    // compare tokens lists
-    AnnotationComparator.compareTokensLists(goldDocument, readInDocument);
-    assertEquals(goldDocument.get(CoreAnnotations.TokensAnnotation.class),
-        readInDocument.get(CoreAnnotations.TokensAnnotation.class));
-    // compare sentences
-    for (int i = 0; i < goldDocument.get(CoreAnnotations.SentencesAnnotation.class).size(); i++) {
-      CoreMap goldSentence = goldDocument.get(CoreAnnotations.SentencesAnnotation.class).get(i);
-      CoreMap readInSentence = readInDocument.get(CoreAnnotations.SentencesAnnotation.class).get(i);
-      // compare sentence text
-      assertEquals(goldSentence.get(CoreAnnotations.TextAnnotation.class),
-          readInSentence.get(CoreAnnotations.TextAnnotation.class));
-      // compare token lists
-      assertEquals(goldSentence.get(CoreAnnotations.TokensAnnotation.class),
-          readInSentence.get(CoreAnnotations.TokensAnnotation.class));
-      // compare semantic graphs
-      SemanticGraph goldGraph =
-          goldDocument.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(
-              SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-      SemanticGraph readInGraph =
-          goldDocument.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(
-              SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-      assertEquals(goldGraph.toList(), readInGraph.toList());
+
+    // Check the document tokens and the sentence tokens lists are the same
+    // The composite list on the document level should just be the sentence tokens gathered into one list
+    List<CoreMap> allTokens = new ArrayList<>();
+    for (int i = 0; i < sentences.size(); ++i) {
+      allTokens.addAll(sentences.get(i).get(CoreAnnotations.TokensAnnotation.class));
+    }
+    assertEquals(readInDocument.get(CoreAnnotations.TokensAnnotation.class), allTokens);
+
+    // Check the text on each of the words
+    // Check the lemmas
+    // Check indices and a couple other annotations we expect to be here
+    for (int i = 0; i < sentences.size(); ++i) {
+      CoreMap sentence = sentences.get(i);
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      assertEquals(EXPECTED_WORD_TEXT[i].length, tokens.size());
+      assertEquals(EXPECTED_LEMMA_TEXT[i].length, tokens.size());
+      assertEquals(EXPECTED_CPOS[i].length, tokens.size());
+      for (int j = 0; j < tokens.size(); ++j) {
+        CoreLabel token = tokens.get(j);
+        assertEquals(EXPECTED_WORD_TEXT[i][j], token.value());
+        assertEquals(EXPECTED_WORD_TEXT[i][j], token.word());
+        assertEquals(EXPECTED_WORD_TEXT[i][j], token.get(CoreAnnotations.OriginalTextAnnotation.class));
+
+        assertEquals(EXPECTED_LEMMA_TEXT[i][j], token.lemma());
+        assertEquals(EXPECTED_CPOS[i][j], token.tag());
+
+        assertEquals(Integer.valueOf(i), token.get(CoreAnnotations.SentenceIndexAnnotation.class));
+        assertEquals(Integer.valueOf(j+1), token.get(CoreAnnotations.IndexAnnotation.class));
+
+        // all tokens should have a False isNewline
+        assertFalse(token.get(CoreAnnotations.IsNewlineAnnotation.class));
+      }
+    }
+
+    // Check the MWT features
+    for (int i = 0; i < sentences.size(); ++i) {
+      CoreMap sentence = sentences.get(i);
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      for (int j = 0; j < tokens.size(); ++j) {
+        CoreLabel token = tokens.get(j);
+        // words 14-15 (indexed one lower here) are the only MWT in this document
+        // otherwise, all fields should be false
+        if (i == 0 && j == 13) {
+          assertTrue(token.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+          assertTrue(token.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+          assertEquals("deberse", token.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+        } else if (i == 0 && j == 14) {
+          assertTrue(token.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+          assertFalse(token.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+          assertEquals("deberse", token.get(CoreAnnotations.MWTTokenTextAnnotation.class));
+        } else {
+          assertFalse(token.get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+          assertFalse(token.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class));
+          assertFalse(token.containsKey(CoreAnnotations.MWTTokenTextAnnotation.class));
+        }
+      }
+    }
+
+    // Check the Before & After features
+    // TODO: May need to reconsider the end of sentence treatment
+    for (int i = 0; i < sentences.size(); ++i) {
+      CoreMap sentence = sentences.get(i);
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      for (int j = 0; j < tokens.size(); ++j) {
+        CoreLabel token = tokens.get(j);
+        if (j == tokens.size() - 1) {
+          assertEquals("\n", token.after());
+        } else if (j == tokens.size() - 2) {
+          assertEquals("", token.after());
+        } else {
+          // TODO: after() should be "" for an MWT
+          // it just doesn't get marked on the CoNLLU
+          assertEquals(" ", token.after());
+        }
+
+        if (i == 0 && j == 0) {
+          assertEquals("", token.before());
+        } else if (j == 0) {
+          assertEquals("\n", token.before());
+        } else if (j == tokens.size() - 1) {
+          assertEquals("", token.before());
+        } else {
+          assertEquals(" ", token.before());
+        }
+      }
+    }
+
+    // Check that these fields are set
+    // Perhaps not checking the values of the offsets, though
+    int tokenCount = 0;
+    for (int i = 0; i < sentences.size(); ++i) {
+      CoreMap sentence = sentences.get(i);
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      for (int j = 0; j < tokens.size(); ++j) {
+        CoreLabel token = tokens.get(j);
+        assertTrue(token.containsKey(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+        assertTrue(token.containsKey(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+        assertEquals(Integer.valueOf(tokenCount), token.get(CoreAnnotations.TokenBeginAnnotation.class));
+        assertEquals(Integer.valueOf(tokenCount+1), token.get(CoreAnnotations.TokenEndAnnotation.class));
+        ++tokenCount;
+      }
+    }
+
+    // check the features and that there are no fields currently unaccounted for
+    for (int i = 0; i < sentences.size(); ++i) {
+      CoreMap sentence = sentences.get(i);
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      assertEquals(EXPECTED_FEATS[i].length, tokens.size());
+      for (int j = 0; j < tokens.size(); ++j) {
+        CoreLabel token = tokens.get(j);
+
+        String expected = EXPECTED_FEATS[i][j];
+        int expectedKeys = 16;
+
+        if (expected == null) {
+          assertFalse(token.containsKey(CoreAnnotations.CoNLLUFeats.class));
+        } else {
+          expectedKeys += 1;
+          String feats = token.get(CoreAnnotations.CoNLLUFeats.class).toString();
+          assertEquals(expected, feats);
+        }
+
+        // the MWT token specifically gets one more field, the MWT text
+        if (i == 0 && (j == 13 || j == 14)) {
+          expectedKeys += 1;
+        }
+        assertEquals(expectedKeys, token.keySet().size());
+
+        // The known fields should be the ones checked above:
+        //    CoreAnnotations.TextAnnotation
+        //    CoreAnnotations.ValueAnnotation
+        //    CoreAnnotations.OriginalTextAnnotation
+        //    CoreAnnotations.IsNewlineAnnotation
+        //    CoreAnnotations.LemmaAnnotation
+        //    CoreAnnotations.PartOfSpeechAnnotation
+        //    CoreAnnotations.IndexAnnotation
+        //    CoreAnnotations.AfterAnnotation
+        //    CoreAnnotations.BeforeAnnotation
+        //    CoreAnnotations.IsMultiWordTokenAnnotation
+        //    CoreAnnotations.IsFirstWordOfMWTAnnotation
+        //    CoreAnnotations.CharacterOffsetBeginAnnotation
+        //    CoreAnnotations.CharacterOffsetEndAnnotation
+        //    CoreAnnotations.TokenBeginAnnotation
+        //    CoreAnnotations.TokenEndAnnotation
+        //    CoreAnnotations.SentenceIndexAnnotation
+        // and sometimes
+        //    CoreAnnotations.CoNLLUFeats
+        //    CoreAnnotations.MWTTokenTextAnnotation
+        //
+        // TODO: make it always add a Feats, even if it's not present?
+      }
+    }
+
+    // compare the SemanticGraph
+    for (int i = 0; i < sentences.size(); ++i) {
+      CoreMap sentence = sentences.get(i);
+      SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+      assertNotNull(graph);
+
+      List<IndexedWord> vertices = graph.vertexListSorted();
+      assertEquals(EXPECTED_WORD_TEXT[i].length, vertices.size());
+      assertEquals(EXPECTED_RELNS[i].length, vertices.size());
+      assertEquals(EXPECTED_HEADS[i].length, vertices.size());
+      for (int j = 0; j < vertices.size(); ++j) {
+        IndexedWord vertex = vertices.get(j);
+        assertEquals(EXPECTED_WORD_TEXT[i][j], vertex.value());
+
+        // each word should be properly indexed with the sentIndex and position in the sentence
+        assertEquals(i, vertex.sentIndex());
+        // j+1 because the arrows are laid out with 0 as root, words with a 1-based index
+        assertEquals(j+1, vertex.index());
+
+        if (EXPECTED_HEADS[i][j] == 0) {
+          assertTrue(graph.isRoot(vertex));
+          continue;
+        }
+
+        // If not a root, then the word should have exactly one parent
+        // The HEAD and RELNS arrays specify the expected parent and relation of the edge
+        List<SemanticGraphEdge> edges = graph.getIncomingEdgesSorted(vertex);
+        assertEquals(1, edges.size());
+        assertEquals(EXPECTED_HEADS[i][j], edges.get(0).getGovernor().index());
+        assertEquals(EXPECTED_RELNS[i][j], edges.get(0).getRelation().toString());
+      }
     }
   }
 }
