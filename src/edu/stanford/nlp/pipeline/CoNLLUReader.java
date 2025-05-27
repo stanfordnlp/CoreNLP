@@ -316,11 +316,11 @@ public class CoNLLUReader {
         cl.setLemma(fields.get(CoNLLU_LemmaField));
 
       if (!fields.get(CoNLLU_UPOSField).equals("_"))
-        cl.setTag(fields.get(CoNLLU_UPOSField));
+        cl.set(CoreAnnotations.CoarseTagAnnotation.class, fields.get(CoNLLU_UPOSField));
 
-      //final String xpos = fields.get(CoNLLU_XPOSField);
-      //if (!xpos.equals("_"))
-      //  cl.setTag(xpos);
+      final String xpos = fields.get(CoNLLU_XPOSField);
+      if (!xpos.equals("_"))
+        cl.setTag(xpos);
 
       if (!fields.get(CoNLLU_FeaturesField).equals("_")) {
         CoNLLUFeatures features = new CoNLLUFeatures(fields.get(CoNLLU_FeaturesField));

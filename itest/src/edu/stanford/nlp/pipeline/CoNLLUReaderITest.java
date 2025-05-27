@@ -45,10 +45,15 @@ public class CoNLLUReaderITest {
     {"de", "allí", "el", "rebaja", "."},
   };
 
-  static final String[][] EXPECTED_CPOS = {
+  static final String[][] EXPECTED_UPOS = {
     {"CCONJ", "DET", "NOUN", "ADP", "NUM", "ADV", "ADJ", "ADP", "DET", "DET", "NOUN", "ADV", "AUX", "VERB", "PRON", "ADP", "DET", "NOUN", "ADP", "NOUN", "PUNCT"},
     {"ADP", "ADV", "DET", "NOUN", "PUNCT"},
   };
+  static final String[][] EXPECTED_XPOS = {
+    {"cc", "da0fs0", "ncfs000", "sps00", "dn0cp0", "rg", "aq0mpp", "sps00", "da0fs0", "di0fs0", "ncfs000", "rg", "vmii3s0", "vmn0000", null, "sps00", "di0ms0", "ncms000", "sps00", "ncfs000", "fp"},
+    {"sps00", "rg", "da0fp0", "ncfp000", "fp"},
+  };
+
 
   static final String[][] EXPECTED_FEATS = {
     {
@@ -133,7 +138,8 @@ public class CoNLLUReaderITest {
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       assertEquals(EXPECTED_WORD_TEXT[i].length, tokens.size());
       assertEquals(EXPECTED_LEMMA_TEXT[i].length, tokens.size());
-      assertEquals(EXPECTED_CPOS[i].length, tokens.size());
+      assertEquals(EXPECTED_UPOS[i].length, tokens.size());
+      assertEquals(EXPECTED_XPOS[i].length, tokens.size());
       for (int j = 0; j < tokens.size(); ++j) {
         CoreLabel token = tokens.get(j);
         assertEquals(EXPECTED_WORD_TEXT[i][j], token.value());
@@ -141,7 +147,8 @@ public class CoNLLUReaderITest {
         assertEquals(EXPECTED_WORD_TEXT[i][j], token.get(CoreAnnotations.OriginalTextAnnotation.class));
 
         assertEquals(EXPECTED_LEMMA_TEXT[i][j], token.lemma());
-        assertEquals(EXPECTED_CPOS[i][j], token.tag());
+        assertEquals(EXPECTED_UPOS[i][j], token.get(CoreAnnotations.CoarseTagAnnotation.class));
+        assertEquals(EXPECTED_XPOS[i][j], token.tag());
 
         assertEquals(Integer.valueOf(i), token.get(CoreAnnotations.SentenceIndexAnnotation.class));
         assertEquals(Integer.valueOf(j+1), token.get(CoreAnnotations.IndexAnnotation.class));
@@ -239,6 +246,11 @@ public class CoNLLUReaderITest {
           assertEquals(expected, feats);
         }
 
+        // Some of the AnCora sentences don't have XPOS
+        if (token.containsKey(CoreAnnotations.PartOfSpeechAnnotation.class)) {
+          expectedKeys += 1;
+        }
+
         // the MWT token specifically gets one more field, the MWT text
         if (i == 0 && (j == 13 || j == 14)) {
           expectedKeys += 1;
@@ -252,6 +264,7 @@ public class CoNLLUReaderITest {
         //    CoreAnnotations.IsNewlineAnnotation
         //    CoreAnnotations.LemmaAnnotation
         //    CoreAnnotations.PartOfSpeechAnnotation
+        //    CoreAnnotations.CoarseTagAnnotation
         //    CoreAnnotations.IndexAnnotation
         //    CoreAnnotations.AfterAnnotation
         //    CoreAnnotations.BeforeAnnotation
