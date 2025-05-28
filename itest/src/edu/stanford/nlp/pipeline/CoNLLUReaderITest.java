@@ -190,7 +190,7 @@ public class CoNLLUReaderITest {
         if (i == 0 && j == 1) {
           assertEquals("  ", token.after());
         } else if (j == tokens.size() - 1) {
-          assertEquals("\n", token.after());
+          assertEquals(System.lineSeparator(), token.after());
         } else if (j == tokens.size() - 2) {
           assertEquals("", token.after());
         } else if (i == 0 && j == 13) {
@@ -205,7 +205,7 @@ public class CoNLLUReaderITest {
           // TODO: is it properly reading the SpacesBefore on the first token?
           assertEquals("", token.before());
         } else if (j == 0) {
-          assertEquals("\n", token.before());
+          assertEquals(System.lineSeparator(), token.before());
         } else if (j == tokens.size() - 1) {
           assertEquals("", token.before());
         } else if (i == 0 && j == 14) {
