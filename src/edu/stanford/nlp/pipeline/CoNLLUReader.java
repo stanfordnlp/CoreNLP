@@ -108,6 +108,79 @@ public class CoNLLUReader {
     columnCount += extraColumns.size();
   }
 
+  // TODO: is there a better place for this?
+  public static String unescapeSpacesAfter(String escaped) {
+    int idx = 0;
+    StringBuilder unescaped = new StringBuilder();
+    while (idx < escaped.length()) {
+      if (escaped.charAt(idx) != '\\') {
+        unescaped.append(escaped.charAt(idx));
+        ++idx;
+        continue;
+      }
+      if (idx + 2 <= escaped.length()) {
+        String piece = escaped.substring(idx, idx + 2);
+        if (piece.equals("\\s")) {
+          unescaped.append(' ');
+          idx += 2;
+          continue;
+        } else if (piece.equals("\\t")) {
+          unescaped.append('\t');
+          idx += 2;
+          continue;
+        } else if (piece.equals("\\r")) {
+          unescaped.append('\r');
+          idx += 2;
+          continue;
+        } else if (piece.equals("\\n")) {
+          unescaped.append('\n');
+          idx += 2;
+          continue;
+        } else if (piece.equals("\\p")) {
+          unescaped.append('|');
+          idx += 2;
+          continue;
+        } else if (piece.equals("\\\\")) {
+          unescaped.append('\\');
+          idx += 2;
+          continue;
+        }
+      }
+      if (idx + 6 <= escaped.length()) {
+        String piece = escaped.substring(idx, idx + 6);
+        if (piece.equals("\\u00A0")) {
+          unescaped.append(' ');
+          idx += 6;
+          continue;
+        }
+      }
+      unescaped.append(escaped.charAt(idx));
+      ++idx;
+    }
+    return unescaped.toString();
+  }
+
+  public static String miscToSpaceAfter(Map<String, String> miscKeyValues) {
+    String spaceAfter = miscKeyValues.get("SpaceAfter");
+    if (spaceAfter != null) {
+      if (spaceAfter.equals("No") || spaceAfter.equals("no")) {
+        return "";
+      } else if (spaceAfter.equals("No~")) {
+        // a random data bug in UD 2.11 Russian-Taiga
+        return "";
+      } else {
+        return " ";
+      }
+    }
+
+    String spacesAfter = miscKeyValues.get("SpacesAfter");
+    if (spacesAfter != null) {
+      return unescapeSpacesAfter(spacesAfter);
+    }
+
+    return " ";
+  }
+
   /**
    * class to store info for a CoNLL-U document
    **/
@@ -345,15 +418,11 @@ public class CoNLLUReader {
        *
        */
       if (!fields.get(CoNLLU_MiscField).equals("_")) {
-        HashMap<String, String> miscKeyValues = new HashMap<>();
+        Map<String, String> miscKeyValues = new HashMap<>();
         Arrays.stream(fields.get(CoNLLU_MiscField).split("\\|")).forEach(
-            kv -> miscKeyValues.put(kv.split("=")[0], kv.split("=")[1]));
-        // unless SpaceAfter=No, add a space after this token
-        if (!miscKeyValues.getOrDefault("SpaceAfter", "Yes").equals("No")) {
-          cl.setAfter(" ");
-        } else {
-          cl.setAfter("");
-        }
+          kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
+        String spaceAfter = miscToSpaceAfter(miscKeyValues);
+        cl.setAfter(spaceAfter);
       } else {
         cl.setAfter(" ");
       }
@@ -372,11 +441,17 @@ public class CoNLLUReader {
           cl.setIsMWTFirst(true);
         }
         // handle MISC info
+        // TODO: only do SpaceAfter/SpacesAfter for the last one
+        // other MWT words should have after==""
         String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
-        for (String miscKV : miscInfo.split("\\|")) {
-          if (miscKV.startsWith("SpaceAfter")) {
-            cl.setAfter(miscKV.split("=")[1].equals("No") ? "" : " ");
-          }
+        if (miscInfo != null && !miscInfo.equals("_")) {
+          Map<String, String> miscKeyValues = new HashMap<>();
+          Arrays.stream(miscInfo.split("\\|")).forEach(
+            kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
+          String spaceAfter = miscToSpaceAfter(miscKeyValues);
+          cl.setAfter(spaceAfter);
+        } else {
+          cl.setAfter(" ");
         }
       } else {
         cl.setIsMWT(false);

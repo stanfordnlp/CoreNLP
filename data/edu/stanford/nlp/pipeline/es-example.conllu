@@ -1,8 +1,9 @@
 # sent_id = 3LB-CAST-a22-0-s10
-# text = Pero la existencia de dos recién nacidos en la misma caja sólo podía deberse a un descuido de fábrica.
+# text = Pero la  existencia de dos recién nacidos en la misma caja sólo podía deberse a un descuido de fábrica.
 # orig_file_sentence 001#48
+# Note = This sentence is from the dev set, but we manually updated word 2 to have SpacesAfter=\s\s
 1	Pero	pero	CCONJ	cc	_	14	advmod	14:advmod	_
-2	la	el	DET	da0fs0	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	3	det	3:det	_
+2	la	el	DET	da0fs0	Definite=Def|Gender=Fem|Number=Sing|PronType=Art	3	det	3:det	SpacesAfter=\s\s
 3	existencia	existencia	NOUN	ncfs000	Gender=Fem|Number=Sing	14	nsubj	14:nsubj	ArgTem=arg1:tem
 4	de	de	ADP	sps00	_	7	case	7:case	_
 5	dos	dos	NUM	dn0cp0	Number=Plur|NumForm=Word|NumType=Card	7	nummod	7:nummod	_

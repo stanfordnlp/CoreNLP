@@ -22,15 +22,13 @@ import org.junit.Test;
  */
 public class CoNLLUReaderITest {
 
-  public String exampleDocument = "Pero la existencia de dos recién nacidos en la misma caja sólo podía deberse a un " +
-      "descuido de fábrica.\nDe allí las rebajas.\n";
   public String examplePath = String.format("edu/stanford/nlp/pipeline/es-example.conllu");
   public StanfordCoreNLP pipeline;
   public Annotation goldDocument;
   public Annotation readInDocument;
 
   static final String[] EXPECTED_SENTENCE_TEXT = {
-    "Pero la existencia de dos recién nacidos en la misma caja sólo podía deberse a un descuido de fábrica.",
+    "Pero la  existencia de dos recién nacidos en la misma caja sólo podía deberse a un descuido de fábrica.",
     "De allí las rebajas."
   };
   static final String EXPECTED_TEXT = String.join(System.lineSeparator(), EXPECTED_SENTENCE_TEXT) + System.lineSeparator();
@@ -189,7 +187,9 @@ public class CoNLLUReaderITest {
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       for (int j = 0; j < tokens.size(); ++j) {
         CoreLabel token = tokens.get(j);
-        if (j == tokens.size() - 1) {
+        if (i == 0 && j == 1) {
+          assertEquals("  ", token.after());
+        } else if (j == tokens.size() - 1) {
           assertEquals("\n", token.after());
         } else if (j == tokens.size() - 2) {
           assertEquals("", token.after());
@@ -199,7 +199,9 @@ public class CoNLLUReaderITest {
           assertEquals(" ", token.after());
         }
 
-        if (i == 0 && j == 0) {
+        if (i == 0 && j == 2) {
+          assertEquals("  ", token.before());
+        } else if (i == 0 && j == 0) {
           assertEquals("", token.before());
         } else if (j == 0) {
           assertEquals("\n", token.before());
