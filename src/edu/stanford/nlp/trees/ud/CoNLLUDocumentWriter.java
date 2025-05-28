@@ -100,6 +100,7 @@ public class CoNLLUDocumentWriter {
             String relnName = reln == null ? "_" : reln.toString();
 
             // don't use after() directly; it returns a default of ""
+            // TODO: does this handle SpaceAfter on other tokens or SpacesAfter?
             if (token.get(CoreAnnotations.AfterAnnotation.class) != null && token.after().equals("")) {
               IndexedWord nextVertex = tokenSg.getNodeByIndexSafe(token.index() + 1);
               // the next word needs to exist and be part of the same MWT
