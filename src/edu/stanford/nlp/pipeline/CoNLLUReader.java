@@ -27,7 +27,7 @@ public class CoNLLUReader {
   // doing that requires processing the empty nodes somehow
   // TODO: read sent_id?
   // TODO: read comments in general
-  // TODO: MWT should have after/before set to ""
+  // TODO: SpacesBefore on the first token should be checked
   // TODO: reconsider the newline as the after on the last word
   public static final int CoNLLU_IndexField = 0;
   public static final int CoNLLU_WordField = 1;
@@ -405,28 +405,6 @@ public class CoNLLUReader {
       }
       cl.setIndex(sentenceTokenIndex);
 
-      /*
-       * analyze MISC field for this token
-       *
-       * MISC should be a "|" separated list in the final column
-       *
-       * example: SpaceAfter=No|NER=PERSON
-       *
-       * supported keys:
-       *
-       * - SpaceAfter (e.g. No if next token is punctuation mark)
-       *
-       */
-      if (!fields.get(CoNLLU_MiscField).equals("_")) {
-        Map<String, String> miscKeyValues = new HashMap<>();
-        Arrays.stream(fields.get(CoNLLU_MiscField).split("\\|")).forEach(
-          kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
-        String spaceAfter = miscToSpaceAfter(miscKeyValues);
-        cl.setAfter(spaceAfter);
-      } else {
-        cl.setAfter(" ");
-      }
-
       // handle the MWT info
       if (sentence.mwtData.containsKey(sentenceTokenIndex - 1)) {
         // set MWT text
@@ -440,22 +418,39 @@ public class CoNLLUReader {
         } else {
           cl.setIsMWTFirst(true);
         }
-        // handle MISC info
-        // TODO: only do SpaceAfter/SpacesAfter for the last one
-        // other MWT words should have after==""
-        String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
-        if (miscInfo != null && !miscInfo.equals("_")) {
+        // SpaceAfter / SpacesAfter should only apply to the last word in an MWT
+        // all other words are treated as implicitly having SpaceAfter=No
+        if (sentence.mwtData.containsKey(sentenceTokenIndex) &&
+            sentence.mwtData.get(sentenceTokenIndex).equals(sentence.mwtData.get(sentenceTokenIndex-1))) {
+          // is there a next word MWT?
+          // and it's the same MWT as this word?
+          // then we aren't last, and SpaceAfter="" is implicitly true
+          cl.setAfter("");
+        } else {
+          String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
+          if (miscInfo != null && !miscInfo.equals("_")) {
+            Map<String, String> miscKeyValues = new HashMap<>();
+            Arrays.stream(miscInfo.split("\\|")).forEach(
+              kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
+            String spaceAfter = miscToSpaceAfter(miscKeyValues);
+            cl.setAfter(spaceAfter);
+          } else {
+            cl.setAfter(" ");
+          }
+        }
+      } else {
+        cl.setIsMWT(false);
+        cl.setIsMWTFirst(false);
+
+        if (!fields.get(CoNLLU_MiscField).equals("_")) {
           Map<String, String> miscKeyValues = new HashMap<>();
-          Arrays.stream(miscInfo.split("\\|")).forEach(
+          Arrays.stream(fields.get(CoNLLU_MiscField).split("\\|")).forEach(
             kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
           String spaceAfter = miscToSpaceAfter(miscKeyValues);
           cl.setAfter(spaceAfter);
         } else {
           cl.setAfter(" ");
         }
-      } else {
-        cl.setIsMWT(false);
-        cl.setIsMWTFirst(false);
       }
       sentenceTokenIndex++;
       coreLabels.add(cl);
@@ -465,16 +460,8 @@ public class CoNLLUReader {
     // set before
     coreLabels.get(0).setBefore("");
     for (int i = 1 ; i < coreLabels.size() ; i++) {
-      if (coreLabels.get(i).isMWT() && !coreLabels.get(i).isMWTFirst()) {
-        // if an MWT derived token and NOT the first one, match before of
-        // previous ; MWT derived tokens should have same char offsets,
-        // before, and after of the original token before splitting
-        coreLabels.get(i).setBefore(coreLabels.get(i-1).before());
-      } else {
-        // standard tokens and first derived token from an MWT
-        // should set before to match after of previous token
-        coreLabels.get(i).setBefore(coreLabels.get(i - 1).after());
-      }
+      // all words should match the after of the previous token
+      coreLabels.get(i).setBefore(coreLabels.get(i - 1).after());
     }
     // handle MWT tokens and build the final sentence text
     int sentenceCharBegin = doc.docText.length();

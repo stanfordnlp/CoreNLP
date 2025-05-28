@@ -193,19 +193,22 @@ public class CoNLLUReaderITest {
           assertEquals("\n", token.after());
         } else if (j == tokens.size() - 2) {
           assertEquals("", token.after());
+        } else if (i == 0 && j == 13) {
+          assertEquals("", token.after());
         } else {
-          // TODO: after() should be "" for an MWT
-          // it just doesn't get marked on the CoNLLU
           assertEquals(" ", token.after());
         }
 
         if (i == 0 && j == 2) {
           assertEquals("  ", token.before());
         } else if (i == 0 && j == 0) {
+          // TODO: is it properly reading the SpacesBefore on the first token?
           assertEquals("", token.before());
         } else if (j == 0) {
           assertEquals("\n", token.before());
         } else if (j == tokens.size() - 1) {
+          assertEquals("", token.before());
+        } else if (i == 0 && j == 14) {
           assertEquals("", token.before());
         } else {
           assertEquals(" ", token.before());
