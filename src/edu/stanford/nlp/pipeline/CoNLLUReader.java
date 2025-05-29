@@ -285,22 +285,6 @@ public class CoNLLUReader {
   }
 
   /**
-   * Read a CoNLL-U file and generate a list of CoNLL-X lines
-   **/
-  public List<String> readCoNLLUFileCreateCoNLLXLines(String filePath) throws IOException {
-    List<CoNLLUDocument> docs = readCoNLLUFileCreateCoNLLUDocuments(filePath);
-    List<String> conllXLines = new ArrayList<String>();
-    for (CoNLLUDocument doc : docs) {
-      for (CoNLLUSentence sentence : doc.sentences) {
-        conllXLines.addAll(sentence.tokenLines);
-        // add a blank line between sentences
-        conllXLines.add("");
-      }
-    }
-    return conllXLines;
-  }
-
-  /**
    * Read a CoNLL-U file and generate a list of CoNLLUDocument objects
    **/
   public List<CoNLLUDocument> readCoNLLUFileCreateCoNLLUDocuments(String filePath) throws IOException {
