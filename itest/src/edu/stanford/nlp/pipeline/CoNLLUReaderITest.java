@@ -419,6 +419,8 @@ public class CoNLLUReaderITest {
 
     SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
     assertEquals(EXPECTED_ENHANCED, enhanced);
+
+    assertEquals("  ", tokens.get(0).before());
   }
 
 }

@@ -25,8 +25,8 @@ public class CoNLLUReader {
    **/
   // TODO: read sent_id?
   // TODO: read comments in general
-  // TODO: SpacesBefore on the first token should be checked
   // TODO: reconsider the newline as the after on the last word
+  // TODO: keep around the rest of the misc annotations
   public static final int CoNLLU_IndexField = 0;
   public static final int CoNLLU_WordField = 1;
   public static final int CoNLLU_LemmaField = 2;
@@ -408,6 +408,19 @@ public class CoNLLUReader {
       cl.set(extraColumns.get(extraColumnIdx), fields.get(extraColumnIdx));
     }
 
+    Map<String, String> miscKeyValues = new HashMap<>();
+    if (!fields.get(CoNLLU_MiscField).equals("_")) {
+      Arrays.stream(fields.get(CoNLLU_MiscField).split("\\|")).forEach(
+        kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
+    }
+
+    // SpacesBefore on a word that isn't the first in a document will
+    // be replaced with the SpacesAfter from the previous token later
+    String spacesBefore = miscKeyValues.get("SpacesBefore");
+    if (spacesBefore != null) {
+      cl.setBefore(unescapeSpacesAfter(spacesBefore));
+    }
+
     // handle the MWT info and after text
     if (isEmpty) {
       // don't set an after for empty tokens
@@ -437,10 +450,10 @@ public class CoNLLUReader {
       } else {
         String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
         if (miscInfo != null && !miscInfo.equals("_")) {
-          Map<String, String> miscKeyValues = new HashMap<>();
+          Map<String, String> mwtKeyValues = new HashMap<>();
           Arrays.stream(miscInfo.split("\\|")).forEach(
-            kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
-          String spaceAfter = miscToSpaceAfter(miscKeyValues);
+            kv -> mwtKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
+          String spaceAfter = miscToSpaceAfter(mwtKeyValues);
           cl.setAfter(spaceAfter);
         } else {
           cl.setAfter(" ");
@@ -450,15 +463,8 @@ public class CoNLLUReader {
       cl.setIsMWT(false);
       cl.setIsMWTFirst(false);
 
-      if (!fields.get(CoNLLU_MiscField).equals("_")) {
-        Map<String, String> miscKeyValues = new HashMap<>();
-        Arrays.stream(fields.get(CoNLLU_MiscField).split("\\|")).forEach(
-          kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
-        String spaceAfter = miscToSpaceAfter(miscKeyValues);
-        cl.setAfter(spaceAfter);
-      } else {
-        cl.setAfter(" ");
-      }
+      String spaceAfter = miscToSpaceAfter(miscKeyValues);
+      cl.setAfter(spaceAfter);
     }
     return cl;
   }
@@ -477,7 +483,9 @@ public class CoNLLUReader {
     // the last token should have a newline after
     coreLabels.get(coreLabels.size() - 1).setAfter(System.lineSeparator());
     // set before
-    coreLabels.get(0).setBefore("");
+    if (!coreLabels.get(0).containsKey(CoreAnnotations.BeforeAnnotation.class)) {
+      coreLabels.get(0).setBefore("");
+    }
     for (int i = 1 ; i < coreLabels.size() ; i++) {
       // all words should match the after of the previous token
       coreLabels.get(i).setBefore(coreLabels.get(i - 1).after());

@@ -1,6 +1,6 @@
 # sent_id = weblog-blogspot.com_healingiraq_20040409053012_ENG_20040409_053012-0022
 # text = Over 300 Iraqis are reported dead and 500 wounded in Fallujah alone.
-1	Over	over	ADV	RB	_	2	advmod	2:advmod	_
+1	Over	over	ADV	RB	_	2	advmod	2:advmod	SpacesBefore=\s\s
 2	300	300	NUM	CD	NumForm=Digit|NumType=Card	3	nummod	3:nummod	_
 3	Iraqis	Iraqi	PROPN	NNPS	Number=Plur	5	nsubj:pass	5:nsubj:pass|6:nsubj:xsubj|8:nsubj:pass	_
 4	are	be	AUX	VBP	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	5	aux:pass	5:aux:pass	_
