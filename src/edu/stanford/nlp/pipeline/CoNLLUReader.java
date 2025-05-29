@@ -354,81 +354,63 @@ public class CoNLLUReader {
   }
 
   /**
-   * Convert a list of CoNLL-U token lines into a sentence CoreMap
-   **/
-  public CoreMap convertCoNLLUSentenceToCoreMap(CoNLLUDocument doc, CoNLLUSentence sentence) {
-    List<String> lines = sentence.tokenLines;
-    // create CoreLabels
-    List<CoreLabel> coreLabels = new ArrayList<CoreLabel>();
-    int sentenceTokenIndex = 1;
-    for (String line : lines) {
-      List<String> fields = Arrays.asList(line.split("\t"));
-      CoreLabel cl = new CoreLabel();
-      cl.setWord(fields.get(CoNLLU_WordField));
-      cl.setValue(fields.get(CoNLLU_WordField));
-      cl.setOriginalText(fields.get(CoNLLU_WordField));
-      cl.setIsNewline(false);
+   * Convert a single ten column CoNLLU line into a CoreLabel
+   */
+  public CoreLabel convertLineToCoreLabel(CoNLLUSentence sentence, String line) {
+    List<String> fields = Arrays.asList(line.split("\t"));
+    CoreLabel cl = new CoreLabel();
+    int sentenceTokenIndex = Integer.valueOf(fields.get(CoNLLU_IndexField));
+    cl.setWord(fields.get(CoNLLU_WordField));
+    cl.setValue(fields.get(CoNLLU_WordField));
+    cl.setOriginalText(fields.get(CoNLLU_WordField));
+    cl.setIsNewline(false);
 
-      if (!fields.get(CoNLLU_LemmaField).equals("_"))
-        cl.setLemma(fields.get(CoNLLU_LemmaField));
+    if (!fields.get(CoNLLU_LemmaField).equals("_"))
+      cl.setLemma(fields.get(CoNLLU_LemmaField));
 
-      if (!fields.get(CoNLLU_UPOSField).equals("_"))
-        cl.set(CoreAnnotations.CoarseTagAnnotation.class, fields.get(CoNLLU_UPOSField));
+    if (!fields.get(CoNLLU_UPOSField).equals("_"))
+      cl.set(CoreAnnotations.CoarseTagAnnotation.class, fields.get(CoNLLU_UPOSField));
 
-      final String xpos = fields.get(CoNLLU_XPOSField);
-      if (!xpos.equals("_"))
-        cl.setTag(xpos);
+    final String xpos = fields.get(CoNLLU_XPOSField);
+    if (!xpos.equals("_"))
+      cl.setTag(xpos);
 
-      if (!fields.get(CoNLLU_FeaturesField).equals("_")) {
-        CoNLLUFeatures features = new CoNLLUFeatures(fields.get(CoNLLU_FeaturesField));
-        cl.set(CoreAnnotations.CoNLLUFeats.class, features);
-      }
-      for (int extraColumnIdx = 10; extraColumnIdx < columnCount && extraColumnIdx < fields.size();
-           extraColumnIdx++) {
-        cl.set(extraColumns.get(extraColumnIdx), fields.get(extraColumnIdx));
-      }
-      cl.setIndex(sentenceTokenIndex);
+    if (!fields.get(CoNLLU_FeaturesField).equals("_")) {
+      CoNLLUFeatures features = new CoNLLUFeatures(fields.get(CoNLLU_FeaturesField));
+      cl.set(CoreAnnotations.CoNLLUFeats.class, features);
+    }
+    for (int extraColumnIdx = 10; extraColumnIdx < columnCount && extraColumnIdx < fields.size();
+         extraColumnIdx++) {
+      cl.set(extraColumns.get(extraColumnIdx), fields.get(extraColumnIdx));
+    }
+    cl.setIndex(sentenceTokenIndex);
 
-      // handle the MWT info
-      if (sentence.mwtData.containsKey(sentenceTokenIndex - 1)) {
-        // set MWT text
-        cl.set(CoreAnnotations.MWTTokenTextAnnotation.class,
-            sentence.mwtTokens.get(sentence.mwtData.get(sentenceTokenIndex - 1)));
-        cl.setIsMWT(true);
-        // check if first
-        if (sentence.mwtData.containsKey(sentenceTokenIndex - 2) &&
-            sentence.mwtData.get(sentenceTokenIndex-2).equals(sentence.mwtData.get(sentenceTokenIndex-1))) {
-          cl.setIsMWTFirst(false);
-        } else {
-          cl.setIsMWTFirst(true);
-        }
-        // SpaceAfter / SpacesAfter should only apply to the last word in an MWT
-        // all other words are treated as implicitly having SpaceAfter=No
-        if (sentence.mwtData.containsKey(sentenceTokenIndex) &&
-            sentence.mwtData.get(sentenceTokenIndex).equals(sentence.mwtData.get(sentenceTokenIndex-1))) {
-          // is there a next word MWT?
-          // and it's the same MWT as this word?
-          // then we aren't last, and SpaceAfter="" is implicitly true
-          cl.setAfter("");
-        } else {
-          String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
-          if (miscInfo != null && !miscInfo.equals("_")) {
-            Map<String, String> miscKeyValues = new HashMap<>();
-            Arrays.stream(miscInfo.split("\\|")).forEach(
-              kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
-            String spaceAfter = miscToSpaceAfter(miscKeyValues);
-            cl.setAfter(spaceAfter);
-          } else {
-            cl.setAfter(" ");
-          }
-        }
-      } else {
-        cl.setIsMWT(false);
+    // handle the MWT info
+    if (sentence.mwtData.containsKey(sentenceTokenIndex - 1)) {
+      // set MWT text
+      cl.set(CoreAnnotations.MWTTokenTextAnnotation.class,
+          sentence.mwtTokens.get(sentence.mwtData.get(sentenceTokenIndex - 1)));
+      cl.setIsMWT(true);
+      // check if first
+      if (sentence.mwtData.containsKey(sentenceTokenIndex - 2) &&
+          sentence.mwtData.get(sentenceTokenIndex-2).equals(sentence.mwtData.get(sentenceTokenIndex-1))) {
         cl.setIsMWTFirst(false);
-
-        if (!fields.get(CoNLLU_MiscField).equals("_")) {
+      } else {
+        cl.setIsMWTFirst(true);
+      }
+      // SpaceAfter / SpacesAfter should only apply to the last word in an MWT
+      // all other words are treated as implicitly having SpaceAfter=No
+      if (sentence.mwtData.containsKey(sentenceTokenIndex) &&
+          sentence.mwtData.get(sentenceTokenIndex).equals(sentence.mwtData.get(sentenceTokenIndex-1))) {
+        // is there a next word MWT?
+        // and it's the same MWT as this word?
+        // then we aren't last, and SpaceAfter="" is implicitly true
+        cl.setAfter("");
+      } else {
+        String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
+        if (miscInfo != null && !miscInfo.equals("_")) {
           Map<String, String> miscKeyValues = new HashMap<>();
-          Arrays.stream(fields.get(CoNLLU_MiscField).split("\\|")).forEach(
+          Arrays.stream(miscInfo.split("\\|")).forEach(
             kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
           String spaceAfter = miscToSpaceAfter(miscKeyValues);
           cl.setAfter(spaceAfter);
@@ -436,7 +418,32 @@ public class CoNLLUReader {
           cl.setAfter(" ");
         }
       }
-      sentenceTokenIndex++;
+    } else {
+      cl.setIsMWT(false);
+      cl.setIsMWTFirst(false);
+
+      if (!fields.get(CoNLLU_MiscField).equals("_")) {
+        Map<String, String> miscKeyValues = new HashMap<>();
+        Arrays.stream(fields.get(CoNLLU_MiscField).split("\\|")).forEach(
+          kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
+        String spaceAfter = miscToSpaceAfter(miscKeyValues);
+        cl.setAfter(spaceAfter);
+      } else {
+        cl.setAfter(" ");
+      }
+    }
+    return cl;
+  }
+
+  /**
+   * Convert a list of CoNLL-U token lines into a sentence CoreMap
+   **/
+  public CoreMap convertCoNLLUSentenceToCoreMap(CoNLLUDocument doc, CoNLLUSentence sentence) {
+    List<String> lines = sentence.tokenLines;
+    // create CoreLabels
+    List<CoreLabel> coreLabels = new ArrayList<CoreLabel>();
+    for (String line : lines) {
+      CoreLabel cl = convertLineToCoreLabel(sentence, line);
       coreLabels.add(cl);
     }
     // the last token should have a newline after
