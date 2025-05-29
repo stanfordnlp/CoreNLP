@@ -373,6 +373,20 @@ public class CoreAnnotations {
   }
 
   /**
+   * This represents a list of the empty words.  We can attach to the
+   * Sentence CoreMap when reading CoNLLU files with such empty words
+   * <br>
+   * See the desctiption of EmptyIndexAnnotation for more explanation
+   * of when this is relevant
+   */
+  public static class EmptyTokensAnnotation implements CoreAnnotation<List<CoreLabel>> {
+    @Override
+    public Class<List<CoreLabel>> getType() {
+      return ErasureUtils.uncheckedCast(List.class);
+    }
+  }
+
+  /**
    * This indexes the beginning of a span of words, e.g., a constituent in a
    * tree. See {@link edu.stanford.nlp.trees.Tree#indexSpans(int)}.
    * This annotation counts tokens.

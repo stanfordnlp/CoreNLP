@@ -23,9 +23,6 @@ import org.junit.Test;
 public class CoNLLUReaderITest {
 
   public String examplePath = String.format("edu/stanford/nlp/pipeline/es-example.conllu");
-  public StanfordCoreNLP pipeline;
-  public Annotation goldDocument;
-  public Annotation readInDocument;
 
   static final String[] EXPECTED_SENTENCE_TEXT = {
     "Pero la  existencia de dos recién nacidos en la misma caja sólo podía deberse a un descuido de fábrica.",
@@ -98,7 +95,7 @@ public class CoNLLUReaderITest {
 
   @Test
   public void testReadingInCoNLLUFile() throws ClassNotFoundException, IOException {
-    readInDocument = new CoNLLUReader(new Properties()).readCoNLLUFile(examplePath).get(0);
+    Annotation readInDocument = readInDocument = new CoNLLUReader(new Properties()).readCoNLLUFile(examplePath).get(0);
 
     assertTrue(readInDocument.containsKey(CoreAnnotations.TextAnnotation.class));
     assertTrue(readInDocument.containsKey(CoreAnnotations.TokensAnnotation.class));
@@ -321,4 +318,42 @@ public class CoNLLUReaderITest {
       }
     }
   }
+
+  public String emptiesPath = String.format("edu/stanford/nlp/pipeline/en-example.conllu");
+
+  String[] EXPECTED_ENGLISH_WORDS = {
+    "Over", "300", "Iraqis", "are", "reported", "dead", "and", "500", "wounded", "in", "Fallujah", "alone", "."
+  };
+
+  @Test
+  /**
+   * Here we run fewer tests.  Just make sure the EmptyToken is properly handled,
+   * and make sure there isn't some weird line skipping going on with the rest of the tokens
+   */
+  public void testReadingInEmpties() throws ClassNotFoundException, IOException {
+    Annotation readInDocument = new CoNLLUReader(new Properties()).readCoNLLUFile(emptiesPath).get(0);
+
+    // this document only has one sentence
+    List<CoreMap> sentences = readInDocument.get(CoreAnnotations.SentencesAnnotation.class);
+    assertEquals(1, sentences.size());
+
+    CoreMap sentence = sentences.get(0);
+
+    // cursory check of the tokens
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    assertEquals(13, tokens.size());
+    assertEquals(13, EXPECTED_ENGLISH_WORDS.length);
+    for (int i = 0; i < tokens.size(); ++i) {
+      assertEquals(i+1, tokens.get(i).index());
+      assertEquals(EXPECTED_ENGLISH_WORDS[i], tokens.get(i).value());
+    }
+
+    List<CoreLabel> emptyTokens = sentence.get(CoreAnnotations.EmptyTokensAnnotation.class);
+    assertEquals(1, emptyTokens.size());
+    CoreLabel empty = emptyTokens.get(0);
+    assertEquals(8, empty.index());
+    assertEquals(Integer.valueOf(1), empty.get(CoreAnnotations.EmptyIndexAnnotation.class));
+    assertEquals("reported", empty.value());
+  }
+
 }

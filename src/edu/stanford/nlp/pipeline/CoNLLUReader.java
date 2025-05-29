@@ -24,7 +24,6 @@ public class CoNLLUReader {
    * field constants
    **/
   // TODO: we should handle field 8, DEPS, for an enhanced dependencies
-  // doing that requires processing the empty nodes somehow
   // TODO: read sent_id?
   // TODO: read comments in general
   // TODO: SpacesBefore on the first token should be checked
@@ -48,6 +47,7 @@ public class CoNLLUReader {
   public static Pattern DOCUMENT_LINE = Pattern.compile("^# newdoc");
   public static Pattern MWT_LINE = Pattern.compile("^[0-9]+-[0-9]+.*");
   public static Pattern TOKEN_LINE = Pattern.compile("^[0-9]+\t.*");
+  public static Pattern EMPTY_LINE = Pattern.compile("^[0-9]+[.][0-9]+\t.*");
 
   /**
    * shorthands for CoreAnnotations
@@ -219,6 +219,8 @@ public class CoNLLUReader {
 
     // the token lines
     public List<String> tokenLines = new ArrayList<>();
+    // in case the enhanced dependencies have empty words
+    public List<String> emptyLines = new ArrayList<>();
     // data for the sentence contained in # key values
     public HashMap<String, String> sentenceData = new HashMap<>();
     // map indices in token list to mwt data if there is any
@@ -240,8 +242,9 @@ public class CoNLLUReader {
         addMWTData(line);
       else if (TOKEN_LINE.matcher(line).matches())
         tokenLines.add(line);
+      else if (EMPTY_LINE.matcher(line).matches())
+        emptyLines.add(line);
       else
-        // TODO: this is ignoring "empty" tokens
         return true;
       return false;
     }
@@ -359,7 +362,23 @@ public class CoNLLUReader {
   public CoreLabel convertLineToCoreLabel(CoNLLUSentence sentence, String line) {
     List<String> fields = Arrays.asList(line.split("\t"));
     CoreLabel cl = new CoreLabel();
-    int sentenceTokenIndex = Integer.valueOf(fields.get(CoNLLU_IndexField));
+
+    String indexField = fields.get(CoNLLU_IndexField);
+    int sentenceTokenIndex;
+    boolean isEmpty;
+    if (indexField.indexOf('.') >= 0) {
+      isEmpty = true;
+      String[] indexPieces = indexField.split("[.]", 2);
+      sentenceTokenIndex = Integer.valueOf(indexPieces[0]);
+      cl.setIndex(sentenceTokenIndex);
+      int emptyIndex = Integer.valueOf(indexPieces[1]);
+      cl.set(CoreAnnotations.EmptyIndexAnnotation.class, emptyIndex);
+    } else {
+      isEmpty = false;
+      sentenceTokenIndex = Integer.valueOf(indexField);
+      cl.setIndex(sentenceTokenIndex);
+    }
+
     cl.setWord(fields.get(CoNLLU_WordField));
     cl.setValue(fields.get(CoNLLU_WordField));
     cl.setOriginalText(fields.get(CoNLLU_WordField));
@@ -383,10 +402,14 @@ public class CoNLLUReader {
          extraColumnIdx++) {
       cl.set(extraColumns.get(extraColumnIdx), fields.get(extraColumnIdx));
     }
-    cl.setIndex(sentenceTokenIndex);
 
-    // handle the MWT info
-    if (sentence.mwtData.containsKey(sentenceTokenIndex - 1)) {
+    // handle the MWT info and after text
+    if (isEmpty) {
+      // don't set an after for empty tokens
+      // empty tokens are not considered part of MWT
+      cl.setIsMWT(false);
+      cl.setIsMWTFirst(false);
+    } else if (sentence.mwtData.containsKey(sentenceTokenIndex - 1)) {
       // set MWT text
       cl.set(CoreAnnotations.MWTTokenTextAnnotation.class,
           sentence.mwtTokens.get(sentence.mwtData.get(sentenceTokenIndex - 1)));
@@ -487,6 +510,12 @@ public class CoNLLUReader {
       }
     }
 
+    List<CoreLabel> emptyLabels = new ArrayList<CoreLabel>();
+    for (String line : sentence.emptyLines) {
+      CoreLabel cl = convertLineToCoreLabel(sentence, line);
+      emptyLabels.add(cl);
+    }
+
     // build SemanticGraphEdges
     List<SemanticGraphEdge> graphEdges = new ArrayList<>();
     for (int i = 0; i < lines.size(); i++) {
@@ -505,6 +534,11 @@ public class CoNLLUReader {
     Annotation sentenceCoreMap = new Annotation(doc.docText.substring(sentenceCharBegin).trim());
     // add tokens
     sentenceCoreMap.set(CoreAnnotations.TokensAnnotation.class, coreLabels);
+    // add empty tokens, if any exist
+    if (emptyLabels.size() > 0) {
+      sentenceCoreMap.set(CoreAnnotations.EmptyTokensAnnotation.class, emptyLabels);
+    }
+
     // add dependency graph
     sentenceCoreMap.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, depParse);
     return sentenceCoreMap;
