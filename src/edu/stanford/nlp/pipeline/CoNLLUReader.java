@@ -516,20 +516,35 @@ public class CoNLLUReader {
       emptyLabels.add(cl);
     }
 
-    // build SemanticGraphEdges
+    // first, prebuild the IndexedWords that will make up the basic graph
+    // (and possibly the enhanced graph)
+    Map<String, IndexedWord> graphNodes = new HashMap<>();
+    for (CoreLabel label : coreLabels) {
+      String index = Integer.toString(label.index());
+      graphNodes.put(index, new IndexedWord(label));
+    }
+    for (CoreLabel empty : emptyLabels) {
+      String index = empty.index() + "." + empty.get(CoreAnnotations.EmptyIndexAnnotation.class);
+      graphNodes.put(index, new IndexedWord(empty));
+    }
+
+    // build SemanticGraphEdges for a basic graph
     List<SemanticGraphEdge> graphEdges = new ArrayList<>();
     for (int i = 0; i < lines.size(); i++) {
       List<String> fields = Arrays.asList(lines.get(i).split("\t"));
       // skip the ROOT node
       if (fields.get(CoNLLU_GovField).equals("0"))
         continue;
-      IndexedWord dependent = new IndexedWord(coreLabels.get(i));
-      IndexedWord gov = new IndexedWord(coreLabels.get(Integer.parseInt(fields.get(CoNLLU_GovField)) - 1));
+      IndexedWord dependent = graphNodes.get(fields.get(CoNLLU_IndexField));
+      IndexedWord gov = graphNodes.get(fields.get(CoNLLU_GovField));
       GrammaticalRelation reln = GrammaticalRelation.valueOf(fields.get(CoNLLU_RelnField));
       graphEdges.add(new SemanticGraphEdge(gov, dependent, reln, 1.0, false));
     }
     // build SemanticGraph
     SemanticGraph depParse = SemanticGraphFactory.makeFromEdges(graphEdges);
+
+    // TODO: here we build the enhanced graph, if it exists
+
     // build sentence CoreMap with full text
     Annotation sentenceCoreMap = new Annotation(doc.docText.substring(sentenceCharBegin).trim());
     // add tokens
