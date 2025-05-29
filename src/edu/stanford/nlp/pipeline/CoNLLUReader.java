@@ -348,6 +348,11 @@ public class CoNLLUReader {
         tokens.add(token);
         documentIdx++;
       }
+      if (sentence.containsKey(CoreAnnotations.EmptyTokensAnnotation.class)) {
+        for (CoreLabel token : sentence.get(CoreAnnotations.EmptyTokensAnnotation.class)) {
+          token.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
+        }
+      }
       sentenceIdx++;
     }
     // make sure to set docText AFTER all the above processing

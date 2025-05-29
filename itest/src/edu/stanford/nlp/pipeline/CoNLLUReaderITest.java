@@ -353,6 +353,7 @@ public class CoNLLUReaderITest {
     CoreLabel empty = emptyTokens.get(0);
     assertEquals(8, empty.index());
     assertEquals(Integer.valueOf(1), empty.get(CoreAnnotations.EmptyIndexAnnotation.class));
+    assertEquals(0, empty.sentIndex());
     assertEquals("reported", empty.value());
   }
 
