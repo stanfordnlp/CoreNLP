@@ -23,7 +23,6 @@ public class CoNLLUReader {
   /**
    * field constants
    **/
-  // TODO: we should handle field 8, DEPS, for an enhanced dependencies
   // TODO: read sent_id?
   // TODO: read comments in general
   // TODO: SpacesBefore on the first token should be checked
@@ -36,6 +35,7 @@ public class CoNLLUReader {
   public static final int CoNLLU_FeaturesField = 5;
   public static final int CoNLLU_GovField = 6;
   public static final int CoNLLU_RelnField = 7;
+  public static final int CoNLLU_EnhancedField = 8;
   public static final int CoNLLU_MiscField = 9;
 
   public int columnCount = 10;
@@ -521,7 +521,17 @@ public class CoNLLUReader {
       emptyLabels.add(cl);
     }
 
-    // first, prebuild the IndexedWords that will make up the basic graph
+    // build sentence CoreMap with full text
+    Annotation sentenceCoreMap = new Annotation(doc.docText.substring(sentenceCharBegin).trim());
+    // add tokens
+    sentenceCoreMap.set(CoreAnnotations.TokensAnnotation.class, coreLabels);
+    // add empty tokens, if any exist
+    if (emptyLabels.size() > 0) {
+      sentenceCoreMap.set(CoreAnnotations.EmptyTokensAnnotation.class, emptyLabels);
+    }
+
+    // to build the basic SemanticGraph, first, prebuild the
+    // IndexedWords that will make up the basic graph
     // (and possibly the enhanced graph)
     Map<String, IndexedWord> graphNodes = new HashMap<>();
     for (CoreLabel label : coreLabels) {
@@ -533,10 +543,13 @@ public class CoNLLUReader {
       graphNodes.put(index, new IndexedWord(empty));
     }
 
+    boolean hasEnhanced = false;
     // build SemanticGraphEdges for a basic graph
     List<SemanticGraphEdge> graphEdges = new ArrayList<>();
     for (int i = 0; i < lines.size(); i++) {
       List<String> fields = Arrays.asList(lines.get(i).split("\t"));
+      // track whether any of these lines signify there is an enhanced graph
+      hasEnhanced = hasEnhanced || !fields.equals("_");
       // skip the ROOT node
       if (fields.get(CoNLLU_GovField).equals("0"))
         continue;
@@ -547,20 +560,36 @@ public class CoNLLUReader {
     }
     // build SemanticGraph
     SemanticGraph depParse = SemanticGraphFactory.makeFromEdges(graphEdges);
-
-    // TODO: here we build the enhanced graph, if it exists
-
-    // build sentence CoreMap with full text
-    Annotation sentenceCoreMap = new Annotation(doc.docText.substring(sentenceCharBegin).trim());
-    // add tokens
-    sentenceCoreMap.set(CoreAnnotations.TokensAnnotation.class, coreLabels);
-    // add empty tokens, if any exist
-    if (emptyLabels.size() > 0) {
-      sentenceCoreMap.set(CoreAnnotations.EmptyTokensAnnotation.class, emptyLabels);
-    }
-
     // add dependency graph
     sentenceCoreMap.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, depParse);
+
+    if (hasEnhanced) {
+      List<SemanticGraphEdge> enhancedEdges = new ArrayList<>();
+      List<IndexedWord> roots = new ArrayList<>();
+
+      List<String> allLines = new ArrayList<>();
+      allLines.addAll(lines);
+      allLines.addAll(sentence.emptyLines);
+      for (String line : allLines) {
+        List<String> fields = Arrays.asList(line.split("\t"));
+        IndexedWord dependent = graphNodes.get(fields.get(CoNLLU_IndexField));
+        String[] arcs = fields.get(CoNLLU_EnhancedField).split("[|]");
+        for (String arc : arcs) {
+          String[] arcPieces = arc.split(":", 2);
+          if (arcPieces[0].equals("0")) {
+            roots.add(dependent);
+          } else {
+            IndexedWord gov = graphNodes.get(arcPieces[0]);
+            GrammaticalRelation reln = GrammaticalRelation.valueOf(arcPieces[1]);
+            enhancedEdges.add(new SemanticGraphEdge(gov, dependent, reln, 1.0, false));
+          }
+        }
+      }
+      SemanticGraph enhancedParse = SemanticGraphFactory.makeFromEdges(enhancedEdges);
+      enhancedParse.setRoots(roots);
+      sentenceCoreMap.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, enhancedParse);
+    }
+
     return sentenceCoreMap;
   }
 

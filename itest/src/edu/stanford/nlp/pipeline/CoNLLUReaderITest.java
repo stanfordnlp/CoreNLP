@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.semgraph.*;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -11,7 +12,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Before;
@@ -111,10 +114,14 @@ public class CoNLLUReaderITest {
     }
 
     // Compare sentence ids
+    // Check that the enhanced dependencies exist
+    //   (these sentences should all have them, but we will check it
+    //    more thoroughly for the Empty test sentence)
     // Check number of keys on each sentence
     for (int i = 0; i < sentences.size(); ++i) {
       assertEquals(Integer.valueOf(i), sentences.get(i).get(CoreAnnotations.SentenceIndexAnnotation.class));
-      assertEquals(4, sentences.get(i).keySet().size());
+      assertTrue(sentences.get(i).containsKey(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
+      assertEquals(5, sentences.get(i).keySet().size());
     }
 
     // Check the document tokens and the sentence tokens lists are the same
@@ -319,11 +326,65 @@ public class CoNLLUReaderITest {
     }
   }
 
-  public String emptiesPath = String.format("edu/stanford/nlp/pipeline/en-example.conllu");
+  public static final String emptiesPath = String.format("edu/stanford/nlp/pipeline/en-example.conllu");
 
-  String[] EXPECTED_ENGLISH_WORDS = {
+  static final String[] EXPECTED_ENGLISH_WORDS = {
     "Over", "300", "Iraqis", "are", "reported", "dead", "and", "500", "wounded", "in", "Fallujah", "alone", "."
   };
+
+  static final String[][] EXPECTED_ENHANCED_EDGES = {
+    {"1", "2", "advmod"},
+    {"2", "3", "nummod"},
+    {"3", "5", "nsubj:pass"},
+    {"3", "6", "nsubj:xsubj"},
+    {"3", "8", "nsubj:pass"},
+    {"4", "5", "aux:pass"},
+    {"6", "5", "xcomp"},
+    {"7", "8", "cc"},
+    {"7", "8.1", "cc"},
+    {"8", "5", "conj:and"},
+    {"8", "8.1", "nsubj:pass"},
+    {"8", "9", "nsubj:xsubj"},
+    {"8.1", "5", "conj:and"},
+    {"9", "8.1", "xcomp"},
+    {"10", "11", "case"},
+    {"11", "5", "obl:in"},
+    {"12", "11", "advmod"},
+    {"13", "5", "punct"},
+  };
+  static final SemanticGraph EXPECTED_ENHANCED = buildEnhancedTest();
+  static SemanticGraph buildEnhancedTest() {
+    Map<String, IndexedWord> graphNodes = new HashMap<>();
+    for (int i = 0; i < EXPECTED_ENGLISH_WORDS.length; ++i) {
+      String index = Integer.toString(i+1);
+      CoreLabel cl = new CoreLabel();
+      cl.setValue(EXPECTED_ENGLISH_WORDS[i]);
+      cl.setIndex(i+1);
+      cl.setSentIndex(0);
+      graphNodes.put(index, new IndexedWord(cl));
+    }
+    {
+      String index = "8.1";
+      CoreLabel cl = new CoreLabel();
+      cl.setValue("reported");
+      cl.setIndex(8);
+      cl.set(CoreAnnotations.EmptyIndexAnnotation.class, 1);
+      cl.setSentIndex(0);
+      graphNodes.put(index, new IndexedWord(cl));
+    }
+    List<SemanticGraphEdge> edges = new ArrayList<>();
+    for (String[] edge : EXPECTED_ENHANCED_EDGES) {
+      IndexedWord dep = graphNodes.get(edge[0]);
+      IndexedWord gov = graphNodes.get(edge[1]);
+      GrammaticalRelation reln = GrammaticalRelation.valueOf(edge[2]);
+      edges.add(new SemanticGraphEdge(gov, dep, reln, 1.0, false));
+    }
+    List<IndexedWord> roots = new ArrayList<>();
+    roots.add(graphNodes.get("5"));
+    SemanticGraph enhancedParse = SemanticGraphFactory.makeFromEdges(edges);
+    enhancedParse.setRoots(roots);
+    return enhancedParse;
+  }
 
   @Test
   /**
@@ -355,6 +416,9 @@ public class CoNLLUReaderITest {
     assertEquals(Integer.valueOf(1), empty.get(CoreAnnotations.EmptyIndexAnnotation.class));
     assertEquals(0, empty.sentIndex());
     assertEquals("reported", empty.value());
+
+    SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    assertEquals(EXPECTED_ENHANCED, enhanced);
   }
 
 }
