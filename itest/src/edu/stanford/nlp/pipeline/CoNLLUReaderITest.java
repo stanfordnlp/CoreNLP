@@ -423,4 +423,31 @@ public class CoNLLUReaderITest {
     assertEquals("  ", tokens.get(0).before());
   }
 
+
+  public static final String noEnhancedPath = String.format("edu/stanford/nlp/pipeline/en-example-noenhanced.conllu");
+
+  @Test
+  /**
+   * Here we run fewer tests.  Just make sure the EmptyToken is properly handled,
+   * and make sure there isn't some weird line skipping going on with the rest of the tokens
+   */
+  public void testReadingNoEnhanced() throws ClassNotFoundException, IOException {
+    Annotation readInDocument = new CoNLLUReader(new Properties()).readCoNLLUFile(noEnhancedPath).get(0);
+
+    // this document only has one sentence
+    List<CoreMap> sentences = readInDocument.get(CoreAnnotations.SentencesAnnotation.class);
+    assertEquals(1, sentences.size());
+
+    CoreMap sentence = sentences.get(0);
+
+    // cursory check of the tokens
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    assertEquals(13, tokens.size());
+    assertEquals(13, EXPECTED_ENGLISH_WORDS.length);
+    for (int i = 0; i < tokens.size(); ++i) {
+      assertEquals(i+1, tokens.get(i).index());
+      assertEquals(EXPECTED_ENGLISH_WORDS[i], tokens.get(i).value());
+    }
+  }
+
 }

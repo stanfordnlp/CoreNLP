@@ -1,0 +1,16 @@
+# sent_id = weblog-blogspot.com_healingiraq_20040409053012_ENG_20040409_053012-0022
+# text = Over 300 Iraqis are reported dead and 500 wounded in Fallujah alone.
+1	Over	over	ADV	RB	_	2	advmod	_	SpacesBefore=\s\s
+2	300	300	NUM	CD	NumForm=Digit|NumType=Card	3	nummod	_	_
+3	Iraqis	Iraqi	PROPN	NNPS	Number=Plur	5	nsubj:pass	_	_
+4	are	be	AUX	VBP	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	5	aux:pass	_	_
+5	reported	report	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	_
+6	dead	dead	ADJ	JJ	Degree=Pos	5	xcomp	_	_
+7	and	and	CCONJ	CC	_	8	cc	_	_
+8	500	500	NUM	CD	NumForm=Digit|NumType=Card	5	conj	_	_
+9	wounded	wounded	ADJ	JJ	Degree=Pos	8	orphan	_	_
+10	in	in	ADP	IN	_	11	case	_	_
+11	Fallujah	Fallujah	PROPN	NNP	Number=Sing	5	obl	_	_
+12	alone	alone	ADV	RB	_	11	advmod	_	SpaceAfter=No
+13	.	.	PUNCT	.	_	5	punct	_	_
+
