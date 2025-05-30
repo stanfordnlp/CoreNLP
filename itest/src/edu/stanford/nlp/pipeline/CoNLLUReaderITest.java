@@ -121,7 +121,8 @@ public class CoNLLUReaderITest {
     for (int i = 0; i < sentences.size(); ++i) {
       assertEquals(Integer.valueOf(i), sentences.get(i).get(CoreAnnotations.SentenceIndexAnnotation.class));
       assertTrue(sentences.get(i).containsKey(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
-      assertEquals(5, sentences.get(i).keySet().size());
+      assertTrue(sentences.get(i).containsKey(CoreAnnotations.CommentsAnnotation.class));
+      assertEquals(6, sentences.get(i).keySet().size());
     }
 
     // Check the document tokens and the sentence tokens lists are the same
