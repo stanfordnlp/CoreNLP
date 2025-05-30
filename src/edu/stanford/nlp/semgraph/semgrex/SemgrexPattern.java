@@ -16,6 +16,7 @@ import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeNormalizer;
+import edu.stanford.nlp.trees.ud.CoNLLUDocumentWriter;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
@@ -438,7 +439,8 @@ public abstract class SemgrexPattern implements Serializable  {
 
   public enum OutputFormat {
     LIST,
-    OFFSET
+    OFFSET,
+    CONLLU
   }
 
 
@@ -548,6 +550,7 @@ public abstract class SemgrexPattern implements Serializable  {
 
     for (CoreMap sentence : sentences) {
       SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+      SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
       SemgrexMatcher matcher = semgrex.matcher(graph);
       if ( ! matcher.find()) {
         continue;
@@ -574,6 +577,30 @@ public abstract class SemgrexPattern implements Serializable  {
         }
         System.out.printf("+%d %s%n", graph.vertexListSorted().get(0).get(CoreAnnotations.LineNumberAnnotation.class),
             argsMap.get(CONLLU_FILE)[0]);
+      } else if (outputFormat == OutputFormat.CONLLU) {
+        CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
+        String semgrexName = semgrex.toString().trim();
+        // TODO: comments should load from the CoNLLU document, if applicable
+        List<String> comments = new ArrayList<>(graph.getComments());
+        boolean found = true;
+        while (found) {
+          StringBuilder comment = new StringBuilder();
+          comment.append("# semgrex pattern |" + semgrexName + "| matched at " + matcher.getMatch().toString(CoreLabel.OutputFormat.VALUE_INDEX));
+
+          List<String> nodeNames = new ArrayList<>();
+          nodeNames.addAll(matcher.getNodeNames());
+          Collections.sort(nodeNames);
+          for (String name : nodeNames) {
+            comment.append("  ");
+            comment.append(name);
+            comment.append(":");
+            comment.append(matcher.getNode(name).toString(CoreLabel.OutputFormat.VALUE_INDEX));
+          }
+          comments.add(comment.toString());
+          found = matcher.find();
+        }
+        String output = writer.printSemanticGraph(graph, enhanced, false, comments);
+        System.out.print(output);
       }
     }
   }

@@ -11,6 +11,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IntPair;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -31,10 +32,14 @@ public class CoNLLUDocumentWriter {
   }
 
   public String printSemanticGraph(SemanticGraph basicSg, SemanticGraph enhancedSg, boolean unescapeParenthesis) {
+    return printSemanticGraph(basicSg, enhancedSg, true, basicSg.getComments());
+  }
+
+  public String printSemanticGraph(SemanticGraph basicSg, SemanticGraph enhancedSg, boolean unescapeParenthesis, Collection<String> comments) {
     StringBuilder sb = new StringBuilder();
 
     /* Print comments. */
-    for (String comment : basicSg.getComments()) {
+    for (String comment : comments) {
       sb.append(comment).append(System.lineSeparator());
     }
 
