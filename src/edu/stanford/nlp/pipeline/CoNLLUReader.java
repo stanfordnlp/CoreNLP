@@ -24,7 +24,6 @@ public class CoNLLUReader {
    * field constants
    **/
   // TODO: read sent_id?
-  // TODO: read comments in general
   // TODO: reconsider the newline as the after on the last word
   // TODO: keep around the rest of the misc annotations
   public static final int CoNLLU_IndexField = 0;
@@ -223,6 +222,8 @@ public class CoNLLUReader {
     public List<String> emptyLines = new ArrayList<>();
     // data for the sentence contained in # key values
     public HashMap<String, String> sentenceData = new HashMap<>();
+    // all of the comments, including the ones that showed up in sentenceData
+    public List<String> comments = new ArrayList<>();
     // map indices in token list to mwt data if there is any
     HashMap<Integer, Integer> mwtData = new HashMap<>();
     // mwt tokens
@@ -259,6 +260,7 @@ public class CoNLLUReader {
         String value = sentenceDataLine.substring(sentenceDataLine.indexOf('='));
         sentenceData.put(key, value);
       }
+      comments.add(sentenceDataLine);
     }
 
     /**
@@ -600,6 +602,7 @@ public class CoNLLUReader {
       sentenceCoreMap.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, enhancedParse);
     }
 
+    sentenceCoreMap.set(CoreAnnotations.CommentsAnnotation.class, sentence.comments);
     return sentenceCoreMap;
   }
 

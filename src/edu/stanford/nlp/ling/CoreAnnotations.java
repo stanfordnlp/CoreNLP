@@ -523,6 +523,16 @@ public class CoreAnnotations {
   }
 
   /**
+   * Comments on the sentence, such as the ones attached to CoNLLU sentences
+   */
+  public static class CommentsAnnotation implements CoreAnnotation<List<String>> {
+    @Override
+    public Class<List<String>> getType() {
+      return ErasureUtils.uncheckedCast(List.class);
+    }
+  }
+
+  /**
    * CoNLL dep parsing - coarser POS tags.
    */
   public static class CoarseTagAnnotation implements CoreAnnotation<String> {

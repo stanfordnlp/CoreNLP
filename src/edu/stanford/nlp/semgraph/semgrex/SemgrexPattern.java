@@ -580,8 +580,11 @@ public abstract class SemgrexPattern implements Serializable  {
       } else if (outputFormat == OutputFormat.CONLLU) {
         CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
         String semgrexName = semgrex.toString().trim();
-        // TODO: comments should load from the CoNLLU document, if applicable
-        List<String> comments = new ArrayList<>(graph.getComments());
+        List<String> comments = new ArrayList<>(sentence.get(CoreAnnotations.CommentsAnnotation.class));
+        // TODO: maybe stop putting comments on the graphs?
+        if (comments.size() == 0) {
+          comments.addAll(graph.getComments());
+        }
         boolean found = true;
         while (found) {
           StringBuilder comment = new StringBuilder();
