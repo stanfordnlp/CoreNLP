@@ -2,17 +2,22 @@ package edu.stanford.nlp.semgraph.semgrex;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.trees.ud.CoNLLUDocumentReader;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeNormalizer;
+import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -506,7 +511,7 @@ public abstract class SemgrexPattern implements Serializable  {
       useExtras = Boolean.parseBoolean(argsMap.get(EXTRAS)[0]);
     }
 
-    List<SemanticGraph> graphs = Generics.newArrayList();
+    List<CoreMap> sentences = new ArrayList<>();
     // TODO: allow other sources of graphs, such as dependency files
     if (argsMap.containsKey(TREE_FILE) && argsMap.get(TREE_FILE).length > 0) {
       for (String treeFile : argsMap.get(TREE_FILE)) {
@@ -517,25 +522,32 @@ public abstract class SemgrexPattern implements Serializable  {
           // TODO: allow other languages... this defaults to English
           SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras ?
                   GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE);
-          graphs.add(graph);
+          CoreMap sentence = new ArrayCoreMap();
+          sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
+          List<CoreLabel> tokens = graph.vertexListSorted().stream().map(x -> x.backingLabel()).collect(Collectors.toList());
+          sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
+          sentences.add(sentence);
         }
       }
     }
 
     if (argsMap.containsKey(CONLLU_FILE) && argsMap.get(CONLLU_FILE).length > 0) {
-      CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
-      for (String conlluFile : argsMap.get(CONLLU_FILE)) {
-        log.info("Loading file " + conlluFile);
-        Iterator<Pair<SemanticGraph,SemanticGraph>> it = reader.getIterator(IOUtils.readerFromString(conlluFile));
-
-        while (it.hasNext()) {
-          SemanticGraph graph = it.next().first;
-          graphs.add(graph);
+      try {
+        CoNLLUReader reader = new CoNLLUReader();
+        for (String conlluFile : argsMap.get(CONLLU_FILE)) {
+          log.info("Loading file " + conlluFile);
+          List<Annotation> docs = reader.readCoNLLUFile(conlluFile);
+          for (Annotation doc : docs) {
+            sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
+          }
         }
+      } catch (ClassNotFoundException e) {
+        throw new RuntimeException(e);
       }
     }
 
-    for (SemanticGraph graph : graphs) {
+    for (CoreMap sentence : sentences) {
+      SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       SemgrexMatcher matcher = semgrex.matcher(graph);
       if ( ! matcher.find()) {
         continue;
