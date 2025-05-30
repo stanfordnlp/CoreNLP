@@ -447,6 +447,8 @@ public class CoNLLUReaderITest {
       assertEquals(i+1, tokens.get(i).index());
       assertEquals(EXPECTED_ENGLISH_WORDS[i], tokens.get(i).value());
     }
+
+    assertFalse(sentence.containsKey(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
   }
 
 }
