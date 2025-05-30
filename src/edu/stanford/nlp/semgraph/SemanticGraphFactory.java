@@ -366,6 +366,29 @@ public class SemanticGraphFactory  {
   }
 
   /**
+   * Given a list of edges, attempts to create and return a rooted SemanticGraph.
+   *
+   * TODO: throw Exceptions, or flag warnings on conditions for concern (no root, etc)
+   */
+  public static SemanticGraph makeFromEdges(Iterable<SemanticGraphEdge> edges, Collection<IndexedWord> roots) {
+    // Identify the root(s) of this graph
+    SemanticGraph sg = new SemanticGraph();
+    Collection<IndexedWord> vertices = getVerticesFromEdgeSet(edges);
+    for (IndexedWord vertex : vertices) {
+      sg.addVertex(vertex);
+    }
+    for (IndexedWord vertex : roots) {
+      sg.addVertex(vertex);
+    }
+    for (SemanticGraphEdge edge : edges) {
+      sg.addEdge(edge.getSource(),edge.getTarget(), edge.getRelation(), edge.getWeight(), edge.isExtra());
+    }
+
+    sg.setRoots(roots);
+    return sg;
+  }
+
+  /**
    * Given an iterable set of edges, returns the set of  vertices covered by these edges.
    *
    * Note: CDM changed the return of this from a List to a Set in 2011. This seemed more

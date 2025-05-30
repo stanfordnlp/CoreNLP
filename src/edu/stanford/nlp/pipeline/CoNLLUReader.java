@@ -554,26 +554,29 @@ public class CoNLLUReader {
     boolean hasEnhanced = false;
     // build SemanticGraphEdges for a basic graph
     List<SemanticGraphEdge> graphEdges = new ArrayList<>();
+    List<IndexedWord> graphRoots = new ArrayList<>();
     for (int i = 0; i < lines.size(); i++) {
       List<String> fields = Arrays.asList(lines.get(i).split("\t"));
       // track whether any of these lines signify there is an enhanced graph
       hasEnhanced = hasEnhanced || !fields.get(CoNLLU_EnhancedField).equals("_");
-      // skip the ROOT node
-      if (fields.get(CoNLLU_GovField).equals("0"))
-        continue;
       IndexedWord dependent = graphNodes.get(fields.get(CoNLLU_IndexField));
-      IndexedWord gov = graphNodes.get(fields.get(CoNLLU_GovField));
-      GrammaticalRelation reln = GrammaticalRelation.valueOf(fields.get(CoNLLU_RelnField));
-      graphEdges.add(new SemanticGraphEdge(gov, dependent, reln, 1.0, false));
+      if (fields.get(CoNLLU_GovField).equals("0")) {
+        // no edges for the ROOT node
+        graphRoots.add(dependent);
+      } else {
+        IndexedWord gov = graphNodes.get(fields.get(CoNLLU_GovField));
+        GrammaticalRelation reln = GrammaticalRelation.valueOf(fields.get(CoNLLU_RelnField));
+        graphEdges.add(new SemanticGraphEdge(gov, dependent, reln, 1.0, false));
+      }
     }
     // build SemanticGraph
-    SemanticGraph depParse = SemanticGraphFactory.makeFromEdges(graphEdges);
+    SemanticGraph depParse = SemanticGraphFactory.makeFromEdges(graphEdges, graphRoots);
     // add dependency graph
     sentenceCoreMap.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, depParse);
 
     if (hasEnhanced) {
       List<SemanticGraphEdge> enhancedEdges = new ArrayList<>();
-      List<IndexedWord> roots = new ArrayList<>();
+      List<IndexedWord> enhancedRoots = new ArrayList<>();
 
       List<String> allLines = new ArrayList<>();
       allLines.addAll(lines);
@@ -585,7 +588,7 @@ public class CoNLLUReader {
         for (String arc : arcs) {
           String[] arcPieces = arc.split(":", 2);
           if (arcPieces[0].equals("0")) {
-            roots.add(dependent);
+            enhancedRoots.add(dependent);
           } else {
             IndexedWord gov = graphNodes.get(arcPieces[0]);
             GrammaticalRelation reln = GrammaticalRelation.valueOf(arcPieces[1]);
@@ -593,8 +596,7 @@ public class CoNLLUReader {
           }
         }
       }
-      SemanticGraph enhancedParse = SemanticGraphFactory.makeFromEdges(enhancedEdges);
-      enhancedParse.setRoots(roots);
+      SemanticGraph enhancedParse = SemanticGraphFactory.makeFromEdges(enhancedEdges, enhancedRoots);
       sentenceCoreMap.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, enhancedParse);
     }
 

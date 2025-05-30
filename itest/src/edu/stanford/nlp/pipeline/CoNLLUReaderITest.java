@@ -451,4 +451,37 @@ public class CoNLLUReaderITest {
     assertFalse(sentence.containsKey(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
   }
 
+  public static final String oneWordPath = String.format("edu/stanford/nlp/pipeline/en-example-oneword.conllu");
+
+  @Test
+  /**
+   * This test checks that the graphs are successfully constructed
+   * when they are only one word big.
+   * (Previously, such a case would throw an error.)
+   */
+  public void testReadingOneWord() throws ClassNotFoundException, IOException {
+    Annotation readInDocument = new CoNLLUReader(new Properties()).readCoNLLUFile(oneWordPath).get(0);
+
+    // this document only has one sentence
+    List<CoreMap> sentences = readInDocument.get(CoreAnnotations.SentencesAnnotation.class);
+    assertEquals(1, sentences.size());
+
+    CoreMap sentence = sentences.get(0);
+
+    // cursory check of the tokens
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    assertEquals(1, tokens.size());
+    assertEquals("...", tokens.get(0).value());
+
+    assertTrue(sentence.containsKey(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
+    SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    assertEquals(0, graph.edgeListSorted().size());
+    assertEquals(1, graph.getRoots().size());
+
+    assertTrue(sentence.containsKey(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
+    graph = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    assertEquals(0, graph.edgeListSorted().size());
+    assertEquals(1, graph.getRoots().size());
+  }
+
 }
