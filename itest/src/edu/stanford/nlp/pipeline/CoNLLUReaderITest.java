@@ -428,8 +428,7 @@ public class CoNLLUReaderITest {
 
   @Test
   /**
-   * Here we run fewer tests.  Just make sure the EmptyToken is properly handled,
-   * and make sure there isn't some weird line skipping going on with the rest of the tokens
+   * Here we run fewer tests.  Just make sure reading a sentence with no enhanced graph still works
    */
   public void testReadingNoEnhanced() throws ClassNotFoundException, IOException {
     Annotation readInDocument = new CoNLLUReader(new Properties()).readCoNLLUFile(noEnhancedPath).get(0);
