@@ -557,7 +557,7 @@ public class CoNLLUReader {
     for (int i = 0; i < lines.size(); i++) {
       List<String> fields = Arrays.asList(lines.get(i).split("\t"));
       // track whether any of these lines signify there is an enhanced graph
-      hasEnhanced = hasEnhanced || !fields.equals("_");
+      hasEnhanced = hasEnhanced || !fields.get(CoNLLU_EnhancedField).equals("_");
       // skip the ROOT node
       if (fields.get(CoNLLU_GovField).equals("0"))
         continue;
