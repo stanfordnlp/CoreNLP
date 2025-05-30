@@ -35,6 +35,32 @@ public class CoNLLUDocumentWriter {
     return printSemanticGraph(basicSg, enhancedSg, true, basicSg.getComments());
   }
 
+  // TODO: put in the same place as CoNLLUReader::unescapeSpacesAfter
+  public static String escapeSpaces(String after) {
+    StringBuilder result = new StringBuilder();
+    for (int i = 0; i < after.length(); ++i) {
+      char next = after.charAt(i);
+      if (next == ' ') {
+        result.append("\\s");
+      } else if (next == '\t') {
+        result.append("\\t");
+      } else if (next == '\r') {
+        result.append("\\r");
+      } else if (next == '\n') {
+        result.append("\\n");
+      } else if (next == '|') {
+        result.append("\\p");
+      } else if (next == '\\') {
+        result.append("\\\\");
+      } else if (next == ' ') {
+        result.append("\\u00A0");
+      } else {
+        result.append(next);
+      }
+    }
+    return result.toString();
+  }
+
   public String printSemanticGraph(SemanticGraph basicSg, SemanticGraph enhancedSg, boolean unescapeParenthesis, Collection<String> comments) {
     StringBuilder sb = new StringBuilder();
 
@@ -97,21 +123,29 @@ public class CoNLLUDocumentWriter {
       String relnName = reln == null ? "_" : reln.toString();
 
       // don't use after() directly; it returns a default of ""
-      // TODO: does this handle SpaceAfter on other tokens or SpacesAfter?
-      if (token.get(CoreAnnotations.AfterAnnotation.class) != null && token.after().equals("")) {
-        IndexedWord nextVertex = tokenSg.getNodeByIndexSafe(token.index() + 1);
-        // the next word needs to exist and be part of the same MWT
-        // and either this word is the start of the MWT
-        //   or this word is the middle of the same MWT as the next word
-        // if that is true, we will skip the SpaceAfter annotation
-        boolean inMWT = ((nextVertex != null && isMWTbutNotStart(nextVertex)) &&
-                         ((token.containsKey(CoreAnnotations.IsFirstWordOfMWTAnnotation.class) && token.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class)) ||
-                          (isMWTbutNotStart(token))));
-        if (!inMWT) {
-          if (misc.equals("_")) {
-            misc = "SpaceAfter=No";
+      // TODO: also print SpacesBefore on the first token
+      if (token.get(CoreAnnotations.AfterAnnotation.class) != null) {
+        String after = token.after();
+        if (!after.equals(" ")) {
+          if (after.equals("")) {
+            after = "SpaceAfter=No";
           } else {
-            misc = misc + "|SpaceAfter=No";
+            after = "SpacesAfter=" + escapeSpaces(after);
+          }
+          IndexedWord nextVertex = tokenSg.getNodeByIndexSafe(token.index() + 1);
+          // the next word needs to exist and be part of the same MWT
+          // and either this word is the start of the MWT
+          //   or this word is the middle of the same MWT as the next word
+          // if that is true, we will skip the SpaceAfter annotation
+          boolean inMWT = ((nextVertex != null && isMWTbutNotStart(nextVertex)) &&
+                           ((token.containsKey(CoreAnnotations.IsFirstWordOfMWTAnnotation.class) && token.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class)) ||
+                            (isMWTbutNotStart(token))));
+          if (!inMWT) {
+            if (misc.equals("_")) {
+              misc = after;
+            } else {
+              misc = misc + "|" + after;
+            }
           }
         }
       }
