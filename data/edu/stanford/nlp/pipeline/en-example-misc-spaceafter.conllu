@@ -1,0 +1,12 @@
+# sent_id = reviews-231203-0002
+# text = I'm  a regular at the HH.
+1-2	I'm	_	_	_	_	_	_	_	SpacesAfter=\s\s
+1	I	I	PRON	PRP	Case=Nom|Number=Sing|Person=1|PronType=Prs	4	nsubj	4:nsubj	_
+2	'm	be	AUX	VBP	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	4	cop	4:cop	_
+3	a	a	DET	DT	Definite=Ind|PronType=Art	4	det	4:det	_
+4	regular	regular	NOUN	NN	Number=Sing	0	root	0:root	_
+5	at	at	ADP	IN	_	7	case	7:case	_
+6	the	the	DET	DT	Definite=Def|PronType=Art	7	det	7:det	_
+7	HH	HH	PROPN	NNP	Number=Sing	4	nmod	4:nmod:at	SpaceAfter=No
+8	.	.	PUNCT	.	_	4	punct	4:punct	_
+
