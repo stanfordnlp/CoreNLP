@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.semgraph.*;
@@ -432,7 +433,10 @@ public class CoNLLUReader {
       cl.set(extraColumns.get(extraColumnIdx), fields.get(extraColumnIdx));
     }
 
-    Map<String, String> miscKeyValues = new HashMap<>();
+    // LinkedHashMap because we care about trying to preserve the order of the keys
+    // for later if we output the document in conllu
+    // (although this doesn't put SpaceAfter in a canonical order)
+    Map<String, String> miscKeyValues = new LinkedHashMap<>();
     if (!fields.get(CoNLLU_MiscField).equals("_")) {
       Arrays.stream(fields.get(CoNLLU_MiscField).split("\\|")).forEach(
         kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
@@ -454,7 +458,7 @@ public class CoNLLUReader {
       cl.setIsMWTFirst(false);
     } else if (sentence.mwtData.containsKey(sentenceTokenIndex - 1)) {
       String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
-      Map<String, String> mwtKeyValues = new HashMap<>();
+      Map<String, String> mwtKeyValues = new LinkedHashMap<>();
       if (miscInfo != null && !miscInfo.equals("_")) {
         Arrays.stream(miscInfo.split("\\|")).forEach(
           kv -> mwtKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
@@ -606,7 +610,7 @@ public class CoNLLUReader {
         graphRoots.add(dependent);
       } else {
         IndexedWord gov = graphNodes.get(fields.get(CoNLLU_GovField));
-        GrammaticalRelation reln = GrammaticalRelation.valueOf(fields.get(CoNLLU_RelnField));
+        GrammaticalRelation reln = GrammaticalRelation.valueOf(Language.UniversalEnglish, fields.get(CoNLLU_RelnField));
         graphEdges.add(new SemanticGraphEdge(gov, dependent, reln, 1.0, false));
       }
     }
@@ -632,7 +636,7 @@ public class CoNLLUReader {
             enhancedRoots.add(dependent);
           } else {
             IndexedWord gov = graphNodes.get(arcPieces[0]);
-            GrammaticalRelation reln = GrammaticalRelation.valueOf(arcPieces[1]);
+            GrammaticalRelation reln = GrammaticalRelation.valueOf(Language.UniversalEnglish, arcPieces[1]);
             enhancedEdges.add(new SemanticGraphEdge(gov, dependent, reln, 1.0, false));
           }
         }
