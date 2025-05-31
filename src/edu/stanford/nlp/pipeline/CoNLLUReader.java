@@ -326,15 +326,14 @@ public class CoNLLUReader {
     // build sentences
     List<CoreMap> sentences = new ArrayList<>();
     for (CoNLLUSentence sent : doc.sentences) {
-      sentences.add(convertCoNLLUSentenceToCoreMap(doc, sent));
+      // pass in the sentences.size() so we can build the CoreLabels with the correct sentIndex()
+      // this way, we don't mess up the hashCodes later
+      sentences.add(convertCoNLLUSentenceToCoreMap(doc, sent, sentences.size()));
     }
     // set sentences
     finalAnnotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
     // build document wide CoreLabels list
-    // TODO: do we need to put new SentenceIndexAnnotations on each of the IndexedWords?
-    // TODO: what about document annotation?
-    //   We should confirm that setting the SentenceIndexAnnotation like this isn't
-    //   distorting any of the SemanticGraphs
+    // TODO: should we set document annotation?
     List<CoreLabel> tokens = new ArrayList<>();
     finalAnnotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
     int documentIdx = 0;
@@ -351,14 +350,8 @@ public class CoNLLUReader {
       for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
         token.set(CoreAnnotations.TokenBeginAnnotation.class, documentIdx);
         token.set(CoreAnnotations.TokenEndAnnotation.class, documentIdx + 1);
-        token.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
         tokens.add(token);
         documentIdx++;
-      }
-      if (sentence.containsKey(CoreAnnotations.EmptyTokensAnnotation.class)) {
-        for (CoreLabel token : sentence.get(CoreAnnotations.EmptyTokensAnnotation.class)) {
-          token.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
-        }
       }
       sentenceIdx++;
     }
@@ -389,9 +382,10 @@ public class CoNLLUReader {
   /**
    * Convert a single ten column CoNLLU line into a CoreLabel
    */
-  public CoreLabel convertLineToCoreLabel(CoNLLUSentence sentence, String line) {
+  public CoreLabel convertLineToCoreLabel(CoNLLUSentence sentence, String line, int sentenceIdx) {
     List<String> fields = Arrays.asList(line.split("\t"));
     CoreLabel cl = new CoreLabel();
+    cl.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
 
     String indexField = fields.get(CoNLLU_IndexField);
     int sentenceTokenIndex;
@@ -522,12 +516,12 @@ public class CoNLLUReader {
   /**
    * Convert a list of CoNLL-U token lines into a sentence CoreMap
    **/
-  public CoreMap convertCoNLLUSentenceToCoreMap(CoNLLUDocument doc, CoNLLUSentence sentence) {
+  public CoreMap convertCoNLLUSentenceToCoreMap(CoNLLUDocument doc, CoNLLUSentence sentence, int sentenceIdx) {
     List<String> lines = sentence.tokenLines;
     // create CoreLabels
     List<CoreLabel> coreLabels = new ArrayList<CoreLabel>();
     for (String line : lines) {
-      CoreLabel cl = convertLineToCoreLabel(sentence, line);
+      CoreLabel cl = convertLineToCoreLabel(sentence, line, sentenceIdx);
       coreLabels.add(cl);
     }
     for (int i = 1 ; i < coreLabels.size() ; i++) {
@@ -570,7 +564,7 @@ public class CoNLLUReader {
 
     List<CoreLabel> emptyLabels = new ArrayList<CoreLabel>();
     for (String line : sentence.emptyLines) {
-      CoreLabel cl = convertLineToCoreLabel(sentence, line);
+      CoreLabel cl = convertLineToCoreLabel(sentence, line, sentenceIdx);
       emptyLabels.add(cl);
     }
 
