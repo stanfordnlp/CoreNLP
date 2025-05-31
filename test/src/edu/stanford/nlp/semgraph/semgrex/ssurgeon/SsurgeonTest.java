@@ -1134,6 +1134,41 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test merging three nodes at once
+   *<br>
+   * The indices should be changed as well
+   */
+  @Test
+  public void readXMLMergeNodesMultiple() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    // Test the head word being the first word
+    String merge = String.join(newline,
+                               "<ssurgeon-pattern-list>",
+                               "  <ssurgeon-pattern>",
+                               "    <uid>38</uid>",
+                               "    <notes>Merge three nodes that should not have been split</notes>",
+                               "    <semgrex>" + XMLUtils.escapeXML("{word:prof}=source >punct ({}=punct . {} !> {}) >nmod ({}=nmod !> {})") + "</semgrex>",
+                               "    <edit-list>mergeNodes -node source -node punct -node nmod</edit-list>",
+                               "  </ssurgeon-pattern>",
+                               "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern mergeSsurgeon = patterns.get(0);
+
+    // nodes 3, 4, 5 are in order in the same unit, so we should be able to merge them
+    SemanticGraph sg = SemanticGraph.valueOf("[fare-7 aux> potrebbe-6 nsubj> [prof-3 det> Il-2 punct> .-4 nmod> Fotticchia-5] obj> [gag-9 det> una-8] obl> [situazione-12 case> su-10 det> la-11]]", Language.UniversalEnglish);
+    SemanticGraph expected = SemanticGraph.valueOf("[fare-5 aux> potrebbe-4 nsubj> [prof.Fotticchia-3 det> Il-2] obj> [gag-7 det> una-6] obl> [situazione-10 case> su-8 det> la-9]]", Language.UniversalEnglish);
+    sg.getNodeByIndexSafe(3).setLemma("prof");
+    sg.getNodeByIndexSafe(4).setLemma(".");
+    sg.getNodeByIndexSafe(5).setLemma("Fotticchia");
+    SemanticGraph newSG = mergeSsurgeon.iterate(sg).first;
+    assertEquals(expected, newSG);
+    IndexedWord prof = sg.getNodeByIndexSafe(3);
+    assertEquals("prof.Fotticchia", prof.lemma());
+  }
+
+  /**
    * A simple test sent to us from a user (unbelievably, ssurgeon apparently has users)
    */
   @Test

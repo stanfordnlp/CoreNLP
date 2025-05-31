@@ -87,7 +87,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code combineMWT -node node -word word}
  * <li> {@code splitWord -node node -headIndex idx -reln depType -regex w1 -regex w2 ...}
  * <li> {@code setRoots n1 (n2 n3 ...)}
- * <li> {@code mergeNodes n1 n2}
+ * <li> {@code mergeNodes -node n1 -node n2 ...}
  * <li> {@code killAllIncomingEdges -node node}
  * <li> {@code delete -node node}
  * <li> {@code deleteLeaf -node node}
