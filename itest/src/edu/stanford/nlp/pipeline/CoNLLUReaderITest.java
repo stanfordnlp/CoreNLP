@@ -31,7 +31,7 @@ public class CoNLLUReaderITest {
     "Pero la  existencia de dos recién nacidos en la misma caja sólo podía deberse a un descuido de fábrica.",
     "De allí las rebajas."
   };
-  static final String EXPECTED_TEXT = String.join(System.lineSeparator(), EXPECTED_SENTENCE_TEXT) + System.lineSeparator();
+  static final String EXPECTED_TEXT = String.join(" ", EXPECTED_SENTENCE_TEXT) + " ";
 
   static final String[][] EXPECTED_WORD_TEXT = {
     {"Pero", "la", "existencia", "de", "dos", "recién", "nacidos", "en", "la", "misma", "caja", "sólo", "podía", "deber", "se", "a", "un", "descuido", "de", "fábrica", "."},
@@ -194,8 +194,6 @@ public class CoNLLUReaderITest {
         CoreLabel token = tokens.get(j);
         if (i == 0 && j == 1) {
           assertEquals("  ", token.after());
-        } else if (j == tokens.size() - 1) {
-          assertEquals(System.lineSeparator(), token.after());
         } else if (j == tokens.size() - 2) {
           assertEquals("", token.after());
         } else if (i == 0 && j == 13) {
@@ -207,10 +205,7 @@ public class CoNLLUReaderITest {
         if (i == 0 && j == 2) {
           assertEquals("  ", token.before());
         } else if (i == 0 && j == 0) {
-          // TODO: is it properly reading the SpacesBefore on the first token?
           assertEquals("", token.before());
-        } else if (j == 0) {
-          assertEquals(System.lineSeparator(), token.before());
         } else if (j == tokens.size() - 1) {
           assertEquals("", token.before());
         } else if (i == 0 && j == 14) {
@@ -265,7 +260,11 @@ public class CoNLLUReaderITest {
         if (i == 0 && (j == 13 || j == 14)) {
           expectedKeys += 1;
         }
-        assertEquals(expectedKeys, token.keySet().size());
+        if (i == 0 && j == 0) {
+          // The very first key won't have a Before unless the document specifically has one
+          expectedKeys -= 1;
+        }
+        assertEquals("Error at sentence " + i + " word " + j, expectedKeys, token.keySet().size());
 
         // The known fields should be the ones checked above:
         //    CoreAnnotations.TextAnnotation

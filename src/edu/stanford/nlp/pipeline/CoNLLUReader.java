@@ -332,6 +332,10 @@ public class CoNLLUReader {
     // set sentences
     finalAnnotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
     // build document wide CoreLabels list
+    // TODO: do we need to put new SentenceIndexAnnotations on each of the IndexedWords?
+    // TODO: what about document annotation?
+    //   We should confirm that setting the SentenceIndexAnnotation like this isn't
+    //   distorting any of the SemanticGraphs
     List<CoreLabel> tokens = new ArrayList<>();
     finalAnnotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
     int documentIdx = 0;
@@ -339,9 +343,11 @@ public class CoNLLUReader {
     for (CoreMap sentence : finalAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {
       sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
       if (sentenceIdx > 0) {
-        // for now we're treating a CoNLL-U document as sentences separated by newline
-        // so every sentence after the first should have a newline as the previous character
-        sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).setBefore(System.lineSeparator());
+        CoreMap previousSentence = finalAnnotation.get(CoreAnnotations.SentencesAnnotation.class).get(sentenceIdx-1);
+        List<CoreLabel> previousTokens = previousSentence.get(CoreAnnotations.TokensAnnotation.class);
+        CoreLabel previousToken = previousTokens.get(previousTokens.size() - 1);
+        String previousAfter = previousToken.get(CoreAnnotations.AfterAnnotation.class);
+        sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).set(CoreAnnotations.BeforeAnnotation.class, previousAfter);
       }
       for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
         token.set(CoreAnnotations.TokenBeginAnnotation.class, documentIdx);
@@ -482,15 +488,10 @@ public class CoNLLUReader {
       CoreLabel cl = convertLineToCoreLabel(sentence, line);
       coreLabels.add(cl);
     }
-    // the last token should have a newline after
-    coreLabels.get(coreLabels.size() - 1).setAfter(System.lineSeparator());
-    // set before
-    if (!coreLabels.get(0).containsKey(CoreAnnotations.BeforeAnnotation.class)) {
-      coreLabels.get(0).setBefore("");
-    }
     for (int i = 1 ; i < coreLabels.size() ; i++) {
       // all words should match the after of the previous token
-      coreLabels.get(i).setBefore(coreLabels.get(i - 1).after());
+      coreLabels.get(i).set(CoreAnnotations.BeforeAnnotation.class,
+                            coreLabels.get(i - 1).get(CoreAnnotations.AfterAnnotation.class));
     }
     // handle MWT tokens and build the final sentence text
     int sentenceCharBegin = doc.docText.length();
