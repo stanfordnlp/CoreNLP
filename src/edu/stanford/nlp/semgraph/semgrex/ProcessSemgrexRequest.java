@@ -10,26 +10,31 @@ package edu.stanford.nlp.semgraph.semgrex;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ProcessProtobufRequest;
 
 public class ProcessSemgrexRequest extends ProcessProtobufRequest {
   /**
    * Builds a single inner SemgrexResult structure from the pair of a SemgrexPattern and a SemanticGraph
    */
-  public static CoreNLPProtos.SemgrexResponse.SemgrexResult matchSentence(SemgrexPattern pattern, SemanticGraph graph, int patternIdx, int graphIdx) {
+  public static CoreNLPProtos.SemgrexResponse.SemgrexResult matchSentence(SemgrexPattern pattern, SemanticGraph graph, List<SemgrexMatch> matches, int patternIdx, int graphIdx) {
     CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder semgrexResultBuilder = CoreNLPProtos.SemgrexResponse.SemgrexResult.newBuilder();
-    SemgrexMatcher matcher = pattern.matcher(graph);
-    while (matcher.find()) {
+    for (SemgrexMatch matcher : matches) {
       CoreNLPProtos.SemgrexResponse.Match.Builder matchBuilder = CoreNLPProtos.SemgrexResponse.Match.newBuilder();
       matchBuilder.setMatchIndex(matcher.getMatch().index());
       matchBuilder.setSemgrexIndex(patternIdx);
@@ -74,30 +79,29 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
     return semgrexResultBuilder.build();
   }
 
-  /**
-   * For a single request, iterate through the SemanticGraphs it
-   * includes, and add the results of each Semgrex operation included
-   * in the request.
-   */
-  public static CoreNLPProtos.SemgrexResponse processRequest(CoreNLPProtos.SemgrexRequest request) {
-    ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+  public static CoreNLPProtos.SemgrexResponse processRequest(List<CoreMap> sentences, List<SemgrexPattern> patterns) {
     CoreNLPProtos.SemgrexResponse.Builder responseBuilder = CoreNLPProtos.SemgrexResponse.newBuilder();
+    List<Pair<CoreMap, List<Pair<SemgrexPattern, List<SemgrexMatch>>>>> allMatches = new ArrayList<>();
+    for (CoreMap sentence : sentences) {
+      allMatches.add(new Pair<>(sentence, new ArrayList<>()));
+    }
+    for (SemgrexPattern pattern : patterns) {
+      List<Pair<CoreMap, List<SemgrexMatch>>> patternMatches = pattern.matchSentences(sentences, true);
+      for (int i = 0; i < sentences.size(); ++i) {
+        Pair<CoreMap, List<SemgrexMatch>> sentenceMatches = patternMatches.get(i);
+        allMatches.get(i).second().add(new Pair<>(pattern, sentenceMatches.second()));
+      }
+    }
 
-    List<SemgrexPattern> patterns = request.getSemgrexList().stream().map(SemgrexPattern::compile).collect(Collectors.toList());
     int graphIdx = 0;
-    for (CoreNLPProtos.SemgrexRequest.Dependencies sentence : request.getQueryList()) {
+    for (Pair<CoreMap, List<Pair<SemgrexPattern, List<SemgrexMatch>>>> sentenceMatches : allMatches) {
       CoreNLPProtos.SemgrexResponse.GraphResult.Builder graphResultBuilder = CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder();
 
-      final List<CoreLabel> tokens;
-      if (sentence.getGraph().getTokenList().size() > 0) {
-        tokens = sentence.getGraph().getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
-      } else {
-        tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
-      }
-      SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, "semgrex");
       int patternIdx = 0;
-      for (SemgrexPattern pattern : patterns) {
-        graphResultBuilder.addResult(matchSentence(pattern, graph, patternIdx, graphIdx));
+      SemanticGraph graph = sentenceMatches.first().get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+      for (Pair<SemgrexPattern, List<SemgrexMatch>> patternMatches : sentenceMatches.second()) {
+        SemgrexPattern pattern = patternMatches.first();
+        graphResultBuilder.addResult(matchSentence(pattern, graph, patternMatches.second(), patternIdx, graphIdx));
         ++patternIdx;
       }
 
@@ -105,6 +109,33 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
       ++graphIdx;
     }
     return responseBuilder.build();
+  }
+
+  /**
+   * For a single request, iterate through the SemanticGraphs it
+   * includes, and add the results of each Semgrex operation included
+   * in the request.
+   */
+  public static CoreNLPProtos.SemgrexResponse processRequest(CoreNLPProtos.SemgrexRequest request) {
+    ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+
+    List<CoreMap> sentences = new ArrayList<>();
+    for (CoreNLPProtos.SemgrexRequest.Dependencies sentence : request.getQueryList()) {
+      final List<CoreLabel> tokens;
+      if (sentence.getGraph().getTokenList().size() > 0) {
+        tokens = sentence.getGraph().getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+      } else {
+        tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+      }
+      SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, "semgrex");
+      CoreMap coremap = new ArrayCoreMap();
+      coremap.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
+      coremap.set(CoreAnnotations.TokensAnnotation.class, tokens);
+      sentences.add(coremap);
+    }
+
+    List<SemgrexPattern> patterns = request.getSemgrexList().stream().map(SemgrexPattern::compile).collect(Collectors.toList());
+    return processRequest(sentences, patterns);
   }
 
   /**

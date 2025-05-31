@@ -62,6 +62,11 @@ SPECIAL_TOKEN:
 
 TOKEN:
 {
+        < UNIQ: "uniq" >
+}
+
+TOKEN:
+{
 	< RELATION: "<" | ">" | ">>" | "<<" | "<>" | "==" | "$+" | "$-" | "$++" | "$--" | "." | ".." | "-" | "--" | ">++" | ">--" | "<++" | "<--" >
 |	< ALIGNRELN: "@" >
 |	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}", "+", "-"])+ >
@@ -77,6 +82,9 @@ SemgrexPattern Root() : {
   Token reverse = null;
   List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
   Token startToken = null;
+
+  List<String> uniqKeys = null;
+  Token nextIdentifier = null;
   // a local variable
 } {
   {
@@ -84,22 +92,44 @@ SemgrexPattern Root() : {
     startToken = getToken(1);
   }
   (
-    (reverse = <ALIGNRELN> node = SubNode(GraphRelation.ALIGNED_ROOT) "\n")
-    |
-    ( node = SubNode(GraphRelation.ROOT) { children.add(node); }
-      ( ":" node = SubNode(GraphRelation.ITERATOR) { children.add(node); } )*
-      "\n"
+    (
+      (reverse = <ALIGNRELN> node = SubNode(GraphRelation.ALIGNED_ROOT))
+      |
+      ( node = SubNode(GraphRelation.ROOT) { children.add(node); }
+        ( ":" node = SubNode(GraphRelation.ITERATOR) { children.add(node); } )*
+      )
     )
+    {
+      if (children.size() > 1)
+        node = new CoordinationPattern(true, children, true, true);
+      if (deprecatedAmp) {
+        throw new SemgrexParseException("Use of & in semgrex patterns is now illegal.  It is equivalent to the same expression without the &.  Offending expression: " + startToken);
+      }
+      if (deprecatedNodeConj) {
+        throw new SemgrexParseException("Use of node conjugation (expressions such as '< [foo bar]' or '< [foo & bar]') is now illegal.  The issue is that expressions such as '[foo bar] < zzz' may intuitively mean that foo < zzz, bar < zzz, zzz the same for both cases, but that is not the way the parser interpreted this expression.  Changing the functionality might break existing expressions, and anyway this can be rewritten in various ways such as 'zzz > foo > bar' or 'foo < zzz=a : bar < zzz=a'.  Offending expression: " + startToken);
+      }
+    }
+  )
+  (
+    (
+      "::" <UNIQ> { uniqKeys = new ArrayList<>(); }  (nextIdentifier = identifier() { uniqKeys.add(nextIdentifier.image); })*
+      {
+        for (String key : uniqKeys) {
+          if (!knownVariables.contains(key)) {
+            throw new SemgrexParseException("Semgrex pattern asked for uniq of node " + key + " which does not exist in the pattern");
+          }
+        }
+        // TODO: can error check that the keys are unique between node and edge names
+        // that might require keeping edge names in a known set
+        // TODO: edge names might need some upgrades anyway - shouldn't name them under negation, for example
+        node = new UniqPattern(node, uniqKeys);
+      }
+    )?
+  )
+  (
+    "\n"
   )
   {
-    if (children.size() > 1)
-      node = new CoordinationPattern(true, children, true, true);
-    if (deprecatedAmp) {
-      throw new SemgrexParseException("Use of & in semgrex patterns is now illegal.  It is equivalent to the same expression without the &.  Offending expression: " + startToken);
-    }
-    if (deprecatedNodeConj) {
-      throw new SemgrexParseException("Use of node conjugation (expressions such as '< [foo bar]' or '< [foo & bar]') is now illegal.  The issue is that expressions such as '[foo bar] < zzz' may intuitively mean that foo < zzz, bar < zzz, zzz the same for both cases, but that is not the way the parser interpreted this expression.  Changing the functionality might break existing expressions, and anyway this can be rewritten in various ways such as 'zzz > foo > bar' or 'foo < zzz=a : bar < zzz=a'.  Offending expression: " + startToken);
-    }
     return node;
   }
 
@@ -185,10 +215,10 @@ SemgrexPattern Relation() : {
 	boolean pC = false;
 } {
 	(
-	( ( ( (numArg = <IDENTIFIER> ("," numArg2 = <IDENTIFIER>)?)? rel = <RELATION>
-		(relnType = <IDENTIFIER> | relnType = <REGEX>)?)
-		(( ("~") name = <IDENTIFIER> ) )?
-                (( ("=") edgeName = <IDENTIFIER> ) )? )
+	( ( ( (numArg = identifier() ("," numArg2 = identifier())?)? rel = <RELATION>
+		(relnType = identifier() | relnType = <REGEX>)?)
+		(( ("~") name = identifier() ) )?
+                (( ("=") edgeName = identifier() ) )? )
 	  | (rel = <ALIGNRELN>))
 
 	{
@@ -252,7 +282,7 @@ SemgrexPattern ModNode(GraphRelation r) : {
 } {
 	( child = Child(r)
 	  | ( "!"
-		  { startUnderNeg = underNodeNegation;
+		  { startUnderNeg = underNodeNegation; // TODO: can negations be nested?  If so, should they cancel?
 		    underNodeNegation = true; } child = Child(r) { underNodeNegation = startUnderNeg; } )
 	   )
 	   {
@@ -276,8 +306,8 @@ void AddAttribute(NodeAttributes attributes) : {
         Token attrType = null;
         boolean negated = false;
 } {
-        (attr = <IDENTIFIER>
-           (( (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>) {
+        (attr = identifier()
+           (( (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>) {
              if (attr != null && value != null) {
                negated = attrType.image.equals("!:");
                attributes.setAttribute(attr.image, value.image, negated);
@@ -285,7 +315,7 @@ void AddAttribute(NodeAttributes attributes) : {
            }) 
            |
            ( ":{"
-           ((key = <IDENTIFIER> | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>)
+           ((key = identifier() | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>)
            {
              if (attr == null || key == null || value == null) {
                throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +
@@ -294,7 +324,7 @@ void AddAttribute(NodeAttributes attributes) : {
              negated = attrType.image.equals("!:");
              attributes.addContains(attr.image, key.image, value.image, negated);
            })
-           ( ";" (key = <IDENTIFIER> | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = <IDENTIFIER> | value = <REGEX>)
+           ( ";" (key = identifier() | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>)
            {
              if (attr == null || key == null || value == null) {
                throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +
@@ -321,7 +351,7 @@ NodePattern Description(GraphRelation r) : {
 	( "{" ( AddAttribute(attributes)
                 (";" AddAttribute(attributes))* )? "}"
 
-	(( ("=" { link = true; }) name = <IDENTIFIER> )
+	(( ("=" { link = true; }) name = identifier() )
             {
               String nodeName = name.image;
               if (underNegation) {
@@ -337,4 +367,11 @@ NodePattern Description(GraphRelation r) : {
   	{ pat = new NodePattern(r, underNodeNegation, attributes, link, name != null ? name.image : null);
 	  return pat;
 	}
+}
+
+Token identifier() : {
+  Token t ;
+}
+{
+  ( t = < UNIQ > | t = < IDENTIFIER > ) { return t; }
 }

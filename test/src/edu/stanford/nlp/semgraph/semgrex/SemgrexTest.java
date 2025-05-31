@@ -589,6 +589,22 @@ public class SemgrexTest extends TestCase {
     runTest("{} 6,6<< {word:A}", graph, "I");
   }
 
+  /** After making UNIQ a separate token in the parser, we should verify that "uniq" can be treated as an identifier as well */
+  public void testUniqNamedNode() {
+    SemanticGraph graph = makeComplicatedGraph();
+
+    runTest("{} >obj ({} >expl {})", graph, "A");
+
+    SemgrexPattern pattern =
+      SemgrexPattern.compile("{} >obj ({} >expl {}=uniq)");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals(1, matcher.getNodeNames().size());
+    assertEquals("E", matcher.getNode("uniq").toString());
+    assertEquals("A", matcher.getMatch().toString());
+    assertFalse(matcher.find());
+  }
+
   public void testNamedNode() {
     SemanticGraph graph = makeComplicatedGraph();
 
@@ -1448,37 +1464,119 @@ public class SemgrexTest extends TestCase {
             "[ate/VBD subj>Billz/NNP obj>[muffins compound>strawberry]]");
   }
 
+  String[] BATCH_PARSES = {
+    "[foo-1 nmod> bar-2]",
+    "[foo-1 obj> bar-2]",
+    "[bar-1 compound> baz-2]",
+    "[foo-1 nmod> baz-2 obj> bar-3]",
+  };
+
   /**
-   * A simple test of the batch search - should return 3 of the 4 sentences
+   * Build a list of sentences with BasicDependenciesAnnotation
    */
-  public void testBatchSearch() {
-    String[] parses = {
-      "[foo-1 nmod> bar-2]",
-      "[foo-1 obj> bar-2]",
-      "[bar-1 compound> baz-2]",
-      "[foo-1 nmod> baz-2 obj> bar-3]",
-    };
+  public List<CoreMap> buildSmallBatch() {
     List<CoreMap> sentences = new ArrayList<>();
-    for (String parse : parses) {
+    for (String parse : BATCH_PARSES) {
       SemanticGraph graph = SemanticGraph.valueOf(parse);
       CoreMap sentence = new ArrayCoreMap();
       sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
       sentence.set(CoreAnnotations.TextAnnotation.class, parse);
       sentences.add(sentence);
     }
+    return sentences;
+  }
 
+  /**
+   * A simple test of the batch search - should return 3 of the 4 sentences
+   */
+  public void testBatchSearch() {
+    List<CoreMap> sentences = buildSmallBatch();
     SemgrexPattern semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y");
-    List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences);
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
     String[] expectedMatches = {
-      parses[0],
-      parses[1],
-      parses[3],
+      BATCH_PARSES[0],
+      BATCH_PARSES[1],
+      BATCH_PARSES[3],
     };
     int[] expectedCount = {1, 1, 2};
     assertEquals(expectedMatches.length, matches.size());
     for (int i = 0; i < expectedMatches.length; ++i) {
       assertEquals(expectedMatches[i], matches.get(i).first().get(CoreAnnotations.TextAnnotation.class));
       assertEquals(expectedCount[i], matches.get(i).second().size());
+    }
+  }
+
+  /**
+   * Test that an illegal uniq expression throws an exception
+   *<br>
+   * Specifically, the expectation is for a SemgrexParseException
+   */
+  public void testBrokenUniq() {
+    try {
+      String pattern = "{word:foo}=foo :: uniq bar";
+      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+      throw new RuntimeException("This expression should fail because the node name is unknown");
+    } catch (SemgrexParseException e) {
+      // yay
+    }
+  }
+
+  /**
+   * Test that a simple uniq expression is correctly parsed
+   */
+  public void testParsesUniq() {
+    String pattern = "{word:foo}=foo :: uniq foo";
+    SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+  }
+
+  /**
+   * Test the uniq functionality on a few simple parses
+   */
+  public void testBatchUniq() {
+    List<CoreMap> sentences = buildSmallBatch();
+    SemgrexPattern semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y :: uniq x");
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
+    // only the first foo sentence should match when using "uniq x"
+    assertEquals(1, matches.size());
+    assertEquals(BATCH_PARSES[0], matches.get(0).first().get(CoreAnnotations.TextAnnotation.class));
+    assertEquals(1, matches.get(0).second().size());
+
+    semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y :: uniq");
+    matches = semgrex.matchSentences(sentences, false);
+    // same thing happens when using "uniq" and no nodes - only one match will occur
+    assertEquals(1, matches.size());
+    assertEquals(BATCH_PARSES[0], matches.get(0).first().get(CoreAnnotations.TextAnnotation.class));
+    assertEquals(1, matches.get(0).second().size());
+
+    semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y :: uniq y");
+    matches = semgrex.matchSentences(sentences, false);
+    // now it should match both foo>bar and foo>baz
+    assertEquals(2, matches.size());
+    assertEquals(BATCH_PARSES[0], matches.get(0).first().get(CoreAnnotations.TextAnnotation.class));
+    assertEquals(1, matches.get(0).second().size());
+    assertEquals(BATCH_PARSES[3], matches.get(1).first().get(CoreAnnotations.TextAnnotation.class));
+    assertEquals(1, matches.get(1).second().size());
+
+    semgrex = SemgrexPattern.compile("{}=x > {}=y :: uniq x y");
+    matches = semgrex.matchSentences(sentences, false);
+    // now it should batch each of foo>bar, bar>baz, foo>baz
+    assertEquals(3, matches.size());
+    assertEquals(BATCH_PARSES[0], matches.get(0).first().get(CoreAnnotations.TextAnnotation.class));
+    assertEquals(1, matches.get(0).second().size());
+    assertEquals(BATCH_PARSES[2], matches.get(1).first().get(CoreAnnotations.TextAnnotation.class));
+    assertEquals(1, matches.get(1).second().size());
+    assertEquals(BATCH_PARSES[3], matches.get(2).first().get(CoreAnnotations.TextAnnotation.class));
+    assertEquals(1, matches.get(2).second().size());
+  }
+
+  public static void outputBatchResults(SemgrexPattern pattern, List<CoreMap> sentences) {
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = pattern.matchSentences(sentences, false);
+    for (Pair<CoreMap, List<SemgrexMatch>> sentenceMatch : matches) {
+      System.out.println("Pattern matched at:");
+      System.out.println(sentenceMatch.first());
+      for (SemgrexMatch match : sentenceMatch.second()) {
+        System.out.println(match);
+      }
     }
   }
 
