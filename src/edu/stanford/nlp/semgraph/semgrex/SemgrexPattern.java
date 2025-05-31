@@ -193,6 +193,15 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code Y} and there are two paths to {@code Y}, one of
  * which goes through a {@code dobj} and one of which goes
  * through a {@code mod}.
+ *</p><p>
+ * There is also a new operation, {@code uniq}, which allows for a query to reduce to only one match:
+ *<br>
+ * {@code {} >dobj ({} > {}=foo) >mod ({} > {}=foo) :: uniq}
+ *<br>
+ * This operation also takes a list of nodes, which if supplied, will use the values of those nodes
+ * as keys for the uniq.  In the above example, this variation will match once per observed value of {@code foo}:
+ *<br>
+ * {@code {} >dobj ({} > {}=foo) >mod ({} > {}=foo) :: uniq foo}
  *
  * <h3>Naming relations</h3>
  *
@@ -337,19 +346,30 @@ public abstract class SemgrexPattern implements Serializable  {
 
   // batch processing
   // -------------------------------------------------------------
+  /**
+   * Postprocess a set of results from the batch processing method
+   *
+   * TODO: make abstract
+   */
+  public List<Pair<CoreMap, List<SemgrexMatch>>> postprocessMatches(List<Pair<CoreMap, List<SemgrexMatch>>> matches, boolean keepEmptyMatches) {
+    return matches;
+  }
 
   /**
    * Returns a list of matching sentences and each of the matches from those sentences.
    *<br>
    * Non-matching sentences are currently not returned (may change in the future to return an empty list).
    */
-  public List<Pair<CoreMap, List<SemgrexMatch>>> matchSentences(List<CoreMap> sentences) {
+  public List<Pair<CoreMap, List<SemgrexMatch>>> matchSentences(List<CoreMap> sentences, boolean keepEmptyMatches) {
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = new ArrayList<>();
     for (CoreMap sentence : sentences) {
       SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
       SemgrexMatcher matcher = matcher(graph);
-      if ( ! matcher.find()) {
+      if (!matcher.find()) {
+        if (keepEmptyMatches) {
+          matches.add(new Pair<>(sentence, new ArrayList<>()));
+        }
         continue;
       }
       matches.add(new Pair<>(sentence, new ArrayList<>()));
@@ -359,6 +379,12 @@ public abstract class SemgrexPattern implements Serializable  {
         found = matcher.find();
       }
     }
+
+    for (SemgrexPattern child : getChildren()) {
+      matches = child.postprocessMatches(matches, keepEmptyMatches);
+    }
+    matches = postprocessMatches(matches, keepEmptyMatches);
+
     return matches;
   }
 
@@ -588,7 +614,7 @@ public abstract class SemgrexPattern implements Serializable  {
       }
     }
 
-    List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences);
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
 
     for (Pair<CoreMap, List<SemgrexMatch>> sentenceMatches : matches) {
       CoreMap sentence = sentenceMatches.first();

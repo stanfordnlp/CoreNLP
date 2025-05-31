@@ -1348,18 +1348,12 @@ public class StanfordCoreNLPServer implements Runnable {
               return Pair.makePair("".getBytes(), null);
             }
 
-            CoreNLPProtos.SemgrexResponse.Builder responseBuilder = CoreNLPProtos.SemgrexResponse.newBuilder();
-            int sentenceIdx = 0;
-            for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
-              SemanticGraph graph = sentence.get(dependenciesType.annotation());
-              CoreNLPProtos.SemgrexResponse.GraphResult.Builder graphResultBuilder = CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder();
-              graphResultBuilder.addResult(ProcessSemgrexRequest.matchSentence(regex, graph, 0, sentenceIdx));
-              responseBuilder.addResult(graphResultBuilder.build());
-              ++sentenceIdx;
-            }
+            List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
+            List<SemgrexPattern> patterns = Collections.singletonList(regex);
+            CoreNLPProtos.SemgrexResponse semgrexResponse = ProcessSemgrexRequest.processRequest(sentences, patterns);
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            responseBuilder.build().writeTo(os);
+            semgrexResponse.writeTo(os);
             os.close();
 
             return Pair.makePair(os.toByteArray(), doc);

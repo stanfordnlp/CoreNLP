@@ -16,9 +16,13 @@ public class ProcessSemgrexRequestTest {
    * Build a fake request.  The same query will be repeated N times
    */
   public static CoreNLPProtos.SemgrexRequest buildFakeRequest(int numQueries, int numSemgrex) {
+    return buildFakeRequest(numQueries, numSemgrex, "{}=source >dobj=foo {}=target");
+  }
+
+  public static CoreNLPProtos.SemgrexRequest buildFakeRequest(int numQueries, int numSemgrex, String semgrexPattern) {
     CoreNLPProtos.SemgrexRequest.Builder request = CoreNLPProtos.SemgrexRequest.newBuilder();
     for (int i = 0; i < numSemgrex; ++i) {
-      request.addSemgrex("{}=source >dobj=foo {}=target");
+      request.addSemgrex(semgrexPattern);
     }
 
     for (int i = 0; i < numQueries; ++i) {
@@ -87,7 +91,7 @@ result {
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
     Assert.assertEquals("Expected exactly 1 reply", 1, response.getResultList().size());
-    checkResult(response, 1, 0);
+    checkResult(response, 1, 0, true);
   }
 
   @Test
@@ -96,39 +100,43 @@ result {
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
     Assert.assertEquals("Expected exactly 1 reply", 1, response.getResultList().size());
-    checkResult(response, 2, 0);
+    checkResult(response, 2, 0, true);
   }
 
-  public static void checkResult(CoreNLPProtos.SemgrexResponse response, int numSemgrex, int graphIdx) {
+  public static void checkResult(CoreNLPProtos.SemgrexResponse response, int numSemgrex, int graphIdx, boolean shouldMatch) {
     CoreNLPProtos.SemgrexResponse.GraphResult result = response.getResultList().get(graphIdx);
 
     Assert.assertEquals("Expected exactly " + numSemgrex + " semgrex result(s)", numSemgrex, result.getResultList().size());
 
     int semgrexIdx = 0;
     for (CoreNLPProtos.SemgrexResponse.SemgrexResult semgrexResult : result.getResultList()) {
-      Assert.assertEquals("Expected exactly 1 match", 1, semgrexResult.getMatchList().size());
-      CoreNLPProtos.SemgrexResponse.Match match = semgrexResult.getMatchList().get(0);
+      if (shouldMatch) {
+        Assert.assertEquals("Expected exactly 1 match", 1, semgrexResult.getMatchList().size());
+        CoreNLPProtos.SemgrexResponse.Match match = semgrexResult.getMatchList().get(0);
 
-      Assert.assertEquals("Match is supposed to be at the root", 1, match.getMatchIndex());
-      Assert.assertEquals("Expected exactly 2 named nodes", 2, match.getNodeList().size());
-      Assert.assertEquals("Expected exactly 1 named reln", 1, match.getRelnList().size());
-      Assert.assertEquals("Expected exactly 1 named edge", 1, match.getEdgeList().size());
+        Assert.assertEquals("Match is supposed to be at the root", 1, match.getMatchIndex());
+        Assert.assertEquals("Expected exactly 2 named nodes", 2, match.getNodeList().size());
+        Assert.assertEquals("Expected exactly 1 named reln", 1, match.getRelnList().size());
+        Assert.assertEquals("Expected exactly 1 named edge", 1, match.getEdgeList().size());
 
-      Assert.assertEquals("Node 1 should be source", 1, match.getNodeList().get(0).getMatchIndex());
-      Assert.assertEquals("Node 1 should be source", "source", match.getNodeList().get(0).getName());
-      Assert.assertEquals("Node 2 should be target", 2, match.getNodeList().get(1).getMatchIndex());
-      Assert.assertEquals("Node 2 should be target", "target", match.getNodeList().get(1).getName());
+        Assert.assertEquals("Node 1 should be source", 1, match.getNodeList().get(0).getMatchIndex());
+        Assert.assertEquals("Node 1 should be source", "source", match.getNodeList().get(0).getName());
+        Assert.assertEquals("Node 2 should be target", 2, match.getNodeList().get(1).getMatchIndex());
+        Assert.assertEquals("Node 2 should be target", "target", match.getNodeList().get(1).getName());
 
-      Assert.assertEquals("Reln dobj should be named foo", "foo", match.getRelnList().get(0).getName());
-      Assert.assertEquals("Reln dobj should be have reln dobj", "dobj", match.getRelnList().get(0).getReln());
+        Assert.assertEquals("Reln dobj should be named foo", "foo", match.getRelnList().get(0).getName());
+        Assert.assertEquals("Reln dobj should be have reln dobj", "dobj", match.getRelnList().get(0).getReln());
 
-      Assert.assertEquals("Edge dobj should be named foo", "foo", match.getEdgeList().get(0).getName());
-      Assert.assertEquals("Edge dobj should have reln dobj", "dobj", match.getEdgeList().get(0).getReln());
-      Assert.assertEquals("Edge dobj source should be 1", 1, match.getEdgeList().get(0).getSource());
-      Assert.assertEquals("Edge dobj source should be 2", 2, match.getEdgeList().get(0).getTarget());
+        Assert.assertEquals("Edge dobj should be named foo", "foo", match.getEdgeList().get(0).getName());
+        Assert.assertEquals("Edge dobj should have reln dobj", "dobj", match.getEdgeList().get(0).getReln());
+        Assert.assertEquals("Edge dobj source should be 1", 1, match.getEdgeList().get(0).getSource());
+        Assert.assertEquals("Edge dobj source should be 2", 2, match.getEdgeList().get(0).getTarget());
 
-      Assert.assertEquals("Graph count was off", graphIdx, match.getGraphIndex());
-      Assert.assertEquals("Semgrex pattern count was off", semgrexIdx, match.getSemgrexIndex());
+        Assert.assertEquals("Graph count was off", graphIdx, match.getGraphIndex());
+        Assert.assertEquals("Semgrex pattern count was off", semgrexIdx, match.getSemgrexIndex());
+      } else {
+        Assert.assertEquals("Expected exactly 0 match", 0, semgrexResult.getMatchList().size());
+      }
       ++semgrexIdx;
     }
   }
@@ -147,8 +155,24 @@ result {
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
     Assert.assertEquals("Expected exactly 2 replies", 2, response.getResultList().size());
-    checkResult(response, 1, 0);
-    checkResult(response, 1, 1);
+    checkResult(response, 1, 0, true);
+    checkResult(response, 1, 1, true);
+  }
+
+  /**
+   * For this test, only the first graph should have any results for the given pattern
+   *<br>
+   * The uniq operator in the SemgrexPattern will remove the match from the second graph,
+   * since the second graph is identical
+   */
+  @Test
+  public void testTwoGraphsUniq() {
+    CoreNLPProtos.SemgrexRequest request = buildFakeRequest(2, 1, "{}=source >dobj=foo {}=target :: uniq source");
+    CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
+
+    Assert.assertEquals("Expected exactly 2 replies", 2, response.getResultList().size());
+    checkResult(response, 1, 0, true);
+    checkResult(response, 1, 1, false);
   }
 
   public byte[] buildRepeatedRequest(int count, boolean closingLength) throws IOException {
@@ -179,7 +203,7 @@ result {
       byte[] responseBytes = new byte[len];
       din.read(responseBytes, 0, len);
       CoreNLPProtos.SemgrexResponse response = CoreNLPProtos.SemgrexResponse.parseFrom(responseBytes);
-      checkResult(response, 1, 0);
+      checkResult(response, 1, 0, true);
     }
     int len = din.readInt();
     Assert.assertEquals("Repeated results should be over", 0, len);
