@@ -523,6 +523,13 @@ public class CoNLLUReaderITest {
     // check the SpaceAfter of the second word, which is where the MWT SpaceAfter should go
     assertEquals("  ", tokens.get(1).after());
 
+    // the MWT SpacesBefore should go on the first word
+    assertEquals("  ", tokens.get(0).before());
+    assertEquals("", tokens.get(1).before());
+
+    assertEquals("Foo=Bar", tokens.get(0).get(CoreAnnotations.MWTTokenMiscAnnotation.class));
+    assertEquals(null, tokens.get(1).get(CoreAnnotations.MWTTokenMiscAnnotation.class));
+
     assertTrue(sentence.containsKey(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
     assertTrue(sentence.containsKey(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
   }

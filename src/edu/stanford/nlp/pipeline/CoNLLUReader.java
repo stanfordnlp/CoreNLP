@@ -24,8 +24,6 @@ public class CoNLLUReader {
    * field constants
    **/
   // TODO: read sent_id?
-  // TODO: reconsider the newline as the after on the last word
-  // TODO: keep around the rest of the misc annotations
   public static final int CoNLLU_IndexField = 0;
   public static final int CoNLLU_WordField = 1;
   public static final int CoNLLU_LemmaField = 2;
@@ -369,6 +367,24 @@ public class CoNLLUReader {
     return finalAnnotation;
   }
 
+  public static final String rebuildMisc(Map<String, String> miscKeyValues) {
+    if (miscKeyValues.size() == 0) {
+      return null;
+    }
+
+    // rebuild the misc, since we have removed the SpaceAfter, SpacesAfter, and SpacesBefore
+    StringBuilder misc = new StringBuilder();
+    for (Map.Entry<String, String> entry : miscKeyValues.entrySet()) {
+      if (misc.length() > 0) {
+        misc.append("|");
+      }
+      misc.append(entry.getKey());
+      misc.append("=");
+      misc.append(entry.getValue());
+    }
+    return misc.toString();
+  }
+
   /**
    * Convert a single ten column CoNLLU line into a CoreLabel
    */
@@ -454,6 +470,12 @@ public class CoNLLUReader {
         cl.setIsMWTFirst(false);
       } else {
         cl.setIsMWTFirst(true);
+
+        // if we are first, look for SpacesBefore
+        String mwtSpacesBefore = mwtKeyValues.get("SpacesBefore");
+        if (mwtSpacesBefore != null) {
+          cl.setBefore(unescapeSpacesAfter(mwtSpacesBefore));
+        }
       }
       // SpaceAfter / SpacesAfter should only apply to the last word in an MWT
       // all other words are treated as implicitly having SpaceAfter=No
@@ -467,6 +489,16 @@ public class CoNLLUReader {
         String spaceAfter = miscToSpaceAfter(mwtKeyValues);
         cl.setAfter(spaceAfter);
       }
+      if (cl.isMWTFirst()) {
+        mwtKeyValues.remove("SpaceAfter");
+        mwtKeyValues.remove("SpacesAfter");
+        mwtKeyValues.remove("SpacesBefore");
+
+        String mwtMisc = rebuildMisc(mwtKeyValues);
+        if (mwtMisc != null) {
+          cl.set(CoreAnnotations.MWTTokenMiscAnnotation.class, mwtMisc);
+        }
+      }
     } else {
       cl.setIsMWT(false);
       cl.setIsMWTFirst(false);
@@ -476,18 +508,9 @@ public class CoNLLUReader {
     }
     miscKeyValues.remove("SpaceAfter");
     miscKeyValues.remove("SpacesAfter");
-    if (miscKeyValues.size() > 0) {
-      // rebuild the misc, since we have removed the SpaceAfter, SpacesAfter, and SpacesBefore
-      StringBuilder misc = new StringBuilder();
-      for (Map.Entry<String, String> entry : miscKeyValues.entrySet()) {
-        if (misc.length() > 0) {
-          misc.append("|");
-        }
-        misc.append(entry.getKey());
-        misc.append("=");
-        misc.append(entry.getValue());
-      }
-      cl.set(CoreAnnotations.CoNLLUMisc.class, misc.toString());
+    String misc = rebuildMisc(miscKeyValues);
+    if (misc != null) {
+      cl.set(CoreAnnotations.CoNLLUMisc.class, misc);
     }
     return cl;
   }

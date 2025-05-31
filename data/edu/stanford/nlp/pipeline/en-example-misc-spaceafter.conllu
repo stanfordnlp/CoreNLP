@@ -1,6 +1,6 @@
 # sent_id = reviews-231203-0002
 # text = I'm  a regular at the HH.
-1-2	I'm	_	_	_	_	_	_	_	SpacesAfter=\s\s
+1-2	I'm	_	_	_	_	_	_	_	Foo=Bar|SpacesBefore=\s\s|SpacesAfter=\s\s
 1	I	I	PRON	PRP	Case=Nom|Number=Sing|Person=1|PronType=Prs	4	nsubj	4:nsubj	_
 2	'm	be	AUX	VBP	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin	4	cop	4:cop	_
 3	a	a	DET	DT	Definite=Ind|PronType=Art	4	det	4:det	_
