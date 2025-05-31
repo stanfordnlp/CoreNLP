@@ -81,7 +81,7 @@ public class CoNLLUDocumentWriter {
 
       // Try to find main governor and additional dependencies
       IndexedWord gov = basicSg.containsVertex(token) ? basicSg.getParent(token) : null;
-      String govIdx = gov != null ? gov.toCopyIndex() : null;
+      String govIdx = gov != null ? gov.toCopyOrEmptyIndex() : null;
       GrammaticalRelation reln = gov != null ? basicSg.getEdge(gov, token).getRelation() : null;
 
       HashMap<String, String> enhancedDependencies = new HashMap<>();
@@ -99,7 +99,7 @@ public class CoNLLUDocumentWriter {
           //} else if (edge.getWeight() == 5.0) {
           //    relationString = relationString + ":ENH_CONJ_PROP";
           //}
-          enhancedDependencies.put(parent.toCopyIndex(), relationString);
+          enhancedDependencies.put(parent.toCopyOrEmptyIndex(), relationString);
         }
       } else {
         // add enhanced ones stored with token
@@ -165,7 +165,7 @@ public class CoNLLUDocumentWriter {
         lemma = lemma.replaceAll(RRB_PATTERN, ")");
       }
 
-      sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.toCopyIndex(), word,
+      sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.toCopyOrEmptyIndex(), word,
                               lemma, upos, pos, featuresString, govIdx, relnName, additionalDepsString, misc));
     }
     sb.append(System.lineSeparator());

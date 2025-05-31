@@ -370,9 +370,14 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     return StringUtils.repeat('\'', copyCount);
   }
 
-  public String toCopyIndex() {
+  public String toCopyOrEmptyIndex() {
+    // TODO: if there's ever a CoNLLU or other situation that has both
+    // copy & empty indices, no idea what to do with such an abomination
     if (copyCount == 0) {
-      if (Double.isNaN(this.pseudoPosition)) {
+      Integer empty = this.get(CoreAnnotations.EmptyIndexAnnotation.class);
+      if (empty != null) {
+        return this.index() + "." + empty;
+      } else if (Double.isNaN(this.pseudoPosition)) {
         return String.valueOf(this.index());
       } else {
         return String.valueOf(this.pseudoPosition);
