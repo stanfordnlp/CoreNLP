@@ -498,4 +498,33 @@ public class CoNLLUReaderITest {
     assertEquals(1, graph.getRoots().size());
   }
 
+
+  public static final String mwtSpaceAfterPath = String.format("edu/stanford/nlp/pipeline/en-example-misc-spaceafter.conllu");
+
+  @Test
+  /**
+   * This test checks that the SpaceAfter on a Misc is respected.
+   */
+  public void testReadingMiscSpaceAfter() throws ClassNotFoundException, IOException {
+    Annotation readInDocument = new CoNLLUReader(new Properties()).readCoNLLUFile(mwtSpaceAfterPath).get(0);
+
+    // this document only has one sentence
+    List<CoreMap> sentences = readInDocument.get(CoreAnnotations.SentencesAnnotation.class);
+    assertEquals(1, sentences.size());
+
+    CoreMap sentence = sentences.get(0);
+
+    // cursory check of the tokens
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    assertEquals(8, tokens.size());
+
+    // check that the non-last words of the MWT have no SpaceAfter
+    assertEquals("", tokens.get(0).after());
+    // check the SpaceAfter of the second word, which is where the MWT SpaceAfter should go
+    assertEquals("  ", tokens.get(1).after());
+
+    assertTrue(sentence.containsKey(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
+    assertTrue(sentence.containsKey(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
+  }
+
 }

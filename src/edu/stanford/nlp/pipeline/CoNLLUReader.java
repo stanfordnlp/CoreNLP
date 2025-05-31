@@ -437,9 +437,16 @@ public class CoNLLUReader {
       cl.setIsMWT(false);
       cl.setIsMWTFirst(false);
     } else if (sentence.mwtData.containsKey(sentenceTokenIndex - 1)) {
+      String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
+      Map<String, String> mwtKeyValues = new HashMap<>();
+      if (miscInfo != null && !miscInfo.equals("_")) {
+        Arrays.stream(miscInfo.split("\\|")).forEach(
+          kv -> mwtKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
+      }
+
       // set MWT text
       cl.set(CoreAnnotations.MWTTokenTextAnnotation.class,
-          sentence.mwtTokens.get(sentence.mwtData.get(sentenceTokenIndex - 1)));
+             sentence.mwtTokens.get(sentence.mwtData.get(sentenceTokenIndex - 1)));
       cl.setIsMWT(true);
       // check if first
       if (sentence.mwtData.containsKey(sentenceTokenIndex - 2) &&
@@ -457,16 +464,8 @@ public class CoNLLUReader {
         // then we aren't last, and SpaceAfter="" is implicitly true
         cl.setAfter("");
       } else {
-        String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
-        if (miscInfo != null && !miscInfo.equals("_")) {
-          Map<String, String> mwtKeyValues = new HashMap<>();
-          Arrays.stream(miscInfo.split("\\|")).forEach(
-            kv -> mwtKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
-          String spaceAfter = miscToSpaceAfter(mwtKeyValues);
-          cl.setAfter(spaceAfter);
-        } else {
-          cl.setAfter(" ");
-        }
+        String spaceAfter = miscToSpaceAfter(mwtKeyValues);
+        cl.setAfter(spaceAfter);
       }
     } else {
       cl.setIsMWT(false);
