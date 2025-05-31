@@ -124,7 +124,8 @@ public class CoNLLUDocumentWriter {
 
       // don't use after() directly; it returns a default of ""
       // TODO: also print SpacesBefore on the first token
-      if (token.get(CoreAnnotations.AfterAnnotation.class) != null) {
+      Boolean isMWT = token.get(CoreAnnotations.IsMultiWordTokenAnnotation.class);
+      if ((isMWT == null || !isMWT) && token.get(CoreAnnotations.AfterAnnotation.class) != null) {
         String after = token.after();
         if (!after.equals(" ")) {
           if (after.equals("")) {
@@ -132,20 +133,10 @@ public class CoNLLUDocumentWriter {
           } else {
             after = "SpacesAfter=" + escapeSpaces(after);
           }
-          IndexedWord nextVertex = tokenSg.getNodeByIndexSafe(token.index() + 1);
-          // the next word needs to exist and be part of the same MWT
-          // and either this word is the start of the MWT
-          //   or this word is the middle of the same MWT as the next word
-          // if that is true, we will skip the SpaceAfter annotation
-          boolean inMWT = ((nextVertex != null && isMWTbutNotStart(nextVertex)) &&
-                           ((token.containsKey(CoreAnnotations.IsFirstWordOfMWTAnnotation.class) && token.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class)) ||
-                            (isMWTbutNotStart(token))));
-          if (!inMWT) {
-            if (misc.equals("_")) {
-              misc = after;
-            } else {
-              misc = misc + "|" + after;
-            }
+          if (misc.equals("_")) {
+            misc = after;
+          } else {
+            misc = misc + "|" + after;
           }
         }
       }
@@ -224,7 +215,31 @@ public class CoNLLUDocumentWriter {
       return;
     }
     String range = String.format("%d-%d", startIndex, endIndex);
-    sb.append(String.format("%s\t%s\t_\t_\t_\t_\t_\t_\t_\t_%n", range, token.get(CoreAnnotations.MWTTokenTextAnnotation.class)));
+
+    IndexedWord endVertex = graph.getNodeByIndexSafe(endIndex);
+
+    String misc = "_";
+    if (token.get(CoreAnnotations.MWTTokenMiscAnnotation.class) != null) {
+      misc = token.get(CoreAnnotations.MWTTokenMiscAnnotation.class);
+    }
+
+    if (endVertex.get(CoreAnnotations.AfterAnnotation.class) != null) {
+      String after = endVertex.after();
+      if (!after.equals(" ")) {
+        if (after.equals("")) {
+          after = "SpaceAfter=No";
+        } else {
+          after = "SpacesAfter=" + escapeSpaces(after);
+        }
+        if (misc.equals("_")) {
+          misc = after;
+        } else {
+          misc = misc + "|" + after;
+        }
+      }
+    }
+
+    sb.append(String.format("%s\t%s\t_\t_\t_\t_\t_\t_\t_\t%s%n", range, token.get(CoreAnnotations.MWTTokenTextAnnotation.class), misc));
   }
 
   /**
