@@ -52,6 +52,10 @@ public class CoNLLUReaderITest {
     {"sps00", "rg", "da0fp0", "ncfp000", "fp"},
   };
 
+  static final String[][] EXPECTED_MISC = {
+    {null, null, "ArgTem=arg1:tem", null, null, "ArgTem=argM:tmp", "ArgTem=arg1:tem", null, null, null, "ArgTem=argM:loc", "ArgTem=argM:adv", null, null, null, null, null, "ArgTem=arg2:atr", null, "ArgTem=arg0:agt", null},
+    {null, null, null, null, null},
+  };
 
   static final String[][] EXPECTED_FEATS = {
     {
@@ -232,11 +236,12 @@ public class CoNLLUReaderITest {
       }
     }
 
-    // check the features and that there are no fields currently unaccounted for
+    // check the features, the misc columns, and that there are no fields currently unaccounted for
     for (int i = 0; i < sentences.size(); ++i) {
       CoreMap sentence = sentences.get(i);
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       assertEquals(EXPECTED_FEATS[i].length, tokens.size());
+      assertEquals(EXPECTED_MISC[i].length, tokens.size());
       for (int j = 0; j < tokens.size(); ++j) {
         CoreLabel token = tokens.get(j);
 
@@ -249,6 +254,15 @@ public class CoNLLUReaderITest {
           expectedKeys += 1;
           String feats = token.get(CoreAnnotations.CoNLLUFeats.class).toString();
           assertEquals(expected, feats);
+        }
+
+        String expectedMisc = EXPECTED_MISC[i][j];
+        if (expectedMisc == null) {
+          assertFalse(token.containsKey(CoreAnnotations.CoNLLUMisc.class));
+        } else {
+          expectedKeys += 1;
+          String misc = token.get(CoreAnnotations.CoNLLUMisc.class).toString();
+          assertEquals(expectedMisc, misc);
         }
 
         // Some of the AnCora sentences don't have XPOS

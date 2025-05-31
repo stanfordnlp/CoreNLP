@@ -427,6 +427,7 @@ public class CoNLLUReader {
     String spacesBefore = miscKeyValues.get("SpacesBefore");
     if (spacesBefore != null) {
       cl.setBefore(unescapeSpacesAfter(spacesBefore));
+      miscKeyValues.remove("SpacesBefore");
     }
 
     // handle the MWT info and after text
@@ -473,6 +474,21 @@ public class CoNLLUReader {
 
       String spaceAfter = miscToSpaceAfter(miscKeyValues);
       cl.setAfter(spaceAfter);
+    }
+    miscKeyValues.remove("SpaceAfter");
+    miscKeyValues.remove("SpacesAfter");
+    if (miscKeyValues.size() > 0) {
+      // rebuild the misc, since we have removed the SpaceAfter, SpacesAfter, and SpacesBefore
+      StringBuilder misc = new StringBuilder();
+      for (Map.Entry<String, String> entry : miscKeyValues.entrySet()) {
+        if (misc.length() > 0) {
+          misc.append("|");
+        }
+        misc.append(entry.getKey());
+        misc.append("=");
+        misc.append(entry.getValue());
+      }
+      cl.set(CoreAnnotations.CoNLLUMisc.class, misc.toString());
     }
     return cl;
   }
