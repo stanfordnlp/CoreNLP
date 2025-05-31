@@ -422,6 +422,7 @@ public class CoNLLUReaderITest {
     for (int i = 0; i < tokens.size(); ++i) {
       assertEquals(i+1, tokens.get(i).index());
       assertEquals(EXPECTED_ENGLISH_WORDS[i], tokens.get(i).value());
+      assertEquals(0, tokens.get(i).sentIndex());
     }
 
     List<CoreLabel> emptyTokens = sentence.get(CoreAnnotations.EmptyTokensAnnotation.class);
@@ -434,6 +435,9 @@ public class CoNLLUReaderITest {
 
     SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
     assertEquals(EXPECTED_ENHANCED, enhanced);
+    for (IndexedWord node : enhanced.vertexSet()) {
+      assertEquals(0, node.sentIndex());
+    }
 
     assertEquals("  ", tokens.get(0).before());
   }
