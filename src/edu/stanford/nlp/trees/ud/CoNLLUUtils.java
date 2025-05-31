@@ -65,7 +65,7 @@ public class CoNLLUUtils {
 
 
     public static class DepIndexComparator implements Comparator<String> {
-
+      // TODO FIXME: technically this doesn't work in the case of 10 or more extra nodes
         @Override
         public int compare(String depIndex1, String depIndex2) {
             return Float.valueOf(depIndex1).compareTo(Float.valueOf(depIndex2));
