@@ -64,7 +64,7 @@ public class CoNLLUDocumentWriter {
   public String printSemanticGraph(SemanticGraph basicSg, SemanticGraph enhancedSg, boolean unescapeParenthesis, Collection<String> comments) {
     StringBuilder sb = new StringBuilder();
 
-    /* Print comments. */
+    // Print comments
     for (String comment : comments) {
       sb.append(comment).append(System.lineSeparator());
     }
@@ -72,14 +72,14 @@ public class CoNLLUDocumentWriter {
     SemanticGraph tokenSg = enhancedSg != null ? enhancedSg : basicSg;
 
     for (IndexedWord token : tokenSg.vertexListSorted()) {
-      /* Check for multiword tokens. */
+      // Check for multiword tokens
       if (token.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class)) {
         printSpan(sb, token);
       } else if (token.containsKey(CoreAnnotations.IsFirstWordOfMWTAnnotation.class) && token.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class)) {
         printMWT(sb, tokenSg, token);
       }
 
-      /* Try to find main governor and additional dependencies. */
+      // Try to find main governor and additional dependencies
       IndexedWord gov = basicSg.containsVertex(token) ? basicSg.getParent(token) : null;
       String govIdx = gov != null ? gov.toCopyIndex() : null;
       GrammaticalRelation reln = gov != null ? basicSg.getEdge(gov, token).getRelation() : null;
@@ -141,7 +141,7 @@ public class CoNLLUDocumentWriter {
         }
       }
 
-      /* Root. */
+      // Root
       if (govIdx == null && basicSg.getRoots().contains(token)) {
         govIdx = "0";
         relnName = GrammaticalRelation.ROOT.toString();
@@ -255,7 +255,7 @@ public class CoNLLUDocumentWriter {
 
     int index = 0;
     for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-      /* Check for multiword tokens. */
+      // Check for multiword tokens
       if (token.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class)) {
         printSpan(sb, token);
       }
