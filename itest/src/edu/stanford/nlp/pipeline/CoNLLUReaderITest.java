@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.semgraph.*;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -390,7 +391,7 @@ public class CoNLLUReaderITest {
     for (String[] edge : EXPECTED_ENHANCED_EDGES) {
       IndexedWord dep = graphNodes.get(edge[0]);
       IndexedWord gov = graphNodes.get(edge[1]);
-      GrammaticalRelation reln = GrammaticalRelation.valueOf(edge[2]);
+      GrammaticalRelation reln = GrammaticalRelation.valueOf(Language.UniversalEnglish, edge[2]);
       edges.add(new SemanticGraphEdge(gov, dep, reln, 1.0, false));
     }
     List<IndexedWord> roots = new ArrayList<>();
