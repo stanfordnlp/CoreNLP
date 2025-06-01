@@ -569,7 +569,6 @@ public abstract class SemgrexPattern implements Serializable  {
           for (String name : nodeNames) {
             log.info("  " + name + ": " + matcher.getNode(name).toString(CoreLabel.OutputFormat.VALUE_INDEX));
           }
-          log.info(" ");
           found = matcher.find();
         }
       } else if (outputFormat == OutputFormat.OFFSET) {
