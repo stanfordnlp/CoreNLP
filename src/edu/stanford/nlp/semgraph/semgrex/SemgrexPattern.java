@@ -549,6 +549,7 @@ public abstract class SemgrexPattern implements Serializable  {
       }
     }
 
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = new ArrayList<>();
     for (CoreMap sentence : sentences) {
       SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
@@ -556,12 +557,23 @@ public abstract class SemgrexPattern implements Serializable  {
       if ( ! matcher.find()) {
         continue;
       }
+      matches.add(new Pair<>(sentence, new ArrayList<>()));
+      boolean found = true;
+      while (found) {
+        matches.get(matches.size() - 1).second().add(new SemgrexMatch(semgrex, matcher));
+        found = matcher.find();
+      }
+    }
 
+    for (Pair<CoreMap, List<SemgrexMatch>> sentenceMatches : matches) {
+      CoreMap sentence = sentenceMatches.first();
+      SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+      SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
       if (outputFormat == OutputFormat.LIST) {
         log.info("Matched graph:" + System.lineSeparator() + graph.toString(SemanticGraph.OutputFormat.LIST));
-        int i = 1;
-        boolean found = true;
-        while (found) {
+        int i = 0;
+        for (SemgrexMatch matcher : sentenceMatches.second()) {
+          i++;
           log.info("Match " + i + " at: " + matcher.getMatch().toString(CoreLabel.OutputFormat.VALUE_INDEX));
           List<String> nodeNames = Generics.newArrayList();
           nodeNames.addAll(matcher.getNodeNames());
@@ -569,7 +581,6 @@ public abstract class SemgrexPattern implements Serializable  {
           for (String name : nodeNames) {
             log.info("  " + name + ": " + matcher.getNode(name).toString(CoreLabel.OutputFormat.VALUE_INDEX));
           }
-          found = matcher.find();
         }
       } else if (outputFormat == OutputFormat.OFFSET) {
         if (graph.vertexListSorted().isEmpty()) {
@@ -585,8 +596,7 @@ public abstract class SemgrexPattern implements Serializable  {
         if (comments.size() == 0) {
           comments.addAll(graph.getComments());
         }
-        boolean found = true;
-        while (found) {
+        for (SemgrexMatch matcher : sentenceMatches.second()) {
           StringBuilder comment = new StringBuilder();
           comment.append("# semgrex pattern |" + semgrexName + "| matched at " + matcher.getMatch().toString(CoreLabel.OutputFormat.VALUE_INDEX));
 
@@ -600,7 +610,6 @@ public abstract class SemgrexPattern implements Serializable  {
             comment.append(matcher.getNode(name).toString(CoreLabel.OutputFormat.VALUE_INDEX));
           }
           comments.add(comment.toString());
-          found = matcher.find();
         }
         String output = writer.printSemanticGraph(graph, enhanced, false, comments);
         System.out.print(output);

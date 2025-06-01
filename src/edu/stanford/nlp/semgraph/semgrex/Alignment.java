@@ -28,6 +28,13 @@ public class Alignment {
     this.justification = justification;
   }
 
+  public Alignment(Alignment other) {
+    // note that we aren't copying the words
+    map = new HashMap<>(other.map);
+    score = other.score;
+    justification = other.justification;
+  }
+
   /*
    * Returns the score for this <code>Alignment</code>.
    */
