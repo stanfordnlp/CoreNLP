@@ -16,13 +16,13 @@ import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeNormalizer;
-import edu.stanford.nlp.trees.tregex.VariableStrings;
 import edu.stanford.nlp.trees.ud.CoNLLUDocumentWriter;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.VariableStrings;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**

@@ -42,6 +42,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.VariableStrings;
 import edu.stanford.nlp.util.logging.Redwood;
 
 

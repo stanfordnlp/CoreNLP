@@ -1,4 +1,4 @@
-package edu.stanford.nlp.trees.tregex;
+package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.ArrayMap;
@@ -8,9 +8,6 @@ import edu.stanford.nlp.util.MutableInteger;
 import java.util.Map;
 
 /** A class that takes care of the stuff necessary for variable strings.
- *
- *<br>
- * TODO: move this to util?
  *
  *  @author Roger Levy (rog@nlp.stanford.edu)
  */

@@ -6,7 +6,7 @@ import java.util.*;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.trees.tregex.VariableStrings;
+import edu.stanford.nlp.util.VariableStrings;
 
 /** @author Chloe Kiddon */
 public class CoordinationPattern extends SemgrexPattern  {

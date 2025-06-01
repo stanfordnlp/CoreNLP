@@ -2,6 +2,7 @@ package edu.stanford.nlp.trees.tregex;
 
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.VariableStrings;
 
 import java.util.Iterator;
 import java.util.List;

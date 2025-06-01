@@ -33,6 +33,7 @@ import java.util.*;
 import edu.stanford.nlp.trees.HasParent;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.VariableStrings;
 
 /**
  * A TregexMatcher can be used to match a {@link TregexPattern} against a {@link edu.stanford.nlp.trees.Tree}.

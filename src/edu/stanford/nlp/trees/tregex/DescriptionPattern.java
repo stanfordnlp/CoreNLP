@@ -6,6 +6,7 @@ import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.ArrayStringFilter;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.VariableStrings;
 import java.util.function.Predicate;
 
 import java.util.*;

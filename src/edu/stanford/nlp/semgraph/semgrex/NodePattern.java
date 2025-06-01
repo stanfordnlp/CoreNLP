@@ -12,10 +12,10 @@ import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.trees.tregex.VariableStrings;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Quadruple;
 import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.VariableStrings;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class NodePattern extends SemgrexPattern  {
