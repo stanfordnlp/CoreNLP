@@ -73,7 +73,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * Constructs a new Counter with the contents of the given Counter.
    */
   public IntCounter(IntCounter<E> c) {
-    this();
+    this(c.mapFactory);
     addAll(c);
   }
 

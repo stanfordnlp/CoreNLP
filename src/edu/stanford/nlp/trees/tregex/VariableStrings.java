@@ -9,16 +9,23 @@ import java.util.Map;
 
 /** A class that takes care of the stuff necessary for variable strings.
  *
+ *<br>
+ * TODO: move this to util?
+ *
  *  @author Roger Levy (rog@nlp.stanford.edu)
  */
-class VariableStrings {
-
+public class VariableStrings {
   private final Map<String, String> varsToStrings;
   private final IntCounter<String> numVarsSet;
 
   public VariableStrings() {
     varsToStrings = ArrayMap.newArrayMap();
     numVarsSet = new IntCounter<>(MapFactory.<String, MutableInteger>arrayMapFactory());
+  }
+
+  public VariableStrings(VariableStrings other) {
+    varsToStrings = new ArrayMap<>(other.varsToStrings);
+    numVarsSet = new IntCounter<>(other.numVarsSet);
   }
 
   public void reset() {

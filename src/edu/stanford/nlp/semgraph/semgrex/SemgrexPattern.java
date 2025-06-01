@@ -16,6 +16,7 @@ import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeNormalizer;
+import edu.stanford.nlp.trees.tregex.VariableStrings;
 import edu.stanford.nlp.trees.ud.CoNLLUDocumentWriter;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
