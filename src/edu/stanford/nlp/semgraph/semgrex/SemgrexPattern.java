@@ -515,7 +515,6 @@ public abstract class SemgrexPattern implements Serializable  {
     }
 
     List<CoreMap> sentences = new ArrayList<>();
-    // TODO: allow other sources of graphs, such as dependency files
     if (argsMap.containsKey(TREE_FILE) && argsMap.get(TREE_FILE).length > 0) {
       for (String treeFile : argsMap.get(TREE_FILE)) {
         log.info("Loading file " + treeFile);
