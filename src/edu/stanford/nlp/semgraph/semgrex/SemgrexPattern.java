@@ -335,6 +335,33 @@ public abstract class SemgrexPattern implements Serializable  {
     return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
   }
 
+  // batch processing
+  // -------------------------------------------------------------
+
+  /**
+   * Returns a list of matching sentences and each of the matches from those sentences.
+   *<br>
+   * Non-matching sentences are currently not returned (may change in the future to return an empty list).
+   */
+  public List<Pair<CoreMap, List<SemgrexMatch>>> matchSentences(List<CoreMap> sentences) {
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = new ArrayList<>();
+    for (CoreMap sentence : sentences) {
+      SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+      SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+      SemgrexMatcher matcher = matcher(graph);
+      if ( ! matcher.find()) {
+        continue;
+      }
+      matches.add(new Pair<>(sentence, new ArrayList<>()));
+      boolean found = true;
+      while (found) {
+        matches.get(matches.size() - 1).second().add(new SemgrexMatch(this, matcher));
+        found = matcher.find();
+      }
+    }
+    return matches;
+  }
+
   // compile method
   // -------------------------------------------------------------
 
@@ -442,30 +469,6 @@ public abstract class SemgrexPattern implements Serializable  {
     LIST,
     OFFSET,
     CONLLU
-  }
-
-  /**
-   * Returns a list of matching sentences and each of the matches from those sentences.
-   *<br>
-   * Non-matching sentences are currently not returned (may change in the future to return an empty list).
-   */
-  public List<Pair<CoreMap, List<SemgrexMatch>>> matchSentences(List<CoreMap> sentences) {
-    List<Pair<CoreMap, List<SemgrexMatch>>> matches = new ArrayList<>();
-    for (CoreMap sentence : sentences) {
-      SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-      SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-      SemgrexMatcher matcher = matcher(graph);
-      if ( ! matcher.find()) {
-        continue;
-      }
-      matches.add(new Pair<>(sentence, new ArrayList<>()));
-      boolean found = true;
-      while (found) {
-        matches.get(matches.size() - 1).second().add(new SemgrexMatch(this, matcher));
-        found = matcher.find();
-      }
-    }
-    return matches;
   }
 
   private static final String PATTERN = "-pattern";
