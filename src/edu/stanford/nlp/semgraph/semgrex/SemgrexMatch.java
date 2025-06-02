@@ -64,4 +64,19 @@ public class SemgrexMatch implements Serializable  {
   public Set<String> getNodeNames() {
     return namesToNodes.keySet();
   }
+
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append(matchedPattern);
+    builder.append("\n");
+    builder.append(sg);
+    builder.append("\n");
+    for (Map.Entry<String, IndexedWord> entry : namesToNodes.entrySet()) {
+      builder.append(entry.getKey() + " matched at " + entry.getValue() + "\n");
+    }
+    for (Map.Entry<String, SemanticGraphEdge> entry : namesToEdges.entrySet()) {
+      builder.append(entry.getKey() + " matched at " + entry.getValue() + "\n");
+    }
+    return builder.toString();
+  }
 }
