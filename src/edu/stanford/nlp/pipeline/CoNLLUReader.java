@@ -236,16 +236,17 @@ public class CoNLLUReader {
      * Process line for current sentence.  Return true if processing empty line (indicating sentence end)
      **/
     public boolean processLine(String line) {
-      if (COMMENT_LINE.matcher(line).matches())
+      if (COMMENT_LINE.matcher(line).matches()) {
         addSentenceData(line);
-      else if (MWT_LINE.matcher(line).matches())
+      } else if (MWT_LINE.matcher(line).matches()) {
         addMWTData(line);
-      else if (TOKEN_LINE.matcher(line).matches())
+      } else if (TOKEN_LINE.matcher(line).matches()) {
         tokenLines.add(line);
-      else if (EMPTY_LINE.matcher(line).matches())
+      } else if (EMPTY_LINE.matcher(line).matches()) {
         emptyLines.add(line);
-      else
+      } else {
         return true;
+      }
       return false;
     }
 
@@ -301,8 +302,14 @@ public class CoNLLUReader {
     for (String line : lines) {
       // if start of a new doc, reset for a new doc
       if (DOCUMENT_LINE.matcher(line).matches()) {
+        // since the next sentence gets added to the previous doc
+        // (see below), we'll need to remove that
+        if (docs.size() > 0) {
+          docs.get(docs.size() - 1).sentences.remove(docs.get(docs.size() - 1).sentences.size() - 1);
+        }
+        // the new document comes prebuilt with a blank sentence, so,
+        // no need to add one here
         docs.add(new CoNLLUDocument());
-        docs.get(docs.size() - 1).sentences.add(new CoNLLUSentence());
       }
       // read in current line
       boolean endSentence = docs.get(docs.size() - 1).lastSentence().processLine(line);
