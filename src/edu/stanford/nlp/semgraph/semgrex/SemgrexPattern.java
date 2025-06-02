@@ -516,12 +516,17 @@ public abstract class SemgrexPattern implements Serializable  {
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
     // args = argsMap.get(null);
 
-    // TODO: allow patterns to be extracted from a file
     if (!(argsMap.containsKey(PATTERN)) || argsMap.get(PATTERN).length == 0) {
       help();
       System.exit(2);
     }
-    SemgrexPattern semgrex = SemgrexPattern.compile(argsMap.get(PATTERN)[0]);
+    SemgrexPattern semgrex;
+    try {
+      String pattern = IOUtils.slurpFile(argsMap.get(PATTERN)[0]);
+      semgrex = SemgrexPattern.compile(pattern);
+    } catch(IOException e) {
+      semgrex = SemgrexPattern.compile(argsMap.get(PATTERN)[0]);
+    }
 
     String modeString = DEFAULT_MODE;
     if (argsMap.containsKey(MODE) && argsMap.get(MODE).length > 0) {
@@ -562,11 +567,20 @@ public abstract class SemgrexPattern implements Serializable  {
     if (argsMap.containsKey(CONLLU_FILE) && argsMap.get(CONLLU_FILE).length > 0) {
       try {
         CoNLLUReader reader = new CoNLLUReader();
-        for (String conlluFile : argsMap.get(CONLLU_FILE)) {
-          log.info("Loading file " + conlluFile);
-          List<Annotation> docs = reader.readCoNLLUFile(conlluFile);
-          for (Annotation doc : docs) {
-            sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
+        for (String conlluPath : argsMap.get(CONLLU_FILE)) {
+          File file = new File(conlluPath);
+          List<File> filenames;
+          if (file.isFile()) {
+            filenames = Collections.singletonList(file);
+          } else {
+            filenames = Arrays.asList(file.listFiles());
+          }
+          for (File conlluFile : filenames) {
+            log.info("Loading file " + conlluFile);
+            List<Annotation> docs = reader.readCoNLLUFile(conlluFile.toString());
+            for (Annotation doc : docs) {
+              sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
+            }
           }
         }
       } catch (ClassNotFoundException e) {
