@@ -3,7 +3,9 @@ package edu.stanford.nlp.semgraph.semgrex;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,7 +15,11 @@ import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
+import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 
@@ -1440,6 +1446,40 @@ public class SemgrexTest extends TestCase {
             "ate/VBD");
     runTest(pattern,
             "[ate/VBD subj>Billz/NNP obj>[muffins compound>strawberry]]");
+  }
+
+  /**
+   * A simple test of the batch search - should return 3 of the 4 sentences
+   */
+  public void testBatchSearch() {
+    String[] parses = {
+      "[foo-1 nmod> bar-2]",
+      "[foo-1 obj> bar-2]",
+      "[bar-1 compound> baz-2]",
+      "[foo-1 nmod> baz-2 obj> bar-3]",
+    };
+    List<CoreMap> sentences = new ArrayList<>();
+    for (String parse : parses) {
+      SemanticGraph graph = SemanticGraph.valueOf(parse);
+      CoreMap sentence = new ArrayCoreMap();
+      sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
+      sentence.set(CoreAnnotations.TextAnnotation.class, parse);
+      sentences.add(sentence);
+    }
+
+    SemgrexPattern semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y");
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences);
+    String[] expectedMatches = {
+      parses[0],
+      parses[1],
+      parses[3],
+    };
+    int[] expectedCount = {1, 1, 2};
+    assertEquals(expectedMatches.length, matches.size());
+    for (int i = 0; i < expectedMatches.length; ++i) {
+      assertEquals(expectedMatches[i], matches.get(i).first().get(CoreAnnotations.TextAnnotation.class));
+      assertEquals(expectedCount[i], matches.get(i).second().size());
+    }
   }
 
   public static void outputResults(String pattern, String graph,
