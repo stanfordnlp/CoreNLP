@@ -66,47 +66,67 @@ public class MergeNodes extends SsurgeonEdit {
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    List<IndexedWord> nodes = new ArrayList<>();
+    Set<IndexedWord> nodeSet = new HashSet<>();
     for (String name : names) {
       IndexedWord node = sm.getNode(name);
       if (node == null) {
         return false;
       }
-      nodes.add(node);
+      nodeSet.add(node);
     }
-    Collections.sort(nodes);
 
     IndexedWord head = null;
-    for (IndexedWord candidate : nodes) {
-      if (sg.hasChildren(candidate)) {
-        // if multiple nodes have children inside the graph,
-        // perhaps we could merge them all,
-        // but the easiest thing to do is just abort
-        // TODO: an alternate approach would be to look for nodes with a head
-        // outside the nodes in the phrase to merge
+    for (IndexedWord candidate : nodeSet) {
+      Set<IndexedWord> parents = sg.getParents(candidate);
+      if (parents.size() == 0) {
+        // found a root
+        // if something else is already the head,
+        // we don't know how to handle that,
+        // so we abort this operation
         if (head != null) {
           return false;
         }
         head = candidate;
+        continue;
+      }
+      for (IndexedWord parent : parents) {
+        if (nodeSet.contains(parent)) {
+          continue;
+        }
+        // parent is outside this subtree
+        // therefore, we can use this word as the head of the subtree
+        // but if we already have a head, give up instead
+        if (head != null) {
+          return false;
+        }
+        head = candidate;
+        break;
       }
     }
+    if (head == null) {
+      return false;
+    }
+
+    // for now, only allow the head to have edges to children outside the subtree
+    // TODO: instead, could make them all point to the new merged word...
+    // but it's not clear that's a structure we want to allow merged
+    for (IndexedWord candidate : nodeSet) {
+      if (candidate == head) {
+        continue;
+      }
+      for (IndexedWord child : sg.getChildren(candidate)) {
+        if (!nodeSet.contains(child)) {
+          return false;
+        }
+      }
+    }
+    ArrayList<IndexedWord> nodes = new ArrayList<>(nodeSet);
+    Collections.sort(nodes);
 
     Set<Integer> depIndices = new HashSet<Integer>();
     for (IndexedWord other : nodes) {
       if (other == head) {
         continue;
-      }
-      Set<IndexedWord> parents = sg.getParents(other);
-      // this shouldn't happen
-      if (parents.size() == 0) {
-        return false;
-      }
-      // iterate instead of just do the first in case
-      // this one day is doing an graph with extra dependencies
-      for (IndexedWord parent : parents) {
-        if (parent != head) {
-          return false;
-        }
       }
       depIndices.add(other.index());
     }
