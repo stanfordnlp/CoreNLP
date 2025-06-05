@@ -65,6 +65,22 @@ public class SemgrexMatch implements Serializable  {
     return namesToNodes.keySet();
   }
 
+  public Set<String> getRelationNames() {
+    return namesToRelations.keySet();
+  }
+
+  public String getRelnString(String name) {
+    return namesToRelations.get(name);
+  }
+
+  public Set<String> getEdgeNames() {
+    return namesToEdges.keySet();
+  }
+
+  public SemanticGraphEdge getEdge(String name) {
+    return namesToEdges.get(name);
+  }
+
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append(matchedPattern);
