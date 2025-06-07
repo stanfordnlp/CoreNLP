@@ -41,6 +41,10 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2025-06-06   4.5.10     Additional Semgrex / SSurgeon features and
+                        remove patterns/lucene because of security
+                        warning
+
 2025-03-23    4.5.9     Additional Semgrex / SSurgeon features and a
                         security patch recommended for deserialization
 
