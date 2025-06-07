@@ -13,7 +13,7 @@ homepage: true
    <img src="assets/images/corenlp-title.png">
 </p>
 
-[<i class="fab fa-java"></i> Download CoreNLP 4.5.9](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
+[<i class="fab fa-java"></i> Download CoreNLP 4.5.10](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 [<i class="fab fa-github"></i> CoreNLP on GitHub](https://github.com/stanfordnlp/CoreNLP){: .btn .fs-5 .mr-2 .mb-md-0 }
 [CoreNLP on 🤗](https://huggingface.co/stanfordnlp/CoreNLP/tree/main){: .btn .fs-5 .mr-2 .mb-md-0 }
 
@@ -21,7 +21,7 @@ homepage: true
 
 {: .no_toc }
 
-> [**What's new:** The v4.5.3 release adds an Ssurgeon interface](https://stanfordnlp.github.io/CoreNLP/history.html)
+> [**What's new:** The v4.5.3 release adds an Ssurgeon interface](https://stanfordnlp.github.io/CoreNLP/history.html).  4.5.10 removes the patterns package to remove the Lucene dependency, as the latest Java 8 version of Lucene has an unpatched security issue.  If you want the patterns package restored for a later Java 11 release, please [file an issue on github](https://github.com/stanfordnlp/CoreNLP)
 
 ## About
 
@@ -77,32 +77,32 @@ CoreNLP generates a variety of linguistic annotations, including:
 
 ## Quickstart
 
-* Download and unzip [CoreNLP 4.5.9](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9.zip) [(HF Hub)](https://huggingface.co/stanfordnlp/CoreNLP/tree/main)
+* Download and unzip [CoreNLP 4.5.10](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10.zip) [(HF Hub)](https://huggingface.co/stanfordnlp/CoreNLP/tree/main)
 
 * Download model jars for the language you want to work on and move the jars to the distribution directory. Jars are available directly from us, from Maven, and from Hugging Face.
 
 | Language | Model Jar | Version |
 | :------- | :-------- | | :----- |
-| Arabic | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.9/stanford-corenlp-4.5.9-models-arabic.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-arabic.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-arabic/tree/v4.5.9) | 4.5.9 |
-| Chinese | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.9/stanford-corenlp-4.5.9-models-chinese.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-chinese.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-chinese/tree/v4.5.9) | 4.5.9 |
-| English (extra) | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.9/stanford-corenlp-4.5.9-models-english.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-english.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-extra/tree/v4.5.9) | 4.5.9 |
-| English (KBP) | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.9/stanford-corenlp-4.5.9-models-english-kbp.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-english-kbp.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-kbp/tree/v4.5.9) | 4.5.9 |
-| French | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.9/stanford-corenlp-4.5.9-models-french.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-french.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-french/tree/v4.5.9) | 4.5.9 |
-| German | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.9/stanford-corenlp-4.5.9-models-german.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-german.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-german/tree/v4.5.9) | 4.5.9 |
-| Hungarian | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.9/stanford-corenlp-4.5.9-models-hungarian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-hungarian.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-hungarian/tree/v4.5.9) | 4.5.9 |
-| Italian | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.9/stanford-corenlp-4.5.9-models-italian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-italian.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-italian/tree/v4.5.9) | 4.5.9 |
-| Spanish | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.9/stanford-corenlp-4.5.9-models-spanish.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.9-models-spanish.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-spanish/tree/v4.5.9) | 4.5.9 |
+| Arabic | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.10/stanford-corenlp-4.5.10-models-arabic.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10-models-arabic.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-arabic/tree/v4.5.10) | 4.5.10 |
+| Chinese | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.10/stanford-corenlp-4.5.10-models-chinese.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10-models-chinese.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-chinese/tree/v4.5.10) | 4.5.10 |
+| English (extra) | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.10/stanford-corenlp-4.5.10-models-english.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10-models-english.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-extra/tree/v4.5.10) | 4.5.10 |
+| English (KBP) | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.10/stanford-corenlp-4.5.10-models-english-kbp.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10-models-english-kbp.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-kbp/tree/v4.5.10) | 4.5.10 |
+| French | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.10/stanford-corenlp-4.5.10-models-french.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10-models-french.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-french/tree/v4.5.10) | 4.5.10 |
+| German | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.10/stanford-corenlp-4.5.10-models-german.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10-models-german.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-german/tree/v4.5.10) | 4.5.10 |
+| Hungarian | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.10/stanford-corenlp-4.5.10-models-hungarian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10-models-hungarian.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-hungarian/tree/v4.5.10) | 4.5.10 |
+| Italian | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.10/stanford-corenlp-4.5.10-models-italian.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10-models-italian.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-italian/tree/v4.5.10) | 4.5.10 |
+| Spanish | [download](https://search.maven.org/remotecontent?filepath=edu/stanford/nlp/stanford-corenlp/4.5.10/stanford-corenlp-4.5.10-models-spanish.jar) [(mirror)](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10-models-spanish.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-spanish/tree/v4.5.10) | 4.5.10 |
 
 Thank you to [HuggingFace](https://huggingface.co/) for helping with our hosting!
 
 ```bash
-mv /path/to/stanford-corenlp-4.5.9-models-french.jar /path/to/stanford-corenlp-4.5.9
+mv /path/to/stanford-corenlp-4.5.10-models-french.jar /path/to/stanford-corenlp-4.5.10
 ```
 
 * Include the distribution directory in your CLASSPATH.
 
 ```bash
-export CLASSPATH=$CLASSPATH:/path/to/stanford-corenlp-4.5.9/*:
+export CLASSPATH=$CLASSPATH:/path/to/stanford-corenlp-4.5.10/*:
 ```
 
 * You're ready to go! There are many ways to run a CoreNLP pipeline. For instance here's how to run a pipeline on a text file.
