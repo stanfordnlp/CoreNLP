@@ -95,9 +95,15 @@ public class MergeNodes extends SsurgeonEdit {
         }
         // parent is outside this subtree
         // therefore, we can use this word as the head of the subtree
-        // but if we already have a head, give up instead
         if (head != null) {
-          return false;
+          if (parents.equals(sg.getParents(head))) {
+            // if the parents of the other node are the same, we can keep going
+            // since the nodes are about to merge anyway
+            break;
+          } else {
+            // if we already have a head with different parents, give up instead
+            return false;
+          }
         }
         head = candidate;
         break;
