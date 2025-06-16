@@ -15,6 +15,8 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.util.Pair;
 
 /**
  * Combines two words into one word
@@ -61,6 +63,31 @@ public class MergeNodes extends SsurgeonEdit {
   }
 
   /**
+   * Test if two nodes have the same parents with the same relations.
+   * If so, then the two nodes can be treated as equivalent when merging nodes.
+   * Otherwise, since there are two different heads, we can't pick a node
+   * to treat as the head of the phrase, and we will have to abort
+   */
+  public static boolean hasSameParents(SemanticGraph sg, IndexedWord head, IndexedWord candidate, Set<IndexedWord> ignoreNodes) {
+    Set<Pair<IndexedWord, GrammaticalRelation>> headParents = new HashSet<>();
+    Set<Pair<IndexedWord, GrammaticalRelation>> candidateParents = new HashSet<>();
+
+    for (SemanticGraphEdge edge : sg.incomingEdgeIterable(head)) {
+      // iterating all parents is relevant for enhanced graphs, for example
+      if (ignoreNodes.contains(edge.getGovernor()))
+        continue;
+      headParents.add(new Pair<>(edge.getGovernor(), edge.getRelation()));
+    }
+    for (SemanticGraphEdge edge : sg.incomingEdgeIterable(candidate)) {
+      // iterating all parents is relevant for enhanced graphs, for example
+      if (ignoreNodes.contains(edge.getGovernor()))
+        continue;
+      candidateParents.add(new Pair<>(edge.getGovernor(), edge.getRelation()));
+    }
+    return headParents.equals(candidateParents);
+  }
+
+  /**
    * If the named nodes are next to each other, and the edges of
    * the graph allow for it, squish those words into one word
    */
@@ -76,6 +103,12 @@ public class MergeNodes extends SsurgeonEdit {
     }
 
     IndexedWord head = null;
+    // Words who share the same parents will go in this set
+    // Therefore, we can later remap any edges going to that word
+    // to point to the chosen head instead
+    // This will let us process phrases where two words could have
+    // been the head and both have edges coming in to them
+    Set<IndexedWord> equivalentHeads = new HashSet<>();
     for (IndexedWord candidate : nodeSet) {
       Set<IndexedWord> parents = sg.getParents(candidate);
       if (parents.size() == 0) {
@@ -96,9 +129,10 @@ public class MergeNodes extends SsurgeonEdit {
         // parent is outside this subtree
         // therefore, we can use this word as the head of the subtree
         if (head != null) {
-          if (parents.equals(sg.getParents(head))) {
-            // if the parents of the other node are the same, we can keep going
+          if (hasSameParents(sg, head, candidate, nodeSet)) {
+            // if the parents *and relations* of the other node are the same, we can keep going
             // since the nodes are about to merge anyway
+            equivalentHeads.add(candidate);
             break;
           } else {
             // if we already have a head with different parents, give up instead
@@ -114,18 +148,36 @@ public class MergeNodes extends SsurgeonEdit {
     }
 
     // for now, only allow the head to have edges to children outside the subtree
-    // TODO: instead, could make them all point to the new merged word...
-    // but it's not clear that's a structure we want to allow merged
+    // also, words with the same parents as the new head can have outgoing edges
+    // TODO: not clear we want to allow other words with different
+    // heads to be merged in this manner
+    List<SemanticGraphEdge> reattachEdges = new ArrayList<>();
     for (IndexedWord candidate : nodeSet) {
       if (candidate == head) {
         continue;
       }
-      for (IndexedWord child : sg.getChildren(candidate)) {
-        if (!nodeSet.contains(child)) {
-          return false;
+      for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(candidate)) {
+        IndexedWord gov = edge.getGovernor();
+        if (gov != candidate) {
+          throw new AssertionError();
+        }
+        IndexedWord dep = edge.getDependent();
+        if (!nodeSet.contains(dep)) {
+          if (equivalentHeads.contains(candidate)) {
+            reattachEdges.add(edge);
+          } else {
+            return false;
+          }
         }
       }
     }
+
+    // at this point, everything checks out and we can start manipulating the graph
+    // we will start by reattaching incoming edges to the chosen head
+    for (SemanticGraphEdge edge : reattachEdges) {
+      ReattachNamedEdge.reattachEdge(sg, sm, edge, null, head, edge.getDependent());
+    }
+
     ArrayList<IndexedWord> nodes = new ArrayList<>(nodeSet);
     Collections.sort(nodes);
 

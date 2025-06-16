@@ -59,6 +59,45 @@ public class ReattachNamedEdge extends SsurgeonEdit {
     return buf.toString();
   }
 
+  public static boolean reattachEdge(SemanticGraph sg, SemgrexMatcher sm,
+                                     SemanticGraphEdge edge, String edgeName, IndexedWord gov, IndexedWord dep) {
+    if (gov == edge.getSource() && dep == edge.getTarget()) {
+      // we were asked to point the edge to the same nodes it already pointed to
+      // nothing to do
+      return false;
+    }
+    boolean success = sg.removeEdge(edge);
+    if (!success) {
+      // maybe it was already removed somehow by a previous operation
+      return false;
+    }
+    final SemanticGraphEdge newEdge;
+    found: {
+      for (SemanticGraphEdge existingEdge : sg.getAllEdges(edge.getSource(), edge.getTarget())) {
+        if (existingEdge.getRelation().equals(edge.getRelation())) {
+          newEdge = existingEdge;
+          break found;
+        }
+      }
+      newEdge = new SemanticGraphEdge(gov,
+                                      dep,
+                                      edge.getRelation(),
+                                      edge.getWeight(),
+                                      edge.isExtra());
+      sg.addEdge(newEdge);
+    }
+    // whether we recreated a new edge with the new relation,
+    // or found an existing edge with the relation we wanted,
+    // update the named edge in the SemgrexMatcher so future
+    // iterations have the name connected to the edge
+    // TODO: if an existing edge was clobbered, perhaps we need to
+    // update anything that named it
+    if (edgeName != null) {
+      sm.putNamedEdge(edgeName, newEdge);
+    }
+    return true;
+  }
+
   /**
    * "Reattach" the named edge by removing it and then recreating it with the new gov and/or dep
    */
@@ -69,39 +108,7 @@ public class ReattachNamedEdge extends SsurgeonEdit {
     if (edge != null) {
       final IndexedWord gov = (govNodeName != null) ? sm.getNode(govNodeName) : edge.getSource();
       final IndexedWord dep = (depNodeName != null) ? sm.getNode(depNodeName) : edge.getTarget();
-      if (gov == edge.getSource() && dep == edge.getTarget()) {
-        // we were asked to point the edge to the same nodes it already pointed to
-        // nothing to do
-        return false;
-      }
-      boolean success = sg.removeEdge(edge);
-      if (!success) {
-        // maybe it was already removed somehow by a previous operation
-        return false;
-      }
-      final SemanticGraphEdge newEdge;
-      found: {
-        for (SemanticGraphEdge existingEdge : sg.getAllEdges(edge.getSource(), edge.getTarget())) {
-          if (existingEdge.getRelation().equals(edge.getRelation())) {
-            newEdge = existingEdge;
-            break found;
-          }
-        }
-        newEdge = new SemanticGraphEdge(gov,
-                                        dep,
-                                        edge.getRelation(),
-                                        edge.getWeight(),
-                                        edge.isExtra());
-        sg.addEdge(newEdge);
-      }
-      // whether we recreated a new edge with the new relation,
-      // or found an existing edge with the relation we wanted,
-      // update the named edge in the SemgrexMatcher so future
-      // iterations have the name connected to the edge
-      // TODO: if an existing edge was clobbered, perhaps we need to
-      // update anything that named it
-      sm.putNamedEdge(edgeName, newEdge);
-      return true;
+      return reattachEdge(sg, sm, edge, edgeName, gov, dep);
     }
     return false;
   }

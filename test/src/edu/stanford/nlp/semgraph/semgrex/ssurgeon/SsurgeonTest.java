@@ -1272,6 +1272,59 @@ public class SsurgeonTest {
   }
 
   /**
+   * This test checks some results when there are two candidate head nodes
+   */
+  @Test
+  public void readXMLMergeNodesTwoHeads() {
+    Ssurgeon inst = Ssurgeon.inst();
+
+    String merge = String.join(newline,
+                               "<ssurgeon-pattern-list>",
+                               "  <ssurgeon-pattern>",
+                               "    <uid>38</uid>",
+                               "    <notes>Merge two nodes that should not have been split</notes>",
+                               "    <semgrex>" + XMLUtils.escapeXML("{word:foo}=first . {word:bar}=second") + "</semgrex>",
+                               "    <edit-list>mergeNodes -node first -node second</edit-list>",
+                               "  </ssurgeon-pattern>",
+                               "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern mergeSsurgeon = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[test-1 obj> foo-2 obj> bar-3]");
+    SemanticGraph newSG = mergeSsurgeon.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[test-1 obj> foobar-2]");
+    assertEquals(expected, newSG);
+
+    // this one should not have been edited, since the relations are different
+    sg = SemanticGraph.valueOf("[test-1 obj> foo-2 nsubj> bar-3]");
+    newSG = mergeSsurgeon.iterate(sg).first;
+    assertEquals(sg, newSG);
+
+    // this one should not have been edited, since the heads are different
+    sg = SemanticGraph.valueOf("[test-1 obj> [a-2 det> foo-4] nsubj> [b-3 det> bar-5]]");
+    newSG = mergeSsurgeon.iterate(sg).first;
+    assertEquals(sg, newSG);
+
+    // various configurations of two nodes with the same head and different children
+    // the children in these configurations should all be attached to the new merged node
+    sg = SemanticGraph.valueOf("[test-1 obj> [foo-2 nsubj> baz-4] obj> bar-3]");
+    newSG = mergeSsurgeon.iterate(sg).first;
+    expected = SemanticGraph.valueOf("[test-1 obj> [foobar-2 nsubj> baz-3]]");
+    assertEquals(expected, newSG);
+
+    sg = SemanticGraph.valueOf("[test-1 obj> [foo-2 nsubj> baz-4] obj> [bar-3 det> the-5]]");
+    newSG = mergeSsurgeon.iterate(sg).first;
+    expected = SemanticGraph.valueOf("[test-1 obj> [foobar-2 nsubj> baz-3 det> the-4]]");
+    assertEquals(expected, newSG);
+
+    sg = SemanticGraph.valueOf("[test-1 obj> foo-2 obj> [bar-3 det> the-4]]");
+    newSG = mergeSsurgeon.iterate(sg).first;
+    expected = SemanticGraph.valueOf("[test-1 obj> [foobar-2 det> the-3]]");
+    assertEquals(expected, newSG);
+  }
+
+  /**
    * Test a basic case of two nodes that should be merged
    *<br>
    * The indices should be changed as well
