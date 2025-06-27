@@ -1,50 +1,50 @@
 package edu.stanford.nlp.trees.tregex.gui;
 
-import com.apple.eawt.ApplicationAdapter;
-import com.apple.eawt.ApplicationEvent;
 
+import java.awt.*;
 
 /**
- * Class to load OSX specific settings for TregexGUI.  Made by consulting the Apple sample code
- * for a similar (and identically named) class at http://devworld.apple.com/samplecode/OSXAdapter/index.html.
+ * Class to load macOS-specific settings for TregexGUI.  This was initially written to use the (pre-2014, OS X)
+ * {@code com.apple.eawt.*} library (AppleJavaExtensions.jar), but now uses the Java 9+ methods in
+ * the {@code java.awt.Desktop} class.
+ *
  * @author rafferty
+ * @author Christopher Manning
  *
  */
-public class OSXAdapter extends ApplicationAdapter {
+public class OSXAdapter {
 
   private static OSXAdapter adapter;
-  private static com.apple.eawt.Application app;
+  private static Desktop desktop;
+  private static TregexGUI mainApp;
 
-  private TregexGUI mainApp;
-  
+
   private OSXAdapter (TregexGUI inApp) {
     mainApp = inApp;
   }
   
   // implemented handler methods.  These are basically hooks into existing 
   // functionality from the main app, as if it came over from another platform.
-  @Override
-  public void handleAbout(ApplicationEvent ae) {
+
+  public void handleAbout() {
     if (mainApp != null) {
-      ae.setHandled(true);
+      // ae.setHandled(true);
       mainApp.about();
     } else {
       throw new IllegalStateException("handleAbout: TregexGUI instance detached from listener");
     }
   }
   
-  @Override
-  public void handlePreferences(ApplicationEvent ae) {
+  public void handlePreferences() {
     if (mainApp != null) {
       mainApp.doPreferences();
-      ae.setHandled(true);
+      // ae.setHandled(true);
     } else {
       throw new IllegalStateException("handlePreferences: TregexGUI instance detached from listener");
     }
   }
   
-  @Override
-  public void handleQuit(ApplicationEvent ae) {
+  public void handleQuit() {
     if (mainApp != null) {
       /*  
       / You MUST setHandled(false) if you want to delay or cancel the quit.
@@ -53,35 +53,38 @@ public class OSXAdapter extends ApplicationAdapter {
       / on all platforms.  This example simply cancels the AppleEvent-based quit and
       / defers to that universal method.
       */
-      ae.setHandled(false);
+      // ae.setHandled(false);
       TregexGUI.doQuit();
     } else {
       throw new IllegalStateException("handleQuit: TregexGUI instance detached from listener");
     }
   }
   
-  
-  // The main entry-point for this functionality.  This is the only method
-  // that needs to be called at runtime, and it can easily be done using
-  // reflection (see MyApp.java) 
-  public static void registerMacOSXApplication(TregexGUI inApp) {
-    if (app == null) {
-      app = new com.apple.eawt.Application();
-    }     
+
+  /** The main method for this macOS-specific functionality. */
+  public static void registerMacOSApplication(TregexGUI inApp) {
+    System.setProperty( "apple.laf.useScreenMenuBar", "true" );
+    System.setProperty( "apple.awt.application.name", "TregexGUI" );
+    System.setProperty( "apple.awt.application.appearance", "system" );
+    // if (app == null) {
+    //   app = new com.apple.eawt.Application();
+    // }
     
     if (adapter == null) {
       adapter = new OSXAdapter(inApp);
     }
-    app.addApplicationListener(adapter);
+    // app.addApplicationListener(adapter);
   }
   
   // Another static entry point for EAWT functionality.  Enables the 
   // "Preferences..." menu item in the application menu. 
   public static void enablePrefs(boolean enabled) {
-    if (app == null) {
-      app = new com.apple.eawt.Application();
-    }
-    app.setEnabledPreferencesMenu(enabled);
+    System.setProperty( "apple.laf.useScreenMenuBar", "true" );
+    System.setProperty( "apple.awt.application.name", "TregexGUI" );
+    // if (app == null) {
+    //   app = new com.apple.eawt.Application();
+    // }
+    // app.setEnabledPreferencesMenu(enabled);
   }
 
 }
