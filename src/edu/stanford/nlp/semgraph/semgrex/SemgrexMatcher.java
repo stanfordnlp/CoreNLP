@@ -77,6 +77,7 @@ public abstract class SemgrexMatcher  {
     namesToNodes.clear();
     namesToRelations.clear();
     namesToEdges.clear();
+    variableStrings.reset();
   }
 
   /**

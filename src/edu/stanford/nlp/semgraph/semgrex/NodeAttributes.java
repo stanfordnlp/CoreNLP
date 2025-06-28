@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Quadruple;
-import edu.stanford.nlp.util.Triple;
 
 /**
  * Stores attributes for a Semgrex NodePattern.
@@ -25,7 +25,7 @@ public class NodeAttributes {
   private boolean root;
   private boolean empty;
   // String, String, Boolean: key, value, negated
-  private List<Triple<String, String, Boolean>> attributes;
+  private List<Quadruple<String, String, Boolean, List<Pair<Integer, String>>>> attributes;
   private Set<String> positiveAttributes;
   // Some annotations, especially morpho freatures (CoreAnnotations.CoNLLUFeats)
   // are represented by Maps.  In some cases it will be easier to search
@@ -59,21 +59,21 @@ public class NodeAttributes {
     return empty;
   }
 
-  public void setAttribute(String key, String value, boolean negated) {
+  public void setAttribute(String key, String value, boolean negated, List<Pair<Integer, String>> varGroups) {
     if (!negated) {
       if (positiveAttributes.contains(key)) {
         throw new SemgrexParseException("Duplicate attribute " + key + " found in semgrex expression");
       }
       positiveAttributes.add(key);
     }
-    attributes.add(new Triple(key, value, negated));
+    attributes.add(new Quadruple<>(key, value, negated, varGroups));
   }
 
   public void addContains(String annotation, String key, String value, Boolean negated) {
     contains.add(new Quadruple(annotation, key, value, negated));
   }
 
-  public List<Triple<String, String, Boolean>> attributes() {
+  public List<Quadruple<String, String, Boolean, List<Pair<Integer, String>>>> attributes() {
     return Collections.unmodifiableList(attributes);
   }
 

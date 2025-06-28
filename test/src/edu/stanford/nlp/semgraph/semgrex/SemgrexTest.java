@@ -5,9 +5,12 @@ import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -1567,6 +1570,65 @@ public class SemgrexTest extends TestCase {
     assertEquals(1, matches.get(1).second().size());
     assertEquals(BATCH_PARSES[3], matches.get(2).first().get(CoreAnnotations.TextAnnotation.class));
     assertEquals(1, matches.get(2).second().size());
+  }
+
+  public void testRegexVariableGroups() {
+    // first, a basic test that it is capturing the variable groups correctly
+    SemgrexPattern pattern = SemgrexPattern.compile("{word:/(.*ill.*)/#1%name}");
+    SemanticGraph graph = SemanticGraph.valueOf("[ate-2 subj> Bill-1 obj>[muffins-6 compound> Blueberry-3 compound> Flueberry-4 compound> filled-5]]");
+    Set<String> matches = new HashSet<>();
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    while (matcher.find()) {
+      // TODO: check the size of the variableStrings here
+      assertNotNull(matcher.variableStrings.getString("name"));
+      matches.add(matcher.variableStrings.getString("name"));
+    }
+    Set<String> expectedMatches = Stream.of("Bill", "filled").collect(Collectors.toCollection(HashSet::new));
+    assertEquals(expectedMatches, matches);
+
+    // test a basic use case of a single variable string matching
+    pattern = SemgrexPattern.compile("{word:/(.*)ill/#1%name} .. {word:/(.*)lueberry/#1%name}");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("B", matcher.variableStrings.getString("name"));
+    // this should not match Flueberry
+    assertFalse(matcher.find());
+
+    // this time, because the variable names are different,
+    // both Blueberry and Flueberry should match
+    pattern = SemgrexPattern.compile("{word:/(.*)ill/#1%name} .. {word:/(.*)lueberry/#1%letter}");
+    matcher = pattern.matcher(graph);
+    matches.clear();
+    assertTrue(matcher.find());
+    assertEquals("B", matcher.variableStrings.getString("name"));
+    assertNotNull(matcher.variableStrings.getString("letter"));
+    matches.add(matcher.variableStrings.getString("letter"));
+    assertTrue(matcher.find());
+    assertEquals("B", matcher.variableStrings.getString("name"));
+    assertNotNull(matcher.variableStrings.getString("letter"));
+    matches.add(matcher.variableStrings.getString("letter"));
+    assertFalse(matcher.find());
+    expectedMatches = Stream.of("B", "F").collect(Collectors.toCollection(HashSet::new));
+    assertEquals(expectedMatches, matches);
+  }
+
+  public void testExactVariableGroups() {
+    SemgrexPattern pattern = SemgrexPattern.compile("{word:__#1%name} .. {word:__#1%name}");
+    SemanticGraph graph = SemanticGraph.valueOf("[ate-2 subj> Bill-1 obj>[muffins-6 compound> Blueberry-3 compound> Bill-4 compound> filled-5]]");
+
+    // This should match exactly once, for Bill & Bill
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("Bill", matcher.variableStrings.getString("name"));
+    assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{word:Bill#1%name} .. {word:__#1%name}");
+
+    // This should match exactly once, for Bill & Bill
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("Bill", matcher.variableStrings.getString("name"));
+    assertFalse(matcher.find());
   }
 
   public static void outputBatchResults(SemgrexPattern pattern, List<CoreMap> sentences) {

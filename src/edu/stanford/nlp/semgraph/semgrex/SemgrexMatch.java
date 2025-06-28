@@ -81,6 +81,10 @@ public class SemgrexMatch implements Serializable  {
     return namesToEdges.get(name);
   }
 
+  public String getVariableString(String var) {
+    return variableStrings.getString(var);
+  }
+
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append(matchedPattern);

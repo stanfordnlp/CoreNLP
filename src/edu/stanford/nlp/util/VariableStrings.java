@@ -41,11 +41,39 @@ public class VariableStrings {
     numVarsSet.incrementCount(var);
   }
 
+  public void setVars(VariableStrings other) {
+    for (String var : other.numVarsSet.keySet()) {
+      int count = other.numVarsSet.getIntCount(var);
+      if (count <= 0) {
+        continue;
+      }
+      String newString = other.varsToStrings.get(var);
+      String oldString = varsToStrings.put(var, newString);
+      if (oldString != null && !oldString.equals(newString)) {
+        throw new RuntimeException("Error -- can't setVars to a different string -- old: " + oldString + " new: " + newString);
+      }
+      numVarsSet.incrementCount(var, count);
+    }
+  }
+
   public void unsetVar(String var) {
     if(numVarsSet.getCount(var) > 0)
       numVarsSet.decrementCount(var);
     if(numVarsSet.getCount(var)==0)
       varsToStrings.put(var,null);
+  }
+
+  public void unsetVars(VariableStrings other) {
+    for (String var : other.numVarsSet.keySet()) {
+      int count = other.numVarsSet.getIntCount(var);
+      if (count <= 0) {
+        continue;
+      }
+      int newCount = numVarsSet.decrementCount(var, count);
+      if (newCount <= 0) {
+        varsToStrings.put(var, null);
+      }
+    }
   }
 
   public String getString(String var) {

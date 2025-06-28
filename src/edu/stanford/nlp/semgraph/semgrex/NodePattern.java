@@ -47,20 +47,9 @@ public class NodePattern extends SemgrexPattern  {
   private final String name;
   private String descString;
   SemgrexPattern child;
-  // specifies the groups in a regex that are captured as
-  // matcher-global string variables
-  private List<Pair<Integer, String>> variableGroups;
 
   public NodePattern(GraphRelation r, boolean negDesc,
                      NodeAttributes attrs, boolean isLink, String name) {
-    this(r, negDesc, attrs, isLink, name,
-            new ArrayList<>(0));
-  }
-
-  // TODO: there is no capacity for named variable groups in the parser right now
-  public NodePattern(GraphRelation r, boolean negDesc,
-                     NodeAttributes attrs, boolean isLink, String name,
-                     List<Pair<Integer, String>> variableGroups) {
     this.reln = r;
     this.negDesc = negDesc;
     this.isLink = isLink;
@@ -72,20 +61,21 @@ public class NodePattern extends SemgrexPattern  {
     this.regexPartialAttributes = new ArrayList<>();
 
     descString = "{";
-    for (Triple<String, String, Boolean> entry : attrs.attributes()) {
+    for (Quadruple<String, String, Boolean, List<Pair<Integer, String>>> entry : attrs.attributes()) {
       if (!descString.equals("{"))
         descString += ";";
       String key = entry.first();
       String value = entry.second();
       boolean negated = entry.third();
+      List<Pair<Integer, String>> varGroups = entry.fourth();
 
       // Add the attributes for this key
       if (value.equals("__")) {
-        attributes.add(new Attribute(key, true, true, negated));
+        attributes.add(new Attribute(key, true, true, negated, varGroups));
       } else if (value.matches("/.*/")) {
-        attributes.add(buildRegexAttribute(key, value, negated));
+        attributes.add(buildRegexAttribute(key, value, negated, varGroups));
       } else { // raw description
-        attributes.add(new Attribute(key, value, value, negated));
+        attributes.add(new Attribute(key, value, value, negated, varGroups));
       }
 
       if (negated) {
@@ -100,6 +90,8 @@ public class NodePattern extends SemgrexPattern  {
       String key = entry.second();
       String value = entry.third();
       boolean negated = entry.fourth();
+      // TODO: can add varGroups, especially for the regex matches
+      List<Pair<Integer, String>> varGroups = Collections.emptyList();
 
       Class<?> clazz = AnnotationLookup.getValueType(AnnotationLookup.toCoreKey(annotation));
       boolean isMap = clazz != null && Map.class.isAssignableFrom(clazz);
@@ -115,11 +107,11 @@ public class NodePattern extends SemgrexPattern  {
       } else {
         // Add the attributes for this key
         if (value.equals("__")) {
-          attr = new Attribute(key, true, true, negated);
+          attr = new Attribute(key, true, true, negated, varGroups);
         } else if (value.matches("/.*/")) {
-          attr = buildRegexAttribute(key, value, negated);
+          attr = buildRegexAttribute(key, value, negated, varGroups);
         } else { // raw description
-          attr = new Attribute(key, value, value, negated);
+          attr = new Attribute(key, value, value, negated, varGroups);
         }
         partialAttributes.add(new Pair<>(annotation, attr));
       }
@@ -148,15 +140,13 @@ public class NodePattern extends SemgrexPattern  {
     this.child = null;
     this.isRoot = attrs.root();
     this.isEmpty = attrs.empty();
-
-    this.variableGroups = Collections.unmodifiableList(variableGroups);
   }
 
   /**
    * Tests the value to see if it's really a regex, or just a string wrapped in regex.
    * Return an Attribute which matches this expression
    */
-  private Attribute buildRegexAttribute(String key, String value, boolean negated) {
+  private Attribute buildRegexAttribute(String key, String value, boolean negated, List<Pair<Integer, String>> varGroups) {
     boolean isRegexp = false;
     for (int i = 1; i < value.length() - 1; ++i) {
       char chr = value.charAt(i);
@@ -170,13 +160,29 @@ public class NodePattern extends SemgrexPattern  {
       return new Attribute(key,
                            Pattern.compile(patternContent),
                            Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE),
-                           negated);
+                           negated, varGroups);
     } else {
-      return new Attribute(key, patternContent, patternContent, negated);
+      return new Attribute(key, patternContent, patternContent, negated, varGroups);
     }
   }
 
-  private boolean checkMatch(Attribute attr, boolean ignoreCase, String nodeValue) {
+  private static boolean checkVarMatch(String key, String matchedString,
+                                       VariableStrings variableStrings, VariableStrings tempVariableStrings) {
+    String existingString = variableStrings.getString(key);
+    if (existingString == null) {
+      existingString = tempVariableStrings.getString(key);
+    }
+    if (existingString != null && !existingString.equals(matchedString)) {
+      return false;
+    }
+    if (matchedString != null) {
+      tempVariableStrings.setVar(key, matchedString);
+    }
+    return true;
+  }
+
+  private boolean checkMatch(Attribute attr, boolean ignoreCase, String nodeValue,
+                             VariableStrings variableStrings, VariableStrings tempVariableStrings) {
     if (nodeValue == null) {
       // treat non-existent attributes has having matched a negated expression
       // so for example, `cpos!:NUM` matches not having a cpos at all
@@ -188,14 +194,51 @@ public class NodePattern extends SemgrexPattern  {
     boolean matches;
     if (toMatch instanceof Boolean) {
       matches = ((Boolean) toMatch);
+
+      if (matches) {
+        for (Pair<Integer, String> varGroup : attr.variableGroups) {
+          // TODO possibly a bug here - it is not honoring ignoreCase
+          String matchedString = nodeValue;
+          String key = varGroup.second();
+          if (!checkVarMatch(key, matchedString, variableStrings, tempVariableStrings)) {
+            matches = false;
+            break;
+          }
+        }
+      }
     } else if (toMatch instanceof String) {
       if (ignoreCase) {
         matches = nodeValue.equalsIgnoreCase(toMatch.toString());
       } else {
         matches = nodeValue.equals(toMatch.toString());
       }
+
+      if (matches) {
+        for (Pair<Integer, String> varGroup : attr.variableGroups) {
+          // TODO possibly a bug here - it is not honoring ignoreCase
+          String matchedString = nodeValue;
+          String key = varGroup.second();
+          if (!checkVarMatch(key, matchedString, variableStrings, tempVariableStrings)) {
+            matches = false;
+            break;
+          }
+        }
+      }
     } else if (toMatch instanceof Pattern) {
-      matches = ((Pattern) toMatch).matcher(nodeValue).matches();
+      Matcher matcher = ((Pattern) toMatch).matcher(nodeValue);
+      if (matcher.matches()) {
+        matches = true;
+        for (Pair<Integer, String> varGroup : attr.variableGroups) {
+          String matchedString = matcher.group(varGroup.first());
+          String key = varGroup.second();
+          if (!checkVarMatch(key, matchedString, variableStrings, tempVariableStrings)) {
+            matches = false;
+            break;
+          }
+        }
+      } else {
+        matches = false;
+      }
     } else {
       throw new IllegalStateException("Unknown matcher type: " + toMatch + " (of class + " + toMatch.getClass() + ")");
     }
@@ -206,7 +249,8 @@ public class NodePattern extends SemgrexPattern  {
   }
 
   @SuppressWarnings("unchecked")
-  public boolean nodeAttrMatch(IndexedWord node, final SemanticGraph sg, boolean ignoreCase) {
+  public boolean nodeAttrMatch(IndexedWord node, final SemanticGraph sg, boolean ignoreCase,
+                               VariableStrings variableStrings, VariableStrings tempVariableStrings) {
     // System.out.println(node.word());
     if (isRoot) {
       // System.out.println("checking root");
@@ -240,7 +284,8 @@ public class NodePattern extends SemgrexPattern  {
       // }
       // System.out.println(nodeValue);
 
-      boolean matches = checkMatch(attr, ignoreCase, nodeValue);
+      boolean matches = checkMatch(attr, ignoreCase, nodeValue, variableStrings, tempVariableStrings);
+
       if (!matches) {
         // System.out.println("doesn't match");
         // System.out.println("");
@@ -266,7 +311,8 @@ public class NodePattern extends SemgrexPattern  {
         nodeValue = (value == null) ? null : value.toString();
       }
 
-      boolean matches = checkMatch(attr, ignoreCase, nodeValue);
+      // TODO: not connected to varGroups yet
+      boolean matches = checkMatch(attr, ignoreCase, nodeValue, variableStrings, tempVariableStrings);
       if (!matches) {
         return negDesc;
       }
@@ -282,6 +328,7 @@ public class NodePattern extends SemgrexPattern  {
           throw new RuntimeException("Can only use partial attributes with Maps... this should have been checked at creation time!");
         map = (Map) rawmap;
       }
+      // TODO: check varGroups here
       boolean matches = partialAttribute.checkMatches(map, ignoreCase);
       if (!matches) {
         return negDesc;
@@ -411,6 +458,7 @@ public class NodePattern extends SemgrexPattern  {
     private SemgrexMatcher childMatcher;
     private boolean matchedOnce = false;
     private boolean committedVariables = false;
+    private VariableStrings localVariableStrings = null;
 
     private String nextMatchReln = null;
     private SemanticGraphEdge nextMatchEdge = null;
@@ -420,7 +468,7 @@ public class NodePattern extends SemgrexPattern  {
     private boolean relnNamedFirst = false;
     private boolean edgeNamedFirst = false;
 
-    private boolean ignoreCase = false;
+    private final boolean ignoreCase;
 
     // universal: childMatcher is null if and only if
     // myNode.child == null OR resetChild has never been called
@@ -477,7 +525,8 @@ public class NodePattern extends SemgrexPattern  {
       decommitNamedNodes();
       decommitNamedRelations();
       finished = true;
-      Matcher m = null;
+      VariableStrings tempVariableStrings = new VariableStrings();
+
       while (nodeMatchCandidateIterator.hasNext()) {
         if (myNode.reln.getName() != null) {
           String foundReln = namesToRelations.get(myNode.reln.getName());
@@ -517,21 +566,8 @@ public class NodePattern extends SemgrexPattern  {
           } else {
             boolean found = myNode.nodeAttrMatch(nextMatch,
                                                  hyp ? sg : sg_aligned,
-                                                 ignoreCase);
+                                                 ignoreCase, variableStrings, tempVariableStrings);
             if (found) {
-              for (Pair<Integer, String> varGroup : myNode.variableGroups) {
-                // if variables have been captured from a regex, they
-                // must match any previous matchings
-                String thisVariable = varGroup.second();
-                String thisVarString = variableStrings.getString(thisVariable);
-                if (thisVarString != null &&
-                    !thisVarString.equals(m.group(varGroup.first()))) {
-                  // failed to match a variable
-                  found = false;
-                  break;
-                }
-              }
-
               // nodeAttrMatch already checks negDesc, so no need to
               // check for that here
               finished = false;
@@ -541,21 +577,8 @@ public class NodePattern extends SemgrexPattern  {
         } else { // try to match the description pattern.
           boolean found = myNode.nodeAttrMatch(nextMatch,
                                                hyp ? sg : sg_aligned,
-                                               ignoreCase);
+                                               ignoreCase, variableStrings, tempVariableStrings);
           if (found) {
-            for (Pair<Integer, String> varGroup : myNode.variableGroups) {
-              // if variables have been captured from a regex, they
-              // must match any previous matchings
-              String thisVariable = varGroup.second();
-              String thisVarString = variableStrings.getString(thisVariable);
-              if (thisVarString != null &&
-                  !thisVarString.equals(m.group(varGroup.first()))) {
-                // failed to match a variable
-                found = false;
-                break;
-              }
-            }
-
             // nodeAttrMatch already checks negDesc, so no need to
             // check for that here
             finished = false;
@@ -586,26 +609,23 @@ public class NodePattern extends SemgrexPattern  {
             edgeNamedFirst = true;
           namesToEdges.put(myNode.reln.getEdgeName(), nextMatchEdge);
         }
-        commitVariableGroups(m); // commit my variable groups.
+        commitVariableGroups(tempVariableStrings); // commit my variable groups.
       }
       // finished is false exiting this if and only if nextChild exists
       // and has a label or backreference that matches
       // (also it will just have been reset)
     }
 
-    private void commitVariableGroups(Matcher m) {
+    private void commitVariableGroups(VariableStrings tempVariableStrings) {
       committedVariables = true; // commit all my variable groups.
-      for (Pair<Integer, String> varGroup : myNode.variableGroups) {
-        String thisVarString = m.group(varGroup.first());
-        variableStrings.setVar(varGroup.second(), thisVarString);
-      }
+      localVariableStrings = tempVariableStrings;
+      variableStrings.setVars(tempVariableStrings);
     }
 
     private void decommitVariableGroups() {
       if (committedVariables) {
-        for (Pair<Integer, String> varGroup : myNode.variableGroups) {
-          variableStrings.unsetVar(varGroup.second());
-        }
+        variableStrings.unsetVars(localVariableStrings);
+        localVariableStrings = null;
       }
       committedVariables = false;
     }

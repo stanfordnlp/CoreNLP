@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /** Token Manager. */
@@ -73,6 +74,8 @@ private int jjMoveStringLiteralDfa0_0(){
          return jjStopAtPos(0, 7);
       case 36:
          return jjStartNfaWithStates_0(0, 8, 25);
+      case 37:
+         return jjStopAtPos(0, 25);
       case 38:
          return jjStopAtPos(0, 16);
       case 40:
@@ -83,9 +86,9 @@ private int jjMoveStringLiteralDfa0_0(){
          return jjStopAtPos(0, 21);
       case 58:
          jjmatchedKind = 10;
-         return jjMoveStringLiteralDfa1_0(0x2000800L);
+         return jjMoveStringLiteralDfa1_0(0x4000800L);
       case 59:
-         return jjStopAtPos(0, 26);
+         return jjStopAtPos(0, 27);
       case 61:
          return jjStartNfaWithStates_0(0, 23, 2);
       case 63:
@@ -99,11 +102,11 @@ private int jjMoveStringLiteralDfa0_0(){
       case 117:
          return jjMoveStringLiteralDfa1_0(0x4L);
       case 123:
-         return jjStopAtPos(0, 28);
+         return jjStopAtPos(0, 29);
       case 124:
          return jjStopAtPos(0, 15);
       case 125:
-         return jjStopAtPos(0, 27);
+         return jjStopAtPos(0, 28);
       case 126:
          return jjStopAtPos(0, 22);
       default :
@@ -127,8 +130,8 @@ private int jjMoveStringLiteralDfa1_0(long active0){
       case 110:
          return jjMoveStringLiteralDfa2_0(active0, 0x4L);
       case 123:
-         if ((active0 & 0x2000000L) != 0L)
-            return jjStopAtPos(1, 25);
+         if ((active0 & 0x4000000L) != 0L)
+            return jjStopAtPos(1, 26);
          break;
       default :
          break;
@@ -426,7 +429,7 @@ private int jjMoveNfa_0(int startState, int curPos)
 public static final String[] jjstrLiteralImages = {
 "", null, "\165\156\151\161", null, "\100", null, null, "\43", "\44", null, 
 "\72", "\72\72", "\12", "\50", "\51", "\174", "\46", "\41", "\77", "\133", "\135", 
-"\54", "\176", "\75", "\41\72", "\72\173", "\73", "\175", "\173", };
+"\54", "\176", "\75", "\41\72", "\45", "\72\173", "\73", "\175", "\173", };
 protected Token jjFillToken()
 {
    final Token t;
@@ -663,10 +666,10 @@ public static final String[] lexStateNames = {
 /** Lex State array. */
 public static final int[] jjnewLexState = {
    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
-   -1, -1, -1, -1, 
+   -1, -1, -1, -1, -1, 
 };
 static final long[] jjtoToken = {
-   0x1ffffffdL, 
+   0x3ffffffdL, 
 };
 static final long[] jjtoSkip = {
    0x2L, 

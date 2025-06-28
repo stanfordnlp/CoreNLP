@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
 class SemgrexParser {
@@ -305,14 +306,24 @@ void AddAttribute(NodeAttributes attributes) : {
 	Token value = null;
         Token attrType = null;
         boolean negated = false;
+        Token groupNum;
+        Token groupVar;
+        List<Pair<Integer,String>> varGroups = new ArrayList<Pair<Integer,String>>();
 } {
         (attr = identifier()
-           (( (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>) {
-             if (attr != null && value != null) {
-               negated = attrType.image.equals("!:");
-               attributes.setAttribute(attr.image, value.image, negated);
+           (
+             (( (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>))
+             ( ( ( "#" groupNum = identifier() "%" groupVar = identifier() ) {
+                // TODO: this should have been NUMBER, but that doesn't seem to exist
+                varGroups.add(new Pair<Integer,String>(Integer.parseInt(groupNum.image),groupVar.image));
+              } )* )
+             {
+               if (attr != null && value != null) {
+                 negated = attrType.image.equals("!:");
+                 attributes.setAttribute(attr.image, value.image, negated, varGroups);
+               }
              }
-           }) 
+           )
            |
            ( ":{"
            ((key = identifier() | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>)
