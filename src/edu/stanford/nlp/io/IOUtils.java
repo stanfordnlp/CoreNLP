@@ -405,33 +405,36 @@ public class IOUtils  {
 
   /**
    * Locates a file in the CLASSPATH if it exists.  Checks both the
-   * System classloader and the IOUtils classloader, since we had
+   * current thread context classloader which default to the system class classloader unless the user sets another
+   * classloader explicitly, then we fallaback to the IOUtils classloader, since we had
    * separate users asking for both of those changes.
    */
   private static InputStream findStreamInClassLoader(String name) {
-    InputStream is = ClassLoader.getSystemResourceAsStream(name);
+    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+    InputStream is = contextClassLoader.getResourceAsStream(name);
     if (is != null)
       return is;
 
     // windows File.separator is \, but getting resources only works with /
-    is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/"));
+    is = contextClassLoader.getResourceAsStream(name.replaceAll("\\\\", "/"));
     if (is != null)
       return is;
 
     // Classpath doesn't like double slashes (e.g., /home/user//foo.txt)
-    is = ClassLoader.getSystemResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
+    is = contextClassLoader.getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
     if (is != null)
       return is;
 
-    is = IOUtils.class.getClassLoader().getResourceAsStream(name);
+    ClassLoader fallbackClassLoader = IOUtils.class.getClassLoader();
+    is = fallbackClassLoader.getResourceAsStream(name);
     if (is != null)
       return is;
 
-    is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
+    is = fallbackClassLoader.getResourceAsStream(name.replaceAll("\\\\", "/"));
     if (is != null)
       return is;
 
-    is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
+    is = fallbackClassLoader.getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
     // at this point we've tried everything
     return is;
   }
