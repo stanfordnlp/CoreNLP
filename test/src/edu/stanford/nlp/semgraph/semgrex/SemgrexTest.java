@@ -1,7 +1,8 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
+import org.junit.Test;
+import static org.junit.Assert.*;
 import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +31,9 @@ import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 /**
  * @author John Bauer
  */
-public class SemgrexTest extends TestCase {
+public class SemgrexTest {
 
+  @Test
   public void testMatchAll() {
     SemanticGraph graph =
       SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
@@ -46,38 +48,28 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.findNextMatchingNode());
   }
 
+  @Test
   public void testTest() {
     runTest("{}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
             "ate", "Bill", "muffins", "blueberry");
 
-    try {
+    assertThrows(AssertionFailedError.class, () ->
       runTest("{}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
-              "ate", "Bill", "muffins", "foo");
-      throw new RuntimeException();
-    } catch (AssertionFailedError e) {
-      // yay
-    }
+              "ate", "Bill", "muffins", "foo"));
 
-    try {
+    assertThrows(AssertionFailedError.class, () ->
       runTest("{}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
-              "ate", "Bill", "muffins");
-      throw new RuntimeException();
-    } catch (AssertionFailedError e) {
-      // yay
-    }
+              "ate", "Bill", "muffins"));
 
-    try {
+    assertThrows(AssertionFailedError.class, () ->
       runTest("{}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
-              "ate", "Bill", "muffins", "blueberry", "blueberry");
-      throw new RuntimeException();
-    } catch (AssertionFailedError e) {
-      // yay
-    }
+              "ate", "Bill", "muffins", "blueberry", "blueberry"));
   }
 
   /**
    * This also tests negated node matches
    */
+  @Test
   public void testWordMatch() {
     runTest("{word:Bill}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
             "Bill");
@@ -114,6 +106,7 @@ public class SemgrexTest extends TestCase {
             "Bill", "muffins", "blueberry", "blueberry");
   }
 
+  @Test
   public void testSimpleDependency() {
     // blueberry has two ancestors
     runTest("{} << {}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
@@ -127,6 +120,7 @@ public class SemgrexTest extends TestCase {
             "ate", "ate", "muffins");
   }
 
+  @Test
   public void testConnected() {
     // the root should connect to all its children
     runTest("{} <> {word:ate}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
@@ -139,6 +133,7 @@ public class SemgrexTest extends TestCase {
             "muffins");
   }
 
+  @Test
   public void testMultipleAttributes() {
     runTest("{} >> {word:Bill}",
             "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]",
@@ -162,6 +157,7 @@ public class SemgrexTest extends TestCase {
             "[ate subj>Bill/NNP obj>[muffins compound>blueberry]]");
   }
 
+  @Test
   public void testNamedDependency() {
     runTest("{} << {word:ate}",
             "[ate subj>Bill obj>[muffins compound>blueberry]]",
@@ -183,6 +179,7 @@ public class SemgrexTest extends TestCase {
             "ate");
   }
 
+  @Test
   public void testNamedGovernor() {
     runTest("{word:blueberry} << {}",
             "[ate subj>Bill obj>[muffins compound>blueberry]]",
@@ -204,6 +201,7 @@ public class SemgrexTest extends TestCase {
             "muffins");
   }
 
+  @Test
   public void testTwoDependencies() {
     runTest("{} >> ({} >> {})",
             "[ate subj>Bill obj>[muffins compound>blueberry]]",
@@ -223,6 +221,7 @@ public class SemgrexTest extends TestCase {
             "ate", "ate", "ate", "ate", "muffins");
   }
 
+  @Test
   public void testRegex() {
     runTest("{word:/Bill/}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
             "Bill");
@@ -238,6 +237,7 @@ public class SemgrexTest extends TestCase {
             "Bill");
   }
 
+  @Test
   public void testNegatedRegex() {
     runTest("{word!:/Bill/}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
             "ate", "blueberry", "muffins");
@@ -245,14 +245,11 @@ public class SemgrexTest extends TestCase {
             "ate", "blueberry");
   }
 
+  @Test
   public void testBrokenContainsExpression() {
-    try {
-      // word is a String, not a Map, so this should throw a parse exception
-      SemgrexPattern pattern = SemgrexPattern.compile("{word:{foo:bar}}");
-      throw new AssertionError("Expected a SemgrexParseException");
-    } catch (SemgrexParseException e) {
-      // good
-    }
+    // word is a String, not a Map, so this should throw a parse exception
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("{word:{foo:bar}}"));
 
     // this one should work.  we run it here to verify the test was
     // valid, as opposed to getting a SemgrexParseException because
@@ -260,6 +257,7 @@ public class SemgrexTest extends TestCase {
     SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:bar}}");
   }
 
+  @Test
   public void testContainsExpression() {
     // morphofeatures is a Map, so this should work
     SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:bar}}");
@@ -275,6 +273,7 @@ public class SemgrexTest extends TestCase {
     runTest(pattern, graph, "D", "F");
   }
 
+  @Test
   public void testContainsRegexKeyExpression() {
     // morphofeatures is a Map, so this should work
     SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/foo/:bar}}");
@@ -290,6 +289,7 @@ public class SemgrexTest extends TestCase {
     runTest(pattern, graph, "D", "F");
   }
 
+  @Test
   public void testContainsRegexKeyPartialMatchExpression() {
     // morphofeatures is a Map, so this should work
     SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/.*o.*/:bar}}");
@@ -305,6 +305,7 @@ public class SemgrexTest extends TestCase {
     runTest(pattern, graph, "D", "F");
   }
 
+  @Test
   public void testContainsRegexKeyMultipleMatchExpression() {
     // morphofeatures is a Map, so this should work
     SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/.*o.*/:bar}}");
@@ -326,6 +327,7 @@ public class SemgrexTest extends TestCase {
     runTest(pattern, graph, "D", "F");
   }
 
+  @Test
   public void testContainsRegexKeyNegatedMatchExpression() {
     // morphofeatures is a Map, so this should work
     SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/.*o.*/!:bar}}");
@@ -347,6 +349,7 @@ public class SemgrexTest extends TestCase {
     runTest(pattern, graph, "A", "B", "C", "E", "G", "H", "I", "J");
   }
 
+  @Test
   public void testContainsRegexExpression() {
     // morphofeatures is a Map, so this should work
     SemanticGraph graph = makeComplicatedGraph();
@@ -370,6 +373,7 @@ public class SemgrexTest extends TestCase {
     runTest(pattern, graph, "A", "C", "E", "F", "G", "H", "I", "J");
   }
 
+  @Test
   public void testDoubleContainsExpression() {
     // morphofeatures is a Map, so this should work
     SemanticGraph graph = makeComplicatedGraph();
@@ -392,6 +396,7 @@ public class SemgrexTest extends TestCase {
     runTest(pattern, graph, "F");
   }
 
+  @Test
   public void testReferencedRegex() {
     runTest("{word:/Bill/}", "[ate subj>Bill obj>[bill det>the]]",
             "Bill");
@@ -460,6 +465,7 @@ public class SemgrexTest extends TestCase {
    * returned with multiplicity 1 if there are multiple paths to the
    * same node.
    */
+  @Test
   public void testComplicatedGraph() {
     SemanticGraph graph = makeComplicatedGraph();
 
@@ -538,6 +544,7 @@ public class SemgrexTest extends TestCase {
     runTest("{} >> {word:K}", graph);
   }
 
+  @Test
   public void testRelationType() {
     SemanticGraph graph = makeComplicatedGraph();
     runTest("{} <<mod {}", graph,
@@ -550,6 +557,7 @@ public class SemgrexTest extends TestCase {
             "A", "B", "C", "D", "E", "F", "G", "H", "J");
   }
 
+  @Test
   public void testExactDepthRelations() {
     SemanticGraph graph = makeComplicatedGraph();
     runTest("{} 2,3<< {word:A}", graph, "E", "F", "G", "J");
@@ -584,6 +592,7 @@ public class SemgrexTest extends TestCase {
   /**
    * Tests that if there are different paths from A to I, those paths show up for exactly the right depths
    */
+  @Test
   public void testMultipleDepths() {
     SemanticGraph graph = makeComplicatedGraph();
     runTest("{} 3,3<< {word:A}", graph, "F", "G", "J");
@@ -593,6 +602,7 @@ public class SemgrexTest extends TestCase {
   }
 
   /** After making UNIQ a separate token in the parser, we should verify that "uniq" can be treated as an identifier as well */
+  @Test
   public void testUniqNamedNode() {
     SemanticGraph graph = makeComplicatedGraph();
 
@@ -608,6 +618,7 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  @Test
   public void testNamedNode() {
     SemanticGraph graph = makeComplicatedGraph();
 
@@ -663,6 +674,7 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  @Test
   public void testPartition() {
     SemanticGraph graph = makeComplicatedGraph();
 
@@ -671,6 +683,7 @@ public class SemgrexTest extends TestCase {
     runTest("{}=a >> {word:E} : {}=a >> {word:B}", graph, "A");
   }
 
+  @Test
   public void testEqualsRelation() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     SemgrexPattern pattern = SemgrexPattern.compile("{} >> ({}=a == {}=b)");
@@ -737,6 +750,7 @@ public class SemgrexTest extends TestCase {
    * one dependent, there should not be any matches with "muffins" as
    * the head, for example.
    */
+  @Test
   public void testNotEquals() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
 
@@ -822,6 +836,7 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  @Test
   public void testInitialConditions() {
     SemanticGraph graph = makeComplicatedGraph();
 
@@ -843,6 +858,7 @@ public class SemgrexTest extends TestCase {
   /**
    * Test that a particular AnnotationLookup is honored
    */
+  @Test
   public void testIndex() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     runTest("{idx:0}", graph, "ate");
@@ -852,6 +868,7 @@ public class SemgrexTest extends TestCase {
     runTest("{idx:4}", graph);
   }
 
+  @Test
   public void testLemma() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     for (IndexedWord word : graph.vertexSet()) {
@@ -862,6 +879,7 @@ public class SemgrexTest extends TestCase {
   }
 
   /** tests a deprecated version - might as well check that it still functions, since it still exists */
+  @Test
   public void testCCLemma() {
     Tree tree = Tree.valueOf("(ROOT (S (NP (PRP I)) (VP (VBP love) (NP (DT the) (NN display))) (. .)))");
     @SuppressWarnings("deprecation")
@@ -877,6 +895,7 @@ public class SemgrexTest extends TestCase {
     runTest("{lemma:love}=Pred >obj {}=Obj ", graph, "love/VBP");
   }
 
+  @Test
   public void testNamedRelation() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     SemgrexPattern pattern = SemgrexPattern.compile("{idx:0}=gov >>~foo {idx:3}=dep");
@@ -913,6 +932,7 @@ public class SemgrexTest extends TestCase {
   }
 
   /** named edges should also have the named reference functionality, as long as you are testing a parent or child relation */
+  @Test
   public void testNamedRelationEdge() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     SemgrexPattern pattern = SemgrexPattern.compile("{idx:2}=gov >=foo {idx:3}=dep");
@@ -938,6 +958,7 @@ public class SemgrexTest extends TestCase {
   /**
    * The named relation feature should incorporate backreferences
    */
+  @Test
   public void testNamedRelationBackreference() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
 
@@ -988,6 +1009,7 @@ public class SemgrexTest extends TestCase {
   /**
    * Test the named edge feature, including backreferences
    */
+  @Test
   public void testNamedEdgeGovernor() {
     // Test a simple version of the named edge search
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
@@ -1038,6 +1060,7 @@ public class SemgrexTest extends TestCase {
   /**
    * Short test that the dependent edge matching is working as well
    */
+  @Test
   public void testNamedEdgeDependent() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     SemgrexPattern pattern = SemgrexPattern.compile("{}=A <subj=foo {}=B");
@@ -1056,6 +1079,7 @@ public class SemgrexTest extends TestCase {
   /**
    * Short test that the left/right versions of governor and dependent do the right thing
    */
+  @Test
   public void testNamedEdgeLeftRight() {
     SemanticGraph graph = SemanticGraph.valueOf("[antennae-2 amod> blue-1 nmod> [head-5 case> on-3 nmod:poss> her-4]]");
     SemgrexPattern pattern = SemgrexPattern.compile("{$}=A >--=foo {}=B");
@@ -1098,17 +1122,14 @@ public class SemgrexTest extends TestCase {
   /**
    * Relations other than the gov / dep relations should not allow a named edge
    */
+  @Test
   public void testNamedEdgeException() {
-    try {
-      SemgrexPattern pattern = SemgrexPattern.compile("{} <<=foo {}");
-      // an unexpected exception would not be caught
-      // failing to throw an exception falls through to the error
-      throw new AssertionError("Expected a SemgrexParseException");
-    } catch (SemgrexParseException e) {
-      // good
-    }
+    // Relations other than the gov / dep relations should not allow a named edge
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("{} <<=foo {}"));
   }
 
+  @Test
   public void testAttributeConjunction() {
     // A possible user submitted error: https://github.com/stanfordnlp/CoreNLP/issues/552
     // A match with both POS and word labeled should have both attributes on the same node
@@ -1136,6 +1157,7 @@ public class SemgrexTest extends TestCase {
   }
 
   /** Test some variations on negated attributes using negative lookahead regex */
+  @Test
   public void testNegatedAttribute() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     runTest("{word:/^(?!Bill).*$/}", graph,
@@ -1164,6 +1186,7 @@ public class SemgrexTest extends TestCase {
             "ate/NN", "blueberry/NN");
   }
 
+  @Test
   public void testTwoWordConstraints() {
     // Another part of issue 552:
     // "{$} > { word:She; word:hello }"
@@ -1173,18 +1196,16 @@ public class SemgrexTest extends TestCase {
     // We fix this issue by making such a state throw an exception.
     SemanticGraph graph = SemanticGraph.valueOf("[said subj>She obj>hello]");
     String pattern = "{$} > {word:She;word:hello}";
-    try {
-      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-      throw new RuntimeException("This was supposed to fail horribly");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
+    // This was supposed to fail horribly: conflicting word constraints should throw
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile(pattern));
   }
 
   /**
    * Verify that this is working for a KBP query which wasn't working
    * for some reason... at least it wasn't the semgrex
    */
+  @Test
   public void testNERAttribute() {
     SemanticGraph graph = SemanticGraph.valueOf("[Young appos>[director nmod:of>Association]]]");
     graph.getNodeByIndex(0).setNER("PERSON");
@@ -1226,6 +1247,7 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  @Test
   public void testRoot() {
     // A few various tests that the $ node attribute works
     runTest("{$} > {word:Bill}",
@@ -1263,6 +1285,7 @@ public class SemgrexTest extends TestCase {
             "ate/NN");
   }
 
+  @Test
   public void testDoubleEquals() {
     // Tests a relation with double equals on it.
     // Note that this also tests the () printing when outputting
@@ -1295,44 +1318,30 @@ public class SemgrexTest extends TestCase {
    * <br>
    * &amp; on relations is now illegal as it is both redundant and confusing.
    */
+  @Test
   public void testIllegal() {
-    try {
-      String pattern = "{word:unban} > [{word:mox} {word:opal}]";
-      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-      throw new RuntimeException("This expression is now illegal");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
+    // This expression is now illegal: node conjugation has unclear semantics
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("{word:unban} > [{word:mox} {word:opal}]"));
 
-    try {
-      String pattern = "{word:unban} > [{word:mox} & {word:opal}]";
-      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-      throw new RuntimeException("This expression is now illegal");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
+    // This expression is now illegal: node conjugation has unclear semantics
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("{word:unban} > [{word:mox} & {word:opal}]"));
 
-    try {
-      String pattern = "{}=unban ![>det {}] & > {word:/^(?!mox).*$/}=opal";
-      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-      throw new RuntimeException("This expression is now illegal");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
+    // This expression is now illegal: & on relations is redundant and confusing
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("{}=unban ![>det {}] & > {word:/^(?!mox).*$/}=opal"));
   }
 
+  @Test
   public void testDuplicateConstraints() {
     // There should be an exception if the same attribute shows up
     // twice as a positive attribute
     // Although it isn't clear that's necessary,
     // since both portions could be regex which match different things
-    try {
-      String pattern = "{word:foo;word:bar}";
-      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-      throw new RuntimeException("This expression is now illegal");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
+    // This expression is now illegal: same attribute cannot appear twice as a positive constraint
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("{word:foo;word:bar}"));
 
     // this should parse since negative constraints which
     // match positive constraints are allowed
@@ -1349,6 +1358,7 @@ public class SemgrexTest extends TestCase {
             "Bill/NN", "muffins");
   }
 
+  @Test
   public void testAdjacent() {
     // test using a colon expression so that the targeted nodes
     // are the nodes which show up
@@ -1358,6 +1368,7 @@ public class SemgrexTest extends TestCase {
     runTest("{}=foo : {word:B} - {}=foo", graph, "A");
   }
 
+  @Test
   public void testRightLeft() {
     // test using a colon expression so that the targeted nodes
     // are the nodes which show up
@@ -1367,6 +1378,7 @@ public class SemgrexTest extends TestCase {
     runTest("{}=foo : {word:E} -- {}=foo", graph, "A", "B", "C", "D");
   }
 
+  @Test
   public void testGovernor() {
     SemanticGraph graph = makeComplicatedGraph();
     runTest("{}=foo : {word:A} > {}=foo", graph, "B", "C", "D");
@@ -1379,6 +1391,7 @@ public class SemgrexTest extends TestCase {
     runTest("{}=foo : {word:A} >++ {}=foo", graph, "B", "C", "D");
   }
 
+  @Test
   public void testDependent() {
     SemanticGraph graph = makeComplicatedGraph();
     runTest("{}=foo < {word:A}", graph, "B", "C", "D");
@@ -1393,6 +1406,7 @@ public class SemgrexTest extends TestCase {
   }
 
   /** Various bracketing tests: | and &amp; */
+  @Test
   public void testBrackets() {
     runTest("{word:ate} [ > {word:Bill} | > {word:muffins}]",
             "[ate/VBD subj>Bill/NNP obj>[muffins compound>blueberry]]",
@@ -1492,6 +1506,7 @@ public class SemgrexTest extends TestCase {
   /**
    * A simple test of the batch search - should return 3 of the 4 sentences
    */
+  @Test
   public void testBatchSearch() {
     List<CoreMap> sentences = buildSmallBatch();
     SemgrexPattern semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y");
@@ -1514,14 +1529,11 @@ public class SemgrexTest extends TestCase {
    *<br>
    * Specifically, the expectation is for a SemgrexParseException
    */
+  @Test
   public void testBrokenUniq() {
-    try {
-      String pattern = "{word:foo}=foo :: uniq bar";
-      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-      throw new RuntimeException("This expression should fail because the node name is unknown");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
+    // This expression should fail because the node name is unknown
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("{word:foo}=foo :: uniq bar"));
   }
 
   /**
@@ -1529,35 +1541,25 @@ public class SemgrexTest extends TestCase {
    *<br>
    * Specifically, the expectation is for a SemgrexParseException
    */
+  @Test
   public void testOverlappingUniq() {
-    try {
-      String pattern = "{word:__#1%foo}=foo :: uniq foo";
-      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-      throw new RuntimeException("This expression should fail because the node name and regex name overlap");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
+    // This expression should fail because the node name and regex name overlap
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("{word:__#1%foo}=foo :: uniq foo"));
 
-    try {
-      String pattern = "{word:__#1%foo} <=foo {} :: uniq foo";
-      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-      throw new RuntimeException("This expression should fail because the edge name and regex name overlap");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
+    // This expression should fail because the edge name and regex name overlap
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("{word:__#1%foo} <=foo {} :: uniq foo"));
 
-    try {
-      String pattern = "{word:__}=foo <=foo {} :: uniq foo";
-      SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-      throw new RuntimeException("This expression should fail because the node name and edge name overlap");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
+    // This expression should fail because the node name and edge name overlap
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("{word:__}=foo <=foo {} :: uniq foo"));
   }
 
   /**
    * Test that a simple uniq expression is correctly parsed
    */
+  @Test
   public void testParsesUniq() {
     // Test the basic node name compilation
     String pattern = "{word:foo}=foo :: uniq foo";
@@ -1571,6 +1573,7 @@ public class SemgrexTest extends TestCase {
   /**
    * Test the uniq functionality on a few simple parses
    */
+  @Test
   public void testBatchUniq() {
     List<CoreMap> sentences = buildSmallBatch();
     SemgrexPattern semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y :: uniq x");
@@ -1637,6 +1640,7 @@ public class SemgrexTest extends TestCase {
     // sentence 3 should not match because both nmod and obj were already seen
   }
 
+  @Test
   public void testCaseInsensitive() {
     List<CoreMap> sentences = buildSmallBatch();
     SemgrexPattern semgrex = SemgrexPattern.compile("(?i: {word:FOO} )");
@@ -1648,16 +1652,14 @@ public class SemgrexTest extends TestCase {
     assertEquals(0, matches.size());
   }
 
+  @Test
   public void testIllegalFlag() {
-    try {
-      SemgrexPattern semgrex = SemgrexPattern.compile("(?z: {word:FOO} )");
-      throw new AssertionError("oops");
-    } catch (SemgrexParseException e) {
-      // yay
-    }
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.compile("(?z: {word:FOO} )"));
   }
 
 
+  @Test
   public void testBatchSort() {
     List<CoreMap> sentences = buildSmallBatch();
     SemgrexPattern semgrex = SemgrexPattern.compile("{word:foo}=x >=edge {}=y :: sort edge");
@@ -1679,6 +1681,7 @@ public class SemgrexTest extends TestCase {
     assertEquals("obj", matches.get(2).second().get(0).getEdge("edge").getRelation().toString());
   }
 
+  @Test
   public void testRegexVariableGroups() {
     // first, a basic test that it is capturing the variable groups correctly
     SemgrexPattern pattern = SemgrexPattern.compile("{word:/(.*ill.*)/#1%name}");
@@ -1719,6 +1722,7 @@ public class SemgrexTest extends TestCase {
     assertEquals(expectedMatches, matches);
   }
 
+  @Test
   public void testExactVariableGroups() {
     SemgrexPattern pattern = SemgrexPattern.compile("{word:__#1%name} .. {word:__#1%name}");
     SemanticGraph graph = SemanticGraph.valueOf("[ate-2 subj> Bill-1 obj>[muffins-6 compound> Blueberry-3 compound> Bill-4 compound> filled-5]]");
