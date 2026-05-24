@@ -1637,6 +1637,18 @@ public class SemgrexTest extends TestCase {
     // sentence 3 should not match because both nmod and obj were already seen
   }
 
+  public void testCaseInsensitive() {
+    List<CoreMap> sentences = buildSmallBatch();
+    SemgrexPattern semgrex = SemgrexPattern.compile("(?i: {word:FOO} )");
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
+    assertEquals(3, matches.size());
+
+    semgrex = SemgrexPattern.compile("{word:FOO}");
+    matches = semgrex.matchSentences(sentences, false);
+    assertEquals(0, matches.size());
+  }
+
+
   public void testBatchSort() {
     List<CoreMap> sentences = buildSmallBatch();
     SemgrexPattern semgrex = SemgrexPattern.compile("{word:foo}=x >=edge {}=y :: sort edge");

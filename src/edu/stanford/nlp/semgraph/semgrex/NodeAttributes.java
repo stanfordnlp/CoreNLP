@@ -8,9 +8,16 @@ import java.util.Set;
 
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Quadruple;
+import edu.stanford.nlp.util.Quintuple;
 
 /**
  * Stores attributes for a Semgrex NodePattern.
+ *<br>
+ * For example, {@code word=foo} gets its own node attribute.
+ * {@code cpos=NOUN} gets it own attribute.
+ * Each requested attribute gets stored in {@code attributes}.
+ *<br>
+ * Maps (such as MorphoFeatures) also get stored here, in {@code contains}.
  *<br>
  * Refactored out of the parser itself for a couple reasons:
  *<ul>
@@ -24,8 +31,8 @@ import edu.stanford.nlp.util.Quadruple;
 public class NodeAttributes {
   private boolean root;
   private boolean empty;
-  // String, String, Boolean: key, value, negated
-  private List<Quadruple<String, String, Boolean, List<Pair<Integer, String>>>> attributes;
+  // String, String, Boolean, List, Boolean: key, value, negated, named variable groups, case insensitive
+  private List<Quintuple<String, String, Boolean, List<Pair<Integer, String>>, Boolean>> attributes;
   private Set<String> positiveAttributes;
   // Some annotations, especially morpho freatures (CoreAnnotations.CoNLLUFeats)
   // are represented by Maps.  In some cases it will be easier to search
@@ -59,21 +66,24 @@ public class NodeAttributes {
     return empty;
   }
 
-  public void setAttribute(String key, String value, boolean negated, List<Pair<Integer, String>> varGroups) {
+  public void setAttribute(String key, String value, boolean negated, List<Pair<Integer, String>> varGroups, boolean caseInsensitive) {
     if (!negated) {
       if (positiveAttributes.contains(key)) {
         throw new SemgrexParseException("Duplicate attribute " + key + " found in semgrex expression");
       }
       positiveAttributes.add(key);
     }
-    attributes.add(new Quadruple<>(key, value, negated, varGroups));
+    if (!"word".equals(key)) {
+      caseInsensitive = false;
+    }
+    attributes.add(new Quintuple<>(key, value, negated, varGroups, caseInsensitive));
   }
 
   public void addContains(String annotation, String key, String value, Boolean negated) {
     contains.add(new Quadruple(annotation, key, value, negated));
   }
 
-  public List<Quadruple<String, String, Boolean, List<Pair<Integer, String>>>> attributes() {
+  public List<Quintuple<String, String, Boolean, List<Pair<Integer, String>>, Boolean>> attributes() {
     return Collections.unmodifiableList(attributes);
   }
 

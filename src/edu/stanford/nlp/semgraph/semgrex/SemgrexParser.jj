@@ -24,6 +24,9 @@ class SemgrexParser {
   // because labeling nodes under negation is illegal
   private boolean underNegation = false;
   private boolean underNodeNegation = false;
+  // track whether we are inside a (?i:...) case-insensitive block;
+  // when true, all attribute value comparisons are made case-insensitively
+  private boolean caseInsensitive = false;
   // keep track of which variables we've already seen
   // lets us make sure we don't name new nodes under a negation
   private Set<String> knownVariables = Generics.newHashSet();
@@ -78,6 +81,7 @@ TOKEN:
 {
 	< RELATION: "<" | ">" | ">>" | "<<" | "<>" | "==" | "$+" | "$-" | "$++" | "$--" | "." | ".." | "-" | "--" | ">++" | ">--" | "<++" | "<--" >
 |	< ALIGNRELN: "@" >
+|	< CASE_INSENSITIVE_OPEN: "(?i:" >
 |	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}", "+", "-"])+ >
 |	< NUMBER: ( ["0"-"9"] )+ >
 |	< EMPTY: "#" >
@@ -157,6 +161,7 @@ SemgrexPattern Root() : {
 SemgrexPattern SubNode(GraphRelation r) : {
 	SemgrexPattern result =  null;
 	SemgrexPattern child = null;
+	boolean startCaseInsensitive;
 } {
 	( "(" result = SubNode(r) ")" ( child = RelationDisj() )? )
 	{
@@ -168,6 +173,28 @@ SemgrexPattern SubNode(GraphRelation r) : {
 	}
 	return result;
     }
+ | ( <CASE_INSENSITIVE_OPEN>
+     { // TODO: if we have more than one flag at the start of an open,
+       // we should merge this with the above rule
+       // and find a different way of processing here
+       // We would need to avoid the tokenizer greedily
+       // eating the flags... perhaps a different state?
+       // or perhaps directly parsing the flags here would work?
+       startCaseInsensitive = caseInsensitive;
+       caseInsensitive = true; }
+     result = SubNode(r)
+     ")"
+     { caseInsensitive = startCaseInsensitive; }
+     ( child = RelationDisj() )? )
+   {
+     if (child != null) {
+       List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
+       newChildren.addAll(result.getChildren());
+       newChildren.add(child);
+       result.setChild(new CoordinationPattern(false, newChildren, true, false));
+     }
+     return result;
+   }
  | ( result = ModNode(r) (child = RelationDisj() )? )
  	{  if (child != null) result.setChild(child);
  		return result;}
@@ -342,7 +369,7 @@ void AddAttribute(NodeAttributes attributes) : {
              {
                if (attr != null && value != null) {
                  negated = attrType.image.equals("!:");
-                 attributes.setAttribute(attr.image, value.image, negated, varGroups);
+                 attributes.setAttribute(attr.image, value.image, negated, varGroups, caseInsensitive);
                }
              }
            )
