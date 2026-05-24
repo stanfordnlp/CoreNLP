@@ -23,7 +23,7 @@ interface SemgrexParserConstants {
   /** RegularExpression Id. */
   int ALIGNRELN = 6;
   /** RegularExpression Id. */
-  int CASE_INSENSITIVE_OPEN = 7;
+  int MODIFIER_OPEN = 7;
   /** RegularExpression Id. */
   int IDENTIFIER = 8;
   /** RegularExpression Id. */
@@ -47,7 +47,7 @@ interface SemgrexParserConstants {
     "\"rsort\"",
     "<RELATION>",
     "\"@\"",
-    "\"(?i:\"",
+    "<MODIFIER_OPEN>",
     "<IDENTIFIER>",
     "<NUMBER>",
     "\"#\"",

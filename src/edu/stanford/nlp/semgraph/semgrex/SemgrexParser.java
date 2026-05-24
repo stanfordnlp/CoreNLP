@@ -18,9 +18,61 @@ class SemgrexParser implements SemgrexParserConstants {
   // because labeling nodes under negation is illegal
   private boolean underNegation = false;
   private boolean underNodeNegation = false;
+
   // track whether we are inside a (?i:...) case-insensitive block;
   // when true, all attribute value comparisons are made case-insensitively
   private boolean caseInsensitive = false;
+  // track whether we are inside a (?s:...) sequential block;
+  // when true, chains like A < B < C are interpreted sequentially (A<B, B<C)
+  // rather than as conjunctions from the first node (A<B, A<C)
+  // TODO: this is not actually implemented yet
+  private boolean sequentialChain = false;
+
+  /**
+   * Saved state for a (?flags:...) modifier block.
+   * Add new flag fields here as new modifiers are introduced.
+   */
+  private static class ParseFlags {
+    final boolean caseInsensitive;
+    final boolean sequentialChain;
+    ParseFlags(boolean caseInsensitive, boolean sequentialChain) {
+      this.caseInsensitive = caseInsensitive;
+      this.sequentialChain = sequentialChain;
+    }
+  }
+
+  /** Save current flags so they can be restored after a modifier block. */
+  private ParseFlags saveFlags() {
+    return new ParseFlags(caseInsensitive, sequentialChain);
+  }
+
+  /** Restore flags saved before entering a modifier block. */
+  private void restoreFlags(ParseFlags saved) {
+    caseInsensitive = saved.caseInsensitive;
+    sequentialChain = saved.sequentialChain;
+  }
+
+  /**
+   * Apply the flag characters encoded in a MODIFIER_OPEN token image
+   * such as "(?i:", "(?s:", "(?is:", "(?si:", etc.
+   * Unknown flag letters cause a parse exception.
+   * Add new flag letters here as new modifiers are introduced.
+   */
+  private void applyModifierFlags(String tokenImage) throws ParseException {
+    // strip leading "(?" and trailing ":"
+    String flags = tokenImage.substring(2, tokenImage.length() - 1);
+    for (int idx = 0; idx < flags.length(); idx++) {
+      char c = flags.charAt(idx);
+      switch (c) {
+        case 'i': caseInsensitive = true; break;
+        case 's': sequentialChain = true; break;
+        default:
+          throw new ParseException("Unknown modifier flag '" + c +
+              "' in semgrex modifier block '" + tokenImage +
+              "'. Supported flags: i (case-insensitive), s (sequential chain).");
+      }
+    }
+  }
   // keep track of which variables we've already seen
   // lets us make sure we don't name new nodes under a negation
   private Set<String> knownVariables = Generics.newHashSet();
@@ -75,7 +127,7 @@ class SemgrexParser implements SemgrexParserConstants {
       node = SubNode(GraphRelation.ALIGNED_ROOT);
       break;
       }
-    case CASE_INSENSITIVE_OPEN:
+    case MODIFIER_OPEN:
     case 16:
     case 20:
     case 22:
@@ -180,7 +232,8 @@ for (String key : postprocessKeys) {
 
   final public SemgrexPattern SubNode(GraphRelation r) throws ParseException {SemgrexPattern result =  null;
         SemgrexPattern child = null;
-        boolean startCaseInsensitive;
+        ParseFlags savedFlags;
+        Token modifierToken;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 16:{
       jj_consume_token(16);
@@ -210,19 +263,13 @@ if (child != null) {
         {if ("" != null) return result;}
       break;
       }
-    case CASE_INSENSITIVE_OPEN:{
-      jj_consume_token(CASE_INSENSITIVE_OPEN);
-// TODO: if we have more than one flag at the start of an open,
-       // we should merge this with the above rule
-       // and find a different way of processing here
-       // We would need to avoid the tokenizer greedily
-       // eating the flags... perhaps a different state?
-       // or perhaps directly parsing the flags here would work?
-       startCaseInsensitive = caseInsensitive;
-       caseInsensitive = true;
+    case MODIFIER_OPEN:{
+      modifierToken = jj_consume_token(MODIFIER_OPEN);
+savedFlags = saveFlags();
+       applyModifierFlags(modifierToken.image);
       result = SubNode(r);
       jj_consume_token(17);
-caseInsensitive = startCaseInsensitive;
+restoreFlags(savedFlags);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
       case RELATION:

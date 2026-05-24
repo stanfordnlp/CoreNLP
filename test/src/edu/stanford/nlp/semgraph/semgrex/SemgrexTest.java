@@ -1648,6 +1648,15 @@ public class SemgrexTest extends TestCase {
     assertEquals(0, matches.size());
   }
 
+  public void testIllegalFlag() {
+    try {
+      SemgrexPattern semgrex = SemgrexPattern.compile("(?z: {word:FOO} )");
+      throw new AssertionError("oops");
+    } catch (SemgrexParseException e) {
+      // yay
+    }
+  }
+
 
   public void testBatchSort() {
     List<CoreMap> sentences = buildSmallBatch();
