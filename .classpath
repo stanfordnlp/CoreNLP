@@ -18,7 +18,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/xom-1.4.1.jar" sourcepath="libsrc/xom-1.4.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/joda-time-2.14.0.jar" sourcepath="libsrc/joda-time-2.14.0.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jollyday-0.4.9.jar" sourcepath="libsrc/jollyday-0.4.9-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-lang3-3.19.0.jar" sourcepath="libsrc/commons-lang3-3.19.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-lang3-3.20.0.jar" sourcepath="libsrc/commons-lang3-3.20.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/protobuf-java-3.25.5.jar" sourcepath="libsrc/protobuf-java-3.25.5-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jakarta.json-1.1.6.jar" sourcepath="libsrc/jakarta.json-1.1.6-sources.jar"/>
