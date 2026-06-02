@@ -33,17 +33,17 @@ public class Embedding implements Serializable  {
   static final String END_WORD = "*END*";
 
   static final String UNKNOWN_WORD = "*UNK*";
-  static final String UNKNOWN_NUMBER = "*NUM*";
-  static final String UNKNOWN_CAPS = "*CAPS*";
-  static final String UNKNOWN_CHINESE_YEAR = "*ZH_YEAR*";
-  static final String UNKNOWN_CHINESE_NUMBER = "*ZH_NUM*";
-  static final String UNKNOWN_CHINESE_PERCENT = "*ZH_PERCENT*";
+  private static final String UNKNOWN_NUMBER = "*NUM*";
+  private static final String UNKNOWN_CAPS = "*CAPS*";
+  private static final String UNKNOWN_CHINESE_YEAR = "*ZH_YEAR*";
+  private static final String UNKNOWN_CHINESE_NUMBER = "*ZH_NUM*";
+  private static final String UNKNOWN_CHINESE_PERCENT = "*ZH_PERCENT*";
 
-  static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9][-0-9,.:]*");
-  static final Pattern CAPS_PATTERN = Pattern.compile("[a-zA-Z]*[A-Z][a-zA-Z]*");
-  static final Pattern CHINESE_YEAR_PATTERN = Pattern.compile("[〇零一二三四五六七八九０１２３４５６７８９]{4}+年");
-  static final Pattern CHINESE_NUMBER_PATTERN = Pattern.compile("(?:[〇０零一二三四五六七八九０１２３４５６７８９十百万千亿]+[点多]?)+");
-  static final Pattern CHINESE_PERCENT_PATTERN = Pattern.compile("百分之[〇０零一二三四五六七八九０１２３４５６７８９十点]+");
+  private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[0-9][-0-9,.:]*");
+  private static final Pattern CAPS_PATTERN = Pattern.compile("[a-zA-Z]*[A-Z][a-zA-Z]*");
+  private static final Pattern CHINESE_YEAR_PATTERN = Pattern.compile("[〇零一二三四五六七八九０１２３４５６７８９]{4}+年");
+  private static final Pattern CHINESE_NUMBER_PATTERN = Pattern.compile("(?:[〇零一二三四五六七八九０１２３４５６７８９十百万千亿][点多]?)+");
+  private static final Pattern CHINESE_PERCENT_PATTERN = Pattern.compile("百分之[〇零一二三四五六七八九０１２３４５６７８９十点]+");
 
   /**
    * Some word vectors are trained with DG representing number.

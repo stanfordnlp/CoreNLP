@@ -1,6 +1,5 @@
 package edu.stanford.nlp.parser.dvparser;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Collection;
@@ -9,10 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Function;
+// import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import org.ejml.data.DMatrixRMaj;
+// import org.ejml.data.DMatrixRMaj;
+// import org.ejml.simple.SimpleBase;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.neural.Embedding;
@@ -34,7 +34,8 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class DVModel implements Serializable  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DVModel.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(DVModel.class);
+
   // Maps from basic category to the matrix transformation matrices for
   // binary nodes and unary nodes.
   // The indices are the children categories.  For binaryTransform, for
@@ -74,11 +75,11 @@ public class DVModel implements Serializable  {
   private static final String START_WORD = "*START*";
   private static final String END_WORD = "*END*";
 
-  private static final Function<SimpleMatrix, DMatrixRMaj> convertSimpleMatrix = matrix -> matrix.getMatrix();
+  /*
+  private static final Function<SimpleMatrix, DMatrixRMaj> convertSimpleMatrix = SimpleBase::getMatrix;
 
   private static final Function<DMatrixRMaj, SimpleMatrix> convertDenseMatrix = matrix -> SimpleMatrix.wrap(matrix);
 
-  /*
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     in.defaultReadObject();
 
@@ -437,7 +438,7 @@ public class DVModel implements Serializable  {
 
   private static final Pattern CHINESE_YEAR_PATTERN = Pattern.compile("[〇零一二三四五六七八九０１２３４５６７８９]{4}+年");
 
-  private static final Pattern CHINESE_NUMBER_PATTERN = Pattern.compile("(?:[〇零一二三四五六七八九０１２３４５６７８９十百万千亿]+[点多]?)+");
+  private static final Pattern CHINESE_NUMBER_PATTERN = Pattern.compile("(?:[〇零一二三四五六七八九０１２３４５６７８９十百万千亿][点多]?)+");
 
   private static final Pattern CHINESE_PERCENT_PATTERN = Pattern.compile("百分之[〇零一二三四五六七八九０１２３４５６７８９十点]+");
 
