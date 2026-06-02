@@ -176,13 +176,13 @@ LAST UPDATE: 2020/10/17
 LAST UPDATE BY: Christopher Manning
 
 ----------------------------------------------------------------------
-xom-1.3.9.jar
+xom-1.4.1.jar
 
-ORIGINAL JAR NAME: xom-1.3.9.jar
+ORIGINAL JAR NAME: xom-1.4.1.jar
 
-VERSION: 1.3.9
+VERSION: 1.4.1
 
-RELEASE DATE: 2023-05-14
+RELEASE DATE: 2026-05-01
 
 SOURCE AVAILABLE: yes
 
@@ -193,7 +193,7 @@ URL: http://www.xom.nu/
 USED BY: StanfordCoreNLP.java
 Needed by CoreNLP distributions
 
-LAST UPDATE: 2023-05-16
+LAST UPDATE: 2026-05-04
 
 LAST UPDATE BY: John Bauer
 

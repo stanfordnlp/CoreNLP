@@ -2,4 +2,4 @@
 
 ## Reporting a Vulnerability
 
-Please report security issues to java-nlp-support@lists.stanford.edu
+Please report security issues on our github: https://github.com/stanfordnlp/CoreNLP/security/advisories?state=Triage

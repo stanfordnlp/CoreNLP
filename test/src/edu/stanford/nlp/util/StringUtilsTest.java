@@ -294,6 +294,13 @@ public class StringUtilsTest {
   }
 
   @Test
+  public void testEscapeString() {
+    String str = "test'test";
+    str = StringUtils.escapeString(str, new char[]{'\''},'\'');
+    Assert.assertEquals("test''test", str);
+  }
+
+  @Test
   public void testSplit() {
     Assert.assertEquals(Arrays.asList("1", "2"), StringUtils.split("1 2"));
     Assert.assertEquals(Arrays.asList("1"), StringUtils.split("1"));

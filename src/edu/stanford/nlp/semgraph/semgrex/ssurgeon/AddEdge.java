@@ -28,16 +28,22 @@ public class AddEdge extends SsurgeonEdit {
   protected final String depName; // Name of the dependent in this reln, in match
   protected final GrammaticalRelation relation; // Type of relation to add between these edges
   protected final double weight;
+  protected final String edgeName;
   
   public AddEdge(String govName, String depName, GrammaticalRelation relation) {
     this(govName, depName, relation, 0.0);
   }
   
   public AddEdge(String govName, String depName, GrammaticalRelation relation, double weight) {
+    this(govName, depName, relation, 0.0, null);
+  }
+
+  public AddEdge(String govName, String depName, GrammaticalRelation relation, double weight, String edgeName) {
     this.govName = govName;
     this.depName = depName;
     this.relation = relation;
     this.weight = weight;
+    this.edgeName = edgeName;
   }
   
   @Override
@@ -81,7 +87,10 @@ public class AddEdge extends SsurgeonEdit {
         sg.addVertex(govNode);
       if (!sg.containsVertex(depNode)) 
         sg.addVertex(depNode);
-      sg.addEdge(govNode, depNode, relation, weight,false );
+      SemanticGraphEdge newEdge = sg.addEdge(govNode, depNode, relation, weight, false);
+      if (edgeName != null) {
+        sm.putNamedEdge(edgeName, newEdge);
+      }
       return true;
     }
     return false;

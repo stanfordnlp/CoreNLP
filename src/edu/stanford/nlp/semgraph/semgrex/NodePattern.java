@@ -13,6 +13,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Quintuple;
 import edu.stanford.nlp.util.Quadruple;
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.VariableStrings;
@@ -61,19 +62,23 @@ public class NodePattern extends SemgrexPattern  {
     this.regexPartialAttributes = new ArrayList<>();
 
     descString = "{";
-    for (Quadruple<String, String, Boolean, List<Pair<Integer, String>>> entry : attrs.attributes()) {
+    for (Quintuple<String, String, Boolean, List<Pair<Integer, String>>, Boolean> entry : attrs.attributes()) {
       if (!descString.equals("{"))
         descString += ";";
       String key = entry.first();
       String value = entry.second();
       boolean negated = entry.third();
       List<Pair<Integer, String>> varGroups = entry.fourth();
+      boolean alwaysCaseInsensitive = entry.fifth();
 
       // Add the attributes for this key
       if (value.equals("__")) {
         attributes.add(new Attribute(key, true, true, negated, varGroups));
       } else if (value.matches("/.*/")) {
-        attributes.add(buildRegexAttribute(key, value, negated, varGroups));
+        attributes.add(buildRegexAttribute(key, value, negated, varGroups, alwaysCaseInsensitive));
+      } else if (alwaysCaseInsensitive) {
+        value = "/" + value + "/";
+        attributes.add(buildRegexAttribute(key, value, negated, varGroups, alwaysCaseInsensitive));
       } else { // raw description
         attributes.add(new Attribute(key, value, value, negated, varGroups));
       }
@@ -109,7 +114,7 @@ public class NodePattern extends SemgrexPattern  {
         if (value.equals("__")) {
           attr = new Attribute(key, true, true, negated, varGroups);
         } else if (value.matches("/.*/")) {
-          attr = buildRegexAttribute(key, value, negated, varGroups);
+          attr = buildRegexAttribute(key, value, negated, varGroups, false);
         } else { // raw description
           attr = new Attribute(key, value, value, negated, varGroups);
         }
@@ -146,7 +151,7 @@ public class NodePattern extends SemgrexPattern  {
    * Tests the value to see if it's really a regex, or just a string wrapped in regex.
    * Return an Attribute which matches this expression
    */
-  private Attribute buildRegexAttribute(String key, String value, boolean negated, List<Pair<Integer, String>> varGroups) {
+  private Attribute buildRegexAttribute(String key, String value, boolean negated, List<Pair<Integer, String>> varGroups, boolean alwaysCaseInsensitive) {
     boolean isRegexp = false;
     for (int i = 1; i < value.length() - 1; ++i) {
       char chr = value.charAt(i);
@@ -156,7 +161,12 @@ public class NodePattern extends SemgrexPattern  {
       }
     }
     String patternContent = value.substring(1, value.length() - 1);
-    if (isRegexp) {
+    if (alwaysCaseInsensitive) {
+      return new Attribute(key,
+                           Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE),
+                           Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE),
+                           negated, varGroups);
+    } else if (isRegexp) {
       return new Attribute(key,
                            Pattern.compile(patternContent),
                            Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE),

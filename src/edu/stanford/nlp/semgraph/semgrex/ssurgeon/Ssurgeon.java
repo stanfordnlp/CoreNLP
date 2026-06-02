@@ -168,7 +168,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -reln} is the name of the dependency type to use.  pieces other than the head will connect using this relation <br>
  * {@code -regex} regex must match the matched node.  all matching groups will be concatenated to form a new word.  need at least 2 to split a word <br>
  * {@code -exact} instead of specifying matching regex, can split to exact pieces.  need at least 2 to split a word <br>
- * {@code -name} will give names to the newly created.  The format is #=name, comma separated
+ * {@code -name} will give names to the newly created nodes.  The format is #=name, comma separated
+ * {@code -edge} will give a name to the newly created edges.  Later operations can update those edges.  Index the edges from the dep (since the gov is always the same)
  *</p><p>
  * {@code setRoots} sets the roots of the sentence to a new root. <br>
  * {@code n1, n2, ...} are the names of the nodes from the Semgrex to use as the root(s). <br>
@@ -591,7 +592,7 @@ public class Ssurgeon  {
   /**
    * Given a string entry, converts it into a SsurgeonEdit object.
    */
-  public static SsurgeonEdit parseEditLine(String editLine, Map<String, String> attributeArgs, Language language) {
+  public static SsurgeonEdit parseEditLine(String editLine, Map<String, String> attributeArgs, Language language, Set<String> knownEdges) {
     try {
       // Extract the operation name first
       final String[] tuples1 = editLine.split("\\s+", 2);
@@ -624,9 +625,18 @@ public class Ssurgeon  {
           throw new SsurgeonParseException("Relation not specified for AddEdge");
         }
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
-        return new AddEdge(argsBox.govNodeName, argsBox.dep, reln, argsBox.weight);
+        if (argsBox.edge != null) {
+          knownEdges.add(argsBox.edge);
+        }
+        return new AddEdge(argsBox.govNodeName, argsBox.dep, reln, argsBox.weight, argsBox.edge);
       } else if (command.equalsIgnoreCase(ReattachNamedEdge.LABEL)) {
-          return new ReattachNamedEdge(argsBox.edge, argsBox.govNodeName, argsBox.dep);
+        if (argsBox.edge == null) {
+          throw new SsurgeonParseException("Edge not specified for ReattachNamedEdge");
+        }
+        if (!knownEdges.contains(argsBox.edge)) {
+          throw new SsurgeonParseException("Edge requested for ReattachNamedEdge is not known to the SemgrexPattern");
+        }
+        return new ReattachNamedEdge(argsBox.edge, argsBox.govNodeName, argsBox.dep);
       } else if (command.equalsIgnoreCase(DeleteGraphFromNode.LABEL)) {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make a DeleteGraphFromNode out of " + argsBox.nodes.size() + " nodes");
@@ -653,8 +663,14 @@ public class Ssurgeon  {
         }
         return new MergeNodes(argsBox.nodes, argsBox.annotations);
       } else if (command.equalsIgnoreCase(RelabelNamedEdge.LABEL)) {
+        if (argsBox.edge == null) {
+          throw new SsurgeonParseException("Edge not specified for RelabelNamedEdge");
+        }
+        if (!knownEdges.contains(argsBox.edge)) {
+          throw new SsurgeonParseException("Edge requested for RelabelNamedEdge is not known to the SemgrexPattern");
+        }
         if (argsBox.reln == null) {
-          throw new SsurgeonParseException("Relation not specified for AddEdge");
+          throw new SsurgeonParseException("Relation not specified for RelabelNamedEdge");
         }
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
         return new RelabelNamedEdge(argsBox.edge, reln);
@@ -684,11 +700,16 @@ public class Ssurgeon  {
         if (argsBox.nodes.size() == 0) {
           throw new SsurgeonParseException("splitWord not given any -node parameter for the node to split");
         }
+        final SplitWord split;
         if (argsBox.regex.size() > 0) {
-          return new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln, argsBox.name, false);
+          split = new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln, argsBox.name, argsBox.edge, false);
         } else {
-          return new SplitWord(argsBox.nodes.get(0), argsBox.exact, argsBox.headIndex, reln, argsBox.name, true);
+          split = new SplitWord(argsBox.nodes.get(0), argsBox.exact, argsBox.headIndex, reln, argsBox.name, argsBox.edge, true);
         }
+        for (String edgeName : split.edgeNames.values()) {
+          knownEdges.add(edgeName);
+        }
+        return split;
       } else if (command.equalsIgnoreCase(ReindexGraph.LABEL)) {
         return new ReindexGraph();
       }
@@ -884,6 +905,8 @@ public class Ssurgeon  {
       retPattern.setLanguage(language);
     }
 
+    Set<String> knownEdges = new HashSet<>(semgrexPattern.getKnownEdges());
+
     NodeList editNodes = elt.getElementsByTagName(SsurgeonPattern.EDIT_LIST_ELEM_TAG);
     for (int i=0; i<editNodes.getLength(); i++) {
       Node node = editNodes.item(i);
@@ -904,7 +927,7 @@ public class Ssurgeon  {
 
         Element editElt = (Element) node;
         String editVal = getEltText(editElt);
-        retPattern.addEdit(Ssurgeon.parseEditLine(editVal, attributeArgs, retPattern.getLanguage()));
+        retPattern.addEdit(Ssurgeon.parseEditLine(editVal, attributeArgs, retPattern.getLanguage(), knownEdges));
       }
     }
 

@@ -3,11 +3,13 @@ package edu.stanford.nlp.parser.server;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.ObjectInputFilter;
 import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.net.Socket;
+import java.util.Set;
 
 import edu.stanford.nlp.trees.Tree;
 
@@ -124,8 +126,61 @@ public class LexicalizedParserClient {
     return result;
   }
 
+  private static final Set<String> ALLOWED = Set.of("edu.stanford.nlp.ling.CoreLabel",
+                                                    "edu.stanford.nlp.trees.LabeledScoredTreeNode",
+                                                    "edu.stanford.nlp.trees.Tree",
+                                                    "edu.stanford.nlp.util.ArrayCoreMap",
+                                                    "edu.stanford.nlp.ling.CoreAnnotations$AfterAnnotation",
+                                                    "edu.stanford.nlp.ling.CoreAnnotations$BeforeAnnotation",
+                                                    "edu.stanford.nlp.ling.CoreAnnotations$CategoryAnnotation",
+                                                    "edu.stanford.nlp.ling.CoreAnnotations$CharacterOffsetBeginAnnotation",
+                                                    "edu.stanford.nlp.ling.CoreAnnotations$CharacterOffsetEndAnnotation",
+                                                    "edu.stanford.nlp.ling.CoreAnnotations$OriginalTextAnnotation",
+                                                    "edu.stanford.nlp.ling.CoreAnnotations$PartOfSpeechAnnotation",
+                                                    "edu.stanford.nlp.ling.CoreAnnotations$TextAnnotation",
+                                                    "edu.stanford.nlp.ling.CoreAnnotations$ValueAnnotation");
+
+  private static boolean isAllowed(Class<?> clazz) {
+    if (clazz == null) {
+        return true;
+    }
+
+    while (clazz.isArray()) {
+        clazz = clazz.getComponentType();
+    }
+
+    String name = clazz.getName();
+    if (name.startsWith("java.lang."))
+      return true;
+    if (ALLOWED.contains(name))
+      return true;
+    return false;
+  }
+
+  public static ObjectInputFilter allowlistedTreeFilter() {
+    return info -> {
+      Class<?> clazz = info.serialClass();
+
+      if (clazz == null) {
+        return ObjectInputFilter.Status.UNDECIDED;
+      }
+      if (isAllowed(clazz)) {
+        return ObjectInputFilter.Status.ALLOWED;
+      }
+      System.err.println("Rejected deserialization class: " + clazz.getName());
+      return ObjectInputFilter.Status.REJECTED;
+    };
+  }
+
   /**
    * Returs a Tree from the server connected to at host:port.
+   *<br>
+   * Filter logic limited to a small set of classes expected for a basic serialized tree.
+   * If more classes are necessary, please file an issue on github.
+   * Logic developed with the help of ChatGPT
+   *<br>
+   * Another option would be to switch to protobuf, but then we wouldn't be compatible
+   * across versions, in case that is a desired property.
    */
   public Tree getTree(String query) 
     throws IOException
@@ -137,6 +192,7 @@ public class LexicalizedParserClient {
     out.flush();
 
     ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+    ois.setObjectInputFilter(allowlistedTreeFilter());
     Object o;
     try {
       o = ois.readObject();

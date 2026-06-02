@@ -8,6 +8,7 @@ import java.io.*;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 
 /**
@@ -44,8 +45,30 @@ public class SplitWord extends SsurgeonEdit {
   final int headIndex;
   final GrammaticalRelation relation;
   final Map<Integer, String> nodeNames;
+  final Map<Integer, String> edgeNames;
 
-  public SplitWord(String node, List<String> nodePieces, Integer headIndex, GrammaticalRelation relation, String nodeNames, boolean exactSplit) {
+  static Map<Integer, String> splitNames(String names, String type, int numPieces) {
+    if (names == null) {
+      return Collections.emptyMap();
+    }
+
+    String[] namePieces = names.split(",");
+    HashMap<Integer, String> references = new HashMap<>();
+    for (String name : namePieces) {
+      String[] pieces = name.split("=", 2);
+      if (pieces.length < 2) {
+        throw new SsurgeonParseException("SplitWord got a -" + type + " parameter which did not have a number for one of the names.  Should look like 0=foo,1=bar");
+      }
+      int idx = Integer.valueOf(pieces[0]);
+      if (idx >= numPieces) {
+        throw new SsurgeonParseException("SplitWord got an index in -" + type + " which was larger than the largest possible split piece, " + idx + " (this is 0-indexed)");
+      }
+      references.put(idx, pieces[1]);
+    }
+    return references;
+  }
+
+  public SplitWord(String node, List<String> nodePieces, Integer headIndex, GrammaticalRelation relation, String nodeNames, String edgeNames, boolean exactSplit) {
     if (node == null) {
       throw new SsurgeonParseException("SplitWord expected -node with the name of the matched node to split");
     }
@@ -78,22 +101,11 @@ public class SplitWord extends SsurgeonEdit {
     }
     this.relation = relation;
 
-    if (nodeNames != null) {
-      String[] namePieces = nodeNames.split(",");
-      this.nodeNames = new HashMap<>();
-      for (String namePiece : namePieces) {
-        String[] pieces = namePiece.split("=", 2);
-        if (pieces.length < 2) {
-          throw new SsurgeonParseException("SplitWord got a -name parameter which did not have a number for one of the names.  Should look like 0=foo,1=bar");
-        }
-        int idx = Integer.valueOf(pieces[0]);
-        if (idx >= nodePieces.size()) {
-          throw new SsurgeonParseException("SplitWord got an index in -name which was larger than the largest possible split piece, " + idx + " (this is 0-indexed)");
-        }
-        this.nodeNames.put(idx, pieces[1]);
-      }
-    } else {
-      this.nodeNames = Collections.emptyMap();
+    this.nodeNames = splitNames(nodeNames, "name", nodePieces.size());
+    this.edgeNames = splitNames(edgeNames, "edge", nodePieces.size());
+
+    if (this.edgeNames.containsKey(this.headIndex)) {
+      throw new SsurgeonParseException("SplitWord received an edge name for " + this.headIndex + ", which is the head of the new phrase");
     }
   }
 
@@ -120,6 +132,9 @@ public class SplitWord extends SsurgeonEdit {
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     IndexedWord matchedNode = sm.getNode(node);
+    if (matchedNode == null) {
+      return false;
+    }
     String origWord = matchedNode.word();
 
     // first, iterate over the regex patterns we had at creation time
@@ -165,7 +180,6 @@ public class SplitWord extends SsurgeonEdit {
     matchedNode.setWord(words.get(headIndex));
     matchedNode.setValue(words.get(headIndex));
 
-    // TODO: update SpaceAfter in a reasonable manner
     for (int i = 0; i < words.size(); ++i) {
       if (i == headIndex) {
         if (nodeNames.containsKey(i)) {
@@ -176,7 +190,9 @@ public class SplitWord extends SsurgeonEdit {
 
       // otherwise, add a word with the appropriate index,
       // then connect it to matchedNode
-      // TODO: add the ability to set more values, such as POS?
+      // rather than adding the ability to set other values,
+      // we insert the nodes and edges with names into the matcher,
+      // allowing further edits to update those values
       IndexedWord newNode = new IndexedWord();
       newNode.setDocID(matchedNode.docID());
       newNode.setIndex(matchedIndex + i);
@@ -185,10 +201,13 @@ public class SplitWord extends SsurgeonEdit {
       newNode.setValue(words.get(i));
 
       sg.addVertex(newNode);
-      sg.addEdge(matchedNode, newNode, relation, 0.0, false);
+      SemanticGraphEdge newEdge = sg.addEdge(matchedNode, newNode, relation, 0.0, false);
 
       if (nodeNames.containsKey(i)) {
         sm.putNode(nodeNames.get(i), newNode);
+      }
+      if (edgeNames.containsKey(i)) {
+        sm.putNamedEdge(edgeNames.get(i), newEdge);
       }
     }
 

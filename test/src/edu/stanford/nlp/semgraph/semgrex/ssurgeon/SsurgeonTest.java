@@ -183,6 +183,29 @@ public class SsurgeonTest {
   }
 
   /**
+   * Test that trying to relabel an unknown edge throws an exception
+   */
+  @Test
+  public void readXMLRelabelEdgeUnknown() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This is a simple test of RelabelNamedEdge</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >obj=foo {}=a2") + "</semgrex>",
+                             "    <edit-list>relabelNamedEdge -edge zzz -reln dep</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    try {
+      List<SsurgeonPattern> patterns = inst.readFromString(doc);
+      throw new AssertionError("Expected a failure because of unknown edges");
+    } catch (SsurgeonParseException e) {
+      // yay
+    }
+  }
+
+  /**
    * Test a few various relabel edge operations
    */
   @Test
@@ -2029,6 +2052,64 @@ public class SsurgeonTest {
     } catch(SsurgeonParseException e) {
       // yay
     }
+  }
+
+  /**
+   * Test that trying to reattach an unknown edge throws an exception
+   */
+  @Test
+  public void readXMLRettachEdgeUnknown() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This is a simple test of RettachNamedEdge</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >obj=foo {}=a2") + "</semgrex>",
+                             "    <edit-list>reattachNamedEdge -edge zzz -gov a1</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    Ssurgeon inst = Ssurgeon.inst();
+    try {
+      List<SsurgeonPattern> patterns = inst.readFromString(doc);
+      throw new AssertionError("Expected a failure because of unknown edges");
+    } catch (SsurgeonParseException e) {
+      // yay
+    }
+  }
+
+  /**
+   * Test that trying to reattach an unknown edge throws an exception
+   */
+  @Test
+  public void readXMLRettachEdgeUnknownAdded() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>This is a simple test of RettachNamedEdge</notes>",
+                             // note the need for '!<det {}=a2' to avoid a bomb
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >obj=foo {}=a2 !<det {}=a2") + "</semgrex>",
+                             "    <edit-list>addEdge -edge zzz -gov a1 -dep a2 -reln det</edit-list>",
+                             "    <edit-list>reattachNamedEdge -edge zzz -dep a1 -gov a2</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    // The AddEdge edit should add zzz to the list of known edges
+    // Therefore, the unknown edge error won't happen
+    Ssurgeon inst = Ssurgeon.inst();
+    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    // this operation will first add an edge, then flip the nodes it points to
+    // we can test the result by checking the edges returned
+    SemanticGraph sg = SemanticGraph.valueOf("[FOO-1 obj> BAR-2]");
+    SemanticGraph newSg = pattern.iterate(sg).first;
+    IndexedWord FOO = newSg.getNodeByIndex(1);
+    IndexedWord BAR = newSg.getNodeByIndex(2);
+    assertEquals(newSg.outDegree(FOO), 1);
+    assertEquals(newSg.outDegree(BAR), 1);
+    assertEquals("obj", newSg.getAllEdges(FOO, BAR).get(0).getRelation().toString());
+    assertEquals("det", newSg.getAllEdges(BAR, FOO).get(0).getRelation().toString());
   }
 
   /**

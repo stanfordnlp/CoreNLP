@@ -24,6 +24,61 @@ class SemgrexParser {
   // because labeling nodes under negation is illegal
   private boolean underNegation = false;
   private boolean underNodeNegation = false;
+
+  // track whether we are inside a (?i:...) case-insensitive block;
+  // when true, all attribute value comparisons are made case-insensitively
+  private boolean caseInsensitive = false;
+  // track whether we are inside a (?s:...) sequential block;
+  // when true, chains like A < B < C are interpreted sequentially (A<B, B<C)
+  // rather than as conjunctions from the first node (A<B, A<C)
+  // TODO: this is not actually implemented yet
+  private boolean sequentialChain = false;
+
+  /**
+   * Saved state for a (?flags:...) modifier block.
+   * Add new flag fields here as new modifiers are introduced.
+   */
+  private static class ParseFlags {
+    final boolean caseInsensitive;
+    final boolean sequentialChain;
+    ParseFlags(boolean caseInsensitive, boolean sequentialChain) {
+      this.caseInsensitive = caseInsensitive;
+      this.sequentialChain = sequentialChain;
+    }
+  }
+
+  /** Save current flags so they can be restored after a modifier block. */
+  private ParseFlags saveFlags() {
+    return new ParseFlags(caseInsensitive, sequentialChain);
+  }
+
+  /** Restore flags saved before entering a modifier block. */
+  private void restoreFlags(ParseFlags saved) {
+    caseInsensitive = saved.caseInsensitive;
+    sequentialChain = saved.sequentialChain;
+  }
+
+  /**
+   * Apply the flag characters encoded in a MODIFIER_OPEN token image
+   * such as "(?i:", "(?s:", "(?is:", "(?si:", etc.
+   * Unknown flag letters cause a parse exception.
+   * Add new flag letters here as new modifiers are introduced.
+   */
+  private void applyModifierFlags(String tokenImage) throws ParseException {
+    // strip leading "(?" and trailing ":"
+    String flags = tokenImage.substring(2, tokenImage.length() - 1);
+    for (int idx = 0; idx < flags.length(); idx++) {
+      char c = flags.charAt(idx);
+      switch (c) {
+        case 'i': caseInsensitive = true; break;
+        case 's': sequentialChain = true; break;
+        default:
+          throw new ParseException("Unknown modifier flag '" + c +
+              "' in semgrex modifier block '" + tokenImage +
+              "'. Supported flags: i (case-insensitive), s (sequential chain).");
+      }
+    }
+  }
   // keep track of which variables we've already seen
   // lets us make sure we don't name new nodes under a negation
   private Set<String> knownVariables = Generics.newHashSet();
@@ -69,14 +124,16 @@ SPECIAL_TOKEN:
 
 TOKEN:
 {
-        < UNIQ: "uniq" >
-|       < SORT: "sort" >
+        < UNIQ:  "uniq" >
+|       < SORT:  "sort" >
+|       < RSORT: "rsort" >
 }
 
 TOKEN:
 {
 	< RELATION: "<" | ">" | ">>" | "<<" | "<>" | "==" | "$+" | "$-" | "$++" | "$--" | "." | ".." | "-" | "--" | ">++" | ">--" | "<++" | "<--" >
 |	< ALIGNRELN: "@" >
+|	< MODIFIER_OPEN: "(?" (["a"-"z"])+ ":" >
 |	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}", "+", "-"])+ >
 |	< NUMBER: ( ["0"-"9"] )+ >
 |	< EMPTY: "#" >
@@ -121,7 +178,7 @@ SemgrexPattern Root() : {
   )
   (
     (
-      "::" (postprocess = <UNIQ> | postprocess = <SORT>) { postprocessKeys = new ArrayList<>(); }  (nextIdentifier = identifier() { postprocessKeys.add(nextIdentifier.image); })*
+      "::" (postprocess = <UNIQ> | postprocess = <SORT> | postprocess = <RSORT>) { postprocessKeys = new ArrayList<>(); }  (nextIdentifier = identifier() { postprocessKeys.add(nextIdentifier.image); })*
       {
         for (String key : postprocessKeys) {
           if (!knownVariables.contains(key) && !knownVarGroups.contains(key) && !knownEdges.contains(key)) {
@@ -137,7 +194,9 @@ SemgrexPattern Root() : {
         if (postprocess.image.equals("uniq")) {
           node = new UniqPattern(node, postprocessKeys);
         } else if (postprocess.image.equals("sort")) {
-          node = new SortPattern(node, postprocessKeys);
+          node = new SortPattern(node, postprocessKeys, false);
+        } else if (postprocess.image.equals("rsort")) {
+          node = new SortPattern(node, postprocessKeys, true);
         }
       }
     )?
@@ -146,7 +205,7 @@ SemgrexPattern Root() : {
     "\n"
   )
   {
-    return node;
+    return new RootPattern(node, knownEdges);
   }
 
 }
@@ -154,6 +213,8 @@ SemgrexPattern Root() : {
 SemgrexPattern SubNode(GraphRelation r) : {
 	SemgrexPattern result =  null;
 	SemgrexPattern child = null;
+	ParseFlags savedFlags;
+	Token modifierToken;
 } {
 	( "(" result = SubNode(r) ")" ( child = RelationDisj() )? )
 	{
@@ -165,6 +226,22 @@ SemgrexPattern SubNode(GraphRelation r) : {
 	}
 	return result;
     }
+ | ( modifierToken = <MODIFIER_OPEN>
+     { savedFlags = saveFlags();
+       applyModifierFlags(modifierToken.image); }
+     result = SubNode(r)
+     ")"
+     { restoreFlags(savedFlags); }
+     ( child = RelationDisj() )? )
+   {
+     if (child != null) {
+       List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
+       newChildren.addAll(result.getChildren());
+       newChildren.add(child);
+       result.setChild(new CoordinationPattern(false, newChildren, true, false));
+     }
+     return result;
+   }
  | ( result = ModNode(r) (child = RelationDisj() )? )
  	{  if (child != null) result.setChild(child);
  		return result;}
@@ -339,7 +416,7 @@ void AddAttribute(NodeAttributes attributes) : {
              {
                if (attr != null && value != null) {
                  negated = attrType.image.equals("!:");
-                 attributes.setAttribute(attr.image, value.image, negated, varGroups);
+                 attributes.setAttribute(attr.image, value.image, negated, varGroups, caseInsensitive);
                }
              }
            )

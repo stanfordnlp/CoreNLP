@@ -56,8 +56,20 @@ public class GenericAnnotationSerializer extends AnnotationSerializer {
       objectInput = (ObjectInputStream) is;
     } else {
       objectInput = new ObjectInputStream(compress ? new GZIPInputStream(is) : is);
+
+      ObjectInputFilter filter = ObjectInputFilter.Config.createFilter(
+        "edu.stanford.nlp.**;" +
+        "java.lang.*;" +
+        "java.util.*;" +
+        "java.util.regex.*;" +
+        "java.time.*;" +
+        "!*"
+      );
+      objectInput.setObjectInputFilter(filter);
     }
+
     Object annotation = objectInput.readObject();
+
     if(annotation == null) return null;
     if(! (annotation instanceof Annotation)){
       throw new ClassCastException("ERROR: Serialized data does not contain an Annotation!");

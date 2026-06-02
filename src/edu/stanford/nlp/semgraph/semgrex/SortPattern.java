@@ -24,10 +24,12 @@ public class SortPattern extends SemgrexPattern  {
 
   private final SemgrexPattern child;
   private final List<String> keys;
+  private final boolean reverse;
 
-  public SortPattern(SemgrexPattern child, List<String> keys) {
+  public SortPattern(SemgrexPattern child, List<String> keys, boolean reverse) {
     this.child = child;
     this.keys = new ArrayList<>(keys);
+    this.reverse = reverse;
   }
 
   static public int compareKeys(List<String> first, List<String> second) {
@@ -83,7 +85,11 @@ public class SortPattern extends SemgrexPattern  {
       sentenceKeys.add(new Pair<>(idx, key));
     }
 
-    Collections.sort(sentenceKeys, new KeyPairComparator());
+    if (this.reverse) {
+      Collections.sort(sentenceKeys, Collections.reverseOrder(new KeyPairComparator()));
+    } else {
+      Collections.sort(sentenceKeys, new KeyPairComparator());
+    }
 
     List<Pair<CoreMap, List<SemgrexMatch>>> finalMatches = new ArrayList<>();
     for (int idx = 0; idx < sentenceKeys.size(); ++idx) {
@@ -132,7 +138,11 @@ public class SortPattern extends SemgrexPattern  {
     if (addChild) {
       sb.append(child.toString(true));
     }
-    sb.append(" :: sort");
+    if (this.reverse) {
+      sb.append(" :: rsort");
+    } else {
+      sb.append(" :: sort");
+    }
     for (String key : keys) {
       sb.append(" ");
       sb.append(key);
