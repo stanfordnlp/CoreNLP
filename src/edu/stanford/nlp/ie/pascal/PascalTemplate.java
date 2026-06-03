@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class PascalTemplate  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PascalTemplate.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(PascalTemplate.class);
 
   public static final String[] fields = {
     //dates
@@ -78,7 +78,7 @@ public class PascalTemplate  {
   /*
    * Acronym stemming and matching fields
    */
-  private static Pattern acronymPattern = Pattern.compile("([ \r-/a-zA-Z]+?)(?:[ -'*\t\r\n\f0-9]*)", Pattern.DOTALL);
+  private static final Pattern acronymPattern = Pattern.compile("([ \r\\-/a-zA-Z]+?)[ -'*\t\r\n\f0-9]*", Pattern.DOTALL);
 
   /**
    *
@@ -95,7 +95,7 @@ public class PascalTemplate  {
    */
   public static String stemAcronym(String s, CliqueTemplates ct) {
     if (ct.stemmedAcronymIndex.containsKey(s)) {
-      return (String) ct.stemmedAcronymIndex.get(s);
+      return ct.stemmedAcronymIndex.get(s);
     }
     Matcher matcher = acronymPattern.matcher(s);
     if (!matcher.matches() || s.equalsIgnoreCase("www")) {
@@ -280,4 +280,5 @@ public class PascalTemplate  {
     }
     return str;
   }
+
 }
