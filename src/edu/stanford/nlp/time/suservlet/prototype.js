@@ -26,7 +26,7 @@ var Prototype = {
         document.createElement('form').__proto__
   },
 
-  ScriptFragment: '<script[^>]*>([\\S\\s]*?)<\/script>',
+  ScriptFragment: '<script[^>]*>([\\S\\s]*?)<\/script\\\\b[^>]*>',
   JSONFilter: /^\/\*-secure-([\s\S]*)\*\/\s*$/,
 
   emptyFunction: function() { },
@@ -375,8 +375,13 @@ Object.extend(String.prototype, {
   },
 
   stripTags: function() {
-    return this.replace(/<\/?[^>]+>/gi, '');
-  },
+    var result = String(this), previous;
+    do {
+      previous = result;
+      result = result.replace(/<\/?[^>]+>/gi, '');
+    } while (result !== previous);
+    return result;
+    },
 
   stripScripts: function() {
     return this.replace(new RegExp(Prototype.ScriptFragment, 'img'), '');
@@ -472,8 +477,8 @@ Object.extend(String.prototype, {
       var character = String.specialChar[match[0]];
       return character ? character : '\\u00' + match[0].charCodeAt().toPaddedString(2, 16);
     });
-    if (useDoubleQuotes) return '"' + escapedString.replace(/"/g, '\\"') + '"';
-    return "'" + escapedString.replace(/'/g, '\\\'') + "'";
+    if (useDoubleQuotes) return '"' + escapedString.replace(/([\\"])/g, '\\$1') + '"';
+    return "'" + escapedString.replace(/([\\'])/g, '\\$1') + "'";
   },
 
   toJSON: function() {
@@ -530,7 +535,7 @@ if (Prototype.Browser.WebKit || Prototype.Browser.IE) Object.extend(String.proto
     return this.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   },
   unescapeHTML: function() {
-    return this.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+    return this.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
   }
 });
 
@@ -2945,7 +2950,7 @@ Object.extend(Selector, {
       return new Template('n = h.attr(n, r, "#{1}", "#{3}", "#{2}", c); c = false;').evaluate(m);
     },
     pseudo: function(m) {
-      if (m[6]) m[6] = m[6].replace(/"/g, '\\"');
+      if (m[6]) m[6] = m[6].replace(/\\/g, '\\\\').replace(/"/g, '\\"');
       return new Template('n = h.pseudo(n, "#{1}", "#{6}", r, c); c = false;').evaluate(m);
     },
     descendant:   'c = "descendant";',
@@ -3317,7 +3322,7 @@ Object.extend(Selector, {
 
   split: function(expression) {
     var expressions = [];
-    expression.scan(/(([\w#:.~>+()\s-]+|\*|\[.*?\])+)\s*(,|$)/, function(m) {
+    expression.scan(/(([\w#:.~>+()\s-]|\*|\[[^\]]*\])+)\s*(,|$)/, function(m) {
       expressions.push(m[1].strip());
     });
     return expressions;
