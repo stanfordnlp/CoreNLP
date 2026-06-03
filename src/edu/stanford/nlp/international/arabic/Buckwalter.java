@@ -128,7 +128,7 @@ public class Buckwalter implements SerializableFunction<String,String>  {
   //In practice we strip tatweel as part of orthographic normalization,
   //so any instances of _ in the Buckwalter should actually be treated as
   //punctuation.
-  private static final Pattern latinPunc = Pattern.compile("[\"\\?%,-;\\._]+");
+  private static final Pattern latinPunc = Pattern.compile("[\"?%,\\-;._]+");
 
   public Buckwalter() {
     if (arabicChars.length != buckChars.length)
