@@ -111,7 +111,7 @@ public class PascalTemplate  {
     ct.stemmedAcronymIndex.put(s, stemmed);
     log.info("Stemmed: " + s + " to: " + stemmed);
     if (ct.inverseAcronymMap.containsKey(stemmed)) {
-      HashSet set = (HashSet) ct.inverseAcronymMap.get(stemmed);
+      HashSet set = ct.inverseAcronymMap.get(stemmed);
       set.add(s);
     } else {
       HashSet set = new HashSet();
