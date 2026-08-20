@@ -601,6 +601,14 @@ public class SemgrexTest {
     runTest("{} 6,6<< {word:A}", graph, "I");
   }
 
+  /**
+   * Should be able to make a keyword part of a regex or name without a parser error
+   */
+  @Test
+  public void testKeywordRegex() {
+    SemgrexPattern pattern = SemgrexPattern.compile("{word:uniq}");
+  }
+
   /** After making UNIQ a separate token in the parser, we should verify that "uniq" can be treated as an identifier as well */
   @Test
   public void testUniqNamedNode() {
