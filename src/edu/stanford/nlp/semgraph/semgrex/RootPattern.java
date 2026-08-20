@@ -22,10 +22,20 @@ import edu.stanford.nlp.util.VariableStrings;
  */
 public class RootPattern extends SemgrexPattern  {
   final SemgrexPattern child;
+  final Set<String> knownVariables;
+  final Set<String> knownVarGroups;
   final Set<String> knownEdges;
 
   public List<SemgrexPattern> getChildren() {
     return Collections.singletonList(child);
+  }
+
+  public Set<String> getKnownVariables() {
+    return knownVariables;
+  }
+
+  public Set<String> getKnownVarGroups() {
+    return knownVarGroups;
   }
 
   public Set<String> getKnownEdges() {
@@ -65,11 +75,13 @@ public class RootPattern extends SemgrexPattern  {
     return child.postprocessMatches(matches, keepEmptyMatches);
   }
 
-  RootPattern(SemgrexPattern child, Set<String> knownEdges) {
+  RootPattern(SemgrexPattern child, Set<String> knownVariables, Set<String> knownVarGroups, Set<String> knownEdges) {
     if (child == null) {
       throw new IllegalArgumentException("Cannot wrap a null SemgrexPattern");
     }
     this.child = child;
+    this.knownVariables = Collections.unmodifiableSet(knownVariables);
+    this.knownVarGroups = Collections.unmodifiableSet(knownVarGroups);
     this.knownEdges = Collections.unmodifiableSet(knownEdges);
   }
 }

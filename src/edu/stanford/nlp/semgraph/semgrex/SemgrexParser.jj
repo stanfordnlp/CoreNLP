@@ -205,7 +205,7 @@ SemgrexPattern Root() : {
     "\n"
   )
   {
-    return new RootPattern(node, knownEdges);
+    return new RootPattern(node, knownVariables, knownVarGroups, knownEdges);
   }
 
 }

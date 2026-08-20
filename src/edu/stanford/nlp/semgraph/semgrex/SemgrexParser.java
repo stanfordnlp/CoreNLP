@@ -228,7 +228,7 @@ for (String key : postprocessKeys) {
       ;
     }
     jj_consume_token(15);
-{if ("" != null) return new RootPattern(node, knownEdges);}
+{if ("" != null) return new RootPattern(node, knownVariables, knownVarGroups, knownEdges);}
     throw new Error("Missing return statement in function");
 }
 

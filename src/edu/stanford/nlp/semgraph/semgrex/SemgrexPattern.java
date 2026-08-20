@@ -296,6 +296,14 @@ public abstract class SemgrexPattern implements Serializable  {
     return opt;
   }
 
+  public Set<String> getKnownVariables() {
+    throw new UnsupportedOperationException("Only the RootPattern knows about the full set of known variables");
+  }
+
+  public Set<String> getKnownVarGroups() {
+    throw new UnsupportedOperationException("Only the RootPattern knows about the full set of known var groups");
+  }
+
   public Set<String> getKnownEdges() {
     throw new UnsupportedOperationException("Only the RootPattern knows about the full set of known edges");
   }
