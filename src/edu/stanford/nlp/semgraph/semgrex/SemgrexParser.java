@@ -190,6 +190,8 @@ postprocessKeys = new ArrayList<>();
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case UNIQ:
+        case SORT:
+        case RSORT:
         case IDENTIFIER:{
           ;
           break;
@@ -241,6 +243,8 @@ for (String key : postprocessKeys) {
       jj_consume_token(17);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
+      case SORT:
+      case RSORT:
       case RELATION:
       case ALIGNRELN:
       case IDENTIFIER:
@@ -272,6 +276,8 @@ savedFlags = saveFlags();
 restoreFlags(savedFlags);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
+      case SORT:
+      case RSORT:
       case RELATION:
       case ALIGNRELN:
       case IDENTIFIER:
@@ -300,6 +306,8 @@ if (child != null) {
       result = ModNode(r);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
+      case SORT:
+      case RSORT:
       case RELATION:
       case ALIGNRELN:
       case IDENTIFIER:
@@ -360,6 +368,8 @@ children.add(child);
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
+      case SORT:
+      case RSORT:
       case RELATION:
       case ALIGNRELN:
       case IDENTIFIER:
@@ -399,6 +409,8 @@ if (children.size() == 1) {
   boolean startUnderNeg;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case UNIQ:
+    case SORT:
+    case RSORT:
     case RELATION:
     case ALIGNRELN:
     case IDENTIFIER:
@@ -439,6 +451,8 @@ child.makeOptional();
       break;
       }
     case UNIQ:
+    case SORT:
+    case RSORT:
     case RELATION:
     case ALIGNRELN:
     case IDENTIFIER:{
@@ -465,10 +479,14 @@ child.makeOptional();
         boolean pC = false;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case UNIQ:
+    case SORT:
+    case RSORT:
     case RELATION:
     case IDENTIFIER:{
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
+      case SORT:
+      case RSORT:
       case IDENTIFIER:{
         numArg = identifier();
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -490,10 +508,14 @@ child.makeOptional();
       rel = jj_consume_token(RELATION);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
+      case SORT:
+      case RSORT:
       case IDENTIFIER:
       case REGEX:{
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case UNIQ:
+        case SORT:
+        case RSORT:
         case IDENTIFIER:{
           relnType = identifier();
           break;
@@ -707,6 +729,8 @@ underNodeNegation = startUnderNeg;
         List<Pair<Integer,String>> varGroups = new ArrayList<Pair<Integer,String>>();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case UNIQ:
+    case SORT:
+    case RSORT:
     case IDENTIFIER:{
       attr = identifier();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -728,6 +752,8 @@ underNodeNegation = startUnderNeg;
         }
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case UNIQ:
+        case SORT:
+        case RSORT:
         case IDENTIFIER:{
           value = identifier();
           break;
@@ -770,6 +796,8 @@ if (attr != null && value != null) {
         jj_consume_token(29);
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case UNIQ:
+        case SORT:
+        case RSORT:
         case IDENTIFIER:{
           key = identifier();
           break;
@@ -799,6 +827,8 @@ if (attr != null && value != null) {
         }
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case UNIQ:
+        case SORT:
+        case RSORT:
         case IDENTIFIER:{
           value = identifier();
           break;
@@ -832,6 +862,8 @@ if (attr == null || key == null || value == null) {
           jj_consume_token(30);
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case UNIQ:
+          case SORT:
+          case RSORT:
           case IDENTIFIER:{
             key = identifier();
             break;
@@ -861,6 +893,8 @@ if (attr == null || key == null || value == null) {
           }
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case UNIQ:
+          case SORT:
+          case RSORT:
           case IDENTIFIER:{
             value = identifier();
             break;
@@ -915,6 +949,8 @@ attributes.setEmpty(true);
     jj_consume_token(32);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case UNIQ:
+    case SORT:
+    case RSORT:
     case IDENTIFIER:
     case EMPTY:
     case ROOT:{
@@ -970,6 +1006,14 @@ pat = new NodePattern(r, underNodeNegation, attributes, link, name != null ? nam
       t = jj_consume_token(UNIQ);
       break;
       }
+    case SORT:{
+      t = jj_consume_token(SORT);
+      break;
+      }
+    case RSORT:{
+      t = jj_consume_token(RSORT);
+      break;
+      }
     case IDENTIFIER:{
       t = jj_consume_token(IDENTIFIER);
       break;
@@ -1000,7 +1044,7 @@ pat = new NodePattern(r, underNodeNegation, attributes, link, name != null ? nam
 	   jj_la1_init_1();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x2000,0x5100c0,0x1c,0x104,0x4000,0x700164,0x700164,0x700164,0x510080,0x40000,0x780164,0x80000,0x700164,0x400164,0x1000000,0x104,0x1104,0x1104,0x2000000,0x4000000,0x164,0x510000,0x40000,0x580000,0x80000,0x500000,0x400000,0x8002000,0x1104,0x400,0x1104,0x8002000,0x1104,0x40000000,0x1104,0x8002000,0x1104,0x28002000,0xd04,0x40000000,0xd04,0x4000000,0x104,};
+	   jj_la1_0 = new int[] {0x2000,0x5100c0,0x1c,0x11c,0x4000,0x70017c,0x70017c,0x70017c,0x510080,0x40000,0x78017c,0x80000,0x70017c,0x40017c,0x1000000,0x11c,0x111c,0x111c,0x2000000,0x4000000,0x17c,0x510000,0x40000,0x580000,0x80000,0x500000,0x400000,0x8002000,0x111c,0x400,0x111c,0x8002000,0x111c,0x40000000,0x111c,0x8002000,0x111c,0x28002000,0xd1c,0x40000000,0xd1c,0x4000000,0x11c,};
 	}
 	private static void jj_la1_init_1() {
 	   jj_la1_1 = new int[] {0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x1,0x0,0x1,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};

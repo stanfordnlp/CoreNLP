@@ -480,5 +480,5 @@ Token identifier() : {
   Token t ;
 }
 {
-  ( t = < UNIQ > | t = < IDENTIFIER > ) { return t; }
+  ( t = < UNIQ > | t = < SORT > | t = < RSORT > | t = < IDENTIFIER > ) { return t; }
 }

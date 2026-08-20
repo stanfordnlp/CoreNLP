@@ -607,6 +607,8 @@ public class SemgrexTest {
   @Test
   public void testKeywordRegex() {
     SemgrexPattern pattern = SemgrexPattern.compile("{word:uniq}");
+    pattern = SemgrexPattern.compile("{word:sort}");
+    pattern = SemgrexPattern.compile("{word:rsort}");
   }
 
   /** After making UNIQ a separate token in the parser, we should verify that "uniq" can be treated as an identifier as well */
