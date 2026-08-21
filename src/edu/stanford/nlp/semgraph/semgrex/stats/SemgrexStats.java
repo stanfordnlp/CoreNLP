@@ -5,26 +5,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoNLLUReader;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexUtils;
 import edu.stanford.nlp.semgraph.semgrex.RootPattern;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexParseException;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexUtils;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
@@ -34,29 +32,53 @@ import edu.stanford.nlp.util.logging.Redwood;
 /**
  * Runs a semgrex stats script over a corpus and prints the results.
  *<br>
- * A script is a semgrex pattern on its first line, followed by one
- * statistics command per line:
+ * Every line of a script is a command word and its arguments.  The
+ * {@code pattern} command opens a stage; the commands after it are the
+ * statistics gathered for that stage:
  *<pre>
  * # subjects, by the relation used and the part of speech of the dependent
- * {}=gov &gt;/nsubj.*&#47;=edge {}=dep
+ * pattern {}=gov &gt;/nsubj.*&#47;=edge {}=dep
  * count edge
  * count edge dep
  *</pre>
- * Blank lines and lines beginning with {@code #} are ignored.  All of
- * the commands accumulate during a single pass over the corpus, so
- * asking several questions at once costs no more than asking one.
+ * All of the commands in one stage accumulate during a single pass over
+ * the corpus, so asking several questions at once costs no more than
+ * asking one.  Blank lines and lines beginning with {@code #} are
+ * ignored, which is why patterns need the {@code pattern} keyword:
+ * {@code #} is also the semgrex token for an empty node, so a bare
+ * pattern at the start of a line could not be told apart from a
+ * comment.
+ *<br>
+ * A script with more than one stage runs one pass over the corpus per
+ * stage, in order.  A later stage can be restricted to values gathered
+ * by an earlier one, which is a question a single pattern cannot ask,
+ * since the sentences matching the first pattern are not all of the
+ * sentences containing those words:
+ *<pre>
+ * pattern {}=word &lt;nmod:poss {}
+ * collect word as possessed
+ *
+ * pattern {}=word &lt;=relation {}
+ * count -restrict word=possessed word relation
+ *</pre>
  *<br>
  * The command language is parsed here rather than in the semgrex
  * grammar.  A command word added to the grammar would become a reserved
  * token in the lexer -- {@code count}, {@code mean}, and {@code top} are
  * all words someone might reasonably want as a node name or a lemma --
  * and every new command would mean regenerating the parser.  This way
- * adding a command is a new class and one line in {@link #REGISTRY}.
+ * adding a command is a new class and one line in the registry.
  *
  * @author John Bauer
  */
 public class SemgrexStats {
   private static final Redwood.RedwoodChannels log = Redwood.channels(SemgrexStats.class);
+
+  /** Opens a new stage.  Handled by the script parser, not by the registry. */
+  public static final String PATTERN_COMMAND = "pattern";
+
+  /** Comments and the semgrex empty node both start with this, which is why patterns are prefixed */
+  private static final String COMMENT = "#";
 
   /**
    * Command word to the thing which builds it.  Add new commands here.
@@ -66,6 +88,7 @@ public class SemgrexStats {
   private static Map<String, SemgrexStat.Factory> buildRegistry() {
     Map<String, SemgrexStat.Factory> registry = new LinkedHashMap<>();
     registry.put("count", CountStat::create);
+    registry.put("collect", CollectStat::create);
     return Collections.unmodifiableMap(registry);
   }
 
@@ -73,29 +96,138 @@ public class SemgrexStats {
     return new ArrayList<>(REGISTRY.keySet());
   }
 
-  private final SemgrexPattern pattern;
-  private final List<SemgrexStat> stats;
+  // ------------------------------------------------------------------
+  // stages
+  // ------------------------------------------------------------------
 
-  public SemgrexStats(SemgrexPattern pattern, List<SemgrexStat> stats) {
-    this.pattern = pattern;
-    this.stats = Collections.unmodifiableList(new ArrayList<>(stats));
+  /**
+   * One pattern and the statistics gathered for it in a single pass over the corpus.
+   */
+  public static class Stage {
+    private final SemgrexPattern pattern;
+    private final List<SemgrexStat> stats;
+
+    Stage(SemgrexPattern pattern, List<SemgrexStat> stats) {
+      this.pattern = pattern;
+      this.stats = Collections.unmodifiableList(new ArrayList<>(stats));
+    }
+
+    public SemgrexPattern getPattern() {
+      return pattern;
+    }
+
+    public List<SemgrexStat> getStats() {
+      return stats;
+    }
+
+    void accumulate(List<CoreMap> sentences) {
+      List<Pair<CoreMap, List<SemgrexMatch>>> matches = pattern.matchSentences(sentences, false);
+      for (Pair<CoreMap, List<SemgrexMatch>> sentence : matches) {
+        for (SemgrexMatch match : sentence.second()) {
+          for (SemgrexStat stat : stats) {
+            stat.accumulate(match);
+          }
+        }
+      }
+    }
+
+    String report() {
+      StringBuilder sb = new StringBuilder();
+      for (SemgrexStat stat : stats) {
+        if (sb.length() > 0) {
+          sb.append(System.lineSeparator());
+        }
+        sb.append(COMMENT).append(" ").append(stat.toString()).append(System.lineSeparator());
+        sb.append(stat.report());
+      }
+      return sb.toString();
+    }
   }
 
-  public SemgrexPattern getPattern() {
-    return pattern;
+  /**
+   * What a command can see while it is being built: the pattern of the
+   * stage it belongs to, and the sets gathered by earlier stages.
+   *<br>
+   * The sets are shared, mutable, and filled in as the stages run.  A
+   * command which reads one holds the same Set object the command which
+   * fills it holds, so by the time a later stage accumulates, an earlier
+   * stage has already finished writing to it.
+   */
+  public static class Context {
+    private final SemgrexPattern pattern;
+    private final int stage;
+    private final Map<String, Set<String>> sets;
+    private final Map<String, Integer> setStages;
+
+    Context(SemgrexPattern pattern, int stage, Map<String, Set<String>> sets, Map<String, Integer> setStages) {
+      this.pattern = pattern;
+      this.stage = stage;
+      this.sets = sets;
+      this.setStages = setStages;
+    }
+
+    public SemgrexPattern getPattern() {
+      return pattern;
+    }
+
+    /** Checks that keys name something in this stage's pattern.  See validateKeys. */
+    public void validateKeys(String command, List<String> keys) {
+      SemgrexStats.validateKeys(pattern, command, keys);
+    }
+
+    /**
+     * Declares a set for a command in this stage to fill.
+     */
+    public Set<String> declareSet(String command, String name) {
+      if (sets.containsKey(name)) {
+        throw new SemgrexParseException(command + " tried to collect into '" + name +
+                                        "', which was already collected in stage " + (setStages.get(name) + 1));
+      }
+      Set<String> values = new LinkedHashSet<>();
+      sets.put(name, values);
+      setStages.put(name, stage);
+      return values;
+    }
+
+    /**
+     * Looks up a set gathered by an earlier stage.
+     *<br>
+     * It has to be an earlier one: a set collected in this same stage is
+     * still being filled while this stage runs, so restricting on it
+     * would depend on the order the sentences happened to arrive in.
+     */
+    public Set<String> useSet(String command, String name) {
+      Integer collected = setStages.get(name);
+      if (collected == null) {
+        throw new SemgrexParseException(command + " asked for the set '" + name + "', which was never collected." +
+                                        (sets.isEmpty() ? "" : "  Collected sets: " + new TreeSet<>(sets.keySet())));
+      }
+      if (collected >= stage) {
+        throw new SemgrexParseException(command + " asked for the set '" + name + "', which is collected in the same " +
+                                        "stage.  A set can only be used by a stage after the one which collects it");
+      }
+      return sets.get(name);
+    }
   }
 
-  public List<SemgrexStat> getStats() {
-    return stats;
+  private final List<Stage> stages;
+
+  public SemgrexStats(List<Stage> stages) {
+    this.stages = Collections.unmodifiableList(new ArrayList<>(stages));
+  }
+
+  public List<Stage> getStages() {
+    return stages;
+  }
+
+  public int numStages() {
+    return stages.size();
   }
 
   // ------------------------------------------------------------------
   // parsing
   // ------------------------------------------------------------------
 
-  /**
-   * Parse a whole script: pattern on the first meaningful line, commands after.
-   */
   public static SemgrexStats parse(String script) {
     return parse(Arrays.asList(script.split("\n")));
   }
@@ -106,32 +238,81 @@ public class SemgrexStats {
       // \r so that a script written on Windows doesn't produce a
       // pattern with an invisible character glued to the end of it
       String trimmed = line.replaceAll("\r$", "").trim();
-      if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+      if (trimmed.isEmpty() || trimmed.startsWith(COMMENT)) {
         continue;
       }
       meaningful.add(trimmed);
     }
 
     if (meaningful.isEmpty()) {
-      throw new SemgrexParseException("Script was empty: expected a semgrex pattern on the first line");
+      throw new SemgrexParseException("Script was empty: expected a '" + PATTERN_COMMAND + "' line");
     }
 
-    // note that we compile a single line, never the whole script.
-    // SemgrexPattern.Root() stops at its newline without checking for
-    // EOF, so handing it the entire script would parse the pattern and
-    // discard every command after it without complaining
-    SemgrexPattern pattern = SemgrexPattern.compile(meaningful.get(0));
+    Map<String, Set<String>> sets = new HashMap<>();
+    Map<String, Integer> setStages = new HashMap<>();
 
+    List<Stage> stages = new ArrayList<>();
+    Context context = null;
     List<SemgrexStat> stats = new ArrayList<>();
-    for (String line : meaningful.subList(1, meaningful.size())) {
-      stats.add(parseCommand(pattern, line));
+
+    for (String line : meaningful) {
+      Pair<String, String> split = splitCommand(line);
+      String command = split.first();
+      String rest = split.second();
+
+      if (PATTERN_COMMAND.equals(command)) {
+        if (context != null) {
+          stages.add(finishStage(context, stats));
+          stats = new ArrayList<>();
+        }
+        if (rest.isEmpty()) {
+          throw new SemgrexParseException("A '" + PATTERN_COMMAND + "' line needs a semgrex pattern after it");
+        }
+        // note that we compile a single line, never the whole script.
+        // SemgrexPattern.Root() stops at its newline without checking
+        // for EOF, so handing it more than one line would parse the
+        // first and discard the rest without complaining
+        context = new Context(SemgrexPattern.compile(rest), stages.size(), sets, setStages);
+        continue;
+      }
+
+      if (context == null) {
+        throw new SemgrexParseException("Found the command '" + command + "' before any '" + PATTERN_COMMAND + "' line");
+      }
+      stats.add(parseCommand(context, command, rest));
     }
 
+    stages.add(finishStage(context, stats));
+    return new SemgrexStats(stages);
+  }
+
+  private static Stage finishStage(Context context, List<SemgrexStat> stats) {
     if (stats.isEmpty()) {
-      throw new SemgrexParseException("Script had a pattern but no statistics commands.  Known commands: " + knownCommands());
+      throw new SemgrexParseException("A '" + PATTERN_COMMAND + "' line had no statistics commands after it.  " +
+                                      "Known commands: " + knownCommands());
     }
+    return new Stage(context.getPattern(), stats);
+  }
 
-    return new SemgrexStats(pattern, stats);
+  /**
+   * Splits a line into its command word and everything after it.
+   *<br>
+   * The remainder is kept verbatim, since for a pattern line it is the
+   * pattern and its internal spacing matters.
+   */
+  static Pair<String, String> splitCommand(String line) {
+    String[] pieces = line.split("\\s+", 2);
+    return new Pair<>(pieces[0], pieces.length > 1 ? pieces[1].trim() : "");
+  }
+
+  public static SemgrexStat parseCommand(Context context, String command, String rest) {
+    SemgrexStat.Factory factory = REGISTRY.get(command);
+    if (factory == null) {
+      throw new SemgrexParseException("Unknown statistics command '" + command + "'.  Known commands: " + knownCommands() +
+                                      ", and '" + PATTERN_COMMAND + "' to start a new stage");
+    }
+    List<String> args = rest.isEmpty() ? Collections.emptyList() : Arrays.asList(rest.split("\\s+"));
+    return factory.create(context, args);
   }
 
   /**
@@ -185,48 +366,32 @@ public class SemgrexStats {
     }
   }
 
-  /**
-   * Parse one command line, such as "count -flat edge dep"
-   */
-  public static SemgrexStat parseCommand(SemgrexPattern pattern, String line) {
-    List<String> pieces = Arrays.asList(line.trim().split("\\s+"));
-    String command = pieces.get(0);
-    SemgrexStat.Factory factory = REGISTRY.get(command);
-    if (factory == null) {
-      throw new SemgrexParseException("Unknown statistics command '" + command + "'.  Known commands: " + knownCommands());
-    }
-    return factory.create(pattern, pieces.subList(1, pieces.size()));
-  }
-
   // ------------------------------------------------------------------
   // running
   // ------------------------------------------------------------------
 
   /**
-   * Match the pattern over these sentences, feeding every match to every command.
+   * Feed a batch of sentences to one stage.
    *<br>
-   * May be called more than once, so that a corpus can be processed a
-   * file at a time rather than held in memory all at once.
+   * May be called more than once for a stage, so that a corpus can be
+   * processed a file at a time rather than held in memory all at once.
+   * Stages must be run in order, since a later one may read a set an
+   * earlier one is still filling.
    */
-  public void accumulate(List<CoreMap> sentences) {
-    List<Pair<CoreMap, List<SemgrexMatch>>> matches = pattern.matchSentences(sentences, false);
-    for (Pair<CoreMap, List<SemgrexMatch>> sentence : matches) {
-      for (SemgrexMatch match : sentence.second()) {
-        for (SemgrexStat stat : stats) {
-          stat.accumulate(match);
-        }
-      }
-    }
+  public void accumulate(int stage, List<CoreMap> sentences) {
+    stages.get(stage).accumulate(sentences);
   }
 
   public String report() {
     StringBuilder sb = new StringBuilder();
-    for (SemgrexStat stat : stats) {
+    for (int idx = 0; idx < stages.size(); ++idx) {
       if (sb.length() > 0) {
         sb.append(System.lineSeparator());
       }
-      sb.append("# ").append(stat.toString()).append(System.lineSeparator());
-      sb.append(stat.report());
+      if (stages.size() > 1) {
+        sb.append(COMMENT).append(COMMENT).append(" stage ").append(idx + 1).append(System.lineSeparator());
+      }
+      sb.append(stages.get(idx).report());
     }
     return sb.toString();
   }
@@ -255,10 +420,17 @@ public class SemgrexStats {
     log.info();
     log.info(SCRIPT + " is required, as is one of " + CONLLU_FILE + " or " + TREE_FILE);
     log.info();
-    log.info("A script is a semgrex pattern followed by one command per line:");
-    log.info("  {}=gov >nsubj=edge {}=dep");
+    log.info("A script is one command per line, with '" + PATTERN_COMMAND + "' starting a stage:");
+    log.info("  " + PATTERN_COMMAND + " {}=gov >nsubj=edge {}=dep");
     log.info("  count edge");
     log.info("  count edge gov");
+    log.info();
+    log.info("A second stage can be restricted to values gathered by the first,");
+    log.info("at the cost of one more pass over the corpus:");
+    log.info("  " + PATTERN_COMMAND + " {}=word <nmod:poss {}");
+    log.info("  collect word as possessed");
+    log.info("  " + PATTERN_COMMAND + " {}=word <=relation {}");
+    log.info("  count -restrict word=possessed word relation");
     log.info();
     log.info("Known commands: " + knownCommands());
   }
@@ -357,20 +529,11 @@ public class SemgrexStats {
       System.exit(2);
     }
 
-    // accumulate a file at a time so that a large corpus doesn't have
-    // to be resident all at once
-    if (argsMap.containsKey(TREE_FILE)) {
-      for (String treeFile : argsMap.get(TREE_FILE)) {
-        log.info("Loading file " + treeFile);
-        stats.accumulate(SemgrexUtils.readTreeFile(treeFile, mode, useExtras));
-      }
-    }
-
+    List<File> conlluFiles = Collections.emptyList();
     if (argsMap.containsKey(CONLLU_FILE)) {
       // expand the whole list before reading anything, so that a typo
       // in the last filename is reported now rather than after an hour
       // of counting
-      List<File> conlluFiles;
       try {
         conlluFiles = expandConlluFiles(argsMap.get(CONLLU_FILE));
       } catch (IllegalArgumentException e) {
@@ -378,19 +541,37 @@ public class SemgrexStats {
         System.exit(2);
         return;
       }
+    }
 
-      try {
-        CoNLLUReader reader = new CoNLLUReader();
-        for (File conlluFile : conlluFiles) {
-          log.info("Loading file " + conlluFile);
-          List<CoreMap> sentences = new ArrayList<>();
-          for (Annotation doc : reader.readCoNLLUFile(conlluFile.toString())) {
-            sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
-          }
-          stats.accumulate(sentences);
+    // one pass over the corpus per stage.  the files are re-read rather
+    // than kept, since a script with two stages should not double the
+    // memory needed for a large treebank
+    for (int stage = 0; stage < stats.numStages(); ++stage) {
+      if (stats.numStages() > 1) {
+        log.info("Stage " + (stage + 1) + " of " + stats.numStages());
+      }
+
+      if (argsMap.containsKey(TREE_FILE)) {
+        for (String treeFile : argsMap.get(TREE_FILE)) {
+          log.info("Loading file " + treeFile);
+          stats.accumulate(stage, SemgrexUtils.readTreeFile(treeFile, mode, useExtras));
         }
-      } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
+      }
+
+      if (!conlluFiles.isEmpty()) {
+        try {
+          CoNLLUReader reader = new CoNLLUReader();
+          for (File conlluFile : conlluFiles) {
+            log.info("Loading file " + conlluFile);
+            List<CoreMap> sentences = new ArrayList<>();
+            for (Annotation doc : reader.readCoNLLUFile(conlluFile.toString())) {
+              sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
+            }
+            stats.accumulate(stage, sentences);
+          }
+        } catch (ClassNotFoundException e) {
+          throw new RuntimeException(e);
+        }
       }
     }
 

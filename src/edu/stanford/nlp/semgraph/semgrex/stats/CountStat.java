@@ -6,10 +6,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexParseException;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexUtils;
 
 /**
@@ -40,31 +40,47 @@ public class CountStat implements SemgrexStat {
 
   private static final String FLAT = "-flat";
   private static final String MAX_COLUMNS = "-maxColumns";
+  private static final String RESTRICT = "-restrict";
 
-  private final SemgrexPattern pattern;
   private final List<String> keys;
   private final Map<List<String>, Integer> counts = new HashMap<>();
 
   private final int maxColumns;
   private final boolean flat;
 
+  /** a key, and the set of values from an earlier stage that key is allowed to take */
+  private static class Restriction {
+    final String key;
+    final String setName;
+    final Set<String> values;
+
+    Restriction(String key, String setName, Set<String> values) {
+      this.key = key;
+      this.setName = setName;
+      this.values = values;
+    }
+  }
+
+  private final List<Restriction> restrictions;
+
   private long totalMatches = 0;
 
-  CountStat(SemgrexPattern pattern, List<String> keys, boolean flat, int maxColumns) {
+  CountStat(List<String> keys, boolean flat, int maxColumns, List<Restriction> restrictions) {
     if (keys.isEmpty()) {
       throw new SemgrexParseException("count needs at least one key to count");
     }
-    this.pattern = pattern;
     this.keys = Collections.unmodifiableList(new ArrayList<>(keys));
     this.flat = flat;
     this.maxColumns = maxColumns;
+    this.restrictions = Collections.unmodifiableList(new ArrayList<>(restrictions));
   }
 
   /**
-   * Parses "count [-flat] [-maxColumns N] KEY [KEY ...]"
+   * Parses "count [-flat] [-maxColumns N] [-restrict KEY=SET ...] KEY [KEY ...]"
    */
-  public static SemgrexStat create(SemgrexPattern pattern, List<String> args) {
+  public static SemgrexStat create(SemgrexStats.Context context, List<String> args) {
     List<String> keys = new ArrayList<>();
+    List<Restriction> restrictions = new ArrayList<>();
     boolean flat = false;
     int maxColumns = DEFAULT_MAX_COLUMNS;
 
@@ -85,8 +101,20 @@ public class CountStat implements SemgrexStat {
         if (maxColumns < 1) {
           throw new SemgrexParseException(MAX_COLUMNS + " must be at least 1");
         }
+      } else if (RESTRICT.equals(arg)) {
+        if (idx + 1 >= args.size()) {
+          throw new SemgrexParseException(RESTRICT + " needs KEY=SET after it");
+        }
+        ++idx;
+        String[] pieces = args.get(idx).split("=", 2);
+        if (pieces.length != 2 || pieces[0].isEmpty() || pieces[1].isEmpty()) {
+          throw new SemgrexParseException(RESTRICT + " needs KEY=SET after it, not '" + args.get(idx) + "'");
+        }
+        context.validateKeys("count " + RESTRICT, Collections.singletonList(pieces[0]));
+        restrictions.add(new Restriction(pieces[0], pieces[1], context.useSet("count " + RESTRICT, pieces[1])));
       } else if (arg.startsWith("-")) {
-        throw new SemgrexParseException("Unknown option '" + arg + "' for count.  Known options: " + FLAT + ", " + MAX_COLUMNS);
+        throw new SemgrexParseException("Unknown option '" + arg + "' for count.  Known options: " +
+                                        FLAT + ", " + MAX_COLUMNS + ", " + RESTRICT);
       } else {
         keys.add(arg);
       }
@@ -95,9 +123,9 @@ public class CountStat implements SemgrexStat {
     if (keys.isEmpty()) {
       throw new SemgrexParseException("count needs at least one key to count");
     }
-    SemgrexStats.validateKeys(pattern, "count", keys);
+    context.validateKeys("count", keys);
 
-    return new CountStat(pattern, keys, flat, maxColumns);
+    return new CountStat(keys, flat, maxColumns, restrictions);
   }
 
   @Override
@@ -112,6 +140,14 @@ public class CountStat implements SemgrexStat {
 
   @Override
   public void accumulate(SemgrexMatch match) {
+    for (Restriction restriction : restrictions) {
+      // an unbound key is not in any collected set, so it cannot pass a restriction
+      String value = SemgrexUtils.getKey(match, restriction.key);
+      if (value == null || !restriction.values.contains(value)) {
+        return;
+      }
+    }
+
     List<String> key = SemgrexUtils.buildKey(match, keys);
     List<String> cleaned = new ArrayList<>(key.size());
     for (String value : key) {
@@ -172,6 +208,10 @@ public class CountStat implements SemgrexStat {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("count");
+    for (Restriction restriction : restrictions) {
+      sb.append(" ").append(RESTRICT).append(" ").append(restriction.key).append("=").append(restriction.setName);
+      sb.append(" (").append(restriction.values.size()).append(" values)");
+    }
     if (flat) {
       sb.append(" ").append(FLAT);
     }
