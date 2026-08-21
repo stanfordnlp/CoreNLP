@@ -32,30 +32,9 @@ public class SortPattern extends SemgrexPattern  {
     this.reverse = reverse;
   }
 
-  static public int compareKeys(List<String> first, List<String> second) {
-    if (first == null && second == null) {
-      return 0;
-    }
-    if (second == null) {
-      return -1;
-    }
-    if (first == null) {
-      return 1;
-    }
-    for (int idx = 0; idx < first.size() && idx < second.size(); ++idx) {
-      int cmp = first.get(idx).compareTo(second.get(idx));
-      if (cmp != 0) {
-        return cmp;
-      }
-    }
-    // what if they are different lengths?
-    // shouldn't happen here anyway
-    return 0;
-  }
-
   static class KeyPairComparator implements Comparator<Pair<Integer, List<String>>> {
     public int compare(Pair<Integer, List<String>> first, Pair<Integer, List<String>> second) {
-      return compareKeys(first.second, second.second);
+      return Utils.compareKeys(first.second, second.second);
     }
   }
 
@@ -78,7 +57,7 @@ public class SortPattern extends SemgrexPattern  {
       List<String> key = null;
       for (SemgrexMatch match : sentence.second()) {
         List<String> newKey = buildKey(match, keys);
-        if (compareKeys(newKey, key) < 0) {
+        if (Utils.compareKeys(newKey, key) < 0) {
           key = newKey;
         }
       }
