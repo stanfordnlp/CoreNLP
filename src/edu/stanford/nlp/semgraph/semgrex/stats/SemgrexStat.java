@@ -3,7 +3,6 @@ package edu.stanford.nlp.semgraph.semgrex.stats;
 import java.util.List;
 
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 
 /**
  * A single statistics command from a semgrex stats script.
@@ -53,11 +52,12 @@ public interface SemgrexStat {
   /**
    * Builds a SemgrexStat from the arguments on one line of a script.
    *<br>
-   * The pattern is passed in so that a command can extract keys from a
-   * match, and so that it can complain about arguments which could
-   * never match anything.
+   * The context carries the pattern of the stage this command belongs
+   * to, so that a command can complain at parse time about arguments
+   * which could never match anything, plus the sets gathered by
+   * earlier stages.
    */
   interface Factory {
-    SemgrexStat create(SemgrexPattern pattern, List<String> args);
+    SemgrexStat create(SemgrexStats.Context context, List<String> args);
   }
 }
