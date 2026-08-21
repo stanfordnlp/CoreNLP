@@ -4,9 +4,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.semgraph.SemanticGraphFactory;
+import edu.stanford.nlp.trees.GrammaticalStructure;
+import edu.stanford.nlp.trees.MemoryTreebank;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeNormalizer;
+import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -69,5 +81,22 @@ public class SemgrexUtils {
     public int compare(Pair<Integer, List<String>> first, Pair<Integer, List<String>> second) {
       return SemgrexUtils.compareKeys(first.second, second.second);
     }
+  }
+
+  public static List<CoreMap> readTreeFile(String treeFile, SemanticGraphFactory.Mode mode, boolean useExtras) {
+    List<CoreMap> sentences = new ArrayList<>();
+    MemoryTreebank treebank = new MemoryTreebank(new TreeNormalizer());
+    treebank.loadPath(treeFile);
+    for (Tree tree : treebank) {
+      // TODO: allow other languages... this defaults to English
+      SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras ?
+              GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE);
+      CoreMap sentence = new ArrayCoreMap();
+      sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
+      List<CoreLabel> tokens = graph.vertexListSorted().stream().map(x -> x.backingLabel()).collect(Collectors.toList());
+      sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
+      sentences.add(sentence);
+    }
+    return sentences;
   }
 }

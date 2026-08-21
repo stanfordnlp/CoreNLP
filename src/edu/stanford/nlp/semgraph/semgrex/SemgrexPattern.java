@@ -2,7 +2,6 @@ package edu.stanford.nlp.semgraph.semgrex;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -12,12 +11,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoNLLUReader;
-import edu.stanford.nlp.trees.GrammaticalStructure;
-import edu.stanford.nlp.trees.MemoryTreebank;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.ud.CoNLLUDocumentWriter;
-import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
@@ -617,19 +611,7 @@ public abstract class SemgrexPattern implements Serializable  {
     List<CoreMap> sentences = new ArrayList<>();
     if (argsMap.containsKey(TREE_FILE) && argsMap.get(TREE_FILE).length > 0) {
       for (String treeFile : argsMap.get(TREE_FILE)) {
-        log.info("Loading file " + treeFile);
-        MemoryTreebank treebank = new MemoryTreebank(new TreeNormalizer());
-        treebank.loadPath(treeFile);
-        for (Tree tree : treebank) {
-          // TODO: allow other languages... this defaults to English
-          SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras ?
-                  GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE);
-          CoreMap sentence = new ArrayCoreMap();
-          sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
-          List<CoreLabel> tokens = graph.vertexListSorted().stream().map(x -> x.backingLabel()).collect(Collectors.toList());
-          sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
-          sentences.add(sentence);
-        }
+        sentences.addAll(SemgrexUtils.readTreeFile(treeFile, mode, useExtras));
       }
     }
 
