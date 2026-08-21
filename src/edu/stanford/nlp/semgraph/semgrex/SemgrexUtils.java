@@ -7,7 +7,7 @@ import java.util.List;
  *
  * @author John Bauer
  */
-public class Utils {
+public class SemgrexUtils {
   static public int compareKeys(List<String> first, List<String> second) {
     if (first == null && second == null) {
       return 0;

@@ -34,7 +34,7 @@ public class SortPattern extends SemgrexPattern  {
 
   static class KeyPairComparator implements Comparator<Pair<Integer, List<String>>> {
     public int compare(Pair<Integer, List<String>> first, Pair<Integer, List<String>> second) {
-      return Utils.compareKeys(first.second, second.second);
+      return SemgrexUtils.compareKeys(first.second, second.second);
     }
   }
 
@@ -57,7 +57,7 @@ public class SortPattern extends SemgrexPattern  {
       List<String> key = null;
       for (SemgrexMatch match : sentence.second()) {
         List<String> newKey = buildKey(match, keys);
-        if (Utils.compareKeys(newKey, key) < 0) {
+        if (SemgrexUtils.compareKeys(newKey, key) < 0) {
           key = newKey;
         }
       }
