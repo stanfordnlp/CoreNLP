@@ -2,7 +2,6 @@ package edu.stanford.nlp.semgraph.semgrex;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,12 +31,6 @@ public class SortPattern extends SemgrexPattern  {
     this.reverse = reverse;
   }
 
-  static class KeyPairComparator implements Comparator<Pair<Integer, List<String>>> {
-    public int compare(Pair<Integer, List<String>> first, Pair<Integer, List<String>> second) {
-      return SemgrexUtils.compareKeys(first.second, second.second);
-    }
-  }
-
   /**
    * Sort sentences by how they matched the keys in the ::sort operation
    *<br>
@@ -56,7 +49,7 @@ public class SortPattern extends SemgrexPattern  {
       Pair<CoreMap, List<SemgrexMatch>> sentence = filteredMatches.get(idx);
       List<String> key = null;
       for (SemgrexMatch match : sentence.second()) {
-        List<String> newKey = buildKey(match, keys);
+        List<String> newKey = SemgrexUtils.buildKey(match, keys);
         if (SemgrexUtils.compareKeys(newKey, key) < 0) {
           key = newKey;
         }
@@ -65,9 +58,9 @@ public class SortPattern extends SemgrexPattern  {
     }
 
     if (this.reverse) {
-      Collections.sort(sentenceKeys, Collections.reverseOrder(new KeyPairComparator()));
+      Collections.sort(sentenceKeys, Collections.reverseOrder(new SemgrexUtils.KeyPairComparator()));
     } else {
-      Collections.sort(sentenceKeys, new KeyPairComparator());
+      Collections.sort(sentenceKeys, new SemgrexUtils.KeyPairComparator());
     }
 
     List<Pair<CoreMap, List<SemgrexMatch>>> finalMatches = new ArrayList<>();

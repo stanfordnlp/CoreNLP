@@ -40,7 +40,7 @@ public class UniqPattern extends SemgrexPattern  {
     for (Pair<CoreMap, List<SemgrexMatch>> sentence : matches) {
       List<SemgrexMatch> newSentenceMatches = new ArrayList<>();
       for (SemgrexMatch match : sentence.second()) {
-        List<String> matchKey = buildKey(match, keys);
+        List<String> matchKey = SemgrexUtils.buildKey(match, keys);
         if (seenKeys.contains(matchKey)) {
           continue;
         }
