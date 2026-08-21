@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.Quadruple;
 import edu.stanford.nlp.util.Quintuple;
 
 /**
@@ -39,8 +38,9 @@ public class NodeAttributes {
   // for individual elements of that map rather than turn the map into a string
   // and search on its contents that way.  This is especially true since there
   // is no guarantee the map will be in a consistent order.
-  // String, String, String, Boolean: node attribute for a map (such as CoNLLUFeats), key in that map, value to match, negated?
-  private List<Quadruple<String, String, String, Boolean>> contains;
+  // String, String, String, Boolean, List: node attribute for a map (such as CoNLLUFeats),
+  // key in that map, value to match, negated?, named variable groups
+  private List<Quintuple<String, String, String, Boolean, List<Pair<Integer, String>>>> contains;
 
   public NodeAttributes() {
     root = false;
@@ -79,15 +79,16 @@ public class NodeAttributes {
     attributes.add(new Quintuple<>(key, value, negated, varGroups, caseInsensitive));
   }
 
-  public void addContains(String annotation, String key, String value, Boolean negated) {
-    contains.add(new Quadruple(annotation, key, value, negated));
+  public void addContains(String annotation, String key, String value, Boolean negated,
+                          List<Pair<Integer, String>> varGroups) {
+    contains.add(new Quintuple(annotation, key, value, negated, new ArrayList<>(varGroups)));
   }
 
   public List<Quintuple<String, String, Boolean, List<Pair<Integer, String>>, Boolean>> attributes() {
     return Collections.unmodifiableList(attributes);
   }
 
-  public List<Quadruple<String, String, String, Boolean>> contains() {
+  public List<Quintuple<String, String, String, Boolean, List<Pair<Integer, String>>>> contains() {
     return Collections.unmodifiableList(contains);
   }
 }

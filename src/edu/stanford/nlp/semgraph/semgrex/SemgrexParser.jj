@@ -404,6 +404,7 @@ void AddAttribute(NodeAttributes attributes) : {
         Token groupNum;
         Token groupVar;
         List<Pair<Integer,String>> varGroups = new ArrayList<Pair<Integer,String>>();
+        List<Pair<Integer,String>> containsVarGroups = new ArrayList<Pair<Integer,String>>();
 } {
         (attr = identifier()
            (
@@ -423,22 +424,32 @@ void AddAttribute(NodeAttributes attributes) : {
            |
            ( ":{"
            ((key = identifier() | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>)
+           ( ( ( "#" groupNum = identifier() "%" groupVar = identifier() ) {
+                containsVarGroups.add(new Pair<Integer,String>(Integer.parseInt(groupNum.image),groupVar.image));
+                knownVarGroups.add(groupVar.image);
+              } )* )
            {
              if (attr == null || key == null || value == null) {
                throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +
                                                " key=" + key + " value=" + value);
              }
              negated = attrType.image.equals("!:");
-             attributes.addContains(attr.image, key.image, value.image, negated);
+             attributes.addContains(attr.image, key.image, value.image, negated, containsVarGroups);
+             containsVarGroups = new ArrayList<Pair<Integer,String>>();
            })
            ( ";" (key = identifier() | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>)
+           ( ( ( "#" groupNum = identifier() "%" groupVar = identifier() ) {
+                containsVarGroups.add(new Pair<Integer,String>(Integer.parseInt(groupNum.image),groupVar.image));
+                knownVarGroups.add(groupVar.image);
+              } )* )
            {
              if (attr == null || key == null || value == null) {
                throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +
                                                " key=" + key + " value=" + value);
              }
              negated = attrType.image.equals("!:");
-             attributes.addContains(attr.image, key.image, value.image, negated);
+             attributes.addContains(attr.image, key.image, value.image, negated, containsVarGroups);
+             containsVarGroups = new ArrayList<Pair<Integer,String>>();
            })*
            "}" ))
         )

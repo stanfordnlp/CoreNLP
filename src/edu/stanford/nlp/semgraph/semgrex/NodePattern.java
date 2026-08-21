@@ -14,7 +14,6 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Quintuple;
-import edu.stanford.nlp.util.Quadruple;
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.VariableStrings;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -90,13 +89,12 @@ public class NodePattern extends SemgrexPattern  {
       }
     }
 
-    for (Quadruple<String, String, String, Boolean> entry : attrs.contains()) {
+    for (Quintuple<String, String, String, Boolean, List<Pair<Integer, String>>> entry : attrs.contains()) {
       String annotation = entry.first();
       String key = entry.second();
       String value = entry.third();
       boolean negated = entry.fourth();
-      // TODO: can add varGroups, especially for the regex matches
-      List<Pair<Integer, String>> varGroups = Collections.emptyList();
+      List<Pair<Integer, String>> varGroups = entry.fifth();
 
       Class<?> clazz = AnnotationLookup.getValueType(AnnotationLookup.toCoreKey(annotation));
       boolean isMap = clazz != null && Map.class.isAssignableFrom(clazz);
@@ -105,10 +103,16 @@ public class NodePattern extends SemgrexPattern  {
       }
 
       final Attribute attr;
-      if (key.equals("__")) {
-        regexPartialAttributes.add(new RegexPartialAttribute(annotation, "/.*/", value, negated));
-      } else if (key.matches("/.*/")) {
-        regexPartialAttributes.add(new RegexPartialAttribute(annotation, key, value, negated));
+      if (key.equals("__") || key.matches("/.*/")) {
+        // TODO: a regex over the keys of the map can match more than one
+        // entry, so it is not clear which one a variable group should
+        // capture.  Rejecting it beats silently binding nothing.
+        if (!varGroups.isEmpty()) {
+          throw new SemgrexParseException("Cannot use a variable group on " + annotation + ":{" + key + ":" + value +
+                                          "} ... variable groups are not supported when the key of the map is itself a regex");
+        }
+        String keyPattern = key.equals("__") ? "/.*/" : key;
+        regexPartialAttributes.add(new RegexPartialAttribute(annotation, keyPattern, value, negated));
       } else {
         // Add the attributes for this key
         if (value.equals("__")) {
@@ -321,7 +325,6 @@ public class NodePattern extends SemgrexPattern  {
         nodeValue = (value == null) ? null : value.toString();
       }
 
-      // TODO: not connected to varGroups yet
       boolean matches = checkMatch(attr, ignoreCase, nodeValue, variableStrings, tempVariableStrings);
       if (!matches) {
         return negDesc;
@@ -338,7 +341,7 @@ public class NodePattern extends SemgrexPattern  {
           throw new RuntimeException("Can only use partial attributes with Maps... this should have been checked at creation time!");
         map = (Map) rawmap;
       }
-      // TODO: check varGroups here
+      // no varGroups here: they are rejected at creation time for a regex key
       boolean matches = partialAttribute.checkMatches(map, ignoreCase);
       if (!matches) {
         return negDesc;
