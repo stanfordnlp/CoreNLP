@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import junit.framework.AssertionFailedError;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -373,19 +374,12 @@ public class SemgrexTest {
     runTest(pattern, graph, "A", "C", "E", "F", "G", "H", "I", "J");
   }
 
+  /**
+   * morphofeatures is a Map, so this will work for contains operations
+   */
   @Test
   public void testDoubleContainsExpression() {
-    // morphofeatures is a Map, so this should work
-    SemanticGraph graph = makeComplicatedGraph();
-    Set<IndexedWord> vertices = graph.vertexSet();
-    for (IndexedWord iw : vertices) {
-      if (iw.value().equals("B") || iw.value().equals("D") || iw.value().equals("F")) {
-        CoNLLUFeatures feats = new CoNLLUFeatures();
-        feats.put("foo", "bar");
-        feats.put("name", iw.value());
-        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
-      }
-    }
+    SemanticGraph graph = makeComplicatedGraphWithFeatures();
 
     // test a positive regex
     SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:/bar/;name:/[BD]/}}");
@@ -394,6 +388,56 @@ public class SemgrexTest {
     // test one positive, one negative regex
     pattern = SemgrexPattern.compile("{morphofeatures:{foo:/bar/;name!:/[BD]/}}");
     runTest(pattern, graph, "F");
+  }
+
+  @Test
+  public void testMorphoVarGroups() {
+    SemanticGraph graph = makeComplicatedGraphWithFeatures();
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:__#0%foo;name:/[BD]/#0%name}}");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+
+    String[] expectedNames = {"B", "D"};
+    List<String> foundNames = new ArrayList<>();
+    for (int i = 0; i < expectedNames.length; ++i) {
+      if (!matcher.find()) {
+        throw new AssertionFailedError("Expected " + expectedNames.length +
+                                       " matches for pattern " + pattern +
+                                       " on " + graph + ", only got " + i);
+      }
+      IndexedWord match = matcher.getMatch();
+      CoNLLUFeatures feats = match.get(CoreAnnotations.CoNLLUFeats.class);
+      assertTrue(feats.containsKey("foo"));
+      assertEquals("bar", feats.get("foo"));
+      assertTrue(matcher.variableStrings.isSet("foo"));
+      assertEquals(feats.get("foo"), matcher.variableStrings.getString("foo"));
+
+      assertTrue(feats.containsKey("name"));
+      assertTrue(matcher.variableStrings.isSet("name"));
+      assertEquals(feats.get("name"), matcher.variableStrings.getString("name"));
+      foundNames.add(feats.get("name"));
+    }
+    if (matcher.findNextMatchingNode()) {
+      throw new AssertionFailedError("Found more than " +
+                                     expectedNames.length +
+                                     " matches for pattern " + pattern +
+                                     " on " + graph + "... extra match is " +
+                                     matcher.getMatch());
+    }
+    Collections.sort(foundNames);
+    assertEquals(foundNames.size(), expectedNames.length);
+    for (int i = 0; i < expectedNames.length; ++i) {
+      assertEquals(foundNames.get(i), expectedNames[i]);
+    }
+  }
+
+  @Test
+  public void testRejectKeyVarGroup() {
+    // if this feature is added, we should update this test with a
+    // check that the functionality actually works
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{PronType:__#1%pron}}=word");
+    // and the rejection
+    assertThrows(SemgrexParseException.class, () ->
+                 SemgrexPattern.compile("{morphofeatures:{/Pron.*/:__#1%pron}}"));
   }
 
   @Test
@@ -457,6 +501,20 @@ public class SemgrexTest {
     graph.addEdge(nodes[9], nodes[8],
                   UniversalEnglishGrammaticalRelations.DETERMINER, 1.0, false);
 
+    return graph;
+  }
+
+  public static SemanticGraph makeComplicatedGraphWithFeatures() {
+    SemanticGraph graph = makeComplicatedGraph();
+    Set<IndexedWord> vertices = graph.vertexSet();
+    for (IndexedWord iw : vertices) {
+      if (iw.value().equals("B") || iw.value().equals("D") || iw.value().equals("F")) {
+        CoNLLUFeatures feats = new CoNLLUFeatures();
+        feats.put("foo", "bar");
+        feats.put("name", iw.value());
+        iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
+      }
+    }
     return graph;
   }
 
