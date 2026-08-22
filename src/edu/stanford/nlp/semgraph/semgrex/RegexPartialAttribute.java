@@ -13,11 +13,11 @@ public class RegexPartialAttribute implements Serializable {
   final Pattern caselessPattern;
   final String exactMatch;
 
-  final boolean negated;
+  final AttributeMode mode;
 
-  RegexPartialAttribute(String annotation, String key, String value, boolean negated) {
+  RegexPartialAttribute(String annotation, String key, String value, AttributeMode mode) {
     this.annotation = annotation;
-    //System.out.println(annotation + " " + key + " " + value + " " + negated);
+    //System.out.println(annotation + " " + key + " " + value + " " + mode);
     String keyContent = key.substring(1, key.length() - 1);
     this.key = Pattern.compile(keyContent);
 
@@ -36,7 +36,7 @@ public class RegexPartialAttribute implements Serializable {
       exactMatch = value;
     }
 
-    this.negated = negated;
+    this.mode = mode;
   }
 
   boolean valueMatches(boolean ignoreCase, String value) {
@@ -51,22 +51,31 @@ public class RegexPartialAttribute implements Serializable {
     //System.out.println("CHECKING MATCHES");
     //System.out.println(map);
     if (map == null) {
-      // we treat an empty map as failing to match
-      // so if the attribute is negated, that means this attribute passes
-      return negated;
+      // we treat an empty map as failing to match, so a negated or an
+      // optional attribute passes
+      return mode.matchesMissing();
     }
+
+    // whether any key matched, regardless of its value.  needed to tell
+    // "the map has no such key" from "it has one and the value is wrong",
+    // which OPTIONAL treats differently and the other two do not
+    boolean keyFound = false;
 
     for (Map.Entry<?, ?> entry : map.entrySet()) {
       //System.out.println(key + " " + entry.getKey().toString() + " " + key.matcher(entry.getKey().toString()).matches());
       if (key.matcher(entry.getKey().toString()).matches()) {
+        keyFound = true;
         String value = entry.getValue().toString();
         if (valueMatches(ignoreCase, value)) {
-          return !negated;
+          return !mode.negated();
         }
       }
     }
 
-    return negated;
+    if (mode == AttributeMode.OPTIONAL) {
+      return !keyFound;
+    }
+    return mode.negated();
   }
 
   private static final long serialVersionUID = 378257698196124612L;

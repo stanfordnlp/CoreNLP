@@ -400,7 +400,7 @@ void AddAttribute(NodeAttributes attributes) : {
 	Token key = null;
 	Token value = null;
         Token attrType = null;
-        boolean negated = false;
+        AttributeMode mode = AttributeMode.REQUIRED;
         Token groupNum;
         Token groupVar;
         List<Pair<Integer,String>> varGroups = new ArrayList<Pair<Integer,String>>();
@@ -408,7 +408,7 @@ void AddAttribute(NodeAttributes attributes) : {
 } {
         (attr = identifier()
            (
-             (( (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>))
+             (( (attrType = ":" | attrType = "!:" | attrType = "?:") (value = identifier() | value = <REGEX>))
              ( ( ( "#" groupNum = identifier() "%" groupVar = identifier() ) {
                 // TODO: this should have been NUMBER, but that doesn't seem to exist
                 varGroups.add(new Pair<Integer,String>(Integer.parseInt(groupNum.image),groupVar.image));
@@ -416,14 +416,14 @@ void AddAttribute(NodeAttributes attributes) : {
               } )* )
              {
                if (attr != null && value != null) {
-                 negated = attrType.image.equals("!:");
-                 attributes.setAttribute(attr.image, value.image, negated, varGroups, caseInsensitive);
+                 mode = AttributeMode.fromSeparator(attrType.image);
+                 attributes.setAttribute(attr.image, value.image, mode, varGroups, caseInsensitive);
                }
              }
            )
            |
            ( ":{"
-           ((key = identifier() | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>)
+           ((key = identifier() | key = <REGEX>) (attrType = ":" | attrType = "!:" | attrType = "?:") (value = identifier() | value = <REGEX>)
            ( ( ( "#" groupNum = identifier() "%" groupVar = identifier() ) {
                 containsVarGroups.add(new Pair<Integer,String>(Integer.parseInt(groupNum.image),groupVar.image));
                 knownVarGroups.add(groupVar.image);
@@ -433,11 +433,11 @@ void AddAttribute(NodeAttributes attributes) : {
                throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +
                                                " key=" + key + " value=" + value);
              }
-             negated = attrType.image.equals("!:");
-             attributes.addContains(attr.image, key.image, value.image, negated, containsVarGroups);
+             mode = AttributeMode.fromSeparator(attrType.image);
+             attributes.addContains(attr.image, key.image, value.image, mode, containsVarGroups);
              containsVarGroups = new ArrayList<Pair<Integer,String>>();
            })
-           ( ";" (key = identifier() | key = <REGEX>) (attrType = ":" | attrType = "!:") (value = identifier() | value = <REGEX>)
+           ( ";" (key = identifier() | key = <REGEX>) (attrType = ":" | attrType = "!:" | attrType = "?:") (value = identifier() | value = <REGEX>)
            ( ( ( "#" groupNum = identifier() "%" groupVar = identifier() ) {
                 containsVarGroups.add(new Pair<Integer,String>(Integer.parseInt(groupNum.image),groupVar.image));
                 knownVarGroups.add(groupVar.image);
@@ -447,8 +447,8 @@ void AddAttribute(NodeAttributes attributes) : {
                throw new SemgrexParseException("null while parsing semgrex expression: attr=" + attr +
                                                " key=" + key + " value=" + value);
              }
-             negated = attrType.image.equals("!:");
-             attributes.addContains(attr.image, key.image, value.image, negated, containsVarGroups);
+             mode = AttributeMode.fromSeparator(attrType.image);
+             attributes.addContains(attr.image, key.image, value.image, mode, containsVarGroups);
              containsVarGroups = new ArrayList<Pair<Integer,String>>();
            })*
            "}" ))
