@@ -30,17 +30,17 @@ import edu.stanford.nlp.util.Quintuple;
 public class NodeAttributes {
   private boolean root;
   private boolean empty;
-  // String, String, Boolean, List, Boolean: key, value, negated, named variable groups, case insensitive
-  private List<Quintuple<String, String, Boolean, List<Pair<Integer, String>>, Boolean>> attributes;
+  // String, String, AttributeMode, List, Boolean: key, value, how the value is matched, named variable groups, case insensitive
+  private List<Quintuple<String, String, AttributeMode, List<Pair<Integer, String>>, Boolean>> attributes;
   private Set<String> positiveAttributes;
   // Some annotations, especially morpho freatures (CoreAnnotations.CoNLLUFeats)
   // are represented by Maps.  In some cases it will be easier to search
   // for individual elements of that map rather than turn the map into a string
   // and search on its contents that way.  This is especially true since there
   // is no guarantee the map will be in a consistent order.
-  // String, String, String, Boolean, List: node attribute for a map (such as CoNLLUFeats),
-  // key in that map, value to match, negated?, named variable groups
-  private List<Quintuple<String, String, String, Boolean, List<Pair<Integer, String>>>> contains;
+  // String, String, String, AttributeMode, List: node attribute for a map (such as CoNLLUFeats),
+  // key in that map, value to match, how the value is matched, named variable groups
+  private List<Quintuple<String, String, String, AttributeMode, List<Pair<Integer, String>>>> contains;
 
   public NodeAttributes() {
     root = false;
@@ -66,8 +66,10 @@ public class NodeAttributes {
     return empty;
   }
 
-  public void setAttribute(String key, String value, boolean negated, List<Pair<Integer, String>> varGroups, boolean caseInsensitive) {
-    if (!negated) {
+  public void setAttribute(String key, String value, AttributeMode mode, List<Pair<Integer, String>> varGroups, boolean caseInsensitive) {
+    // only a required attribute can conflict with another of the same
+    // key.  two negated or two optional constraints are both satisfiable
+    if (mode == AttributeMode.REQUIRED) {
       if (positiveAttributes.contains(key)) {
         throw new SemgrexParseException("Duplicate attribute " + key + " found in semgrex expression");
       }
@@ -76,19 +78,19 @@ public class NodeAttributes {
     if (!"word".equals(key)) {
       caseInsensitive = false;
     }
-    attributes.add(new Quintuple<>(key, value, negated, varGroups, caseInsensitive));
+    attributes.add(new Quintuple<>(key, value, mode, varGroups, caseInsensitive));
   }
 
-  public void addContains(String annotation, String key, String value, Boolean negated,
+  public void addContains(String annotation, String key, String value, AttributeMode mode,
                           List<Pair<Integer, String>> varGroups) {
-    contains.add(new Quintuple(annotation, key, value, negated, new ArrayList<>(varGroups)));
+    contains.add(new Quintuple(annotation, key, value, mode, new ArrayList<>(varGroups)));
   }
 
-  public List<Quintuple<String, String, Boolean, List<Pair<Integer, String>>, Boolean>> attributes() {
+  public List<Quintuple<String, String, AttributeMode, List<Pair<Integer, String>>, Boolean>> attributes() {
     return Collections.unmodifiableList(attributes);
   }
 
-  public List<Quintuple<String, String, String, Boolean, List<Pair<Integer, String>>>> contains() {
+  public List<Quintuple<String, String, String, AttributeMode, List<Pair<Integer, String>>>> contains() {
     return Collections.unmodifiableList(contains);
   }
 }

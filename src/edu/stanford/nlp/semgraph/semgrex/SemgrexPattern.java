@@ -64,6 +64,20 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code {morphofeatures:{Tense:Past;Person!:3}}}
  * This expression will
  * search for words which are past tense but are not in 3rd person.
+ * <br>
+ * Note that a negated attribute also matches a word which doesn't have
+ * that attribute at all, so {@code {lemma!:boy}} matches a word with no
+ * lemma, and {@code {morphofeatures:{Person!:3}}} matches a word with no
+ * Person feature.
+ * <br>
+ * An attribute can be made optional with {@code ?:}, which matches a word
+ * that either doesn't have the attribute or has it with a matching value:
+ * {@code {morphofeatures:{PronType?:Prs}}} matches a word with no
+ * PronType as well as one whose PronType is Prs, but not one whose
+ * PronType is Dem.  Combined with a variable group and a value of
+ * {@code __}, this gives a pattern which matches every word and captures
+ * the feature only where it exists:
+ * {@code {morphofeatures:{PronType?:__#0%pron}}}
  * <h3>Relations</h3>
  *
  * Relations are defined by a symbol representing the type of relationship and a

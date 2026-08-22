@@ -28,7 +28,7 @@ public class NodePattern extends SemgrexPattern  {
   private final GraphRelation reln;
   private final boolean negDesc;
   /**
-   *  A list of Attribute - key, case_sensitive_pattern, case_insensitive_pattern, negated
+   *  A list of Attribute - key, case_sensitive_pattern, case_insensitive_pattern, mode
    *
    *  If the type of the entry is a String, then string comparison is safe.
    *  If the type is a Boolean, it will always either match or not match corresponding to the Boolean value.
@@ -61,39 +61,35 @@ public class NodePattern extends SemgrexPattern  {
     this.regexPartialAttributes = new ArrayList<>();
 
     descString = "{";
-    for (Quintuple<String, String, Boolean, List<Pair<Integer, String>>, Boolean> entry : attrs.attributes()) {
+    for (Quintuple<String, String, AttributeMode, List<Pair<Integer, String>>, Boolean> entry : attrs.attributes()) {
       if (!descString.equals("{"))
         descString += ";";
       String key = entry.first();
       String value = entry.second();
-      boolean negated = entry.third();
+      AttributeMode mode = entry.third();
       List<Pair<Integer, String>> varGroups = entry.fourth();
       boolean alwaysCaseInsensitive = entry.fifth();
 
       // Add the attributes for this key
       if (value.equals("__")) {
-        attributes.add(new Attribute(key, true, true, negated, varGroups));
+        attributes.add(new Attribute(key, true, true, mode, varGroups));
       } else if (value.matches("/.*/")) {
-        attributes.add(buildRegexAttribute(key, value, negated, varGroups, alwaysCaseInsensitive));
+        attributes.add(buildRegexAttribute(key, value, mode, varGroups, alwaysCaseInsensitive));
       } else if (alwaysCaseInsensitive) {
         value = "/" + value + "/";
-        attributes.add(buildRegexAttribute(key, value, negated, varGroups, alwaysCaseInsensitive));
+        attributes.add(buildRegexAttribute(key, value, mode, varGroups, alwaysCaseInsensitive));
       } else { // raw description
-        attributes.add(new Attribute(key, value, value, negated, varGroups));
+        attributes.add(new Attribute(key, value, value, mode, varGroups));
       }
 
-      if (negated) {
-        descString += (key + "!:" + value);
-      } else {
-        descString += (key + ':' + value);
-      }
+      descString += (key + mode.separator() + value);
     }
 
-    for (Quintuple<String, String, String, Boolean, List<Pair<Integer, String>>> entry : attrs.contains()) {
+    for (Quintuple<String, String, String, AttributeMode, List<Pair<Integer, String>>> entry : attrs.contains()) {
       String annotation = entry.first();
       String key = entry.second();
       String value = entry.third();
-      boolean negated = entry.fourth();
+      AttributeMode mode = entry.fourth();
       List<Pair<Integer, String>> varGroups = entry.fifth();
 
       Class<?> clazz = AnnotationLookup.getValueType(AnnotationLookup.toCoreKey(annotation));
@@ -108,26 +104,26 @@ public class NodePattern extends SemgrexPattern  {
         // entry, so it is not clear which one a variable group should
         // capture.  Rejecting it beats silently binding nothing.
         if (!varGroups.isEmpty()) {
-          throw new SemgrexParseException("Cannot use a variable group on " + annotation + ":{" + key + ":" + value +
+          throw new SemgrexParseException("Cannot use a variable group on " + annotation + ":{" + key + mode.separator() + value +
                                           "} ... variable groups are not supported when the key of the map is itself a regex");
         }
         String keyPattern = key.equals("__") ? "/.*/" : key;
-        regexPartialAttributes.add(new RegexPartialAttribute(annotation, keyPattern, value, negated));
+        regexPartialAttributes.add(new RegexPartialAttribute(annotation, keyPattern, value, mode));
       } else {
         // Add the attributes for this key
         if (value.equals("__")) {
-          attr = new Attribute(key, true, true, negated, varGroups);
+          attr = new Attribute(key, true, true, mode, varGroups);
         } else if (value.matches("/.*/")) {
-          attr = buildRegexAttribute(key, value, negated, varGroups, false);
+          attr = buildRegexAttribute(key, value, mode, varGroups, false);
         } else { // raw description
-          attr = new Attribute(key, value, value, negated, varGroups);
+          attr = new Attribute(key, value, value, mode, varGroups);
         }
         partialAttributes.add(new Pair<>(annotation, attr));
       }
 
       if (!descString.equals("{"))
         descString += ";";
-      String separator = negated ? "!:" : ":";
+      String separator = mode.separator();
       // TODO: the descString might look nicer if multiple contains
       // for the same attribute were collapsed into the same map
       descString += (annotation + ":{" + key + separator + value + "}");
@@ -155,7 +151,7 @@ public class NodePattern extends SemgrexPattern  {
    * Tests the value to see if it's really a regex, or just a string wrapped in regex.
    * Return an Attribute which matches this expression
    */
-  private Attribute buildRegexAttribute(String key, String value, boolean negated, List<Pair<Integer, String>> varGroups, boolean alwaysCaseInsensitive) {
+  private Attribute buildRegexAttribute(String key, String value, AttributeMode mode, List<Pair<Integer, String>> varGroups, boolean alwaysCaseInsensitive) {
     boolean isRegexp = false;
     for (int i = 1; i < value.length() - 1; ++i) {
       char chr = value.charAt(i);
@@ -169,14 +165,14 @@ public class NodePattern extends SemgrexPattern  {
       return new Attribute(key,
                            Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE),
                            Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE),
-                           negated, varGroups);
+                           mode, varGroups);
     } else if (isRegexp) {
       return new Attribute(key,
                            Pattern.compile(patternContent),
                            Pattern.compile(patternContent, Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE),
-                           negated, varGroups);
+                           mode, varGroups);
     } else {
-      return new Attribute(key, patternContent, patternContent, negated, varGroups);
+      return new Attribute(key, patternContent, patternContent, mode, varGroups);
     }
   }
 
@@ -198,9 +194,11 @@ public class NodePattern extends SemgrexPattern  {
   private boolean checkMatch(Attribute attr, boolean ignoreCase, String nodeValue,
                              VariableStrings variableStrings, VariableStrings tempVariableStrings) {
     if (nodeValue == null) {
-      // treat non-existent attributes has having matched a negated expression
-      // so for example, `cpos!:NUM` matches not having a cpos at all
-      return attr.negated;
+      // treat non-existent attributes as having matched a negated
+      // expression, so for example `cpos!:NUM` matches not having a cpos
+      // at all.  an optional attribute passes for the same reason, which
+      // is the whole point of it: `cpos?:NUM` is NUM or nothing
+      return attr.mode.matchesMissing();
     }
 
     // Get the node pattern
@@ -256,7 +254,7 @@ public class NodePattern extends SemgrexPattern  {
     } else {
       throw new IllegalStateException("Unknown matcher type: " + toMatch + " (of class + " + toMatch.getClass() + ")");
     }
-    if (attr.negated) {
+    if (attr.mode.negated()) {
       matches = !matches;
     }
     return matches;

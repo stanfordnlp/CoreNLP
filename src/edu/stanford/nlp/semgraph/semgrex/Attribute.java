@@ -11,17 +11,17 @@ public class Attribute implements Serializable {
   final String key;
   final Object cased;
   final Object caseless;
-  final boolean negated;
+  final AttributeMode mode;
 
   // specifies the groups in a regex that are captured as
   // matcher-global string variables
   final List<Pair<Integer, String>> variableGroups;
 
-  Attribute(String key, Object cased, Object caseless, boolean negated, List<Pair<Integer, String>> varGroups) {
+  Attribute(String key, Object cased, Object caseless, AttributeMode mode, List<Pair<Integer, String>> varGroups) {
     this.key = key;
     this.cased = cased;
     this.caseless = caseless;
-    this.negated = negated;
+    this.mode = mode;
     this.variableGroups = Collections.unmodifiableList(new ArrayList<>(varGroups));
   }
 
