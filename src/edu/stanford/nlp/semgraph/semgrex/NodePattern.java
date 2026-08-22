@@ -3,6 +3,7 @@ package edu.stanford.nlp.semgraph.semgrex;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -82,8 +83,13 @@ public class NodePattern extends SemgrexPattern  {
         attributes.add(new Attribute(key, value, value, mode, varGroups));
       }
 
-      descString += (key + mode.separator() + value);
+      descString += (key + mode.separator() + value + varGroupString(varGroups));
     }
+
+    // gather the contains descriptions by annotation, so that a node
+    // written with several keys in one map prints as one map rather than
+    // as several maps of one key each
+    Map<String, StringBuilder> containsDesc = new LinkedHashMap<>();
 
     for (Quintuple<String, String, String, AttributeMode, List<Pair<Integer, String>>> entry : attrs.contains()) {
       String annotation = entry.first();
@@ -121,12 +127,20 @@ public class NodePattern extends SemgrexPattern  {
         partialAttributes.add(new Pair<>(annotation, attr));
       }
 
+      StringBuilder desc = containsDesc.get(annotation);
+      if (desc == null) {
+        desc = new StringBuilder();
+        containsDesc.put(annotation, desc);
+      } else {
+        desc.append(";");
+      }
+      desc.append(key).append(mode.separator()).append(value).append(varGroupString(varGroups));
+    }
+
+    for (Map.Entry<String, StringBuilder> desc : containsDesc.entrySet()) {
       if (!descString.equals("{"))
         descString += ";";
-      String separator = mode.separator();
-      // TODO: the descString might look nicer if multiple contains
-      // for the same attribute were collapsed into the same map
-      descString += (annotation + ":{" + key + separator + value + "}");
+      descString += (desc.getKey() + ":{" + desc.getValue() + "}");
     }
 
     if (attrs.root()) {
@@ -145,6 +159,18 @@ public class NodePattern extends SemgrexPattern  {
     this.child = null;
     this.isRoot = attrs.root();
     this.isEmpty = attrs.empty();
+  }
+
+  /**
+   * Rebuilds the "#0%name" suffixes of an attribute, so that a compiled
+   * pattern prints the way it was written
+   */
+  private static String varGroupString(List<Pair<Integer, String>> varGroups) {
+    StringBuilder sb = new StringBuilder();
+    for (Pair<Integer, String> varGroup : varGroups) {
+      sb.append("#").append(varGroup.first()).append("%").append(varGroup.second());
+    }
+    return sb.toString();
   }
 
   /**

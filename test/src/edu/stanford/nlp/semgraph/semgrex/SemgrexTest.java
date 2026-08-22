@@ -330,8 +330,7 @@ public class SemgrexTest {
 
   @Test
   public void testContainsRegexKeyNegatedMatchExpression() {
-    // morphofeatures is a Map, so this should work
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/.*o.*/!:bar}}");
+    // morphofeatures is a Map, which is required for the contains patters to work
     SemanticGraph graph = makeComplicatedGraph();
     Set<IndexedWord> vertices = graph.vertexSet();
     for (IndexedWord iw : vertices) {
@@ -347,7 +346,7 @@ public class SemgrexTest {
         iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
       }
     }
-    runTest(pattern, graph, "A", "B", "C", "E", "G", "H", "I", "J");
+    runTest("{morphofeatures:{/.*o.*/!:bar}}", graph, "A", "B", "C", "E", "G", "H", "I", "J");
   }
 
   @Test
@@ -364,14 +363,12 @@ public class SemgrexTest {
     }
 
     // test a positive regex
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:/bar[BD]/}}");
-    runTest(pattern, graph, "B", "D");
+    runTest("{morphofeatures:{foo:/bar[BD]/}}", graph, "B", "D");
 
     // test a negative regex
     // should match both the ones that don't have features
     // and the ones that have a non-matching feature
-    pattern = SemgrexPattern.compile("{morphofeatures:{foo!:/bar[BD]/}}");
-    runTest(pattern, graph, "A", "C", "E", "F", "G", "H", "I", "J");
+    runTest("{morphofeatures:{foo!:/bar[BD]/}}", graph, "A", "C", "E", "F", "G", "H", "I", "J");
   }
 
   /**
@@ -382,23 +379,19 @@ public class SemgrexTest {
     SemanticGraph graph = makeComplicatedGraphWithFeatures();
 
     // test a positive regex
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:/bar/;name:/[BD]/}}");
-    runTest(pattern, graph, "B", "D");
+    runTest("{morphofeatures:{foo:/bar/;name:/[BD]/}}", graph, "B", "D");
 
     // test one positive, one negative regex
-    pattern = SemgrexPattern.compile("{morphofeatures:{foo:/bar/;name!:/[BD]/}}");
-    runTest(pattern, graph, "F");
+    runTest("{morphofeatures:{foo:/bar/;name!:/[BD]/}}", graph, "F");
   }
 
   @Test
   public void testMorphoVarGroups() {
     SemanticGraph graph = makeComplicatedGraphWithFeatures();
-    // TODO: we wouldn't need to compile this, except the round trip toString() isn't working...
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:__#0%foo;name:/[BD]/#0%name}}");
 
     String[] expectedNames = {"B", "D"};
     List<String> foundNames = new ArrayList<>();
-    List<SemgrexMatch> matches = runTest(pattern, graph, "B", "D");
+    List<SemgrexMatch> matches = runTest("{morphofeatures:{foo:__#0%foo;name:/[BD]/#0%name}}", graph, "B", "D");
     assertEquals(expectedNames.length, matches.size());
     for (int i = 0; i < expectedNames.length; ++i) {
       SemgrexMatch match = matches.get(i);
@@ -426,9 +419,8 @@ public class SemgrexTest {
   @Test
   public void testOptionalMorphoVarGroupsWrongMatch() {
     SemanticGraph graph = makeComplicatedGraphWithFeatures();
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:__#0%foo;name?:/[BD]/#0%name}}");
     // should match B & D, but not F, with the optional match
-    runTest(pattern, graph, "B", "D");
+    runTest("{morphofeatures:{foo:__#0%foo;name?:/[BD]/#0%name}}", graph, "B", "D");
   }
 
   @Test
@@ -441,15 +433,13 @@ public class SemgrexTest {
     feats.put("foo", "bar");
     word.set(CoreAnnotations.CoNLLUFeats.class, feats);
 
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:__#0%foo;name?:/[BD]/#0%name}}");
     // should match B & D, but not F, with the optional match
     // also, the optional match should find A, since the value isn't there at all
-    runTest(pattern, graph, "A", "B", "D");
+    runTest("{morphofeatures:{foo:__#0%foo;name?:/[BD]/#0%name}}", graph, "A", "B", "D");
 
-    pattern = SemgrexPattern.compile("{morphofeatures:{foo:__#0%foo;name?:__#0%name}}");
     // all of them should show up if any value is allowed
     // of course, only the words with "foo" set on it, not the whole graph
-    runTest(pattern, graph, "A", "B", "D", "F");
+    runTest("{morphofeatures:{foo:__#0%foo;name?:__#0%name}}", graph, "A", "B", "D", "F");
   }
 
   @Test
