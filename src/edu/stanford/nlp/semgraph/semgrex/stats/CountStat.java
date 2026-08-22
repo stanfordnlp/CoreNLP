@@ -40,6 +40,9 @@ public class CountStat implements SemgrexStat {
 
   private static final String FLAT = "-flat";
   private static final String MAX_COLUMNS = "-maxColumns";
+
+  /** width of the percentage column, wide enough for "100.00%" */
+  private static final int PCT_WIDTH = 6;
   private static final String RESTRICT = "-restrict";
 
   private final List<String> keys;
@@ -64,6 +67,15 @@ public class CountStat implements SemgrexStat {
   private final List<Restriction> restrictions;
 
   private long totalMatches = 0;
+
+  /**
+   * Whether the chart needs Unicode bidi controls to lay out correctly.
+   *<br>
+   * Set once, at report time, when any value or key contains a strong
+   * right to left character.  An ascii only chart is emitted exactly as
+   * it always was, so this costs nothing when it isn't needed.
+   */
+  private boolean bidi = false;
 
   CountStat(List<String> keys, boolean flat, int maxColumns, List<Restriction> restrictions) {
     if (keys.isEmpty()) {
@@ -182,8 +194,89 @@ public class CountStat implements SemgrexStat {
   // rendering
   // ------------------------------------------------------------------
 
+  /** first strong isolate: makes a cell pick its own direction without affecting its neighbours */
+  private static final String FSI = "\u2068";
+  /** pop directional isolate */
+  private static final String PDI = "\u2069";
+  /** left to right mark: pins a line's base direction so the columns don't reverse */
+  private static final String LRM = "\u200E";
+
+  /**
+   * Whether any strong right to left character appears in this string.
+   *<br>
+   * Iterates by code point rather than by char so that the RTL scripts
+   * outside the BMP, such as Adlam, are caught too.
+   */
+  private static boolean hasRightToLeft(String value) {
+    for (int i = 0; i < value.length(); ) {
+      int codePoint = value.codePointAt(i);
+      byte directionality = Character.getDirectionality(codePoint);
+      if (directionality == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
+          directionality == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC) {
+        return true;
+      }
+      i += Character.charCount(codePoint);
+    }
+    return false;
+  }
+
+  /**
+   * Decides whether this chart needs the bidi controls.
+   *<br>
+   * Without them, a row label in a right to left script makes that line's
+   * base direction RTL, which reverses the whole column order.  The
+   * padding spaces are neutrals and join whichever run is next to them,
+   * so cells bleed into one another as well.
+   */
+  private void detectBidi() {
+    for (String key : keys) {
+      if (hasRightToLeft(key)) {
+        bidi = true;
+        return;
+      }
+    }
+    for (List<String> key : counts.keySet()) {
+      for (String value : key) {
+        if (hasRightToLeft(value)) {
+          bidi = true;
+          return;
+        }
+      }
+    }
+  }
+
+  /** Starts a line, pinning its base direction when the chart needs it */
+  private String start() {
+    return bidi ? LRM : "";
+  }
+
+  /**
+   * One padded cell.
+   *<br>
+   * The width is measured on the raw value and the padding goes outside
+   * the isolate: spaces inside it would join the cell's own direction and
+   * end up on the wrong side of the word.
+   */
+  private String cell(String value, int width, boolean leftAlign) {
+    StringBuilder padding = new StringBuilder();
+    for (int i = value.length(); i < width; ++i) {
+      padding.append(' ');
+    }
+    String content = bidi ? FSI + value + PDI : value;
+    return leftAlign ? content + padding : padding + content;
+  }
+
+  private String dashes(int width) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < width; ++i) {
+      sb.append('-');
+    }
+    return cell(sb.toString(), width, true);
+  }
+
   @Override
   public String report() {
+    detectBidi();
     if (counts.isEmpty()) {
       return "No matches, nothing to count." + System.lineSeparator();
     }
@@ -196,7 +289,7 @@ public class CountStat implements SemgrexStat {
     List<String> columnValues = distinctValues(1);
     if (columnValues.size() > maxColumns) {
       StringBuilder sb = new StringBuilder();
-      sb.append("# ").append(keys.get(1)).append(" took ").append(columnValues.size());
+      sb.append(start()).append("# ").append(keys.get(1)).append(" took ").append(columnValues.size());
       sb.append(" distinct values, which is more than ").append(MAX_COLUMNS).append(" (").append(maxColumns);
       sb.append("), so printing the flat form.").append(System.lineSeparator());
       sb.append(flatChart());
@@ -239,29 +332,35 @@ public class CountStat implements SemgrexStat {
     keyWidth = Math.max(keyWidth, "TOTAL".length());
     countWidth = Math.max(countWidth, Long.toString(totalMatches).length());
 
-    String format = "%-" + keyWidth + "s  %" + countWidth + "s  %6s" + System.lineSeparator();
     StringBuilder sb = new StringBuilder();
-    sb.append(String.format(format, keys.get(0), "count", "pct"));
+    sb.append(row(keyWidth, countWidth, keys.get(0), "count", "pct"));
     sb.append(rule(keyWidth, countWidth));
     for (Map.Entry<List<String>, Integer> entry : entries) {
-      sb.append(String.format(format, entry.getKey().get(0), entry.getValue(),
-                              percent(entry.getValue(), totalMatches)));
+      sb.append(row(keyWidth, countWidth, entry.getKey().get(0), Integer.toString(entry.getValue()),
+                    percent(entry.getValue(), totalMatches)));
     }
     sb.append(rule(keyWidth, countWidth));
-    sb.append(String.format("%-" + keyWidth + "s  %" + countWidth + "s" + System.lineSeparator(), "TOTAL", totalMatches));
+    sb.append(start());
+    sb.append(cell("TOTAL", keyWidth, true)).append("  ");
+    sb.append(cell(Long.toString(totalMatches), countWidth, false));
+    sb.append(System.lineSeparator());
+    return sb.toString();
+  }
+
+  private String row(int keyWidth, int countWidth, String key, String count, String pct) {
+    StringBuilder sb = new StringBuilder(start());
+    sb.append(cell(key, keyWidth, true)).append("  ");
+    sb.append(cell(count, countWidth, false)).append("  ");
+    sb.append(cell(pct, PCT_WIDTH, false));
+    sb.append(System.lineSeparator());
     return sb.toString();
   }
 
   private String rule(int keyWidth, int countWidth) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < keyWidth; ++i) {
-      sb.append('-');
-    }
-    sb.append("  ");
-    for (int i = 0; i < countWidth; ++i) {
-      sb.append('-');
-    }
-    sb.append("  ------");
+    StringBuilder sb = new StringBuilder(start());
+    sb.append(dashes(keyWidth)).append("  ");
+    sb.append(dashes(countWidth)).append("  ");
+    sb.append(dashes(PCT_WIDTH));
     sb.append(System.lineSeparator());
     return sb.toString();
   }
@@ -294,53 +393,45 @@ public class CountStat implements SemgrexStat {
     int totalWidth = Math.max("TOTAL".length(), Long.toString(totalMatches).length());
 
     StringBuilder sb = new StringBuilder();
-    sb.append("# rows: ").append(keys.get(0));
+    sb.append(start()).append("# rows: ").append(keys.get(0));
     sb.append(", columns: ").append(keys.get(1)).append(System.lineSeparator());
 
-    sb.append(pad(keys.get(0), rowHeaderWidth));
+    sb.append(start()).append(cell(keys.get(0), rowHeaderWidth, true));
     for (int i = 0; i < columnValues.size(); ++i) {
-      sb.append("  ").append(lpad(columnValues.get(i), columnWidths.get(i)));
+      sb.append("  ").append(cell(columnValues.get(i), columnWidths.get(i), false));
     }
-    sb.append("  ").append(lpad("TOTAL", totalWidth)).append(System.lineSeparator());
+    sb.append("  ").append(cell("TOTAL", totalWidth, false)).append(System.lineSeparator());
 
     sb.append(gridRule(rowHeaderWidth, columnWidths, totalWidth));
 
     for (String row : rowValues) {
-      sb.append(pad(row, rowHeaderWidth));
+      sb.append(start()).append(cell(row, rowHeaderWidth, true));
       for (int i = 0; i < columnValues.size(); ++i) {
-        sb.append("  ").append(lpad(Integer.toString(get(row, columnValues.get(i))), columnWidths.get(i)));
+        sb.append("  ").append(cell(Integer.toString(get(row, columnValues.get(i))), columnWidths.get(i), false));
       }
-      sb.append("  ").append(lpad(Integer.toString(rowTotals.getOrDefault(row, 0)), totalWidth));
+      sb.append("  ").append(cell(Integer.toString(rowTotals.getOrDefault(row, 0)), totalWidth, false));
       sb.append(System.lineSeparator());
     }
 
     sb.append(gridRule(rowHeaderWidth, columnWidths, totalWidth));
 
-    sb.append(pad("TOTAL", rowHeaderWidth));
+    sb.append(start()).append(cell("TOTAL", rowHeaderWidth, true));
     for (int i = 0; i < columnValues.size(); ++i) {
-      sb.append("  ").append(lpad(Integer.toString(columnTotals.getOrDefault(columnValues.get(i), 0)), columnWidths.get(i)));
+      sb.append("  ").append(cell(Integer.toString(columnTotals.getOrDefault(columnValues.get(i), 0)), columnWidths.get(i), false));
     }
-    sb.append("  ").append(lpad(Long.toString(totalMatches), totalWidth));
+    sb.append("  ").append(cell(Long.toString(totalMatches), totalWidth, false));
     sb.append(System.lineSeparator());
 
     return sb.toString();
   }
 
   private String gridRule(int rowHeaderWidth, List<Integer> columnWidths, int totalWidth) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < rowHeaderWidth; ++i) {
-      sb.append('-');
-    }
+    StringBuilder sb = new StringBuilder(start());
+    sb.append(dashes(rowHeaderWidth));
     for (int width : columnWidths) {
-      sb.append("  ");
-      for (int i = 0; i < width; ++i) {
-        sb.append('-');
-      }
+      sb.append("  ").append(dashes(width));
     }
-    sb.append("  ");
-    for (int i = 0; i < totalWidth; ++i) {
-      sb.append('-');
-    }
+    sb.append("  ").append(dashes(totalWidth));
     sb.append(System.lineSeparator());
     return sb.toString();
   }
@@ -363,19 +454,20 @@ public class CountStat implements SemgrexStat {
       countWidth = Math.max(countWidth, Integer.toString(entry.getValue()).length());
     }
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder(start());
     for (int i = 0; i < keys.size(); ++i) {
-      sb.append(pad(keys.get(i), widths.get(i))).append("  ");
+      sb.append(cell(keys.get(i), widths.get(i), true)).append("  ");
     }
-    sb.append(lpad("count", countWidth)).append("  ").append(lpad("pct", 6));
+    sb.append(cell("count", countWidth, false)).append("  ").append(cell("pct", PCT_WIDTH, false));
     sb.append(System.lineSeparator());
 
     for (Map.Entry<List<String>, Integer> entry : entries) {
+      sb.append(start());
       for (int i = 0; i < keys.size(); ++i) {
-        sb.append(pad(entry.getKey().get(i), widths.get(i))).append("  ");
+        sb.append(cell(entry.getKey().get(i), widths.get(i), true)).append("  ");
       }
-      sb.append(lpad(Integer.toString(entry.getValue()), countWidth));
-      sb.append("  ").append(lpad(percent(entry.getValue(), totalMatches), 6));
+      sb.append(cell(Integer.toString(entry.getValue()), countWidth, false));
+      sb.append("  ").append(cell(percent(entry.getValue(), totalMatches), PCT_WIDTH, false));
       sb.append(System.lineSeparator());
     }
 
@@ -441,20 +533,5 @@ public class CountStat implements SemgrexStat {
     return String.format("%.2f%%", 100.0 * count / total);
   }
 
-  private static String pad(String value, int width) {
-    StringBuilder sb = new StringBuilder(value);
-    while (sb.length() < width) {
-      sb.append(' ');
-    }
-    return sb.toString();
-  }
-
-  private static String lpad(String value, int width) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = value.length(); i < width; ++i) {
-      sb.append(' ');
-    }
-    sb.append(value);
-    return sb.toString();
-  }
 }
+
