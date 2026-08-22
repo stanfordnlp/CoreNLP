@@ -424,6 +424,35 @@ public class SemgrexTest {
   }
 
   @Test
+  public void testOptionalMorphoVarGroupsWrongMatch() {
+    SemanticGraph graph = makeComplicatedGraphWithFeatures();
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:__#0%foo;name?:/[BD]/#0%name}}");
+    // should match B & D, but not F, with the optional match
+    runTest(pattern, graph, "B", "D");
+  }
+
+  @Test
+  public void testOptionalMorphoVarGroupsMissingMatches() {
+    SemanticGraph graph = makeComplicatedGraphWithFeatures();
+    IndexedWord word = graph.getNodeByIndex(1);
+    assertEquals("A", word.word());
+
+    CoNLLUFeatures feats = new CoNLLUFeatures();
+    feats.put("foo", "bar");
+    word.set(CoreAnnotations.CoNLLUFeats.class, feats);
+
+    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:__#0%foo;name?:/[BD]/#0%name}}");
+    // should match B & D, but not F, with the optional match
+    // also, the optional match should find A, since the value isn't there at all
+    runTest(pattern, graph, "A", "B", "D");
+
+    pattern = SemgrexPattern.compile("{morphofeatures:{foo:__#0%foo;name?:__#0%name}}");
+    // all of them should show up if any value is allowed
+    // of course, only the words with "foo" set on it, not the whole graph
+    runTest(pattern, graph, "A", "B", "D", "F");
+  }
+
+  @Test
   public void testRejectKeyVarGroup() {
     // if this feature is added, we should update this test with a
     // check that the functionality actually works
