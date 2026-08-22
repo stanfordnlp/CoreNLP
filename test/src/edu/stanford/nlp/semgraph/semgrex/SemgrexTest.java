@@ -393,36 +393,29 @@ public class SemgrexTest {
   @Test
   public void testMorphoVarGroups() {
     SemanticGraph graph = makeComplicatedGraphWithFeatures();
+    // TODO: we wouldn't need to compile this, except the round trip toString() isn't working...
     SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:__#0%foo;name:/[BD]/#0%name}}");
-    SemgrexMatcher matcher = pattern.matcher(graph);
 
     String[] expectedNames = {"B", "D"};
     List<String> foundNames = new ArrayList<>();
+    List<SemgrexMatch> matches = runTest(pattern, graph, "B", "D");
+    assertEquals(expectedNames.length, matches.size());
     for (int i = 0; i < expectedNames.length; ++i) {
-      if (!matcher.find()) {
-        throw new AssertionFailedError("Expected " + expectedNames.length +
-                                       " matches for pattern " + pattern +
-                                       " on " + graph + ", only got " + i);
-      }
-      IndexedWord match = matcher.getMatch();
-      CoNLLUFeatures feats = match.get(CoreAnnotations.CoNLLUFeats.class);
+      SemgrexMatch match = matches.get(i);
+      IndexedWord word = match.getMatch();
+
+      CoNLLUFeatures feats = word.get(CoreAnnotations.CoNLLUFeats.class);
       assertTrue(feats.containsKey("foo"));
       assertEquals("bar", feats.get("foo"));
-      assertTrue(matcher.variableStrings.isSet("foo"));
-      assertEquals(feats.get("foo"), matcher.variableStrings.getString("foo"));
+      assertNotNull(match.getVariableString("foo"));
+      assertEquals(feats.get("foo"), match.getVariableString("foo"));
 
       assertTrue(feats.containsKey("name"));
-      assertTrue(matcher.variableStrings.isSet("name"));
-      assertEquals(feats.get("name"), matcher.variableStrings.getString("name"));
+      assertNotNull(match.getVariableString("name"));
+      assertEquals(feats.get("name"), match.getVariableString("name"));
       foundNames.add(feats.get("name"));
     }
-    if (matcher.findNextMatchingNode()) {
-      throw new AssertionFailedError("Found more than " +
-                                     expectedNames.length +
-                                     " matches for pattern " + pattern +
-                                     " on " + graph + "... extra match is " +
-                                     matcher.getMatch());
-    }
+
     Collections.sort(foundNames);
     assertEquals(foundNames.size(), expectedNames.length);
     for (int i = 0; i < expectedNames.length; ++i) {
@@ -1867,26 +1860,26 @@ public class SemgrexTest {
     assertEquals(pattern.trim(), tostring.trim());
   }
 
-  public static void runTest(String pattern, String graph,
-                             String... expectedMatches) {
+  public static List<SemgrexMatch> runTest(String pattern, String graph,
+                                           String... expectedMatches) {
     comparePatternToString(pattern);
-    runTest(SemgrexPattern.compile(pattern), SemanticGraph.valueOf(graph),
-            expectedMatches);
+    return runTest(SemgrexPattern.compile(pattern), SemanticGraph.valueOf(graph),
+                   expectedMatches);
   }
 
-  public static void runTest(String pattern, SemanticGraph graph,
-                             String... expectedMatches) {
+  public static List<SemgrexMatch> runTest(String pattern, SemanticGraph graph,
+                                           String... expectedMatches) {
     comparePatternToString(pattern);
-    runTest(SemgrexPattern.compile(pattern), graph, expectedMatches);
+    return runTest(SemgrexPattern.compile(pattern), graph, expectedMatches);
   }
 
-  public static void runTest(SemgrexPattern pattern, String graph,
-                             String... expectedMatches) {
-    runTest(pattern, SemanticGraph.valueOf(graph), expectedMatches);
+  public static List<SemgrexMatch> runTest(SemgrexPattern pattern, String graph,
+                                           String... expectedMatches) {
+    return runTest(pattern, SemanticGraph.valueOf(graph), expectedMatches);
   }
 
-  public static void runTest(SemgrexPattern pattern, SemanticGraph graph,
-                             String... expectedMatches) {
+  public static List<SemgrexMatch> runTest(SemgrexPattern pattern, SemanticGraph graph,
+                                           String... expectedMatches) {
     // results are not in the order I would expect.  Using a counter
     // allows them to be in any order
     IntCounter<String> counts = new IntCounter<>();
@@ -1896,6 +1889,7 @@ public class SemgrexTest {
     IntCounter<String> originalCounts = new IntCounter<>(counts);
 
     SemgrexMatcher matcher = pattern.matcher(graph);
+    List<SemgrexMatch> matches = new ArrayList<>();
 
     for (int i = 0; i < expectedMatches.length; ++i) {
       if (!matcher.find()) {
@@ -1915,6 +1909,7 @@ public class SemgrexTest {
                                        " for pattern " + pattern +
                                        " on " + graph);
       }
+      matches.add(new SemgrexMatch(pattern, matcher));
     }
     if (matcher.findNextMatchingNode()) {
       throw new AssertionFailedError("Found more than " +
@@ -1923,6 +1918,8 @@ public class SemgrexTest {
                                      " on " + graph + "... extra match is " +
                                      matcher.getMatch());
     }
+
+    return matches;
   }
 
 }
