@@ -44,12 +44,14 @@ public class CountStat implements SemgrexStat {
   /** width of the percentage column, wide enough for "100.00%" */
   private static final int PCT_WIDTH = 6;
   private static final String RESTRICT = "-restrict";
+  private static final String NO_BIDI = "-noBidi";
 
   private final List<String> keys;
   private final Map<List<String>, Integer> counts = new HashMap<>();
 
   private final int maxColumns;
   private final boolean flat;
+  private final boolean bidiAllowed;
 
   /** a key, and the set of values from an earlier stage that key is allowed to take */
   private static class Restriction {
@@ -77,7 +79,7 @@ public class CountStat implements SemgrexStat {
    */
   private boolean bidi = false;
 
-  CountStat(List<String> keys, boolean flat, int maxColumns, List<Restriction> restrictions) {
+  CountStat(List<String> keys, boolean flat, int maxColumns, List<Restriction> restrictions, boolean bidiAllowed) {
     if (keys.isEmpty()) {
       throw new SemgrexParseException("count needs at least one key to count");
     }
@@ -85,16 +87,20 @@ public class CountStat implements SemgrexStat {
     this.flat = flat;
     this.maxColumns = maxColumns;
     this.restrictions = Collections.unmodifiableList(new ArrayList<>(restrictions));
+    this.bidiAllowed = bidiAllowed;
   }
 
   /**
-   * Parses "count [-flat] [-maxColumns N] [-restrict KEY=SET ...] KEY [KEY ...]"
+   * Parses "count [-flat] [-maxColumns N] [-noBidi] [-restrict KEY=SET ...] KEY [KEY ...]"
    */
   public static SemgrexStat create(SemgrexStats.Context context, List<String> args) {
     List<String> keys = new ArrayList<>();
     List<Restriction> restrictions = new ArrayList<>();
     boolean flat = false;
     int maxColumns = DEFAULT_MAX_COLUMNS;
+    // the run decides by default, since it is a property of whatever is
+    // displaying the chart, but a script may still turn it off itself
+    boolean bidiAllowed = context.bidiAllowed();
 
     for (int idx = 0; idx < args.size(); ++idx) {
       String arg = args.get(idx);
@@ -113,6 +119,8 @@ public class CountStat implements SemgrexStat {
         if (maxColumns < 1) {
           throw new SemgrexParseException(MAX_COLUMNS + " must be at least 1");
         }
+      } else if (NO_BIDI.equals(arg)) {
+        bidiAllowed = false;
       } else if (RESTRICT.equals(arg)) {
         if (idx + 1 >= args.size()) {
           throw new SemgrexParseException(RESTRICT + " needs KEY=SET after it");
@@ -126,7 +134,7 @@ public class CountStat implements SemgrexStat {
         restrictions.add(new Restriction(pieces[0], pieces[1], context.useSet("count " + RESTRICT, pieces[1])));
       } else if (arg.startsWith("-")) {
         throw new SemgrexParseException("Unknown option '" + arg + "' for count.  Known options: " +
-                                        FLAT + ", " + MAX_COLUMNS + ", " + RESTRICT);
+                                        FLAT + ", " + MAX_COLUMNS + ", " + NO_BIDI + ", " + RESTRICT);
       } else {
         keys.add(arg);
       }
@@ -137,7 +145,7 @@ public class CountStat implements SemgrexStat {
     }
     context.validateKeys("count", keys);
 
-    return new CountStat(keys, flat, maxColumns, restrictions);
+    return new CountStat(keys, flat, maxColumns, restrictions, bidiAllowed);
   }
 
   @Override
@@ -229,6 +237,9 @@ public class CountStat implements SemgrexStat {
    * so cells bleed into one another as well.
    */
   private void detectBidi() {
+    if (!bidiAllowed) {
+      return;
+    }
     for (String key : keys) {
       if (hasRightToLeft(key)) {
         bidi = true;
@@ -310,6 +321,9 @@ public class CountStat implements SemgrexStat {
     }
     if (maxColumns != DEFAULT_MAX_COLUMNS) {
       sb.append(" ").append(MAX_COLUMNS).append(" ").append(maxColumns);
+    }
+    if (!bidiAllowed) {
+      sb.append(" ").append(NO_BIDI);
     }
     for (String key : keys) {
       sb.append(" ").append(key);
@@ -534,4 +548,3 @@ public class CountStat implements SemgrexStat {
   }
 
 }
-

@@ -158,12 +158,27 @@ public class SemgrexStats {
     private final int stage;
     private final Map<String, Set<String>> sets;
     private final Map<String, Integer> setStages;
+    private final boolean bidiAllowed;
 
-    Context(SemgrexPattern pattern, int stage, Map<String, Set<String>> sets, Map<String, Integer> setStages) {
+    Context(SemgrexPattern pattern, int stage, Map<String, Set<String>> sets, Map<String, Integer> setStages,
+            boolean bidiAllowed) {
       this.pattern = pattern;
       this.stage = stage;
       this.sets = sets;
       this.setStages = setStages;
+      this.bidiAllowed = bidiAllowed;
+    }
+
+    /**
+     * Whether a command may use Unicode bidi controls in its output.
+     *<br>
+     * This is a run level setting rather than a property of the script,
+     * since whether the controls help depends on what is displaying the
+     * output rather than on what is being counted.  A command may still
+     * override it for itself.
+     */
+    public boolean bidiAllowed() {
+      return bidiAllowed;
     }
 
     public SemgrexPattern getPattern() {
@@ -229,10 +244,18 @@ public class SemgrexStats {
   // ------------------------------------------------------------------
 
   public static SemgrexStats parse(String script) {
-    return parse(Arrays.asList(script.split("\n")));
+    return parse(script, true);
+  }
+
+  public static SemgrexStats parse(String script, boolean bidiAllowed) {
+    return parse(Arrays.asList(script.split("\n")), bidiAllowed);
   }
 
   public static SemgrexStats parse(List<String> lines) {
+    return parse(lines, true);
+  }
+
+  public static SemgrexStats parse(List<String> lines, boolean bidiAllowed) {
     List<String> meaningful = new ArrayList<>();
     for (String line : lines) {
       // \r so that a script written on Windows doesn't produce a
@@ -272,7 +295,7 @@ public class SemgrexStats {
         // SemgrexPattern.Root() stops at its newline without checking
         // for EOF, so handing it more than one line would parse the
         // first and discard the rest without complaining
-        context = new Context(SemgrexPattern.compile(rest), stages.size(), sets, setStages);
+        context = new Context(SemgrexPattern.compile(rest), stages.size(), sets, setStages, bidiAllowed);
         continue;
       }
 
@@ -407,6 +430,7 @@ public class SemgrexStats {
   private static final String DEFAULT_MODE = "BASIC";
   private static final String EXTRAS = "-extras";
   private static final String CONLLU_EXTENSION = ".conllu";
+  private static final String NO_BIDI = "-noBidi";
 
   public static void help() {
     log.info("Possible arguments for SemgrexStats:");
@@ -417,6 +441,10 @@ public class SemgrexStats {
     log.info(TREE_FILE + ": a file of trees to process");
     log.info(MODE + ": what mode for dependencies.  basic, collapsed, or ccprocessed.  To get 'noncollapsed', use basic with extras");
     log.info(EXTRAS + ": whether or not to use extras");
+    log.info(NO_BIDI + ": never add the Unicode bidi controls which keep a right to left "
+                     + "script from reversing a chart's columns.  They are added automatically "
+                     + "when the data needs them, which is right for a browser or a chat client "
+                     + "but not for a terminal which mangles them");
     log.info();
     log.info(SCRIPT + " is required, as is one of " + CONLLU_FILE + " or " + TREE_FILE);
     log.info();
@@ -494,6 +522,7 @@ public class SemgrexStats {
     flagMap.put(CONLLU_FILE, 1);
     flagMap.put(MODE, 1);
     flagMap.put(EXTRAS, 1);
+    flagMap.put(NO_BIDI, 0);
 
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
 
@@ -511,7 +540,7 @@ public class SemgrexStats {
       System.exit(2);
       return;
     }
-    SemgrexStats stats = SemgrexStats.parse(script);
+    SemgrexStats stats = SemgrexStats.parse(script, !argsMap.containsKey(NO_BIDI));
 
     String modeString = DEFAULT_MODE;
     if (argsMap.containsKey(MODE) && argsMap.get(MODE).length > 0) {
