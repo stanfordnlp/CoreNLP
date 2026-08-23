@@ -210,13 +210,13 @@ SemgrexPattern Root() : {
 
 }
 
-SemgrexPattern SubNode(GraphRelation r) : {
-	SemgrexPattern result =  null;
+SemgrexPattern SubNode(GraphRelation reln) : {
+	SemgrexPattern result = null;
 	SemgrexPattern child = null;
 	ParseFlags savedFlags;
 	Token modifierToken;
 } {
-	( "(" result = SubNode(r) ")" ( child = RelationDisj() )? )
+	( "(" result = SubNode(reln) ")" ( child = RelationDisj() )? )
 	{
 		if (child != null) {
 		List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
@@ -229,7 +229,7 @@ SemgrexPattern SubNode(GraphRelation r) : {
  | ( modifierToken = <MODIFIER_OPEN>
      { savedFlags = saveFlags();
        applyModifierFlags(modifierToken.image); }
-     result = SubNode(r)
+     result = SubNode(reln)
      ")"
      { restoreFlags(savedFlags); }
      ( child = RelationDisj() )? )
@@ -242,7 +242,7 @@ SemgrexPattern SubNode(GraphRelation r) : {
      }
      return result;
    }
- | ( result = ModNode(r) (child = RelationDisj() )? )
+ | ( result = ModNode(reln) (child = RelationDisj() )? )
  	{  if (child != null) result.setChild(child);
  		return result;}
 }
@@ -346,12 +346,12 @@ SemgrexPattern Relation() : {
 	}
 }
 
-SemgrexPattern NodeDisj(GraphRelation r) : {
+SemgrexPattern NodeDisj(GraphRelation reln) : {
 	SemgrexPattern child;
 	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
 } {
-    ((	 "[" ( child = NodeConj(r) )  { children.add(child); }
-	( ( "|" child = NodeConj(r) ) { children.add(child); } )* "]" )
+    ((	 "[" ( child = NodeConj(reln) )  { children.add(child); }
+	( ( "|" child = NodeConj(reln) ) { children.add(child); } )* "]" )
  	{ if (children.size() == 1)
 		return child;
 	  else
@@ -359,12 +359,12 @@ SemgrexPattern NodeDisj(GraphRelation r) : {
      })
 }
 
-SemgrexPattern NodeConj(GraphRelation r) : {
+SemgrexPattern NodeConj(GraphRelation reln) : {
 	SemgrexPattern child;
 	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
 } {
-    (	 (child = ModNode(r) ) { children.add(child); }
-	( ( ("&")? child = ModNode(r) ) { children.add(child); deprecatedNodeConj = true; } )* )
+    (	 (child = ModNode(reln) ) { children.add(child); }
+	( ( ("&")? child = ModNode(reln) ) { children.add(child); deprecatedNodeConj = true; } )* )
  	{ if (children.size() == 1)
 		return child;
 	  else
@@ -372,25 +372,25 @@ SemgrexPattern NodeConj(GraphRelation r) : {
   }
 }
 
-SemgrexPattern ModNode(GraphRelation r) : {
+SemgrexPattern ModNode(GraphRelation reln) : {
 	SemgrexPattern child;
 	boolean startUnderNeg;
 } {
-	( child = Child(r)
+	( child = Child(reln)
 	  | ( "!"
 		  { startUnderNeg = underNodeNegation; // TODO: can negations be nested?  If so, should they cancel?
-		    underNodeNegation = true; } child = Child(r) { underNodeNegation = startUnderNeg; } )
+		    underNodeNegation = true; } child = Child(reln) { underNodeNegation = startUnderNeg; } )
 	   )
 	   {
 	   	return child; }
 }
 
 
-SemgrexPattern Child(GraphRelation r) : {
+SemgrexPattern Child(GraphRelation reln) : {
 	SemgrexPattern child;
 } {
-	(( child = NodeDisj(r) )
-		| child = Description(r) )
+	(( child = NodeDisj(reln) )
+		| child = Description(reln) )
 	  {
 	  return child; }
 }
@@ -459,7 +459,7 @@ void AddAttribute(NodeAttributes attributes) : {
 	( attr = <EMPTY> { attributes.setEmpty(true); } )
 }
 
-NodePattern Description(GraphRelation r) : {
+NodePattern Description(GraphRelation reln) : {
 	Token name = null;
 	boolean link = false;
         NodeAttributes attributes = new NodeAttributes();
@@ -482,7 +482,7 @@ NodePattern Description(GraphRelation r) : {
             }
 	  )?
 	)
-  	{ pat = new NodePattern(r, underNodeNegation, attributes, link, name != null ? name.image : null);
+  	{ pat = new NodePattern(reln, underNodeNegation, attributes, link, name != null ? name.image : null);
 	  return pat;
 	}
 }

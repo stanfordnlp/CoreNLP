@@ -232,14 +232,14 @@ for (String key : postprocessKeys) {
     throw new Error("Missing return statement in function");
 }
 
-  final public SemgrexPattern SubNode(GraphRelation r) throws ParseException {SemgrexPattern result =  null;
+  final public SemgrexPattern SubNode(GraphRelation reln) throws ParseException {SemgrexPattern result = null;
         SemgrexPattern child = null;
         ParseFlags savedFlags;
         Token modifierToken;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 16:{
       jj_consume_token(16);
-      result = SubNode(r);
+      result = SubNode(reln);
       jj_consume_token(17);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
@@ -271,7 +271,7 @@ if (child != null) {
       modifierToken = jj_consume_token(MODIFIER_OPEN);
 savedFlags = saveFlags();
        applyModifierFlags(modifierToken.image);
-      result = SubNode(r);
+      result = SubNode(reln);
       jj_consume_token(17);
 restoreFlags(savedFlags);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -303,7 +303,7 @@ if (child != null) {
     case 20:
     case 22:
     case 33:{
-      result = ModNode(r);
+      result = ModNode(reln);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
       case SORT:
@@ -610,10 +610,10 @@ if (edgeName != null) {
     throw new Error("Missing return statement in function");
 }
 
-  final public SemgrexPattern NodeDisj(GraphRelation r) throws ParseException {SemgrexPattern child;
+  final public SemgrexPattern NodeDisj(GraphRelation reln) throws ParseException {SemgrexPattern child;
         List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
     jj_consume_token(22);
-    child = NodeConj(r);
+    child = NodeConj(reln);
 children.add(child);
     label_5:
     while (true) {
@@ -627,7 +627,7 @@ children.add(child);
         break label_5;
       }
       jj_consume_token(18);
-      child = NodeConj(r);
+      child = NodeConj(reln);
 children.add(child);
     }
     jj_consume_token(23);
@@ -638,9 +638,9 @@ if (children.size() == 1)
     throw new Error("Missing return statement in function");
 }
 
-  final public SemgrexPattern NodeConj(GraphRelation r) throws ParseException {SemgrexPattern child;
+  final public SemgrexPattern NodeConj(GraphRelation reln) throws ParseException {SemgrexPattern child;
         List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
-    child = ModNode(r);
+    child = ModNode(reln);
 children.add(child);
     label_6:
     while (true) {
@@ -665,7 +665,7 @@ children.add(child);
         jj_la1[24] = jj_gen;
         ;
       }
-      child = ModNode(r);
+      child = ModNode(reln);
 children.add(child); deprecatedNodeConj = true;
     }
 if (children.size() == 1)
@@ -675,19 +675,19 @@ if (children.size() == 1)
     throw new Error("Missing return statement in function");
 }
 
-  final public SemgrexPattern ModNode(GraphRelation r) throws ParseException {SemgrexPattern child;
+  final public SemgrexPattern ModNode(GraphRelation reln) throws ParseException {SemgrexPattern child;
         boolean startUnderNeg;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 22:
     case 33:{
-      child = Child(r);
+      child = Child(reln);
       break;
       }
     case 20:{
       jj_consume_token(20);
 startUnderNeg = underNodeNegation; // TODO: can negations be nested?  If so, should they cancel?
                     underNodeNegation = true;
-      child = Child(r);
+      child = Child(reln);
 underNodeNegation = startUnderNeg;
       break;
       }
@@ -700,14 +700,14 @@ underNodeNegation = startUnderNeg;
     throw new Error("Missing return statement in function");
 }
 
-  final public SemgrexPattern Child(GraphRelation r) throws ParseException {SemgrexPattern child;
+  final public SemgrexPattern Child(GraphRelation reln) throws ParseException {SemgrexPattern child;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 22:{
-      child = NodeDisj(r);
+      child = NodeDisj(reln);
       break;
       }
     case 33:{
-      child = Description(r);
+      child = Description(reln);
       break;
       }
     default:
@@ -994,7 +994,7 @@ attributes.setEmpty(true);
     }
 }
 
-  final public NodePattern Description(GraphRelation r) throws ParseException {Token name = null;
+  final public NodePattern Description(GraphRelation reln) throws ParseException {Token name = null;
         boolean link = false;
         NodeAttributes attributes = new NodeAttributes();
         NodePattern pat;
@@ -1047,7 +1047,7 @@ String nodeName = name.image;
       jj_la1[43] = jj_gen;
       ;
     }
-pat = new NodePattern(r, underNodeNegation, attributes, link, name != null ? name.image : null);
+pat = new NodePattern(reln, underNodeNegation, attributes, link, name != null ? name.image : null);
           {if ("" != null) return pat;}
     throw new Error("Missing return statement in function");
 }
