@@ -260,8 +260,6 @@ public class SemgrexTest {
 
   @Test
   public void testContainsExpression() {
-    // morphofeatures is a Map, so this should work
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:bar}}");
     SemanticGraph graph = makeComplicatedGraph();
     Set<IndexedWord> vertices = graph.vertexSet();
     for (IndexedWord iw : vertices) {
@@ -271,13 +269,12 @@ public class SemgrexTest {
         iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
       }
     }
-    runTest(pattern, graph, "D", "F");
+    // morphofeatures is a Map, which is the requirement for contains attributes
+    runTest("{morphofeatures:{foo:bar}}", graph, "D", "F");
   }
 
   @Test
   public void testContainsRegexKeyExpression() {
-    // morphofeatures is a Map, so this should work
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/foo/:bar}}");
     SemanticGraph graph = makeComplicatedGraph();
     Set<IndexedWord> vertices = graph.vertexSet();
     for (IndexedWord iw : vertices) {
@@ -287,13 +284,12 @@ public class SemgrexTest {
         iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
       }
     }
-    runTest(pattern, graph, "D", "F");
+    // morphofeatures is a Map, which is the requirement for contains attributes
+    runTest("{morphofeatures:{/foo/:bar}}", graph, "D", "F");
   }
 
   @Test
   public void testContainsRegexKeyPartialMatchExpression() {
-    // morphofeatures is a Map, so this should work
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/.*o.*/:bar}}");
     SemanticGraph graph = makeComplicatedGraph();
     Set<IndexedWord> vertices = graph.vertexSet();
     for (IndexedWord iw : vertices) {
@@ -303,13 +299,12 @@ public class SemgrexTest {
         iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
       }
     }
-    runTest(pattern, graph, "D", "F");
+    // morphofeatures is a Map, which is the requirement for contains attributes
+    runTest("{morphofeatures:{/.*o.*/:bar}}", graph, "D", "F");
   }
 
   @Test
   public void testContainsRegexKeyMultipleMatchExpression() {
-    // morphofeatures is a Map, so this should work
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{/.*o.*/:bar}}");
     SemanticGraph graph = makeComplicatedGraph();
     Set<IndexedWord> vertices = graph.vertexSet();
     for (IndexedWord iw : vertices) {
@@ -325,12 +320,12 @@ public class SemgrexTest {
         iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
       }
     }
-    runTest(pattern, graph, "D", "F");
+    // morphofeatures is a Map, which is the requirement for contains attributes
+    runTest("{morphofeatures:{/.*o.*/:bar}}", graph, "D", "F");
   }
 
   @Test
   public void testContainsRegexKeyNegatedMatchExpression() {
-    // morphofeatures is a Map, which is required for the contains patters to work
     SemanticGraph graph = makeComplicatedGraph();
     Set<IndexedWord> vertices = graph.vertexSet();
     for (IndexedWord iw : vertices) {
@@ -346,6 +341,7 @@ public class SemgrexTest {
         iw.set(CoreAnnotations.CoNLLUFeats.class, feats);
       }
     }
+    // morphofeatures is a Map, which is the requirement for contains attributes
     runTest("{morphofeatures:{/.*o.*/!:bar}}", graph, "A", "B", "C", "E", "G", "H", "I", "J");
   }
 
@@ -652,11 +648,9 @@ public class SemgrexTest {
 
     // use this method to avoid the toString() test, since we expect it
     // to use 2,2>> instead of 2>>
-    runTest(SemgrexPattern.compile("{} 2>> {word:I}"), graph,
-            "E", "H");
+    runTest(SemgrexPattern.compile("{} 2>> {word:I}"), graph, "E", "H");
 
-    runTest("{} 1,2>> {word:I}", graph,
-            "E", "H", "J");
+    runTest("{} 1,2>> {word:I}", graph, "E", "H", "J");
   }
 
   /**
@@ -704,8 +698,7 @@ public class SemgrexTest {
 
     runTest("{} >obj ({} >expl {})", graph, "A");
 
-    SemgrexPattern pattern =
-      SemgrexPattern.compile("{} >obj ({} >expl {}=foo)");
+    SemgrexPattern pattern = SemgrexPattern.compile("{} >obj ({} >expl {}=foo)");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(1, matcher.getNodeNames().size());
@@ -1016,6 +1009,14 @@ public class SemgrexTest {
   public void testNamedRelationEdge() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     SemgrexPattern pattern = SemgrexPattern.compile("{idx:2}=gov >=foo {idx:3}=dep");
+    // test two different mechanisms so we can make sure the SemgrexMatch pattern is working
+    List<SemgrexMatch> matches = runTest(pattern, graph, "muffins");
+    assertEquals(1, matches.size());
+    SemgrexMatch match = matches.get(0);
+    assertEquals("muffins", match.getNode("gov").toString());
+    assertEquals("blueberry", match.getNode("dep").toString());
+    assertEquals("compound", match.getRelnString("foo"));
+
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("muffins", matcher.getNode("gov").toString());
