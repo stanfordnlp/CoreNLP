@@ -1008,15 +1008,16 @@ public class SemgrexTest {
   @Test
   public void testNamedRelationEdge() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
-    SemgrexPattern pattern = SemgrexPattern.compile("{idx:2}=gov >=foo {idx:3}=dep");
+    String patternString = "{idx:2}=gov >=foo {idx:3}=dep";
     // test two different mechanisms so we can make sure the SemgrexMatch pattern is working
-    List<SemgrexMatch> matches = runTest(pattern, graph, "muffins");
+    List<SemgrexMatch> matches = runTest(patternString, graph, "muffins");
     assertEquals(1, matches.size());
     SemgrexMatch match = matches.get(0);
     assertEquals("muffins", match.getNode("gov").toString());
     assertEquals("blueberry", match.getNode("dep").toString());
     assertEquals("compound", match.getRelnString("foo"));
 
+    SemgrexPattern pattern = SemgrexPattern.compile(patternString);
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("muffins", matcher.getNode("gov").toString());
@@ -1026,14 +1027,13 @@ public class SemgrexTest {
 
     // it should accept this once, going from root to the dep node,
     // as the ~foo will require that it have the same edge label as =foo
-    pattern = SemgrexPattern.compile("{idx:2}=gov >=foo {idx:3}=dep : {$}=root >>~foo {}");
-    matcher = pattern.matcher(graph);
-    assertTrue(matcher.find());
-    assertEquals("ate", matcher.getNode("root").toString());
-    assertEquals("muffins", matcher.getNode("gov").toString());
-    assertEquals("blueberry", matcher.getNode("dep").toString());
-    assertEquals("compound", matcher.getRelnString("foo"));
-    assertFalse(matcher.find());
+    matches = runTest("{idx:2}=gov >=foo {idx:3}=dep : {$}=root >>~foo {}", graph, "muffins");
+    assertEquals(1, matches.size());
+    match = matches.get(0);
+    assertEquals("ate", match.getNode("root").toString());
+    assertEquals("muffins", match.getNode("gov").toString());
+    assertEquals("blueberry", match.getNode("dep").toString());
+    assertEquals("compound", match.getRelnString("foo"));
   }
 
   /**

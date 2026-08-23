@@ -83,7 +83,15 @@ abstract class GraphRelation implements Serializable {
 
   @Override
   public String toString() {
-    return symbol + ((rawType != null) ? rawType : "") + ((name != null) ? "=" + name : "") + ((edgeName != null) ? "~" + edgeName : "");
+    StringBuilder result = new StringBuilder();
+    result.append(symbol);
+    result.append((rawType != null) ? rawType : "");
+    if (edgeName != null) {
+      result.append("=").append(edgeName);
+    } else if (name != null) {
+      result.append("~").append(name);
+    }
+    return result.toString();
   }
 
   public Predicate<String> getPattern(String relnType)
