@@ -430,14 +430,19 @@ public class SemgrexStats {
   private static final String DEFAULT_MODE = "BASIC";
   private static final String EXTRAS = "-extras";
   private static final String CONLLU_EXTENSION = ".conllu";
+  private static final String CONLLU_EXTENSION_FLAG = "-conlluExtension";
   private static final String NO_BIDI = "-noBidi";
 
   public static void help() {
     log.info("Possible arguments for SemgrexStats:");
     log.info(SCRIPT + ": a file containing a stats script");
-    log.info(CONLLU_FILE + ": CoNLL-U dependency trees to process.  May be a file, a directory of "
-                         + CONLLU_EXTENSION + " files, several of either separated by , or ; "
-                         + "or the flag repeated");
+    log.info(CONLLU_FILE + ": CoNLL-U dependency trees to process.  May be a file, a directory, "
+                         + "several of either separated by , or ; or the flag repeated.  Bare paths "
+                         + "with no flag in front of them are read the same way, so a list of files "
+                         + "can simply be separated by spaces");
+    log.info(CONLLU_EXTENSION_FLAG + ": which extensions to pick up when a directory is given, "
+                         + "separated by , or ; .  Default " + CONLLU_EXTENSION + ".  A file named "
+                         + "explicitly is always read whatever it is called");
     log.info(TREE_FILE + ": a file of trees to process");
     log.info(MODE + ": what mode for dependencies.  basic, collapsed, or ccprocessed.  To get 'noncollapsed', use basic with extras");
     log.info(EXTRAS + ": whether or not to use extras");
@@ -471,12 +476,16 @@ public class SemgrexStats {
    * repeated, since StringUtils.argsToMap appends repeats of a flag it
    * knows the arity of.
    *<br>
-   * A directory contributes the CONLLU_EXTENSION files directly inside
-   * it, sorted, since File.listFiles is in no particular order and a
-   * UD treebank directory also holds a README and a LICENSE.  A file
-   * named explicitly is read whatever it happens to be called.
+   * A directory contributes the files directly inside it whose name ends
+   * in one of the extensions, sorted, since File.listFiles is in no
+   * particular order and a UD treebank directory also holds a README and
+   * a LICENSE.  A file named explicitly is read whatever it is called.
+   *<br>
+   * Anything in a directory which is passed over is reported, since a
+   * file which should have been counted and wasn't is a chart which is
+   * quietly wrong rather than obviously broken.
    */
-  static List<File> expandConlluFiles(String[] paths) {
+  static List<File> expandConlluFiles(List<String> paths, List<String> extensions) {
     List<File> files = new ArrayList<>();
     for (String arg : paths) {
       for (String path : arg.split("[,;]")) {
@@ -492,15 +501,26 @@ public class SemgrexStats {
             throw new IllegalArgumentException("Could not read the directory " + path);
           }
           List<File> found = new ArrayList<>();
+          List<String> skipped = new ArrayList<>();
           for (File child : contents) {
-            if (child.isFile() && child.getName().toLowerCase().endsWith(CONLLU_EXTENSION)) {
+            if (!child.isFile()) {
+              continue;
+            }
+            if (matchesExtension(child.getName(), extensions)) {
               found.add(child);
+            } else {
+              skipped.add(child.getName());
             }
           }
           if (found.isEmpty()) {
-            throw new IllegalArgumentException("Found no " + CONLLU_EXTENSION + " files in the directory " + path);
+            throw new IllegalArgumentException("Found no " + extensions + " files in the directory " + path);
           }
           Collections.sort(found);
+          if (!skipped.isEmpty()) {
+            Collections.sort(skipped);
+            log.warn("Skipped " + skipped.size() + " file(s) in " + path + " which do not end in " +
+                     extensions + ": " + skipped + "  (use " + CONLLU_EXTENSION_FLAG + " to include them)");
+          }
           files.addAll(found);
         } else if (file.isFile()) {
           files.add(file);
@@ -515,6 +535,37 @@ public class SemgrexStats {
     return files;
   }
 
+  private static boolean matchesExtension(String filename, List<String> extensions) {
+    String lower = filename.toLowerCase();
+    for (String extension : extensions) {
+      if (lower.endsWith(extension)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Which extensions to pick up when a directory is given
+   */
+  static List<String> parseExtensions(String arg) {
+    List<String> extensions = new ArrayList<>();
+    for (String extension : arg.split("[,;]")) {
+      extension = extension.trim().toLowerCase();
+      if (extension.isEmpty()) {
+        continue;
+      }
+      if (!extension.startsWith(".")) {
+        extension = "." + extension;
+      }
+      extensions.add(extension);
+    }
+    if (extensions.isEmpty()) {
+      throw new IllegalArgumentException(CONLLU_EXTENSION_FLAG + " was given no extensions");
+    }
+    return extensions;
+  }
+
   public static void main(String[] args) throws IOException {
     Map<String, Integer> flagMap = Generics.newHashMap();
     flagMap.put(SCRIPT, 1);
@@ -523,6 +574,7 @@ public class SemgrexStats {
     flagMap.put(MODE, 1);
     flagMap.put(EXTRAS, 1);
     flagMap.put(NO_BIDI, 0);
+    flagMap.put(CONLLU_EXTENSION_FLAG, 1);
 
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
 
@@ -553,18 +605,36 @@ public class SemgrexStats {
       useExtras = Boolean.parseBoolean(argsMap.get(EXTRAS)[0]);
     }
 
-    if (!argsMap.containsKey(TREE_FILE) && !argsMap.containsKey(CONLLU_FILE)) {
+    // StringUtils.argsToMap cannot give a flag a variable number of
+    // arguments, since it takes one count and uses it as both the minimum
+    // and the maximum, so -conlluFile a b c would eat the next flag.  it
+    // does collect everything not attached to a flag under the null key
+    // though, which makes bare paths a space separated list for free
+    List<String> conlluPaths = new ArrayList<>();
+    if (argsMap.containsKey(CONLLU_FILE)) {
+      conlluPaths.addAll(Arrays.asList(argsMap.get(CONLLU_FILE)));
+    }
+    String[] positional = argsMap.get(null);
+    if (positional != null) {
+      conlluPaths.addAll(Arrays.asList(positional));
+    }
+
+    if (!argsMap.containsKey(TREE_FILE) && conlluPaths.isEmpty()) {
       help();
       System.exit(2);
     }
 
     List<File> conlluFiles = Collections.emptyList();
-    if (argsMap.containsKey(CONLLU_FILE)) {
+    if (!conlluPaths.isEmpty()) {
       // expand the whole list before reading anything, so that a typo
       // in the last filename is reported now rather than after an hour
       // of counting
       try {
-        conlluFiles = expandConlluFiles(argsMap.get(CONLLU_FILE));
+        List<String> extensions = Collections.singletonList(CONLLU_EXTENSION);
+        if (argsMap.containsKey(CONLLU_EXTENSION_FLAG) && argsMap.get(CONLLU_EXTENSION_FLAG).length > 0) {
+          extensions = parseExtensions(argsMap.get(CONLLU_EXTENSION_FLAG)[0]);
+        }
+        conlluFiles = expandConlluFiles(conlluPaths, extensions);
       } catch (IllegalArgumentException e) {
         log.err(e.getMessage());
         System.exit(2);
@@ -607,3 +677,4 @@ public class SemgrexStats {
     System.out.print(stats.report());
   }
 }
+
