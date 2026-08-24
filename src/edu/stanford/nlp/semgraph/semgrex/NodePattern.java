@@ -27,6 +27,7 @@ public class NodePattern extends SemgrexPattern  {
   private static final long serialVersionUID = -5981133879119233896L;
 
   private final GraphRelation reln;
+  private final String graphName;
   private final boolean negDesc;
   /**
    *  A list of Attribute - key, case_sensitive_pattern, case_insensitive_pattern, mode
@@ -48,9 +49,10 @@ public class NodePattern extends SemgrexPattern  {
   private final String name;
   private final String descString;
 
-  public NodePattern(GraphRelation r, boolean negDesc,
+  public NodePattern(GraphRelation r, String graphName, boolean negDesc,
                      NodeAttributes attrs, boolean isLink, String name) {
     this.reln = r;
+    this.graphName = graphName;
     this.negDesc = negDesc;
     this.isLink = isLink;
     // order the attributes so that the pattern stays the same when
@@ -426,7 +428,7 @@ public class NodePattern extends SemgrexPattern  {
     if (reln == null) {
       return "";
     }
-    return reln.toString() + " ";
+    return reln.toString(graphName) + " ";
   }
 
   /** The attributes and the name, without the relation which arrives here */
