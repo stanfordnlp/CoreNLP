@@ -690,9 +690,15 @@ public class Ssurgeon  {
       } else if (command.equalsIgnoreCase(CombineMWT.LABEL)) {
         return new CombineMWT(argsBox.nodes, argsBox.annotations.get("word"));
       } else if (command.equalsIgnoreCase(SetPhraseHead.LABEL)) {
+        if (argsBox.reln == null) {
+          throw new SsurgeonParseException(command + " requires a -reln argument");
+        }
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
         return new SetPhraseHead(argsBox.nodes, argsBox.headIndex, reln, argsBox.weight);
       } else if (command.equalsIgnoreCase(SplitWord.LABEL)) {
+        if (argsBox.reln == null) {
+          throw new SsurgeonParseException(command + " requires a -reln argument");
+        }
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
         if (argsBox.regex.size() > 0 && argsBox.exact.size() > 0) {
           throw new SsurgeonParseException("Found both regex and exact in the splits for splitWord");
