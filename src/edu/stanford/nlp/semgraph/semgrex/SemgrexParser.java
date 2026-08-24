@@ -27,8 +27,6 @@ class SemgrexParser implements SemgrexParserConstants {
   // TODO: this is not actually implemented yet
   private boolean sequentialChain = false;
 
-  private final static Set<String> KNOWN_GRAPHS = Set.of("basic", "enhanced");
-
   /**
    * Track both a relation and the graph it applies to
    *<br>
@@ -38,8 +36,8 @@ class SemgrexParser implements SemgrexParserConstants {
    */
   private static class RelationTarget {
     final GraphRelation relation;
-    final String graphName;
-    RelationTarget(GraphRelation relation, String graphName) {
+    final SemgrexGraphName graphName;
+    RelationTarget(GraphRelation relation, SemgrexGraphName graphName) {
       this.relation = relation;
       this.graphName = graphName;
     }
@@ -486,7 +484,7 @@ child.makeOptional();
 }
 
   final public SemgrexPattern Relation() throws ParseException {GraphRelation reln;
-        String graphName = null;
+        SemgrexGraphName graphName = null;
         Token rel = null;
         Token relnType = null;
         Token numArg = null;
@@ -596,9 +594,9 @@ child.makeOptional();
       throw new ParseException();
     }
 if (graph != null) {
-            graphName = graph.image;
-            if (!KNOWN_GRAPHS.contains(graphName)) {
-              {if (true) throw new SemgrexParseException("Unknown graph name " + graphName);}
+            graphName = SemgrexGraphName.fromName(graph.image);
+            if (graphName == null) {
+              {if (true) throw new SemgrexParseException("Unknown graph name " + graph.image);}
             }
           }
           if (edgeName != null) {

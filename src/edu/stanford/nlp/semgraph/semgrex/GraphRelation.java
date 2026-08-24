@@ -80,7 +80,7 @@ abstract class GraphRelation implements Serializable {
     return toString(null);
   }
 
-  public String toString(String graphName) {
+  public String toString(SemgrexGraphName graphName) {
     StringBuilder result = new StringBuilder();
     result.append(symbol);
     result.append((rawType != null) ? rawType : "");
@@ -89,7 +89,7 @@ abstract class GraphRelation implements Serializable {
     // of the toString()
     if (graphName != null) {
       result.append("@");
-      result.append(graphName);
+      result.append(graphName.lowerName);
     }
     if (edgeName != null) {
       result.append("=").append(edgeName);
