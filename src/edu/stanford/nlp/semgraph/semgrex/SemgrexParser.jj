@@ -18,7 +18,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
 class SemgrexParser {
-
   // this is so we can tell, at any point during the parse
   // whether we are under a negation, which we need to know
   // because labeling nodes under negation is illegal
@@ -33,6 +32,24 @@ class SemgrexParser {
   // rather than as conjunctions from the first node (A<B, A<C)
   // TODO: this is not actually implemented yet
   private boolean sequentialChain = false;
+
+  private final static Set<String> KNOWN_GRAPHS = Set.of("basic", "enhanced");
+
+  /**
+   * Track both a relation and the graph it applies to
+   *<br>
+   * NodePattern wants both, so both need to thread down to
+   * where the NodePattern is created from where the
+   * GraphRelation is parsed
+   */
+  private static class RelationTarget {
+    final GraphRelation relation;
+    final String graphName;
+    RelationTarget(GraphRelation relation, String graphName) {
+      this.relation = relation;
+      this.graphName = graphName;
+    }
+  }
 
   /**
    * Saved state for a (?flags:...) modifier block.
@@ -159,10 +176,10 @@ SemgrexPattern Root() : {
   }
   (
     (
-      (reverse = <ALIGNRELN> node = SubNode(GraphRelation.ALIGNED_ROOT))
+      (reverse = <ALIGNRELN> node = SubNode(new RelationTarget(GraphRelation.ALIGNED_ROOT, null)))
       |
-      ( node = SubNode(GraphRelation.ROOT) { children.add(node); }
-        ( ":" node = SubNode(GraphRelation.ITERATOR) { children.add(node); } )*
+      ( node = SubNode(new RelationTarget(GraphRelation.ROOT, null)) { children.add(node); }
+        ( ":" node = SubNode(new RelationTarget(GraphRelation.ITERATOR, null)) { children.add(node); } )*
       )
     )
     {
@@ -210,7 +227,7 @@ SemgrexPattern Root() : {
 
 }
 
-SemgrexPattern SubNode(GraphRelation reln) : {
+SemgrexPattern SubNode(RelationTarget reln) : {
 	SemgrexPattern result = null;
 	SemgrexPattern child = null;
 	ParseFlags savedFlags;
@@ -298,10 +315,12 @@ SemgrexPattern RelChild() : {
 
 SemgrexPattern Relation() : {
 	GraphRelation reln;
+        String graphName = null;
 	Token rel = null;
 	Token relnType = null;
 	Token numArg = null;
 	Token numArg2 = null;
+        Token graph = null;
 	Token name = null;
 	Token edgeName = null;
 	SemgrexPattern node;
@@ -310,11 +329,18 @@ SemgrexPattern Relation() : {
 	(
 	( ( ( (numArg = identifier() ("," numArg2 = identifier())?)? rel = <RELATION>
 		(relnType = identifier() | relnType = <REGEX>)?)
-		(( ("~") name = identifier() ) )?
+                (( ("@") graph = identifier() ) )?
+                (( ("~") name = identifier() ) )?
                 (( ("=") edgeName = identifier() ) )? )
 	  | (rel = <ALIGNRELN>))
 
 	{
+          if (graph != null) {
+            graphName = graph.image;
+            if (!KNOWN_GRAPHS.contains(graphName)) {
+              throw new SemgrexParseException("Unknown graph name " + graphName);
+            }
+          }
           if (edgeName != null) {
             knownEdges.add(edgeName.image);
           }
@@ -338,15 +364,15 @@ SemgrexPattern Relation() : {
                                              edgeName != null ? edgeName.image : null);
 	  }
 	}
-	( (node = ModNode(reln)) |
-	  	("(" node = SubNode(reln) ")") ) )
+	( (node = ModNode(new RelationTarget(reln, graphName))) |
+	  	("(" node = SubNode(new RelationTarget(reln, graphName)) ")") ) )
 
 	 {
 	 return node;
 	}
 }
 
-SemgrexPattern NodeDisj(GraphRelation reln) : {
+SemgrexPattern NodeDisj(RelationTarget reln) : {
 	SemgrexPattern child;
 	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
 } {
@@ -359,7 +385,7 @@ SemgrexPattern NodeDisj(GraphRelation reln) : {
      })
 }
 
-SemgrexPattern NodeConj(GraphRelation reln) : {
+SemgrexPattern NodeConj(RelationTarget reln) : {
 	SemgrexPattern child;
 	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
 } {
@@ -372,7 +398,7 @@ SemgrexPattern NodeConj(GraphRelation reln) : {
   }
 }
 
-SemgrexPattern ModNode(GraphRelation reln) : {
+SemgrexPattern ModNode(RelationTarget reln) : {
 	SemgrexPattern child;
 	boolean startUnderNeg;
 } {
@@ -386,7 +412,7 @@ SemgrexPattern ModNode(GraphRelation reln) : {
 }
 
 
-SemgrexPattern Child(GraphRelation reln) : {
+SemgrexPattern Child(RelationTarget reln) : {
 	SemgrexPattern child;
 } {
 	(( child = NodeDisj(reln) )
@@ -459,13 +485,12 @@ void AddAttribute(NodeAttributes attributes) : {
 	( attr = <EMPTY> { attributes.setEmpty(true); } )
 }
 
-NodePattern Description(GraphRelation reln) : {
+NodePattern Description(RelationTarget reln) : {
 	Token name = null;
 	boolean link = false;
         NodeAttributes attributes = new NodeAttributes();
 	NodePattern pat;
 } {
-
 	( "{" ( AddAttribute(attributes)
                 (";" AddAttribute(attributes))* )? "}"
 
@@ -482,7 +507,7 @@ NodePattern Description(GraphRelation reln) : {
             }
 	  )?
 	)
-  	{ pat = new NodePattern(reln, underNodeNegation, attributes, link, name != null ? name.image : null);
+	{ pat = new NodePattern(reln.relation, reln.graphName, underNodeNegation, attributes, link, name != null ? name.image : null);
 	  return pat;
 	}
 }

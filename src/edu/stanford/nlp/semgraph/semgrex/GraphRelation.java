@@ -77,9 +77,20 @@ abstract class GraphRelation implements Serializable {
 
   @Override
   public String toString() {
+    return toString(null);
+  }
+
+  public String toString(String graphName) {
     StringBuilder result = new StringBuilder();
     result.append(symbol);
     result.append((rawType != null) ? rawType : "");
+    // The graphName used for the relation is kept on the NodePattern,
+    // so it may be passed in from the containing NodePattern as part
+    // of the toString()
+    if (graphName != null) {
+      result.append("@");
+      result.append(graphName);
+    }
     if (edgeName != null) {
       result.append("=").append(edgeName);
     } else if (name != null) {
