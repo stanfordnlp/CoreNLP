@@ -21,6 +21,7 @@ import edu.stanford.nlp.util.CoreMap;
  * @author John Bauer
  */
 public class SemgrexStatsTest {
+  List<String> CONLLU_EXTENSIONS = List.of(".conllu");
 
   /**
    * A tiny corpus with a couple of repeated relations, so that the
@@ -677,7 +678,7 @@ public class SemgrexStatsTest {
       file.deleteOnExit();
     }
 
-    List<File> files = SemgrexStats.expandConlluFiles(new String[] {dir.toString()});
+    List<File> files = SemgrexStats.expandConlluFiles(List.of(dir.toString()), CONLLU_EXTENSIONS);
     assertEquals(2, files.size());
     assertEquals("xx-ud-dev.conllu", files.get(0).getName());
     assertEquals("xx-ud-train.conllu", files.get(1).getName());
@@ -700,13 +701,13 @@ public class SemgrexStatsTest {
     }
 
     assertEquals(Arrays.asList(train, dev),
-                 SemgrexStats.expandConlluFiles(new String[] {train.toString(), dev.toString()}));
+                 SemgrexStats.expandConlluFiles(List.of(train.toString(), dev.toString()), CONLLU_EXTENSIONS));
     assertEquals(Arrays.asList(train, dev),
-                 SemgrexStats.expandConlluFiles(new String[] {train + "," + dev}));
+                 SemgrexStats.expandConlluFiles(List.of(train + "," + dev), CONLLU_EXTENSIONS));
     assertEquals(Arrays.asList(train, dev),
-                 SemgrexStats.expandConlluFiles(new String[] {train + " ; " + dev}));
+                 SemgrexStats.expandConlluFiles(List.of(train + " ; " + dev), CONLLU_EXTENSIONS));
     assertEquals(Arrays.asList(odd),
-                 SemgrexStats.expandConlluFiles(new String[] {odd.toString()}));
+                 SemgrexStats.expandConlluFiles(List.of(odd.toString()), CONLLU_EXTENSIONS));
   }
 
   /**
@@ -719,12 +720,12 @@ public class SemgrexStatsTest {
 
     // an empty directory has no conllu files in it
     assertThrows(IllegalArgumentException.class, () ->
-      SemgrexStats.expandConlluFiles(new String[] {dir.toString()}));
+                 SemgrexStats.expandConlluFiles(List.of(dir.toString()), CONLLU_EXTENSIONS));
 
     assertThrows(IllegalArgumentException.class, () ->
-      SemgrexStats.expandConlluFiles(new String[] {new File(dir, "nope.conllu").toString()}));
+                 SemgrexStats.expandConlluFiles(List.of(new File(dir, "nope.conllu").toString()), CONLLU_EXTENSIONS));
 
     assertThrows(IllegalArgumentException.class, () ->
-      SemgrexStats.expandConlluFiles(new String[] {""}));
+                 SemgrexStats.expandConlluFiles(List.of(""), CONLLU_EXTENSIONS));
   }
 }
