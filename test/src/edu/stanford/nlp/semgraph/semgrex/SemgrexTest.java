@@ -1872,6 +1872,31 @@ public class SemgrexTest {
     }
   }
 
+  /**
+   * A run of relations after a node description are siblings of that
+   * node, not a chain descending from one another
+   *<br>
+   * {@code {a} >r1 {b} >r2 {c}} asks for a node with an r1 child and an
+   * r2 child, not for a grandchild.  Parentheses are what nests, and
+   * they are the only thing that does.  This is easy to get backwards
+   * when reading a long pattern, and it decides which node a relation is
+   * asked of, so it is worth stating outright.
+   */
+  @Test
+  public void testRelationChainIsSiblings() {
+    String graph = "[married-2 nsubjpass> Bill-1 prep_to> [Mary-3 amod> tall-4]]";
+
+    // both relations are asked of "married"
+    runTest("{}=a >nsubjpass {}=b >prep_to {}=c", graph, "married");
+
+    // so this asks "married" for an amod, which it does not have,
+    // rather than asking "Mary"
+    runTest("{}=a >prep_to {}=b >amod {}=c", graph);
+
+    // parentheses are what makes it a chain
+    runTest("{}=a >prep_to ({}=b >amod {}=c)", graph, "married");
+  }
+
   /** Verify that the semgrex pattern gets compiled without being changed */
   public static void comparePatternToString(String pattern) {
     SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
@@ -1943,4 +1968,3 @@ public class SemgrexTest {
   }
 
 }
-
