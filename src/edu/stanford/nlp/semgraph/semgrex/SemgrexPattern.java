@@ -607,13 +607,17 @@ public abstract class SemgrexPattern implements Serializable  {
 
     String modeString = DEFAULT_MODE;
     if (argsMap.containsKey(MODE) && argsMap.get(MODE).length > 0) {
-      modeString = argsMap.get(MODE)[0].toUpperCase();
+      // ROOT, since this is matched against the names of enum constants
+      // rather than against text.  in a Turkish locale the default would
+      // uppercase the i of "basic" to a dotted capital I, and the valueOf
+      // below would then fail
+      modeString = argsMap.get(MODE)[0].toUpperCase(Locale.ROOT);
     }
     SemanticGraphFactory.Mode mode = SemanticGraphFactory.Mode.valueOf(modeString);
 
     String outputFormatString = DEFAULT_OUTPUT_FORMAT;
     if (argsMap.containsKey(OUTPUT_FORMAT_OPTION) && argsMap.get(OUTPUT_FORMAT_OPTION).length > 0) {
-      outputFormatString = argsMap.get(OUTPUT_FORMAT_OPTION)[0].toUpperCase();
+      outputFormatString = argsMap.get(OUTPUT_FORMAT_OPTION)[0].toUpperCase(Locale.ROOT);
     }
     OutputFormat outputFormat = OutputFormat.valueOf(outputFormatString);
 

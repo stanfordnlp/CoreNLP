@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -536,7 +537,10 @@ public class SemgrexStats {
   }
 
   private static boolean matchesExtension(String filename, List<String> extensions) {
-    String lower = filename.toLowerCase();
+    // ROOT so that a filename is cased the same way an extension was.
+    // in a Turkish locale the default would send "I" to a dotless
+    // lowercase and the two sides would stop agreeing
+    String lower = filename.toLowerCase(Locale.ROOT);
     for (String extension : extensions) {
       if (lower.endsWith(extension)) {
         return true;
@@ -551,7 +555,7 @@ public class SemgrexStats {
   static List<String> parseExtensions(String arg) {
     List<String> extensions = new ArrayList<>();
     for (String extension : arg.split("[,;]")) {
-      extension = extension.trim().toLowerCase();
+      extension = extension.trim().toLowerCase(Locale.ROOT);
       if (extension.isEmpty()) {
         continue;
       }
@@ -596,7 +600,11 @@ public class SemgrexStats {
 
     String modeString = DEFAULT_MODE;
     if (argsMap.containsKey(MODE) && argsMap.get(MODE).length > 0) {
-      modeString = argsMap.get(MODE)[0].toUpperCase();
+      // ROOT, since this is matched against the names of enum constants
+      // rather than against text.  in a Turkish locale the default would
+      // uppercase the i of "basic" to a dotted capital I, and the valueOf
+      // below would then fail
+      modeString = argsMap.get(MODE)[0].toUpperCase(Locale.ROOT);
     }
     SemanticGraphFactory.Mode mode = SemanticGraphFactory.Mode.valueOf(modeString);
 

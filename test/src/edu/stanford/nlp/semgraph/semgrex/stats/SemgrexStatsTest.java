@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Locale;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -682,6 +683,47 @@ public class SemgrexStatsTest {
     assertEquals(2, files.size());
     assertEquals("xx-ud-dev.conllu", files.get(0).getName());
     assertEquals("xx-ud-train.conllu", files.get(1).getName());
+  }
+
+  /**
+   * Extensions are matched in a fixed locale, not the default one
+   *<br>
+   * The Turkish locale maps i and I to a dotted and a dotless letter,
+   * so a default locale conversion would case the filename and the
+   * extension differently and the two would stop agreeing.  This is the
+   * only test which touches the default locale, so it puts it back.
+   */
+  @Test
+  public void testExtensionLocale() throws IOException {
+    File dir = Files.createTempDirectory("semgrexStats").toFile();
+    dir.deleteOnExit();
+    for (String name : new String[] {"xx-ud-train.mini", "README.md"}) {
+      File file = new File(dir, name);
+      file.createNewFile();
+      file.deleteOnExit();
+    }
+
+    Locale previous = Locale.getDefault();
+    try {
+      Locale.setDefault(new Locale("tr", "TR"));
+
+      // the default locale would give ".m" plus a dotless i, which no
+      // ascii filename can end with
+      List<String> extensions = SemgrexStats.parseExtensions("MINI");
+      assertEquals(List.of(".mini"), extensions);
+
+      List<File> files = SemgrexStats.expandConlluFiles(List.of(dir.toString()), extensions);
+      assertEquals(1, files.size());
+      assertEquals("xx-ud-train.mini", files.get(0).getName());
+
+      // and the other direction: an extension which was never passed
+      // through parseExtensions, as the .conllu default is
+      files = SemgrexStats.expandConlluFiles(List.of(new File(dir, "xx-ud-train.mini").toString()),
+                                             List.of(".mini"));
+      assertEquals(1, files.size());
+    } finally {
+      Locale.setDefault(previous);
+    }
   }
 
   /**
