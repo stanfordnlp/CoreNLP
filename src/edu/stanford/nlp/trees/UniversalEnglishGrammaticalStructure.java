@@ -764,7 +764,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
   /* Used by correctWHAttachment */
-  private static final SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|obj)$/ {}=wh ?>/(i?obj)/ {}=obj");
+  private static final SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|obj)$/ {pos:/^W.*/}=wh ?>/(i?obj)/ {}=obj");
 
   /**
    * Tries to correct complicated cases of WH-movement in
@@ -788,29 +788,27 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       IndexedWord wh = matcher.getNode("wh");
       IndexedWord dobj = matcher.getNode("obj");
 
-      /* Check if the object is a WH-word. */
-      if (wh.tag() != null && wh.tag().startsWith("W")) {
-        boolean reattach = false;
-        /* If the control verb already has an object, then
-           we have to reattach the WH-word to the verb in the embedded clause. */
-        if (dobj != null) {
-          reattach = true;
-        } else {
-          /* If the control verb can't have an object, we also have to reattach. */
-          if (root.value() != null && root.tag() != null) {
-            String lemma = Morphology.lemmaStatic(root.value(), root.tag());
-            if (lemma != null && lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
-              reattach = true;
-            }
+      // =wh is a WH-word given the way we wrote the Semgrex
+      boolean reattach = false;
+      /* If the control verb already has an object, then
+         we have to reattach the WH-word to the verb in the embedded clause. */
+      if (dobj != null) {
+        reattach = true;
+      } else {
+        /* If the control verb can't have an object, we also have to reattach. */
+        if (root.value() != null && root.tag() != null) {
+          String lemma = Morphology.lemmaStatic(root.value(), root.tag());
+          if (lemma != null && lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
+            reattach = true;
           }
         }
+      }
 
-        if (reattach) {
-          SemanticGraphEdge edge = sg.getEdge(root, wh);
-          if (edge != null) {
-            sg.removeEdge(edge);
-            sg.addEdge(embeddedVerb, wh, DIRECT_OBJECT, Double.NEGATIVE_INFINITY, false);
-          }
+      if (reattach) {
+        SemanticGraphEdge edge = sg.getEdge(root, wh);
+        if (edge != null) {
+          sg.removeEdge(edge);
+          sg.addEdge(embeddedVerb, wh, DIRECT_OBJECT, Double.NEGATIVE_INFINITY, false);
         }
       }
     }

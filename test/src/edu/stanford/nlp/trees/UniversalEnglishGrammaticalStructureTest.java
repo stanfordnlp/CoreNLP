@@ -98,6 +98,58 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "root(ROOT-0, big-3)\n" +
            "cc(honest-5, and-4)\n" +
            "conj(big-3, honest-5)\n"},
+         // What does Mary seem to have?
+         // correctWHAttachment moves the fronted WH word off the control
+         // verb and onto the verb of the embedded clause: it is the object
+         // of "have", not of "seem".  XCOMP_PATTERN is what finds these.
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ does) (NP (NNP Mary)) (VP (VB seem) (S (VP (TO to) (VP (VB have)))))) (. ?)))",
+          "obj(have-6, What-1)\n" +
+           "aux(seem-4, does-2)\n" +
+           "nsubj(seem-4, Mary-3)\n" +
+           "root(ROOT-0, seem-4)\n" +
+           "mark(have-6, to-5)\n" +
+           "xcomp(seem-4, have-6)\n"},
+
+         // What does Mary like to eat?
+         // The same reattachment for a control verb which cannot take the
+         // WH word as its own object.
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ does) (NP (NNP Mary)) (VP (VB like) (S (VP (TO to) (VP (VB eat)))))) (. ?)))",
+          "obj(eat-6, What-1)\n" +
+           "aux(like-4, does-2)\n" +
+           "nsubj(like-4, Mary-3)\n" +
+           "root(ROOT-0, like-4)\n" +
+           "mark(eat-6, to-5)\n" +
+           "xcomp(like-4, eat-6)\n"},
+
+         // What did Mary want to eat?
+         // "want" can take an object of its own and has none here, so the
+         // reattachment is declined and the WH word stays put.  This is the
+         // case which fails if the pattern is broadened too far.
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBD did) (NP (NNP Mary)) (VP (VB want) (S (VP (TO to) (VP (VB eat)))))) (. ?)))",
+          "dep(want-4, What-1)\n" +
+           "aux(want-4, did-2)\n" +
+           "nsubj(want-4, Mary-3)\n" +
+           "root(ROOT-0, want-4)\n" +
+           "mark(eat-6, to-5)\n" +
+           "xcomp(want-4, eat-6)\n"},
+
+         // What did Mary tell John to bring?
+         // "John" is also a candidate for the wh node, so this only comes
+         // out right because XCOMP_PATTERN constrains the wh word by tag
+         // rather than leaving it to the java.
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBD did) (NP (NNP Mary)) (VP (VB tell) (NP (NNP John)) (S (VP (TO to) (VP (VB bring)))))) (. ?)))",
+          "obj(bring-7, What-1)\n" +
+           "aux(tell-4, did-2)\n" +
+           "nsubj(tell-4, Mary-3)\n" +
+           "root(ROOT-0, tell-4)\n" +
+           "obj(tell-4, John-5)\n" +
+           "mark(bring-7, to-6)\n" +
+           "xcomp(tell-4, bring-7)\n"},
+
          {TestType.BASIC,
           "(ROOT (S (NP (NNP Clinton)) (VP (VBD defeated) (NP (NNP Dole))) (. .)))",
           "nsubj(defeated-2, Clinton-1)\n" +

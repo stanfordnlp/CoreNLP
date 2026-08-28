@@ -54,6 +54,16 @@ public class EnglishGrammaticalStructureTest {
          "(ROOT (S (NP (NNP Kennedy)) (VP (VBZ has) (VP (VBN been) (VP (VBN killed)))) (. .)))",
          "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (NP (DT an) (JJ honest) (NN man))) (. .)))",
          "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (ADJP (JJ big) (CC and) (JJ honest))) (. .)))",
+         // correctWHAttachment moves a fronted WH word off the control verb
+         // and onto the verb of the embedded clause
+         "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ does) (NP (NNP Mary)) (VP (VB seem) (S (VP (TO to) (VP (VB have)))))) (. ?)))",
+         "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ does) (NP (NNP Mary)) (VP (VB like) (S (VP (TO to) (VP (VB eat)))))) (. ?)))",
+         // "want" can take an object of its own, so the WH word stays put
+         "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBD did) (NP (NNP Mary)) (VP (VB want) (S (VP (TO to) (VP (VB eat)))))) (. ?)))",
+         // "John" is also a candidate for the wh node, so this only comes out
+         // right because XCOMP_PATTERN constrains the wh word by tag rather
+         // than leaving it to the java
+         "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBD did) (NP (NNP Mary)) (VP (VB tell) (NP (NNP John)) (S (VP (TO to) (VP (VB bring)))))) (. ?)))",
          "(ROOT (S (NP (NNP Clinton)) (VP (VBD defeated) (NP (NNP Dole))) (. .)))",
          "(ROOT (S (SBAR (WHNP (WP What)) (S (NP (PRP she)) (VP (VBD said)))) (VP (VBZ is) (ADJP (JJ untrue))) (. .)))",
          "(ROOT (S (NP (NNP Dole)) (VP (VBD was) (VP (VBN defeated) (PP (IN by) (NP (NNP Clinton))))) (. .)))",
@@ -146,6 +156,10 @@ public class EnglishGrammaticalStructureTest {
         "nsubjpass(killed-4, Kennedy-1)\n" + "aux(killed-4, has-2)\n" + "auxpass(killed-4, been-3)\n" + "root(ROOT-0, killed-4)\n",
         "nsubj(man-5, Bill-1)\n" + "cop(man-5, is-2)\n" + "det(man-5, an-3)\n" + "amod(man-5, honest-4)\n" + "root(ROOT-0, man-5)\n",
         "nsubj(big-3, Bill-1)\n" + "cop(big-3, is-2)\n" + "root(ROOT-0, big-3)\n" + "cc(big-3, and-4)\n" + "conj(big-3, honest-5)\n",
+        "dobj(have-6, What-1)\n" + "aux(seem-4, does-2)\n" + "nsubj(seem-4, Mary-3)\n" + "root(ROOT-0, seem-4)\n" + "aux(have-6, to-5)\n" + "xcomp(seem-4, have-6)\n",
+        "dobj(eat-6, What-1)\n" + "aux(like-4, does-2)\n" + "nsubj(like-4, Mary-3)\n" + "root(ROOT-0, like-4)\n" + "aux(eat-6, to-5)\n" + "xcomp(like-4, eat-6)\n",
+        "dep(want-4, What-1)\n" + "aux(want-4, did-2)\n" + "nsubj(want-4, Mary-3)\n" + "root(ROOT-0, want-4)\n" + "aux(eat-6, to-5)\n" + "xcomp(want-4, eat-6)\n",
+        "dobj(bring-7, What-1)\n" + "aux(tell-4, did-2)\n" + "nsubj(tell-4, Mary-3)\n" + "root(ROOT-0, tell-4)\n" + "dobj(tell-4, John-5)\n" + "aux(bring-7, to-6)\n" + "xcomp(tell-4, bring-7)\n",
         "nsubj(defeated-2, Clinton-1)\n" + "root(ROOT-0, defeated-2)\n" + "dobj(defeated-2, Dole-3)\n",
         "dobj(said-3, What-1)\n" + "nsubj(said-3, she-2)\n" + "csubj(untrue-5, said-3)\n" + "cop(untrue-5, is-4)\n" + "root(ROOT-0, untrue-5)\n",
         "nsubjpass(defeated-3, Dole-1)\n" + "auxpass(defeated-3, was-2)\n" + "root(ROOT-0, defeated-3)\n" + "prep(defeated-3, by-4)\n" + "pobj(by-4, Clinton-5)\n",
