@@ -154,6 +154,12 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <p>
  * Relations can be made optional with the '?' operator.  This way the
  * expression will match even if the optional relation is not satisfied.
+ * <br>
+ * In the following example, {@code foo} is matched whether or not it has
+ * an {@code nsubj} relation, and if it does, the subject is saved in {@code bar}
+ * <blockquote>
+ *{@code {word:foo}=foo ?<nsubj {}=bar }
+ * </blockquote>
  * <p>
  * The operator ":" partitions a pattern into separate patterns,
  * each of which must be matched.  For example, the following is a
