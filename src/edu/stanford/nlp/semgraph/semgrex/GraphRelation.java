@@ -1169,11 +1169,11 @@ abstract class GraphRelation implements Serializable {
   public static GraphRelation getRelation(String reln,
                                           String type,
                                           String name,
-                                          String edgeName) throws ParseException {
+                                          String edgeName) throws SemgrexParseException {
     if (reln == null && type == null)
       return null;
     if (!isKnownRelation(reln)) {
-      throw new ParseException("Unknown relation " + reln);
+      throw new SemgrexParseException("Unknown relation " + reln);
     }
     switch (reln) {
       case ">":
@@ -1192,7 +1192,7 @@ abstract class GraphRelation implements Serializable {
         return new CONNECTED(type, name, edgeName);
     }
     if (edgeName != null) {
-      throw new ParseException("Relation " + reln + " does not allow for named edges");
+      throw new SemgrexParseException("Relation " + reln + " does not allow for named edges");
     }
     switch (reln) {
       case ">>":
@@ -1221,8 +1221,7 @@ abstract class GraphRelation implements Serializable {
         return new ALIGNMENT();
       default:
         //error
-        throw new ParseException("Relation " + reln +
-            " not handled by getRelation");
+        throw new SemgrexParseException("Relation " + reln + " not handled by getRelation");
     }
   }
 
@@ -1230,9 +1229,9 @@ abstract class GraphRelation implements Serializable {
                                           String type,
                                           int num,
                                           String name,
-                                          String edgeName) throws ParseException {
+                                          String edgeName) throws SemgrexParseException {
     if (edgeName != null) {
-      throw new ParseException("Relation " + reln + " does not allow for named edges");
+      throw new SemgrexParseException("Relation " + reln + " does not allow for named edges");
     }
     if (reln == null && type == null)
       return null;
@@ -1241,20 +1240,18 @@ abstract class GraphRelation implements Serializable {
     else if (reln.equals("<<"))
       return new LIMITED_GRANDKID(type, name, num, num);
     else if (isKnownRelation(reln))
-      throw new ParseException("Relation " + reln +
-                               " does not use numeric arguments");
+      throw new SemgrexParseException("Relation " + reln + " does not use numeric arguments");
     else //error
-      throw new ParseException("Unrecognized compound relation " + reln + " "
-                               + type);
+      throw new SemgrexParseException("Unrecognized compound relation " + reln + " " + type);
   }
 
   public static GraphRelation getRelation(String reln,
                                           String type,
                                           int num, int num2,
                                           String name,
-                                          String edgeName) throws ParseException {
+                                          String edgeName) throws SemgrexParseException {
     if (edgeName != null) {
-      throw new ParseException("Relation " + reln + " does not allow for named edges");
+      throw new SemgrexParseException("Relation " + reln + " does not allow for named edges");
     }
     if (reln == null && type == null)
       return null;
@@ -1263,11 +1260,10 @@ abstract class GraphRelation implements Serializable {
     else if (reln.equals("<<"))
       return new LIMITED_GRANDKID(type, name, num, num2);
     else if (isKnownRelation(reln))
-      throw new ParseException("Relation " + reln +
-                               " does not use numeric arguments");
+      throw new SemgrexParseException("Relation " + reln +
+                                      " does not use numeric arguments");
     else //error
-      throw new ParseException("Unrecognized compound relation " + reln + " "
-                               + type);
+      throw new SemgrexParseException("Unrecognized compound relation " + reln + " " + type);
   }
 
   @Override
