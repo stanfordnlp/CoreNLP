@@ -143,7 +143,10 @@ public class CreateClauseDataset implements TSVSentenceProcessor  {
                                                                  Map<Integer, Span> traceTargets,
                                                                  Map<Integer, Integer> traceSources) {
 //    log(StringUtils.join(tokens.stream().map(CoreLabel::word), " "));
-    List<Pair<Span, Span>> data = new ArrayList<>();
+    // This is only ever used for testing membership, so a Set avoids keeping
+    // multiple results and keeps the intermediate steps smaller.
+    // LinkedHashSet so the dataset comes out in the same order each build.
+    Collection<Pair<Span, Span>> data = new LinkedHashSet<>();
     for (SemgrexPattern vpPattern : segmenter.VP_PATTERNS) {
       SemgrexMatcher matcher = vpPattern.matcher(depparse);
       while (matcher.find()) {
@@ -378,3 +381,4 @@ public class CreateClauseDataset implements TSVSentenceProcessor  {
 //    new CreateClauseDataset().runAndExit(in, System.err, code -> code);
   }
 }
+
