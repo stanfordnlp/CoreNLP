@@ -486,6 +486,16 @@ public class NodePattern extends SemgrexPattern  {
      * node match candidates.
      */
     private boolean finished = false;
+    /**
+     * Whether any child match has been produced for the current candidate node.
+     *<br>
+     * An optional relation means "with this relation if there is one,
+     * otherwise without": every satisfying edge is a match, and the
+     * unbound case is only produced when there were none.  Resets with
+     * the child iterator, since it is a property of the node being tried
+     * rather than of the matcher.
+     */
+    private boolean matchedAny = false;
     private Iterator<IndexedWord> nodeMatchCandidateIterator = null;
     private final NodePattern myNode;
     /**
@@ -527,6 +537,7 @@ public class NodePattern extends SemgrexPattern  {
         ((GraphRelation.ALIGNMENT) myNode.reln).setAlignment(alignment, hyp,
             (GraphRelation.SearchNodeIterator) nodeMatchCandidateIterator);
       finished = false;
+      matchedAny = false;
       if (nextMatch != null) {
         decommitVariableGroups();
         decommitNamedNodes();
@@ -729,7 +740,7 @@ public class NodePattern extends SemgrexPattern  {
       // System.out.println(toString());
       // System.out.println(namesToNodes);
       // log.info("matches: " + myNode.reln);
-      // this is necessary so that a negated/optional node matches only once
+      // this is necessary so that a negated node matches only once
       if (finished) {
         // System.out.println(false);
         return false;
@@ -741,9 +752,9 @@ public class NodePattern extends SemgrexPattern  {
             finished = true;
             return false; // cannot be optional and negated
           } else {
-            if (myNode.isOptional()) {
-              finished = true;
-            }
+            // an optional relation does not stop here: every edge which
+            // satisfies it is a match, the same as a required relation
+            matchedAny = true;
             // System.out.println(true);
             return true;
           }
@@ -758,8 +769,11 @@ public class NodePattern extends SemgrexPattern  {
         decommitVariableGroups();
         decommitNamedNodes();
         decommitNamedRelations();
-        // didn't match, but return true anyway if optional
-        return myNode.isOptional();
+        // an optional relation which matched nothing at all still lets
+        // the node through, with its names left unbound.  if it matched
+        // something, those matches have already been returned and there
+        // is no unbound case to add
+        return myNode.isOptional() && !matchedAny;
       }
     }
 

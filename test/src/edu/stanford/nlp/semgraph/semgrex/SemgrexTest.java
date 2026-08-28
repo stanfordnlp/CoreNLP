@@ -1941,6 +1941,110 @@ public class SemgrexTest {
   }
 
   /**
+   * A graph where "ate" has two objects, so an optional relation has more
+   * than one way to be satisfied
+   */
+  static final String TWO_OBJECTS = "[ate-1 nsubj> Bill-2 obj> cake-3 obj> pie-4 nmod> Mary-5]";
+
+  /**
+   * An optional relation which cannot be satisfied still matches, leaving its names unbound
+   */
+  @Test
+  public void testOptionalNoMatch() {
+    runTest("{word:ate}=a ?>advmod {}=b", TWO_OBJECTS, "ate");
+
+    // and a node with no such child at all
+    runTest("{word:Bill}=a ?>obj {}=b", TWO_OBJECTS, "Bill");
+
+    // the name really is unbound rather than bound to something
+    SemgrexMatcher matcher = compile("{word:ate}=a ?>advmod {}=b").matcher(SemanticGraph.valueOf(TWO_OBJECTS));
+    assertTrue(matcher.find());
+    assertNull(matcher.getNode("b"));
+    assertFalse(matcher.find());
+  }
+
+  /**
+   * An optional relation produces one match per satisfying edge, the same as a required one
+   *<br>
+   * It does not stop after the first.  "ate" has two objects, so both are
+   * returned, and there is no extra unbound match on the end: the unbound
+   * case is only for a node where the relation matched nothing at all.
+   */
+  @Test
+  public void testOptionalMultipleMatches() {
+    runTest("{word:ate}=a >obj {}=b", TWO_OBJECTS, "ate", "ate");
+    runTest("{word:ate}=a ?>obj {}=b", TWO_OBJECTS, "ate", "ate");
+
+    Set<String> objects = new HashSet<>();
+    SemgrexMatcher matcher = compile("{word:ate}=a ?>obj {}=b").matcher(SemanticGraph.valueOf(TWO_OBJECTS));
+    while (matcher.find()) {
+      objects.add(matcher.getNode("b").word());
+    }
+    assertEquals(new HashSet<>(Arrays.asList("cake", "pie")), objects);
+  }
+
+  /**
+   * The description on the far side of an optional relation still has to match
+   *<br>
+   * If it does not, the relation has matched nothing and the unbound case
+   * is what comes back -- not a match with the wrong node bound.
+   */
+  @Test
+  public void testOptionalDescriptionMustMatch() {
+    runTest("{word:ate}=a ?>obj {word:cake}=b", TWO_OBJECTS, "ate");
+    runTest("{word:ate}=a ?>obj {word:soup}=b", TWO_OBJECTS, "ate");
+
+    SemgrexMatcher matcher = compile("{word:ate}=a ?>obj {word:soup}=b").matcher(SemanticGraph.valueOf(TWO_OBJECTS));
+    assertTrue(matcher.find());
+    assertNull(matcher.getNode("b"));
+  }
+
+  /**
+   * An optional relation never removes matches which a required one would find
+   *<br>
+   * Every node matches, since the relation is optional; the nodes which
+   * do have a parent bind it, and the rest come back unbound.
+   */
+  @Test
+  public void testOptionalIsASuperset() {
+    runTest("{}=a <obj {}=b", TWO_OBJECTS, "cake", "pie");
+    runTest("{}=a ?<obj {}=b", TWO_OBJECTS, "ate", "Bill", "cake", "pie", "Mary");
+  }
+
+  /**
+   * Optional relations combine with required ones and with each other
+   */
+  @Test
+  public void testOptionalCombined() {
+    // the required nsubj pins one match; the optional obj multiplies it
+    runTest("{word:ate}=a >nsubj {}=s ?>obj {}=b", TWO_OBJECTS, "ate", "ate");
+
+    // two optionals: two objects and one nmod gives two matches
+    runTest("{word:ate}=a ?>obj {}=b ?>nmod {}=c", TWO_OBJECTS, "ate", "ate");
+
+    // an optional whose relation is named still names the edge
+    SemgrexMatcher matcher = compile("{word:ate}=a ?>obj=e {}=b").matcher(SemanticGraph.valueOf(TWO_OBJECTS));
+    assertTrue(matcher.find());
+    assertNotNull(matcher.getEdge("e"));
+  }
+
+  /**
+   * An optional relation prints the way it was written
+   *<br>
+   * The marker and the space around it used to come out the other way
+   * round, so "?&gt;obj" printed as "? &gt;obj".  Negation had the same
+   * problem.  runTest checks the round trip for every pattern above, but
+   * these are the shapes worth naming.
+   */
+  @Test
+  public void testOptionalToString() {
+    comparePatternToString("{}=a ?>obj {}=b");
+    comparePatternToString("{}=a ?<obj {}=b");
+    comparePatternToString("{}=a !>obj {}");
+    comparePatternToString("{}=a >nsubj {}=s ?>obj {}=b");
+  }
+
+  /**
    * Compile a pattern, checking that it prints the way it was written.
    *<br>
    * Tests should use this rather than SemgrexPattern.compile so that every
