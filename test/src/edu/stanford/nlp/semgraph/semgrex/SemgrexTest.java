@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import junit.framework.AssertionFailedError;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -648,11 +649,45 @@ public class SemgrexTest {
 
     // use this method to avoid the toString() test, since we expect it
     // to use 2,2>> instead of 2>>
-    // TODO: does not round trip, so it cannot use compile() yet.  A relation
-    // with one numeric argument prints both bounds: "2>>" becomes "2,2>>"
-    runTest(SemgrexPattern.compile("{} 2>> {word:I}"), graph, "E", "H");
+    runTest("{} 2>> {word:I}", graph, "E", "H");
 
     runTest("{} 1,2>> {word:I}", graph, "E", "H", "J");
+
+    // one bound and two equal bounds mean the same thing, and each prints
+    // the way it was written rather than being rewritten into the other
+    runTest("{} 3<< {word:A}", graph, "F", "G", "J");
+    runTest("{} 3,3<< {word:A}", graph, "F", "G", "J");
+  }
+
+  /**
+   * Two spellings of the same numeric relation are equal and hash alike
+   *<br>
+   * The symbol records how the relation was written, so that a pattern
+   * prints the way it was typed, but "2&gt;&gt;" and "2,2&gt;&gt;" mean the
+   * same thing and compare that way.
+   */
+  @Test
+  public void testNumericRelationEquality() {
+    GraphRelation oneBound = GraphRelation.getRelation(">>", null, 2, null, null);
+    GraphRelation twoBounds = GraphRelation.getRelation(">>", null, 2, 2, null, null);
+    GraphRelation wider = GraphRelation.getRelation(">>", null, 2, 3, null, null);
+    GraphRelation otherWay = GraphRelation.getRelation("<<", null, 2, null, null);
+
+    // each prints the way it was written
+    assertEquals("2>>", oneBound.toString());
+    assertEquals("2,2>>", twoBounds.toString());
+
+    // but they are the same relation
+    assertEquals(oneBound, twoBounds);
+    assertEquals(twoBounds, oneBound);
+    assertEquals(oneBound.hashCode(), twoBounds.hashCode());
+
+    // and these are not
+    assertNotEquals(oneBound, wider);
+    assertNotEquals(oneBound, otherWay);
+
+    Set<GraphRelation> relations = new HashSet<>(Arrays.asList(oneBound, twoBounds, wider, otherWay));
+    assertEquals(3, relations.size());
   }
 
   /**

@@ -485,10 +485,19 @@ abstract class GraphRelation implements Serializable {
     final int startDepth, endDepth;
 
     LIMITED_GRANDPARENT(String reln, String name,
-                        int startDepth, int endDepth) {
-      super(startDepth + "," + endDepth + ">>", reln, name);
+                        int startDepth, int endDepth, String depthSpec) {
+      super(depthSpec + ">>", reln, name);
       this.startDepth = startDepth;
       this.endDepth = endDepth;
+    }
+
+    /**
+     * "2>>" and "2,2>>" are the same relation written two ways,
+     * so they compare on the bounds rather than on how they were spelled
+     */
+    @Override
+    String comparisonSymbol() {
+      return startDepth + "," + endDepth + ">>";
     }
 
     @Override
@@ -704,10 +713,19 @@ abstract class GraphRelation implements Serializable {
     final int startDepth, endDepth;
 
     LIMITED_GRANDKID(String reln, String name,
-                        int startDepth, int endDepth) {
-      super(startDepth + "," + endDepth + "<<", reln, name);
+                        int startDepth, int endDepth, String depthSpec) {
+      super(depthSpec + "<<", reln, name);
       this.startDepth = startDepth;
       this.endDepth = endDepth;
+    }
+
+    /**
+     * "2<<" and "2,2<<" are the same relation written two ways,
+     * so they compare on the bounds rather than on how they were spelled
+     */
+    @Override
+    String comparisonSymbol() {
+      return startDepth + "," + endDepth + "<<";
     }
 
     @Override
@@ -1236,9 +1254,9 @@ abstract class GraphRelation implements Serializable {
     if (reln == null && type == null)
       return null;
     if (reln.equals(">>"))
-      return new LIMITED_GRANDPARENT(type, name, num, num);
+      return new LIMITED_GRANDPARENT(type, name, num, num, Integer.toString(num));
     else if (reln.equals("<<"))
-      return new LIMITED_GRANDKID(type, name, num, num);
+      return new LIMITED_GRANDKID(type, name, num, num, Integer.toString(num));
     else if (isKnownRelation(reln))
       throw new SemgrexParseException("Relation " + reln + " does not use numeric arguments");
     else //error
@@ -1256,9 +1274,9 @@ abstract class GraphRelation implements Serializable {
     if (reln == null && type == null)
       return null;
     if (reln.equals(">>"))
-      return new LIMITED_GRANDPARENT(type, name, num, num2);
+      return new LIMITED_GRANDPARENT(type, name, num, num2, num + "," + num2);
     else if (reln.equals("<<"))
-      return new LIMITED_GRANDKID(type, name, num, num2);
+      return new LIMITED_GRANDKID(type, name, num, num2, num + "," + num2);
     else if (isKnownRelation(reln))
       throw new SemgrexParseException("Relation " + reln +
                                       " does not use numeric arguments");
@@ -1266,9 +1284,20 @@ abstract class GraphRelation implements Serializable {
       throw new SemgrexParseException("Unrecognized compound relation " + reln + " " + type);
   }
 
+  /**
+   * The symbol two relations are compared on.
+   *<br>
+   * Normally this is the symbol itself, but a relation whose symbol
+   * records how it was written rather than what it means overrides this
+   * so that two spellings of the same relation still compare equal.
+   */
+  String comparisonSymbol() {
+    return symbol;
+  }
+
   @Override
   public int hashCode() {
-    return symbol.hashCode();
+    return comparisonSymbol().hashCode();
   }
 
   @Override
@@ -1282,7 +1311,7 @@ abstract class GraphRelation implements Serializable {
 
     final GraphRelation relation = (GraphRelation) o;
 
-    if (!symbol.equals(relation.symbol) ||
+    if (!comparisonSymbol().equals(relation.comparisonSymbol()) ||
         !type.equals(relation.type)) {
       return false;
     }
