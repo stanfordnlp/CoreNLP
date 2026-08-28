@@ -1169,7 +1169,7 @@ abstract class GraphRelation implements Serializable {
   public static GraphRelation getRelation(String reln,
                                           String type,
                                           String name,
-                                          String edgeName) throws SemgrexParseException {
+                                          String edgeName) {
     if (reln == null && type == null)
       return null;
     if (!isKnownRelation(reln)) {
@@ -1229,7 +1229,7 @@ abstract class GraphRelation implements Serializable {
                                           String type,
                                           int num,
                                           String name,
-                                          String edgeName) throws SemgrexParseException {
+                                          String edgeName) {
     if (edgeName != null) {
       throw new SemgrexParseException("Relation " + reln + " does not allow for named edges");
     }
@@ -1249,7 +1249,7 @@ abstract class GraphRelation implements Serializable {
                                           String type,
                                           int num, int num2,
                                           String name,
-                                          String edgeName) throws SemgrexParseException {
+                                          String edgeName) {
     if (edgeName != null) {
       throw new SemgrexParseException("Relation " + reln + " does not allow for named edges");
     }
