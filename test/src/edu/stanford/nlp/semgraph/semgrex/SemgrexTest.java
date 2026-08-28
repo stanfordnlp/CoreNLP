@@ -40,7 +40,7 @@ public class SemgrexTest {
       SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
     Set<IndexedWord> words = graph.vertexSet();
 
-    SemgrexPattern pattern = SemgrexPattern.compile("{}");
+    SemgrexPattern pattern = compile("{}");
     SemgrexMatcher matcher = pattern.matcher(graph);
     String[] expectedMatches = {"ate", "Bill", "muffins", "blueberry"};
     for (int i = 0; i < expectedMatches.length; ++i) {
@@ -255,7 +255,7 @@ public class SemgrexTest {
     // this one should work.  we run it here to verify the test was
     // valid, as opposed to getting a SemgrexParseException because
     // this wasn't even following proper contains syntax
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{foo:bar}}");
+    SemgrexPattern pattern = compile("{morphofeatures:{foo:bar}}");
   }
 
   @Test
@@ -442,7 +442,7 @@ public class SemgrexTest {
   public void testRejectKeyVarGroup() {
     // if this feature is added, we should update this test with a
     // check that the functionality actually works
-    SemgrexPattern pattern = SemgrexPattern.compile("{morphofeatures:{PronType:__#1%pron}}=word");
+    SemgrexPattern pattern = compile("{morphofeatures:{PronType:__#1%pron}}=word");
     // and the rejection
     assertThrows(SemgrexParseException.class, () ->
                  SemgrexPattern.compile("{morphofeatures:{/Pron.*/:__#1%pron}}"));
@@ -648,6 +648,8 @@ public class SemgrexTest {
 
     // use this method to avoid the toString() test, since we expect it
     // to use 2,2>> instead of 2>>
+    // TODO: does not round trip, so it cannot use compile() yet.  A relation
+    // with one numeric argument prints both bounds: "2>>" becomes "2,2>>"
     runTest(SemgrexPattern.compile("{} 2>> {word:I}"), graph, "E", "H");
 
     runTest("{} 1,2>> {word:I}", graph, "E", "H", "J");
@@ -670,9 +672,9 @@ public class SemgrexTest {
    */
   @Test
   public void testKeywordRegex() {
-    SemgrexPattern pattern = SemgrexPattern.compile("{word:uniq}");
-    pattern = SemgrexPattern.compile("{word:sort}");
-    pattern = SemgrexPattern.compile("{word:rsort}");
+    SemgrexPattern pattern = compile("{word:uniq}");
+    pattern = compile("{word:sort}");
+    pattern = compile("{word:rsort}");
   }
 
   /** After making UNIQ a separate token in the parser, we should verify that "uniq" can be treated as an identifier as well */
@@ -683,7 +685,7 @@ public class SemgrexTest {
     runTest("{} >obj ({} >expl {})", graph, "A");
 
     SemgrexPattern pattern =
-      SemgrexPattern.compile("{} >obj ({} >expl {}=uniq)");
+      compile("{} >obj ({} >expl {}=uniq)");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(1, matcher.getNodeNames().size());
@@ -698,7 +700,7 @@ public class SemgrexTest {
 
     runTest("{} >obj ({} >expl {})", graph, "A");
 
-    SemgrexPattern pattern = SemgrexPattern.compile("{} >obj ({} >expl {}=foo)");
+    SemgrexPattern pattern = compile("{} >obj ({} >expl {}=foo)");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(1, matcher.getNodeNames().size());
@@ -706,7 +708,7 @@ public class SemgrexTest {
     assertEquals("A", matcher.getMatch().toString());
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{} >obj ({} >expl {}=foo) >mod {}");
+    pattern = compile("{} >obj ({} >expl {}=foo) >mod {}");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(1, matcher.getNodeNames().size());
@@ -715,7 +717,7 @@ public class SemgrexTest {
     assertFalse(matcher.find());
 
     pattern =
-      SemgrexPattern.compile("{} >obj ({} >expl {}=foo) >mod ({} >mark {})");
+      compile("{} >obj ({} >expl {}=foo) >mod ({} >mark {})");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(1, matcher.getNodeNames().size());
@@ -724,7 +726,7 @@ public class SemgrexTest {
     assertFalse(matcher.find());
 
     pattern =
-      SemgrexPattern.compile("{} >obj ({} >expl {}=foo) >mod ({} > {})");
+      compile("{} >obj ({} >expl {}=foo) >mod ({} > {})");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(1, matcher.getNodeNames().size());
@@ -733,7 +735,7 @@ public class SemgrexTest {
     assertFalse(matcher.find());
 
     pattern =
-      SemgrexPattern.compile("{} >obj ({} >expl {}=foo) >mod ({} > {}=foo)");
+      compile("{} >obj ({} >expl {}=foo) >mod ({} > {}=foo)");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(1, matcher.getNodeNames().size());
@@ -742,7 +744,7 @@ public class SemgrexTest {
     assertFalse(matcher.find());
 
     pattern =
-      SemgrexPattern.compile("{} >obj ({} >expl {}=foo) >mod ({}=foo > {})");
+      compile("{} >obj ({} >expl {}=foo) >mod ({}=foo > {})");
     matcher = pattern.matcher(graph);
     assertFalse(matcher.find());
   }
@@ -752,14 +754,14 @@ public class SemgrexTest {
     SemanticGraph graph = makeComplicatedGraph();
 
     runTest("{}=a >> {word:E}", graph, "A", "B", "C", "D");
-    SemgrexPattern pattern = SemgrexPattern.compile("{}=a >> {word:E} : {}=a >> {word:B}");
+    SemgrexPattern pattern = compile("{}=a >> {word:E} : {}=a >> {word:B}");
     runTest("{}=a >> {word:E} : {}=a >> {word:B}", graph, "A");
   }
 
   @Test
   public void testEqualsRelation() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
-    SemgrexPattern pattern = SemgrexPattern.compile("{} >> ({}=a == {}=b)");
+    SemgrexPattern pattern = compile("{} >> ({}=a == {}=b)");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(2, matcher.getNodeNames().size());
@@ -788,7 +790,7 @@ public class SemgrexTest {
     assertFalse(matcher.find());
 
     // This split pattern should also work
-    pattern = SemgrexPattern.compile("{} >> {}=a >> {}=b : {}=a == {}=b");
+    pattern = compile("{} >> {}=a >> {}=b : {}=a == {}=b");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(2, matcher.getNodeNames().size());
@@ -827,7 +829,7 @@ public class SemgrexTest {
   public void testNotEquals() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
 
-    SemgrexPattern pattern = SemgrexPattern.compile("{} >> {}=a >> {}=b : {}=a !== {}=b");
+    SemgrexPattern pattern = compile("{} >> {}=a >> {}=b : {}=a !== {}=b");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(2, matcher.getNodeNames().size());
@@ -868,7 +870,7 @@ public class SemgrexTest {
     assertFalse(matcher.find());
 
     // same as the first test, essentially, but with a more compact expression
-    pattern = SemgrexPattern.compile("{} >> {}=a >> ({}=b !== {}=a)");
+    pattern = compile("{} >> {}=a >> ({}=b !== {}=a)");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals(2, matcher.getNodeNames().size());
@@ -914,7 +916,7 @@ public class SemgrexTest {
     SemanticGraph graph = makeComplicatedGraph();
 
     SemgrexPattern pattern =
-      SemgrexPattern.compile("{}=a >> {}=b : {}=a >> {}=c");
+      compile("{}=a >> {}=b : {}=a >> {}=c");
     Map<String, IndexedWord> variables = new HashMap<>();
     variables.put("b", graph.getNodeByIndex(5));
     variables.put("c", graph.getNodeByIndex(2));
@@ -971,7 +973,7 @@ public class SemgrexTest {
   @Test
   public void testNamedRelation() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
-    SemgrexPattern pattern = SemgrexPattern.compile("{idx:0}=gov >>~foo {idx:3}=dep");
+    SemgrexPattern pattern = compile("{idx:0}=gov >>~foo {idx:3}=dep");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("ate", matcher.getNode("gov").toString());
@@ -979,7 +981,7 @@ public class SemgrexTest {
     assertEquals("compound", matcher.getRelnString("foo"));
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{idx:3}=dep <<~foo {idx:0}=gov");
+    pattern = compile("{idx:3}=dep <<~foo {idx:0}=gov");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("ate", matcher.getNode("gov").toString());
@@ -987,7 +989,7 @@ public class SemgrexTest {
     assertEquals("obj", matcher.getRelnString("foo"));
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{idx:3}=dep <~foo {idx:2}=gov");
+    pattern = compile("{idx:3}=dep <~foo {idx:2}=gov");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("muffins", matcher.getNode("gov").toString());
@@ -995,7 +997,7 @@ public class SemgrexTest {
     assertEquals("compound", matcher.getRelnString("foo"));
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{idx:2}=gov >~foo {idx:3}=dep");
+    pattern = compile("{idx:2}=gov >~foo {idx:3}=dep");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("muffins", matcher.getNode("gov").toString());
@@ -1017,7 +1019,7 @@ public class SemgrexTest {
     assertEquals("blueberry", match.getNode("dep").toString());
     assertEquals("compound", match.getRelnString("foo"));
 
-    SemgrexPattern pattern = SemgrexPattern.compile(patternString);
+    SemgrexPattern pattern = compile(patternString);
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("muffins", matcher.getNode("gov").toString());
@@ -1043,7 +1045,7 @@ public class SemgrexTest {
   public void testNamedRelationBackreference() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
 
-    SemgrexPattern pattern = SemgrexPattern.compile("{}=A >~foo ({}=B >~foo {}=C)");
+    SemgrexPattern pattern = compile("{}=A >~foo ({}=B >~foo {}=C)");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertFalse(matcher.find());
 
@@ -1065,7 +1067,7 @@ public class SemgrexTest {
     assertFalse(matcher.find());
 
     graph = SemanticGraph.valueOf("[antennae amod> big amod> blue]");
-    pattern = SemgrexPattern.compile("{}=A >~foo {}=B >~foo ({}=C !== {}=B)");
+    pattern = compile("{}=A >~foo {}=B >~foo ({}=C !== {}=B)");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("antennae", matcher.getNode("A").toString());
@@ -1082,7 +1084,7 @@ public class SemgrexTest {
     assertFalse(matcher.find());
 
     graph = SemanticGraph.valueOf("[antennae amod> big dep> blue]");
-    pattern = SemgrexPattern.compile("{}=A >~foo {}=B >~foo ({}=C !== {}=B)");
+    pattern = compile("{}=A >~foo {}=B >~foo ({}=C !== {}=B)");
     matcher = pattern.matcher(graph);
     assertFalse(matcher.find());
   }
@@ -1094,7 +1096,7 @@ public class SemgrexTest {
   public void testNamedEdgeGovernor() {
     // Test a simple version of the named edge search
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
-    SemgrexPattern pattern = SemgrexPattern.compile("{}=A >subj=foo {}=B");
+    SemgrexPattern pattern = compile("{}=A >subj=foo {}=B");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     SemanticGraphEdge edge = matcher.getEdge("foo");
@@ -1108,7 +1110,7 @@ public class SemgrexTest {
 
     // Test the expected behavior of a pattern without backref
     graph = SemanticGraph.valueOf("[antennae amod> big amod> blue]");
-    pattern = SemgrexPattern.compile("{}=A > {}=B > {}=C");
+    pattern = compile("{}=A > {}=B > {}=C");
     matcher = pattern.matcher(graph);
     // two children, iterate for both halves of the expression,
     // so there should be 4 matches total
@@ -1120,7 +1122,7 @@ public class SemgrexTest {
 
     // Test the expected behavior of a pattern *with* backref
     graph = SemanticGraph.valueOf("[antennae amod> big amod> blue]");
-    pattern = SemgrexPattern.compile("{}=A >=foo {}=B >=foo {}=C");
+    pattern = compile("{}=A >=foo {}=B >=foo {}=C");
     matcher = pattern.matcher(graph);
     // this time it should only accept when the edges are the same
     assertTrue(matcher.find());
@@ -1144,7 +1146,7 @@ public class SemgrexTest {
   @Test
   public void testNamedEdgeDependent() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill obj>[muffins compound>blueberry]]");
-    SemgrexPattern pattern = SemgrexPattern.compile("{}=A <subj=foo {}=B");
+    SemgrexPattern pattern = compile("{}=A <subj=foo {}=B");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     SemanticGraphEdge edge = matcher.getEdge("foo");
@@ -1163,7 +1165,7 @@ public class SemgrexTest {
   @Test
   public void testNamedEdgeLeftRight() {
     SemanticGraph graph = SemanticGraph.valueOf("[antennae-2 amod> blue-1 nmod> [head-5 case> on-3 nmod:poss> her-4]]");
-    SemgrexPattern pattern = SemgrexPattern.compile("{$}=A >--=foo {}=B");
+    SemgrexPattern pattern = compile("{$}=A >--=foo {}=B");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     SemanticGraphEdge edge = matcher.getEdge("foo");
@@ -1172,7 +1174,7 @@ public class SemgrexTest {
     assertEquals(edge.getTarget().word(), "blue");
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{$}=A >++=foo {}=B");
+    pattern = compile("{$}=A >++=foo {}=B");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     edge = matcher.getEdge("foo");
@@ -1181,7 +1183,7 @@ public class SemgrexTest {
     assertEquals(edge.getTarget().word(), "head");
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{}=A <++=foo {$}=B");
+    pattern = compile("{}=A <++=foo {$}=B");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     edge = matcher.getEdge("foo");
@@ -1190,7 +1192,7 @@ public class SemgrexTest {
     assertEquals(edge.getTarget().word(), "blue");
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{}=A <--=foo {$}=B");
+    pattern = compile("{}=A <--=foo {$}=B");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     edge = matcher.getEdge("foo");
@@ -1215,9 +1217,7 @@ public class SemgrexTest {
     // A possible user submitted error: https://github.com/stanfordnlp/CoreNLP/issues/552
     // A match with both POS and word labeled should have both attributes on the same node
     String pattern = "{$} > {pos:JJS;word:most}";
-    // check that the compiled pattern is the same as the input pattern    
-    comparePatternToString(pattern);
-    SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+    SemgrexPattern semgrex = compile(pattern);
 
     // root is "foo", has 3 children with various relations
     SemanticGraph graph = SemanticGraph.valueOf("[foo obj> most subj> bar dep> asdf]");
@@ -1293,7 +1293,7 @@ public class SemgrexTest {
     graph.getNodeByIndex(1).setNER("TITLE");
     graph.getNodeByIndex(2).setNER("ORGANIZATION");
 
-    SemgrexPattern pattern = SemgrexPattern.compile("{}=entity  >appos ({ner:/TITLE/}  >/(nmod:|obl:|prep_)of/ {ner:/ORGANIZATION|LOCATION|COUNTRY|STATE_OR_PROVINCE|CITY|NATIONALITY/}=slot)");
+    SemgrexPattern pattern = compile("{}=entity >appos ({ner:/TITLE/} >/(nmod:|obl:|prep_)of/ {ner:/ORGANIZATION|LOCATION|COUNTRY|STATE_OR_PROVINCE|CITY|NATIONALITY/}=slot)");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("Young", matcher.getNode("entity").toString());
@@ -1357,8 +1357,11 @@ public class SemgrexTest {
             "ate/NN");
 
     // It shouldn't matter if $ is first or last
+    // TODO: "{$;tag:NN}" does not round trip, so it cannot use compile()
+    // yet.  The root attribute is always printed last, so it comes back as
+    // "{tag:NN;$}" -- the same pattern, written the other way round
     SemgrexPattern dollarFirst = SemgrexPattern.compile("{$;tag:NN}");
-    SemgrexPattern dollarLast = SemgrexPattern.compile("{tag:NN;$}");
+    SemgrexPattern dollarLast = compile("{tag:NN;$}");
     assertEquals(dollarFirst, dollarLast);
     runTest(dollarFirst, graph,
             "ate/NN");
@@ -1379,7 +1382,7 @@ public class SemgrexTest {
     // This is technically the same expression as above, as the parser will
     // ask for a root node with two relations: == _/VB and > !Doug/NN
     String pattern2 = "{$} == {pos:/VB.*/} > ({pos:NN} == !{word:Doug})";
-    SemgrexPattern semgrex2 = SemgrexPattern.compile(pattern2);
+    SemgrexPattern semgrex2 = compile(pattern2);
     assertEquals(semgrex.toString(), semgrex2.toString());
     runTest(pattern2,
             "[ate/VBD subj>Bill/NN obj>[muffins compound>blueberry]]",
@@ -1427,13 +1430,13 @@ public class SemgrexTest {
     // this should parse since negative constraints which
     // match positive constraints are allowed
     String pattern = "{word:/.*i.*/;word!:/.*m.*/}";
-    SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+    SemgrexPattern semgrex = compile(pattern);
     runTest(pattern,
             "[ate/NN subj>Bill/NN obj>[muffins compound>blueberry]]",
             "Bill/NN");
 
     pattern = "{word:/.*i.*/;word!:/.*z.*/}";
-    semgrex = SemgrexPattern.compile(pattern);
+    semgrex = compile(pattern);
     runTest(pattern,
             "[ate/NN subj>Bill/NN obj>[muffins compound>blueberry]]",
             "Bill/NN", "muffins");
@@ -1504,6 +1507,7 @@ public class SemgrexTest {
     // These should be equivalent expressions
     String pattern = "{word:ate} > [{word:Bill} | {word:muffins}]";
     String pattern2 = "{word:ate} [ > {word:Bill} | > {word:muffins}]";
+    // TODO: does not round trip, so it cannot use compile() yet: "{word:ate} > [...|...]" prints as "[ > ... | > ... ]"
     SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
     SemgrexPattern semgrex2 = SemgrexPattern.compile(pattern2);
     assertEquals(semgrex.toString(), semgrex2.toString());
@@ -1523,6 +1527,7 @@ public class SemgrexTest {
     // These should be equivalent expressions
     pattern = "{word:ate} [ > {word:Bill} > {word:muffins}]";
     pattern2 = "{word:ate} > {word:Bill} > {word:muffins}";
+    // TODO: does not round trip, so it cannot use compile() yet: "[ > A > B ]" prints without the brackets, as "> A > B"
     semgrex = SemgrexPattern.compile(pattern);
     semgrex2 = SemgrexPattern.compile(pattern2);
     assertEquals(semgrex.toString(), semgrex2.toString());
@@ -1590,7 +1595,7 @@ public class SemgrexTest {
   @Test
   public void testBatchSearch() {
     List<CoreMap> sentences = buildSmallBatch();
-    SemgrexPattern semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y");
+    SemgrexPattern semgrex = compile("{word:foo}=x > {}=y");
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
     String[] expectedMatches = {
       BATCH_PARSES[0],
@@ -1644,7 +1649,7 @@ public class SemgrexTest {
   public void testParsesUniq() {
     // Test the basic node name compilation
     String pattern = "{word:foo}=foo :: uniq foo";
-    SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
+    SemgrexPattern semgrex = compile(pattern);
 
     // Test the basic regex compilation
     pattern = "{word:__#1%foo} :: uniq foo";
@@ -1657,21 +1662,21 @@ public class SemgrexTest {
   @Test
   public void testBatchUniq() {
     List<CoreMap> sentences = buildSmallBatch();
-    SemgrexPattern semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y :: uniq x");
+    SemgrexPattern semgrex = compile("{word:foo}=x > {}=y :: uniq x");
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
     // only the first foo sentence should match when using "uniq x"
     assertEquals(1, matches.size());
     assertEquals(BATCH_PARSES[0], matches.get(0).first().get(CoreAnnotations.TextAnnotation.class));
     assertEquals(1, matches.get(0).second().size());
 
-    semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y :: uniq");
+    semgrex = compile("{word:foo}=x > {}=y :: uniq");
     matches = semgrex.matchSentences(sentences, false);
     // same thing happens when using "uniq" and no nodes - only one match will occur
     assertEquals(1, matches.size());
     assertEquals(BATCH_PARSES[0], matches.get(0).first().get(CoreAnnotations.TextAnnotation.class));
     assertEquals(1, matches.get(0).second().size());
 
-    semgrex = SemgrexPattern.compile("{word:foo}=x > {}=y :: uniq y");
+    semgrex = compile("{word:foo}=x > {}=y :: uniq y");
     matches = semgrex.matchSentences(sentences, false);
     // now it should match both foo>bar and foo>baz
     assertEquals(2, matches.size());
@@ -1680,7 +1685,7 @@ public class SemgrexTest {
     assertEquals(BATCH_PARSES[3], matches.get(1).first().get(CoreAnnotations.TextAnnotation.class));
     assertEquals(1, matches.get(1).second().size());
 
-    semgrex = SemgrexPattern.compile("{}=x > {}=y :: uniq x y");
+    semgrex = compile("{}=x > {}=y :: uniq x y");
     matches = semgrex.matchSentences(sentences, false);
     // now it should batch each of foo>bar, bar>baz, foo>baz
     assertEquals(3, matches.size());
@@ -1692,7 +1697,7 @@ public class SemgrexTest {
     assertEquals(1, matches.get(2).second().size());
 
     // test the uniq operator on a regex match
-    semgrex = SemgrexPattern.compile("{word:__#1%x} !< {} :: uniq x");
+    semgrex = compile("{word:__#1%x} !< {} :: uniq x");
     matches = semgrex.matchSentences(sentences, false);
     assertEquals(2, matches.size());
     assertEquals(BATCH_PARSES[0], matches.get(0).first().get(CoreAnnotations.TextAnnotation.class));
@@ -1703,7 +1708,7 @@ public class SemgrexTest {
     assertEquals("bar", matches.get(1).second().get(0).getVariableString("x"));
 
     // test the uniq operator on an edge
-    semgrex = SemgrexPattern.compile("{} !< {} >=edge {} :: uniq edge");
+    semgrex = compile("{} !< {} >=edge {} :: uniq edge");
     matches = semgrex.matchSentences(sentences, false);
     assertEquals(3, matches.size());
     // sentence 0 should match because the root has a child with nmod
@@ -1724,11 +1729,14 @@ public class SemgrexTest {
   @Test
   public void testCaseInsensitive() {
     List<CoreMap> sentences = buildSmallBatch();
+    // TODO: does not round trip, so it cannot use compile() yet.  The case
+    // insensitive modifier is not reproduced: the pattern prints as
+    // "{word:/FOO/}", which is not the same pattern
     SemgrexPattern semgrex = SemgrexPattern.compile("(?i: {word:FOO} )");
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
     assertEquals(3, matches.size());
 
-    semgrex = SemgrexPattern.compile("{word:FOO}");
+    semgrex = compile("{word:FOO}");
     matches = semgrex.matchSentences(sentences, false);
     assertEquals(0, matches.size());
   }
@@ -1743,7 +1751,7 @@ public class SemgrexTest {
   @Test
   public void testBatchSort() {
     List<CoreMap> sentences = buildSmallBatch();
-    SemgrexPattern semgrex = SemgrexPattern.compile("{word:foo}=x >=edge {}=y :: sort edge");
+    SemgrexPattern semgrex = compile("{word:foo}=x >=edge {}=y :: sort edge");
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
     assertEquals(3, matches.size());
 
@@ -1765,7 +1773,7 @@ public class SemgrexTest {
   @Test
   public void testRegexVariableGroups() {
     // first, a basic test that it is capturing the variable groups correctly
-    SemgrexPattern pattern = SemgrexPattern.compile("{word:/(.*ill.*)/#1%name}");
+    SemgrexPattern pattern = compile("{word:/(.*ill.*)/#1%name}");
     SemanticGraph graph = SemanticGraph.valueOf("[ate-2 subj> Bill-1 obj>[muffins-6 compound> Blueberry-3 compound> Flueberry-4 compound> filled-5]]");
     Set<String> matches = new HashSet<>();
     SemgrexMatcher matcher = pattern.matcher(graph);
@@ -1778,7 +1786,7 @@ public class SemgrexTest {
     assertEquals(expectedMatches, matches);
 
     // test a basic use case of a single variable string matching
-    pattern = SemgrexPattern.compile("{word:/(.*)ill/#1%name} .. {word:/(.*)lueberry/#1%name}");
+    pattern = compile("{word:/(.*)ill/#1%name} .. {word:/(.*)lueberry/#1%name}");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("B", matcher.variableStrings.getString("name"));
@@ -1787,7 +1795,7 @@ public class SemgrexTest {
 
     // this time, because the variable names are different,
     // both Blueberry and Flueberry should match
-    pattern = SemgrexPattern.compile("{word:/(.*)ill/#1%name} .. {word:/(.*)lueberry/#1%letter}");
+    pattern = compile("{word:/(.*)ill/#1%name} .. {word:/(.*)lueberry/#1%letter}");
     matcher = pattern.matcher(graph);
     matches.clear();
     assertTrue(matcher.find());
@@ -1805,7 +1813,7 @@ public class SemgrexTest {
 
   @Test
   public void testExactVariableGroups() {
-    SemgrexPattern pattern = SemgrexPattern.compile("{word:__#1%name} .. {word:__#1%name}");
+    SemgrexPattern pattern = compile("{word:__#1%name} .. {word:__#1%name}");
     SemanticGraph graph = SemanticGraph.valueOf("[ate-2 subj> Bill-1 obj>[muffins-6 compound> Blueberry-3 compound> Bill-4 compound> filled-5]]");
 
     // This should match exactly once, for Bill & Bill
@@ -1814,7 +1822,7 @@ public class SemgrexTest {
     assertEquals("Bill", matcher.variableStrings.getString("name"));
     assertFalse(matcher.find());
 
-    pattern = SemgrexPattern.compile("{word:Bill#1%name} .. {word:__#1%name}");
+    pattern = compile("{word:Bill#1%name} .. {word:__#1%name}");
 
     // This should match exactly once, for Bill & Bill
     matcher = pattern.matcher(graph);
@@ -1895,6 +1903,20 @@ public class SemgrexTest {
 
     // parentheses are what makes it a chain
     runTest("{}=a >prep_to ({}=b >amod {}=c)", graph, "married");
+  }
+
+  /**
+   * Compile a pattern, checking that it prints the way it was written.
+   *<br>
+   * Tests should use this rather than SemgrexPattern.compile so that every
+   * pattern in this file exercises the round trip, without anyone having to
+   * maintain a separate list of patterns to check.  A few patterns do not
+   * round trip yet; those still call SemgrexPattern.compile directly and are
+   * marked with a TODO where they appear.
+   */
+  public static SemgrexPattern compile(String pattern) {
+    comparePatternToString(pattern);
+    return SemgrexPattern.compile(pattern);
   }
 
   /** Verify that the semgrex pattern gets compiled without being changed */
