@@ -402,13 +402,13 @@ public class NodePattern extends SemgrexPattern  {
 
   public String toString(boolean hasPrecedence, boolean addChild) {
     StringBuilder sb = new StringBuilder();
+    sb.append(' ');
     if (isNegated()) {
       sb.append('!');
     }
     if (isOptional()) {
       sb.append('?');
     }
-    sb.append(' ');
     if (reln != null) {
       sb.append(reln);
       sb.append(' ');
