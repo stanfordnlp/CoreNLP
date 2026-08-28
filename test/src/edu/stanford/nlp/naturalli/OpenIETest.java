@@ -196,26 +196,22 @@ public class OpenIETest {
   }
 
   /**
-   * With two prepositional phrases, only one of them is carried over
+   * Each prepositional phrase on the noun gives its own entailment
    *<br>
-   * The rule's pattern ends in {@code ?>/(nmod|acl).*&#47;=prep {}=pobj},
-   * and an optional relation currently stops after its first satisfying
-   * edge, so only one PP ever reaches the entailment.  Which one is
-   * decided by the order the edges were added to the graph rather than by
-   * anything about the sentence, so "with a hat" is dropped here and
-   * would be kept if the parse had been built the other way round.
+   * The rule's pattern ends in {@code ?>/(nmod|acl).*&#47;=prep {}=pobj}.
+   * An optional relation produces a match per satisfying edge, so a noun
+   * with two PPs yields an entailment for each, and neither is dropped.
    *<br>
-   * If optional relations are changed to yield every satisfying edge,
-   * this test should start failing with a third entailment,
-   * "Bill is happy hat", and that third entailment is the correct
-   * behaviour -- both PPs are real.  Update the expectation rather than
-   * the code.
+   * Before optional relations were changed to do that, only one PP ever
+   * reached an entailment, and which one depended on the order the edges
+   * went into the graph rather than on the sentence.
    */
   @Test
   public void testAdjectiveEntailmentTwoPPs() {
     assertEquals(new TreeSet<String>() {{
       add("Bill is a happy man in park with hat");
       add("Bill is happy park");
+      add("Bill is happy hat");
     }}, adjectiveEntailments(TWO_PPS));
   }
 
