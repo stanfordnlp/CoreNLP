@@ -1,6 +1,7 @@
 package edu.stanford.nlp.semgraph.semgrex.stats;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -43,6 +44,12 @@ public class CountStat implements SemgrexStat {
 
   /** width of the percentage column, wide enough for "100.00%" */
   private static final int PCT_WIDTH = 6;
+
+  /** how far the rows of a block chart are indented under their block */
+  private static final String INDENT = "  ";
+
+  /** label of a block's summary row */
+  private static final String SUBTOTAL = "subtotal";
   private static final String RESTRICT = "-restrict";
   private static final String NO_BIDI = "-noBidi";
 
@@ -291,22 +298,30 @@ public class CountStat implements SemgrexStat {
     if (counts.isEmpty()) {
       return "No matches, nothing to count." + System.lineSeparator();
     }
-    if (flat || keys.size() > 2) {
+    if (flat || keys.size() > 3) {
       return flatChart();
     }
     if (keys.size() == 1) {
       return oneDimensionalChart();
     }
-    List<String> columnValues = distinctValues(1);
+
+    // the last key is always the columns; the keys before it nest
+    // leftward, so two keys are rows against columns and three are
+    // blocks of rows against columns
+    int columnKey = keys.size() - 1;
+    List<String> columnValues = distinctValues(columnKey);
     if (columnValues.size() > maxColumns) {
       StringBuilder sb = new StringBuilder();
-      sb.append(start()).append("# ").append(keys.get(1)).append(" took ").append(columnValues.size());
+      sb.append(start()).append("# ").append(keys.get(columnKey)).append(" took ").append(columnValues.size());
       sb.append(" distinct values, which is more than ").append(MAX_COLUMNS).append(" (").append(maxColumns);
       sb.append("), so printing the flat form.").append(System.lineSeparator());
       sb.append(flatChart());
       return sb.toString();
     }
-    return twoDimensionalChart(columnValues);
+    if (keys.size() == 2) {
+      return twoDimensionalChart(columnValues);
+    }
+    return blockChart(columnValues);
   }
 
   @Override
@@ -451,7 +466,105 @@ public class CountStat implements SemgrexStat {
   }
 
   /**
-   * count X Y Z ... , or a 2D count too wide to draw
+   * count X Y Z
+   *<br>
+   * The first key groups the rows into blocks, the second labels the
+   * rows within a block, and the third is the columns.  The columns are
+   * shared by every block, so blocks can be compared to one another and
+   * to the totals at the foot; the rows are not, so each block shows
+   * only what occurs in it.
+   */
+  private String blockChart(List<String> columnValues) {
+    List<String> blockValues = distinctValues(0);
+    Map<String, Integer> columnTotals = marginal(2);
+
+    int rowHeaderWidth = keys.get(0).length();
+    for (String block : blockValues) {
+      rowHeaderWidth = Math.max(rowHeaderWidth, block.length());
+      for (String row : distinctValuesInBlock(block, 1)) {
+        rowHeaderWidth = Math.max(rowHeaderWidth, INDENT.length() + row.length());
+      }
+    }
+    rowHeaderWidth = Math.max(rowHeaderWidth, INDENT.length() + SUBTOTAL.length());
+    rowHeaderWidth = Math.max(rowHeaderWidth, "TOTAL".length());
+
+    List<Integer> columnWidths = new ArrayList<>();
+    for (String column : columnValues) {
+      int width = Math.max(column.length(), Integer.toString(columnTotals.getOrDefault(column, 0)).length());
+      for (String block : blockValues) {
+        for (String row : distinctValuesInBlock(block, 1)) {
+          width = Math.max(width, Integer.toString(get(block, row, column)).length());
+        }
+      }
+      columnWidths.add(width);
+    }
+    int totalWidth = Math.max("TOTAL".length(), Long.toString(totalMatches).length());
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(start()).append("# blocks: ").append(keys.get(0));
+    sb.append(", rows: ").append(keys.get(1));
+    sb.append(", columns: ").append(keys.get(2)).append(System.lineSeparator());
+
+    sb.append(start()).append(cell(keys.get(0), rowHeaderWidth, true));
+    for (int i = 0; i < columnValues.size(); ++i) {
+      sb.append("  ").append(cell(columnValues.get(i), columnWidths.get(i), false));
+    }
+    sb.append("  ").append(cell("TOTAL", totalWidth, false)).append(System.lineSeparator());
+
+    sb.append(gridRule(rowHeaderWidth, columnWidths, totalWidth));
+
+    for (int b = 0; b < blockValues.size(); ++b) {
+      String block = blockValues.get(b);
+      if (b > 0) {
+        sb.append(System.lineSeparator());
+      }
+      // the block's own line carries only its label, so there is no
+      // trailing whitespace to strip out of a paste
+      sb.append(start()).append(block).append(System.lineSeparator());
+
+      List<String> rowValues = distinctValuesInBlock(block, 1);
+      int[] subtotals = new int[columnValues.size()];
+      int blockTotal = 0;
+
+      for (String row : rowValues) {
+        // the indent goes outside the isolate for the same reason the
+        // padding does: it is neutral, and inside it would join the
+        // cell's own direction and end up on the wrong side of the word
+        sb.append(start()).append(INDENT).append(cell(row, rowHeaderWidth - INDENT.length(), true));
+        int rowTotal = 0;
+        for (int i = 0; i < columnValues.size(); ++i) {
+          int value = get(block, row, columnValues.get(i));
+          subtotals[i] += value;
+          rowTotal += value;
+          sb.append("  ").append(cell(Integer.toString(value), columnWidths.get(i), false));
+        }
+        blockTotal += rowTotal;
+        sb.append("  ").append(cell(Integer.toString(rowTotal), totalWidth, false));
+        sb.append(System.lineSeparator());
+      }
+
+      sb.append(start()).append(INDENT).append(cell(SUBTOTAL, rowHeaderWidth - INDENT.length(), true));
+      for (int i = 0; i < columnValues.size(); ++i) {
+        sb.append("  ").append(cell(Integer.toString(subtotals[i]), columnWidths.get(i), false));
+      }
+      sb.append("  ").append(cell(Integer.toString(blockTotal), totalWidth, false));
+      sb.append(System.lineSeparator());
+    }
+
+    sb.append(gridRule(rowHeaderWidth, columnWidths, totalWidth));
+
+    sb.append(start()).append(cell("TOTAL", rowHeaderWidth, true));
+    for (int i = 0; i < columnValues.size(); ++i) {
+      sb.append("  ").append(cell(Integer.toString(columnTotals.getOrDefault(columnValues.get(i), 0)), columnWidths.get(i), false));
+    }
+    sb.append("  ").append(cell(Long.toString(totalMatches), totalWidth, false));
+    sb.append(System.lineSeparator());
+
+    return sb.toString();
+  }
+
+  /**
+   * count W X Y Z ... , or a count too wide to draw
    */
   private String flatChart() {
     List<Map.Entry<List<String>, Integer>> entries = sortedEntries();
@@ -493,10 +606,41 @@ public class CountStat implements SemgrexStat {
   // ------------------------------------------------------------------
 
   private int get(String row, String column) {
-    List<String> key = new ArrayList<>();
-    key.add(row);
-    key.add(column);
-    return counts.getOrDefault(key, 0);
+    return counts.getOrDefault(Arrays.asList(row, column), 0);
+  }
+
+  private int get(String block, String row, String column) {
+    return counts.getOrDefault(Arrays.asList(block, row, column), 0);
+  }
+
+  /**
+   * The distinct values the key at this position took within one block,
+   * ordered by their totals in that block.
+   *<br>
+   * Blocks are ragged on purpose: a block shows the rows which occur in
+   * it rather than every row in the chart.  Padding them to a common set
+   * would make the blocks line up, but for the data this is useful on --
+   * a word belongs to one feature value -- almost every padded row is
+   * zero.
+   */
+  private List<String> distinctValuesInBlock(String block, int position) {
+    Map<String, Integer> totals = new HashMap<>();
+    for (Map.Entry<List<String>, Integer> entry : counts.entrySet()) {
+      if (entry.getKey().get(0).equals(block)) {
+        totals.merge(entry.getKey().get(position), entry.getValue(), Integer::sum);
+      }
+    }
+    List<String> values = new ArrayList<>(totals.keySet());
+    Collections.sort(values, new Comparator<String>() {
+      public int compare(String first, String second) {
+        int cmp = totals.get(second).compareTo(totals.get(first));
+        if (cmp != 0) {
+          return cmp;
+        }
+        return first.compareTo(second);
+      }
+    });
+    return values;
   }
 
   /**

@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.Locale;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -470,11 +471,80 @@ public class SemgrexStatsTest {
     SemgrexStats stats = runScript(lines("pattern {}=gov >=relation {}=dep",
                                          "count gov relation dep"));
     String report = stats.report();
+
+    // the last key is the columns; the keys before it nest leftward, so
+    // the first groups the rows into blocks
+    assertTrue(report.contains("# blocks: gov, rows: relation, columns: dep"));
+
+    // the header names the columns, in column total order.  they are
+    // shared by every block, which is what makes blocks comparable
+    assertChartRow(report, "gov", "Bill", "his", "book", "cake", "her", "TOTAL");
+
+    // a block's label sits on a line of its own with its rows indented
+    // beneath it, so the label line has no counts on it
+    assertChartRow(report, "ate");
+    assertChartRow(report, "nsubj", "1", "0", "0", "0", "0", "1");
+
+    // and the grand total is still every edge
+    assertEquals(8, countStat(stats, 0, 0).getTotalMatches());
+    assertChartRow(report, "TOTAL", "3", "2", "1", "1", "1", "8");
+  }
+
+  /**
+   * -flat still gives the tuple listing for three keys
+   */
+  @Test
+  public void testThreeKeysFlat() {
+    SemgrexStats stats = runScript(lines("pattern {}=gov >=relation {}=dep",
+                                         "count -flat gov relation dep"));
+    String report = stats.report();
     assertNull(chartRow(report, "TOTAL"));
     // all 8 edges are distinct triples
     assertEquals(8, countStat(stats, 0, 0).getDistinctKeys());
-    assertEquals(8, chartRows(report, "count gov relation dep").size());
+    assertEquals(8, chartRows(report, "count -flat gov relation dep").size());
     assertChartRow(report, "ate", "nsubj", "Bill", "1", "12.50%");
+  }
+
+  /**
+   * Blocks are ragged: each shows only the rows which occur in it
+   *<br>
+   * Padding every block to a common row set would let you scan a fixed
+   * row position down the chart, but for the data this is useful on the
+   * padding is nearly all zeros, since a governor has its own dependents
+   * and nobody else's.
+   */
+  @Test
+  public void testBlocksAreRagged() {
+    SemgrexStats stats = runScript(lines("pattern {}=gov >=relation {}=dep",
+                                         "count gov relation dep"));
+    List<String> labels = new ArrayList<>();
+    for (String line : stats.report().split("\\R")) {
+      String trimmed = line.trim();
+      if (!trimmed.isEmpty() && !trimmed.startsWith("#") && !trimmed.matches("[-\\s]+")) {
+        labels.add(trimmed.split("\\s+")[0]);
+      }
+    }
+    assertEquals("gov", labels.get(0));
+    assertEquals("TOTAL", labels.get(labels.size() - 1));
+
+    // six governors, so six blocks and six subtotals
+    assertEquals(6, Collections.frequency(labels, "subtotal"));
+
+    // "ate" governs two relations and "saw" one, so the chart comes to
+    // 1 header + 6 labels + 8 rows + 6 subtotals + 1 total
+    assertEquals(1 + 6 + 8 + 6 + 1, labels.size());
+  }
+
+  /**
+   * A fourth key is past what a chart can show, so it falls back to the flat listing
+   */
+  @Test
+  public void testFourKeys() {
+    SemgrexStats stats = runScript(lines("pattern {}=gov >=relation {}=dep",
+                                         "count gov relation dep gov"));
+    String report = stats.report();
+    assertFalse(report.contains("# blocks:"));
+    assertNull(chartRow(report, "TOTAL"));
   }
 
   /**
