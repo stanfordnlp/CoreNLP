@@ -58,6 +58,14 @@ public class AddEdge extends SsurgeonEdit {
     buf.write(relation.toString()); buf.write("\t");
     buf.write(Ssurgeon.WEIGHT_ARG);buf.write(" ");
     buf.write(String.valueOf(weight));
+    // the edge name has to be printed too: a later edit in the same list
+    // may refer to it, and Ssurgeon will refuse to read that edit if the
+    // name was never introduced
+    if (edgeName != null) {
+      buf.write("\t");
+      buf.write(Ssurgeon.EDGE_NAME_ARG);buf.write(" ");
+      buf.write(edgeName);
+    }
     return buf.toString();
   }
   
