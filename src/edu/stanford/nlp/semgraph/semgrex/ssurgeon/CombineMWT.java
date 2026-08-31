@@ -45,10 +45,13 @@ public class CombineMWT extends SsurgeonEdit {
     buf.write(LABEL);
     for (String name : names) {
       buf.write("\t");
+      buf.write(Ssurgeon.NODENAME_ARG);
+      buf.write(" ");
       buf.write(name);
     }
     if (word != null && !word.equals("")) {
       buf.write("\t");
+      buf.write("-word ");
       buf.write(word);
     }
     return buf.toString();

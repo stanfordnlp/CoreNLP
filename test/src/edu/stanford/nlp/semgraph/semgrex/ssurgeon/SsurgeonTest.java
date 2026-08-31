@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,64 @@ import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.util.XMLUtils;
 
 public class SsurgeonTest {
+
+  /**
+   * An edit's printed form can be read back, and prints the same again
+   *<br>
+   * SsurgeonEdit.toEditString is documented as "a parseable String
+   * representing the edit", and Ssurgeon writes patterns back out with it,
+   * but nothing checked that claim.  Three edits were printing something
+   * Ssurgeon could not read: addDep and editNode wrote a closing quote
+   * around an attribute value with no opening one, editNode dropped its
+   * -remove list entirely, and combineMWT dropped the -node and -word
+   * flags from its arguments.
+   *<br>
+   * Note that a few edits validate their named edges against the pattern
+   * they belong to, so those are exercised through the XML tests instead.
+   */
+  @Test
+  public void editStringRoundTrips() {
+    Ssurgeon inst = Ssurgeon.inst();
+    String[] edits = {
+      "addEdge -gov a1 -dep a2 -reln dep -weight 0.5",
+      "removeEdge -gov a1 -dep a2 -reln dep",
+      "removeNamedEdge -edge foo",
+      "delete -node a1",
+      "deleteLeaf -node a1",
+      "killAllIncomingEdges -node a1",
+      "killNonRooted",
+      "setRoots a1",
+      "lemmatize -node a1",
+      "reindexGraph",
+      "mergeNodes -node a1 -node a2",
+      "combineMWT -node a1 -node a2",
+      "combineMWT -node a1 -node a2 -word foo",
+      "setPhraseHead -node a1 -node a2 -headIndex 0 -reln flat",
+      "addDep -gov a1 -reln dep -word blue",
+      "addDep -gov a1 -reln dep -word blue -position -a1",
+      "editNode -node a1 -word blue",
+      "editNode -node a1 -remove lemma",
+      "splitWord -node a1 -headIndex 0 -reln dep -regex (.*)o -regex o(.*)",
+    };
+
+    for (String edit : edits) {
+      SsurgeonEdit parsed = inst.parseEditLine(edit, new HashMap<>(), Language.UniversalEnglish, new HashSet<>());
+      String printed = parsed.toEditString();
+
+      // the printed form has to be something Ssurgeon can read back
+      SsurgeonEdit reparsed;
+      try {
+        reparsed = inst.parseEditLine(printed, new HashMap<>(), Language.UniversalEnglish, new HashSet<>());
+      } catch (SsurgeonParseException e) {
+        throw new AssertionError("Could not reparse the printed form of '" + edit + "', which printed as '" + printed + "'", e);
+      }
+
+      // and printing it again has to give the same thing, so that writing a
+      // pattern out and reading it in is stable rather than drifting
+      assertEquals("Printed form of '" + edit + "' was not stable",
+                   printed, reparsed.toEditString());
+    }
+  }
 
   @Test
   public void readXMLEmptyPattern() {

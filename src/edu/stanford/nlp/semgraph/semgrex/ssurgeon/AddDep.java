@@ -75,6 +75,7 @@ public class AddDep extends SsurgeonEdit {
       buf.write("-");
       buf.write(key);
       buf.write(" ");
+      buf.write("\"");
       buf.write(attributes.get(key));
       buf.write("\"\t");
     }

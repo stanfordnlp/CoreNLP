@@ -68,9 +68,16 @@ public class EditNode extends SsurgeonEdit {
       buf.append("-");
       buf.append(key);
       buf.append(" ");
+      buf.append("\"");
       buf.append(attributes.get(key));
-      // TODO: why the stray quote characters?
       buf.append("\"\t");
+    }
+
+    for (String remove : removedAttributes) {
+      buf.append(Ssurgeon.REMOVE);
+      buf.append(" ");
+      buf.append(remove);
+      buf.append("\t");
     }
 
     if (this.updateMorphoFeatures.size() > 0) {
