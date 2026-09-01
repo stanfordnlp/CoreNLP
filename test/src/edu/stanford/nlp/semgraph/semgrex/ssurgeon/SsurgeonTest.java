@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -24,60 +25,46 @@ import edu.stanford.nlp.util.XMLUtils;
 public class SsurgeonTest {
 
   /**
-   * An edit's printed form can be read back, and prints the same again
+   * Read a pattern list, checking that every edit in it prints back to
+   * something Ssurgeon can read.
+   *<br>
+   * Tests should use this rather than Ssurgeon.inst().readFromString, so
+   * that every edit written anywhere in this file exercises the round trip
+   * without anyone having to maintain a separate list of edits to check.
    *<br>
    * SsurgeonEdit.toEditString is documented as "a parseable String
-   * representing the edit", and Ssurgeon writes patterns back out with it,
-   * but nothing checked that claim.  Three edits were printing something
-   * Ssurgeon could not read: addDep and editNode wrote a closing quote
+   * representing the edit" and Ssurgeon writes patterns back out with it,
+   * but nothing checked the claim.  Three edits were printing something
+   * Ssurgeon could not read back: addDep and editNode wrote a closing quote
    * around an attribute value with no opening one, editNode dropped its
-   * -remove list entirely, and combineMWT dropped the -node and -word
-   * flags from its arguments.
-   *<br>
-   * Note that a few edits validate their named edges against the pattern
-   * they belong to, so those are exercised through the XML tests instead.
+   * -remove list entirely, and combineMWT dropped the -node and -word flags.
    */
-  @Test
-  public void editStringRoundTrips() {
-    Ssurgeon inst = Ssurgeon.inst();
-    String[] edits = {
-      "addEdge -gov a1 -dep a2 -reln dep -weight 0.5",
-      "removeEdge -gov a1 -dep a2 -reln dep",
-      "removeNamedEdge -edge foo",
-      "delete -node a1",
-      "deleteLeaf -node a1",
-      "killAllIncomingEdges -node a1",
-      "killNonRooted",
-      "setRoots a1",
-      "lemmatize -node a1",
-      "reindexGraph",
-      "mergeNodes -node a1 -node a2",
-      "combineMWT -node a1 -node a2",
-      "combineMWT -node a1 -node a2 -word foo",
-      "setPhraseHead -node a1 -node a2 -headIndex 0 -reln flat",
-      "addDep -gov a1 -reln dep -word blue",
-      "addDep -gov a1 -reln dep -word blue -position -a1",
-      "editNode -node a1 -word blue",
-      "editNode -node a1 -remove lemma",
-      "splitWord -node a1 -headIndex 0 -reln dep -regex (.*)o -regex o(.*)",
-    };
+  public static List<SsurgeonPattern> readFromString(String doc) {
+    List<SsurgeonPattern> patterns = Ssurgeon.inst().readFromString(doc);
+    for (SsurgeonPattern pattern : patterns) {
+      checkEditStringRoundTrip(pattern);
+    }
+    return patterns;
+  }
 
-    for (String edit : edits) {
-      SsurgeonEdit parsed = inst.parseEditLine(edit, new HashMap<>(), Language.UniversalEnglish, new HashSet<>());
-      String printed = parsed.toEditString();
-
-      // the printed form has to be something Ssurgeon can read back
+  /**
+   * Every edit of a pattern prints to something which reads back and prints the same again
+   */
+  public static void checkEditStringRoundTrip(SsurgeonPattern pattern) {
+    // Start from the edge names the semgrex pattern knows and let the edits
+    // add to it as we go, which is what Ssurgeon does when it reads a
+    // pattern: an addEdge earlier in the list introduces a name that a
+    // reattachNamedEdge later in the list is allowed to use.
+    Set<String> knownEdges = new HashSet<>(pattern.getSemgrexPattern().getKnownEdges());
+    for (SsurgeonEdit edit : pattern.getEditScript()) {
+      String printed = edit.toEditString();
       SsurgeonEdit reparsed;
       try {
-        reparsed = inst.parseEditLine(printed, new HashMap<>(), Language.UniversalEnglish, new HashSet<>());
+        reparsed = Ssurgeon.parseEditLine(printed, new HashMap<>(), pattern.getLanguage(), knownEdges);
       } catch (SsurgeonParseException e) {
-        throw new AssertionError("Could not reparse the printed form of '" + edit + "', which printed as '" + printed + "'", e);
+        throw new AssertionError("Could not reparse the printed form of an edit: '" + printed + "'", e);
       }
-
-      // and printing it again has to give the same thing, so that writing a
-      // pattern out and reading it in is stable rather than drifting
-      assertEquals("Printed form of '" + edit + "' was not stable",
-                   printed, reparsed.toEditString());
+      assertEquals("Printed form of an edit was not stable", printed, reparsed.toEditString());
     }
   }
 
@@ -92,8 +79,7 @@ public class SsurgeonTest {
                              "    <semgrex>{}=a1 &gt;appos=e1 {}=a2 &lt;nsubj=e2 {}=a3</semgrex>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> pattern = inst.readFromString(doc);
+    List<SsurgeonPattern> pattern = readFromString(doc);
     assertEquals(pattern.size(), 1);
   }
 
@@ -110,8 +96,7 @@ public class SsurgeonTest {
                              "    <edit-list>addEdge -gov a1 -dep a2 -reln dep -weight 0.5</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -136,8 +121,7 @@ public class SsurgeonTest {
                              "    <edit-list>addEdge -gov a1 -dep a2 -reln dep -weight 0.5</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -162,8 +146,7 @@ public class SsurgeonTest {
                              "    <edit-list>removeEdge -gov a1 -dep a2 -reln dep</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -196,8 +179,7 @@ public class SsurgeonTest {
                              "    <edit-list>removeEdge -gov a1 -dep a2</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -222,8 +204,7 @@ public class SsurgeonTest {
                              "    <edit-list>removeNamedEdge -edge foo</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -255,9 +236,8 @@ public class SsurgeonTest {
                              "    <edit-list>relabelNamedEdge -edge zzz -reln dep</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
     try {
-      List<SsurgeonPattern> patterns = inst.readFromString(doc);
+      List<SsurgeonPattern> patterns = readFromString(doc);
       throw new AssertionError("Expected a failure because of unknown edges");
     } catch (SsurgeonParseException e) {
       // yay
@@ -278,8 +258,7 @@ public class SsurgeonTest {
                              "    <edit-list>relabelNamedEdge -edge foo -reln dep</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -326,8 +305,7 @@ public class SsurgeonTest {
                              "    <edit-list>relabelNamedEdge -edge foo -reln dep</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -353,8 +331,7 @@ public class SsurgeonTest {
                              "    <edit-list>relabelNamedEdge -edge foo -reln gov</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -383,8 +360,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLPruneNodesIterate() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     String cut = String.join(newline,
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
@@ -394,7 +369,7 @@ public class SsurgeonTest {
                              "    <edit-list>removeEdge -gov a1 -dep a2 -reln dep</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    List<SsurgeonPattern> patterns = readFromString(cut);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern ssurgeonCut = patterns.get(0);
 
@@ -407,7 +382,7 @@ public class SsurgeonTest {
                                "    <edit-list>delete -node disjoint</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(prune);
+    patterns = readFromString(prune);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern ssurgeonPrune = patterns.get(0);
 
@@ -450,8 +425,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLTwoStepPruneIterate() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     String xml = String.join(newline,
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
@@ -462,7 +435,7 @@ public class SsurgeonTest {
                              "    <edit-list>delete -node a2</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(xml);
+    List<SsurgeonPattern> patterns = readFromString(xml);
     assertEquals(1, patterns.size());
     SsurgeonPattern ssurgeon = patterns.get(0);
     assertEquals(2, ssurgeon.editScript.size());
@@ -497,8 +470,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLPruneNodesResetRoots() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     String cut = String.join(newline,
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
@@ -508,7 +479,7 @@ public class SsurgeonTest {
                              "    <edit-list>removeEdge -gov a1 -dep a2 -reln dep</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    List<SsurgeonPattern> patterns = readFromString(cut);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern ssurgeonCut = patterns.get(0);
 
@@ -521,7 +492,7 @@ public class SsurgeonTest {
                                "    <edit-list>delete -node root</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(prune);
+    patterns = readFromString(prune);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern ssurgeonPrune = patterns.get(0);
 
@@ -548,8 +519,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLKillNonRootedIterate() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     String cut = String.join(newline,
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
@@ -559,7 +528,7 @@ public class SsurgeonTest {
                              "    <edit-list>removeEdge -gov a1 -dep a2 -reln dep</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    List<SsurgeonPattern> patterns = readFromString(cut);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern ssurgeonCut = patterns.get(0);
 
@@ -572,7 +541,7 @@ public class SsurgeonTest {
                                "    <edit-list>killNonRooted</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(prune);
+    patterns = readFromString(prune);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern ssurgeonPrune = patterns.get(0);
 
@@ -609,8 +578,6 @@ public class SsurgeonTest {
 
   @Test
   public void readXMLKillIncomingEdges() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     String cut = String.join(newline,
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
@@ -620,7 +587,7 @@ public class SsurgeonTest {
                              "    <edit-list>killAllIncomingEdges -node a2</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    List<SsurgeonPattern> patterns = readFromString(cut);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern ssurgeonCut = patterns.get(0);
 
@@ -637,8 +604,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLSetRoots() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     String cut = String.join(newline,
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
@@ -650,7 +615,7 @@ public class SsurgeonTest {
                              "    <edit-list>setRoots b</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    List<SsurgeonPattern> patterns = readFromString(cut);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern rearrange = patterns.get(0);
 
@@ -667,8 +632,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLSetRootsException() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     String cut = String.join(newline,
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
@@ -680,7 +643,7 @@ public class SsurgeonTest {
                              "    <edit-list>setRoots c</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(cut);
+    List<SsurgeonPattern> patterns = readFromString(cut);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern rearrange = patterns.get(0);
 
@@ -699,8 +662,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLAddDep() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -712,7 +673,7 @@ public class SsurgeonTest {
                              "    <edit-list>addDep -gov antennae -reln dep -word blue</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern addSsurgeon = patterns.get(0);
 
@@ -740,7 +701,7 @@ public class SsurgeonTest {
                       "    <edit-list>addDep -gov antennae -reln dep -word blue -tag JJ</edit-list>",
                       "  </ssurgeon-pattern>",
                       "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(add);
+    patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     addSsurgeon = patterns.get(0);
 
@@ -761,8 +722,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLAddDepStartPosition() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -774,7 +733,7 @@ public class SsurgeonTest {
                              "    <edit-list>addDep -gov antennae -reln dep -word blue -position -</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern addSsurgeon = patterns.get(0);
 
@@ -797,8 +756,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLAddDepRelativePosition() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -810,7 +767,7 @@ public class SsurgeonTest {
                              "    <edit-list>addDep -gov antennae -reln dep -word blue -position -antennae</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern addSsurgeon = patterns.get(0);
 
@@ -838,7 +795,7 @@ public class SsurgeonTest {
                       "    <edit-list>addDep -gov antennae -reln dep -word blue -position +prev</edit-list>",
                       "  </ssurgeon-pattern>",
                       "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(add);
+    patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     addSsurgeon = patterns.get(0);
 
@@ -862,8 +819,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLAddDepNodeAttributes() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -875,7 +830,7 @@ public class SsurgeonTest {
                              "    <edit-list word=\"blue\" reln=\"dep\">addDep -gov antennae -position -antennae</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern addSsurgeon = patterns.get(0);
 
@@ -905,7 +860,7 @@ public class SsurgeonTest {
                       "    <edit-list word=\"bl ue\" reln=\"dep\">addDep -gov antennae -position -antennae</edit-list>",
                       "  </ssurgeon-pattern>",
                       "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(add);
+    patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     addSsurgeon = patterns.get(0);
 
@@ -929,8 +884,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLAddDepQuotedAttributes() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -942,7 +895,7 @@ public class SsurgeonTest {
                              "    <edit-list>addDep -gov antennae -reln \"dep\" -word \"blue\" -position -antennae</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern addSsurgeon = patterns.get(0);
 
@@ -971,7 +924,7 @@ public class SsurgeonTest {
                       "    <edit-list>addDep -gov antennae -reln \"dep\" -word \"bl ue\" -position -antennae</edit-list>",
                       "  </ssurgeon-pattern>",
                       "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(add);
+    patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     addSsurgeon = patterns.get(0);
 
@@ -995,8 +948,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLAddDepMorphoFeatures() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -1008,7 +959,7 @@ public class SsurgeonTest {
                              "    <edit-list>addDep -gov antennae -reln dep -word blue -position -antennae -morphofeatures a=b|c=d</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern addSsurgeon = patterns.get(0);
 
@@ -1037,8 +988,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLAddUniversalDep() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
@@ -1050,7 +999,7 @@ public class SsurgeonTest {
                              "    <edit-list>addDep -gov antennae -reln amod -word blue -position -antennae</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern addSsurgeon = patterns.get(0);
 
@@ -1087,7 +1036,7 @@ public class SsurgeonTest {
                       "    <edit-list>addDep -gov antennae -reln amod -word blue -position -antennae</edit-list>",
                       "  </ssurgeon-pattern>",
                       "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(add);
+    patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     addSsurgeon = patterns.get(0);
 
@@ -1124,8 +1073,6 @@ public class SsurgeonTest {
   public void readXMLAddDepBrokenAnnotation() {
     String missingKey = "zzzzzz";
     assertNull(AnnotationLookup.toCoreKey(missingKey));
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -1138,7 +1085,7 @@ public class SsurgeonTest {
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
     try {
-      List<SsurgeonPattern> patterns = inst.readFromString(add);
+      List<SsurgeonPattern> patterns = readFromString(add);
       throw new AssertionError("Expected a failure because of missingKey " + missingKey);
     } catch (SsurgeonParseException e) {
       // yay
@@ -1152,8 +1099,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLMergeNodes() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // Test the head word being the first word
     String merge = String.join(newline,
                                "<ssurgeon-pattern-list>",
@@ -1164,7 +1109,7 @@ public class SsurgeonTest {
                                "    <edit-list>mergeNodes -node source -node punct</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    List<SsurgeonPattern> patterns = readFromString(merge);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern mergeSsurgeon = patterns.get(0);
 
@@ -1197,7 +1142,7 @@ public class SsurgeonTest {
                         "    <edit-list>mergeNodes -node source -node punct</edit-list>",
                         "  </ssurgeon-pattern>",
                         "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(merge);
+    patterns = readFromString(merge);
     assertEquals(patterns.size(), 1);
     mergeSsurgeon = patterns.get(0);
 
@@ -1222,8 +1167,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLMergeNodesMultiple() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // Test the head word being the first word
     String merge = String.join(newline,
                                "<ssurgeon-pattern-list>",
@@ -1234,7 +1177,7 @@ public class SsurgeonTest {
                                "    <edit-list>mergeNodes -node source -node punct -node nmod</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    List<SsurgeonPattern> patterns = readFromString(merge);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern mergeSsurgeon = patterns.get(0);
 
@@ -1255,8 +1198,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLMergeNodesIceCream() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // demostrate merging with the order ice, cream -> icecream
     String merge = String.join(newline,
                                "<ssurgeon-pattern-list>",
@@ -1267,7 +1208,7 @@ public class SsurgeonTest {
                                "    <edit-list>mergeNodes -node node2 -node node1</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    List<SsurgeonPattern> patterns = readFromString(merge);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern mergeSsurgeon = patterns.get(0);
 
@@ -1285,7 +1226,7 @@ public class SsurgeonTest {
                         "    <edit-list>mergeNodes -node node1 -node node2</edit-list>",
                         "  </ssurgeon-pattern>",
                         "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(merge);
+    patterns = readFromString(merge);
     assertEquals(patterns.size(), 1);
     mergeSsurgeon = patterns.get(0);
 
@@ -1302,8 +1243,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLMergeNodesAttributes() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // Test the head word being the first word
     String merge = String.join(newline,
                                "<ssurgeon-pattern-list>",
@@ -1314,7 +1253,7 @@ public class SsurgeonTest {
                                "    <edit-list>mergeNodes -node source -node punct -word foo -lemma bar</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    List<SsurgeonPattern> patterns = readFromString(merge);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern mergeSsurgeon = patterns.get(0);
 
@@ -1338,7 +1277,7 @@ public class SsurgeonTest {
                         "    <edit-list>mergeNodes -node source -node punct -lemma bar</edit-list>",
                         "  </ssurgeon-pattern>",
                         "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(merge);
+    patterns = readFromString(merge);
     assertEquals(patterns.size(), 1);
     mergeSsurgeon = patterns.get(0);
 
@@ -1358,8 +1297,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLMergeNodesTwoHeads() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     String merge = String.join(newline,
                                "<ssurgeon-pattern-list>",
                                "  <ssurgeon-pattern>",
@@ -1369,7 +1306,7 @@ public class SsurgeonTest {
                                "    <edit-list>mergeNodes -node first -node second</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    List<SsurgeonPattern> patterns = readFromString(merge);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern mergeSsurgeon = patterns.get(0);
 
@@ -1413,8 +1350,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLMergeNodesFailCases() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String merge = String.join(newline,
                                "<ssurgeon-pattern-list>",
@@ -1425,7 +1360,7 @@ public class SsurgeonTest {
                                "    <edit-list>mergeNodes -node source -node punct</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(merge);
+    List<SsurgeonPattern> patterns = readFromString(merge);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern mergeSsurgeon = patterns.get(0);
 
@@ -1450,8 +1385,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLCheckSMNodes() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -1464,7 +1397,7 @@ public class SsurgeonTest {
                              "    <edit-list>editNode -node antennae -word antennae</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern addSsurgeon = patterns.get(0);
 
@@ -1490,8 +1423,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLCheckSMEdges() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -1504,7 +1435,7 @@ public class SsurgeonTest {
                              "    <edit-list>relabelNamedEdge -edge obj -reln dep</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern addSsurgeon = patterns.get(0);
 
@@ -1529,8 +1460,6 @@ public class SsurgeonTest {
    */
   @Test
   public void checkAnnotationConversionErrors() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // this should exist, but a string will not produce it
     assertNotNull(AnnotationLookup.toCoreKey("SPAN"));
 
@@ -1547,7 +1476,7 @@ public class SsurgeonTest {
                              "</ssurgeon-pattern-list>");
 
     try {
-      List<SsurgeonPattern> patterns = inst.readFromString(add);
+      List<SsurgeonPattern> patterns = readFromString(add);
       throw new AssertionError("Expected a failure because IntPair is not readable from a String in CoreLabel");
     } catch (SsurgeonParseException e) {
       // yay
@@ -1567,7 +1496,7 @@ public class SsurgeonTest {
                       "</ssurgeon-pattern-list>");
 
     try {
-      List<SsurgeonPattern> patterns = inst.readFromString(add);
+      List<SsurgeonPattern> patterns = readFromString(add);
       throw new AssertionError("Expected a failure in CoreLabel because the String given should not have been turned into an Integer");
     } catch (SsurgeonParseException e) {
       // yay
@@ -1580,8 +1509,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLLemmatize() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String lemma = String.join(newline,
                                "<ssurgeon-pattern-list>",
@@ -1592,7 +1519,7 @@ public class SsurgeonTest {
                                "    <edit-list>lemmatize -node nolemma</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(lemma);
+    List<SsurgeonPattern> patterns = readFromString(lemma);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern lemmatizeSsurgeon = patterns.get(0);
 
@@ -1616,7 +1543,7 @@ public class SsurgeonTest {
                         "    <edit-list>lemmatize -node nolemma</edit-list>",
                         "  </ssurgeon-pattern>",
                         "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(lemma);
+    patterns = readFromString(lemma);
     assertEquals(patterns.size(), 1);
     lemmatizeSsurgeon = patterns.get(0);
 
@@ -1635,8 +1562,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLEditNode() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -1647,7 +1572,7 @@ public class SsurgeonTest {
                              "    <edit-list>EditNode -node blue -word blue</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern editSsurgeon = patterns.get(0);
 
@@ -1674,7 +1599,6 @@ public class SsurgeonTest {
     assertNull(AnnotationLookup.toCoreKey(missingKey));
 
     try {
-      Ssurgeon inst = Ssurgeon.inst();
       String remove = String.join(newline,
                                   "<ssurgeon-pattern-list>",
                                   "  <ssurgeon-pattern>",
@@ -1684,7 +1608,7 @@ public class SsurgeonTest {
                                   "    <edit-list>EditNode -node blue -remove " + missingKey + "</edit-list>",
                                   "  </ssurgeon-pattern>",
                                   "</ssurgeon-pattern-list>");
-      inst.readFromString(remove);
+      readFromString(remove);
       throw new AssertionError("Expected a parse exception!");
     } catch(SsurgeonParseException e) {
       // yay
@@ -1698,8 +1622,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLEditNodeRemove() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -1710,7 +1632,7 @@ public class SsurgeonTest {
                              "    <edit-list>EditNode -node blue -lemma blue</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern editSsurgeon = patterns.get(0);
 
@@ -1738,7 +1660,7 @@ public class SsurgeonTest {
                                 "    <edit-list>EditNode -node blue -remove lemma</edit-list>",
                                 "  </ssurgeon-pattern>",
                                 "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(remove);
+    patterns = readFromString(remove);
     assertEquals(patterns.size(), 1);
     editSsurgeon = patterns.get(0);
 
@@ -1758,8 +1680,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLEditNodeUpdateMorpho() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // This should add two morpho features to the word
     // (and should not crash even though the word previously had no features)
     String editPattern = String.join(newline,
@@ -1772,7 +1692,7 @@ public class SsurgeonTest {
                                      "  </ssurgeon-pattern>",
                                      "</ssurgeon-pattern-list>");
 
-    List<SsurgeonPattern> patterns = inst.readFromString(editPattern);
+    List<SsurgeonPattern> patterns = readFromString(editPattern);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern editSsurgeon = patterns.get(0);
 
@@ -1794,7 +1714,7 @@ public class SsurgeonTest {
                               "  </ssurgeon-pattern>",
                               "</ssurgeon-pattern-list>");
 
-    patterns = inst.readFromString(editPattern);
+    patterns = readFromString(editPattern);
     assertEquals(patterns.size(), 1);
     editSsurgeon = patterns.get(0);
 
@@ -1807,8 +1727,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLEditNodeMorpho() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     String editPattern = String.join(newline,
                                      "<ssurgeon-pattern-list>",
                                      "  <ssurgeon-pattern>",
@@ -1819,7 +1737,7 @@ public class SsurgeonTest {
                                      "  </ssurgeon-pattern>",
                                      "</ssurgeon-pattern-list>");
 
-    List<SsurgeonPattern> patterns = inst.readFromString(editPattern);
+    List<SsurgeonPattern> patterns = readFromString(editPattern);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern editSsurgeon = patterns.get(0);
 
@@ -1842,7 +1760,7 @@ public class SsurgeonTest {
                               "  </ssurgeon-pattern>",
                               "</ssurgeon-pattern-list>");
 
-    patterns = inst.readFromString(editPattern);
+    patterns = readFromString(editPattern);
     assertEquals(patterns.size(), 1);
     editSsurgeon = patterns.get(0);
 
@@ -1859,7 +1777,7 @@ public class SsurgeonTest {
                               "  </ssurgeon-pattern>",
                               "</ssurgeon-pattern-list>");
 
-    patterns = inst.readFromString(editPattern);
+    patterns = readFromString(editPattern);
     assertEquals(patterns.size(), 1);
     editSsurgeon = patterns.get(0);
 
@@ -1874,8 +1792,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLEditNodeMWT() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -1887,7 +1803,7 @@ public class SsurgeonTest {
                              "    <edit-list>EditNode -node s  -is_mwt true  -is_first_mwt false -mwt_text it's</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(add);
+    List<SsurgeonPattern> patterns = readFromString(add);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern editSsurgeon = patterns.get(0);
 
@@ -1925,8 +1841,6 @@ public class SsurgeonTest {
    */
   @Test
   public void readXMLCombineMWT() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // combine using the CombineMWT operation, using the default concatenation for the MWT text
     String mwt = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -1937,7 +1851,7 @@ public class SsurgeonTest {
                              "    <edit-list>CombineMWT -node it -node s</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    List<SsurgeonPattern> patterns = inst.readFromString(mwt);
+    List<SsurgeonPattern> patterns = readFromString(mwt);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern editSsurgeon = patterns.get(0);
 
@@ -1985,7 +1899,7 @@ public class SsurgeonTest {
                       "    <edit-list>CombineMWT -node it -node s -word foo</edit-list>",
                       "  </ssurgeon-pattern>",
                       "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(mwt);
+    patterns = readFromString(mwt);
     assertEquals(patterns.size(), 1);
     editSsurgeon = patterns.get(0);
 
@@ -2034,7 +1948,7 @@ public class SsurgeonTest {
                       "    <edit-list>CombineMWT -node it -node s</edit-list>",
                       "  </ssurgeon-pattern>",
                       "</ssurgeon-pattern-list>");
-    patterns = inst.readFromString(mwt);
+    patterns = readFromString(mwt);
     assertEquals(patterns.size(), 1);
     editSsurgeon = patterns.get(0);
 
@@ -2078,8 +1992,6 @@ public class SsurgeonTest {
    */
   @Test
   public void forbidIllegalAttributes() {
-    Ssurgeon inst = Ssurgeon.inst();
-
     // use "dep" as the dependency so as to be language-agnostic in this test
     String add = String.join(newline,
                              "<ssurgeon-pattern-list>",
@@ -2091,7 +2003,7 @@ public class SsurgeonTest {
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
     try {
-      List<SsurgeonPattern> patterns = inst.readFromString(add);
+      List<SsurgeonPattern> patterns = readFromString(add);
       throw new AssertionError("Expected a parse exception!");
     } catch(SsurgeonParseException e) {
       // yay
@@ -2106,7 +2018,7 @@ public class SsurgeonTest {
                       "  </ssurgeon-pattern>",
                       "</ssurgeon-pattern-list>");
     try {
-      List<SsurgeonPattern> patterns = inst.readFromString(add);
+      List<SsurgeonPattern> patterns = readFromString(add);
       throw new AssertionError("Expected a parse exception!");
     } catch(SsurgeonParseException e) {
       // yay
@@ -2127,9 +2039,8 @@ public class SsurgeonTest {
                              "    <edit-list>reattachNamedEdge -edge zzz -gov a1</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
     try {
-      List<SsurgeonPattern> patterns = inst.readFromString(doc);
+      List<SsurgeonPattern> patterns = readFromString(doc);
       throw new AssertionError("Expected a failure because of unknown edges");
     } catch (SsurgeonParseException e) {
       // yay
@@ -2154,8 +2065,7 @@ public class SsurgeonTest {
                              "</ssurgeon-pattern-list>");
     // The AddEdge edit should add zzz to the list of known edges
     // Therefore, the unknown edge error won't happen
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -2189,8 +2099,7 @@ public class SsurgeonTest {
                              "    <edit-list>addEdge -gov root -dep punct -reln punct</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -2218,8 +2127,7 @@ public class SsurgeonTest {
                              "    <edit-list>reattachNamedEdge -edge bad -gov root</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -2240,8 +2148,7 @@ public class SsurgeonTest {
                       "    <edit-list>reattachNamedEdge -edge bad -gov root -dep punct</edit-list>",
                       "  </ssurgeon-pattern>",
                       "</ssurgeon-pattern-list>");
-    inst = Ssurgeon.inst();
-    patterns = inst.readFromString(doc);
+    patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     pattern = patterns.get(0);
 
@@ -2263,8 +2170,7 @@ public class SsurgeonTest {
                       "    <edit-list>reattachNamedEdge -edge bar -gov n2 -dep n1</edit-list>",
                       "  </ssurgeon-pattern>",
                       "</ssurgeon-pattern-list>");
-    inst = Ssurgeon.inst();
-    patterns = inst.readFromString(doc);
+    patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     pattern = patterns.get(0);
 
@@ -2295,8 +2201,7 @@ public class SsurgeonTest {
                              "    <edit-list>deleteLeaf -node dash</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -2325,8 +2230,7 @@ public class SsurgeonTest {
                              "    <edit-list>SetPhraseHead -node n1 -node n2 -headIndex 0 -reln flat</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -2358,8 +2262,7 @@ public class SsurgeonTest {
                              "    <edit-list>splitWord -node split -regex ^(foo)bar$ -regex ^foo(bar)$ -reln dep -headIndex 0</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -2384,8 +2287,7 @@ public class SsurgeonTest {
                              "    <edit-list>splitWord -node split -exact foo -exact bar -reln dep -headIndex 0</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -2410,8 +2312,7 @@ public class SsurgeonTest {
                              "    <edit-list>splitWord -node split -regex ^(foo)bar$ -regex ^foo(bar)$ -reln dep -headIndex 1</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -2437,8 +2338,7 @@ public class SsurgeonTest {
                              "    <edit-list>editNode -node asdf -pos ADJ</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -2474,8 +2374,7 @@ public class SsurgeonTest {
                              "    <edit-list>reindexGraph</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
@@ -2516,8 +2415,7 @@ public class SsurgeonTest {
                              "    <edit-list>splitWord -node split -regex ^(foo)barbaz$ -regex ^foo(bar)baz$ -regex ^foobar(baz)$ -reln dep -headIndex 1</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
-    Ssurgeon inst = Ssurgeon.inst();
-    List<SsurgeonPattern> patterns = inst.readFromString(doc);
+    List<SsurgeonPattern> patterns = readFromString(doc);
     assertEquals(patterns.size(), 1);
     SsurgeonPattern pattern = patterns.get(0);
 
