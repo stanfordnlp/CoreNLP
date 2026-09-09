@@ -303,7 +303,7 @@ if (child != null) {
     case 20:
     case 22:
     case 33:{
-      result = ModNode(reln);
+      result = MaybeNegatedChild(reln);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
       case SORT:
@@ -592,7 +592,7 @@ if (edgeName != null) {
     case 20:
     case 22:
     case 33:{
-      node = ModNode(reln);
+      node = MaybeNegatedChild(reln);
       break;
       }
     case 16:{
@@ -640,7 +640,7 @@ if (children.size() == 1)
 
   final public SemgrexPattern NodeConj(GraphRelation reln) throws ParseException {SemgrexPattern child;
         List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
-    child = ModNode(reln);
+    child = MaybeNegatedChild(reln);
 children.add(child);
     label_6:
     while (true) {
@@ -665,7 +665,7 @@ children.add(child);
         jj_la1[24] = jj_gen;
         ;
       }
-      child = ModNode(reln);
+      child = MaybeNegatedChild(reln);
 children.add(child); deprecatedNodeConj = true;
     }
 if (children.size() == 1)
@@ -675,7 +675,7 @@ if (children.size() == 1)
     throw new Error("Missing return statement in function");
 }
 
-  final public SemgrexPattern ModNode(GraphRelation reln) throws ParseException {SemgrexPattern child;
+  final public SemgrexPattern MaybeNegatedChild(GraphRelation reln) throws ParseException {SemgrexPattern child;
         boolean startUnderNeg;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 22:

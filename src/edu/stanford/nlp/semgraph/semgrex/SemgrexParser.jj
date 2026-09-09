@@ -242,7 +242,7 @@ SemgrexPattern SubNode(GraphRelation reln) : {
      }
      return result;
    }
- | ( result = ModNode(reln) (child = RelationDisj() )? )
+ | ( result = MaybeNegatedChild(reln) (child = RelationDisj() )? )
  	{  if (child != null) result.setChild(child);
  		return result;}
 }
@@ -338,7 +338,7 @@ SemgrexPattern Relation() : {
                                              edgeName != null ? edgeName.image : null);
 	  }
 	}
-	( (node = ModNode(reln)) |
+	( (node = MaybeNegatedChild(reln)) |
 	  	("(" node = SubNode(reln) ")") ) )
 
 	 {
@@ -363,8 +363,8 @@ SemgrexPattern NodeConj(GraphRelation reln) : {
 	SemgrexPattern child;
 	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
 } {
-    (	 (child = ModNode(reln) ) { children.add(child); }
-	( ( ("&")? child = ModNode(reln) ) { children.add(child); deprecatedNodeConj = true; } )* )
+    (	 (child = MaybeNegatedChild(reln) ) { children.add(child); }
+	( ( ("&")? child = MaybeNegatedChild(reln) ) { children.add(child); deprecatedNodeConj = true; } )* )
  	{ if (children.size() == 1)
 		return child;
 	  else
@@ -372,7 +372,7 @@ SemgrexPattern NodeConj(GraphRelation reln) : {
   }
 }
 
-SemgrexPattern ModNode(GraphRelation reln) : {
+SemgrexPattern MaybeNegatedChild(GraphRelation reln) : {
 	SemgrexPattern child;
 	boolean startUnderNeg;
 } {
