@@ -398,10 +398,12 @@ deprecatedAmp = true;
 children.add(child);
     }
 if (children.size() == 1) {
-                {if ("" != null) return child;}
-          } else {
-                {if ("" != null) return new CoordinationPattern(false, children, true, false);}
-      }
+          {if ("" != null) return child;}
+        } else {
+          // this production exists only to tell the user that these patterns are no longer allowed
+          // see the error thrown in Root()
+          {if ("" != null) return new CoordinationPattern(false, children, true, false);}
+        }
     throw new Error("Missing return statement in function");
 }
 

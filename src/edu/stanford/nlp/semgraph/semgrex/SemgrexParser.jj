@@ -265,14 +265,16 @@ SemgrexPattern RelationConj() : {
 	SemgrexPattern child;
 	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
 } {
-    (	  (child = ModRelation() ) { children.add(child); }
-	( ( ("&" { deprecatedAmp = true; } )? child = ModRelation() ) { children.add(child); } )* )
- 	{ if (children.size() == 1) {
-		return child;
-	  } else {
-		return new CoordinationPattern(false, children, true, false);
-      }
-    }
+    ( ( child = ModRelation() ) { children.add(child); }
+      ( ( ("&" { deprecatedAmp = true; } )? child = ModRelation() ) { children.add(child); } )* )
+        { if (children.size() == 1) {
+          return child;
+        } else {
+          // this production exists only to tell the user that these patterns are no longer allowed
+          // see the error thrown in Root()
+          return new CoordinationPattern(false, children, true, false);
+        }
+  }
 }
 
 SemgrexPattern ModRelation() : {
