@@ -124,7 +124,7 @@ class SemgrexParser implements SemgrexParserConstants {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case ALIGNRELN:{
       reverse = jj_consume_token(ALIGNRELN);
-      node = SubNode(GraphRelation.ALIGNED_ROOT);
+      node = SubPattern(GraphRelation.ALIGNED_ROOT);
       break;
       }
     case MODIFIER_OPEN:
@@ -132,7 +132,7 @@ class SemgrexParser implements SemgrexParserConstants {
     case 20:
     case 22:
     case 33:{
-      node = SubNode(GraphRelation.ROOT);
+      node = SubPattern(GraphRelation.ROOT);
 children.add(node);
       label_1:
       while (true) {
@@ -146,7 +146,7 @@ children.add(node);
           break label_1;
         }
         jj_consume_token(13);
-        node = SubNode(GraphRelation.ITERATOR);
+        node = SubPattern(GraphRelation.ITERATOR);
 children.add(node);
       }
       break;
@@ -232,14 +232,14 @@ for (String key : postprocessKeys) {
     throw new Error("Missing return statement in function");
 }
 
-  final public SemgrexPattern SubNode(GraphRelation reln) throws ParseException {SemgrexPattern result = null;
+  final public SemgrexPattern SubPattern(GraphRelation reln) throws ParseException {SemgrexPattern result = null;
         SemgrexPattern child = null;
         ParseFlags savedFlags;
         Token modifierToken;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 16:{
       jj_consume_token(16);
-      result = SubNode(reln);
+      result = SubPattern(reln);
       jj_consume_token(17);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case UNIQ:
@@ -271,7 +271,7 @@ if (child != null) {
       modifierToken = jj_consume_token(MODIFIER_OPEN);
 savedFlags = saveFlags();
        applyModifierFlags(modifierToken.image);
-      result = SubNode(reln);
+      result = SubPattern(reln);
       jj_consume_token(17);
 restoreFlags(savedFlags);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -597,7 +597,7 @@ if (edgeName != null) {
       }
     case 16:{
       jj_consume_token(16);
-      node = SubNode(reln);
+      node = SubPattern(reln);
       jj_consume_token(17);
       break;
       }

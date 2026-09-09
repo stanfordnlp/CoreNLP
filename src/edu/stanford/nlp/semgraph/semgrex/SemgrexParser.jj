@@ -159,10 +159,10 @@ SemgrexPattern Root() : {
   }
   (
     (
-      (reverse = <ALIGNRELN> node = SubNode(GraphRelation.ALIGNED_ROOT))
+      (reverse = <ALIGNRELN> node = SubPattern(GraphRelation.ALIGNED_ROOT))
       |
-      ( node = SubNode(GraphRelation.ROOT) { children.add(node); }
-        ( ":" node = SubNode(GraphRelation.ITERATOR) { children.add(node); } )*
+      ( node = SubPattern(GraphRelation.ROOT) { children.add(node); }
+        ( ":" node = SubPattern(GraphRelation.ITERATOR) { children.add(node); } )*
       )
     )
     {
@@ -210,13 +210,13 @@ SemgrexPattern Root() : {
 
 }
 
-SemgrexPattern SubNode(GraphRelation reln) : {
+SemgrexPattern SubPattern(GraphRelation reln) : {
 	SemgrexPattern result = null;
 	SemgrexPattern child = null;
 	ParseFlags savedFlags;
 	Token modifierToken;
 } {
-	( "(" result = SubNode(reln) ")" ( child = RelationDisj() )? )
+	( "(" result = SubPattern(reln) ")" ( child = RelationDisj() )? )
 	{
 		if (child != null) {
 		List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
@@ -229,7 +229,7 @@ SemgrexPattern SubNode(GraphRelation reln) : {
  | ( modifierToken = <MODIFIER_OPEN>
      { savedFlags = saveFlags();
        applyModifierFlags(modifierToken.image); }
-     result = SubNode(reln)
+     result = SubPattern(reln)
      ")"
      { restoreFlags(savedFlags); }
      ( child = RelationDisj() )? )
@@ -339,10 +339,10 @@ SemgrexPattern Relation() : {
 	  }
 	}
 	( (node = MaybeNegatedChild(reln)) |
-	  	("(" node = SubNode(reln) ")") ) )
+          ("(" node = SubPattern(reln) ")") ) )
 
-	 {
-	 return node;
+	{
+	  return node;
 	}
 }
 
