@@ -390,7 +390,7 @@ SemgrexPattern Child(GraphRelation reln) : {
 	SemgrexPattern child;
 } {
 	(( child = NodeDisj(reln) )
-		| child = Description(reln) )
+		| child = NodeDescription(reln) )
 	  {
 	  return child; }
 }
@@ -459,7 +459,7 @@ void AddAttribute(NodeAttributes attributes) : {
 	( attr = <EMPTY> { attributes.setEmpty(true); } )
 }
 
-NodePattern Description(GraphRelation reln) : {
+NodePattern NodeDescription(GraphRelation reln) : {
 	Token name = null;
 	boolean link = false;
         NodeAttributes attributes = new NodeAttributes();

@@ -707,7 +707,7 @@ underNodeNegation = startUnderNeg;
       break;
       }
     case 33:{
-      child = Description(reln);
+      child = NodeDescription(reln);
       break;
       }
     default:
@@ -994,7 +994,7 @@ attributes.setEmpty(true);
     }
 }
 
-  final public NodePattern Description(GraphRelation reln) throws ParseException {Token name = null;
+  final public NodePattern NodeDescription(GraphRelation reln) throws ParseException {Token name = null;
         boolean link = false;
         NodeAttributes attributes = new NodeAttributes();
         NodePattern pat;
