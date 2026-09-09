@@ -168,6 +168,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -reln} is the name of the dependency type to use.  pieces other than the head will connect using this relation <br>
  * {@code -regex} regex must match the matched node.  all matching groups will be concatenated to form a new word.  need at least 2 to split a word <br>
  * {@code -exact} instead of specifying matching regex, can split to exact pieces.  need at least 2 to split a word <br>
+ * {@code -siblings true} attaches the new words to the governors of the split node rather than to the split node itself <br>
  * {@code -name} will give names to the newly created nodes.  The format is #=name, comma separated
  * {@code -edge} will give a name to the newly created edges.  Later operations can update those edges.  Index the edges from the dep (since the gov is always the same)
  *</p><p>
@@ -437,6 +438,7 @@ public class Ssurgeon  {
   public static final String NODENAME_ARG = "-node";
   public static final String REGEX_ARG = "-regex";
   public static final String EXACT_ARG = "-exact";
+  public static final String SIBLINGS_ARG = "-siblings";
   public static final String RELN_ARG = "-reln";
   public static final String NODE_PROTO_ARG = "-nodearg";
   public static final String WEIGHT_ARG = "-weight";
@@ -468,6 +470,7 @@ public class Ssurgeon  {
     public List<String> regex = new ArrayList<>();
 
     public List<String> exact = new ArrayList<>();
+    public boolean siblings = false;
 
     // below are string representations of the intended values
     public String nodeString = null;
@@ -549,6 +552,9 @@ public class Ssurgeon  {
           break;
         case EXACT_ARG:
           argsBox.exact.add(argsValue);
+          break;
+        case SIBLINGS_ARG:
+          argsBox.siblings = Boolean.parseBoolean(argsValue);
           break;
         case NODE_PROTO_ARG:
           argsBox.nodeString = argsValue;
@@ -708,9 +714,9 @@ public class Ssurgeon  {
         }
         final SplitWord split;
         if (argsBox.regex.size() > 0) {
-          split = new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln, argsBox.name, argsBox.edge, false);
+          split = new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln, argsBox.name, argsBox.edge, false, argsBox.siblings);
         } else {
-          split = new SplitWord(argsBox.nodes.get(0), argsBox.exact, argsBox.headIndex, reln, argsBox.name, argsBox.edge, true);
+          split = new SplitWord(argsBox.nodes.get(0), argsBox.exact, argsBox.headIndex, reln, argsBox.name, argsBox.edge, true, argsBox.siblings);
         }
         for (String edgeName : split.edgeNames.values()) {
           knownEdges.add(edgeName);

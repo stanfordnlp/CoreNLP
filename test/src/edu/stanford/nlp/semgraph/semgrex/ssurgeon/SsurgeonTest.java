@@ -1,4 +1,3 @@
-
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import static org.junit.Assert.*;
@@ -66,6 +65,85 @@ public class SsurgeonTest {
       }
       assertEquals("Printed form of an edit was not stable", printed, reparsed.toEditString());
     }
+  }
+
+  /**
+   * splitWord -siblings attaches the new words to the governors of the split node
+   *<br>
+   * A Spanish contraction such as "yla" splits into "y" and "la", neither
+   * of which heads the other: both belong under whatever the original word
+   * hung from.  One -reln serves for every new piece, so the edges are
+   * named and relabelled afterwards.
+   */
+  @Test
+  public void readXMLSplitWordSiblings() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Split a contraction into two words under the same governor</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:yla}=split") + "</semgrex>",
+                             "    <edit-list>splitWord -node split -exact y -exact la -reln dep -headIndex 0 -siblings true -edge 1=second</edit-list>",
+                             "    <edit-list>relabelNamedEdge -edge second -reln det</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = readFromString(doc);
+    assertEquals(patterns.size(), 1);
+    SsurgeonPattern pattern = patterns.get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-4 det> yla-3]]");
+    SemanticGraph newSG = pattern.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-5 det> y-3 det> la-4]]");
+    assertEquals(expected, newSG);
+  }
+
+  /**
+   * Without -siblings, the other pieces hang off the piece named by -headIndex
+   */
+  @Test
+  public void readXMLSplitWordNotSiblings() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>39</uid>",
+                             "    <notes>Split a word, keeping the pieces under the head piece</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:yla}=split") + "</semgrex>",
+                             "    <edit-list>splitWord -node split -exact y -exact la -reln dep -headIndex 0</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    SsurgeonPattern pattern = readFromString(doc).get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-4 det> yla-3]]");
+    SemanticGraph newSG = pattern.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-5 det> [y-3 dep> la-4]]]");
+    assertEquals(expected, newSG);
+  }
+
+  /**
+   * A node with no governor has nothing to be a sibling under, so the split does nothing
+   *<br>
+   * The check happens before any of the editing, so the graph is left alone
+   * rather than half split with the word already renamed.
+   */
+  @Test
+  public void readXMLSplitWordSiblingsNoGovernor() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>40</uid>",
+                             "    <notes>The root has no governor to hang the new words from</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:yla}=split") + "</semgrex>",
+                             "    <edit-list>splitWord -node split -exact y -exact la -reln dep -headIndex 0 -siblings true</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    SsurgeonPattern pattern = readFromString(doc).get(0);
+
+    SemanticGraph sg = SemanticGraph.valueOf("[yla-1 nsubj> Juan-2]");
+    SemanticGraph newSG = pattern.iterate(sg).first;
+    assertEquals(SemanticGraph.valueOf("[yla-1 nsubj> Juan-2]"), newSG);
   }
 
   @Test

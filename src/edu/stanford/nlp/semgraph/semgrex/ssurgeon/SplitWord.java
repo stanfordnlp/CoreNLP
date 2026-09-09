@@ -33,6 +33,29 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  *   splitWord -node split -regex ^(foo)bar$ -regex ^foo(bar)$ -reln dep -headIndex 1 -name 0=asdf
  *   editNode -node asdf -pos ADJ
  * </pre>
+ * <br>
+ * The piece named by -headIndex keeps the matched node, along with its
+ * index, its incoming edges and its children.  The other pieces are new
+ * nodes, attached by -reln.  By default they are attached to that piece,
+ * which suits a word whose pieces really are headed by one of them.
+ * <br>
+ * With {@code -siblings true} they are attached to the governors of the
+ * matched node instead, so that all of the pieces sit side by side under
+ * whatever the original word hung from.  A Spanish contraction such as
+ * "yla" splits into "y" and "la", and neither of those is the head of the
+ * other; they both belong to the phrase the original word belonged to.
+ * Since one -reln has to serve for every new piece, name the edges with
+ * -edge and relabel them afterwards:
+ * <pre>
+ * semgrex:
+ *   {word:/yla/}=split
+ * ssurgeon:
+ *   splitWord -node split -exact y -exact la -reln dep -headIndex 0 -siblings true -edge 1=second
+ *   relabelNamedEdge -edge second -reln det
+ * </pre>
+ * <br>
+ * A matched node with no governor at all, such as the root, cannot be
+ * split this way, and the edit does nothing.
  *
  * @author John Bauer
  */
@@ -46,6 +69,7 @@ public class SplitWord extends SsurgeonEdit {
   final GrammaticalRelation relation;
   final Map<Integer, String> nodeNames;
   final Map<Integer, String> edgeNames;
+  final boolean siblings;
 
   static Map<Integer, String> splitNames(String names, String type, int numPieces) {
     if (names == null) {
@@ -69,6 +93,11 @@ public class SplitWord extends SsurgeonEdit {
   }
 
   public SplitWord(String node, List<String> nodePieces, Integer headIndex, GrammaticalRelation relation, String nodeNames, String edgeNames, boolean exactSplit) {
+    this(node, nodePieces, headIndex, relation, nodeNames, edgeNames, exactSplit, false);
+  }
+
+  public SplitWord(String node, List<String> nodePieces, Integer headIndex, GrammaticalRelation relation, String nodeNames, String edgeNames, boolean exactSplit, boolean siblings) {
+    this.siblings = siblings;
     if (node == null) {
       throw new SsurgeonParseException("SplitWord expected -node with the name of the matched node to split");
     }
@@ -109,6 +138,22 @@ public class SplitWord extends SsurgeonEdit {
     }
   }
 
+  /**
+   * Renders a name map as the 0=foo,1=bar the parser reads, in index order
+   */
+  static String joinNames(Map<Integer, String> names) {
+    List<Integer> indices = new ArrayList<>(names.keySet());
+    Collections.sort(indices);
+    StringBuilder buf = new StringBuilder();
+    for (Integer index : indices) {
+      if (buf.length() > 0) {
+        buf.append(",");
+      }
+      buf.append(index).append("=").append(names.get(index));
+    }
+    return buf.toString();
+  }
+
   @Override
   public String toEditString() {
     StringWriter buf = new StringWriter();
@@ -125,6 +170,15 @@ public class SplitWord extends SsurgeonEdit {
       }
     }
     buf.write("-reln " + relation.toString() + "\t");
+    if (nodeNames.size() > 0) {
+      buf.write("-name " + joinNames(nodeNames) + "\t");
+    }
+    if (edgeNames.size() > 0) {
+      buf.write("-edge " + joinNames(edgeNames) + "\t");
+    }
+    if (siblings) {
+      buf.write("-siblings true\t");
+    }
     buf.write("-headIndex " + headIndex);
     return buf.toString();
   }
@@ -136,6 +190,13 @@ public class SplitWord extends SsurgeonEdit {
       return false;
     }
     String origWord = matchedNode.word();
+
+    // the new pieces attach to the governors of the matched node, so a node
+    // with none of them cannot be split this way.  checked before anything
+    // is edited, since a graph half split is worse than one not split
+    if (siblings && sg.incomingEdgeList(matchedNode).size() == 0) {
+      return false;
+    }
 
     // first, iterate over the regex patterns we had at creation time
     //
@@ -180,6 +241,12 @@ public class SplitWord extends SsurgeonEdit {
     matchedNode.setWord(words.get(headIndex));
     matchedNode.setValue(words.get(headIndex));
 
+    // read the governors after the moves above: those renumber the nodes,
+    // and an edge held from before them names a vertex the graph no longer
+    // has, which would put a stale copy of it back when used
+    List<SemanticGraphEdge> governingEdges =
+      siblings ? sg.incomingEdgeList(matchedNode) : null;
+
     for (int i = 0; i < words.size(); ++i) {
       if (i == headIndex) {
         if (nodeNames.containsKey(i)) {
@@ -201,7 +268,21 @@ public class SplitWord extends SsurgeonEdit {
       newNode.setValue(words.get(i));
 
       sg.addVertex(newNode);
-      SemanticGraphEdge newEdge = sg.addEdge(matchedNode, newNode, relation, 0.0, false);
+      SemanticGraphEdge newEdge;
+      if (siblings) {
+        // one edge from each governor of the matched node, so the new piece
+        // sits alongside it rather than under it.  the first is the one a
+        // name refers to, since a later edit can only relabel one edge
+        newEdge = null;
+        for (SemanticGraphEdge parentEdge : governingEdges) {
+          SemanticGraphEdge siblingEdge = sg.addEdge(parentEdge.getGovernor(), newNode, relation, 0.0, false);
+          if (newEdge == null) {
+            newEdge = siblingEdge;
+          }
+        }
+      } else {
+        newEdge = sg.addEdge(matchedNode, newNode, relation, 0.0, false);
+      }
 
       if (nodeNames.containsKey(i)) {
         sm.putNode(nodeNames.get(i), newNode);
