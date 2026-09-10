@@ -216,35 +216,45 @@ SemgrexPattern SubPattern(GraphRelation reln) : {
 	ParseFlags savedFlags;
 	Token modifierToken;
 } {
-	( "(" result = SubPattern(reln) ")" ( child = RelationDisj() )? )
-	{
-		if (child != null) {
-		List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
-		newChildren.addAll(result.getChildren());
-		newChildren.add(child);
-		result.setChild(new CoordinationPattern(false, newChildren, true, false));
-	}
-	return result;
+    ( result = PatternAtom(reln) ( child = RelationDisj() )? )
+    {
+      if (child != null) {
+        if (result.getChildren().size() == 0) {
+          result.setChild(child);
+        } else {
+          List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
+          newChildren.addAll(result.getChildren());
+          newChildren.add(child);
+          result.setChild(new CoordinationPattern(false, newChildren, true, false));
+        }
+      }
+      return result;
     }
- | ( modifierToken = <MODIFIER_OPEN>
-     { savedFlags = saveFlags();
-       applyModifierFlags(modifierToken.image); }
+}
+
+SemgrexPattern PatternAtom(GraphRelation reln) : {
+	SemgrexPattern result = null;
+	SemgrexPattern child = null;
+	ParseFlags savedFlags;
+	Token modifierToken;
+} {
+    ( "(" result = SubPattern(reln) ")" )
+    {
+      return result;
+    }
+  | ( modifierToken = <MODIFIER_OPEN>
+    { savedFlags = saveFlags();
+      applyModifierFlags(modifierToken.image); }
      result = SubPattern(reln)
-     ")"
-     { restoreFlags(savedFlags); }
-     ( child = RelationDisj() )? )
-   {
-     if (child != null) {
-       List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
-       newChildren.addAll(result.getChildren());
-       newChildren.add(child);
-       result.setChild(new CoordinationPattern(false, newChildren, true, false));
-     }
-     return result;
-   }
- | ( result = MaybeNegatedChild(reln) (child = RelationDisj() )? )
- 	{  if (child != null) result.setChild(child);
- 		return result;}
+    ")" )
+    {
+      restoreFlags(savedFlags);
+      return result;
+    }
+  | ( result = MaybeNegatedChild(reln) )
+    {
+      return result;
+    }
 }
 
 SemgrexPattern RelationDisj() : {
