@@ -1651,6 +1651,43 @@ public class SemgrexTest {
             "[ate/VBD subj>Billz/NNP obj>[muffins compound>strawberry]]");
   }
 
+  /**
+   * A relation written after a group reaches every alternative in it, and
+   * does not displace the relations already there
+   *<br>
+   * SubPattern parses a group and then any relations which follow it, and
+   * what it does with them depends on what the group turned out to be.  A
+   * coordination is a set of alternatives, so the relation goes to each of
+   * them.  A node which already has relations keeps them, with the new one
+   * conjoined.  A node with none simply takes it.
+   *<br>
+   * In the graph below X sits under both Y and Z, P under Y alone, and R
+   * under Z alone, so a pattern which loses either half of "< Y < Z" picks
+   * up a node it should not.
+   */
+  @Test
+  public void testTrailingRelationOnGroup() {
+    String graph = "[W-9 c> [Y-1 a> X-2 a> P-4] c> [Z-5 b> X-2 b> R-6]]";
+
+    // TODO: none of these round trip, so they cannot use compile() yet.
+    // Parentheses are dropped and a disjunction is distributed over its
+    // alternatives, both at parse time
+
+    // a group with no relations of its own
+    runTest(SemgrexPattern.compile("({word:X}) < {word:Y}"), graph, "X");
+
+    // each alternative of a disjunction takes the relation
+    runTest(SemgrexPattern.compile("[{word:X} | {word:P}] < {word:Y}"), graph, "X", "P");
+
+    // and keeps the one it already had: R is under Z but not Y, so it must
+    // not match, which it would if the inner "< Y" were displaced
+    runTest(SemgrexPattern.compile("([{word:X} | {word:R}] < {word:Y}) < {word:Z}"), graph, "X");
+    runTest(SemgrexPattern.compile("[{word:X} | {word:R}] < {word:Y} < {word:Z}"), graph, "X");
+
+    // P is under Y but not Z, so it drops out for the same reason
+    runTest(SemgrexPattern.compile("([{word:X} | {word:P}] < {word:Y}) < {word:Z}"), graph, "X");
+  }
+
   String[] BATCH_PARSES = {
     "[foo-1 nmod> bar-2]",
     "[foo-1 obj> bar-2]",

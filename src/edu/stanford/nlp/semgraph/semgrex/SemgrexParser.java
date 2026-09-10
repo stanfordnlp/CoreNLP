@@ -42,6 +42,31 @@ class SemgrexParser implements SemgrexParserConstants {
   }
 
   /** Save current flags so they can be restored after a modifier block. */
+
+  /**
+   * Attaches a trailing relation to a pattern which has just been parsed.
+   *<br>
+   * A coordination is a set of alternatives, so the relation goes to each
+   * of them: "[A | B] < Z" means A < Z or B < Z.  A node which already has
+   * relations of its own keeps them, with this one conjoined: the "< Z" of
+   * "(A < Y) < Z" joins the "< Y" rather than replacing it.  A node with no
+   * relations yet simply takes it.
+   */
+  private void attachRelation(SemgrexPattern result, SemgrexPattern child) {
+    if (result instanceof CoordinationPattern) {
+      for (SemgrexPattern alternative : result.getChildren()) {
+        attachRelation(alternative, child);
+      }
+    } else if (result.getChildren().size() == 0) {
+      result.setChild(child);
+    } else {
+      List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
+      newChildren.addAll(result.getChildren());
+      newChildren.add(child);
+      result.setChild(new CoordinationPattern(false, newChildren, true, false));
+    }
+  }
+
   private ParseFlags saveFlags() {
     return new ParseFlags(caseInsensitive, sequentialChain);
   }
@@ -255,14 +280,7 @@ for (String key : postprocessKeys) {
       ;
     }
 if (child != null) {
-        if (result.getChildren().size() == 0) {
-          result.setChild(child);
-        } else {
-          List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
-          newChildren.addAll(result.getChildren());
-          newChildren.add(child);
-          result.setChild(new CoordinationPattern(false, newChildren, true, false));
-        }
+        attachRelation(result, child);
       }
       {if ("" != null) return result;}
     throw new Error("Missing return statement in function");
