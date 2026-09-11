@@ -46,7 +46,7 @@ public class NodePattern extends SemgrexPattern  {
   private final boolean isLink;
   private final boolean isEmpty;
   private final String name;
-  private String descString;
+  private final String descString;
   SemgrexPattern child;
 
   public NodePattern(GraphRelation r, boolean negDesc,
@@ -61,10 +61,9 @@ public class NodePattern extends SemgrexPattern  {
     this.partialAttributes = new ArrayList<>();
     this.regexPartialAttributes = new ArrayList<>();
 
-    descString = "{";
+    StringBuilder descBuilder = new StringBuilder();
+    descBuilder.append("{");
     for (Quintuple<String, String, AttributeMode, List<Pair<Integer, String>>, Boolean> entry : attrs.attributes()) {
-      if (!descString.equals("{"))
-        descString += ";";
       String key = entry.first();
       String value = entry.second();
       AttributeMode mode = entry.third();
@@ -83,7 +82,9 @@ public class NodePattern extends SemgrexPattern  {
         attributes.add(new Attribute(key, value, value, mode, varGroups));
       }
 
-      descString += (key + mode.separator() + value + varGroupString(varGroups));
+      if (descBuilder.length() != 1)
+        descBuilder.append(";");
+      descBuilder.append(key + mode.separator() + value + varGroupString(varGroups));
     }
 
     // gather the contains descriptions by annotation, so that a node
@@ -138,22 +139,23 @@ public class NodePattern extends SemgrexPattern  {
     }
 
     for (Map.Entry<String, StringBuilder> desc : containsDesc.entrySet()) {
-      if (!descString.equals("{"))
-        descString += ";";
-      descString += (desc.getKey() + ":{" + desc.getValue() + "}");
+      if (descBuilder.length() != 1)
+        descBuilder.append(";");
+      descBuilder.append(desc.getKey() + ":{" + desc.getValue() + "}");
     }
 
     if (attrs.root()) {
-      if (!descString.equals("{"))
-        descString += ";";
-      descString += "$";
+      if (descBuilder.length() != 1)
+        descBuilder.append(";");
+      descBuilder.append("$");
     }
     if (attrs.empty()) {
-      if (!descString.equals("{"))
-        descString += ";";
-      descString += "#";
+      if (descBuilder.length() != 1)
+        descBuilder.append(";");
+      descBuilder.append("#");
     }
-    descString += '}';
+    descBuilder.append('}');
+    this.descString = descBuilder.toString();
 
     this.name = name;
     this.child = null;
