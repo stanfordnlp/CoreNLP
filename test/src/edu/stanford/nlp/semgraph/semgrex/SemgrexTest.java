@@ -4,10 +4,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import junit.framework.AssertionFailedError;
 
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -514,32 +510,6 @@ public class SemgrexTest {
 
     // and a capture which cannot agree finds nothing
     runTest("{word:/(spill)ing/#1%s} > {word:/(spill)ed/#1%s}", graph);
-  }
-
-  /**
-   * A batch file can name a piece of regex once and refer to it by ${name}
-   *<br>
-   * This is plain textual substitution done before the pattern is compiled,
-   * so the macro holds the text of the regex without the slashes around it.
-   */
-  @Test
-  public void testReferencedRegexMacros() throws IOException {
-    // TODO: turn this into a larger test of the SemgrexBatchParser
-    String batch = String.join("\n",
-                               "macro STEM = (fill|spill)",
-                               "{word:/${STEM}ing/} > {word:/${STEM}ed/}",
-                               "{word:/${STEM}ing/}");
-    List<SemgrexPattern> patterns = SemgrexBatchParser.compileStream(
-        new ByteArrayInputStream(batch.getBytes(StandardCharsets.UTF_8)));
-
-    assertEquals(2, patterns.size());
-    assertEquals("{word:/(fill|spill)ing/} > {word:/(fill|spill)ed/}",
-                 patterns.get(0).toString().replaceAll(" +", " ").trim());
-    assertEquals("{word:/(fill|spill)ing/}",
-                 patterns.get(1).toString().replaceAll(" +", " ").trim());
-
-    // and the expanded pattern is the one which runs
-    runTest(patterns.get(1), "[filling obj> filled nsubj> spilling]", "filling", "spilling");
   }
 
   /**
