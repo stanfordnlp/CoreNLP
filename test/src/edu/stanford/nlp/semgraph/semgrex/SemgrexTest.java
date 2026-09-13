@@ -449,6 +449,40 @@ public class SemgrexTest {
                  SemgrexPattern.compile("{morphofeatures:{/Pron.*/:__#1%pron}}"));
   }
 
+  /**
+   * A candidate which fails does not leave its variable group captures behind
+   *<br>
+   * The captures found while testing a node are held aside until that node
+   * matches, so that two attributes naming the same group have to agree
+   * with each other.  A candidate which captures a group and then fails a
+   * later attribute must not have that capture compared against the next
+   * candidate, which is a different node and free to capture something
+   * else.
+   *<br>
+   * Below, "foo" captures c=f and then fails the tag, and "boo" captures
+   * c=b and passes.  If the capture from "foo" is still around, "boo" is
+   * rejected for disagreeing with a node which did not match, and whether
+   * that happens depends on the order the edges went into the graph.
+   */
+  @Test
+  public void testVariableGroupsAcrossCandidates() {
+    String pattern = "{}=r >dep {word:/(.)oo/#1%c;tag:NN}=x";
+
+    // the same graph either way round, so the answer must be the same
+    runTest(pattern, "[eat/VB dep> foo/VB dep> boo/NN]", "eat/VB");
+    runTest(pattern, "[eat/VB dep> boo/NN dep> foo/VB]", "eat/VB");
+    runTest(pattern, "[eat/VB dep> boo/NN]", "eat/VB");
+
+    // two attributes of one node still share their captures, so they have
+    // to agree with each other
+    runTest("{word:/(N)oo/#1%c;tag:/(N)N/#1%c}", "[Noo/NN]", "Noo/NN");
+    runTest("{word:/(f)oo/#1%c;tag:/(N)N/#1%c}", "[foo/NN]");
+
+    // and a group named by two different nodes has to agree as well
+    runTest("{word:/(.)oo/#1%c} > {word:/(.)ar/#1%c}", "[foo/NN dep> far/NN]", "foo/NN");
+    runTest("{word:/(.)oo/#1%c} > {word:/(.)ar/#1%c}", "[foo/NN dep> bar/NN]");
+  }
+
   @Test
   public void testReferencedRegex() {
     runTest("{word:/Bill/}", "[ate subj>Bill obj>[bill det>the]]",

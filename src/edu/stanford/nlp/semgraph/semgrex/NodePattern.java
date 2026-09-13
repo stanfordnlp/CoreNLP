@@ -584,6 +584,8 @@ public class NodePattern extends SemgrexPattern  {
       VariableStrings tempVariableStrings = new VariableStrings();
 
       while (nodeMatchCandidateIterator.hasNext()) {
+        tempVariableStrings.reset();
+
         if (myNode.reln.getName() != null) {
           String foundReln = namesToRelations.get(myNode.reln.getName());
           nextMatchReln = ((GraphRelation.SearchNodeIterator) nodeMatchCandidateIterator).getReln();
