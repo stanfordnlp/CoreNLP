@@ -4,6 +4,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import junit.framework.AssertionFailedError;
 
+import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -237,6 +241,9 @@ public class SemgrexTest {
 
     runTest("{word:/.*il.*/}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
             "Bill");
+
+    runTest("{word:/[Bb]ill/}", "[ate subj>Bill obj>[bill det>the]]",
+            "Bill", "bill");
   }
 
   @Test
@@ -483,18 +490,56 @@ public class SemgrexTest {
     runTest("{word:/(.)oo/#1%c} > {word:/(.)ar/#1%c}", "[foo/NN dep> bar/NN]");
   }
 
+  /**
+   * A group captured by one regex can be required to match a group captured by another
+   *<br>
+   * A regex attribute may name the text of one of its groups, with
+   * "#1%name" for the first group.  Two attributes which name the same
+   * group have to capture the same text, whether they are on one node or
+   * on two, which is how a pattern says "these two words share a stem"
+   * without knowing what the stem is.
+   */
   @Test
-  public void testReferencedRegex() {
-    runTest("{word:/Bill/}", "[ate subj>Bill obj>[bill det>the]]",
-            "Bill");
+  public void testReferencedRegexVariableGroups() {
+    String graph = "[filling obj> filled nsubj> spilled]";
 
-    runTest("{word:/.*ill/}", "[ate subj>Bill obj>[bill det>the]]",
-            "Bill", "bill");
+    // "filling" and "filled" share the captured text, so the pattern holds
+    // of "filling"; "spilled" captures something else and drops out
+    runTest("{word:/(fill).*/#1%s} > {word:/(fill).*/#1%s}", graph, "filling");
+    runTest("{word:/(.*)ing/#1%s} > {word:/(.*)ed/#1%s}", graph, "filling");
 
-    runTest("{word:/[Bb]ill/}", "[ate subj>Bill obj>[bill det>the]]",
-            "Bill", "bill");
+    // the same pattern with two different group names asks for nothing of
+    // the kind, so both children qualify and the head matches twice
+    runTest("{word:/(.*)ing/#1%s} > {word:/(.*)ed/#1%t}", graph, "filling", "filling");
 
-    // TODO: implement referencing regexes
+    // and a capture which cannot agree finds nothing
+    runTest("{word:/(spill)ing/#1%s} > {word:/(spill)ed/#1%s}", graph);
+  }
+
+  /**
+   * A batch file can name a piece of regex once and refer to it by ${name}
+   *<br>
+   * This is plain textual substitution done before the pattern is compiled,
+   * so the macro holds the text of the regex without the slashes around it.
+   */
+  @Test
+  public void testReferencedRegexMacros() throws IOException {
+    // TODO: turn this into a larger test of the SemgrexBatchParser
+    String batch = String.join("\n",
+                               "macro STEM = (fill|spill)",
+                               "{word:/${STEM}ing/} > {word:/${STEM}ed/}",
+                               "{word:/${STEM}ing/}");
+    List<SemgrexPattern> patterns = SemgrexBatchParser.compileStream(
+        new ByteArrayInputStream(batch.getBytes(StandardCharsets.UTF_8)));
+
+    assertEquals(2, patterns.size());
+    assertEquals("{word:/(fill|spill)ing/} > {word:/(fill|spill)ed/}",
+                 patterns.get(0).toString().replaceAll(" +", " ").trim());
+    assertEquals("{word:/(fill|spill)ing/}",
+                 patterns.get(1).toString().replaceAll(" +", " ").trim());
+
+    // and the expanded pattern is the one which runs
+    runTest(patterns.get(1), "[filling obj> filled nsubj> spilling]", "filling", "spilling");
   }
 
   /**
