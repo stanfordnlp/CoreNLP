@@ -52,19 +52,8 @@ class SemgrexParser implements SemgrexParserConstants {
    * "(A < Y) < Z" joins the "< Y" rather than replacing it.  A node with no
    * relations yet simply takes it.
    */
-  private void attachRelation(SemgrexPattern result, SemgrexPattern child) {
-    if (result instanceof CoordinationPattern) {
-      for (SemgrexPattern alternative : result.getChildren()) {
-        attachRelation(alternative, child);
-      }
-    } else if (result.getChildren().size() == 0) {
-      result.setChild(child);
-    } else {
-      List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
-      newChildren.addAll(result.getChildren());
-      newChildren.add(child);
-      result.setChild(new CoordinationPattern(false, newChildren, true, false));
-    }
+  private SemgrexPattern attachRelation(SemgrexPattern result, SemgrexPattern child) {
+    return new HeadedPattern(result, child);
   }
 
   private ParseFlags saveFlags() {
@@ -280,7 +269,7 @@ for (String key : postprocessKeys) {
       ;
     }
 if (child != null) {
-        attachRelation(result, child);
+        result = attachRelation(result, child);
       }
       {if ("" != null) return result;}
     throw new Error("Missing return statement in function");

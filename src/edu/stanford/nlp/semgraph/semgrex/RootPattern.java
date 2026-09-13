@@ -46,10 +46,6 @@ public class RootPattern extends SemgrexPattern  {
     return child.localString();
   }
 
-  public void setChild(SemgrexPattern child) {
-    throw new UnsupportedOperationException("Cannot update a SemgrexPattern's children once set!");
-  }
-
   public String toString() {
     return child.toString();
   }

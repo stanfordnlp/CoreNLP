@@ -286,7 +286,6 @@ public abstract class SemgrexPattern implements Serializable  {
 
   abstract String localString();
 
-  abstract void setChild(SemgrexPattern child);
 
   void negate() {
     if (opt) {

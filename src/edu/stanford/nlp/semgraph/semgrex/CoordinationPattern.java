@@ -41,18 +41,6 @@ public class CoordinationPattern extends SemgrexPattern  {
   public boolean isNodeCoord() { return isNodeCoord; }
 
   @Override
-  public void setChild(SemgrexPattern child) {
-    if (isNodeCoord) {
-      for (Object c : children) {
-        if (c instanceof NodePattern)
-          ((NodePattern)c).setChild(child);
-      }
-    } else {
-
-    }
-  }
-
-  @Override
   public List<SemgrexPattern> getChildren() {
     return children;
   }

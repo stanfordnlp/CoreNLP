@@ -71,11 +71,6 @@ public class UniqPattern extends SemgrexPattern  {
   }
 
   @Override
-  public void setChild(SemgrexPattern n) {
-    throw new UnsupportedOperationException("Child should only be set on a UniqPattern at creation time");
-  }
-
-  @Override
   public List<SemgrexPattern> getChildren() {
     if (child == null) {
       return Collections.emptyList();

@@ -47,7 +47,6 @@ public class NodePattern extends SemgrexPattern  {
   private final boolean isEmpty;
   private final String name;
   private final String descString;
-  SemgrexPattern child;
 
   public NodePattern(GraphRelation r, boolean negDesc,
                      NodeAttributes attrs, boolean isLink, String name) {
@@ -158,7 +157,6 @@ public class NodePattern extends SemgrexPattern  {
     this.descString = descBuilder.toString();
 
     this.name = name;
-    this.child = null;
     this.isRoot = attrs.root();
     this.isEmpty = attrs.empty();
   }
@@ -411,13 +409,29 @@ public class NodePattern extends SemgrexPattern  {
     if (isOptional()) {
       sb.append('?');
     }
-    if (reln != null) {
-      sb.append(reln);
-      sb.append(' ');
+    sb.append(relnString());
+    sb.append(descriptionString());
+    return sb.toString();
+  }
+
+  /**
+   * The relation this node is reached by, as it is written, or "" for a root.
+   *<br>
+   * Kept apart from the description so that a HeadedPattern wrapped around
+   * this node can print its relations inside the parentheses and the
+   * relation which arrives here outside them, the way the pattern was
+   * written: ">obj ({} >expl {})".
+   */
+  String relnString() {
+    if (reln == null) {
+      return "";
     }
-    if (!hasPrecedence && addChild && child != null) {
-      sb.append('(');
-    }
+    return reln.toString() + " ";
+  }
+
+  /** The attributes and the name, without the relation which arrives here */
+  String descriptionString() {
+    StringBuilder sb = new StringBuilder();
     if (negDesc) {
       sb.append('!');
     }
@@ -425,28 +439,17 @@ public class NodePattern extends SemgrexPattern  {
     if (name != null) {
       sb.append('=').append(name);
     }
-    if (addChild && child != null) {
-      sb.append(' ');
-      sb.append(child.toString(false));
-      if (!hasPrecedence) {
-        sb.append(')');
-      }
-    }
     return sb.toString();
   }
 
   @Override
-  public void setChild(SemgrexPattern n) {
-    child = n;
+  public List<SemgrexPattern> getChildren() {
+    return Collections.emptyList();
   }
 
-  @Override
-  public List<SemgrexPattern> getChildren() {
-    if (child == null) {
-      return Collections.emptyList();
-    } else {
-      return Collections.singletonList(child);
-    }
+  /** The relation this node is reached by, which HeadedPattern needs for the alignment swap */
+  GraphRelation getReln() {
+    return reln;
   }
 
   public String getName() {
@@ -500,11 +503,6 @@ public class NodePattern extends SemgrexPattern  {
     private boolean matchedAny = false;
     private Iterator<IndexedWord> nodeMatchCandidateIterator = null;
     private final NodePattern myNode;
-    /**
-     * a NodeMatcher only has a single child; if it is the left side
-     * of multiple relations, a CoordinationMatcher is used.
-     */
-    private SemgrexMatcher childMatcher;
     private boolean matchedOnce = false;
     private boolean committedVariables = false;
     private VariableStrings localVariableStrings = null;
@@ -518,9 +516,6 @@ public class NodePattern extends SemgrexPattern  {
     private boolean edgeNamedFirst = false;
 
     private final boolean ignoreCase;
-
-    // universal: childMatcher is null if and only if
-    // myNode.child == null OR resetChild has never been called
 
     public NodeMatcher(NodePattern n, SemanticGraph sg, Alignment alignment, SemanticGraph sg_align, boolean hyp,
                        IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
@@ -547,21 +542,6 @@ public class NodePattern extends SemgrexPattern  {
       }
       nextMatch = null;
 
-    }
-
-    private void resetChild() {
-      if (childMatcher == null) {
-        if (myNode.child == null) {
-          matchedOnce = false;
-        } else {
-          childMatcher = myNode.child.matcher(sg, alignment, sg_aligned,
-                                              (myNode.reln instanceof GraphRelation.ALIGNMENT) ? !hyp : hyp,
-                                              nextMatch, namesToNodes, namesToRelations, namesToEdges,
-                                              variableStrings, ignoreCase);
-        }
-      } else {
-        childMatcher.resetChildIter(nextMatch);
-      }
     }
 
     /*
@@ -646,7 +626,7 @@ public class NodePattern extends SemgrexPattern  {
       } // end while
 
       if ( ! finished) { // I successfully matched.
-        resetChild();
+        matchedOnce = false;
         if (myNode.name != null) {
           // note: have to fill in the map as we go for backreferencing
           if (!namesToNodes.containsKey(myNode.name)) {
@@ -706,9 +686,12 @@ public class NodePattern extends SemgrexPattern  {
       }
     }
 
-    /*
-     * tries to match the unique child of the NodePattern node to a node.
-     * Returns "true" if succeeds.
+    /**
+     * Whether the current candidate node counts as a match.
+     *<br>
+     * A NodePattern binds one node, so a candidate matches once.  The
+     * relations which used to be checked here now belong to the
+     * HeadedPattern which wraps this one.
      */
     private boolean matchChild() {
       // entering here (given that it's called only once in matches())
@@ -719,29 +702,11 @@ public class NodePattern extends SemgrexPattern  {
                                // certainly can't be matched yet.
         return false;
       }
-      if (childMatcher == null) {
-        if (!matchedOnce) {
-          matchedOnce = true;
-          return true;
-        }
-        return false;
+      if (!matchedOnce) {
+        matchedOnce = true;
+        return true;
       }
-      // childMatcher.namesToNodes.putAll(this.namesToNodes);
-      // childMatcher.namesToRelations.putAll(this.namesToRelations);
-      boolean match = childMatcher.matches();
-      if (match) {
-        // namesToNodes.putAll(childMatcher.namesToNodes);
-        // namesToRelations.putAll(childMatcher.namesToRelations);
-        // System.out.println(node.word() + " " +
-        // namesToNodes.get("partnerTwo"));
-      } else {
-        if (nextMatch != null) {
-          decommitVariableGroups();
-          decommitNamedNodes();
-          decommitNamedRelations();
-        }
-      }
-      return match;
+      return false;
     }
 
     // find the next local match
