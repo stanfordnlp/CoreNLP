@@ -219,8 +219,8 @@ public class NodePattern extends SemgrexPattern  {
     return true;
   }
 
-  private boolean checkMatch(Attribute attr, boolean ignoreCase, String nodeValue,
-                             VariableStrings variableStrings, VariableStrings tempVariableStrings) {
+  private boolean checkAttributeMatch(Attribute attr, boolean ignoreCase, String nodeValue,
+                                      VariableStrings variableStrings, VariableStrings tempVariableStrings) {
     if (nodeValue == null) {
       // treat non-existent attributes as having matched a negated
       // expression, so for example `cpos!:NUM` matches not having a cpos
@@ -324,7 +324,7 @@ public class NodePattern extends SemgrexPattern  {
       // }
       // System.out.println(nodeValue);
 
-      boolean matches = checkMatch(attr, ignoreCase, nodeValue, variableStrings, tempVariableStrings);
+      boolean matches = checkAttributeMatch(attr, ignoreCase, nodeValue, variableStrings, tempVariableStrings);
 
       if (!matches) {
         // System.out.println("doesn't match");
@@ -351,7 +351,7 @@ public class NodePattern extends SemgrexPattern  {
         nodeValue = (value == null) ? null : value.toString();
       }
 
-      boolean matches = checkMatch(attr, ignoreCase, nodeValue, variableStrings, tempVariableStrings);
+      boolean matches = checkAttributeMatch(attr, ignoreCase, nodeValue, variableStrings, tempVariableStrings);
       if (!matches) {
         return negDesc;
       }
@@ -575,6 +575,12 @@ public class NodePattern extends SemgrexPattern  {
       decommitNamedNodes();
       decommitNamedRelations();
       finished = true;
+      // Variable group captures found while trying candidates.  They are
+      // kept separate from variableStrings until a candidate matches, at
+      // which point commitVariableGroups makes them visible to the rest of
+      // the pattern.  Attributes on the same node see each other's captures
+      // through here, which is what makes two attributes with the same
+      // group name have to agree.
       VariableStrings tempVariableStrings = new VariableStrings();
 
       while (nodeMatchCandidateIterator.hasNext()) {
