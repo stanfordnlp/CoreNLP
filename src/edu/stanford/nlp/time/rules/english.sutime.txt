@@ -396,7 +396,8 @@
 
   # Euro - Ambiguous pattern - interpret as dd.MM.yy(yy)
   { ruleType: "time", pattern: /dd?\.MM?\.(yyyy|yy)/ }
-  { ruleType: "time", pattern: /HH?''hmm/ }
+  # French/European "10h30": the h is a literal separator, so it must be quoted.
+  { ruleType: "time", pattern: /HH?'h'mm/ }
 
   # Timezones
   { ruleType: "time", pattern: /zzz/, action: Tag(_, "TIMEZONE", TRUE) }
