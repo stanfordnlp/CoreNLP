@@ -1669,20 +1669,19 @@ public class SemgrexTest {
   public void testTrailingRelationOnGroup() {
     String graph = "[W-9 c> [Y-1 a> X-2 a> P-4] c> [Z-5 b> X-2 b> R-6]]";
 
-    // TODO: none of these round trip, so they cannot use compile() yet.
-    // Parentheses are dropped and a disjunction is distributed over its
-    // alternatives, both at parse time
+    // TODO: the parenthesised forms below print without their parentheses,
+    // so they cannot use compile() yet
 
     // a group with no relations of its own
     runTest(SemgrexPattern.compile("({word:X}) < {word:Y}"), graph, "X");
 
     // each alternative of a disjunction takes the relation
-    runTest(SemgrexPattern.compile("[{word:X} | {word:P}] < {word:Y}"), graph, "X", "P");
+    runTest("[{word:X} | {word:P}] < {word:Y}", graph, "X", "P");
 
     // and keeps the one it already had: R is under Z but not Y, so it must
     // not match, which it would if the inner "< Y" were displaced
     runTest(SemgrexPattern.compile("([{word:X} | {word:R}] < {word:Y}) < {word:Z}"), graph, "X");
-    runTest(SemgrexPattern.compile("[{word:X} | {word:R}] < {word:Y} < {word:Z}"), graph, "X");
+    runTest("[{word:X} | {word:R}] < {word:Y} < {word:Z}", graph, "X");
 
     // P is under Y but not Z, so it drops out for the same reason
     runTest(SemgrexPattern.compile("([{word:X} | {word:P}] < {word:Y}) < {word:Z}"), graph, "X");
@@ -2147,9 +2146,34 @@ public class SemgrexTest {
   /** Verify that the semgrex pattern gets compiled without being changed */
   public static void comparePatternToString(String pattern) {
     SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
-    String tostring = semgrex.toString();
-    tostring = tostring.replaceAll(" +", " ");
-    assertEquals(pattern.trim(), tostring.trim());
+    assertEquals(withoutIdleWhitespace(pattern), withoutIdleWhitespace(semgrex.toString()));
+  }
+
+  /**
+   * A pattern with the whitespace which does not mean anything taken out.
+   *<br>
+   * Where a pattern puts its spaces is a matter of taste, and the various
+   * pieces of the printer do not agree with each other about it -- one
+   * writes a space before a relation, another does not write one after an
+   * opening bracket.  None of that changes what the pattern matches, so it
+   * should not decide whether a pattern is considered to round trip.
+   *<br>
+   * Whitespace inside a /regex/ does mean something, so it is left alone.
+   */
+  public static String withoutIdleWhitespace(String pattern) {
+    StringBuilder sb = new StringBuilder();
+    boolean inRegex = false;
+    for (int i = 0; i < pattern.length(); ++i) {
+      char c = pattern.charAt(i);
+      if (c == '/' && (i == 0 || pattern.charAt(i - 1) != '\\')) {
+        inRegex = !inRegex;
+      }
+      if (!inRegex && Character.isWhitespace(c)) {
+        continue;
+      }
+      sb.append(c);
+    }
+    return sb.toString();
   }
 
   public static List<SemgrexMatch> runTest(String pattern, String graph,
