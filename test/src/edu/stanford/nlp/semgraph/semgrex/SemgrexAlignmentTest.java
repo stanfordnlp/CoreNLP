@@ -220,6 +220,56 @@ public class SemgrexAlignmentTest {
                   "a=married-2 b=Bill-1 c=wife-3 d=Mary-3");
   }
 
+  /**
+   * Crossing to the other graph is sticky: it holds for the relations below, however deep
+   *<br>
+   * The graphs here share no word, so a node can only be found if the
+   * search is looking in the graph which holds it.  Three levels below an
+   * {@code @} the search is still in the text graph, and a hypothesis
+   * relation asked there finds nothing.  Crossing a second time comes
+   * back, and the same holds when the crossing starts from a disjunction
+   * rather than a single node.
+   */
+  @Test
+  public void testAlignmentIsSticky() {
+    SemanticGraph hyp = SemanticGraph.valueOf("[h1-1 ha> [h2-2 hb> [h3-3 hc> h4-4]]]");
+    SemanticGraph txt = SemanticGraph.valueOf("[t1-1 ta> [t2-2 tb> [t3-3 tc> t4-4]]]");
+    Map<IndexedWord, IndexedWord> map = new HashMap<>();
+    for (IndexedWord h : hyp.vertexSet()) {
+      for (IndexedWord t : txt.vertexSet()) {
+        if (t.word().substring(1).equals(h.word().substring(1))) {
+          map.put(h, t);
+        }
+      }
+    }
+    Alignment alignment = new Alignment(map, 1.0, "deep");
+
+    assertTrue(SemgrexPattern.compile("{word:h1} @ ({} >ta ({} >tb ({} >tc {})))")
+               .matcher(hyp, alignment, txt).find());
+    assertFalse(SemgrexPattern.compile("{word:h1} @ ({} >ha {})")
+                .matcher(hyp, alignment, txt).find());
+
+    assertTrue(SemgrexPattern.compile("{word:h1} @ ({} @ ({} >ha {}))")
+               .matcher(hyp, alignment, txt).find());
+    assertFalse(SemgrexPattern.compile("{word:h1} @ ({} @ ({} >ta {}))")
+                .matcher(hyp, alignment, txt).find());
+
+    assertTrue(SemgrexPattern.compile("[{word:h1} | {word:h2}] @ ({} >ta {})")
+               .matcher(hyp, alignment, txt).find());
+    assertFalse(SemgrexPattern.compile("[{word:h1} | {word:h2}] @ ({} >ha {})")
+                .matcher(hyp, alignment, txt).find());
+  }
+
+  /**
+   * Several relations written after one {@code @} all resolve in the text graph
+   */
+  @Test
+  public void testSeveralRelationsAcrossAlignment() {
+    assertMatches(findAll("{word:married}=h @ ({}=t >poss {}=p >nn {}=n)",
+                          fullAlignment(), "h", "t", "p", "n"),
+                  "h=married-2 t=wife-3 p=his-2 n=Mary-4");
+  }
+
   // ------------------------------------------------------------------
   // hypothesis words with no text partner
   // ------------------------------------------------------------------
