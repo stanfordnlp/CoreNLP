@@ -283,9 +283,9 @@ public class TimeFormatterTest {
 
   @Test
   public void testQuotedLiteralBetweenNumericFields() {
-    // A quoted literal between two numeric fields, as in French-style times like
-    // "10h30". The h has to be quoted: an unquoted h is the clockhourOfHalfday field,
-    // and "''" is an escaped apostrophe rather than a literal h.
+    // The pattern shipped in english.sutime.txt for French-style times such as "10h30".
+    // The h has to be quoted: an unquoted h is the clockhourOfHalfday field, and "''"
+    // is an escaped apostrophe rather than a literal h.
     assertEquals("\\b(\\d\\d?)\\Qh\\E(\\d\\d)\\b", extractor("HH?'h'mm").getTextPattern().pattern());
     assertEquals("T10:30", parse("HH?'h'mm", "10h30"));
     assertEquals("T09:30", parse("HH?'h'mm", "9h30"));
