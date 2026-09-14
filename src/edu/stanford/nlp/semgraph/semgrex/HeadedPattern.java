@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.VariableStrings;
 
@@ -122,21 +121,12 @@ class HeadedPattern extends SemgrexPattern {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemanticGraph sg, IndexedWord node,
-                                Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
-                                Map<String, SemanticGraphEdge> namesToEdges,
-                                VariableStrings variableStrings, boolean ignoreCase) {
-    return new HeadedMatcher(this, sg, null, null, true, node, namesToNodes, namesToRelations,
-                             namesToEdges, variableStrings, ignoreCase);
-  }
-
-  @Override
-  public SemgrexMatcher matcher(SemanticGraph sg, Alignment alignment, SemanticGraph sg_align, boolean hyp,
+  public SemgrexMatcher matcher(SemgrexGraphs graphs, boolean hyp,
                                 IndexedWord node, Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings, boolean ignoreCase) {
-    return new HeadedMatcher(this, sg, alignment, sg_align, hyp, node, namesToNodes, namesToRelations,
+    return new HeadedMatcher(this, graphs, hyp, node, namesToNodes, namesToRelations,
                              namesToEdges, variableStrings, ignoreCase);
   }
 
@@ -150,14 +140,13 @@ class HeadedPattern extends SemgrexPattern {
     private boolean finished = false;
     private boolean matchedAny = false;
 
-    public HeadedMatcher(HeadedPattern n, SemanticGraph sg, Alignment alignment, SemanticGraph sg_align,
-                         boolean hyp, IndexedWord node, Map<String, IndexedWord> namesToNodes,
+    public HeadedMatcher(HeadedPattern n, SemgrexGraphs graphs, boolean hyp, IndexedWord node, Map<String, IndexedWord> namesToNodes,
                          Map<String, String> namesToRelations, Map<String, SemanticGraphEdge> namesToEdges,
                          VariableStrings variableStrings, boolean ignoreCase) {
-      super(sg, alignment, sg_align, hyp, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
+      super(graphs, hyp, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       this.myNode = n;
       this.ignoreCase = ignoreCase;
-      this.headMatcher = n.head.matcher(sg, alignment, sg_align, hyp, node, namesToNodes,
+      this.headMatcher = n.head.matcher(graphs, hyp, node, namesToNodes,
                                         namesToRelations, namesToEdges, variableStrings, ignoreCase);
     }
 
@@ -187,7 +176,7 @@ class HeadedPattern extends SemgrexPattern {
     private void resetChild() {
       GraphRelation reln = myNode.arrivalRelation();
       boolean childHyp = (reln instanceof GraphRelation.ALIGNMENT) ? !hyp : hyp;
-      childMatcher = myNode.child.matcher(sg, alignment, sg_aligned, childHyp, headMatcher.getMatch(),
+      childMatcher = myNode.child.matcher(graphs, childHyp, headMatcher.getMatch(),
                                           namesToNodes, namesToRelations, namesToEdges,
                                           variableStrings, ignoreCase);
     }

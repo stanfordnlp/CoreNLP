@@ -30,9 +30,9 @@ public abstract class SemgrexMatcher  {
 
   IndexedWord node;
 
-  // to be used for patterns involving "@"
-  final Alignment alignment;
-  final SemanticGraph sg_aligned;
+  /** The graphs being matched against, and the alignment joining them */
+  final SemgrexGraphs graphs;
+  /** Which side of an alignment this matcher is searching */
   final boolean hyp;
 
   // these things are used by "find"
@@ -40,19 +40,16 @@ public abstract class SemgrexMatcher  {
   private IndexedWord findCurrent;
 
 
-  SemgrexMatcher(SemanticGraph sg,
-                 Alignment alignment,
-                 SemanticGraph sg_aligned,
-                 boolean hyp, 
+  SemgrexMatcher(SemgrexGraphs graphs,
+                 boolean hyp,
                  IndexedWord node,
                  Map<String, IndexedWord> namesToNodes,
                  Map<String, String> namesToRelations,
                  Map<String, SemanticGraphEdge> namesToEdges,
                  VariableStrings variableStrings) {
-    this.sg = sg;
-    this.alignment = alignment;
-    this.sg_aligned = sg_aligned;
+    this.graphs = graphs;
     this.hyp = hyp;
+    this.sg = graphs.get(hyp);
     this.node = node;
     this.namesToNodes = namesToNodes;
     this.namesToRelations = namesToRelations;
@@ -60,13 +57,13 @@ public abstract class SemgrexMatcher  {
     this.variableStrings = variableStrings;
   }
 
-  SemgrexMatcher(SemanticGraph sg,
+  SemgrexMatcher(SemgrexGraphs graphs,
                  IndexedWord node,
                  Map<String, IndexedWord> namesToNodes,
                  Map<String, String> namesToRelations,
                  Map<String, SemanticGraphEdge> namesToEdges,
                  VariableStrings variableStrings) {
-    this(sg, null, null, true, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
+    this(graphs, true, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
   }
 
   /**
@@ -144,13 +141,13 @@ public abstract class SemgrexMatcher  {
         } catch (CyclicGraphException e) {
           findIterator = sg.vertexSet().iterator();
         }
-      } else if (sg_aligned == null) {
+      } else if (graphs.alignedGraph == null) {
         return false;
       } else {
         try {
-          findIterator = sg_aligned.topologicalSort().iterator();
+          findIterator = graphs.alignedGraph.topologicalSort().iterator();
         } catch (CyclicGraphException e) {
-          findIterator = sg_aligned.vertexSet().iterator();
+          findIterator = graphs.alignedGraph.vertexSet().iterator();
         }
       }
     }
