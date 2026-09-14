@@ -256,7 +256,11 @@ SemgrexPattern PatternAtom(GraphRelation reln) : {
     ")" )
     {
       restoreFlags(savedFlags);
-      return result;
+
+      // strip leading "(?" and trailing ":"
+      // this will be the flags used to create a ModifierPattern
+      String flags = modifierToken.image.substring(2, modifierToken.image.length() - 1);
+      return new ModifierPattern(flags, result);
     }
   | ( result = MaybeNegatedChild(reln) )
     {

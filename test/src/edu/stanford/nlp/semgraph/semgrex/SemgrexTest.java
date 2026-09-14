@@ -1849,10 +1849,7 @@ public class SemgrexTest {
   @Test
   public void testCaseInsensitive() {
     List<CoreMap> sentences = buildSmallBatch();
-    // TODO: does not round trip, so it cannot use compile() yet.  The case
-    // insensitive modifier is not reproduced: the pattern prints as
-    // "{word:/FOO/}", which is not the same pattern
-    SemgrexPattern semgrex = SemgrexPattern.compile("(?i: {word:FOO} )");
+    SemgrexPattern semgrex = compile("(?i: {word:/FOO/} )");
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
     assertEquals(3, matches.size());
 

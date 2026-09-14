@@ -294,7 +294,11 @@ savedFlags = saveFlags();
       result = SubPattern(reln);
       jj_consume_token(17);
 restoreFlags(savedFlags);
-      {if ("" != null) return result;}
+
+      // strip leading "(?" and trailing ":"
+      // this will be the flags used to create a ModifierPattern
+      String flags = modifierToken.image.substring(2, modifierToken.image.length() - 1);
+      {if ("" != null) return new ModifierPattern(flags, result);}
       break;
       }
     case 20:
