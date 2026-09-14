@@ -282,6 +282,24 @@ public abstract class SemgrexPattern implements Serializable  {
 
   // NodePattern will return its one child, CoordinationPattern will
   // return the list of children it conjuncts or disjuncts
+  /**
+   * The relation by which the node this pattern binds was reached, if any.
+   *<br>
+   * A HeadedPattern needs this to know whether the relations it holds are
+   * to be matched in the other graph, since an alignment relation swaps
+   * which graph is being searched.  Patterns which do not bind a node of
+   * their own answer for whatever does.
+   */
+  GraphRelation arrivalRelation() {
+    for (SemgrexPattern child : getChildren()) {
+      GraphRelation reln = child.arrivalRelation();
+      if (reln != null) {
+        return reln;
+      }
+    }
+    return null;
+  }
+
   abstract List<SemgrexPattern> getChildren();
 
   abstract String localString();

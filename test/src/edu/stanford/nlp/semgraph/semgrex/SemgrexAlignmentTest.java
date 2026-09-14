@@ -261,6 +261,42 @@ public class SemgrexAlignmentTest {
   }
 
   /**
+   * The graph swap is found however deeply the aligned node is nested in disjunctions
+   *<br>
+   * Whether the relations below a head are matched in the other graph is
+   * decided by the relation which arrives at that head.  When the head is
+   * a disjunction, the answer has to be looked for among its alternatives,
+   * and when those are disjunctions in their own right, among theirs.
+   *<br>
+   * Only the last of these tells the two apart: with one level of
+   * disjunction the first alternative is a node and answers immediately,
+   * so a search which stops there still gets it right.
+   */
+  @Test
+  public void testAlignmentThroughNestedDisjunctions() {
+    SemanticGraph hyp = SemanticGraph.valueOf("[h1-1 ha> h2-2]");
+    SemanticGraph txt = SemanticGraph.valueOf("[t1-1 ta> t2-2]");
+    Map<IndexedWord, IndexedWord> map = new HashMap<>();
+    for (IndexedWord h : hyp.vertexSet()) {
+      for (IndexedWord t : txt.vertexSet()) {
+        if (t.word().substring(1).equals(h.word().substring(1))) {
+          map.put(h, t);
+        }
+      }
+    }
+    Alignment alignment = new Alignment(map, 1.0, "nested");
+
+    // ta is an edge of the text graph, so each of these matches only if
+    // the search crossed over when it followed the @
+    assertTrue(SemgrexPattern.compile("{word:h1} @ ({word:t1} >ta {})")
+               .matcher(hyp, alignment, txt).find());
+    assertTrue(SemgrexPattern.compile("{word:h1} @ ([{word:t1} | {word:zz}] >ta {})")
+               .matcher(hyp, alignment, txt).find());
+    assertTrue(SemgrexPattern.compile("{word:h1} @ ([[{word:t1} | {word:zz}] | [{word:yy} | {word:xx}]] >ta {})")
+               .matcher(hyp, alignment, txt).find());
+  }
+
+  /**
    * Several relations written after one {@code @} all resolve in the text graph
    */
   @Test

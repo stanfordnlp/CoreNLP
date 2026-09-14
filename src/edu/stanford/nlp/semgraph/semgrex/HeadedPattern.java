@@ -49,25 +49,12 @@ class HeadedPattern extends SemgrexPattern {
   }
 
   /**
-   * The relation the head arrived by, which the alignment matcher needs in
-   * order to know whether to swap graphs for the relations below it.
+   * The relations below a head are matched in whichever graph the head
+   * arrived in, so only the head is asked, never the relations themselves.
    */
-  private GraphRelation headReln() {
-    SemgrexPattern current = head;
-    while (current instanceof HeadedPattern) {
-      current = ((HeadedPattern) current).head;
-    }
-    if (current instanceof NodePattern) {
-      return ((NodePattern) current).getReln();
-    }
-    if (current instanceof CoordinationPattern) {
-      for (SemgrexPattern alternative : current.getChildren()) {
-        if (alternative instanceof NodePattern) {
-          return ((NodePattern) alternative).getReln();
-        }
-      }
-    }
-    return null;
+  @Override
+  GraphRelation arrivalRelation() {
+    return head.arrivalRelation();
   }
 
   @Override
@@ -198,7 +185,7 @@ class HeadedPattern extends SemgrexPattern {
      * relations below one are matched against the other graph.
      */
     private void resetChild() {
-      GraphRelation reln = myNode.headReln();
+      GraphRelation reln = myNode.arrivalRelation();
       boolean childHyp = (reln instanceof GraphRelation.ALIGNMENT) ? !hyp : hyp;
       childMatcher = myNode.child.matcher(sg, alignment, sg_aligned, childHyp, headMatcher.getMatch(),
                                           namesToNodes, namesToRelations, namesToEdges,

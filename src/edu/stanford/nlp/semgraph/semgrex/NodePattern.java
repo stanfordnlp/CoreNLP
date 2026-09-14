@@ -447,8 +447,8 @@ public class NodePattern extends SemgrexPattern  {
     return Collections.emptyList();
   }
 
-  /** The relation this node is reached by, which HeadedPattern needs for the alignment swap */
-  GraphRelation getReln() {
+  @Override
+  GraphRelation arrivalRelation() {
     return reln;
   }
 
