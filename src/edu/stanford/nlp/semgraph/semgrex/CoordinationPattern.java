@@ -4,7 +4,6 @@ import edu.stanford.nlp.util.logging.Redwood;
 import java.util.*;
 
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.VariableStrings;
 
@@ -89,28 +88,13 @@ public class CoordinationPattern extends SemgrexPattern  {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemanticGraph sg, IndexedWord node,
-                                Map<String, IndexedWord> namesToNodes, 
-                                Map<String, String> namesToRelations,
-                                Map<String, SemanticGraphEdge> namesToEdges,
-                                VariableStrings variableStrings, 
-                                boolean ignoreCase) {
-    return new CoordinationMatcher(this, sg, null, null, true, node, 
-                                   namesToNodes, namesToRelations, namesToEdges,
-                                   variableStrings, ignoreCase);
-  }
-
-  @Override
-  public SemgrexMatcher matcher(SemanticGraph sg, 
-                                Alignment alignment, SemanticGraph sg_align,
-                                boolean hypToText, IndexedWord node, 
+  public SemgrexMatcher matcher(SemgrexGraphs graphs, boolean hyp, IndexedWord node, 
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations, 
                                 Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings, 
                                 boolean ignoreCase) {
-    return new CoordinationMatcher(this, sg, alignment, sg_align, 
-                                   hypToText, node,
+    return new CoordinationMatcher(this, graphs, hyp, node,
                                    namesToNodes, namesToRelations, namesToEdges,
                                    variableStrings, ignoreCase);
   }
@@ -125,19 +109,18 @@ public class CoordinationPattern extends SemgrexPattern  {
     // do all con/dis-juncts have to be considered to determine a match?
     // i.e. true if conj and not negated or disj and negated
 
-    public CoordinationMatcher(CoordinationPattern c, SemanticGraph sg, Alignment alignment,
-                               SemanticGraph sg_align, boolean hypToText, IndexedWord n,
+    public CoordinationMatcher(CoordinationPattern c, SemgrexGraphs graphs, boolean hyp, IndexedWord n,
                                Map<String, IndexedWord> namesToNodes,
                                Map<String, String> namesToRelations,
                                Map<String, SemanticGraphEdge> namesToEdges,
                                VariableStrings variableStrings,
                                boolean ignoreCase) {
-      super(sg, alignment, sg_align, hypToText, n, namesToNodes, namesToRelations, namesToEdges, variableStrings);
+      super(graphs, hyp, n, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       myNode = c;
       children = new SemgrexMatcher[myNode.children.size()];
       for (int i = 0; i < children.length; i++) {
         SemgrexPattern node = myNode.children.get(i);
-        children[i] = node.matcher(sg, alignment, sg_align, hypToText,
+        children[i] = node.matcher(graphs, hyp,
                                    n, namesToNodes,
                                    namesToRelations, namesToEdges, variableStrings, ignoreCase);
       }

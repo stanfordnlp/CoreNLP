@@ -44,12 +44,12 @@ public class SemgrexMatch implements Serializable  {
     namesToRelations = new HashMap<>(matcher.namesToRelations);
     namesToEdges = new HashMap<>(matcher.namesToEdges);
     variableStrings = new VariableStrings(matcher.variableStrings);
-    if (matcher.alignment != null) {
-      alignment = new Alignment(matcher.alignment);
+    if (matcher.graphs.alignment != null) {
+      alignment = new Alignment(matcher.graphs.alignment);
     } else {
       alignment = null;
     }
-    sg_aligned = matcher.sg_aligned;
+    sg_aligned = matcher.graphs.alignedGraph;
     hyp = matcher.hyp;
     match = matcher.getMatch();
   }
