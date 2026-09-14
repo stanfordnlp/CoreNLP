@@ -375,32 +375,28 @@ public class JodaTimeUtilsTest {
   }
 
   @Test
-  public void testCombineNormalisesClockhourOfHalfdayOffByOne() {
-    // QUIRK: clockhourOfHalfday runs 1..12, so the conversion to hourOfDay should be
-    // (hour % 12), but the code subtracts one instead. Every 12-hour time therefore
-    // lands an hour early. This is the root cause of the wrong values recorded in
-    // TimeFormatterTest.testTwelveHourClockIsOffByOne.
-    // Correct results would be 10, 22, 1 and 11 respectively.
+  public void testCombineNormalisesClockhourOfHalfday() {
+    // clockhourOfHalfday runs 1..12, so the hour within the halfday is the value
+    // modulo 12. Ordinary hours are carried across unchanged in the morning and
+    // shifted by twelve in the afternoon.
     assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 10, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
-            HALFDAY, 0, HOUR, 9);
-    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 10, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
-            HALFDAY, 1, HOUR, 21);
-    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 1, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
-            HALFDAY, 0, HOUR, 0);
-    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 11, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
             HALFDAY, 0, HOUR, 10);
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 10, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
+            HALFDAY, 1, HOUR, 22);
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 1, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
+            HALFDAY, 0, HOUR, 1);
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 11, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
+            HALFDAY, 1, HOUR, 23);
   }
 
   @Test
-  public void testCombineMidnightAndMiddayAreOnTheWrongHalfOfTheDay() {
-    // QUIRK: the same subtraction turns 12 into 11, which also defeats the branch that
-    // exists to fold twelve o'clock down to hour zero: it only fires when the computed
-    // hour is exactly 12, which after the subtraction it never is.
-    // 12 AM should give hour 0 and 12 PM should give hour 12.
+  public void testCombineHandlesTwelveOClock() {
+    // Twelve is the boundary case: it means the zero hour of its halfday, so 12 AM is
+    // midnight and 12 PM is midday.
     assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 12, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
-            HALFDAY, 0, HOUR, 11);
+            HALFDAY, 0, HOUR, 0);
     assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 12, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
-            HALFDAY, 1, HOUR, 23);
+            HALFDAY, 1, HOUR, 12);
   }
 
   @Test

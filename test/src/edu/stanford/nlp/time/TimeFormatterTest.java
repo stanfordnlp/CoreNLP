@@ -35,11 +35,9 @@ import static org.junit.Assert.assertTrue;
  * <h2>What is deliberately pinned</h2>
  *
  * <p>Several behaviours here are wrong rather than merely surprising, and are marked
- * QUIRK. The 12-hour clock is off by one hour in every case; single-letter field tokens
- * generate fixed-width single-digit regexes that reject ordinary input; two-digit years
- * never reach a century; and a day-of-year field is parsed and then discarded. These are
- * asserted as they currently behave so that a rewrite is a deliberate change rather than
- * an accident. See the note on the 12-hour tests for where the root cause lives.
+ * QUIRK: two-digit years never reach a century, a day-of-year field is parsed and then
+ * discarded, and an explicit era prefixes the year with a sign. These are asserted as
+ * they currently behave so that a rewrite is a deliberate change rather than an accident.
  *
  * <h2>Time zones</h2>
  *
@@ -161,45 +159,55 @@ public class TimeFormatterTest {
   // ------------------------------------------------------------- 12h times
 
   @Test
-  public void testTwelveHourClockIsOffByOne() {
-    // QUIRK: every hh value comes out an hour early. The root cause is in
-    // JodaTimeUtils.combine, which normalises clockhourOfHalfday with (hour - 1)
-    // where clockhourOfHalfday is 1..12 and the correct mapping is (hour % 12).
-    // See JodaTimeUtilsTest.testCombineNormalisesClockhourOfHalfdayOffByOne.
-    // Correct values would be T10:30, T22:30, T01:00, T11:00 and T23:00.
-    assertEquals("T09:30", parse("hh:mm a", "10:30 AM"));
-    assertEquals("T21:30", parse("hh:mm a", "10:30 PM"));
-    assertEquals("T00:00", parse("hh:mm a", "01:00 AM"));
-    assertEquals("T10:00", parse("hh:mm a", "11:00 AM"));
-    assertEquals("T22:00", parse("hh:mm a", "11:00 PM"));
+  public void testTwelveHourClock() {
+    // hh is clockhourOfHalfday; the conversion to a 24-hour clock happens in
+    // JodaTimeUtils.combine. See JodaTimeUtilsTest.testCombineNormalisesClockhourOfHalfday.
+    assertEquals("T10:30", parse("hh:mm a", "10:30 AM"));
+    assertEquals("T22:30", parse("hh:mm a", "10:30 PM"));
+    assertEquals("T01:00", parse("hh:mm a", "01:00 AM"));
+    assertEquals("T11:00", parse("hh:mm a", "11:00 AM"));
+    assertEquals("T23:00", parse("hh:mm a", "11:00 PM"));
   }
 
   @Test
-  public void testTwelveHourMidnightAndNoonAreWrong() {
-    // QUIRK: the same off-by-one, but here it also lands on the wrong half of the day.
-    // Midnight should be T00:30 and midday T12:30.
-    assertEquals("T11:30", parse("hh:mm a", "12:30 AM"));
-    assertEquals("T23:30", parse("hh:mm a", "12:30 PM"));
+  public void testTwelveHourMidnightAndNoon() {
+    assertEquals("T00:30", parse("hh:mm a", "12:30 AM"));
+    assertEquals("T12:30", parse("hh:mm a", "12:30 PM"));
   }
 
   @Test
   public void testAmPmMarkerIsCaseInsensitive() {
-    assertEquals("T12:05", parse("h:mm a", "1:05 pm"));
+    assertEquals("T13:05", parse("h:mm a", "1:05 pm"));
   }
 
   // -------------------------------------------------- fixed-width tokens
 
   @Test
-  public void testSingleLetterTokensMatchExactlyOneDigit() {
-    // QUIRK: a one-character field token generates a one-digit regex rather than a
-    // one-or-two-digit one, so "d" cannot parse a two-digit day at all. This makes the
-    // natural-looking pattern "MMMM d, yyyy" fail on most dates of the month.
-    assertEquals("\\b(\\d)\\b", extractor("d").getTextPattern().pattern());
+  public void testSingleLetterTokensMatchOneOrTwoDigits() {
+    // A one-character field token means "one or two digits", as it does in
+    // SimpleDateFormat, so "MMMM d, yyyy" parses ordinary dates of the month.
+    assertEquals("\\b(\\d{1,2})\\b", extractor("d").getTextPattern().pattern());
     assertEquals("XXXX-XX-05", parse("d", "5"));
-    assertNull("a two-digit day does not match the one-digit pattern", parse("d", "15"));
-    assertNull(parse("MMMM d, yyyy", "June 15, 2017"));
-    // The two-character form works as expected.
-    assertEquals("XXXX-XX-15", parse("dd", "15"));
+    assertEquals("XXXX-XX-15", parse("d", "15"));
+    assertEquals("2017-06-15", parse("MMMM d, yyyy", "June 15, 2017"));
+    assertEquals("1999-12-01", parse("MMMM d, yyyy", "December 1, 1999"));
+    // The two-character form is still fixed width.
+    assertEquals("\\b(\\d\\d)\\b", extractor("dd").getTextPattern().pattern());
+    assertNull(parse("dd", "5"));
+  }
+
+  @Test
+  public void testAnExplicitQuantifierOverridesTheDefaultWidth() {
+    // When the pattern supplies its own quantifier it is appended to the field's regex,
+    // so the field must not also widen itself: "S{1,3}" has to come out as \d{1,3} and
+    // not as \d{1,2}{1,3}. The shipped ISO rules depend on this.
+    assertEquals("\\b(\\d{1,3})\\b", extractor("S{1,3}").getTextPattern().pattern());
+    assertEquals("2017-06-15T10:30:45.123",
+            parse("yyyy-MM-dd'T'HH:mm:ss[.,]S{1,3}", "2017-06-15T10:30:45.123"));
+    // The optional-second-digit idiom used throughout the rule files still works.
+    assertEquals("\\b(\\d\\d?)\\b", extractor("dd?").getTextPattern().pattern());
+    assertEquals("XXXX-XX-05", parse("dd?", "5"));
+    assertEquals("XXXX-XX-15", parse("dd?", "15"));
   }
 
   // -------------------------------------------------------- two-digit years

@@ -318,7 +318,13 @@ public class TimeFormatter {
     }
 
     protected StringBuilder appendRegex0(StringBuilder sb) {
-      if (maxDigits > 5 || minDigits != maxDigits) {
+      if (minDigits == 1 && maxDigits == 1 && quantifier == null) {
+        // A one-character field token means "one or two digits", as it does in
+        // SimpleDateFormat. When the pattern supplies its own quantifier that
+        // quantifier is appended to this regex, so leave the width alone and let
+        // the pattern say what it wants.
+        sb.append("\\d{1,2}");
+      } else if (maxDigits > 5 || minDigits != maxDigits) {
         sb.append("\\d{").append(minDigits).append(',').append(maxDigits).append('}');
       } else {
         for (int i = 0; i < minDigits; i++) {
