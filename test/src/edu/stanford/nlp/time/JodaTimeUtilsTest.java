@@ -401,8 +401,38 @@ public class JodaTimeUtilsTest {
 
   @Test
   public void testCombineNormalisesClockhourOfDay() {
+    // clockhourOfDay runs 1..24 with 24 standing for the zero hour, so the hour of the
+    // day is the value modulo 24. Values that are already past noon are left alone by
+    // the PM adjustment below, since it only shifts hours smaller than twelve.
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_DAY, 1, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
+            HALFDAY, 0, HOUR, 1);
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_DAY, 1, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
+            HALFDAY, 1, HOUR, 13);
     assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_DAY, 13, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
+            HALFDAY, 1, HOUR, 13);
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_DAY, 23, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
+            HALFDAY, 1, HOUR, 23);
+  }
+
+  @Test
+  public void testCombineHandlesTwentyFourOClock() {
+    // Twenty-four is the boundary case and means the zero hour.
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_DAY, 24, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
+            HALFDAY, 0, HOUR, 0);
+    // Twelve means midnight in the morning half and midday in the afternoon half, the
+    // same as it does for clockhourOfHalfday.
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_DAY, 12, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
+            HALFDAY, 0, HOUR, 0);
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_DAY, 12, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
             HALFDAY, 1, HOUR, 12);
+  }
+
+  @Test
+  public void testCombineLeavesClockhourOfDayAloneWithoutAHalfday() {
+    // The whole normalisation block is guarded on halfdayOfDay being present, which is
+    // why "24 o'clock" with no AM/PM marker keeps its clockhour and renders as T24:00.
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_DAY, 24, MINUTE, 0), new Partial()),
+            CLOCKHOUR_DAY, 24, MINUTE, 0);
   }
 
   @Test

@@ -364,7 +364,9 @@ public class JodaTimeUtils {
         hour = p.get(DateTimeFieldType.clockhourOfHalfday()) % 12;
         p = p.without(DateTimeFieldType.clockhourOfHalfday());
       } else if (p.isSupported(DateTimeFieldType.clockhourOfDay())) {
-        hour = p.get(DateTimeFieldType.clockhourOfDay())-1;
+        // clockhourOfDay runs 1..24 with 24 standing for the zero hour,
+        // so the hour of the day is the value modulo 24.
+        hour = p.get(DateTimeFieldType.clockhourOfDay()) % 24;
         p = p.without(DateTimeFieldType.clockhourOfDay());
       } else if (p.isSupported(DateTimeFieldType.hourOfDay())) {
         hour = p.get(DateTimeFieldType.hourOfDay());

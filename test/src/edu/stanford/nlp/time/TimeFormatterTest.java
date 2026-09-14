@@ -152,8 +152,20 @@ public class TimeFormatterTest {
   @Test
   public void testClockhourOfDay() {
     assertEquals("T10:30", parse("kk:mm", "10:30"));
-    // 24 is a legal clockhour and is not normalised to hour 0 of the next day.
+    assertEquals("T01:00", parse("kk:mm", "01:00"));
+    // With no AM/PM marker the halfday normalisation never runs, so 24 keeps its
+    // clockhour rather than folding to hour 0.
     assertEquals("T24:00", parse("kk:mm", "24:00"));
+  }
+
+  @Test
+  public void testClockhourOfDayWithAHalfdayMarker() {
+    // Adding a marker sends the value through JodaTimeUtils.combine. See
+    // JodaTimeUtilsTest.testCombineNormalisesClockhourOfDay.
+    assertEquals("T10:30", parse("kk:mm a", "10:30 AM"));
+    assertEquals("T22:30", parse("kk:mm a", "10:30 PM"));
+    assertEquals("T00:00", parse("kk:mm a", "12:00 AM"));
+    assertEquals("T12:00", parse("kk:mm a", "12:00 PM"));
   }
 
   // ------------------------------------------------------------- 12h times
