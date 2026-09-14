@@ -459,19 +459,7 @@ public class NodePattern extends SemgrexPattern  {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemanticGraph sg, IndexedWord node,
-                                Map<String, IndexedWord> namesToNodes,
-                                Map<String, String> namesToRelations,
-                                Map<String, SemanticGraphEdge> namesToEdges,
-                                VariableStrings variableStrings,
-                                boolean ignoreCase) {
-    return new NodeMatcher(this, sg, null, null, true, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);
-  }
-
-  @Override
-  public SemgrexMatcher matcher(SemanticGraph sg,
-                                Alignment alignment, SemanticGraph sg_align,
-                                boolean hyp, IndexedWord node,
+  public SemgrexMatcher matcher(SemgrexGraphs graphs, boolean hyp, IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
@@ -479,9 +467,9 @@ public class NodePattern extends SemgrexPattern  {
                                 boolean ignoreCase) {
     // log.info("making matcher: " +
     // ((reln.equals(GraphRelation.ALIGNED_ROOT)) ? false : hyp));
-    return new NodeMatcher(this, sg, alignment, sg_align,
+    return new NodeMatcher(this, graphs,
                            (reln.equals(GraphRelation.ALIGNED_ROOT)) ? false : hyp,
-                           (reln.equals(GraphRelation.ALIGNED_ROOT)) ? sg_align.getFirstRoot() : node,
+                           (reln.equals(GraphRelation.ALIGNED_ROOT)) ? graphs.alignedGraph.getFirstRoot() : node,
                            namesToNodes, namesToRelations, namesToEdges,
                            variableStrings, ignoreCase);
   }
@@ -519,11 +507,11 @@ public class NodePattern extends SemgrexPattern  {
 
     private final boolean ignoreCase;
 
-    public NodeMatcher(NodePattern n, SemanticGraph sg, Alignment alignment, SemanticGraph sg_align, boolean hyp,
+    public NodeMatcher(NodePattern n, SemgrexGraphs graphs, boolean hyp,
                        IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
                        Map<String, SemanticGraphEdge> namesToEdges,
                        VariableStrings variableStrings, boolean ignoreCase) {
-      super(sg, alignment, sg_align, hyp, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
+      super(graphs, hyp, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       myNode = n;
       this.ignoreCase = ignoreCase;
       resetChildIter();
@@ -531,9 +519,9 @@ public class NodePattern extends SemgrexPattern  {
 
     @Override
     void resetChildIter() {
-      nodeMatchCandidateIterator = myNode.reln.searchNodeIterator(node, hyp ? sg : sg_aligned);
+      nodeMatchCandidateIterator = myNode.reln.searchNodeIterator(node, sg);
       if (myNode.reln instanceof GraphRelation.ALIGNMENT)
-        ((GraphRelation.ALIGNMENT) myNode.reln).setAlignment(alignment, hyp,
+        ((GraphRelation.ALIGNMENT) myNode.reln).setAlignment(graphs.alignment, hyp,
             (GraphRelation.SearchNodeIterator) nodeMatchCandidateIterator);
       finished = false;
       matchedAny = false;
@@ -605,7 +593,7 @@ public class NodePattern extends SemgrexPattern  {
             }
           } else {
             boolean found = myNode.nodeAttrMatch(nextMatch,
-                                                 hyp ? sg : sg_aligned,
+                                                 sg,
                                                  ignoreCase, variableStrings, tempVariableStrings);
             if (found) {
               // nodeAttrMatch already checks negDesc, so no need to
@@ -616,7 +604,7 @@ public class NodePattern extends SemgrexPattern  {
           }
         } else { // try to match the description pattern.
           boolean found = myNode.nodeAttrMatch(nextMatch,
-                                               hyp ? sg : sg_aligned,
+                                               sg,
                                                ignoreCase, variableStrings, tempVariableStrings);
           if (found) {
             // nodeAttrMatch already checks negDesc, so no need to

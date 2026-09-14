@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
@@ -41,18 +40,11 @@ public class ModifierPattern extends SemgrexPattern  {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemanticGraph sg, IndexedWord node, Map<String, IndexedWord> namesToNodes,
-                                Map<String, String> namesToRelations, Map<String, SemanticGraphEdge> namesToEdges,
-                                VariableStrings variableStrings, boolean ignoreCase) {
-    return child.matcher(sg, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);
-  }
-
-  @Override
-  public SemgrexMatcher matcher(SemanticGraph sg, Alignment alignment, SemanticGraph sg_align, boolean hypToText,
+  public SemgrexMatcher matcher(SemgrexGraphs graphs, boolean hyp,
                                 IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings, boolean ignoreCase) {
-    return child.matcher(sg, alignment, sg_align, hypToText, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);
+    return child.matcher(graphs, hyp, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);
   }
 
   @Override
