@@ -281,6 +281,43 @@ public class TimeFormatterTest {
     assertEquals("2017-06-15T10:30+0000", parse("yyyy-MM-dd HH:mm z", "2017-06-15 10:30 UTC"));
   }
 
+  @Test
+  public void testQuotedLiteralBetweenNumericFields() {
+    // A quoted literal between two numeric fields, as in French-style times like
+    // "10h30". The h has to be quoted: an unquoted h is the clockhourOfHalfday field,
+    // and "''" is an escaped apostrophe rather than a literal h.
+    assertEquals("\\b(\\d\\d?)\\Qh\\E(\\d\\d)\\b", extractor("HH?'h'mm").getTextPattern().pattern());
+    assertEquals("T10:30", parse("HH?'h'mm", "10h30"));
+    assertEquals("T09:30", parse("HH?'h'mm", "9h30"));
+    assertEquals("T05:05", parse("HH?'h'mm", "5h05"));
+    assertEquals("T00:00", parse("HH?'h'mm", "00h00"));
+    assertEquals("T23:59", parse("HH?'h'mm", "23h59"));
+    // Quoted literals are matched case insensitively, like the rest of the pattern.
+    assertEquals("T10:30", parse("HH?'h'mm", "10H30"));
+  }
+
+  @Test
+  public void testQuotedLiteralPatternRejectsNearMisses() {
+    // Word boundaries and field widths keep the pattern from firing on neighbouring text.
+    assertNull("minutes are two digits", parse("HH?'h'mm", "10h3"));
+    assertNull(parse("HH?'h'mm", "10h300"));
+    assertNull(parse("HH?'h'mm", "1000h30"));
+    assertNull("hours run 0..23", parse("HH?'h'mm", "25h30"));
+    assertNull("minutes run 0..59", parse("HH?'h'mm", "10h60"));
+    assertNull(parse("HH?'h'mm", "x10h30"));
+    assertNull(parse("HH?'h'mm", "10h30x"));
+  }
+
+  @Test
+  public void testUnquotedHourFieldIsNotALiteral() {
+    // The contrasting case, kept so the difference is on the record: "''" is an escaped
+    // apostrophe and the following h is a field, so this pattern wants an apostrophe in
+    // the text and reads the next digits as an hour.
+    assertEquals("\\b(\\d\\d?)\\Q'\\E(\\d{1,2})(\\d\\d)\\b",
+            extractor("HH?''hmm").getTextPattern().pattern());
+    assertNull(parse("HH?''hmm", "10h30"));
+  }
+
   // ----------------------------------------- literals, groups, alternation
 
   @Test
