@@ -53,6 +53,10 @@ public class JodaTimeUtilsTest {
   private static final DateTimeFieldType WEEKYEAR = DateTimeFieldType.weekyear();
   private static final DateTimeFieldType YOC = DateTimeFieldType.yearOfCentury();
   private static final DateTimeFieldType CENTURY = DateTimeFieldType.centuryOfEra();
+  private static final DateTimeFieldType HALFDAY = DateTimeFieldType.halfdayOfDay();
+  private static final DateTimeFieldType CLOCKHOUR_HALFDAY = DateTimeFieldType.clockhourOfHalfday();
+  private static final DateTimeFieldType HOUR_HALFDAY = DateTimeFieldType.hourOfHalfday();
+  private static final DateTimeFieldType CLOCKHOUR_DAY = DateTimeFieldType.clockhourOfDay();
 
   private static final Chronology ISO = ISOChronology.getInstanceUTC();
 
@@ -355,6 +359,68 @@ public class JodaTimeUtilsTest {
     assertPartial(JodaTimeUtils.combine(partial(YOC, 17), partial(YEAR, 2017)), YEAR, 2017);
     // A full year already present wins over a two-digit year in the reference.
     assertPartial(JodaTimeUtils.combine(partial(YEAR, 2017), partial(YOC, 97)), YEAR, 2017);
+  }
+
+  // ------------------------------------------- combine: halfday normalisation
+
+  @Test
+  public void testCombineNormalisesHourOfHalfday() {
+    // hourOfHalfday is 0..11 and is carried straight across, with 12 folding to 0.
+    assertPartial(JodaTimeUtils.combine(partial(HOUR_HALFDAY, 10, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
+            HALFDAY, 0, HOUR, 10);
+    assertPartial(JodaTimeUtils.combine(partial(HOUR_HALFDAY, 10, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
+            HALFDAY, 1, HOUR, 22);
+    assertPartial(JodaTimeUtils.combine(partial(HOUR_HALFDAY, 0, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
+            HALFDAY, 0, HOUR, 0);
+  }
+
+  @Test
+  public void testCombineNormalisesClockhourOfHalfdayOffByOne() {
+    // QUIRK: clockhourOfHalfday runs 1..12, so the conversion to hourOfDay should be
+    // (hour % 12), but the code subtracts one instead. Every 12-hour time therefore
+    // lands an hour early. This is the root cause of the wrong values recorded in
+    // TimeFormatterTest.testTwelveHourClockIsOffByOne.
+    // Correct results would be 10, 22, 1 and 11 respectively.
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 10, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
+            HALFDAY, 0, HOUR, 9);
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 10, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
+            HALFDAY, 1, HOUR, 21);
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 1, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
+            HALFDAY, 0, HOUR, 0);
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 11, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
+            HALFDAY, 0, HOUR, 10);
+  }
+
+  @Test
+  public void testCombineMidnightAndMiddayAreOnTheWrongHalfOfTheDay() {
+    // QUIRK: the same subtraction turns 12 into 11, which also defeats the branch that
+    // exists to fold twelve o'clock down to hour zero: it only fires when the computed
+    // hour is exactly 12, which after the subtraction it never is.
+    // 12 AM should give hour 0 and 12 PM should give hour 12.
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 12, HALFDAY, SUTime.HALFDAY_AM), new Partial()),
+            HALFDAY, 0, HOUR, 11);
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 12, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
+            HALFDAY, 1, HOUR, 23);
+  }
+
+  @Test
+  public void testCombineNormalisesClockhourOfDay() {
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_DAY, 13, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
+            HALFDAY, 1, HOUR, 12);
+  }
+
+  @Test
+  public void testCombineLeavesHourOfDayAlone() {
+    assertPartial(JodaTimeUtils.combine(partial(HOUR, 14, HALFDAY, SUTime.HALFDAY_PM), new Partial()),
+            HALFDAY, 1, HOUR, 14);
+  }
+
+  @Test
+  public void testCombineOnlyNormalisesWhenAHalfdayIsPresent() {
+    // Without halfdayOfDay there is nothing to disambiguate against, so the clockhour
+    // is left exactly as it was.
+    assertPartial(JodaTimeUtils.combine(partial(CLOCKHOUR_HALFDAY, 10, MINUTE, 30), new Partial()),
+            CLOCKHOUR_HALFDAY, 10, MINUTE, 30);
   }
 
   // ---------------------------------------------- generality of a partial
