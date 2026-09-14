@@ -1146,10 +1146,25 @@ public class JodaTimeUtils {
       if(!seenTime){ b.append("T"); seenTime = true; }
       b.append(opts.approximate ? "X" : duration.get(minutes())).append("M");
     }
-    //(seconds)
-    if(duration.get(seconds()) != 0){
+    //(seconds and milliseconds)
+    // ISO 8601 has no field for sub-second amounts: they are written as a fraction of
+    // the seconds field, so the two are emitted together.
+    int secs = duration.get(seconds());
+    int millis = duration.get(millis());
+    if(secs != 0 || millis != 0){
       if(!seenTime){ b.append("T"); seenTime = true; }
-      b.append(opts.approximate ? "X" : duration.get(seconds())).append("S");
+      if(opts.approximate){
+        b.append("X").append("S");
+      } else if(millis != 0){
+        b.append(secs).append('.').append(String.format("%03d", Math.abs(millis))).append("S");
+      } else {
+        b.append(secs).append("S");
+      }
+    }
+    if(b.length() == 1){
+      // Nothing was emitted, so every field was zero. A bare "P" is not a duration;
+      // ISO 8601 requires at least one component, and PT0S is the canonical zero.
+      return "PT0S";
     }
     return b.toString();
   }

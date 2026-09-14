@@ -976,9 +976,35 @@ public class JodaTimeUtilsTest {
 
   @Test
   public void testTimexDurationValueOfZero() {
-    // QUIRK: every field is zero, so nothing is appended and the result is a bare "P",
-    // which is not a valid ISO 8601 duration.
-    assertEquals("P", JodaTimeUtils.timexDurationValue(new Period(0)));
+    // ISO 8601 requires at least one component, so the zero duration is PT0S rather
+    // than a bare "P". This matches what joda's own Period rendering produces.
+    assertEquals("PT0S", JodaTimeUtils.timexDurationValue(new Period(0)));
+    assertEquals("PT0S", JodaTimeUtils.timexDurationValue(Period.seconds(0)));
+    assertEquals("PT0S", JodaTimeUtils.timexDurationValue(Period.days(0)));
+    assertEquals("PT0S", new Period(0).toString());
+  }
+
+  @Test
+  public void testTimexDurationValueSubSecond() {
+    // Sub-second amounts have no field of their own in ISO 8601 and are written as a
+    // fraction of the seconds field.
+    assertEquals("PT0.500S", JodaTimeUtils.timexDurationValue(Period.millis(500)));
+    assertEquals("PT1.500S", JodaTimeUtils.timexDurationValue(Period.seconds(1).withMillis(500)));
+    assertEquals("PT2M0.250S", JodaTimeUtils.timexDurationValue(Period.minutes(2).withMillis(250)));
+    assertEquals("P1DT0.001S", JodaTimeUtils.timexDurationValue(Period.days(1).withMillis(1)));
+    // The sign sits on the seconds, as it does in joda.
+    assertEquals("PT-1.500S", JodaTimeUtils.timexDurationValue(Period.seconds(-1).withMillis(-500)));
+  }
+
+  @Test
+  public void testTimexDurationValueAgreesWithJodaOnSubSecondPeriods() {
+    // The two renderings diverge on the larger units, where the timex form promotes
+    // years to L/C/E and months to Q, but they agree at and below the second.
+    for (Period p : new Period[] {new Period(0), Period.millis(1), Period.millis(500),
+            Period.seconds(45), Period.seconds(1).withMillis(500),
+            Period.minutes(2).withMillis(250)}) {
+      assertEquals(p.toString(), JodaTimeUtils.timexDurationValue(p));
+    }
   }
 
   @Test
