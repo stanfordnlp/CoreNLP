@@ -2103,6 +2103,25 @@ public class SUTimeITest extends TestCase {
     }
   }
 
+  public void testSUTimeFrenchHour() throws IOException {
+    String testText = "The train leaves at 10h30 and the next one at 9h30.";
+ 
+    Iterator<Timex> expectedTimexes =
+            Arrays.asList(
+                    Timex.fromXml("<TIMEX3 tid=\"t1\" value=\"T10:30\" type=\"TIME\">10h30</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"T09:30\" type=\"TIME\">9h30</TIMEX3>")).iterator();
+ 
+    Annotation document = createDocument(testText);
+    TimeAnnotator sutime = getTimeAnnotator();
+    sutime.annotate(document);
+
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
+      Timex expectedTimex = expectedTimexes.next();
+      checkTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
+    }
+    assertFalse(expectedTimexes.hasNext());
+  }
+
   private static void checkTimex(String documentText, String expectedText,
                           Timex expectedTimex, CoreMap timexAnn) {
     String actualText = timexAnn.get(CoreAnnotations.TextAnnotation.class);
