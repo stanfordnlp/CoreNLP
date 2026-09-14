@@ -2,6 +2,7 @@ package edu.stanford.nlp.time;
 
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeField;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
 import org.joda.time.DurationFieldType;
@@ -245,19 +246,26 @@ public class JodaTimeUtilsTest {
   }
 
   @Test
-  public void testYearOfDecadeDuplicatesDecadeOfCentury() {
-    // QUIRK: YearOfDecade.getField() builds a DividedDateTimeField, exactly as
-    // DecadeOfCentury does, so it returns the decade rather than the year within the
-    // decade. A RemainderDateTimeField (as MonthOfQuarter uses) would give 7/0/9/3 here.
-    // Nothing in SUTime reads YearOfDecade, so this is latent, but it is public API.
-    assertEquals(1, utc("2017-01-15T00:00:00Z").get(JodaTimeUtils.YearOfDecade));
+  public void testYearOfDecade() {
+    // The year within the decade, so the last digit of the year.
+    assertEquals(7, utc("2017-01-15T00:00:00Z").get(JodaTimeUtils.YearOfDecade));
     assertEquals(0, utc("2000-02-29T00:00:00Z").get(JodaTimeUtils.YearOfDecade));
     assertEquals(9, utc("1999-06-15T00:00:00Z").get(JodaTimeUtils.YearOfDecade));
-    assertEquals(2, utc("2023-11-08T00:00:00Z").get(JodaTimeUtils.YearOfDecade));
-    for (String date : new String[] {"2017-01-15", "2000-02-29", "1999-06-15", "2023-11-08"}) {
-      DateTime dt = utc(date + "T00:00:00Z");
-      assertEquals(dt.get(JodaTimeUtils.DecadeOfCentury), dt.get(JodaTimeUtils.YearOfDecade));
-    }
+    assertEquals(3, utc("2023-11-08T00:00:00Z").get(JodaTimeUtils.YearOfDecade));
+    assertEquals(0, utc("1990-01-01T00:00:00Z").get(JodaTimeUtils.YearOfDecade));
+  }
+
+  @Test
+  public void testYearOfDecadeIsDistinctFromDecadeOfCentury() {
+    // These two were once defined identically, both dividing yearOfCentury by ten. The
+    // year within the decade is the remainder; the decade is the quotient.
+    DateTime dt = utc("1997-06-15T00:00:00Z");
+    assertEquals(9, dt.get(JodaTimeUtils.DecadeOfCentury));
+    assertEquals(7, dt.get(JodaTimeUtils.YearOfDecade));
+    DateTimeField field =
+            JodaTimeUtils.YearOfDecade.getField(ISO);
+    assertEquals(0, field.getMinimumValue());
+    assertEquals(9, field.getMaximumValue());
   }
 
   // ------------------------------------------------------- field predicates

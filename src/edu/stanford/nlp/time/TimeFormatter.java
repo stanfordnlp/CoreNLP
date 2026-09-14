@@ -853,7 +853,7 @@ public class TimeFormatter {
       appendTextField(DateTimeFieldType.halfdayOfDay(), false);
     }
     protected void appendClockhourOfDay(int digits) {
-      builder.appendDayOfYear(digits);
+      builder.appendClockhourOfDay(digits);
       appendNumericField(DateTimeFieldType.clockhourOfDay(), digits);
     }
     protected void appendClockhourOfHalfday(int digits) {

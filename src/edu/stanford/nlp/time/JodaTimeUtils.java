@@ -232,7 +232,9 @@ public class JodaTimeUtils {
 
     @Override
     public DateTimeField getField(Chronology chronology) {
-      return new DividedDateTimeField(chronology.yearOfCentury(), YearOfDecade, 10);
+      // The year within the decade is the remainder, not the quotient: dividing gives
+      // the decade, which is what DecadeOfCentury above already provides.
+      return new RemainderDateTimeField(chronology.yearOfCentury(), YearOfDecade, 10);
     }
   };
 
