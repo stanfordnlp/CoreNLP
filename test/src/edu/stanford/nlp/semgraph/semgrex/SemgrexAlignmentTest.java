@@ -397,6 +397,22 @@ public class SemgrexAlignmentTest {
   // ------------------------------------------------------------------
 
   /**
+   * A pattern which starts at the aligned root needs an alignment to start from
+   *<br>
+   * There is nowhere for it to begin without one.  Matching the near side
+   * instead would answer a different question and look like a result, so
+   * it fails loudly rather than quietly.
+   */
+  @Test
+  public void testAlignedRootWithoutAlignment() {
+    SemgrexPattern pattern = SemgrexPattern.compile("@ {}=t");
+    assertThrows(IllegalStateException.class, () -> pattern.matcher(HYP).find());
+
+    // and with an alignment it reaches the text graph, starting at its root
+    assertMatches(findAll("@ {word:wife}=t", fullAlignment(), "t"), "t=wife-3");
+  }
+
+  /**
    * An {@code @} pattern run through the single graph matcher matches nothing
    *<br>
    * ALIGNMENT's iterator returns without producing anything when there is

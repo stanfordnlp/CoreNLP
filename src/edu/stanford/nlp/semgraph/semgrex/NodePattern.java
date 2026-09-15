@@ -466,13 +466,13 @@ public class NodePattern extends SemgrexPattern  {
                                 VariableStrings variableStrings,
                                 boolean ignoreCase) {
     // the aligned root starts the search on the other side of the
-    // alignment, at that sentence's own root
+    // alignment, at that sentence's own root.
+    // (throws an exception if that alignment doesn't exist)
     if (reln.equals(GraphRelation.ALIGNED_ROOT)) {
       SemgrexGraphs crossed = graphs.crossAlignment();
       if (crossed == null) {
-        return new NodeMatcher(this, graphs, node,
-                               namesToNodes, namesToRelations, namesToEdges,
-                               variableStrings, ignoreCase);
+        throw new IllegalStateException("Semgrex pattern starts at the aligned root, " +
+                                        "but it is being matched without an alignment: " + this);
       }
       return new NodeMatcher(this, crossed, crossed.getDefault().getFirstRoot(),
                              namesToNodes, namesToRelations, namesToEdges,
