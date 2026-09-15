@@ -121,12 +121,12 @@ class HeadedPattern extends SemgrexPattern {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemgrexGraphs graphs, boolean hyp,
+  public SemgrexMatcher matcher(SemgrexGraphs graphs,
                                 IndexedWord node, Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings, boolean ignoreCase) {
-    return new HeadedMatcher(this, graphs, hyp, node, namesToNodes, namesToRelations,
+    return new HeadedMatcher(this, graphs, node, namesToNodes, namesToRelations,
                              namesToEdges, variableStrings, ignoreCase);
   }
 
@@ -140,13 +140,13 @@ class HeadedPattern extends SemgrexPattern {
     private boolean finished = false;
     private boolean matchedAny = false;
 
-    public HeadedMatcher(HeadedPattern n, SemgrexGraphs graphs, boolean hyp, IndexedWord node, Map<String, IndexedWord> namesToNodes,
+    public HeadedMatcher(HeadedPattern n, SemgrexGraphs graphs, IndexedWord node, Map<String, IndexedWord> namesToNodes,
                          Map<String, String> namesToRelations, Map<String, SemanticGraphEdge> namesToEdges,
                          VariableStrings variableStrings, boolean ignoreCase) {
-      super(graphs, hyp, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
+      super(graphs, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       this.myNode = n;
       this.ignoreCase = ignoreCase;
-      this.headMatcher = n.head.matcher(graphs, hyp, node, namesToNodes,
+      this.headMatcher = n.head.matcher(graphs, node, namesToNodes,
                                         namesToRelations, namesToEdges, variableStrings, ignoreCase);
     }
 
@@ -174,9 +174,11 @@ class HeadedPattern extends SemgrexPattern {
      * relations below one are matched against the other graph.
      */
     private void resetChild() {
+      // an alignment relation crosses to the other sentence, so the
+      // relations below it are matched against that sentence's graphs
       GraphRelation reln = myNode.arrivalRelation();
-      boolean childHyp = (reln instanceof GraphRelation.ALIGNMENT) ? !hyp : hyp;
-      childMatcher = myNode.child.matcher(graphs, childHyp, headMatcher.getMatch(),
+      SemgrexGraphs childGraphs = (reln instanceof GraphRelation.ALIGNMENT) ? graphs.crossAlignment() : graphs;
+      childMatcher = myNode.child.matcher(childGraphs, headMatcher.getMatch(),
                                           namesToNodes, namesToRelations, namesToEdges,
                                           variableStrings, ignoreCase);
     }

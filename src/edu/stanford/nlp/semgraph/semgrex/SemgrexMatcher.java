@@ -32,8 +32,6 @@ public abstract class SemgrexMatcher  {
 
   /** The graphs being matched against, and the alignment joining them */
   final SemgrexGraphs graphs;
-  /** Which side of an alignment this matcher is searching */
-  final boolean hyp;
 
   // these things are used by "find"
   private Iterator<IndexedWord> findIterator;
@@ -41,29 +39,18 @@ public abstract class SemgrexMatcher  {
 
 
   SemgrexMatcher(SemgrexGraphs graphs,
-                 boolean hyp,
                  IndexedWord node,
                  Map<String, IndexedWord> namesToNodes,
                  Map<String, String> namesToRelations,
                  Map<String, SemanticGraphEdge> namesToEdges,
                  VariableStrings variableStrings) {
     this.graphs = graphs;
-    this.hyp = hyp;
-    this.sg = graphs.get(hyp);
+    this.sg = graphs.getDefault();
     this.node = node;
     this.namesToNodes = namesToNodes;
     this.namesToRelations = namesToRelations;
     this.namesToEdges = namesToEdges;
     this.variableStrings = variableStrings;
-  }
-
-  SemgrexMatcher(SemgrexGraphs graphs,
-                 IndexedWord node,
-                 Map<String, IndexedWord> namesToNodes,
-                 Map<String, String> namesToRelations,
-                 Map<String, SemanticGraphEdge> namesToEdges,
-                 VariableStrings variableStrings) {
-    this(graphs, true, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
   }
 
   /**
@@ -128,27 +115,19 @@ public abstract class SemgrexMatcher  {
    * @return whether there is a match somewhere in the graph
    */
   public boolean find() {
-    // log.info("hyp: " + hyp);
     // there was a cache of the topological sorts to reuse across
     // SemgrexPatterns which used IdentityHashMap to remember
     // SemanticGraphs, but it was apparently the cause of various
     // thread safety bugs when the results were used for an old
     // SemanticGraph
     if (findIterator == null) {
-      if (hyp) {
-        try {
-          findIterator = sg.topologicalSort().iterator();
-        } catch (CyclicGraphException e) {
-          findIterator = sg.vertexSet().iterator();
-        }
-      } else if (graphs.alignedGraph == null) {
+      if (sg == null) {
         return false;
-      } else {
-        try {
-          findIterator = graphs.alignedGraph.topologicalSort().iterator();
-        } catch (CyclicGraphException e) {
-          findIterator = graphs.alignedGraph.vertexSet().iterator();
-        }
+      }
+      try {
+        findIterator = sg.topologicalSort().iterator();
+      } catch (CyclicGraphException e) {
+        findIterator = sg.vertexSet().iterator();
       }
     }
 

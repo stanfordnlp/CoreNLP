@@ -49,8 +49,8 @@ public class SemgrexMatch implements Serializable  {
     } else {
       alignment = null;
     }
-    sg_aligned = matcher.graphs.alignedGraph;
-    hyp = matcher.hyp;
+    sg_aligned = matcher.graphs.crossAlignment() == null ? null : matcher.graphs.crossAlignment().getDefault();
+    hyp = matcher.graphs.mapsFrom();
     match = matcher.getMatch();
   }
 
