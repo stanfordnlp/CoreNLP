@@ -343,14 +343,7 @@ public abstract class SemgrexPattern implements Serializable  {
   // ------------------------------------------------------------
 
   // These get implemented in semgrex.CoordinationMatcher and NodeMatcher
-  /** Matches from the start of the graphs, before any alignment has been crossed */
-  SemgrexMatcher matcher(SemgrexGraphs graphs, IndexedWord node, Map<String, IndexedWord> namesToNodes,
-                         Map<String, String> namesToRelations, Map<String, SemanticGraphEdge> namesToEdges,
-                         VariableStrings variableStrings, boolean ignoreCase) {
-    return matcher(graphs, true, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);
-  }
-
-  abstract SemgrexMatcher matcher(SemgrexGraphs graphs, boolean hyp,
+  abstract SemgrexMatcher matcher(SemgrexGraphs graphs,
                                   IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
                                   Map<String, SemanticGraphEdge> namesToEdges,
                                   VariableStrings variableStrings, boolean ignoreCase);
@@ -397,11 +390,11 @@ public abstract class SemgrexPattern implements Serializable  {
   }
 
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph) {
-    return matcher(new SemgrexGraphs(hypGraph, alignment, txtGraph), true, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
+    return matcher(SemgrexGraphs.aligned(hypGraph, alignment, txtGraph), hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }
 
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph, boolean ignoreCase) {
-    return matcher(new SemgrexGraphs(hypGraph, alignment, txtGraph), true, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
+    return matcher(SemgrexGraphs.aligned(hypGraph, alignment, txtGraph), hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
   }
 
   // batch processing

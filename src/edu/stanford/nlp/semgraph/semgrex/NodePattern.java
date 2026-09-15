@@ -459,17 +459,26 @@ public class NodePattern extends SemgrexPattern  {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemgrexGraphs graphs, boolean hyp, IndexedWord node,
+  public SemgrexMatcher matcher(SemgrexGraphs graphs, IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings,
                                 boolean ignoreCase) {
-    // log.info("making matcher: " +
-    // ((reln.equals(GraphRelation.ALIGNED_ROOT)) ? false : hyp));
-    return new NodeMatcher(this, graphs,
-                           (reln.equals(GraphRelation.ALIGNED_ROOT)) ? false : hyp,
-                           (reln.equals(GraphRelation.ALIGNED_ROOT)) ? graphs.alignedGraph.getFirstRoot() : node,
+    // the aligned root starts the search on the other side of the
+    // alignment, at that sentence's own root
+    if (reln.equals(GraphRelation.ALIGNED_ROOT)) {
+      SemgrexGraphs crossed = graphs.crossAlignment();
+      if (crossed == null) {
+        return new NodeMatcher(this, graphs, node,
+                               namesToNodes, namesToRelations, namesToEdges,
+                               variableStrings, ignoreCase);
+      }
+      return new NodeMatcher(this, crossed, crossed.getDefault().getFirstRoot(),
+                             namesToNodes, namesToRelations, namesToEdges,
+                             variableStrings, ignoreCase);
+    }
+    return new NodeMatcher(this, graphs, node,
                            namesToNodes, namesToRelations, namesToEdges,
                            variableStrings, ignoreCase);
   }
@@ -507,11 +516,11 @@ public class NodePattern extends SemgrexPattern  {
 
     private final boolean ignoreCase;
 
-    public NodeMatcher(NodePattern n, SemgrexGraphs graphs, boolean hyp,
+    public NodeMatcher(NodePattern n, SemgrexGraphs graphs,
                        IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
                        Map<String, SemanticGraphEdge> namesToEdges,
                        VariableStrings variableStrings, boolean ignoreCase) {
-      super(graphs, hyp, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
+      super(graphs, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       myNode = n;
       this.ignoreCase = ignoreCase;
       resetChildIter();
@@ -521,7 +530,7 @@ public class NodePattern extends SemgrexPattern  {
     void resetChildIter() {
       nodeMatchCandidateIterator = myNode.reln.searchNodeIterator(node, sg);
       if (myNode.reln instanceof GraphRelation.ALIGNMENT)
-        ((GraphRelation.ALIGNMENT) myNode.reln).setAlignment(graphs.alignment, hyp,
+        ((GraphRelation.ALIGNMENT) myNode.reln).setAlignment(graphs.alignment, graphs.mapsFrom(),
             (GraphRelation.SearchNodeIterator) nodeMatchCandidateIterator);
       finished = false;
       matchedAny = false;
