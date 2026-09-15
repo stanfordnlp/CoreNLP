@@ -53,11 +53,11 @@ public class RootPattern extends SemgrexPattern  {
     return child.toString(hasPrecedence);
   }
 
-  public SemgrexMatcher matcher(SemgrexGraphs graphs, boolean hyp,
+  public SemgrexMatcher matcher(SemgrexGraphs graphs,
                                 IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings, boolean ignoreCase) {
-    return child.matcher(graphs, hyp, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);
+    return child.matcher(graphs, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);
   }
 
   public List<Pair<CoreMap, List<SemgrexMatch>>> postprocessMatches(List<Pair<CoreMap, List<SemgrexMatch>>> matches, boolean keepEmptyMatches) {

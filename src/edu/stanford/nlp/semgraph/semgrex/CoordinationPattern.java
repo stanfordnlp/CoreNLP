@@ -88,13 +88,13 @@ public class CoordinationPattern extends SemgrexPattern  {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemgrexGraphs graphs, boolean hyp, IndexedWord node, 
+  public SemgrexMatcher matcher(SemgrexGraphs graphs, IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
-                                Map<String, String> namesToRelations, 
+                                Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
-                                VariableStrings variableStrings, 
+                                VariableStrings variableStrings,
                                 boolean ignoreCase) {
-    return new CoordinationMatcher(this, graphs, hyp, node,
+    return new CoordinationMatcher(this, graphs, node,
                                    namesToNodes, namesToRelations, namesToEdges,
                                    variableStrings, ignoreCase);
   }
@@ -109,18 +109,18 @@ public class CoordinationPattern extends SemgrexPattern  {
     // do all con/dis-juncts have to be considered to determine a match?
     // i.e. true if conj and not negated or disj and negated
 
-    public CoordinationMatcher(CoordinationPattern c, SemgrexGraphs graphs, boolean hyp, IndexedWord n,
+    public CoordinationMatcher(CoordinationPattern c, SemgrexGraphs graphs, IndexedWord n,
                                Map<String, IndexedWord> namesToNodes,
                                Map<String, String> namesToRelations,
                                Map<String, SemanticGraphEdge> namesToEdges,
                                VariableStrings variableStrings,
                                boolean ignoreCase) {
-      super(graphs, hyp, n, namesToNodes, namesToRelations, namesToEdges, variableStrings);
+      super(graphs, n, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       myNode = c;
       children = new SemgrexMatcher[myNode.children.size()];
       for (int i = 0; i < children.length; i++) {
         SemgrexPattern node = myNode.children.get(i);
-        children[i] = node.matcher(graphs, hyp,
+        children[i] = node.matcher(graphs,
                                    n, namesToNodes,
                                    namesToRelations, namesToEdges, variableStrings, ignoreCase);
       }
