@@ -42,7 +42,10 @@ public class CoNLLUReader {
    * patterns to match in CoNLL-U file
    **/
   public static Pattern COMMENT_LINE = Pattern.compile("^#.*");
-  public static Pattern DOCUMENT_LINE = Pattern.compile("^# newdoc");
+  // a newdoc line is normally followed by an id, as in
+  // "# newdoc id = reviews-091234", but the bare form is also legal.
+  // the optional whitespace keeps "# newdocument" from matching
+  public static Pattern DOCUMENT_LINE = Pattern.compile("^# newdoc(\\s.*)?$");
   public static Pattern MWT_LINE = Pattern.compile("^[0-9]+-[0-9]+.*");
   public static Pattern TOKEN_LINE = Pattern.compile("^[0-9]+\t.*");
   public static Pattern EMPTY_LINE = Pattern.compile("^[0-9]+[.][0-9]+\t.*");
@@ -261,6 +264,30 @@ public class CoNLLUReader {
     public CoNLLUSentence lastSentence() {
       return sentences.get(sentences.size() - 1);
     }
+
+    /**
+     * True if no line has been read into this document yet
+     *<br>
+     * A document is built with one sentence already waiting for lines, so
+     * having a single empty sentence is the same as having nothing at all.
+     **/
+    public boolean isEmpty() {
+      return sentences.isEmpty() || (sentences.size() == 1 && sentences.get(0).isEmpty());
+    }
+
+    /**
+     * Drop the sentence at the end if nothing was ever read into it
+     *<br>
+     * A sentence is created to catch the lines after a blank line, so at
+     * the end of a document there is usually one left over with nothing in
+     * it.  A file which stops without a final blank line has no such
+     * leftover, and then the last sentence is real and is kept.
+     **/
+    public void removeTrailingEmptySentence() {
+      if (!sentences.isEmpty() && lastSentence().isEmpty()) {
+        sentences.remove(sentences.size() - 1);
+      }
+    }
   }
 
   /**
@@ -284,6 +311,13 @@ public class CoNLLUReader {
     List<String> mwtMiscs = new ArrayList<>();
     // indexes of last CoreLabel for each MWT
     List<Integer> mwtLastCoreLabels = new ArrayList<>();
+
+    /**
+     * True if no line has been read into this sentence yet
+     **/
+    public boolean isEmpty() {
+      return tokenLines.isEmpty() && emptyLines.isEmpty() && comments.isEmpty() && mwtTokens.isEmpty();
+    }
 
     /**
      * Process line for current sentence.  Return true if processing empty line (indicating sentence end)
@@ -368,14 +402,16 @@ public class CoNLLUReader {
       // if start of a new doc, reset for a new doc
       // only a comment can be a newdoc line, so the rest are not tested at all
       if (lineType == LineType.COMMENT && DOCUMENT_LINE.matcher(line).matches()) {
-        // since the next sentence gets added to the previous doc
-        // (see below), we'll need to remove that
-        if (docs.size() > 0) {
-          docs.get(docs.size() - 1).sentences.remove(docs.get(docs.size() - 1).sentences.size() - 1);
+        CoNLLUDocument current = docs.get(docs.size() - 1);
+        // a newdoc at the very top of the file names the document which is
+        // already open, rather than asking for another one after it
+        if (!current.isEmpty()) {
+          // the sentence waiting for lines belongs to neither document
+          current.removeTrailingEmptySentence();
+          // the new document comes prebuilt with a blank sentence, so,
+          // no need to add one here
+          docs.add(new CoNLLUDocument());
         }
-        // the new document comes prebuilt with a blank sentence, so,
-        // no need to add one here
-        docs.add(new CoNLLUDocument());
       }
       // read in current line
       boolean endSentence = docs.get(docs.size() - 1).lastSentence().processLine(line, lineType);
@@ -384,8 +420,7 @@ public class CoNLLUReader {
         docs.get(docs.size() - 1).sentences.add(new CoNLLUSentence());
       }
     }
-    // remove the empty last sentence of the last document
-    docs.get(docs.size() - 1).sentences.remove(docs.get(docs.size() - 1).sentences.size() - 1);
+    docs.get(docs.size() - 1).removeTrailingEmptySentence();
     return docs;
   }
 

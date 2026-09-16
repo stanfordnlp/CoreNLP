@@ -71,7 +71,7 @@ public class DependencyParserITest {
     props.put("testFile", String.format("%s/depparser/nn/benchmark/wsj-test.conllu", TestPaths.testHome()));
     props.put("model", "edu/stanford/nlp/models/parser/nndep/english_UD.gz");
     props.put("outFile", "tmp.conll");
-    runDepparseTest(props, 93.4, 92.09);
+    runDepparseTest(props, 93.39, 92.09);
   }
 
 

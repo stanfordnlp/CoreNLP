@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -480,34 +479,8 @@ public class CoNLLUReaderTest {
   }
 
   // ------------------------------------------------------------------
-  // documents and extra columns
+  // extra columns and misc
   // ------------------------------------------------------------------
-
-  @Test
-  public void testMultipleDocuments() throws Exception {
-    // the first document deliberately has no newdoc line of its own: the
-    // reader starts with a document already open, so a newdoc at the top
-    // of the file leaves that one behind empty.  See
-    // testLeadingNewdocLeavesNoEmptyDocument below.
-    String text = String.join("\n",
-        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
-        "",
-        "# newdoc",
-        "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
-        "",
-        "");
-    List<Annotation> documents = readDocuments(text);
-    assertEquals(2, documents.size());
-    for (Annotation document : documents) {
-      assertEquals(1, document.get(CoreAnnotations.SentencesAnnotation.class).size());
-    }
-    // each document gets its own text, and its own offsets starting at zero
-    assertEquals("Hola ", documents.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("Adiós ", documents.get(1).get(CoreAnnotations.TextAnnotation.class));
-    for (Annotation document : documents) {
-      assertEquals(0, document.get(CoreAnnotations.TokensAnnotation.class).get(0).beginPosition());
-    }
-  }
 
   @Test
   public void testExtraColumn() throws Exception {
@@ -545,60 +518,108 @@ public class CoNLLUReaderTest {
   }
 
   // ------------------------------------------------------------------
-  // known issues: these describe what the reader should do, and currently
-  // do not pass.  Remove the @Ignore along with the fix.
+  // documents
   // ------------------------------------------------------------------
 
-  /**
-   * DOCUMENT_LINE is used with matches(), not lookingAt(), so only a line
-   * which is exactly "# newdoc" starts a new document.  The usual UD form,
-   * with an id after it, is treated as an ordinary comment.
-   */
-  @Ignore("# newdoc with an id after it does not currently start a new document")
   @Test
   public void testNewdocWithId() throws Exception {
+    // the form an actual UD file uses
+    String text = String.join("\n",
+        "# newdoc id = first",
+        "# sent_id = first-1",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "# newdoc id = second",
+        "# sent_id = second-1",
+        "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    List<Annotation> documents = readDocuments(text);
+    assertEquals(2, documents.size());
+    for (Annotation document : documents) {
+      assertEquals(1, document.get(CoreAnnotations.SentencesAnnotation.class).size());
+    }
+    assertEquals("Hola ", documents.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("Adiós ", documents.get(1).get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  @Test
+  public void testLeadingNewdocLeavesNoEmptyDocument() throws Exception {
+    // a newdoc on the first line names the document about to be read, and
+    // does not ask for an empty one in front of it
+    String text = String.join("\n",
+        "# newdoc",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "# newdoc",
+        "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    List<Annotation> documents = readDocuments(text);
+    assertEquals(2, documents.size());
+    for (Annotation document : documents) {
+      assertEquals(1, document.get(CoreAnnotations.SentencesAnnotation.class).size());
+      assertEquals(0, document.get(CoreAnnotations.TokensAnnotation.class).get(0).beginPosition());
+    }
+  }
+
+  @Test
+  public void testNewdocKeepsItsComment() throws Exception {
     String text = String.join("\n",
         "# newdoc id = first",
         "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
         "",
+        "");
+    CoreMap sentence = readSentences(text).get(0);
+    assertEquals(Collections.singletonList("# newdoc id = first"),
+                 sentence.get(CoreAnnotations.CommentsAnnotation.class));
+  }
+
+  @Test
+  public void testNewdocNeedsAWordBoundary() throws Exception {
+    // a comment which merely starts with the letters of newdoc is a
+    // comment, not the start of a document
+    String text = String.join("\n",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "# newdocument of some kind",
+        "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    assertEquals(1, readDocuments(text).size());
+    assertEquals(2, readSentences(text).size());
+  }
+
+  @Test
+  public void testNewdocAfterAnUnterminatedSentence() throws Exception {
+    // no blank line before the newdoc, so the sentence before it has no
+    // trailing empty sentence to drop and must not be dropped itself
+    String text = String.join("\n",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
         "# newdoc id = second",
         "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
         "",
         "");
-    assertEquals(2, readDocuments(text).size());
+    List<Annotation> documents = readDocuments(text);
+    assertEquals(2, documents.size());
+    assertEquals("Hola ", documents.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("Adiós ", documents.get(1).get(CoreAnnotations.TextAnnotation.class));
   }
 
-  /**
-   * readCoNLLUFileCreateCoNLLUDocuments opens a document before it reads
-   * anything, so a newdoc line at the top of the file starts a second one
-   * and leaves the first with no sentences in it.  This is invisible today
-   * only because the newdoc line is not recognized in the first place;
-   * fixing that makes every ordinary UD file come back with an empty
-   * Annotation in front of it.
-   */
-  @Ignore("a newdoc at the top of the file leaves an empty document in front of it")
-  @Test
-  public void testLeadingNewdocLeavesNoEmptyDocument() throws Exception {
-    String text = String.join("\n",
-        "# newdoc",
-        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
-        "",
-        "# newdoc",
-        "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
-        "",
-        "");
-    assertEquals(2, readDocuments(text).size());
-  }
-
-  /**
-   * The last sentence of a document is dropped if the file does not end
-   * with a blank line, since readCoNLLUFileCreateCoNLLUDocuments removes
-   * the trailing sentence whether or not anything was read into it.
-   */
-  @Ignore("a file with no trailing blank line loses its last sentence")
   @Test
   public void testNoTrailingBlankLine() throws Exception {
+    // the last sentence of a file which stops without a blank line is real
+    // and is kept
     String text = "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_\n";
-    assertEquals(1, readSentences(text).size());
+    List<CoreMap> sentences = readSentences(text);
+    assertEquals(1, sentences.size());
+    assertEquals("Hola", sentences.get(0).get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  @Test
+  public void testEmptyFile() throws Exception {
+    List<Annotation> documents = readDocuments("");
+    assertEquals(1, documents.size());
+    assertEquals(0, documents.get(0).get(CoreAnnotations.SentencesAnnotation.class).size());
   }
 }
