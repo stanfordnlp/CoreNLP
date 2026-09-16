@@ -787,14 +787,30 @@ public class CoNLLUReader {
       allFields.addAll(tokenFields);
       allFields.addAll(emptyFields);
       for (String[] fields : allFields) {
+        String enhancedField = fields[CoNLLU_EnhancedField];
+        // a word can have no enhanced dependencies of its own while other
+        // words in the same sentence do.  it simply gets no incoming edge
+        if (enhancedField.equals("_")) {
+          continue;
+        }
         IndexedWord dependent = graphNodes.get(fields[CoNLLU_IndexField]);
-        String[] arcs = fields[CoNLLU_EnhancedField].split("[|]");
+        String[] arcs = enhancedField.split("[|]");
         for (String arc : arcs) {
           String[] arcPieces = arc.split(":", 2);
           if (arcPieces[0].equals("0")) {
             enhancedRoots.add(dependent);
           } else {
+            if (arcPieces.length < 2) {
+              throw new IllegalArgumentException("Cannot parse the enhanced dependency |" + arc +
+                                                 "| of word " + fields[CoNLLU_IndexField] +
+                                                 ": expected a head and a relation separated by :");
+            }
             IndexedWord gov = graphNodes.get(arcPieces[0]);
+            if (gov == null) {
+              throw new IllegalArgumentException("The enhanced dependency |" + arc + "| of word " +
+                                                 fields[CoNLLU_IndexField] + " has a head, " +
+                                                 arcPieces[0] + ", which is not a word of this sentence");
+            }
             GrammaticalRelation reln = GrammaticalRelation.valueOf(Language.UniversalEnglish, arcPieces[1]);
             enhancedEdges.add(new SemanticGraphEdge(gov, dependent, reln, 1.0, false));
           }
