@@ -39,7 +39,7 @@ public class SemgrexMatch implements Serializable  {
 
   public SemgrexMatch(SemgrexPattern pattern, SemgrexMatcher matcher) {
     matchedPattern = pattern;
-    sg = matcher.sg;
+    sg = matcher.graphs.get(matcher.getGraph());
     namesToNodes = new HashMap<>(matcher.namesToNodes);
     namesToRelations = new HashMap<>(matcher.namesToRelations);
     namesToEdges = new HashMap<>(matcher.namesToEdges);

@@ -459,7 +459,7 @@ public class NodePattern extends SemgrexPattern  {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemgrexGraphs graphs, IndexedWord node,
+  public SemgrexMatcher matcher(SemgrexGraphs graphs, SemgrexGraphName currentGraph, IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
@@ -474,11 +474,13 @@ public class NodePattern extends SemgrexPattern  {
         throw new IllegalStateException("Semgrex pattern starts at the aligned root, " +
                                         "but it is being matched without an alignment: " + this);
       }
-      return new NodeMatcher(this, crossed, crossed.getDefault().getFirstRoot(),
-                             namesToNodes, namesToRelations, namesToEdges,
-                             variableStrings, ignoreCase);
+      graphs = crossed;
+      node = crossed.getDefault().getFirstRoot();
     }
-    return new NodeMatcher(this, graphs, node,
+    if (this.graphName != null) {
+      currentGraph = graphName;
+    }
+    return new NodeMatcher(this, graphs, currentGraph, node,
                            namesToNodes, namesToRelations, namesToEdges,
                            variableStrings, ignoreCase);
   }
@@ -516,11 +518,16 @@ public class NodePattern extends SemgrexPattern  {
 
     private final boolean ignoreCase;
 
-    public NodeMatcher(NodePattern n, SemgrexGraphs graphs,
+    private final SemgrexGraphName currentGraph;
+    private final SemanticGraph sg;
+
+    public NodeMatcher(NodePattern n, SemgrexGraphs graphs, SemgrexGraphName currentGraph,
                        IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
                        Map<String, SemanticGraphEdge> namesToEdges,
                        VariableStrings variableStrings, boolean ignoreCase) {
       super(graphs, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
+      this.currentGraph = currentGraph;
+      this.sg = graphs.get(currentGraph);
       myNode = n;
       this.ignoreCase = ignoreCase;
       resetChildIter();
@@ -754,6 +761,11 @@ public class NodePattern extends SemgrexPattern  {
     @Override
     public IndexedWord getMatch() {
       return nextMatch;
+    }
+
+    @Override
+    public SemgrexGraphName getGraph() {
+      return currentGraph;
     }
 
     @Override
