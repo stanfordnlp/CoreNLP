@@ -616,6 +616,94 @@ public class CoNLLUReaderTest {
     assertEquals("Hola", sentences.get(0).get(CoreAnnotations.TextAnnotation.class));
   }
 
+  // ------------------------------------------------------------------
+  // blank lines and stray comments
+  // ------------------------------------------------------------------
+
+  @Test
+  public void testDoubledBlankLine() throws Exception {
+    // a second blank line does not start an extra sentence with no words
+    // in it, which nothing downstream is prepared for
+    String text = String.join("\n",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\tSpaceAfter=No",
+        "",
+        "",
+        "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    List<CoreMap> sentences = readSentences(text);
+    assertEquals(2, sentences.size());
+    assertEquals("Hola", sentences.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("Adiós", sentences.get(1).get(CoreAnnotations.TextAnnotation.class));
+    // the handoff between the sentences still happens, and the blank lines
+    // add nothing to the text: Hola has SpaceAfter=No, so Adiós starts at
+    // 4, immediately after it
+    assertEquals("", tokens(sentences.get(1)).get(0).before());
+    assertEquals(4, tokens(sentences.get(1)).get(0).beginPosition());
+    assertEquals("HolaAdiós ",
+                 readDocuments(text).get(0).get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  @Test
+  public void testManyBlankLines() throws Exception {
+    String text = String.join("\n",
+        "",
+        "",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "",
+        "",
+        "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "",
+        "");
+    List<CoreMap> sentences = readSentences(text);
+    assertEquals(2, sentences.size());
+    assertEquals(1, tokens(sentences.get(0)).size());
+    assertEquals(1, tokens(sentences.get(1)).size());
+  }
+
+  @Test
+  public void testCommentsWithNoWordsAfterThem() throws Exception {
+    // a header comment cut off by a blank line is not a sentence of its
+    // own; it belongs to the next sentence which does have words
+    String text = String.join("\n",
+        "# header",
+        "",
+        "# sent_id = 1",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    List<CoreMap> sentences = readSentences(text);
+    assertEquals(1, sentences.size());
+    assertEquals(java.util.Arrays.asList("# header", "# sent_id = 1"),
+                 sentences.get(0).get(CoreAnnotations.CommentsAnnotation.class));
+  }
+
+  @Test
+  public void testBlankLinesAroundNewdoc() throws Exception {
+    String text = String.join("\n",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "",
+        "# newdoc id = second",
+        "",
+        "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    List<Annotation> documents = readDocuments(text);
+    assertEquals(2, documents.size());
+    assertEquals("Hola ", documents.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("Adiós ", documents.get(1).get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  @Test
+  public void testNothingButBlankLines() throws Exception {
+    List<Annotation> documents = readDocuments("\n\n\n");
+    assertEquals(1, documents.size());
+    assertEquals(0, documents.get(0).get(CoreAnnotations.SentencesAnnotation.class).size());
+  }
+
   @Test
   public void testEmptyFile() throws Exception {
     List<Annotation> documents = readDocuments("");
