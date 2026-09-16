@@ -9,6 +9,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -421,6 +422,62 @@ public class CoNLLUReaderTest {
     assertEquals(6, tokens(sentence).size());
     assertEquals("Ella come manzanas y él peras",
                  sentence.get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  @Test
+  public void testPartiallyEnhanced() throws Exception {
+    // manzanas has no enhanced dependency of its own.  the rest of the
+    // sentence still gets an enhanced graph, and manzanas is simply not
+    // attached in it
+    String text = String.join("\n",
+        "1\tElla\tella\tPRON\t_\t_\t2\tnsubj\t2:nsubj\t_",
+        "2\tcome\tcomer\tVERB\t_\t_\t0\troot\t0:root\t_",
+        "3\tmanzanas\tmanzana\tNOUN\t_\t_\t2\tobj\t_\tSpaceAfter=No",
+        "",
+        "");
+    CoreMap sentence = readSentences(text).get(0);
+    SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    assertNotNull(enhanced);
+    assertEquals(sorted("nsubj(come-2, Ella-1)"), describeEdges(enhanced));
+    assertEquals(1, enhanced.getRoots().size());
+    assertEquals(2, enhanced.getFirstRoot().index());
+
+    // the word is still a token, and the basic graph is untouched by any
+    // of this
+    assertEquals(3, tokens(sentence).size());
+    SemanticGraph basic = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    assertEquals(3, basic.size());
+    assertEquals(sorted("nsubj(come-2, Ella-1)", "obj(come-2, manzanas-3)"), describeEdges(basic));
+  }
+
+  @Test
+  public void testEnhancedHeadWhichIsNotAWord() throws Exception {
+    String text = String.join("\n",
+        "1\tElla\tella\tPRON\t_\t_\t2\tnsubj\t9:nsubj\t_",
+        "2\tcome\tcomer\tVERB\t_\t_\t0\troot\t0:root\tSpaceAfter=No",
+        "",
+        "");
+    try {
+      readSentences(text);
+      fail("Expected a dangling enhanced head to be reported");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().contains("9:nsubj"));
+    }
+  }
+
+  @Test
+  public void testEnhancedArcWithNoRelation() throws Exception {
+    String text = String.join("\n",
+        "1\tElla\tella\tPRON\t_\t_\t2\tnsubj\t2\t_",
+        "2\tcome\tcomer\tVERB\t_\t_\t0\troot\t0:root\tSpaceAfter=No",
+        "",
+        "");
+    try {
+      readSentences(text);
+      fail("Expected an enhanced dependency with no relation to be reported");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().contains("expected a head and a relation"));
+    }
   }
 
   // ------------------------------------------------------------------
