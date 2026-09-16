@@ -526,9 +526,13 @@ public class NodePattern extends SemgrexPattern  {
                        Map<String, SemanticGraphEdge> namesToEdges,
                        VariableStrings variableStrings, boolean ignoreCase) {
       super(graphs, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
+      myNode = n;
       this.currentGraph = currentGraph;
       this.sg = graphs.get(currentGraph);
-      myNode = n;
+      if (this.sg == null) {
+        throw new IllegalStateException("Semgrex pattern requested graph " + currentGraph +
+                                        ", but that graph is not present: " + this);
+      }
       this.ignoreCase = ignoreCase;
       resetChildIter();
     }
