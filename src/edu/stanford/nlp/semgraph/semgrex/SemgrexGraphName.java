@@ -18,7 +18,7 @@ public enum SemgrexGraphName {
 
   public static SemgrexGraphName fromName(String name) {
     for (SemgrexGraphName graph : values()) {
-      if (graph.lowerName.equals(name)) {
+      if (graph.lowerName.equalsIgnoreCase(name)) {
         return graph;
       }
     }
