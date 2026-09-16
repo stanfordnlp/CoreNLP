@@ -449,11 +449,6 @@ public class NodePattern extends SemgrexPattern  {
     return Collections.emptyList();
   }
 
-  @Override
-  GraphRelation arrivalRelation() {
-    return reln;
-  }
-
   public String getName() {
     return name;
   }
@@ -770,6 +765,22 @@ public class NodePattern extends SemgrexPattern  {
     @Override
     public SemgrexGraphName getGraph() {
       return currentGraph;
+    }
+
+    /**
+     * An alignment relation crosses to the other sentence, so the relations
+     * written after this node are matched there.
+     *<br>
+     * This matcher keeps the near side for itself: the alignment is walked
+     * in the direction of the side it started from, and ALIGNMENT's own
+     * iterator reads the map rather than either graph.
+     */
+    @Override
+    public SemgrexGraphs getGraphs() {
+      if (myNode.reln instanceof GraphRelation.ALIGNMENT) {
+        return graphs.crossAlignment();
+      }
+      return graphs;
     }
 
     @Override

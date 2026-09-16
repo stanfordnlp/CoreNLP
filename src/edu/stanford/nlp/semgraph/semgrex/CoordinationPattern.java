@@ -108,6 +108,7 @@ public class CoordinationPattern extends SemgrexPattern  {
     private final boolean considerAll;
     private IndexedWord nextNodeMatch = null;
     private SemgrexGraphName currentGraph = null;
+    private SemgrexGraphs currentGraphs = null;
     // do all con/dis-juncts have to be considered to determine a match?
     // i.e. true if conj and not negated or disj and negated
 
@@ -139,6 +140,7 @@ public class CoordinationPattern extends SemgrexPattern  {
       }
       nextNodeMatch = null;
       currentGraph = null;
+      currentGraphs = null;
     }
 
     @Override
@@ -184,6 +186,7 @@ public class CoordinationPattern extends SemgrexPattern  {
               } else if (myNode.isNodeCoord) {
                 nextNodeMatch = children[0].getMatch();
                 currentGraph = children[0].getGraph();
+                currentGraphs = children[0].getGraphs();
               }
               return true;
             }
@@ -215,6 +218,7 @@ public class CoordinationPattern extends SemgrexPattern  {
             if (myNode.isNodeCoord) {
               nextNodeMatch = children[currChild].getMatch();
               currentGraph = children[currChild].getGraph();
+              currentGraphs = children[currChild].getGraphs();
             }
             //    this.namesToNodes.putAll(children[currChild].namesToNodes);
             //   this.namesToRelations.putAll(children[currChild].namesToRelations);
@@ -241,6 +245,12 @@ public class CoordinationPattern extends SemgrexPattern  {
     @Override
     public SemgrexGraphName getGraph() {
       return currentGraph;
+    }
+
+    /** The graphs of whichever alternative matched */
+    @Override
+    public SemgrexGraphs getGraphs() {
+      return currentGraphs == null ? graphs : currentGraphs;
     }
 
     @Override
