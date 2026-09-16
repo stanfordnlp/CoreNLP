@@ -501,9 +501,10 @@ public abstract class SemgrexPattern implements Serializable  {
   public List<Pair<CoreMap, List<SemgrexMatch>>> matchSentences(List<CoreMap> sentences, boolean keepEmptyMatches) {
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = new ArrayList<>();
     for (CoreMap sentence : sentences) {
-      SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+      SemanticGraph basic = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-      SemgrexMatcher matcher = matcher(graph);
+      SemgrexGraphs graphs = SemgrexGraphs.of(basic, enhanced);
+      SemgrexMatcher matcher = matcher(graphs);
       if (!matcher.find()) {
         if (keepEmptyMatches) {
           matches.add(new Pair<>(sentence, new ArrayList<>()));
