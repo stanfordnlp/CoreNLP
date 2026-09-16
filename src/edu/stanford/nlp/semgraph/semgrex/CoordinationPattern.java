@@ -88,13 +88,14 @@ public class CoordinationPattern extends SemgrexPattern  {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemgrexGraphs graphs, IndexedWord node,
+  public SemgrexMatcher matcher(SemgrexGraphs graphs, SemgrexGraphName currentGraph,
+                                IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings,
                                 boolean ignoreCase) {
-    return new CoordinationMatcher(this, graphs, node,
+    return new CoordinationMatcher(this, graphs, currentGraph, node,
                                    namesToNodes, namesToRelations, namesToEdges,
                                    variableStrings, ignoreCase);
   }
@@ -106,10 +107,12 @@ public class CoordinationPattern extends SemgrexPattern  {
     private int currChild;
     private final boolean considerAll;
     private IndexedWord nextNodeMatch = null;
+    private SemgrexGraphName currentGraph = null;
     // do all con/dis-juncts have to be considered to determine a match?
     // i.e. true if conj and not negated or disj and negated
 
-    public CoordinationMatcher(CoordinationPattern c, SemgrexGraphs graphs, IndexedWord n,
+    public CoordinationMatcher(CoordinationPattern c, SemgrexGraphs graphs, SemgrexGraphName currentGraph,
+                               IndexedWord n,
                                Map<String, IndexedWord> namesToNodes,
                                Map<String, String> namesToRelations,
                                Map<String, SemanticGraphEdge> namesToEdges,
@@ -120,7 +123,7 @@ public class CoordinationPattern extends SemgrexPattern  {
       children = new SemgrexMatcher[myNode.children.size()];
       for (int i = 0; i < children.length; i++) {
         SemgrexPattern node = myNode.children.get(i);
-        children[i] = node.matcher(graphs,
+        children[i] = node.matcher(graphs, currentGraph,
                                    n, namesToNodes,
                                    namesToRelations, namesToEdges, variableStrings, ignoreCase);
       }
@@ -135,6 +138,7 @@ public class CoordinationPattern extends SemgrexPattern  {
         aChildren.resetChildIter();
       }
       nextNodeMatch = null;
+      currentGraph = null;
     }
 
     @Override
@@ -179,6 +183,7 @@ public class CoordinationPattern extends SemgrexPattern  {
                 currChild = -1;
               } else if (myNode.isNodeCoord) {
                 nextNodeMatch = children[0].getMatch();
+                currentGraph = children[0].getGraph();
               }
               return true;
             }
@@ -207,8 +212,10 @@ public class CoordinationPattern extends SemgrexPattern  {
             if (myNode.isNegated()) {
               currChild = children.length;
             }
-            if (myNode.isNodeCoord)
+            if (myNode.isNodeCoord) {
               nextNodeMatch = children[currChild].getMatch();
+              currentGraph = children[currChild].getGraph();
+            }
             //    this.namesToNodes.putAll(children[currChild].namesToNodes);
             //   this.namesToRelations.putAll(children[currChild].namesToRelations);
             return true;
@@ -229,6 +236,11 @@ public class CoordinationPattern extends SemgrexPattern  {
       } else {
         throw new UnsupportedOperationException();
       }
+    }
+
+    @Override
+    public SemgrexGraphName getGraph() {
+      return currentGraph;
     }
 
     @Override

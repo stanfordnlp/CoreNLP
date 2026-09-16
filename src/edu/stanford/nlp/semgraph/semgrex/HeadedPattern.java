@@ -121,12 +121,12 @@ class HeadedPattern extends SemgrexPattern {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemgrexGraphs graphs,
+  public SemgrexMatcher matcher(SemgrexGraphs graphs, SemgrexGraphName currentGraph,
                                 IndexedWord node, Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings, boolean ignoreCase) {
-    return new HeadedMatcher(this, graphs, node, namesToNodes, namesToRelations,
+    return new HeadedMatcher(this, graphs, currentGraph, node, namesToNodes, namesToRelations,
                              namesToEdges, variableStrings, ignoreCase);
   }
 
@@ -140,13 +140,14 @@ class HeadedPattern extends SemgrexPattern {
     private boolean finished = false;
     private boolean matchedAny = false;
 
-    public HeadedMatcher(HeadedPattern n, SemgrexGraphs graphs, IndexedWord node, Map<String, IndexedWord> namesToNodes,
+    public HeadedMatcher(HeadedPattern n, SemgrexGraphs graphs, SemgrexGraphName currentGraph,
+                         IndexedWord node, Map<String, IndexedWord> namesToNodes,
                          Map<String, String> namesToRelations, Map<String, SemanticGraphEdge> namesToEdges,
                          VariableStrings variableStrings, boolean ignoreCase) {
       super(graphs, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       this.myNode = n;
       this.ignoreCase = ignoreCase;
-      this.headMatcher = n.head.matcher(graphs, node, namesToNodes,
+      this.headMatcher = n.head.matcher(graphs, currentGraph, node, namesToNodes,
                                         namesToRelations, namesToEdges, variableStrings, ignoreCase);
     }
 
@@ -178,7 +179,7 @@ class HeadedPattern extends SemgrexPattern {
       // relations below it are matched against that sentence's graphs
       GraphRelation reln = myNode.arrivalRelation();
       SemgrexGraphs childGraphs = (reln instanceof GraphRelation.ALIGNMENT) ? graphs.crossAlignment() : graphs;
-      childMatcher = myNode.child.matcher(childGraphs, headMatcher.getMatch(),
+      childMatcher = myNode.child.matcher(childGraphs, headMatcher.getGraph(), headMatcher.getMatch(),
                                           namesToNodes, namesToRelations, namesToEdges,
                                           variableStrings, ignoreCase);
     }
@@ -220,6 +221,11 @@ class HeadedPattern extends SemgrexPattern {
     @Override
     public IndexedWord getMatch() {
       return headMatcher.getMatch();
+    }
+
+    @Override
+    public SemgrexGraphName getGraph() {
+      return headMatcher.getGraph();
     }
 
     @Override

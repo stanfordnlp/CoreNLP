@@ -343,7 +343,7 @@ public abstract class SemgrexPattern implements Serializable  {
   // ------------------------------------------------------------
 
   // These get implemented in semgrex.CoordinationMatcher and NodeMatcher
-  abstract SemgrexMatcher matcher(SemgrexGraphs graphs,
+  abstract SemgrexMatcher matcher(SemgrexGraphs graphs, SemgrexGraphName currentGraph,
                                   IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
                                   Map<String, SemanticGraphEdge> namesToEdges,
                                   VariableStrings variableStrings, boolean ignoreCase);
@@ -355,7 +355,7 @@ public abstract class SemgrexPattern implements Serializable  {
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg) {
-    return matcher(new SemgrexGraphs(sg), sg.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
+    return matcher(new SemgrexGraphs(sg), SemgrexGraphName.BASIC, sg.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }
 
   /**
@@ -366,7 +366,7 @@ public abstract class SemgrexPattern implements Serializable  {
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg, IndexedWord root) {
-    return matcher(new SemgrexGraphs(sg), root, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
+    return matcher(new SemgrexGraphs(sg), SemgrexGraphName.BASIC, root, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }
 
   /**
@@ -374,7 +374,7 @@ public abstract class SemgrexPattern implements Serializable  {
    * initial conditions on the variable assignments
    */
   public SemgrexMatcher matcher(SemanticGraph sg, Map<String, IndexedWord> variables) {
-    return matcher(new SemgrexGraphs(sg), sg.getFirstRoot(), variables, new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
+    return matcher(new SemgrexGraphs(sg), SemgrexGraphName.BASIC, sg.getFirstRoot(), variables, new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }
 
   /**
@@ -386,15 +386,15 @@ public abstract class SemgrexPattern implements Serializable  {
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg, boolean ignoreCase) {
-    return matcher(new SemgrexGraphs(sg), sg.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
+    return matcher(new SemgrexGraphs(sg), SemgrexGraphName.BASIC, sg.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
   }
 
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph) {
-    return matcher(SemgrexGraphs.aligned(hypGraph, alignment, txtGraph), hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
+    return matcher(SemgrexGraphs.aligned(hypGraph, alignment, txtGraph), SemgrexGraphName.BASIC, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }
 
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph, boolean ignoreCase) {
-    return matcher(SemgrexGraphs.aligned(hypGraph, alignment, txtGraph), hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
+    return matcher(SemgrexGraphs.aligned(hypGraph, alignment, txtGraph), SemgrexGraphName.BASIC, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
   }
 
   // batch processing

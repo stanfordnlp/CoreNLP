@@ -117,12 +117,13 @@ public class SortPattern extends SemgrexPattern  {
   }
 
   @Override
-  public SemgrexMatcher matcher(SemgrexGraphs graphs, IndexedWord node,
+  public SemgrexMatcher matcher(SemgrexGraphs graphs, SemgrexGraphName currentGraph,
+                                IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
                                 Map<String, SemanticGraphEdge> namesToEdges,
                                 VariableStrings variableStrings,
                                 boolean ignoreCase) {
-    return child.matcher(graphs, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);
+    return child.matcher(graphs, currentGraph, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);
   }
 }
