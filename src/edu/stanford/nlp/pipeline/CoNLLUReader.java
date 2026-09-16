@@ -47,6 +47,57 @@ public class CoNLLUReader {
   public static Pattern TOKEN_LINE = Pattern.compile("^[0-9]+\t.*");
   public static Pattern EMPTY_LINE = Pattern.compile("^[0-9]+[.][0-9]+\t.*");
 
+  /** The kinds of line a CoNLL-U file is made of */
+  enum LineType {
+    COMMENT, MWT, TOKEN, EMPTY, OTHER
+  }
+
+  /**
+   * Which kind of line this is, decided from its first few characters.
+   *<br>
+   * A comment starts with #.  The rest all start with an index: digits
+   * followed by - for the range of an MWT, . for an empty word, or a tab
+   * for a plain token.  Anything else, such as the blank line which ends
+   * a sentence, is OTHER.
+   */
+  static LineType classifyLine(String line) {
+    if (line.isEmpty()) {
+      return LineType.OTHER;
+    }
+    if (line.charAt(0) == '#') {
+      return LineType.COMMENT;
+    }
+    int idx = digitRunEnd(line, 0);
+    if (idx == 0 || idx >= line.length()) {
+      return LineType.OTHER;
+    }
+    char separator = line.charAt(idx);
+    if (separator == '\t') {
+      return LineType.TOKEN;
+    }
+    if (separator == '-') {
+      // an MWT is digits-digits, with no constraint on what follows
+      return digitRunEnd(line, idx + 1) > idx + 1 ? LineType.MWT : LineType.OTHER;
+    }
+    if (separator == '.') {
+      // an empty word is digits.digits, and then a tab
+      int end = digitRunEnd(line, idx + 1);
+      if (end > idx + 1 && end < line.length() && line.charAt(end) == '\t') {
+        return LineType.EMPTY;
+      }
+    }
+    return LineType.OTHER;
+  }
+
+  /** The index just past the run of digits starting at start, which may be start itself */
+  private static int digitRunEnd(String line, int start) {
+    int idx = start;
+    while (idx < line.length() && line.charAt(idx) >= '0' && line.charAt(idx) <= '9') {
+      ++idx;
+    }
+    return idx;
+  }
+
   /**
    * shorthands for CoreAnnotations
    **/
@@ -195,8 +246,10 @@ public class CoNLLUReader {
 
     /**
      * full doc text
+     *<br>
+     * A StringBuilder, as the text is accumulated a token at a time
      **/
-    public String docText = "";
+    public StringBuilder docText = new StringBuilder();
 
     public CoNLLUDocument() {
       sentences.add(new CoNLLUSentence());
@@ -236,28 +289,39 @@ public class CoNLLUReader {
      * Process line for current sentence.  Return true if processing empty line (indicating sentence end)
      **/
     public boolean processLine(String line) {
-      if (COMMENT_LINE.matcher(line).matches()) {
+      return processLine(line, classifyLine(line));
+    }
+
+    /**
+     * Process a line whose kind has already been decided by the caller
+     **/
+    public boolean processLine(String line, LineType lineType) {
+      switch (lineType) {
+      case COMMENT:
         addSentenceData(line);
-      } else if (MWT_LINE.matcher(line).matches()) {
+        return false;
+      case MWT:
         addMWTData(line);
-      } else if (TOKEN_LINE.matcher(line).matches()) {
+        return false;
+      case TOKEN:
         tokenLines.add(line);
-      } else if (EMPTY_LINE.matcher(line).matches()) {
+        return false;
+      case EMPTY:
         emptyLines.add(line);
-      } else {
+        return false;
+      default:
         return true;
       }
-      return false;
     }
 
     /**
      * Add sentence data for this sentence
      **/
     public void addSentenceData(String sentenceDataLine) {
-      if (COMMENT_LINE.matcher(sentenceDataLine).matches() && sentenceDataLine.contains("=")) {
-        String[] keyAndValue = sentenceDataLine.substring(1).split("=");
-        String key = sentenceDataLine.substring(1, sentenceDataLine.indexOf('='));
-        String value = sentenceDataLine.substring(sentenceDataLine.indexOf('='));
+      int equals = sentenceDataLine.indexOf('=');
+      if (equals >= 0 && !sentenceDataLine.isEmpty() && sentenceDataLine.charAt(0) == '#') {
+        String key = sentenceDataLine.substring(1, equals);
+        String value = sentenceDataLine.substring(equals);
         sentenceData.put(key, value);
       }
       comments.add(sentenceDataLine);
@@ -300,8 +364,10 @@ public class CoNLLUReader {
     docs.add(new CoNLLUDocument());
     // process lines
     for (String line : lines) {
+      LineType lineType = classifyLine(line);
       // if start of a new doc, reset for a new doc
-      if (DOCUMENT_LINE.matcher(line).matches()) {
+      // only a comment can be a newdoc line, so the rest are not tested at all
+      if (lineType == LineType.COMMENT && DOCUMENT_LINE.matcher(line).matches()) {
         // since the next sentence gets added to the previous doc
         // (see below), we'll need to remove that
         if (docs.size() > 0) {
@@ -312,7 +378,7 @@ public class CoNLLUReader {
         docs.add(new CoNLLUDocument());
       }
       // read in current line
-      boolean endSentence = docs.get(docs.size() - 1).lastSentence().processLine(line);
+      boolean endSentence = docs.get(docs.size() - 1).lastSentence().processLine(line, lineType);
       // if sentence is over, add sentence to doc, reset for new sentence
       if (endSentence) {
         docs.get(docs.size() - 1).sentences.add(new CoNLLUSentence());
@@ -364,8 +430,35 @@ public class CoNLLUReader {
     }
     // make sure to set docText AFTER all the above processing
     // the doc.docText is derived from the sentences (not the comments)
-    finalAnnotation.set(CoreAnnotations.TextAnnotation.class, doc.docText);
+    finalAnnotation.set(CoreAnnotations.TextAnnotation.class, doc.docText.toString());
     return finalAnnotation;
+  }
+
+  /**
+   * Parse a bar separated misc field, such as SpaceAfter=No|Gloss=cat, into its key value pairs.
+   *<br>
+   * A LinkedHashMap, since the order of the keys is kept if the document
+   * is written back out as CoNLL-U.  A piece with no = in it is skipped.
+   * A value may itself contain =, and keeps it.
+   */
+  public static Map<String, String> parseKeyValues(String field) {
+    Map<String, String> keyValues = new LinkedHashMap<>();
+    if (field == null || field.equals("_")) {
+      return keyValues;
+    }
+    int start = 0;
+    while (start <= field.length()) {
+      int end = field.indexOf('|', start);
+      if (end < 0) {
+        end = field.length();
+      }
+      int equals = field.indexOf('=', start);
+      if (equals >= 0 && equals < end) {
+        keyValues.put(field.substring(start, equals), field.substring(equals + 1, end));
+      }
+      start = end + 1;
+    }
+    return keyValues;
   }
 
   public static final String rebuildMisc(Map<String, String> miscKeyValues) {
@@ -390,11 +483,19 @@ public class CoNLLUReader {
    * Convert a single ten column CoNLLU line into a CoreLabel
    */
   public CoreLabel convertLineToCoreLabel(CoNLLUSentence sentence, String line, int sentenceIdx) {
-    List<String> fields = Arrays.asList(line.split("\t"));
-    CoreLabel cl = new CoreLabel();
+    return convertLineToCoreLabel(sentence, line.split("\t"), sentenceIdx);
+  }
+
+  /**
+   * Convert the already split fields of a ten column CoNLLU line into a CoreLabel
+   */
+  public CoreLabel convertLineToCoreLabel(CoNLLUSentence sentence, String[] fields, int sentenceIdx) {
+    // a CoNLL-U token ends up with roughly twenty annotations, so the
+    // CoreLabel is built wide enough to hold them without regrowing
+    CoreLabel cl = new CoreLabel(24);
     cl.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
 
-    String indexField = fields.get(CoNLLU_IndexField);
+    String indexField = fields[CoNLLU_IndexField];
     int sentenceTokenIndex;
     boolean isEmpty;
     if (indexField.indexOf('.') >= 0) {
@@ -410,38 +511,34 @@ public class CoNLLUReader {
       cl.setIndex(sentenceTokenIndex);
     }
 
-    cl.setWord(fields.get(CoNLLU_WordField));
-    cl.setValue(fields.get(CoNLLU_WordField));
-    cl.setOriginalText(fields.get(CoNLLU_WordField));
+    cl.setWord(fields[CoNLLU_WordField]);
+    cl.setValue(fields[CoNLLU_WordField]);
+    cl.setOriginalText(fields[CoNLLU_WordField]);
     cl.setIsNewline(false);
 
-    if (!fields.get(CoNLLU_LemmaField).equals("_"))
-      cl.setLemma(fields.get(CoNLLU_LemmaField));
+    if (!fields[CoNLLU_LemmaField].equals("_"))
+      cl.setLemma(fields[CoNLLU_LemmaField]);
 
-    if (!fields.get(CoNLLU_UPOSField).equals("_"))
-      cl.set(CoreAnnotations.CoarseTagAnnotation.class, fields.get(CoNLLU_UPOSField));
+    if (!fields[CoNLLU_UPOSField].equals("_"))
+      cl.set(CoreAnnotations.CoarseTagAnnotation.class, fields[CoNLLU_UPOSField]);
 
-    final String xpos = fields.get(CoNLLU_XPOSField);
+    final String xpos = fields[CoNLLU_XPOSField];
     if (!xpos.equals("_"))
       cl.setTag(xpos);
 
-    if (!fields.get(CoNLLU_FeaturesField).equals("_")) {
-      CoNLLUFeatures features = new CoNLLUFeatures(fields.get(CoNLLU_FeaturesField));
+    if (!fields[CoNLLU_FeaturesField].equals("_")) {
+      CoNLLUFeatures features = new CoNLLUFeatures(fields[CoNLLU_FeaturesField]);
       cl.set(CoreAnnotations.CoNLLUFeats.class, features);
     }
-    for (int extraColumnIdx = 10; extraColumnIdx < columnCount && extraColumnIdx < fields.size();
+    for (int extraColumnIdx = 10; extraColumnIdx < columnCount && extraColumnIdx < fields.length;
          extraColumnIdx++) {
-      cl.set(extraColumns.get(extraColumnIdx), fields.get(extraColumnIdx));
+      cl.set(extraColumns.get(extraColumnIdx), fields[extraColumnIdx]);
     }
 
     // LinkedHashMap because we care about trying to preserve the order of the keys
     // for later if we output the document in conllu
     // (although this doesn't put SpaceAfter in a canonical order)
-    Map<String, String> miscKeyValues = new LinkedHashMap<>();
-    if (!fields.get(CoNLLU_MiscField).equals("_")) {
-      Arrays.stream(fields.get(CoNLLU_MiscField).split("\\|")).forEach(
-        kv -> miscKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
-    }
+    Map<String, String> miscKeyValues = parseKeyValues(fields[CoNLLU_MiscField]);
 
     // SpacesBefore on a word that isn't the first in a document will
     // be replaced with the SpacesAfter from the previous token later
@@ -459,11 +556,7 @@ public class CoNLLUReader {
       cl.setIsMWTFirst(false);
     } else if (sentence.mwtData.containsKey(sentenceTokenIndex - 1)) {
       String miscInfo = sentence.mwtMiscs.get(sentence.mwtData.get(sentenceTokenIndex - 1));
-      Map<String, String> mwtKeyValues = new LinkedHashMap<>();
-      if (miscInfo != null && !miscInfo.equals("_")) {
-        Arrays.stream(miscInfo.split("\\|")).forEach(
-          kv -> mwtKeyValues.put(kv.split("=", 2)[0], kv.split("=")[1]));
-      }
+      Map<String, String> mwtKeyValues = parseKeyValues(miscInfo);
 
       // set MWT text
       cl.set(CoreAnnotations.MWTTokenTextAnnotation.class,
@@ -525,10 +618,16 @@ public class CoNLLUReader {
    **/
   public CoreMap convertCoNLLUSentenceToCoreMap(CoNLLUDocument doc, CoNLLUSentence sentence, int sentenceIdx) {
     List<String> lines = sentence.tokenLines;
-    // create CoreLabels
-    List<CoreLabel> coreLabels = new ArrayList<CoreLabel>();
+    // each line is split once here, and the fields are then reused for the
+    // CoreLabel and for the basic and enhanced graphs
+    List<String[]> tokenFields = new ArrayList<>(lines.size());
     for (String line : lines) {
-      CoreLabel cl = convertLineToCoreLabel(sentence, line, sentenceIdx);
+      tokenFields.add(line.split("\t"));
+    }
+    // create CoreLabels
+    List<CoreLabel> coreLabels = new ArrayList<CoreLabel>(tokenFields.size());
+    for (String[] fields : tokenFields) {
+      CoreLabel cl = convertLineToCoreLabel(sentence, fields, sentenceIdx);
       coreLabels.add(cl);
     }
     for (int i = 1 ; i < coreLabels.size() ; i++) {
@@ -548,12 +647,12 @@ public class CoNLLUReader {
         if (sentence.mwtData.get(cl.index() - 1) == processedMWTTokens) {
           // add this MWT to the doc text
           cl.setBeginPosition(doc.docText.length());
-          doc.docText += sentence.mwtTokens.get(processedMWTTokens);
+          doc.docText.append(sentence.mwtTokens.get(processedMWTTokens));
           cl.setEndPosition(doc.docText.length());
           lastMWTCharBegin = cl.beginPosition();
           lastMWTCharEnd = cl.endPosition();
           // add after for this MWT by getting after of last CoreLabel for this MWT
-          doc.docText += coreLabels.get(sentence.mwtLastCoreLabels.get(processedMWTTokens)).after();
+          doc.docText.append(coreLabels.get(sentence.mwtLastCoreLabels.get(processedMWTTokens)).after());
           // move on to next MWT
           processedMWTTokens += 1;
         } else {
@@ -563,15 +662,19 @@ public class CoNLLUReader {
         cl.setIsMWT(true);
       } else {
         cl.setBeginPosition(doc.docText.length());
-        doc.docText += cl.word();
+        doc.docText.append(cl.word());
         cl.setEndPosition(doc.docText.length());
-        doc.docText += cl.after();
+        doc.docText.append(cl.after());
       }
     }
 
-    List<CoreLabel> emptyLabels = new ArrayList<CoreLabel>();
+    List<String[]> emptyFields = new ArrayList<>(sentence.emptyLines.size());
     for (String line : sentence.emptyLines) {
-      CoreLabel cl = convertLineToCoreLabel(sentence, line, sentenceIdx);
+      emptyFields.add(line.split("\t"));
+    }
+    List<CoreLabel> emptyLabels = new ArrayList<CoreLabel>(emptyFields.size());
+    for (String[] fields : emptyFields) {
+      CoreLabel cl = convertLineToCoreLabel(sentence, fields, sentenceIdx);
       emptyLabels.add(cl);
     }
 
@@ -587,7 +690,7 @@ public class CoNLLUReader {
     // to build the basic SemanticGraph, first, prebuild the
     // IndexedWords that will make up the basic graph
     // (and possibly the enhanced graph)
-    Map<String, IndexedWord> graphNodes = new HashMap<>();
+    Map<String, IndexedWord> graphNodes = new HashMap<>(coreLabels.size() + emptyLabels.size());
     for (CoreLabel label : coreLabels) {
       String index = Integer.toString(label.index());
       graphNodes.put(index, new IndexedWord(label));
@@ -601,17 +704,16 @@ public class CoNLLUReader {
     // build SemanticGraphEdges for a basic graph
     List<SemanticGraphEdge> graphEdges = new ArrayList<>();
     List<IndexedWord> graphRoots = new ArrayList<>();
-    for (int i = 0; i < lines.size(); i++) {
-      List<String> fields = Arrays.asList(lines.get(i).split("\t"));
+    for (String[] fields : tokenFields) {
       // track whether any of these lines signify there is an enhanced graph
-      hasEnhanced = hasEnhanced || !fields.get(CoNLLU_EnhancedField).equals("_");
-      IndexedWord dependent = graphNodes.get(fields.get(CoNLLU_IndexField));
-      if (fields.get(CoNLLU_GovField).equals("0")) {
+      hasEnhanced = hasEnhanced || !fields[CoNLLU_EnhancedField].equals("_");
+      IndexedWord dependent = graphNodes.get(fields[CoNLLU_IndexField]);
+      if (fields[CoNLLU_GovField].equals("0")) {
         // no edges for the ROOT node
         graphRoots.add(dependent);
       } else {
-        IndexedWord gov = graphNodes.get(fields.get(CoNLLU_GovField));
-        GrammaticalRelation reln = GrammaticalRelation.valueOf(Language.UniversalEnglish, fields.get(CoNLLU_RelnField));
+        IndexedWord gov = graphNodes.get(fields[CoNLLU_GovField]);
+        GrammaticalRelation reln = GrammaticalRelation.valueOf(Language.UniversalEnglish, fields[CoNLLU_RelnField]);
         graphEdges.add(new SemanticGraphEdge(gov, dependent, reln, 1.0, false));
       }
     }
@@ -624,13 +726,12 @@ public class CoNLLUReader {
       List<SemanticGraphEdge> enhancedEdges = new ArrayList<>();
       List<IndexedWord> enhancedRoots = new ArrayList<>();
 
-      List<String> allLines = new ArrayList<>();
-      allLines.addAll(lines);
-      allLines.addAll(sentence.emptyLines);
-      for (String line : allLines) {
-        List<String> fields = Arrays.asList(line.split("\t"));
-        IndexedWord dependent = graphNodes.get(fields.get(CoNLLU_IndexField));
-        String[] arcs = fields.get(CoNLLU_EnhancedField).split("[|]");
+      List<String[]> allFields = new ArrayList<>(tokenFields.size() + emptyFields.size());
+      allFields.addAll(tokenFields);
+      allFields.addAll(emptyFields);
+      for (String[] fields : allFields) {
+        IndexedWord dependent = graphNodes.get(fields[CoNLLU_IndexField]);
+        String[] arcs = fields[CoNLLU_EnhancedField].split("[|]");
         for (String arc : arcs) {
           String[] arcPieces = arc.split(":", 2);
           if (arcPieces[0].equals("0")) {
