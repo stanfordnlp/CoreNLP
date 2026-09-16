@@ -371,6 +371,22 @@ public abstract class SemgrexPattern implements Serializable  {
     return matcher(new SemgrexGraphs(sg), SemgrexGraphName.BASIC, sg.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
   }
 
+  /**
+   * Matches against a sentence which has more than one graph of it.
+   *<br>
+   * The search starts in the basic graph; a relation written with a graph
+   * name, such as {@code >nsubj@enhanced}, moves it to that one.
+   */
+  public SemgrexMatcher matcher(SemgrexGraphs graphs) {
+    if (graphs.getDefault() == null) {
+      throw new IllegalStateException("Semgrex matching starts in the " + SemgrexGraphName.BASIC +
+                                      " graph, but the sentence does not have one");
+    }
+    return matcher(graphs, SemgrexGraphName.BASIC, graphs.getDefault().getFirstRoot(),
+                   new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(),
+                   new VariableStrings(), false);
+  }
+
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph) {
     return matcher(SemgrexGraphs.aligned(hypGraph, alignment, txtGraph), SemgrexGraphName.BASIC, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }

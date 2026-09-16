@@ -73,6 +73,25 @@ public class SemgrexGraphs implements Serializable {
   }
 
   /**
+   * The basic and enhanced graphs of one sentence.
+   *<br>
+   * Either may be null, for a sentence which was not given that graph.  A
+   * pattern which then asks for the missing one says so when it is run,
+   * rather than the caller having to decide in advance which graphs a
+   * pattern is going to want.
+   */
+  public static SemgrexGraphs of(SemanticGraph basic, SemanticGraph enhanced) {
+    Map<SemgrexGraphName, SemanticGraph> map = new EnumMap<>(SemgrexGraphName.class);
+    if (basic != null) {
+      map.put(SemgrexGraphName.BASIC, basic);
+    }
+    if (enhanced != null) {
+      map.put(SemgrexGraphName.ENHANCED, enhanced);
+    }
+    return new SemgrexGraphs(Collections.unmodifiableMap(map));
+  }
+
+  /**
    * Two sentences joined by an alignment, each with the one graph.
    *<br>
    * The two sides are linked to each other here rather than built on
