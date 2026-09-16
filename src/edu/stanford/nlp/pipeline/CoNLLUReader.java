@@ -151,13 +151,42 @@ public class CoNLLUReader {
     } else {
       int extraColumnIndex = 10;
       for (String className : props.getProperty("conllu.extraColumns").split(",")) {
-        if (classShorthandToFull.containsKey(className))
-          className = classShorthandToFull.get(className) + className;
-        Class clazz = Class.forName(className);
-        extraColumns.put(extraColumnIndex, clazz);
+        extraColumns.put(extraColumnIndex, findExtraColumnClass(className.trim()));
+        ++extraColumnIndex;
       }
     }
     columnCount += extraColumns.size();
+  }
+
+  /**
+   * The CoreAnnotation named by one piece of the conllu.extraColumns property.
+   *<br>
+   * A name may be a full class name, or one of the shorthands such as
+   * CoreAnnotations.TrueCaseAnnotation, where the first piece names a
+   * class listed in classShorthandToFull and supplies the package.
+   *<br>
+   * These annotations are classes nested inside another class, which
+   * Class.forName wants written with a $ rather than a dot.  The name is
+   * tried as given first, so that a full name which already uses a $ works
+   * as well as one written the way it would be written in Java.
+   */
+  static Class findExtraColumnClass(String className) throws ClassNotFoundException {
+    int firstDot = className.indexOf('.');
+    if (firstDot >= 0) {
+      String packageName = classShorthandToFull.get(className.substring(0, firstDot));
+      if (packageName != null) {
+        className = packageName + className.substring(0, firstDot) + '$' + className.substring(firstDot + 1);
+      }
+    }
+    try {
+      return Class.forName(className);
+    } catch (ClassNotFoundException e) {
+      int lastDot = className.lastIndexOf('.');
+      if (lastDot < 0) {
+        throw e;
+      }
+      return Class.forName(className.substring(0, lastDot) + '$' + className.substring(lastDot + 1));
+    }
   }
 
   // TODO: is there a better place for this?

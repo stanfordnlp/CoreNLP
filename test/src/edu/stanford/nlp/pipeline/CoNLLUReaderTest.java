@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.junit.Test;
 
@@ -87,10 +88,14 @@ public class CoNLLUReaderTest {
    * Write the text to a temp file and read it back as the reader's Annotations
    */
   private static List<Annotation> readDocuments(String conllu) throws Exception {
+    return readDocuments(new CoNLLUReader(), conllu);
+  }
+
+  private static List<Annotation> readDocuments(CoNLLUReader reader, String conllu) throws Exception {
     File file = IOUtils.writeStringToTempFile(conllu, "conllutest", "UTF-8");
     file.deleteOnExit();
     try {
-      return new CoNLLUReader().readCoNLLUFile(file.getPath());
+      return reader.readCoNLLUFile(file.getPath());
     } finally {
       file.delete();
     }
@@ -98,7 +103,11 @@ public class CoNLLUReaderTest {
 
   /** The sentences of text which is expected to hold exactly one document */
   private static List<CoreMap> readSentences(String conllu) throws Exception {
-    List<Annotation> documents = readDocuments(conllu);
+    return readSentences(new CoNLLUReader(), conllu);
+  }
+
+  private static List<CoreMap> readSentences(CoNLLUReader reader, String conllu) throws Exception {
+    List<Annotation> documents = readDocuments(reader, conllu);
     assertEquals(1, documents.size());
     return documents.get(0).get(CoreAnnotations.SentencesAnnotation.class);
   }
@@ -559,6 +568,61 @@ public class CoNLLUReaderTest {
         "");
     CoreLabel token = tokens(readSentences(text).get(0)).get(0);
     assertEquals("PERSON", token.ner());
+  }
+
+  @Test
+  public void testDefaultExtraColumnCount() throws Exception {
+    assertEquals(11, new CoNLLUReader().columnCount);
+  }
+
+  @Test
+  public void testSeveralExtraColumns() throws Exception {
+    // every named column gets its own index, not just the last one
+    Properties props = new Properties();
+    props.setProperty("conllu.extraColumns",
+                      "CoreAnnotations.NamedEntityTagAnnotation,CoreAnnotations.TrueCaseAnnotation");
+    CoNLLUReader reader = new CoNLLUReader(props);
+    assertEquals(12, reader.columnCount);
+
+    String text = String.join("\n",
+        "1\tJuan\tJuan\tPROPN\t_\t_\t0\troot\t_\t_\tPERSON\tINIT_UPPER",
+        "",
+        "");
+    CoreLabel token = tokens(readSentences(reader, text).get(0)).get(0);
+    assertEquals("PERSON", token.ner());
+    assertEquals("INIT_UPPER", token.get(CoreAnnotations.TrueCaseAnnotation.class));
+  }
+
+  @Test
+  public void testExtraColumnsIgnoreSpaces() throws Exception {
+    Properties props = new Properties();
+    props.setProperty("conllu.extraColumns",
+                      "CoreAnnotations.NamedEntityTagAnnotation, CoreAnnotations.CategoryAnnotation");
+    assertEquals(12, new CoNLLUReader(props).columnCount);
+  }
+
+  @Test
+  public void testFindExtraColumnClass() throws Exception {
+    // the shorthand names a class nested in CoreAnnotations
+    assertEquals(CoreAnnotations.TrueCaseAnnotation.class,
+                 CoNLLUReader.findExtraColumnClass("CoreAnnotations.TrueCaseAnnotation"));
+    // a full class name works written either way a person might write it
+    assertEquals(CoreAnnotations.TrueCaseAnnotation.class,
+                 CoNLLUReader.findExtraColumnClass("edu.stanford.nlp.ling.CoreAnnotations$TrueCaseAnnotation"));
+    assertEquals(CoreAnnotations.TrueCaseAnnotation.class,
+                 CoNLLUReader.findExtraColumnClass("edu.stanford.nlp.ling.CoreAnnotations.TrueCaseAnnotation"));
+  }
+
+  @Test
+  public void testUnknownExtraColumnClass() throws Exception {
+    Properties props = new Properties();
+    props.setProperty("conllu.extraColumns", "CoreAnnotations.NoSuchAnnotation");
+    try {
+      new CoNLLUReader(props);
+      fail("Expected an unknown annotation to be reported");
+    } catch (ClassNotFoundException e) {
+      // expected
+    }
   }
 
   @Test
