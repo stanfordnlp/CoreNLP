@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Set;
+
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.VariableStrings;
@@ -45,6 +47,22 @@ class HeadedPattern extends SemgrexPattern {
 
   public SemgrexPattern getHead() {
     return head;
+  }
+
+  /**
+   * Asks the head, and the relations off it only if the head is the start.
+   *<br>
+   * A head which was itself reached by a relation puts this whole pattern
+   * below one, so the relations it holds are matched from wherever that
+   * relation arrived and say nothing about where a match may begin.
+   */
+  @Override
+  boolean collectStartingGraphs(Set<SemgrexGraphName> names) {
+    if (head.collectStartingGraphs(names)) {
+      return true;
+    }
+    child.collectStartingGraphs(names);
+    return false;
   }
 
   @Override
@@ -211,6 +229,11 @@ class HeadedPattern extends SemgrexPattern {
     @Override
     public IndexedWord getMatch() {
       return headMatcher.getMatch();
+    }
+
+    @Override
+    SemgrexPattern getPattern() {
+      return myNode;
     }
 
     @Override

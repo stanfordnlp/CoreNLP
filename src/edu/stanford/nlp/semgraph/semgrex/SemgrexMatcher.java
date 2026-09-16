@@ -66,6 +66,50 @@ public abstract class SemgrexMatcher  {
    * Resets the matcher to start searching on the given node for matching
    * subexpressions.
    */
+  /**
+   * The nodes which could start a match, in the order they are tried.
+   *<br>
+   * Only the graphs a match could start in are searched.  For the usual
+   * pattern that is one graph, and the nodes come out in dependency order
+   * as they always have.  Where more than one graph is involved there is
+   * no such order between them, so the nodes are taken together in
+   * sentence order, which is where an enhanced graph's extra nodes belong.
+   */
+  private Iterator<IndexedWord> candidates() {
+    Set<SemgrexGraphName> names = getPattern().startingGraphs();
+    if (names.isEmpty()) {
+      // nothing in the pattern says where it may start, so anywhere it can
+      names = EnumSet.allOf(SemgrexGraphName.class);
+    }
+
+    List<SemanticGraph> searched = new ArrayList<>();
+    for (SemgrexGraphName name : names) {
+      SemanticGraph graph = graphs.get(name);
+      if (graph != null) {
+        searched.add(graph);
+      }
+    }
+    if (searched.isEmpty()) {
+      return Collections.emptyIterator();
+    }
+    if (searched.size() == 1) {
+      SemanticGraph only = searched.get(0);
+      try {
+        return only.topologicalSort().iterator();
+      } catch (CyclicGraphException e) {
+        return only.vertexSet().iterator();
+      }
+    }
+
+    // IndexedWord orders by index, then empty index, then copy, so the
+    // extra nodes of an enhanced graph land where they belong
+    Set<IndexedWord> union = new TreeSet<>();
+    for (SemanticGraph graph : searched) {
+      union.addAll(graph.vertexSet());
+    }
+    return union.iterator();
+  }
+
   void resetChildIter(IndexedWord node) {
     this.node = node;
     resetChildIter();
@@ -109,6 +153,13 @@ public abstract class SemgrexMatcher  {
   public abstract SemgrexGraphName getGraph();
 
   /**
+   * The pattern this matcher was built from.
+   * Not a member variable because each Matcher stores
+   * its local class instead of an abstract SemgrexPattern
+   */
+  abstract SemgrexPattern getPattern();
+
+  /**
    * The graphs a relation written after this one should be matched against.
    *<br>
    * Normally the ones this matcher is searching.  A matcher which crossed
@@ -131,16 +182,8 @@ public abstract class SemgrexMatcher  {
     // SemanticGraphs, but it was apparently the cause of various
     // thread safety bugs when the results were used for an old
     // SemanticGraph
-    SemanticGraph sg = graphs.getDefault();
     if (findIterator == null) {
-      if (sg == null) {
-        return false;
-      }
-      try {
-        findIterator = sg.topologicalSort().iterator();
-      } catch (CyclicGraphException e) {
-        findIterator = sg.vertexSet().iterator();
-      }
+      findIterator = candidates();
     }
 
     if (findCurrent != null && matches()) {

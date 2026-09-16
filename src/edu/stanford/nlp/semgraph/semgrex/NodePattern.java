@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -444,6 +446,45 @@ public class NodePattern extends SemgrexPattern  {
     return sb.toString();
   }
 
+  /**
+   * Adds the graph this relation is looked for in, and stops the walk there.
+   *<br>
+   * A relation is looked for in the graph it names, or in whichever graph
+   * the search is already in.  At the start of a pattern that is the basic
+   * graph, which is what the walk records; further in it depends on what
+   * the match crossed to get there, and is only known while matching.
+   *<br>
+   * Returning true is what stops the walk: the relations below this node
+   * are matched from the node this relation found, so they have no say in
+   * where a match may begin.  A node the search starts at rather than
+   * arrives at has no relation of its own to add, and lets the walk carry
+   * on to the relations written off it.
+   */
+  @Override
+  boolean collectStartingGraphs(Set<SemgrexGraphName> names) {
+    if (isStartingRelation()) {
+      return false;
+    }
+    names.add(graphName == null ? SemgrexGraphName.BASIC : graphName);
+    return true;
+  }
+
+  @Override
+  void collectRequiredGraphs(Set<SemgrexGraphName> names) {
+    if (!isStartingRelation()) {
+      names.add(graphName == null ? SemgrexGraphName.BASIC : graphName);
+    }
+  }
+
+  /**
+   * Whether this node is where the search begins rather than one reached by
+   * following an edge.  The roots stand for a starting point rather than
+   * for a relation of the graph, so there is no graph to look them up in.
+   */
+  private boolean isStartingRelation() {
+    return reln == null || reln.equals(GraphRelation.ROOT) || reln.equals(GraphRelation.ALIGNED_ROOT);
+  }
+
   @Override
   public List<SemgrexPattern> getChildren() {
     return Collections.emptyList();
@@ -760,6 +801,11 @@ public class NodePattern extends SemgrexPattern  {
     @Override
     public IndexedWord getMatch() {
       return nextMatch;
+    }
+
+    @Override
+    SemgrexPattern getPattern() {
+      return myNode;
     }
 
     @Override

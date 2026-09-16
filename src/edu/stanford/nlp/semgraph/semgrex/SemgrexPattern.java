@@ -282,6 +282,62 @@ public abstract class SemgrexPattern implements Serializable  {
 
   // NodePattern will return its one child, CoordinationPattern will
   // return the list of children it conjuncts or disjuncts
+  /**
+   * The graphs whose nodes could be the start of a match.
+   *<br>
+   * A node can only start a match if the relations written directly off it
+   * can be satisfied, and each of those names the graph it is looked for
+   * in, or the one the search was started in.  So an ordinary pattern can
+   * start at a node of the basic graph, and one which reaches across can
+   * also start at a node which only the named graph has.
+   *<br>
+   * The walk stops at each relation rather than carrying on through the
+   * whole pattern: what lies beyond a relation is matched from the node
+   * that relation found, so it has no say in where a match may begin.
+   *<br>
+   * An empty result means nothing in the pattern constrains where it
+   * starts, so any node of any graph will do.
+   */
+  Set<SemgrexGraphName> startingGraphs() {
+    Set<SemgrexGraphName> names = EnumSet.noneOf(SemgrexGraphName.class);
+    collectStartingGraphs(names);
+    return names;
+  }
+
+  /**
+   * Adds the graphs named by the relations at the top of this pattern.
+   *<br>
+   * Returns whether this pattern is itself reached by a relation, which is
+   * how the walk knows to stop.
+   */
+  boolean collectStartingGraphs(Set<SemgrexGraphName> names) {
+    boolean reached = false;
+    for (SemgrexPattern child : getChildren()) {
+      reached |= child.collectStartingGraphs(names);
+    }
+    return reached;
+  }
+
+  /**
+   * Every graph any relation of this pattern names, wherever it appears.
+   *<br>
+   * A sentence without one of these cannot be matched as the pattern
+   * intends, so the whole pattern is checked against the sentence once,
+   * when the search is set up, rather than a relation at a time as the
+   * match happens to reach it.
+   */
+  Set<SemgrexGraphName> requiredGraphs() {
+    Set<SemgrexGraphName> names = EnumSet.noneOf(SemgrexGraphName.class);
+    collectRequiredGraphs(names);
+    return names;
+  }
+
+  void collectRequiredGraphs(Set<SemgrexGraphName> names) {
+    for (SemgrexPattern child : getChildren()) {
+      child.collectRequiredGraphs(names);
+    }
+  }
+
   abstract List<SemgrexPattern> getChildren();
 
   abstract String localString();
@@ -378,11 +434,22 @@ public abstract class SemgrexPattern implements Serializable  {
    * name, such as {@code >nsubj@enhanced}, moves it to that one.
    */
   public SemgrexMatcher matcher(SemgrexGraphs graphs) {
-    if (graphs.getDefault() == null) {
+    SemanticGraph graph = graphs.getDefault();
+    if (graph == null) {
       throw new IllegalStateException("Semgrex matching starts in the " + SemgrexGraphName.BASIC +
-                                      " graph, but the sentence does not have one");
+                                      " graph, but the sentence has not got one");
     }
-    return matcher(graphs, SemgrexGraphName.BASIC, graphs.getDefault().getFirstRoot(),
+    // the whole pattern is checked against the sentence here, rather than a
+    // relation at a time as the match reaches it, so that a pattern which
+    // cannot be matched as written says so instead of quietly finding less
+    for (SemgrexGraphName name : requiredGraphs()) {
+      if (graphs.get(name) == null) {
+        throw new IllegalStateException("Semgrex pattern uses the " + name +
+                                        " graph, which the sentence has not got: " + this);
+      }
+    }
+
+    return matcher(graphs, SemgrexGraphName.BASIC, graph.getFirstRoot(),
                    new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(),
                    new VariableStrings(), false);
   }
