@@ -154,8 +154,11 @@ public abstract class SemgrexMatcher  {
 
   /**
    * The pattern this matcher was built from.
-   * Not a member variable because each Matcher stores
-   * its local class instead of an abstract SemgrexPattern
+   *<br>
+   * Not a member variable here because each matcher keeps its own pattern
+   * at its own type -- NodeMatcher holds a NodePattern, and so on -- and
+   * uses it without casting.  A field here would be a second copy of the
+   * same reference, at a less useful type.
    */
   abstract SemgrexPattern getPattern();
 
