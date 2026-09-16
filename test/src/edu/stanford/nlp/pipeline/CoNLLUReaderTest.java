@@ -182,6 +182,18 @@ public class CoNLLUReaderTest {
     assertEquals(LineType.OTHER, CoNLLUReader.classifyLine("-1\tfoo"));
   }
 
+  @Test
+  public void testDocumentsAndSentencesAreStandalone() {
+    // the nested classes keep no reference to a reader, so they can be
+    // built without one.  this will not compile if they stop being static
+    CoNLLUReader.CoNLLUDocument document = new CoNLLUReader.CoNLLUDocument();
+    assertTrue(document.isEmpty());
+    assertFalse(document.lastSentence().hasWords());
+    document.lastSentence().processLine("1\tHola\thola", LineType.TOKEN);
+    assertFalse(document.isEmpty());
+    assertTrue(document.lastSentence().hasWords());
+  }
+
   // ------------------------------------------------------------------
   // misc / features key values
   // ------------------------------------------------------------------
