@@ -272,11 +272,6 @@ public class CoNLLUReader {
     public List<CoNLLUSentence> sentences = new ArrayList<>();
 
     /**
-     * doc metadata
-     **/
-    public HashMap<String, String> docData = new HashMap<>();
-
-    /**
      * full doc text
      *<br>
      * A StringBuilder, as the text is accumulated a token at a time
@@ -329,6 +324,7 @@ public class CoNLLUReader {
     // in case the enhanced dependencies have empty words
     public List<String> emptyLines = new ArrayList<>();
     // data for the sentence contained in # key values
+    // "# sent_id = weblog-0003" is stored as sent_id -> weblog-0003
     public HashMap<String, String> sentenceData = new HashMap<>();
     // all of the comments, including the ones that showed up in sentenceData
     public List<String> comments = new ArrayList<>();
@@ -393,8 +389,11 @@ public class CoNLLUReader {
     public void addSentenceData(String sentenceDataLine) {
       int equals = sentenceDataLine.indexOf('=');
       if (equals >= 0 && !sentenceDataLine.isEmpty() && sentenceDataLine.charAt(0) == '#') {
-        String key = sentenceDataLine.substring(1, equals);
-        String value = sentenceDataLine.substring(equals);
+        // the # and the spaces around the = are how the line is written,
+        // not part of the key or of the value.  only the first = is a
+        // separator, so a value may contain one of its own
+        String key = sentenceDataLine.substring(1, equals).trim();
+        String value = sentenceDataLine.substring(equals + 1).trim();
         sentenceData.put(key, value);
       }
       comments.add(sentenceDataLine);

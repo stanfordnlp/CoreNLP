@@ -101,6 +101,22 @@ public class CoNLLUReaderTest {
     }
   }
 
+  /**
+   * The CoNLLUDocuments, before they are turned into Annotations
+   *<br>
+   * sentenceData lives on the CoNLLUSentence and is not carried onto the
+   * CoreMap, so a test of it has to read at this level.
+   */
+  private static List<CoNLLUReader.CoNLLUDocument> readRawDocuments(String conllu) throws Exception {
+    File file = IOUtils.writeStringToTempFile(conllu, "conllutest", "UTF-8");
+    file.deleteOnExit();
+    try {
+      return new CoNLLUReader().readCoNLLUFileCreateCoNLLUDocuments(file.getPath());
+    } finally {
+      file.delete();
+    }
+  }
+
   /** The sentences of text which is expected to hold exactly one document */
   private static List<CoreMap> readSentences(String conllu) throws Exception {
     return readSentences(new CoNLLUReader(), conllu);
@@ -549,6 +565,40 @@ public class CoNLLUReaderTest {
     assertEquals(5, countTokens(documents));
     assertEverySentenceIsRead(text);
     assertEverySentenceIsRead(withoutFinalBlankLine(text));
+  }
+
+  // ------------------------------------------------------------------
+  // sentence data from the comments
+  // ------------------------------------------------------------------
+
+  @Test
+  public void testSentenceData() throws Exception {
+    String text = String.join("\n",
+        "# sent_id = weblog-0003",
+        "# text = Hola mundo.",
+        "# a comment with no equals sign in it",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    CoNLLUReader.CoNLLUSentence sentence = readRawDocuments(text).get(0).sentences.get(0);
+    // neither the # nor the spaces around the = belong to the key or the value
+    assertEquals("weblog-0003", sentence.sentenceData.get("sent_id"));
+    assertEquals("Hola mundo.", sentence.sentenceData.get("text"));
+    // a comment with no = has no key and no value, but is still a comment
+    assertEquals(2, sentence.sentenceData.size());
+    assertEquals(3, sentence.comments.size());
+  }
+
+  @Test
+  public void testSentenceDataValueWithAnEqualsSign() throws Exception {
+    // only the first = separates the key from the value
+    String text = String.join("\n",
+        "# text = f(x) = y",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    CoNLLUReader.CoNLLUSentence sentence = readRawDocuments(text).get(0).sentences.get(0);
+    assertEquals("f(x) = y", sentence.sentenceData.get("text"));
   }
 
   // ------------------------------------------------------------------
