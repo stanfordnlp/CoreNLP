@@ -236,7 +236,7 @@ public class CoNLLUReader {
   /**
    * class to store info for a CoNLL-U document
    **/
-  public class CoNLLUDocument {
+  public static class CoNLLUDocument {
     /**
      * sentences for this doc
      **/
@@ -293,7 +293,7 @@ public class CoNLLUReader {
   /**
    * class to store info for a CoNLL-U sentence
    **/
-  public class CoNLLUSentence {
+  public static class CoNLLUSentence {
 
     // the token lines
     public List<String> tokenLines = new ArrayList<>();
