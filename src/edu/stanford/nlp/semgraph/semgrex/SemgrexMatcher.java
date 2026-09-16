@@ -22,7 +22,6 @@ public abstract class SemgrexMatcher  {
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(SemgrexMatcher.class);
 	
-  final SemanticGraph sg;
   final Map<String, IndexedWord> namesToNodes;
   final Map<String, String> namesToRelations;
   final Map<String, SemanticGraphEdge> namesToEdges;
@@ -45,7 +44,6 @@ public abstract class SemgrexMatcher  {
                  Map<String, SemanticGraphEdge> namesToEdges,
                  VariableStrings variableStrings) {
     this.graphs = graphs;
-    this.sg = graphs.getDefault();
     this.node = node;
     this.namesToNodes = namesToNodes;
     this.namesToRelations = namesToRelations;
@@ -108,6 +106,7 @@ public abstract class SemgrexMatcher  {
    */
   public abstract IndexedWord getMatch();
 
+  public abstract SemgrexGraphName getGraph();
 
   /**
    * Find the next match of the pattern in the graph.
@@ -120,6 +119,7 @@ public abstract class SemgrexMatcher  {
     // SemanticGraphs, but it was apparently the cause of various
     // thread safety bugs when the results were used for an old
     // SemanticGraph
+    SemanticGraph sg = graphs.getDefault();
     if (findIterator == null) {
       if (sg == null) {
         return false;
@@ -219,12 +219,4 @@ public abstract class SemgrexMatcher  {
 
   @Override
   public abstract String toString();
-
-  /**
-   * Returns the graph associated with this match.
-   */
-  public SemanticGraph getGraph() {
-    return sg;
-  }
-  
 }
