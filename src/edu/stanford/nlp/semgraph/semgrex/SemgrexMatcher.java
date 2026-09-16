@@ -109,6 +109,18 @@ public abstract class SemgrexMatcher  {
   public abstract SemgrexGraphName getGraph();
 
   /**
+   * The graphs a relation written after this one should be matched against.
+   *<br>
+   * Normally the ones this matcher is searching.  A matcher which crossed
+   * an alignment reports the sentence it crossed to, so that the relations
+   * below it carry on there.  Read after a match, since which graphs apply
+   * can depend on which part of the pattern matched.
+   */
+  public SemgrexGraphs getGraphs() {
+    return graphs;
+  }
+
+  /**
    * Find the next match of the pattern in the graph.
    *
    * @return whether there is a match somewhere in the graph

@@ -47,15 +47,6 @@ class HeadedPattern extends SemgrexPattern {
     return head;
   }
 
-  /**
-   * The relations below a head are matched in whichever graph the head
-   * arrived in, so only the head is asked, never the relations themselves.
-   */
-  @Override
-  GraphRelation arrivalRelation() {
-    return head.arrivalRelation();
-  }
-
   @Override
   List<SemgrexPattern> getChildren() {
     return Arrays.asList(head, child);
@@ -175,11 +166,10 @@ class HeadedPattern extends SemgrexPattern {
      * relations below one are matched against the other graph.
      */
     private void resetChild() {
-      // an alignment relation crosses to the other sentence, so the
-      // relations below it are matched against that sentence's graphs
-      GraphRelation reln = myNode.arrivalRelation();
-      SemgrexGraphs childGraphs = (reln instanceof GraphRelation.ALIGNMENT) ? graphs.crossAlignment() : graphs;
-      childMatcher = myNode.child.matcher(childGraphs, headMatcher.getGraph(), headMatcher.getMatch(),
+      // where the relations below the head are matched is whatever the
+      // head ended up in, which is not decided by the pattern alone: an
+      // alternative of a disjunction may name a graph the others do not
+      childMatcher = myNode.child.matcher(headMatcher.getGraphs(), headMatcher.getGraph(), headMatcher.getMatch(),
                                           namesToNodes, namesToRelations, namesToEdges,
                                           variableStrings, ignoreCase);
     }
@@ -226,6 +216,11 @@ class HeadedPattern extends SemgrexPattern {
     @Override
     public SemgrexGraphName getGraph() {
       return headMatcher.getGraph();
+    }
+
+    @Override
+    public SemgrexGraphs getGraphs() {
+      return headMatcher.getGraphs();
     }
 
     @Override
