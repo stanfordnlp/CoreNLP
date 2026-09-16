@@ -385,6 +385,173 @@ public class CoNLLUReaderTest {
   }
 
   // ------------------------------------------------------------------
+  // counting what was read
+  //
+  // a sentence quietly going missing does not fail any test which only
+  // looks at the sentences it does get back, so these count instead
+  // ------------------------------------------------------------------
+
+  /** One sentence: a sent_id and a chain of words hanging off the first */
+  private static String sentenceLines(int sentenceNumber, int words) {
+    StringBuilder lines = new StringBuilder();
+    lines.append("# sent_id = ").append(sentenceNumber).append("\n");
+    for (int i = 1; i <= words; i++) {
+      lines.append(i).append("\tw").append(sentenceNumber).append("_").append(i);
+      lines.append("\tw\tNOUN\t_\t_\t").append(i == 1 ? 0 : i - 1);
+      lines.append(i == 1 ? "\troot" : "\tdep").append("\t_\t_\n");
+    }
+    return lines.toString();
+  }
+
+  /** Several sentences, each followed by the blank line which ends it */
+  private static String sentenceBlock(int firstSentenceNumber, int count, int words) {
+    StringBuilder text = new StringBuilder();
+    for (int i = 0; i < count; i++) {
+      text.append(sentenceLines(firstSentenceNumber + i, words));
+      text.append("\n");
+    }
+    return text.toString();
+  }
+
+  /** The same text with the blank line at the end of the file taken off */
+  private static String withoutFinalBlankLine(String conllu) {
+    return conllu.substring(0, conllu.length() - 1);
+  }
+
+  private static int countSentences(List<Annotation> documents) {
+    int count = 0;
+    for (Annotation document : documents) {
+      count += document.get(CoreAnnotations.SentencesAnnotation.class).size();
+    }
+    return count;
+  }
+
+  private static int countTokens(List<Annotation> documents) {
+    int count = 0;
+    for (Annotation document : documents) {
+      count += document.get(CoreAnnotations.TokensAnnotation.class).size();
+    }
+    return count;
+  }
+
+  /**
+   * Every sentence written into the text comes back out of the reader.
+   *<br>
+   * The expected number is counted from the sent_id comments in the text
+   * itself, the way a treebank names its sentences, rather than written
+   * out beside it where it can drift away from the data.
+   */
+  private static void assertEverySentenceIsRead(String conllu) throws Exception {
+    int expected = 0;
+    for (String line : conllu.split("\n", -1)) {
+      if (line.startsWith("# sent_id")) {
+        expected++;
+      }
+    }
+    assertEquals(expected, countSentences(readDocuments(conllu)));
+  }
+
+  @Test
+  public void testCountsForAWholeFile() throws Exception {
+    String text = sentenceBlock(1, 50, 7);
+    List<Annotation> documents = readDocuments(text);
+    assertEquals(1, documents.size());
+    assertEquals(50, countSentences(documents));
+    assertEquals(350, countTokens(documents));
+    assertEverySentenceIsRead(text);
+  }
+
+  @Test
+  public void testCountsWithNoBlankLineAtTheEnd() throws Exception {
+    // a treebank which was hand edited, truncated, or built by
+    // concatenation can be missing the blank line after its last
+    // sentence.  that sentence is still a sentence
+    String text = sentenceBlock(1, 50, 7);
+    String truncated = withoutFinalBlankLine(text);
+    assertEquals(50, countSentences(readDocuments(truncated)));
+    assertEquals(350, countTokens(readDocuments(truncated)));
+    assertEverySentenceIsRead(truncated);
+    // and the two read to the same text, not merely the same counts
+    assertEquals(readDocuments(text).get(0).get(CoreAnnotations.TextAnnotation.class),
+                 readDocuments(truncated).get(0).get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  @Test
+  public void testDocumentAndSentenceCounts() throws Exception {
+    StringBuilder text = new StringBuilder();
+    int sentenceNumber = 1;
+    for (int doc = 1; doc <= 4; doc++) {
+      text.append("# newdoc id = doc").append(doc).append("\n");
+      text.append(sentenceBlock(sentenceNumber, 3, 5));
+      sentenceNumber += 3;
+    }
+    List<Annotation> documents = readDocuments(text.toString());
+    assertEquals(4, documents.size());
+    for (Annotation document : documents) {
+      assertEquals(3, document.get(CoreAnnotations.SentencesAnnotation.class).size());
+      assertEquals(15, document.get(CoreAnnotations.TokensAnnotation.class).size());
+    }
+    assertEquals(12, countSentences(documents));
+    assertEverySentenceIsRead(text.toString());
+  }
+
+  @Test
+  public void testDocumentAndSentenceCountsWithNoBlankLineAtTheEnd() throws Exception {
+    StringBuilder text = new StringBuilder();
+    int sentenceNumber = 1;
+    for (int doc = 1; doc <= 4; doc++) {
+      text.append("# newdoc id = doc").append(doc).append("\n");
+      text.append(sentenceBlock(sentenceNumber, 3, 5));
+      sentenceNumber += 3;
+    }
+    String truncated = withoutFinalBlankLine(text.toString());
+    List<Annotation> documents = readDocuments(truncated);
+    assertEquals(4, documents.size());
+    assertEquals(12, countSentences(documents));
+    assertEquals(60, countTokens(documents));
+    assertEverySentenceIsRead(truncated);
+  }
+
+  @Test
+  public void testCountsWithStrayBlankLines() throws Exception {
+    // extra blank lines between sentences, and around a newdoc, are not
+    // sentences of their own
+    String text = sentenceBlock(1, 3, 4) + "\n\n" +
+                  "# newdoc id = second\n" + "\n" +
+                  sentenceBlock(4, 2, 4) + "\n";
+    List<Annotation> documents = readDocuments(text);
+    assertEquals(2, documents.size());
+    assertEquals(3, documents.get(0).get(CoreAnnotations.SentencesAnnotation.class).size());
+    assertEquals(2, documents.get(1).get(CoreAnnotations.SentencesAnnotation.class).size());
+    assertEquals(5, countSentences(documents));
+    assertEquals(20, countTokens(documents));
+    assertEverySentenceIsRead(text);
+  }
+
+  @Test
+  public void testCountsWithMultiWordTokens() throws Exception {
+    // the MWT lines are not words, so they are not counted as tokens
+    String text = String.join("\n",
+        "# sent_id = 1",
+        "1\tVamos\tir\tVERB\t_\t_\t0\troot\t_\t_",
+        "2-3\tal\t_\t_\t_\t_\t_\t_\t_\t_",
+        "2\ta\ta\tADP\t_\t_\t4\tcase\t_\t_",
+        "3\tel\tel\tDET\t_\t_\t4\tdet\t_\t_",
+        "4\tparque\tparque\tNOUN\t_\t_\t1\tobl\t_\t_",
+        "",
+        "# sent_id = 2",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    List<Annotation> documents = readDocuments(text);
+    assertEquals(1, documents.size());
+    assertEquals(2, countSentences(documents));
+    assertEquals(5, countTokens(documents));
+    assertEverySentenceIsRead(text);
+    assertEverySentenceIsRead(withoutFinalBlankLine(text));
+  }
+
+  // ------------------------------------------------------------------
   // graphs
   // ------------------------------------------------------------------
 
