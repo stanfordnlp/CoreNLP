@@ -243,6 +243,11 @@ public class CoordinationPattern extends SemgrexPattern  {
     }
 
     @Override
+    SemgrexPattern getPattern() {
+      return myNode;
+    }
+
+    @Override
     public SemgrexGraphName getGraph() {
       return currentGraph;
     }

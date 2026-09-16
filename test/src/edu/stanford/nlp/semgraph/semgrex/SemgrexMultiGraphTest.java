@@ -3,6 +3,7 @@ package edu.stanford.nlp.semgraph.semgrex;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -179,6 +180,120 @@ public class SemgrexMultiGraphTest {
     // nowhere to start even if the pattern only ever asks for the enhanced
     assertThrows(IllegalStateException.class,
                  () -> pattern.matcher(SemgrexGraphs.of(null, ENHANCED)).find());
+  }
+
+  /**
+   * The search can start in the enhanced graph, over the nodes only it has
+   *<br>
+   * Which graph the search begins in decides which nodes it can begin at.
+   * Starting in the basic graph, "enh" is never reached, because the scan
+   * only ever visits nodes of the graph it started in.  A pattern rooted
+   * at an extra node of the enhanced graph therefore has to start there.
+   */
+  @Test
+  public void testStartingInTheEnhancedGraph() {
+    // a pattern with no relations says nothing about where it may start,
+    // so every graph is searched and the extra node is among the candidates
+    assertMatches("{word:enh}", both(), "enh");
+
+    // and a pattern whose first relation names the enhanced graph starts
+    // there, so it can begin at a node only that graph has
+    assertMatches("{word:enh} >deeper@enhanced {word:low}", both(), "enh");
+
+    // the relations below carry on in the graph it started in
+    assertMatches("{word:enh} >deeper@enhanced ({word:low})", both(), "enh");
+  }
+
+  /**
+   * Only the graphs a match could start in are searched
+   *<br>
+   * Which graphs those are is read off the relations written directly at
+   * the start of the pattern, each of which names the graph it is looked
+   * for in.  What lies beyond one of those relations is matched from the
+   * node it found, so it has no say in where a match may begin.
+   */
+  @Test
+  public void testStartingGraphs() {
+    // an ordinary pattern begins in the basic graph
+    assertEquals(EnumSet.of(SemgrexGraphName.BASIC),
+                 SemgrexPattern.compile("{word:root} >shared {}").startingGraphs());
+
+    // one which reaches across begins in the graph it names
+    assertEquals(EnumSet.of(SemgrexGraphName.ENHANCED),
+                 SemgrexPattern.compile("{word:root} >extra@enhanced {}").startingGraphs());
+
+    // either, when the first relation is a choice between them
+    assertEquals(EnumSet.of(SemgrexGraphName.BASIC, SemgrexGraphName.ENHANCED),
+                 SemgrexPattern.compile("{word:root} [>shared {} | >extra@enhanced {}]")
+                 .startingGraphs());
+
+    // two relations written side by side are both at the start
+    assertEquals(EnumSet.of(SemgrexGraphName.BASIC, SemgrexGraphName.ENHANCED),
+                 SemgrexPattern.compile("{word:root} >shared {} >extra@enhanced {}")
+                 .startingGraphs());
+
+    // but a graph named below the first relation says nothing about the start
+    assertEquals(EnumSet.of(SemgrexGraphName.BASIC),
+                 SemgrexPattern.compile("{word:root} >shared ({} >deeper@enhanced {})")
+                 .startingGraphs());
+
+    // a pattern with no relations is unconstrained
+    assertEquals(EnumSet.noneOf(SemgrexGraphName.class),
+                 SemgrexPattern.compile("{word:root}").startingGraphs());
+  }
+
+  /**
+   * A pattern which can only start in a graph the sentence has not got says so
+   */
+  @Test
+  public void testNoStartingGraphPresent() {
+    // named at the start
+    IllegalStateException e =
+      assertThrows(IllegalStateException.class,
+                   () -> findAll("{word:root} >extra@enhanced {}", basicOnly()));
+    assertTrue(e.getMessage().contains("ENHANCED"));
+
+    // named below the first relation, where the search could have started
+    // but the pattern still asks for a graph which is not there
+    e = assertThrows(IllegalStateException.class,
+                     () -> findAll("{word:root} >shared ({} >deeper@enhanced {})", basicOnly()));
+    assertTrue(e.getMessage().contains("ENHANCED"));
+
+    // and named in one branch of a choice, where the other branch could
+    // have matched: the pattern as written cannot be satisfied here
+    e = assertThrows(IllegalStateException.class,
+                     () -> findAll("{word:root} [>shared {} | >extra@enhanced {}]", basicOnly()));
+    assertTrue(e.getMessage().contains("ENHANCED"));
+
+    // every graph the pattern names, wherever it appears
+    assertEquals(EnumSet.of(SemgrexGraphName.BASIC, SemgrexGraphName.ENHANCED),
+                 SemgrexPattern.compile("{word:root} >shared ({} >deeper@enhanced {})")
+                 .requiredGraphs());
+  }
+
+  /**
+   * An ordinary pattern still visits the nodes in dependency order
+   *<br>
+   * Only one graph is searched for it, so the topological sort which was
+   * always used still applies.  The union of two graphs has no such order,
+   * and is visited in sentence order instead.
+   */
+  @Test
+  public void testOrdinaryPatternKeepsItsOrder() {
+    List<String> order = new ArrayList<>();
+    SemgrexMatcher matcher = SemgrexPattern.compile("{} >shared {}").matcher(both());
+    while (matcher.find()) {
+      order.add(matcher.getMatch().word());
+    }
+    assertEquals(Collections.singletonList("root"), order);
+
+    // every node of the basic graph is a candidate, in dependency order
+    order.clear();
+    matcher = SemgrexPattern.compile("{}=any >shared {}").matcher(SemgrexGraphs.of(BASIC, null));
+    while (matcher.find()) {
+      order.add(matcher.getMatch().word());
+    }
+    assertEquals(Collections.singletonList("root"), order);
   }
 
   /**
