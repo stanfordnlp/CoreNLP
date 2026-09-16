@@ -401,37 +401,39 @@ public class CoNLLUReader {
    * Read a CoNLL-U file and generate a list of CoNLLUDocument objects
    **/
   public List<CoNLLUDocument> readCoNLLUFileCreateCoNLLUDocuments(String filePath) throws IOException {
-    // set up iterable
-    BufferedReader reader = IOUtils.readerFromString(filePath);
-    Iterable<String> lines = IOUtils.getLineIterable(reader, false);
     List<CoNLLUDocument> docs = new ArrayList<>();
     docs.add(new CoNLLUDocument());
-    // process lines
-    for (String line : lines) {
-      LineType lineType = classifyLine(line);
-      // if start of a new doc, reset for a new doc
-      // only a comment can be a newdoc line, so the rest are not tested at all
-      if (lineType == LineType.COMMENT && DOCUMENT_LINE.matcher(line).matches()) {
-        CoNLLUDocument current = docs.get(docs.size() - 1);
-        // a newdoc at the very top of the file names the document which is
-        // already open, rather than asking for another one after it
-        if (!current.isEmpty()) {
-          // the sentence waiting for lines belongs to neither document
-          current.removeTrailingEmptySentence();
-          // the new document comes prebuilt with a blank sentence, so,
-          // no need to add one here
-          docs.add(new CoNLLUDocument());
+    // the reader is closed here rather than left for the garbage collector
+    // to get to, since reading a directory of treebanks would otherwise
+    // hold a file open for each one of them
+    try (BufferedReader reader = IOUtils.readerFromString(filePath)) {
+      // process lines
+      for (String line : IOUtils.getLineIterable(reader, false)) {
+        LineType lineType = classifyLine(line);
+        // if start of a new doc, reset for a new doc
+        // only a comment can be a newdoc line, so the rest are not tested at all
+        if (lineType == LineType.COMMENT && DOCUMENT_LINE.matcher(line).matches()) {
+          CoNLLUDocument current = docs.get(docs.size() - 1);
+          // a newdoc at the very top of the file names the document which is
+          // already open, rather than asking for another one after it
+          if (!current.isEmpty()) {
+            // the sentence waiting for lines belongs to neither document
+            current.removeTrailingEmptySentence();
+            // the new document comes prebuilt with a blank sentence, so,
+            // no need to add one here
+            docs.add(new CoNLLUDocument());
+          }
         }
-      }
-      // read in current line
-      boolean endSentence = docs.get(docs.size() - 1).lastSentence().processLine(line, lineType);
-      // if sentence is over, add sentence to doc, reset for new sentence
-      // a run of blank lines, or comments which no words follow, do not
-      // make a sentence of their own: a second blank line finds a sentence
-      // with nothing in it and leaves it to be filled, and comments carry
-      // over to the next sentence which does have words
-      if (endSentence && docs.get(docs.size() - 1).lastSentence().hasWords()) {
-        docs.get(docs.size() - 1).sentences.add(new CoNLLUSentence());
+        // read in current line
+        boolean endSentence = docs.get(docs.size() - 1).lastSentence().processLine(line, lineType);
+        // if sentence is over, add sentence to doc, reset for new sentence
+        // a run of blank lines, or comments which no words follow, do not
+        // make a sentence of their own: a second blank line finds a sentence
+        // with nothing in it and leaves it to be filled, and comments carry
+        // over to the next sentence which does have words
+        if (endSentence && docs.get(docs.size() - 1).lastSentence().hasWords()) {
+          docs.get(docs.size() - 1).sentences.add(new CoNLLUSentence());
+        }
       }
     }
     docs.get(docs.size() - 1).removeTrailingEmptySentence();
