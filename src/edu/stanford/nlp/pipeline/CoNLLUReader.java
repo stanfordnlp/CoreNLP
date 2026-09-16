@@ -320,6 +320,16 @@ public class CoNLLUReader {
     }
 
     /**
+     * True if any word has been read into this sentence
+     *<br>
+     * Comments on their own are not a sentence: CoNLL-U gives every
+     * sentence at least one word.
+     **/
+    public boolean hasWords() {
+      return !tokenLines.isEmpty() || !emptyLines.isEmpty();
+    }
+
+    /**
      * Process line for current sentence.  Return true if processing empty line (indicating sentence end)
      **/
     public boolean processLine(String line) {
@@ -416,7 +426,11 @@ public class CoNLLUReader {
       // read in current line
       boolean endSentence = docs.get(docs.size() - 1).lastSentence().processLine(line, lineType);
       // if sentence is over, add sentence to doc, reset for new sentence
-      if (endSentence) {
+      // a run of blank lines, or comments which no words follow, do not
+      // make a sentence of their own: a second blank line finds a sentence
+      // with nothing in it and leaves it to be filled, and comments carry
+      // over to the next sentence which does have words
+      if (endSentence && docs.get(docs.size() - 1).lastSentence().hasWords()) {
         docs.get(docs.size() - 1).sentences.add(new CoNLLUSentence());
       }
     }
@@ -446,16 +460,22 @@ public class CoNLLUReader {
     finalAnnotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
     int documentIdx = 0;
     int sentenceIdx = 0;
-    for (CoreMap sentence : finalAnnotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+    for (CoreMap sentence : sentences) {
       sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
-      if (sentenceIdx > 0) {
-        CoreMap previousSentence = finalAnnotation.get(CoreAnnotations.SentencesAnnotation.class).get(sentenceIdx-1);
+      List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      // a sentence with no words has no text to hand over, and nothing to
+      // hand it to.  such a sentence is not legal CoNLL-U, but a file with
+      // stray comments in it can still produce one
+      if (sentenceIdx > 0 && !sentenceTokens.isEmpty()) {
+        CoreMap previousSentence = sentences.get(sentenceIdx - 1);
         List<CoreLabel> previousTokens = previousSentence.get(CoreAnnotations.TokensAnnotation.class);
-        CoreLabel previousToken = previousTokens.get(previousTokens.size() - 1);
-        String previousAfter = previousToken.get(CoreAnnotations.AfterAnnotation.class);
-        sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).set(CoreAnnotations.BeforeAnnotation.class, previousAfter);
+        if (!previousTokens.isEmpty()) {
+          CoreLabel previousToken = previousTokens.get(previousTokens.size() - 1);
+          String previousAfter = previousToken.get(CoreAnnotations.AfterAnnotation.class);
+          sentenceTokens.get(0).set(CoreAnnotations.BeforeAnnotation.class, previousAfter);
+        }
       }
-      for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+      for (CoreLabel token : sentenceTokens) {
         token.set(CoreAnnotations.TokenBeginAnnotation.class, documentIdx);
         token.set(CoreAnnotations.TokenEndAnnotation.class, documentIdx + 1);
         tokens.add(token);
