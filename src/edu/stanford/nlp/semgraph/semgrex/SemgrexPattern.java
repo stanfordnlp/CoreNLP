@@ -30,7 +30,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * of the data to be searched.  Rather there is a linear scan through the graph
  * where matches are sought.
  *
- * <h3>Nodes</h3>
+ * <h2>Nodes</h2>
  *
  * A node is represented by a set of attributes and their values contained by
  * curly braces: {attr1:value1;attr2:value2;...}.  Therefore, {} represents any
@@ -81,7 +81,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code __}, this gives a pattern which matches every word and captures
  * the feature only where it exists:
  * {@code {morphofeatures:{PronType?:__#0%pron}}}
- * <h3>Relations</h3>
+ * <h2>Relations</h2>
  *
  * Relations are defined by a symbol representing the type of relationship and a
  * string or regular expression representing the value of the relationship. A
@@ -138,7 +138,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * and all of the nodes which have a sequence leading to A.
  *
  *
- * <h3>Searching more than one graph</h3>
+ * <h2>Searching more than one graph</h2>
  *
  * A sentence may have more than one dependency graph of it: a basic
  * graph, and an enhanced graph which adds edges the basic one cannot
@@ -182,7 +182,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * written if a graph it uses is missing.
  *
  *
- * <h3>Boolean relational operators</h3>
+ * <h2>Boolean relational operators</h2>
  *
  * Relations can be combined using the '&amp;' and '|' operators, negated with
  * the '!' operator, and made optional with the '?' operator.
@@ -227,7 +227,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * However, for more complex examples, partitioning a pattern may make
  * it more readable.
  *
- * <h3>Naming nodes</h3>
+ * <h2>Naming nodes</h2>
  *
  * Nodes can be given names (a.k.a. handles) using '='.  A named node will
  * be stored in a map that maps names to nodes so that if a match is found, the
@@ -255,7 +255,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code Y} and there are two paths to {@code Y}, one of
  * which goes through a {@code dobj} and one of which goes
  * through a {@code mod}.
- *</p><p>
+ * <p>
  * There is also a new operation, {@code uniq}, which allows for a query to reduce to only one match:
  *<br>
  * {@code {} >dobj ({} > {}=foo) >mod ({} > {}=foo) :: uniq}
@@ -265,7 +265,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *<br>
  * {@code {} >dobj ({} > {}=foo) >mod ({} > {}=foo) :: uniq foo}
  *
- * <h3>Naming relations</h3>
+ * <h2>Naming relations</h2>
  *
  * It is also possible to name relations.  For example, you can write the pattern
  * {@code {idx:1} >=reln {idx:2}}  The name of the relation will then
@@ -276,9 +276,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <p>
  * In the case of ancestor and descendant relations, the <b>last</b>
  * relation in the sequence of relations is the name used.
- * <p>
  *
- * <h3>Naming edges</h3>
+ *
+ * <h2>Naming edges</h2>
  *
  * It is also possible to name edges themselves.  The following
  * pattern will iterate through the edges from the root:
@@ -291,7 +291,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * This is only legal on relations with only one link between the two endpoints.
  * Other relations (such as grandparent) will throw a parse exception.
  *
- * <h3>Variable Groups</h3>
+ * <h2>Variable Groups</h2>
  *
  * If you write a node description using a regular expression, you can
  * assign its matching groups to variable names. If more than one node
@@ -305,7 +305,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * {@code {word:__#1%w} . {word:__#1%w}}
  *
- * <h3>TODO</h3>
+ * <h2>TODO</h2>
  * At present a Semgrex pattern will match only once at a root node, even if there is more than one way of satisfying
  * it under the root node. Probably its semantics should be changed, or at least the option should be given, to return
  * all matches, as is the case for Tregex.  (Is this still true?  It seems to match multiple times from root.)
