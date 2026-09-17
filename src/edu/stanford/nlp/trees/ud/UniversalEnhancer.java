@@ -26,8 +26,9 @@ public class UniversalEnhancer {
   /** Logging for the empty nodes and edges copied into an enhanced graph */
   private static final Redwood.RedwoodChannels log = Redwood.channels(UniversalEnhancer.class);
 
+  /** True if this is an empty word, such as the 5.1 of a gapped clause */
   private static boolean isEmptyNode(IndexedWord iw) {
-    return (iw.pseudoPosition() * 10) % 10 > 0;
+    return iw.getEmptyIndex() > 0;
   }
 
   public static void copyEmptyNodes(SemanticGraph source, SemanticGraph target) {
