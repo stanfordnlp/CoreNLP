@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import edu.stanford.nlp.ling.IndexedWord;
@@ -210,14 +211,13 @@ public class UniversalEnhancerTest {
   // ------------------------------------------------------------------
   // how an empty word is represented
   //
-  // this is the before picture for getting rid of pseudoPosition: the
-  // reader marks an empty word by setting a fractional pseudoPosition and
-  // does not set EmptyIndexAnnotation at all, which is why isEmptyNode
-  // tests the fraction
+  // the reader marks an empty word both ways for now: with its empty index,
+  // and with a fractional pseudoPosition which says the same thing less
+  // exactly.  isEmptyNode still tests the fraction
   // ------------------------------------------------------------------
 
   @Test
-  public void testEmptyWordIsMarkedWithPseudoPosition() {
+  public void testEmptyWordIsMarked() {
     IndexedWord empty = null;
     for (IndexedWord word : sentence(GAPPING).second().vertexListSorted()) {
       if (word.toCopyOrEmptyIndex().equals("5.1")) {
@@ -227,14 +227,39 @@ public class UniversalEnhancerTest {
     assertNotNull("expected an empty word 5.1 in the gapping sentence", empty);
     assertEquals("bought", empty.value());
     assertEquals(5, empty.index());
+    assertEquals(1, empty.getEmptyIndex());
     assertEquals(5.1, empty.pseudoPosition(), 1e-9);
-    // neither of these is what marks it: both are what a plain word has
-    assertEquals(0, empty.getEmptyIndex());
+    // an empty word is not a copy of anything
     assertEquals(0, empty.copyCount());
   }
 
   @Test
-  public void testPlainWordsHaveAWholePseudoPosition() {
+  public void testEmptyWordIsNotItsOwnIndex() {
+    // word 5 and empty word 5.1 share an index, so the empty index is what
+    // keeps them apart.  without it they hash alike, since hashCode does
+    // not look at the pseudoPosition
+    SemanticGraph enhanced = sentence(GAPPING).second();
+    IndexedWord plain = null;
+    IndexedWord empty = null;
+    for (IndexedWord word : enhanced.vertexListSorted()) {
+      if (word.index() == 5) {
+        if (word.getEmptyIndex() == 0) {
+          plain = word;
+        } else {
+          empty = word;
+        }
+      }
+    }
+    assertNotNull(plain);
+    assertNotNull(empty);
+    assertEquals("Mary", plain.value());
+    assertEquals("bought", empty.value());
+    assertNotEquals(plain, empty);
+    assertNotEquals(plain.hashCode(), empty.hashCode());
+  }
+
+  @Test
+  public void testPlainWordsHaveNoEmptyIndex() {
     for (IndexedWord word : sentence(COORD).second().vertexListSorted()) {
       assertEquals(describeNode(word), (double) word.index(), word.pseudoPosition(), 1e-9);
       assertEquals(describeNode(word), 0, word.getEmptyIndex());

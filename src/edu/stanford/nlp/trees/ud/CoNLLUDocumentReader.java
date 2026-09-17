@@ -236,9 +236,16 @@ public class CoNLLUDocumentReader implements
         word.set(CoreAnnotations.CoNLLUTokenSpanAnnotation.class, new IntPair(start, end));
         word.set(CoreAnnotations.IndexAnnotation.class, start);
       } else if(bits[0].contains(".")) {
-        double pseudoIndex = Double.parseDouble(bits[0]);
-        word.setIndex((int) pseudoIndex);
-        word.setPseudoPosition(pseudoIndex);
+        // an empty word is written as its index, a dot, and which empty
+        // word it is: 5.1 is the first empty word after word 5.  the two
+        // are parsed separately so that a tenth empty word, 5.10, is not
+        // read as word 6
+        int dot = bits[0].indexOf('.');
+        word.setIndex(Integer.parseInt(bits[0].substring(0, dot)));
+        word.setEmptyIndex(Integer.parseInt(bits[0].substring(dot + 1)));
+        // the pseudoPosition says the same thing less exactly, and is kept
+        // for the code which still reads it
+        word.setPseudoPosition(Double.parseDouble(bits[0]));
         word.setValue(bits[1]);
         word.set(CoreAnnotations.LemmaAnnotation.class, bits[2]);
         word.set(CoreAnnotations.CoarseTagAnnotation.class, bits[3]);
