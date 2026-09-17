@@ -113,6 +113,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td>A &lt;++ B <td>B is a right dependent of A
  * <tr><td>A &lt;-- B <td>B is a left dependent of A
  * <tr><td>A @ B <td>A is aligned to B (this is only used when you have two dependency graphs which are aligned)
+ * <tr><td>{@code A >reln@graph B} <td>the relation is searched for in the named graph of the sentence, such as {@code >nsubj@enhanced}; see below
  * <caption>Currently supported node relations</caption>
  * </table>
  * <p>
@@ -135,6 +136,50 @@ import edu.stanford.nlp.util.logging.Redwood;
  * the sequence.  Therefore, if A governs B with the relation type
  * foo, the pattern {@code {} >>foo {}} will then match A
  * and all of the nodes which have a sequence leading to A.
+ *
+ *
+ * <h3>Searching more than one graph</h3>
+ *
+ * A sentence may have more than one dependency graph of it: a basic
+ * graph, and an enhanced graph which adds edges the basic one cannot
+ * express and may have extra nodes of its own.  A relation is searched
+ * for in the basic graph unless it says otherwise, which it does by
+ * naming a graph after the relation with {@code @}:
+ * <p>
+ * {@code {} >nsubj@enhanced {}}
+ * <p>
+ * The graph names are {@code basic} and {@code enhanced}.  A name which
+ * is not one of those is rejected when the pattern is compiled, so a
+ * misspelling is reported rather than quietly matching nothing.
+ * <p>
+ * The choice carries to the relations written below the one which made
+ * it.  In {@code {} >nsubj@enhanced ({} >obj {})} the {@code >obj} is
+ * searched for in the enhanced graph as well, since it is matched from
+ * the node the {@code >nsubj@enhanced} arrived at.  A relation may name
+ * a graph of its own to go somewhere else, including back:
+ * {@code {} >nsubj@enhanced ({} >obj@basic {})}.
+ * <p>
+ * Relations written side by side are not below one another, so
+ * {@code {} >nsubj@enhanced {} >obj {}} asks for a node with an
+ * enhanced nsubj and a basic obj.  Parentheses are what put one relation
+ * below another; see the note above about chains of relations.
+ * <p>
+ * Which graphs a pattern names also decides where a match can start.
+ * The nodes searched are those of the graphs the relations at the start
+ * of the pattern name, so a pattern which reaches into the enhanced
+ * graph can begin at a node only that graph has.  This is how the empty
+ * nodes of an enhanced graph are reached:
+ * <p>
+ * {@code {} <@enhanced {} !< {}}
+ * <p>
+ * matches a node with a governor in the enhanced graph and none in the
+ * basic graph, which is to say a node the basic graph has not got.  A
+ * pattern with no relations at all says nothing about where it starts,
+ * so it searches every graph of the sentence.
+ * <p>
+ * A pattern which names a graph the sentence has not got is an error
+ * rather than an empty result, since a pattern cannot be matched as
+ * written if a graph it uses is missing.
  *
  *
  * <h3>Boolean relational operators</h3>
