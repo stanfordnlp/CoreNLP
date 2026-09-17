@@ -8,6 +8,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Iterator;
 import java.util.Properties;
@@ -22,6 +23,9 @@ import java.util.regex.Pattern;
 
 public class UniversalEnhancer {
 
+  /** Logging for the empty nodes and edges copied into an enhanced graph */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(UniversalEnhancer.class);
+
   private static boolean isEmptyNode(IndexedWord iw) {
     return (iw.pseudoPosition() * 10) % 10 > 0;
   }
@@ -30,7 +34,7 @@ public class UniversalEnhancer {
     for (IndexedWord node : source.vertexSet()) {
       if (isEmptyNode(node)) {
         target.addVertex(node);
-        System.err.println("added vertex" + node);
+        log.debug("added vertex " + node);
       }
     }
 
@@ -38,14 +42,13 @@ public class UniversalEnhancer {
     for (SemanticGraphEdge edge: target.edgeListSorted()) {
       if (edge.getRelation().getShortName().equals("orphan")) {
         target.removeEdge(edge);
-        System.err.println("removed edge" + edge);
-
+        log.debug("removed edge " + edge);
       }
     }
     for (SemanticGraphEdge edge : source.edgeIterable()) {
       if (edge.getRelation().getShortName().equals("orphan") || isEmptyNode(edge.getDependent()) || isEmptyNode(edge.getGovernor())) {
         target.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
-        System.err.println("added edge" + edge);
+        log.debug("added edge " + edge);
       }
     }
   }
