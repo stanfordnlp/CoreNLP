@@ -1536,6 +1536,42 @@ public class SemgrexTest {
     runTest("{}=foo : {word:B} - {}=foo", graph, "A");
   }
 
+  /**
+   * A choice between two runs of adjacent words, each written as a chain
+   *<br>
+   * Spanish clitics are the case this is for: they follow an infinitive
+   * and are written onto it, as in "dárselo", but come before a finite
+   * verb, as in "se lo quiere dar".  One pattern looks for both, with a
+   * chain inside each alternative so that the two clitics have to be next
+   * to each other and in that order.
+   *<br>
+   * The parentheses are what make a chain rather than a pair of relations
+   * of the verb: "{} . ({word:se} . {word:lo})" asks for a "se" after the
+   * verb and a "lo" after that "se", not for a "se" and a "lo" both after
+   * the verb.
+   */
+  @Test
+  public void testAdjacentChainDisjunction() {
+    // "quiere dárselo", with the infinitive split from its clitics
+    String enclitic = "[quiere-1 xcomp> [dar-2 obj> lo-4 iobj> se-3]]";
+    // "se lo quiere dar", the same words before the finite verb
+    String proclitic = "[quiere-3 obj> lo-2 iobj> se-1 xcomp> dar-4]";
+
+    String pattern = "{}=verb [ . ({word:se} . {word:lo}) | - ({word:lo} - {word:se})]";
+    runTest(pattern, enclitic, "dar");
+    runTest(pattern, proclitic, "quiere");
+
+    // each alternative finds only the order it is written for
+    runTest("{}=verb . ({word:se} . {word:lo})", enclitic, "dar");
+    runTest("{}=verb . ({word:se} . {word:lo})", proclitic);
+    runTest("{}=verb - ({word:lo} - {word:se})", proclitic, "quiere");
+    runTest("{}=verb - ({word:lo} - {word:se})", enclitic);
+
+    // without the parentheses the relations are both of the verb, which
+    // asks for something else entirely and finds nothing here
+    runTest("{}=verb . {word:se} . {word:lo}", enclitic);
+  }
+
   @Test
   public void testRightLeft() {
     // test using a colon expression so that the targeted nodes
