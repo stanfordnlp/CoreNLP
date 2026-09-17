@@ -36,19 +36,20 @@ public class CoNLLUReader {
   public static final int CoNLLU_EnhancedField = 8;
   public static final int CoNLLU_MiscField = 9;
 
-  public int columnCount = 10;
+  /** How many columns a line of this file is read as, 10 plus any extras */
+  public final int columnCount;
 
   /**
    * patterns to match in CoNLL-U file
    **/
-  public static Pattern COMMENT_LINE = Pattern.compile("^#.*");
+  public static final Pattern COMMENT_LINE = Pattern.compile("^#.*");
   // a newdoc line is normally followed by an id, as in
   // "# newdoc id = reviews-091234", but the bare form is also legal.
   // the optional whitespace keeps "# newdocument" from matching
-  public static Pattern DOCUMENT_LINE = Pattern.compile("^# newdoc(\\s.*)?$");
-  public static Pattern MWT_LINE = Pattern.compile("^[0-9]+-[0-9]+.*");
-  public static Pattern TOKEN_LINE = Pattern.compile("^[0-9]+\t.*");
-  public static Pattern EMPTY_LINE = Pattern.compile("^[0-9]+[.][0-9]+\t.*");
+  public static final Pattern DOCUMENT_LINE = Pattern.compile("^# newdoc(\\s.*)?$");
+  public static final Pattern MWT_LINE = Pattern.compile("^[0-9]+-[0-9]+.*");
+  public static final Pattern TOKEN_LINE = Pattern.compile("^[0-9]+\t.*");
+  public static final Pattern EMPTY_LINE = Pattern.compile("^[0-9]+[.][0-9]+\t.*");
 
   /** The kinds of line a CoNLL-U file is made of */
   enum LineType {
@@ -104,12 +105,14 @@ public class CoNLLUReader {
   /**
    * shorthands for CoreAnnotations
    **/
-  public static HashMap<String, String> classShorthandToFull = new HashMap<>();
+  public static final Map<String, String> classShorthandToFull;
 
   static {
-    classShorthandToFull.put("CoreAnnotations", "edu.stanford.nlp.ling.");
-    classShorthandToFull.put("SemanticGraphCoreAnnotations", "edu.stanford.nlp.semgraph.");
-    classShorthandToFull.put("SentimentCoreAnnotations", "edu.stanford.nlp.sentiment.");
+    Map<String, String> shorthands = new HashMap<>();
+    shorthands.put("CoreAnnotations", "edu.stanford.nlp.ling.");
+    shorthands.put("SemanticGraphCoreAnnotations", "edu.stanford.nlp.semgraph.");
+    shorthands.put("SentimentCoreAnnotations", "edu.stanford.nlp.sentiment.");
+    classShorthandToFull = Collections.unmodifiableMap(shorthands);
   }
 
   /**
@@ -138,7 +141,7 @@ public class CoNLLUReader {
    * <p>
    * conllu.extraColumns = CoreAnnotations.TrueCaseAnnotation,CoreAnnotations.CategoryAnnotation
    */
-  private HashMap<Integer, Class> extraColumns = new HashMap<>();
+  private final Map<Integer, Class<? extends CoreAnnotation<String>>> extraColumns = new HashMap<>();
 
   public CoNLLUReader() throws ClassNotFoundException {
     this(new Properties());
@@ -155,7 +158,7 @@ public class CoNLLUReader {
         ++extraColumnIndex;
       }
     }
-    columnCount += extraColumns.size();
+    columnCount = 10 + extraColumns.size();
   }
 
   /**
@@ -170,7 +173,8 @@ public class CoNLLUReader {
    * tried as given first, so that a full name which already uses a $ works
    * as well as one written the way it would be written in Java.
    */
-  static Class findExtraColumnClass(String className) throws ClassNotFoundException {
+  @SuppressWarnings("unchecked")
+  static Class<? extends CoreAnnotation<String>> findExtraColumnClass(String className) throws ClassNotFoundException {
     int firstDot = className.indexOf('.');
     if (firstDot >= 0) {
       String packageName = classShorthandToFull.get(className.substring(0, firstDot));
@@ -178,15 +182,21 @@ public class CoNLLUReader {
         className = packageName + className.substring(0, firstDot) + '$' + className.substring(firstDot + 1);
       }
     }
+    Class<?> clazz;
     try {
-      return Class.forName(className);
+      clazz = Class.forName(className);
     } catch (ClassNotFoundException e) {
       int lastDot = className.lastIndexOf('.');
       if (lastDot < 0) {
         throw e;
       }
-      return Class.forName(className.substring(0, lastDot) + '$' + className.substring(lastDot + 1));
+      clazz = Class.forName(className.substring(0, lastDot) + '$' + className.substring(lastDot + 1));
     }
+    if (!CoreAnnotation.class.isAssignableFrom(clazz)) {
+      throw new IllegalArgumentException("Cannot use " + clazz.getName() +
+                                         " as an extra column: it is not a CoreAnnotation");
+    }
+    return (Class<? extends CoreAnnotation<String>>) clazz;
   }
 
   // TODO: is there a better place for this?
@@ -269,14 +279,14 @@ public class CoNLLUReader {
     /**
      * sentences for this doc
      **/
-    public List<CoNLLUSentence> sentences = new ArrayList<>();
+    public final List<CoNLLUSentence> sentences = new ArrayList<>();
 
     /**
      * full doc text
      *<br>
      * A StringBuilder, as the text is accumulated a token at a time
      **/
-    public StringBuilder docText = new StringBuilder();
+    public final StringBuilder docText = new StringBuilder();
 
     public CoNLLUDocument() {
       sentences.add(new CoNLLUSentence());
@@ -320,22 +330,22 @@ public class CoNLLUReader {
   public static class CoNLLUSentence {
 
     // the token lines
-    public List<String> tokenLines = new ArrayList<>();
+    public final List<String> tokenLines = new ArrayList<>();
     // in case the enhanced dependencies have empty words
-    public List<String> emptyLines = new ArrayList<>();
+    public final List<String> emptyLines = new ArrayList<>();
     // data for the sentence contained in # key values
     // "# sent_id = weblog-0003" is stored as sent_id -> weblog-0003
-    public HashMap<String, String> sentenceData = new HashMap<>();
+    public final Map<String, String> sentenceData = new HashMap<>();
     // all of the comments, including the ones that showed up in sentenceData
-    public List<String> comments = new ArrayList<>();
+    public final List<String> comments = new ArrayList<>();
     // map indices in token list to mwt data if there is any
-    HashMap<Integer, Integer> mwtData = new HashMap<>();
+    final Map<Integer, Integer> mwtData = new HashMap<>();
     // mwt tokens
-    List<String> mwtTokens = new ArrayList<>();
+    final List<String> mwtTokens = new ArrayList<>();
     // mwt misc info
-    List<String> mwtMiscs = new ArrayList<>();
+    final List<String> mwtMiscs = new ArrayList<>();
     // indexes of last CoreLabel for each MWT
-    List<Integer> mwtLastCoreLabels = new ArrayList<>();
+    final List<Integer> mwtLastCoreLabels = new ArrayList<>();
 
     /**
      * How to refer to this sentence when reporting a line which cannot be read

@@ -631,6 +631,32 @@ public class CoNLLUReaderTest {
   }
 
   // ------------------------------------------------------------------
+  // the reader's own state cannot be scribbled on
+  // ------------------------------------------------------------------
+
+  @Test
+  public void testClassShorthandsAreReadOnly() {
+    try {
+      CoNLLUReader.classShorthandToFull.put("Nope", "com.example.");
+      fail("Expected the shorthands to be unmodifiable");
+    } catch (UnsupportedOperationException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void testExtraColumnMustBeACoreAnnotation() throws Exception {
+    Properties props = new Properties();
+    props.setProperty("conllu.extraColumns", "java.lang.String");
+    try {
+      new CoNLLUReader(props);
+      fail("Expected a class which is not a CoreAnnotation to be rejected");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("not a CoreAnnotation"));
+    }
+  }
+
+  // ------------------------------------------------------------------
   // sentence data from the comments
   // ------------------------------------------------------------------
 
