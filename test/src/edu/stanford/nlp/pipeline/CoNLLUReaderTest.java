@@ -568,6 +568,117 @@ public class CoNLLUReaderTest {
   }
 
   // ------------------------------------------------------------------
+  // line numbers
+  // ------------------------------------------------------------------
+
+  /** The line number of every token of every sentence, in order */
+  private static List<Integer> lineNumbers(List<CoreMap> sentences) {
+    List<Integer> found = new ArrayList<>();
+    for (CoreMap sentence : sentences) {
+      for (CoreLabel token : tokens(sentence)) {
+        found.add(token.get(CoreAnnotations.LineNumberAnnotation.class));
+      }
+    }
+    return found;
+  }
+
+  @Test
+  public void testLineNumbers() throws Exception {
+    // written out with the line each word sits on, counting from 1 the way
+    // an editor does, so that the expected numbers can be read off
+    String text = String.join("\n",
+        /*  1 */ "# sent_id = 1",
+        /*  2 */ "# text = Hola mundo.",
+        /*  3 */ "1\tHola\thola\tINTJ\t_\t_\t2\tdiscourse\t_\t_",
+        /*  4 */ "2\tmundo\tmundo\tNOUN\t_\t_\t0\troot\t_\tSpaceAfter=No",
+        /*  5 */ "3\t.\t.\tPUNCT\t_\t_\t2\tpunct\t_\t_",
+        /*  6 */ "",
+        /*  7 */ "# sent_id = 2",
+        /*  8 */ "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
+        /*  9 */ "",
+                 "");
+    assertEquals(java.util.Arrays.asList(3, 4, 5, 8), lineNumbers(readSentences(text)));
+  }
+
+  @Test
+  public void testLineNumbersCountBlankLinesAndComments() throws Exception {
+    // the extra blank lines and the comment are still lines of the file,
+    // so the words after them move down
+    String text = String.join("\n",
+        /*  1 */ "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        /*  2 */ "",
+        /*  3 */ "",
+        /*  4 */ "",
+        /*  5 */ "# sent_id = 2",
+        /*  6 */ "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
+        /*  7 */ "",
+                 "");
+    assertEquals(java.util.Arrays.asList(1, 6), lineNumbers(readSentences(text)));
+  }
+
+  @Test
+  public void testLineNumbersWithMWTAndEmptyWords() throws Exception {
+    // the MWT line is not a word and gets no CoreLabel, but it does take
+    // up a line, so the words after it are numbered past it
+    String text = String.join("\n",
+        /*  1 */ "1\tElla\tella\tPRON\t_\t_\t2\tnsubj\t2:nsubj\t_",
+        /*  2 */ "2\tcome\tcomer\tVERB\t_\t_\t0\troot\t0:root\t_",
+        /*  3 */ "3-4\tdel\t_\t_\t_\t_\t_\t_\t_\t_",
+        /*  4 */ "3\tde\tde\tADP\t_\t_\t5\tcase\t5:case\t_",
+        /*  5 */ "4\tel\tel\tDET\t_\t_\t5\tdet\t5:det\t_",
+        /*  6 */ "5\tplato\tplato\tNOUN\t_\t_\t2\tobl\t2:obl\tSpaceAfter=No",
+        /*  7 */ "5.1\tcome\tcomer\tVERB\t_\t_\t_\t_\t2:conj\t_",
+        /*  8 */ "",
+                 "");
+    List<CoreMap> sentences = readSentences(text);
+    assertEquals(java.util.Arrays.asList(1, 2, 4, 5, 6), lineNumbers(sentences));
+    // the empty word is numbered too, though it is not among the tokens
+    List<CoreLabel> empties = sentences.get(0).get(CoreAnnotations.EmptyTokensAnnotation.class);
+    assertEquals(1, empties.size());
+    assertEquals(Integer.valueOf(7), empties.get(0).get(CoreAnnotations.LineNumberAnnotation.class));
+  }
+
+  @Test
+  public void testLineNumbersRestartForEachDocument() throws Exception {
+    // the number is the line of the file, not of the document
+    String text = String.join("\n",
+        /*  1 */ "# newdoc id = first",
+        /*  2 */ "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        /*  3 */ "",
+        /*  4 */ "# newdoc id = second",
+        /*  5 */ "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
+        /*  6 */ "",
+                 "");
+    List<Annotation> documents = readDocuments(text);
+    assertEquals(2, documents.size());
+    assertEquals(Integer.valueOf(2), documents.get(0).get(CoreAnnotations.TokensAnnotation.class)
+                 .get(0).get(CoreAnnotations.LineNumberAnnotation.class));
+    assertEquals(Integer.valueOf(5), documents.get(1).get(CoreAnnotations.TokensAnnotation.class)
+                 .get(0).get(CoreAnnotations.LineNumberAnnotation.class));
+  }
+
+  @Test
+  public void testNoLineNumberWhenThereIsNoneToGive() throws Exception {
+    // a sentence built by hand has no file to have come from
+    CoNLLUReader.CoNLLUDocument document = new CoNLLUReader.CoNLLUDocument();
+    document.lastSentence().processLine("1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_", LineType.TOKEN);
+    CoreLabel token = new CoNLLUReader().convertCoNLLUSentenceToCoreMap(document, document.lastSentence(), 0)
+        .get(CoreAnnotations.TokensAnnotation.class).get(0);
+    assertNull(token.get(CoreAnnotations.LineNumberAnnotation.class));
+  }
+
+  @Test
+  public void testMalformedLineNamesItsLineNumber() throws Exception {
+    String message = messageFromReading(String.join("\n",
+        "# sent_id = broken-1",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "2\tmundo",
+        "",
+        ""));
+    assertTrue(message, message.contains("line 3"));
+  }
+
+  // ------------------------------------------------------------------
   // malformed lines say what is wrong with them
   // ------------------------------------------------------------------
 
