@@ -498,12 +498,48 @@ public abstract class SemgrexPattern implements Serializable  {
    *<br>
    * Non-matching sentences are currently not returned (may change in the future to return an empty list).
    */
+  /**
+   * A sentence as it would be named in a complaint about it.
+   *<br>
+   * The sent_id comment if the sentence came from a CoNLL-U file, since
+   * that is what someone would search the file for, and the text of the
+   * sentence otherwise.
+   */
+  private static String describe(CoreMap sentence) {
+    List<String> comments = sentence.get(CoreAnnotations.CommentsAnnotation.class);
+    if (comments != null) {
+      for (String comment : comments) {
+        String trimmed = comment.trim();
+        if (trimmed.startsWith("#") && trimmed.replace("#", "").trim().startsWith("sent_id")) {
+          return "the sentence at |" + trimmed + "|";
+        }
+      }
+    }
+    String text = sentence.get(CoreAnnotations.TextAnnotation.class);
+    if (text != null) {
+      return "the sentence |" + text + "|";
+    }
+    return "a sentence";
+  }
+
   public List<Pair<CoreMap, List<SemgrexMatch>>> matchSentences(List<CoreMap> sentences, boolean keepEmptyMatches) {
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = new ArrayList<>();
     for (CoreMap sentence : sentences) {
       SemanticGraph basic = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
       SemgrexGraphs graphs = SemgrexGraphs.of(basic, enhanced);
+      // the same checks the single sentence entry point makes, but naming
+      // the sentence: one out of thousands is no use without saying which
+      if (basic == null) {
+        throw new IllegalStateException("Semgrex matching starts in the " + SemgrexGraphName.BASIC +
+                                        " graph, and " + describe(sentence) + " has not got one");
+      }
+      for (SemgrexGraphName name : requiredGraphs()) {
+        if (graphs.get(name) == null) {
+          throw new IllegalStateException("Semgrex pattern uses the " + name + " graph, and " +
+                                          describe(sentence) + " has not got one: " + this);
+        }
+      }
       SemgrexMatcher matcher = matcher(graphs);
       if (!matcher.find()) {
         if (keepEmptyMatches) {
@@ -854,7 +890,7 @@ public abstract class SemgrexPattern implements Serializable  {
           }
         }
       } else if (outputFormat == OutputFormat.OFFSET) {
-        if (graph.vertexListSorted().isEmpty()) {
+        if (graph == null || graph.vertexListSorted().isEmpty()) {
           continue;
         }
         System.out.printf("+%d %s%n", graph.vertexListSorted().get(0).get(CoreAnnotations.LineNumberAnnotation.class),
