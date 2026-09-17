@@ -568,6 +568,69 @@ public class CoNLLUReaderTest {
   }
 
   // ------------------------------------------------------------------
+  // malformed lines say what is wrong with them
+  // ------------------------------------------------------------------
+
+  /** The message of the IllegalArgumentException the text provokes */
+  private static String messageFromReading(String conllu) throws Exception {
+    try {
+      readSentences(conllu);
+    } catch (IllegalArgumentException e) {
+      return e.getMessage();
+    }
+    fail("Expected the text to be rejected");
+    return null;
+  }
+
+  @Test
+  public void testShortTokenLine() throws Exception {
+    // a line which starts like a token but stops early used to fall over
+    // on whichever column it ran out of
+    String message = messageFromReading(String.join("\n",
+        "# sent_id = broken-1",
+        "1\tHola\thola",
+        "",
+        ""));
+    assertTrue(message, message.contains("3 columns"));
+    assertTrue(message, message.contains("broken-1"));
+    assertTrue(message, message.contains("1\\tHola\\thola"));
+  }
+
+  @Test
+  public void testShortMWTLine() throws Exception {
+    String message = messageFromReading(String.join("\n",
+        "# sent_id = broken-2",
+        "1\tVamos\tir\tVERB\t_\t_\t0\troot\t_\t_",
+        "2-3\tal",
+        "2\ta\ta\tADP\t_\t_\t1\tcase\t_\t_",
+        "3\tel\tel\tDET\t_\t_\t1\tdet\t_\t_",
+        "",
+        ""));
+    assertTrue(message, message.contains("2 columns"));
+    assertTrue(message, message.contains("broken-2"));
+  }
+
+  @Test
+  public void testBasicHeadWhichIsNotAWord() throws Exception {
+    // the same check the enhanced graph does, which the basic graph used
+    // to skip: the edge was built with a null governor
+    String message = messageFromReading(String.join("\n",
+        "# sent_id = broken-3",
+        "1\tHola\thola\tINTJ\t_\t_\t9\tdep\t_\t_",
+        "2\tmundo\tmundo\tNOUN\t_\t_\t0\troot\t_\t_",
+        "",
+        ""));
+    assertTrue(message, message.contains("head 9"));
+    assertTrue(message, message.contains("broken-3"));
+  }
+
+  @Test
+  public void testSentenceWithNoSentIdIsStillNamed() throws Exception {
+    String message = messageFromReading("1\tHola\thola\n\n");
+    assertTrue(message, message.contains("no sent_id"));
+  }
+
+  // ------------------------------------------------------------------
   // sentence data from the comments
   // ------------------------------------------------------------------
 

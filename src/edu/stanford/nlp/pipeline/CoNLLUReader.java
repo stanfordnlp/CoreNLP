@@ -338,6 +338,14 @@ public class CoNLLUReader {
     List<Integer> mwtLastCoreLabels = new ArrayList<>();
 
     /**
+     * How to refer to this sentence when reporting a line which cannot be read
+     **/
+    public String description() {
+      String sentId = sentenceData.get("sent_id");
+      return sentId == null ? "a sentence with no sent_id" : "sentence " + sentId;
+    }
+
+    /**
      * True if no line has been read into this sentence yet
      **/
     public boolean isEmpty() {
@@ -404,6 +412,7 @@ public class CoNLLUReader {
      **/
     void addMWTData(String mwtDataLine) {
       String[] mwtFields = mwtDataLine.split("\t");
+      checkColumnCount(mwtFields, this);
       String[] mwtRange = mwtFields[CoNLLU_IndexField].split("-");
       String mwtText = mwtFields[CoNLLU_WordField];
       int mwtStart = Integer.parseInt(mwtRange[0]);
@@ -520,6 +529,26 @@ public class CoNLLUReader {
   }
 
   /**
+   * Check that a line has the ten columns CoNLL-U gives every line.
+   *<br>
+   * A line is recognized as a token, an MWT or an empty word by how it
+   * starts, so one which is cut short gets that far and then falls over on
+   * whichever column is missing.  Saying which line it was, and which
+   * sentence, is the difference between a fixable report and a puzzle.
+   */
+  static void checkColumnCount(String[] fields, CoNLLUSentence sentence) {
+    if (fields.length < CoNLLU_MiscField + 1) {
+      // the columns are shown separated by a written out \t rather than by
+      // the tabs themselves, since the point of the message is to show
+      // where the columns of the line actually are
+      throw new IllegalArgumentException("Cannot read a CoNLL-U line with " + fields.length +
+                                         " columns, expected at least " + (CoNLLU_MiscField + 1) +
+                                         ", in " + sentence.description() + ": |" +
+                                         String.join("\\t", fields) + "|");
+    }
+  }
+
+  /**
    * Parse a bar separated misc field, such as SpaceAfter=No|Gloss=cat, into its key value pairs.
    *<br>
    * A LinkedHashMap, since the order of the keys is kept if the document
@@ -575,6 +604,7 @@ public class CoNLLUReader {
    * Convert the already split fields of a ten column CoNLLU line into a CoreLabel
    */
   public CoreLabel convertLineToCoreLabel(CoNLLUSentence sentence, String[] fields, int sentenceIdx) {
+    checkColumnCount(fields, sentence);
     // a CoNLL-U token ends up with roughly twenty annotations, so the
     // CoreLabel is built wide enough to hold them without regrowing
     CoreLabel cl = new CoreLabel(24);
@@ -798,6 +828,12 @@ public class CoNLLUReader {
         graphRoots.add(dependent);
       } else {
         IndexedWord gov = graphNodes.get(fields[CoNLLU_GovField]);
+        if (gov == null) {
+          throw new IllegalArgumentException("Word " + fields[CoNLLU_IndexField] + " of " +
+                                             sentence.description() + " has the head " +
+                                             fields[CoNLLU_GovField] +
+                                             ", which is not a word of this sentence");
+        }
         GrammaticalRelation reln = GrammaticalRelation.valueOf(Language.UniversalEnglish, fields[CoNLLU_RelnField]);
         graphEdges.add(new SemanticGraphEdge(gov, dependent, reln, 1.0, false));
       }
@@ -830,13 +866,15 @@ public class CoNLLUReader {
           } else {
             if (arcPieces.length < 2) {
               throw new IllegalArgumentException("Cannot parse the enhanced dependency |" + arc +
-                                                 "| of word " + fields[CoNLLU_IndexField] +
+                                                 "| of word " + fields[CoNLLU_IndexField] + " of " +
+                                                 sentence.description() +
                                                  ": expected a head and a relation separated by :");
             }
             IndexedWord gov = graphNodes.get(arcPieces[0]);
             if (gov == null) {
               throw new IllegalArgumentException("The enhanced dependency |" + arc + "| of word " +
-                                                 fields[CoNLLU_IndexField] + " has a head, " +
+                                                 fields[CoNLLU_IndexField] + " of " +
+                                                 sentence.description() + " has the head " +
                                                  arcPieces[0] + ", which is not a word of this sentence");
             }
             GrammaticalRelation reln = GrammaticalRelation.valueOf(Language.UniversalEnglish, arcPieces[1]);
