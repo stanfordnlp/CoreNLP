@@ -327,11 +327,25 @@ SemgrexPattern ModRelation() : {
 }
 
 SemgrexPattern RelChild() : {
-  SemgrexPattern child;
+  SemgrexPattern head = null;
+  SemgrexPattern child = null;
 } {
-  (( "[" child = RelationDisj() "]")
-    | child = Relation() )
-  { return child; }
+  ( (( "[" child = RelationDisj() "]")
+      | child = Relation() )
+    { return child; }
+    |
+    ( "("
+        "[" head = RelationDisj() "]"
+        ( child = RelationDisj() )?
+      ")"
+      {
+        if (child == null) {
+          return head;
+        } else {
+          return attachRelation(head, child);
+        }
+      }
+    ) )
 }
 
 SemgrexPattern Relation() : {
