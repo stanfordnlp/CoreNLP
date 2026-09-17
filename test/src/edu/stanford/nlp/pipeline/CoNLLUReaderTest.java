@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 
 import org.junit.Test;
@@ -92,13 +93,18 @@ public class CoNLLUReaderTest {
   }
 
   private static List<Annotation> readDocuments(CoNLLUReader reader, String conllu) throws Exception {
-    File file = IOUtils.writeStringToTempFile(conllu, "conllutest", "UTF-8");
-    file.deleteOnExit();
+    File file = writeTempFile(conllu);
     try {
       return reader.readCoNLLUFile(file.getPath());
     } finally {
       file.delete();
     }
+  }
+
+  private static File writeTempFile(String conllu) throws Exception {
+    File file = IOUtils.writeStringToTempFile(conllu, "conllutest", "UTF-8");
+    file.deleteOnExit();
+    return file;
   }
 
   /**
@@ -565,6 +571,173 @@ public class CoNLLUReaderTest {
     assertEquals(5, countTokens(documents));
     assertEverySentenceIsRead(text);
     assertEverySentenceIsRead(withoutFinalBlankLine(text));
+  }
+
+  // ------------------------------------------------------------------
+  // reading one sentence at a time
+  // ------------------------------------------------------------------
+
+  /** Two documents with an MWT, an empty word, enhanced arcs and odd spacing in them */
+  private static final String RICH = String.join("\n",
+      "# newdoc id = first",
+      "# sent_id = 1",
+      "# text = Vamos al parque.",
+      "1\tVamos\tir\tVERB\tVMIP1P0\tNumber=Plur\t0\troot\t0:root\t_",
+      "2-3\tal\t_\t_\t_\t_\t_\t_\t_\tGloss=to+the",
+      "2\ta\ta\tADP\tSPS00\t_\t4\tcase\t4:case\t_",
+      "3\tel\tel\tDET\tDA0MS0\tNumber=Sing\t4\tdet\t4:det\t_",
+      "4\tparque\tparque\tNOUN\tNCMS000\tNumber=Sing\t1\tobl\t1:obl\tSpaceAfter=No",
+      "5\t.\t.\tPUNCT\tFp\t_\t1\tpunct\t1:punct\t_",
+      "",
+      "",
+      "# sent_id = 2",
+      "1\tElla\tella\tPRON\t_\t_\t2\tnsubj\t2:nsubj\tSpacesAfter=\\s\\s",
+      "2\tcome\tcomer\tVERB\t_\t_\t0\troot\t0:root\t_",
+      "3\tperas\tpera\tNOUN\t_\t_\t2\tobj\t3.1:obj\tSpaceAfter=No",
+      "3.1\tcome\tcomer\tVERB\t_\t_\t_\t_\t2:conj\t_",
+      "",
+      "# newdoc id = second",
+      "# sent_id = 3",
+      "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+      "2\tmundo\tmundo\tNOUN\t_\t_\t1\tdep\t_\t_",
+      "",
+      "");
+
+  /** Everything a sentence carries, rendered so two readings can be compared */
+  private static String describeSentenceFully(CoreMap sentence) {
+    StringBuilder described = new StringBuilder();
+    described.append("text |").append(sentence.get(CoreAnnotations.TextAnnotation.class)).append("|\n");
+    described.append("index ").append(sentence.get(CoreAnnotations.SentenceIndexAnnotation.class)).append("\n");
+    described.append("comments ").append(sentence.get(CoreAnnotations.CommentsAnnotation.class)).append("\n");
+    for (CoreLabel token : tokens(sentence)) {
+      described.append("token ").append(describeTokenFully(token)).append("\n");
+    }
+    List<CoreLabel> empties = sentence.get(CoreAnnotations.EmptyTokensAnnotation.class);
+    if (empties != null) {
+      for (CoreLabel empty : empties) {
+        described.append("empty ").append(describeTokenFully(empty)).append("\n");
+      }
+    }
+    described.append("basic ").append(describeEdges(
+        sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class))).append("\n");
+    SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    described.append("enhanced ").append(enhanced == null ? "none" : describeEdges(enhanced)).append("\n");
+    return described.toString();
+  }
+
+  private static String describeTokenFully(CoreLabel token) {
+    return token.index() + " " + token.word() + " " + token.lemma() + " " + token.tag() + " " +
+        token.get(CoreAnnotations.CoarseTagAnnotation.class) +
+        " before |" + token.before() + "| after |" + token.after() + "|" +
+        " chars " + token.beginPosition() + "-" + token.endPosition() +
+        " tokens " + token.get(CoreAnnotations.TokenBeginAnnotation.class) +
+        "-" + token.get(CoreAnnotations.TokenEndAnnotation.class) +
+        " line " + token.get(CoreAnnotations.LineNumberAnnotation.class) +
+        " sentence " + token.get(CoreAnnotations.SentenceIndexAnnotation.class) +
+        " empty " + token.get(CoreAnnotations.EmptyIndexAnnotation.class) +
+        " mwt " + token.isMWT() + " first " + token.isMWTFirst() +
+        " mwtText " + token.get(CoreAnnotations.MWTTokenTextAnnotation.class) +
+        " mwtMisc " + token.get(CoreAnnotations.MWTTokenMiscAnnotation.class) +
+        " misc " + token.get(CoreAnnotations.CoNLLUMisc.class) +
+        " feats " + token.get(CoreAnnotations.CoNLLUFeats.class);
+  }
+
+  private static List<String> describeByReadingWholeFile(String conllu) throws Exception {
+    List<String> described = new ArrayList<>();
+    for (Annotation document : readDocuments(conllu)) {
+      for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+        described.add(describeSentenceFully(sentence));
+      }
+    }
+    return described;
+  }
+
+  private static List<String> describeByStreaming(String conllu) throws Exception {
+    File file = writeTempFile(conllu);
+    List<String> described = new ArrayList<>();
+    try (CoNLLUReader.SentenceIterator sentences = new CoNLLUReader().sentenceIterator(file.getPath())) {
+      while (sentences.hasNext()) {
+        described.add(describeSentenceFully(sentences.next()));
+      }
+    } finally {
+      file.delete();
+    }
+    return described;
+  }
+
+  @Test
+  public void testStreamingMatchesReadingTheWholeFile() throws Exception {
+    // the sentences have to be identical down to the character offsets and
+    // the document wide token indices, or the two ways of reading a file
+    // are not two ways of reading the same file
+    assertEquals(describeByReadingWholeFile(RICH), describeByStreaming(RICH));
+  }
+
+  @Test
+  public void testStreamingMatchesWithNoBlankLineAtTheEnd() throws Exception {
+    String truncated = withoutFinalBlankLine(RICH);
+    assertEquals(describeByReadingWholeFile(truncated), describeByStreaming(truncated));
+  }
+
+  @Test
+  public void testStreamingMatchesAWholeTreebank() throws Exception {
+    String text = sentenceBlock(1, 50, 7);
+    assertEquals(50, describeByStreaming(text).size());
+    assertEquals(describeByReadingWholeFile(text), describeByStreaming(text));
+  }
+
+  @Test
+  public void testStreamingMatchesWithADanglingComment() throws Exception {
+    // a comment after the last sentence has no words to go with, so it is
+    // not a sentence, either way the file is read
+    String text = sentenceBlock(1, 2, 3) + "# newdoc id = second\n";
+    assertEquals(2, describeByStreaming(text).size());
+    assertEquals(describeByReadingWholeFile(text), describeByStreaming(text));
+  }
+
+  @Test
+  public void testStreamingClosedBeforeItRunsOut() throws Exception {
+    // the case Closeable is here for: a caller which stops reading partway
+    // through and closes the iterator itself.  no try with resources,
+    // since the point is the explicit close
+    File file = writeTempFile(sentenceBlock(1, 50, 7));
+    try {
+      CoNLLUReader.SentenceIterator sentences = new CoNLLUReader().sentenceIterator(file.getPath());
+      assertNotNull(sentences.next());
+      sentences.close();
+      // an iterator which has been closed has no more sentences to give,
+      // and closing it again is not an error
+      assertFalse(sentences.hasNext());
+      sentences.close();
+    } finally {
+      file.delete();
+    }
+  }
+
+  @Test
+  public void testStreamingAnEmptyFile() throws Exception {
+    assertEquals(Collections.emptyList(), describeByStreaming(""));
+    assertEquals(Collections.emptyList(), describeByStreaming("\n\n\n"));
+  }
+
+  @Test
+  public void testStreamingRunsOut() throws Exception {
+    File file = writeTempFile(sentenceBlock(1, 2, 3));
+    try (CoNLLUReader.SentenceIterator sentences = new CoNLLUReader().sentenceIterator(file.getPath())) {
+      assertTrue(sentences.hasNext());
+      sentences.next();
+      assertTrue(sentences.hasNext());
+      sentences.next();
+      assertFalse(sentences.hasNext());
+      try {
+        sentences.next();
+        fail("Expected the iterator to be out of sentences");
+      } catch (NoSuchElementException e) {
+        // expected
+      }
+    } finally {
+      file.delete();
+    }
   }
 
   // ------------------------------------------------------------------

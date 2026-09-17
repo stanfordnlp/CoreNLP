@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.semgraph.*;
 import edu.stanford.nlp.trees.*;
@@ -318,15 +319,20 @@ public class CoNLLUReader {
     }
 
     /**
-     * Drop the sentence at the end if nothing was ever read into it
+     * Drop the sentence at the end unless it has words in it
      *<br>
      * A sentence is created to catch the lines after a blank line, so at
      * the end of a document there is usually one left over with nothing in
      * it.  A file which stops without a final blank line has no such
      * leftover, and then the last sentence is real and is kept.
+     *<br>
+     * Words rather than lines decide it, so that a comment left dangling
+     * after the last sentence does not become a sentence of its own with
+     * nothing in it.  Reading the file one sentence at a time would never
+     * produce such a sentence, and the two ways of reading a file agree.
      **/
     public void removeTrailingEmptySentence() {
-      if (!sentences.isEmpty() && lastSentence().isEmpty()) {
+      if (!sentences.isEmpty() && !lastSentence().hasWords()) {
         sentences.remove(sentences.size() - 1);
       }
     }
@@ -520,6 +526,151 @@ public class CoNLLUReader {
   }
 
   /**
+   * The sentences of a CoNLL-U file, one at a time, without holding the file in memory.
+   *<br>
+   * The sentences are exactly the ones readCoNLLUFile builds, with the
+   * same words, offsets, graphs and comments.  What is not here is the
+   * document: an Annotation's own TextAnnotation and TokensAnnotation are
+   * the whole document's, and cannot be known until its last sentence has
+   * been read.  Everything a sentence carries is available as it arrives.
+   *<br>
+   * The iterator holds the file open, so it is closed when it runs out of
+   * sentences, and it is Closeable for the times it does not:
+   *<br>
+   * {@code try (SentenceIterator sentences = reader.sentenceIterator(path)) { ... } }
+   */
+  public SentenceIterator sentenceIterator(String filePath) throws IOException {
+    return new SentenceIterator(filePath);
+  }
+
+  public class SentenceIterator implements Iterator<CoreMap>, Closeable {
+    private final BufferedReader reader;
+    private final Iterator<String> lines;
+    private int lineNumber = 0;
+
+    // only the document's running text is used here.  its list of
+    // sentences is left alone, so that the sentences already handed out
+    // can be collected rather than piling up in it
+    private CoNLLUDocument document;
+    private CoNLLUSentence sentence;
+    private boolean documentHasSentences;
+    private int sentenceIdx;
+    private int documentTokenIdx;
+    private CoreLabel previousToken;
+
+    private CoreMap next;
+    private boolean closed;
+
+    private SentenceIterator(String filePath) throws IOException {
+      this.reader = IOUtils.readerFromString(filePath);
+      this.lines = IOUtils.getLineIterable(reader, false).iterator();
+      startDocument();
+      this.next = readSentence();
+    }
+
+    private void startDocument() {
+      document = new CoNLLUDocument();
+      sentence = new CoNLLUSentence();
+      documentHasSentences = false;
+      sentenceIdx = 0;
+      documentTokenIdx = 0;
+      previousToken = null;
+    }
+
+    /** Has anything been read into the document currently open? */
+    private boolean documentIsEmpty() {
+      return !documentHasSentences && sentence.isEmpty();
+    }
+
+    /** Turn the sentence just read into a CoreMap and get ready for the next */
+    private CoreMap finishSentence() {
+      CoreMap converted = convertCoNLLUSentenceToCoreMap(document, sentence, sentenceIdx);
+      documentTokenIdx = attachDocumentAnnotations(converted, sentenceIdx, documentTokenIdx, previousToken, null);
+      previousToken = lastToken(converted);
+      ++sentenceIdx;
+      documentHasSentences = true;
+      sentence = new CoNLLUSentence();
+      return converted;
+    }
+
+    /**
+     * Read lines until a sentence is complete, or the file runs out
+     *<br>
+     * The decisions here are the ones readCoNLLUFileCreateCoNLLUDocuments
+     * makes: a newdoc line opens a document unless nothing has been read
+     * into the one already open, a blank line ends a sentence which has
+     * words in it, and a file which stops without a blank line still ends
+     * the sentence it was in the middle of.
+     */
+    private CoreMap readSentence() {
+      while (lines.hasNext()) {
+        String line = lines.next();
+        ++lineNumber;
+        LineType lineType = classifyLine(line);
+        CoreMap finished = null;
+        if (lineType == LineType.COMMENT && DOCUMENT_LINE.matcher(line).matches() && !documentIsEmpty()) {
+          // a sentence still being read when the newdoc arrives belongs to
+          // the document which is ending, not to the one being opened
+          if (sentence.hasWords()) {
+            finished = finishSentence();
+          }
+          startDocument();
+        }
+        if (sentence.processLine(line, lineType, lineNumber) && sentence.hasWords()) {
+          finished = finishSentence();
+        }
+        if (finished != null) {
+          return finished;
+        }
+      }
+      if (sentence.hasWords()) {
+        return finishSentence();
+      }
+      closeQuietly();
+      return null;
+    }
+
+    private void closeQuietly() {
+      try {
+        close();
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    }
+
+    @Override
+    public boolean hasNext() {
+      return next != null;
+    }
+
+    @Override
+    public CoreMap next() {
+      if (next == null) {
+        throw new NoSuchElementException();
+      }
+      CoreMap current = next;
+      next = readSentence();
+      return current;
+    }
+
+    /**
+     * The file is closed once, whether by running out of sentences or by the caller
+     *<br>
+     * A closed iterator has no more sentences to give, so that a caller
+     * which stops partway through and closes it does not then read from a
+     * file which is no longer open.
+     */
+    @Override
+    public void close() throws IOException {
+      next = null;
+      if (!closed) {
+        closed = true;
+        reader.close();
+      }
+    }
+  }
+
+  /**
    * Convert a CoNLLUDocument into an Annotation
    * The convention is that a CoNLLU document represents a list of sentences,
    * one sentence per line, separated by newline.
@@ -541,27 +692,10 @@ public class CoNLLUReader {
     finalAnnotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
     int documentIdx = 0;
     int sentenceIdx = 0;
+    CoreLabel previousToken = null;
     for (CoreMap sentence : sentences) {
-      sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
-      List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      // a sentence with no words has no text to hand over, and nothing to
-      // hand it to.  such a sentence is not legal CoNLL-U, but a file with
-      // stray comments in it can still produce one
-      if (sentenceIdx > 0 && !sentenceTokens.isEmpty()) {
-        CoreMap previousSentence = sentences.get(sentenceIdx - 1);
-        List<CoreLabel> previousTokens = previousSentence.get(CoreAnnotations.TokensAnnotation.class);
-        if (!previousTokens.isEmpty()) {
-          CoreLabel previousToken = previousTokens.get(previousTokens.size() - 1);
-          String previousAfter = previousToken.get(CoreAnnotations.AfterAnnotation.class);
-          sentenceTokens.get(0).set(CoreAnnotations.BeforeAnnotation.class, previousAfter);
-        }
-      }
-      for (CoreLabel token : sentenceTokens) {
-        token.set(CoreAnnotations.TokenBeginAnnotation.class, documentIdx);
-        token.set(CoreAnnotations.TokenEndAnnotation.class, documentIdx + 1);
-        tokens.add(token);
-        documentIdx++;
-      }
+      documentIdx = attachDocumentAnnotations(sentence, sentenceIdx, documentIdx, previousToken, tokens);
+      previousToken = lastToken(sentence);
       sentenceIdx++;
     }
     // make sure to set docText AFTER all the above processing
@@ -621,6 +755,52 @@ public class CoNLLUReader {
       start = end + 1;
     }
     return keyValues;
+  }
+
+  /**
+   * Attach to a sentence what depends on where it sits in its document.
+   *<br>
+   * This is its index in the document, the text which carries over from
+   * the sentence ahead of it, and the span of the document's tokens which
+   * are its own.  A sentence read one at a time gets exactly the same
+   * treatment as one read as part of a whole document, which is how the
+   * two ways of reading a file end up agreeing.
+   *
+   * @param previousToken The last word of the sentence before this one, or null for the first
+   * @param documentTokens Collects the words of the document in order, or null when they are not being collected
+   * @return The document token index to give the sentence after this one
+   */
+  static int attachDocumentAnnotations(CoreMap sentence, int sentenceIdx, int documentTokenIdx,
+                                       CoreLabel previousToken, List<CoreLabel> documentTokens) {
+    sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
+    List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    // the space between two sentences is written twice, as the after of
+    // the last word of one and the before of the first word of the next
+    if (previousToken != null && !sentenceTokens.isEmpty()) {
+      sentenceTokens.get(0).set(CoreAnnotations.BeforeAnnotation.class,
+                                previousToken.get(CoreAnnotations.AfterAnnotation.class));
+    }
+    for (CoreLabel token : sentenceTokens) {
+      token.set(CoreAnnotations.TokenBeginAnnotation.class, documentTokenIdx);
+      token.set(CoreAnnotations.TokenEndAnnotation.class, documentTokenIdx + 1);
+      if (documentTokens != null) {
+        documentTokens.add(token);
+      }
+      ++documentTokenIdx;
+    }
+    return documentTokenIdx;
+  }
+
+  /**
+   * The last word of a sentence, or null if it has none
+   *<br>
+   * A sentence with no words hands nothing on to the sentence after it.
+   * That is not legal CoNLL-U, but a file with stray comments in it can
+   * still produce one.
+   */
+  private static CoreLabel lastToken(CoreMap sentence) {
+    List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    return sentenceTokens.isEmpty() ? null : sentenceTokens.get(sentenceTokens.size() - 1);
   }
 
   public static final String rebuildMisc(Map<String, String> miscKeyValues) {
