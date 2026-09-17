@@ -1,5 +1,11 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -13,6 +19,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.CoNLLUReader;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 
 /**
@@ -294,6 +306,76 @@ public class SemgrexMultiGraphTest {
       order.add(matcher.getMatch().word());
     }
     assertEquals(Collections.singletonList("root"), order);
+  }
+
+  /**
+   * A sentence with an empty node, as an enhanced UD treebank has
+   *<br>
+   * Word 2.1 is a dropped pronoun: the enhanced graph gives it an
+   * incoming edge, and the basic graph does not have it at all.  This is
+   * the shape the pattern below is for.
+   */
+  static final String EMPTY_NODE_SENTENCE = String.join("\n",
+      "# sent_id = dropped-pronoun",
+      "# text = Salió fuera",
+      "1\tSalió\tsalir\tVERB\t_\t_\t0\troot\t0:root\t_",
+      "2\tfuera\tfuera\tADV\t_\t_\t1\tadvmod\t1:advmod\t_",
+      "2.1\t_\t_\tPRON\tp\t_\t_\t_\t1:nsubj\t_",
+      "", "");
+
+  /**
+   * Reads sentences from CoNLL-U text, the way the command line tool does
+   */
+  static List<CoreMap> readSentences(String conllu) throws IOException {
+    File file = File.createTempFile("semgrex", ".conllu");
+    file.deleteOnExit();
+    try (Writer out = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+      out.write(conllu);
+    }
+    List<CoreMap> sentences = new ArrayList<>();
+    try {
+      for (Annotation doc : new CoNLLUReader().readCoNLLUFile(file.toString())) {
+        sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
+      }
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+    return sentences;
+  }
+
+  /**
+   * The empty nodes of an enhanced graph, found through matchSentences
+   *<br>
+   * An empty node has a governor in the enhanced graph and none in the
+   * basic graph, which is another way of saying the basic graph has not
+   * got it.  Finding one needs the whole of the multiple graph support at
+   * once: both graphs read from the sentence, the search covering the
+   * graphs the pattern names rather than the basic one alone, and the
+   * relations resolved in the graph each of them asks for.
+   */
+  @Test
+  public void testEmptyNodesThroughMatchSentences() throws IOException {
+    List<CoreMap> sentences = readSentences(EMPTY_NODE_SENTENCE);
+    assertEquals(1, sentences.size());
+
+    SemgrexPattern pattern = SemgrexPattern.compile("{} <@enhanced {} !< {}");
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = pattern.matchSentences(sentences, false);
+    assertEquals(1, matches.size());
+
+    List<SemgrexMatch> found = matches.get(0).second();
+    assertEquals(1, found.size());
+    IndexedWord empty = found.get(0).getMatch();
+    assertEquals(2, empty.index());
+    assertEquals(1, empty.getEmptyIndex());
+
+    // a pattern with no relations searches every graph, so it sees the two
+    // words of the basic graph and the empty node the enhanced graph adds
+    SemgrexPattern everything = SemgrexPattern.compile("{}");
+    assertEquals(3, everything.matchSentences(sentences, false).get(0).second().size());
+
+    // whereas one which stays in the basic graph sees only the two words
+    SemgrexPattern basicOnly = SemgrexPattern.compile("{} <<{}");
+    assertEquals(1, basicOnly.matchSentences(sentences, false).get(0).second().size());
   }
 
   /**
