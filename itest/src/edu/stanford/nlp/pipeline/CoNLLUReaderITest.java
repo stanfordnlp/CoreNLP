@@ -100,6 +100,10 @@ public class CoNLLUReaderITest {
     { 14, 3, 14, 7, 7, 7, 3, 11, 11, 9, 3, 14, 14, 0, 14, 18, 18, 14, 20, 18, 14 },
     { 2, 4, 4, 0, 4 },
   };
+  static final long[][] EXPECTED_LINE_NUMBERS = {
+    { 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26 },
+    { 31, 32, 33, 34, 35 },
+  };
 
   @Test
   public void testReadingInCoNLLUFile() throws ClassNotFoundException, IOException {
@@ -163,6 +167,7 @@ public class CoNLLUReaderITest {
 
         // all tokens should have a False isNewline
         assertFalse(token.get(CoreAnnotations.IsNewlineAnnotation.class));
+        assertEquals(EXPECTED_LINE_NUMBERS[i][j], token.get(CoreAnnotations.LineNumberAnnotation.class).longValue());
       }
     }
 
@@ -247,7 +252,7 @@ public class CoNLLUReaderITest {
         CoreLabel token = tokens.get(j);
 
         String expected = EXPECTED_FEATS[i][j];
-        int expectedKeys = 16;
+        int expectedKeys = 17;
 
         if (expected == null) {
           assertFalse(token.containsKey(CoreAnnotations.CoNLLUFeats.class));

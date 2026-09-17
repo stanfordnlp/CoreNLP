@@ -40,6 +40,14 @@ public class CoNLLUReader {
   public final int columnCount;
 
   /**
+   * The line number of a line read without one being tracked
+   *<br>
+   * A sentence built by hand, rather than read from a file, has no line
+   * numbers to give its words.
+   */
+  public static final int UNKNOWN_LINE_NUMBER = -1;
+
+  /**
    * patterns to match in CoNLL-U file
    **/
   public static final Pattern COMMENT_LINE = Pattern.compile("^#.*");
@@ -331,8 +339,13 @@ public class CoNLLUReader {
 
     // the token lines
     public final List<String> tokenLines = new ArrayList<>();
+    // the line of the file each token line came from, counting every line
+    // from 1, so a word can be pointed back at where it was written
+    public final List<Integer> tokenLineNumbers = new ArrayList<>();
     // in case the enhanced dependencies have empty words
     public final List<String> emptyLines = new ArrayList<>();
+    // the line of the file each empty word line came from
+    public final List<Integer> emptyLineNumbers = new ArrayList<>();
     // data for the sentence contained in # key values
     // "# sent_id = weblog-0003" is stored as sent_id -> weblog-0003
     public final Map<String, String> sentenceData = new HashMap<>();
@@ -376,25 +389,39 @@ public class CoNLLUReader {
      * Process line for current sentence.  Return true if processing empty line (indicating sentence end)
      **/
     public boolean processLine(String line) {
-      return processLine(line, classifyLine(line));
+      return processLine(line, classifyLine(line), UNKNOWN_LINE_NUMBER);
     }
 
     /**
      * Process a line whose kind has already been decided by the caller
      **/
     public boolean processLine(String line, LineType lineType) {
+      return processLine(line, lineType, UNKNOWN_LINE_NUMBER);
+    }
+
+    /**
+     * Process a line, remembering which line of the file it came from
+     *<br>
+     * The numbers are kept beside the lines rather than in them, and one
+     * is recorded whether or not the caller knew it, so that
+     * tokenLineNumbers and emptyLineNumbers stay as long as the lists they
+     * go with.
+     **/
+    public boolean processLine(String line, LineType lineType, int lineNumber) {
       switch (lineType) {
       case COMMENT:
         addSentenceData(line);
         return false;
       case MWT:
-        addMWTData(line);
+        addMWTData(line, lineNumber);
         return false;
       case TOKEN:
         tokenLines.add(line);
+        tokenLineNumbers.add(lineNumber);
         return false;
       case EMPTY:
         emptyLines.add(line);
+        emptyLineNumbers.add(lineNumber);
         return false;
       default:
         return true;
@@ -420,9 +447,9 @@ public class CoNLLUReader {
     /**
      * Add mwt data for this mwt line
      **/
-    void addMWTData(String mwtDataLine) {
+    void addMWTData(String mwtDataLine, int lineNumber) {
       String[] mwtFields = mwtDataLine.split("\t");
-      checkColumnCount(mwtFields, this);
+      checkColumnCount(mwtFields, this, lineNumber);
       String[] mwtRange = mwtFields[CoNLLU_IndexField].split("-");
       String mwtText = mwtFields[CoNLLU_WordField];
       int mwtStart = Integer.parseInt(mwtRange[0]);
@@ -453,9 +480,14 @@ public class CoNLLUReader {
     // the reader is closed here rather than left for the garbage collector
     // to get to, since reading a directory of treebanks would otherwise
     // hold a file open for each one of them
+    // every line of the file is counted, blank lines and comments
+    // included, so that a line number here is the line a text editor would
+    // take you to
+    int lineNumber = 0;
     try (BufferedReader reader = IOUtils.readerFromString(filePath)) {
       // process lines
       for (String line : IOUtils.getLineIterable(reader, false)) {
+        ++lineNumber;
         LineType lineType = classifyLine(line);
         // if start of a new doc, reset for a new doc
         // only a comment can be a newdoc line, so the rest are not tested at all
@@ -472,7 +504,7 @@ public class CoNLLUReader {
           }
         }
         // read in current line
-        boolean endSentence = docs.get(docs.size() - 1).lastSentence().processLine(line, lineType);
+        boolean endSentence = docs.get(docs.size() - 1).lastSentence().processLine(line, lineType, lineNumber);
         // if sentence is over, add sentence to doc, reset for new sentence
         // a run of blank lines, or comments which no words follow, do not
         // make a sentence of their own: a second blank line finds a sentence
@@ -546,16 +578,22 @@ public class CoNLLUReader {
    * whichever column is missing.  Saying which line it was, and which
    * sentence, is the difference between a fixable report and a puzzle.
    */
-  static void checkColumnCount(String[] fields, CoNLLUSentence sentence) {
+  static void checkColumnCount(String[] fields, CoNLLUSentence sentence, int lineNumber) {
     if (fields.length < CoNLLU_MiscField + 1) {
       // the columns are shown separated by a written out \t rather than by
       // the tabs themselves, since the point of the message is to show
       // where the columns of the line actually are
       throw new IllegalArgumentException("Cannot read a CoNLL-U line with " + fields.length +
                                          " columns, expected at least " + (CoNLLU_MiscField + 1) +
-                                         ", in " + sentence.description() + ": |" +
+                                         ", " + describeLine(sentence, lineNumber) + ": |" +
                                          String.join("\\t", fields) + "|");
     }
+  }
+
+  /** Where a line came from, by its line number when there is one */
+  static String describeLine(CoNLLUSentence sentence, int lineNumber) {
+    String where = "in " + sentence.description();
+    return lineNumber == UNKNOWN_LINE_NUMBER ? where : "on line " + lineNumber + ", " + where;
   }
 
   /**
@@ -607,18 +645,28 @@ public class CoNLLUReader {
    * Convert a single ten column CoNLLU line into a CoreLabel
    */
   public CoreLabel convertLineToCoreLabel(CoNLLUSentence sentence, String line, int sentenceIdx) {
-    return convertLineToCoreLabel(sentence, line.split("\t"), sentenceIdx);
+    return convertLineToCoreLabel(sentence, line.split("\t"), sentenceIdx, UNKNOWN_LINE_NUMBER);
   }
 
   /**
    * Convert the already split fields of a ten column CoNLLU line into a CoreLabel
    */
   public CoreLabel convertLineToCoreLabel(CoNLLUSentence sentence, String[] fields, int sentenceIdx) {
-    checkColumnCount(fields, sentence);
+    return convertLineToCoreLabel(sentence, fields, sentenceIdx, UNKNOWN_LINE_NUMBER);
+  }
+
+  /**
+   * Convert the fields of a CoNLLU line into a CoreLabel which knows which line it was
+   */
+  public CoreLabel convertLineToCoreLabel(CoNLLUSentence sentence, String[] fields, int sentenceIdx, int lineNumber) {
+    checkColumnCount(fields, sentence, lineNumber);
     // a CoNLL-U token ends up with roughly twenty annotations, so the
     // CoreLabel is built wide enough to hold them without regrowing
     CoreLabel cl = new CoreLabel(24);
     cl.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIdx);
+    if (lineNumber != UNKNOWN_LINE_NUMBER) {
+      cl.set(CoreAnnotations.LineNumberAnnotation.class, lineNumber);
+    }
 
     String indexField = fields[CoNLLU_IndexField];
     int sentenceTokenIndex;
@@ -751,8 +799,9 @@ public class CoNLLUReader {
     }
     // create CoreLabels
     List<CoreLabel> coreLabels = new ArrayList<CoreLabel>(tokenFields.size());
-    for (String[] fields : tokenFields) {
-      CoreLabel cl = convertLineToCoreLabel(sentence, fields, sentenceIdx);
+    for (int i = 0; i < tokenFields.size(); i++) {
+      CoreLabel cl = convertLineToCoreLabel(sentence, tokenFields.get(i), sentenceIdx,
+                                            sentence.tokenLineNumbers.get(i));
       coreLabels.add(cl);
     }
     for (int i = 1 ; i < coreLabels.size() ; i++) {
@@ -798,8 +847,9 @@ public class CoNLLUReader {
       emptyFields.add(line.split("\t"));
     }
     List<CoreLabel> emptyLabels = new ArrayList<CoreLabel>(emptyFields.size());
-    for (String[] fields : emptyFields) {
-      CoreLabel cl = convertLineToCoreLabel(sentence, fields, sentenceIdx);
+    for (int i = 0; i < emptyFields.size(); i++) {
+      CoreLabel cl = convertLineToCoreLabel(sentence, emptyFields.get(i), sentenceIdx,
+                                            sentence.emptyLineNumbers.get(i));
       emptyLabels.add(cl);
     }
 
