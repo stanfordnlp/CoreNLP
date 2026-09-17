@@ -26,6 +26,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 
 /**
  * Tests that CoNLL-U text is turned into the Annotations it describes:
@@ -735,6 +736,79 @@ public class CoNLLUReaderTest {
       } catch (NoSuchElementException e) {
         // expected
       }
+    } finally {
+      file.delete();
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // the two graphs of each sentence, for the tools built around that pair
+  // ------------------------------------------------------------------
+
+  @Test
+  public void testGraphIterator() throws Exception {
+    File file = writeTempFile(RICH);
+    List<String> basicGraphs = new ArrayList<>();
+    List<String> enhancedGraphs = new ArrayList<>();
+    List<List<String>> comments = new ArrayList<>();
+    try (CoNLLUReader.GraphIterator graphs = new CoNLLUReader().graphIterator(file.getPath())) {
+      while (graphs.hasNext()) {
+        Pair<SemanticGraph, SemanticGraph> pair = graphs.next();
+        basicGraphs.add(describeEdges(pair.first()).toString());
+        enhancedGraphs.add(describeEdges(pair.second()).toString());
+        comments.add(new ArrayList<>(pair.first().getComments()));
+      }
+    } finally {
+      file.delete();
+    }
+
+    List<String> expectedBasic = new ArrayList<>();
+    List<String> expectedEnhanced = new ArrayList<>();
+    List<List<String>> expectedComments = new ArrayList<>();
+    for (Annotation document : readDocuments(RICH)) {
+      for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+        SemanticGraph basic = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+        expectedBasic.add(describeEdges(basic).toString());
+        // a sentence with no enhanced dependencies is given the basic
+        // graph, so the writer does not go looking for them on the words
+        expectedEnhanced.add(describeEdges(enhanced == null ? basic : enhanced).toString());
+        expectedComments.add(sentence.get(CoreAnnotations.CommentsAnnotation.class));
+      }
+    }
+    assertEquals(expectedBasic, basicGraphs);
+    assertEquals(expectedEnhanced, enhancedGraphs);
+    // the comments ride on the graph, which is where the writer looks
+    assertEquals(expectedComments, comments);
+  }
+
+  @Test
+  public void testGraphIteratorWithoutEnhancedDependencies() throws Exception {
+    String text = String.join("\n",
+        "# sent_id = 1",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "2\tmundo\tmundo\tNOUN\t_\t_\t1\tdep\t_\t_",
+        "",
+        "");
+    File file = writeTempFile(text);
+    try (CoNLLUReader.GraphIterator graphs = new CoNLLUReader().graphIterator(file.getPath())) {
+      Pair<SemanticGraph, SemanticGraph> pair = graphs.next();
+      assertNotNull(pair.second());
+      assertEquals(pair.first(), pair.second());
+      assertFalse(graphs.hasNext());
+    } finally {
+      file.delete();
+    }
+  }
+
+  @Test
+  public void testGraphIteratorClosedBeforeItRunsOut() throws Exception {
+    File file = writeTempFile(sentenceBlock(1, 50, 7));
+    try {
+      CoNLLUReader.GraphIterator graphs = new CoNLLUReader().graphIterator(file.getPath());
+      assertNotNull(graphs.next());
+      graphs.close();
+      assertFalse(graphs.hasNext());
     } finally {
       file.delete();
     }

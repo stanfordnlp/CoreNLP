@@ -674,6 +674,65 @@ public class CoNLLUReader {
   }
 
   /**
+   * The basic and enhanced graph of each sentence of a file, one sentence at a time.
+   *<br>
+   * This is the shape trees.ud.CoNLLUDocumentReader hands its sentences
+   * out in, and CoNLLUDocumentWriter reads them back from, so a tool built
+   * around that pair can read its input here instead.  Two things are done
+   * to match what those two expect of each other:
+   *<br>
+   * The comments are put on the graphs.  A sentence keeps them in its
+   * CommentsAnnotation, but printSemanticGraph asks the basic graph for
+   * them.
+   *<br>
+   * A sentence with no enhanced dependencies of its own is given the basic
+   * graph as its enhanced graph rather than null, since the writer treats
+   * a null enhanced graph as a reason to look for the dependencies on the
+   * words instead, where they are not.
+   */
+  public GraphIterator graphIterator(String filePath) throws IOException {
+    return new GraphIterator(filePath);
+  }
+
+  public class GraphIterator implements Iterator<Pair<SemanticGraph, SemanticGraph>>, Closeable {
+    private final SentenceIterator sentences;
+
+    private GraphIterator(String filePath) throws IOException {
+      this.sentences = sentenceIterator(filePath);
+    }
+
+    @Override
+    public boolean hasNext() {
+      return sentences.hasNext();
+    }
+
+    @Override
+    public Pair<SemanticGraph, SemanticGraph> next() {
+      CoreMap sentence = sentences.next();
+      SemanticGraph basic = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+      SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+      if (enhanced == null) {
+        enhanced = basic;
+      }
+      List<String> comments = sentence.get(CoreAnnotations.CommentsAnnotation.class);
+      if (comments != null) {
+        for (String comment : comments) {
+          basic.addComment(comment);
+          if (enhanced != basic) {
+            enhanced.addComment(comment);
+          }
+        }
+      }
+      return new Pair<>(basic, enhanced);
+    }
+
+    @Override
+    public void close() throws IOException {
+      sentences.close();
+    }
+  }
+
+  /**
    * Convert a CoNLLUDocument into an Annotation
    * The convention is that a CoNLLU document represents a list of sentences,
    * one sentence per line, separated by newline.
