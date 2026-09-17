@@ -106,9 +106,10 @@ public class CoordinationPattern extends SemgrexPattern  {
     private final CoordinationPattern myNode;
     private int currChild;
     private final boolean considerAll;
-    private IndexedWord nextNodeMatch = null;
-    private SemgrexGraphName currentGraph = null;
-    private SemgrexGraphs currentGraphs = null;
+    /** whichever member matched: what getMatch, getGraph and getGraphs report */
+    private SemgrexMatcher matched = null;
+    /** the graph this coordination was handed, for before any member has matched */
+    private final SemgrexGraphName incomingGraph;
     // do all con/dis-juncts have to be considered to determine a match?
     // i.e. true if conj and not negated or disj and negated
 
@@ -120,6 +121,7 @@ public class CoordinationPattern extends SemgrexPattern  {
                                VariableStrings variableStrings,
                                boolean ignoreCase) {
       super(graphs, n, namesToNodes, namesToRelations, namesToEdges, variableStrings);
+      this.incomingGraph = currentGraph;
       myNode = c;
       children = new SemgrexMatcher[myNode.children.size()];
       for (int i = 0; i < children.length; i++) {
@@ -138,9 +140,7 @@ public class CoordinationPattern extends SemgrexPattern  {
       for (SemgrexMatcher aChildren : children) {
         aChildren.resetChildIter();
       }
-      nextNodeMatch = null;
-      currentGraph = null;
-      currentGraphs = null;
+      matched = null;
     }
 
     @Override
@@ -183,10 +183,10 @@ public class CoordinationPattern extends SemgrexPattern  {
               if (myNode.isNegated()) {
                 // a negated node should only match once (before being reset)
                 currChild = -1;
-              } else if (myNode.isNodeCoord) {
-                nextNodeMatch = children[0].getMatch();
-                currentGraph = children[0].getGraph();
-                currentGraphs = children[0].getGraphs();
+              } else {
+                // every member of a conjunction is matched at the same
+                // node, so the first of them speaks for all
+                matched = children[0];
               }
               return true;
             }
@@ -215,11 +215,7 @@ public class CoordinationPattern extends SemgrexPattern  {
             if (myNode.isNegated()) {
               currChild = children.length;
             }
-            if (myNode.isNodeCoord) {
-              nextNodeMatch = children[currChild].getMatch();
-              currentGraph = children[currChild].getGraph();
-              currentGraphs = children[currChild].getGraphs();
-            }
+            matched = children[currChild];
             //    this.namesToNodes.putAll(children[currChild].namesToNodes);
             //   this.namesToRelations.putAll(children[currChild].namesToRelations);
             return true;
@@ -234,12 +230,25 @@ public class CoordinationPattern extends SemgrexPattern  {
     }
 
     @Override
+    /**
+     * The node the member which matched arrived at.
+     *<br>
+     * Asked of that member rather than worked out when the match was
+     * made, because not every pattern can answer -- a conjunction of
+     * relations arrives at no one node -- and most callers never ask.
+     * Working it out eagerly would refuse matches which were going to be
+     * perfectly fine.
+     */
     public IndexedWord getMatch() {
-      if (myNode.isNodeCoord && !myNode.isNegated()) {
-        return nextNodeMatch;
-      } else {
+      if (myNode.isNegated()) {
         throw new UnsupportedOperationException();
       }
+      if (matched == null) {
+        // nothing has matched yet, which callers ask about before they
+        // start searching
+        return null;
+      }
+      return matched.getMatch();
     }
 
     @Override
@@ -249,13 +258,13 @@ public class CoordinationPattern extends SemgrexPattern  {
 
     @Override
     public SemgrexGraphName getGraph() {
-      return currentGraph;
+      return matched == null ? incomingGraph : matched.getGraph();
     }
 
     /** The graphs of whichever alternative matched */
     @Override
     public SemgrexGraphs getGraphs() {
-      return currentGraphs == null ? graphs : currentGraphs;
+      return matched == null ? graphs : matched.getGraphs();
     }
 
     @Override

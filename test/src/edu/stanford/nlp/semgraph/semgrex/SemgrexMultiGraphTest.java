@@ -16,6 +16,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -376,6 +377,36 @@ public class SemgrexMultiGraphTest {
     // whereas one which stays in the basic graph sees only the two words
     SemgrexPattern basicOnly = SemgrexPattern.compile("{} <<{}");
     assertEquals(1, basicOnly.matchSentences(sentences, false).get(0).second().size());
+  }
+
+  /**
+   * A relation after a group is matched in the graph the group's branch used
+   *<br>
+   * The alternatives of a group may reach into different graphs, so which
+   * graph the relation after it belongs to is not settled by reading the
+   * pattern: it is whichever the alternative that matched was in.
+   *<br>
+   * The two graphs here share only "foo", and each has its own chain above
+   * it, so a relation can only be satisfied in the graph which has it.
+   */
+  @Test
+  public void testGroupCarriesItsBranchesGraph() {
+    SemanticGraph basic = SemanticGraph.valueOf("[root-9 c> [bup-4 x> [bhead-2 x> foo-1]]]");
+    SemanticGraph enhanced = SemanticGraph.valueOf("[root-9 c> [eup-5 y> [ehead-3 y> foo-1]]]");
+    SemgrexGraphs graphs = SemgrexGraphs.of(basic, enhanced);
+
+    // only the basic alternative can match, so the relation after the
+    // group is asked of the basic graph: bup is there, eup is not
+    assertTrue(SemgrexPattern.compile("{word:foo} ([<@basic {word:bhead} | <@enhanced {word:zzz}] < {word:bup})")
+               .matcher(graphs).find());
+    assertFalse(SemgrexPattern.compile("{word:foo} ([<@basic {word:bhead} | <@enhanced {word:zzz}] < {word:eup})")
+                .matcher(graphs).find());
+
+    // and with only the enhanced alternative able to match, the other way round
+    assertTrue(SemgrexPattern.compile("{word:foo} ([<@basic {word:zzz} | <@enhanced {word:ehead}] < {word:eup})")
+               .matcher(graphs).find());
+    assertFalse(SemgrexPattern.compile("{word:foo} ([<@basic {word:zzz} | <@enhanced {word:ehead}] < {word:bup})")
+                .matcher(graphs).find());
   }
 
   /**
