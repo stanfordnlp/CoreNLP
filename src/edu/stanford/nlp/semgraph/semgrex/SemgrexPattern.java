@@ -948,20 +948,52 @@ public abstract class SemgrexPattern implements Serializable  {
         if (comments.size() == 0) {
           comments.addAll(graph.getComments());
         }
+        Set<Integer> highlightNodes = new TreeSet<>();
+        Set<Integer> highlightEdges = new TreeSet<>();
         for (SemgrexMatch matcher : sentenceMatches.second()) {
           StringBuilder comment = new StringBuilder();
-          comment.append("# semgrex pattern |" + semgrexName + "| matched at " + matcher.getMatch().toString(CoreLabel.OutputFormat.VALUE_INDEX));
+          comment.append("# semgrex pattern = |" + semgrexName + "| matched at " + matcher.getMatch().toString(CoreLabel.OutputFormat.VALUE_INDEX));
+
+          // TODO: figure out how conllueditor handles empty nodes
+          IndexedWord match = matcher.getMatch();
+          if (match.getEmptyIndex() == 0 && match.copyCount() == 0) {
+            highlightNodes.add(match.index());
+          }
 
           List<String> nodeNames = new ArrayList<>();
           nodeNames.addAll(matcher.getNodeNames());
           Collections.sort(nodeNames);
           for (String name : nodeNames) {
+            IndexedWord node = matcher.getNode(name);
             comment.append("  ");
             comment.append(name);
             comment.append(":");
-            comment.append(matcher.getNode(name).toString(CoreLabel.OutputFormat.VALUE_INDEX));
+            comment.append(node.toString(CoreLabel.OutputFormat.VALUE_INDEX));
+
+            // TODO: figure out how conllueditor handles empty nodes
+            if (node.getEmptyIndex() == 0 && node.copyCount() == 0) {
+              highlightNodes.add(node.index());
+            }
+          }
+          for (String name : matcher.getEdgeNames()) {
+            SemanticGraphEdge edge = matcher.getEdge(name);
+            IndexedWord target = edge.getTarget();
+            if (target.getEmptyIndex() == 0 && target.copyCount() == 0) {
+              // TODO: figure out how conllueditor handles empty nodes
+              highlightEdges.add(target.index());
+            }
           }
           comments.add(comment.toString());
+          if (highlightNodes.size() > 0) {
+            String highlight = StringUtils.join(highlightNodes, " ");
+            highlight = "# highlight tokens = " + highlight;
+            comments.add(highlight);
+          }
+          if (highlightEdges.size() > 0) {
+            String highlight = StringUtils.join(highlightEdges, " ");
+            highlight = "# highlight deprels = " + highlight;
+            comments.add(highlight);
+          }
         }
         String output = writer.printSemanticGraph(graph, enhanced, false, comments);
         System.out.print(output);
