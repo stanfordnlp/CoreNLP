@@ -10,6 +10,7 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.Triple;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -372,21 +373,21 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
         for (SemgrexPattern p: PREP_PATTERNS) {
             SemanticGraph sgCopy = sg.makeSoftCopy();
             SemgrexMatcher matcher = p.matcher(sgCopy);
-            IndexedWord oldCaseMarker = null;
+            Set<Triple<IndexedWord, IndexedWord, IndexedWord>> marked = new HashSet<>();
             while (matcher.find()) {
-
-
+                IndexedWord gov = matcher.getNode("gov");
+                IndexedWord mod = matcher.getNode("mod");
                 IndexedWord caseMarker = matcher.getNode("c1");
 
-                if (oldCaseMarker != null && caseMarker.equals(oldCaseMarker)) {
+                // a word can hang off two governors, as the shared argument
+                // of a coordination does, and the one case marker belongs on
+                // both of those relations.  only the very same edge with the
+                // very same marker is not worth doing twice
+                if (!marked.add(new Triple<>(gov, mod, caseMarker))) {
                     continue;
                 }
 
-                IndexedWord gov = matcher.getNode("gov");
-                IndexedWord mod = matcher.getNode("mod");
                 addCaseMarkersToReln(sg, gov, mod, caseMarker);
-
-                oldCaseMarker = caseMarker;
             }
         }
     }
