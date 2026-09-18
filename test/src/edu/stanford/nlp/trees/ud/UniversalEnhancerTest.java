@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees.ud;
 
+import java.io.File;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +15,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -360,6 +363,163 @@ public class UniversalEnhancerTest {
                                    "punct(works-2, .-7)");
     assertEquals(expected, describeEdges(enhance(sentence(COORD), true)));
     assertEquals(expected, describeEdges(enhance(sentence(COORD), false)));
+  }
+
+  // ------------------------------------------------------------------
+  // the two readers
+  //
+  // these do not say what the right answer is, only that both readers give
+  // the same one.  that is what has to hold before the tool can read its
+  // input with pipeline.CoNLLUReader instead
+  // ------------------------------------------------------------------
+
+  /** Sentences reaching what the fixture above does not: an MWT, SpacesAfter, an empty word */
+  private static final String BOTH_READERS = String.join("\n",
+      "# sent_id = mwt",
+      "# text = Vamos al parque  ahora.",
+      "1\tVamos\tir\tVERB\tVMIP1P0\tNumber=Plur\t0\troot\t0:root\t_",
+      "2-3\tal\t_\t_\t_\t_\t_\t_\t_\tGloss=to+the",
+      "2\ta\ta\tADP\tSPS00\t_\t4\tcase\t4:case\t_",
+      "3\tel\tel\tDET\tDA0MS0\tNumber=Sing\t4\tdet\t4:det\t_",
+      "4\tparque\tparque\tNOUN\tNCMS000\tNumber=Sing\t1\tobl\t1:obl\tSpacesAfter=\\s\\s",
+      "5\tahora\tahora\tADV\tRG\t_\t1\tadvmod\t1:advmod\tSpaceAfter=No",
+      "6\t.\t.\tPUNCT\tFp\t_\t1\tpunct\t1:punct\t_",
+      "",
+      "# sent_id = gapping",
+      "# text = John bought apples and Mary pears.",
+      "1\tJohn\tJohn\tPROPN\tNNP\tNumber=Sing\t2\tnsubj\t2:nsubj\t_",
+      "2\tbought\tbuy\tVERB\tVBD\tTense=Past\t0\troot\t0:root\t_",
+      "3\tapples\tapple\tNOUN\tNNS\tNumber=Plur\t2\tobj\t2:obj\t_",
+      "4\tand\tand\tCCONJ\tCC\t_\t5\tcc\t5:cc\t_",
+      "5\tMary\tMary\tPROPN\tNNP\tNumber=Sing\t2\tconj\t5.1:nsubj\t_",
+      "5.1\tbought\tbuy\tVERB\tVBD\tTense=Past\t_\t_\t2:conj\t_",
+      "6\tpears\tpear\tNOUN\tNNS\tNumber=Plur\t5\torphan\t5.1:obj\tSpaceAfter=No",
+      "7\t.\t.\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_",
+      "",
+      "# sent_id = no-deps",
+      "# text = He works in Paris and London.",
+      "1\tHe\the\tPRON\tPRP\tNumber=Sing\t2\tnsubj\t_\t_",
+      "2\tworks\twork\tVERB\tVBZ\tNumber=Sing\t0\troot\t_\t_",
+      "3\tin\tin\tADP\tIN\t_\t4\tcase\t_\t_",
+      "4\tParis\tParis\tPROPN\tNNP\tNumber=Sing\t2\tobl\t_\t_",
+      "5\tand\tand\tCCONJ\tCC\t_\t6\tcc\t_\t_",
+      "6\tLondon\tLondon\tPROPN\tNNP\tNumber=Sing\t4\tconj\t_\tSpaceAfter=No",
+      "7\t.\t.\tPUNCT\t.\t_\t2\tpunct\t_\t_",
+      "",
+      "");
+
+  private static List<Pair<SemanticGraph, SemanticGraph>> readWithDocumentReader(String conllu) {
+    List<Pair<SemanticGraph, SemanticGraph>> sentences = new ArrayList<>();
+    Iterator<Pair<SemanticGraph, SemanticGraph>> iterator =
+        new CoNLLUDocumentReader().getIterator(new StringReader(conllu));
+    while (iterator.hasNext()) {
+      sentences.add(iterator.next());
+    }
+    return sentences;
+  }
+
+  private static List<Pair<SemanticGraph, SemanticGraph>> readWithCoNLLUReader(String conllu) throws Exception {
+    File file = IOUtils.writeStringToTempFile(conllu, "enhancertest", "UTF-8");
+    file.deleteOnExit();
+    List<Pair<SemanticGraph, SemanticGraph>> sentences = new ArrayList<>();
+    try (CoNLLUReader.GraphIterator graphs = new CoNLLUReader().graphIterator(file.getPath())) {
+      while (graphs.hasNext()) {
+        sentences.add(graphs.next());
+      }
+    } finally {
+      file.delete();
+    }
+    return sentences;
+  }
+
+  @Test
+  public void testBothReadersGiveTheSameGraphs() throws Exception {
+    List<Pair<SemanticGraph, SemanticGraph>> fromDocumentReader = readWithDocumentReader(BOTH_READERS);
+    List<Pair<SemanticGraph, SemanticGraph>> fromCoNLLUReader = readWithCoNLLUReader(BOTH_READERS);
+    assertEquals(3, fromDocumentReader.size());
+    assertEquals(fromDocumentReader.size(), fromCoNLLUReader.size());
+    for (int i = 0; i < fromDocumentReader.size(); i++) {
+      String where = "sentence " + i;
+      assertEquals(where, describeEdges(fromDocumentReader.get(i).first()),
+                   describeEdges(fromCoNLLUReader.get(i).first()));
+      assertEquals(where, describeEdges(fromDocumentReader.get(i).second()),
+                   describeEdges(fromCoNLLUReader.get(i).second()));
+      assertEquals(where, describeRoots(fromDocumentReader.get(i).first()),
+                   describeRoots(fromCoNLLUReader.get(i).first()));
+    }
+  }
+
+  @Test
+  public void testBothReadersGiveTheSameComments() throws Exception {
+    List<Pair<SemanticGraph, SemanticGraph>> fromDocumentReader = readWithDocumentReader(BOTH_READERS);
+    List<Pair<SemanticGraph, SemanticGraph>> fromCoNLLUReader = readWithCoNLLUReader(BOTH_READERS);
+    for (int i = 0; i < fromDocumentReader.size(); i++) {
+      assertEquals("sentence " + i, fromDocumentReader.get(i).first().getComments(),
+                   fromCoNLLUReader.get(i).first().getComments());
+    }
+  }
+
+  /** The misc of the range line of an MWT, or null if the text has no MWT */
+  private static String multiWordTokenMisc(String conllu) {
+    for (String line : conllu.split("\\R")) {
+      String[] fields = line.split("\t");
+      if (fields[0].indexOf('-') > 0) {
+        return fields[fields.length - 1];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * The same text with the misc of any MWT range line blanked
+   *<br>
+   * The one place the two readers are known to differ, which
+   * testDocumentReaderDropsMultiWordTokenMisc is about.  Taking it out here
+   * lets everything else on the sentence be compared.
+   */
+  private static String withoutMultiWordTokenMisc(String conllu) {
+    StringBuilder rewritten = new StringBuilder();
+    for (String line : conllu.split("\\R", -1)) {
+      String[] fields = line.split("\t");
+      if (fields[0].indexOf('-') > 0) {
+        fields[fields.length - 1] = "_";
+        line = String.join("\t", fields);
+      }
+      rewritten.append(line).append(System.lineSeparator());
+    }
+    return rewritten.toString();
+  }
+
+  private static String enhanceAndWrite(Pair<SemanticGraph, SemanticGraph> sentence) {
+    return new CoNLLUDocumentWriter().printSemanticGraph(sentence.first(), enhance(sentence, true));
+  }
+
+  @Test
+  public void testBothReadersEnhanceAndWriteTheSame() throws Exception {
+    // the whole path: the MWT, the SpacesAfter and the empty word all have
+    // to come back out the way they went in, whichever reader put them in
+    List<Pair<SemanticGraph, SemanticGraph>> fromDocumentReader = readWithDocumentReader(BOTH_READERS);
+    List<Pair<SemanticGraph, SemanticGraph>> fromCoNLLUReader = readWithCoNLLUReader(BOTH_READERS);
+    for (int i = 0; i < fromDocumentReader.size(); i++) {
+      assertEquals("sentence " + i,
+                   withoutMultiWordTokenMisc(enhanceAndWrite(fromDocumentReader.get(i))),
+                   withoutMultiWordTokenMisc(enhanceAndWrite(fromCoNLLUReader.get(i))));
+    }
+  }
+
+  @Test
+  public void testDocumentReaderDropsMultiWordTokenMisc() {
+    // CoNLLUDocumentReader reads nothing but the span out of an MWT range
+    // line, so whatever was in its misc is gone by the time it is written
+    // back out.  SpaceAfter=No lives there in a great many treebanks
+    String written = enhanceAndWrite(readWithDocumentReader(BOTH_READERS).get(0));
+    assertEquals("_", multiWordTokenMisc(written));
+  }
+
+  @Test
+  public void testCoNLLUReaderKeepsMultiWordTokenMisc() throws Exception {
+    String written = enhanceAndWrite(readWithCoNLLUReader(BOTH_READERS).get(0));
+    assertEquals("Gloss=to+the", multiWordTokenMisc(written));
   }
 
   // ------------------------------------------------------------------
