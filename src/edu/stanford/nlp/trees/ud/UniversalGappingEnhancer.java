@@ -258,7 +258,7 @@ public class UniversalGappingEnhancer {
     private static final List<List<ArgumentSequence>> getFullConjunctArgumentsHelper(SemanticGraph sg, IndexedWord conjGov, IndexedWord orphanGov) {
         List<List<ArgumentSequence>> arguments = new LinkedList<>();
         for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(conjGov)) {
-            if (isArgument(sg, edge) && edge.getDependent().pseudoPosition() < orphanGov.pseudoPosition()) {
+            if (isArgument(sg, edge) && edge.getDependent().compareTo(orphanGov) < 0) {
                 List<ArgumentSequence> argumentVariants = new LinkedList<>();
                 ArgumentSequence seq = new ArgumentSequence(edge.getDependent(), sg.yield(edge.getDependent()));
                 argumentVariants.add(seq);
@@ -350,7 +350,6 @@ public class UniversalGappingEnhancer {
                                             List<Integer> alignment) {
         HashMap<IndexedWord, IndexedWord> copiedNodes = new HashMap<>();
         IndexedWord conjGovCopy = conjGov.makeSoftCopy();
-        conjGovCopy.setPseudoPosition(conjGovCopy.pseudoPosition() + conjGovCopy.copyCount() / 10.0);
         SemanticGraphEdge edge = sg.getEdge(conjGov, orphanGov);
         sg.removeEdge(edge);
         sg.addEdge(conjGov, conjGovCopy, edge.getRelation(), EDGE_WEIGHT, false);
@@ -375,7 +374,6 @@ public class UniversalGappingEnhancer {
                     IndexedWord sourceNode = copiedNodes.get(parallelEdge.getGovernor());
                     if (sourceNode == null) {
                         IndexedWord copyNode = parallelEdge.getGovernor().makeSoftCopy();
-                        copyNode.setPseudoPosition(copyNode.pseudoPosition() + copyNode.copyCount() / 10.0);
                         copiedNodes.put(parallelEdge.getGovernor(), copyNode);
                         newCopyNode = true;
                         sourceNode = copyNode;
@@ -385,7 +383,6 @@ public class UniversalGappingEnhancer {
 
                     if (targetNode == null) {
                         IndexedWord copyNode = parallelEdge.getDependent().makeSoftCopy();
-                        copyNode.setPseudoPosition(copyNode.pseudoPosition() + copyNode.copyCount() / 10.0);
                         copiedNodes.put(parallelEdge.getDependent(), copyNode);
                         newCopyNode = true;
                         targetNode = copyNode;
@@ -428,7 +425,7 @@ public class UniversalGappingEnhancer {
                     continue;
                 }
 
-                if (arg2.pseudoPosition() > arg1.pseudoPosition() && conjDep.pseudoPosition() > arg2.pseudoPosition()) {
+                if (arg2.compareTo(arg1) > 0 && conjDep.compareTo(arg2) > 0) {
                     SemanticGraphEdge conjEdge = sg.getEdge(arg1, conjDep);
                     sg.removeEdge(conjEdge);
                     sg.addEdge(pred, conjDep, UniversalEnglishGrammaticalRelations.CONJUNCT, EDGE_WEIGHT, false);
