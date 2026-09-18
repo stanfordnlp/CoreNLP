@@ -1,8 +1,8 @@
 package edu.stanford.nlp.trees.ud;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.neural.Embedding;
+import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.Pair;
@@ -10,7 +10,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.Iterator;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -80,43 +80,37 @@ public class UniversalEnhancer {
     return enhanced;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
 
     String conlluFileName = props.getProperty("conlluFile");
-
     String relativePronounsPatternStr = props.getProperty("relativePronouns");
-
     String embeddingsFilename = props.getProperty("embeddings");
-
     boolean keepEmptyNodes = PropertiesUtils.getBool(props, "keepEmpty", false);
 
-    Pattern relativePronounsPattern = Pattern.compile(relativePronounsPatternStr);
+    if (conlluFileName == null) {
+      throw new IllegalArgumentException("Expected a treebank to enhance: -conlluFile <file>");
+    }
 
-    Iterator<Pair<SemanticGraph, SemanticGraph>> sgIterator; // = null;
+    // both of these are optional: enhanceGraph skips the referents when
+    // there is no pattern to find them with, and skips the gapping when
+    // there are no embeddings
+    Pattern relativePronounsPattern =
+        relativePronounsPatternStr == null ? null : Pattern.compile(relativePronounsPatternStr);
+    Embedding embeddings =
+        embeddingsFilename == null ? null : new Embedding(embeddingsFilename);
 
-    CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
     CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
-    try {
-      sgIterator = reader.getIterator(IOUtils.readerFromString(conlluFileName));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    try (CoNLLUReader.GraphIterator sgIterator = new CoNLLUReader().graphIterator(conlluFileName)) {
+      while (sgIterator.hasNext()) {
+        Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
+        SemanticGraph basic = sgs.first();
+        SemanticGraph originalEnhanced = sgs.second();
+
+        SemanticGraph enhanced = enhanceGraph(basic, originalEnhanced, keepEmptyNodes, embeddings, relativePronounsPattern);
+        System.out.print(writer.printSemanticGraph(basic, enhanced));
+      }
     }
-
-    Embedding embeddings = null;
-    if (embeddingsFilename != null) {
-      embeddings = new Embedding(embeddingsFilename);
-    }
-
-    while (sgIterator.hasNext()) {
-      Pair<SemanticGraph, SemanticGraph> sgs = sgIterator.next();
-      SemanticGraph basic = sgs.first();
-      SemanticGraph originalEnhanced = sgs.second();
-
-      SemanticGraph enhanced = enhanceGraph(basic, originalEnhanced, keepEmptyNodes, embeddings, relativePronounsPattern);
-      System.out.print(writer.printSemanticGraph(basic, enhanced));
-    }
-
   } // end main()
 
 }
