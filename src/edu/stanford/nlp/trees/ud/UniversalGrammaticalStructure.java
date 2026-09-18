@@ -37,12 +37,16 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
 
 
     public static void addRef(SemanticGraph sg, Pattern relativizingWordPattern) {
-        for (SemanticGraphEdge edge : sg.findAllRelns("acl:relcl")) {
+        // every decision below is made from the graph as it was when the
+        // method was entered, so that a referent added for one relative
+        // clause is not then a candidate referent for another
+        SemanticGraph sgCopy = sg.makeSoftCopy();
+        for (SemanticGraphEdge edge : sgCopy.findAllRelns("acl:relcl")) {
             IndexedWord head = edge.getGovernor();
             IndexedWord modifier = edge.getDependent();
 
             SemanticGraphEdge leftChildEdge = null;
-            for (SemanticGraphEdge childEdge : sg.outgoingEdgeIterable(modifier)) {
+            for (SemanticGraphEdge childEdge : sgCopy.outgoingEdgeIterable(modifier)) {
                  if (relativizingWordPattern.matcher(childEdge.getDependent().value()).matches() &&
                         (leftChildEdge == null || childEdge.getDependent().index() < leftChildEdge.getDependent().index())) {
                     leftChildEdge = childEdge;
@@ -50,7 +54,7 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
             }
 
             SemanticGraphEdge leftGrandchildEdge = null;
-            for (SemanticGraphEdge childEdge : sg.outgoingEdgeIterable(modifier)) {
+            for (SemanticGraphEdge childEdge : sgCopy.outgoingEdgeIterable(modifier)) {
                 if (childEdge.getRelation().getShortName().contains("comp")
                         || childEdge.getRelation().getShortName().contains("conj")
                         || childEdge.getRelation().getShortName().contains("parataxis")
@@ -64,7 +68,7 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
                         || childEdge.getRelation().getShortName().contains("appos")) {
                     continue;
                 }
-                for (SemanticGraphEdge grandchildEdge : sg.outgoingEdgeIterable(childEdge.getDependent())) {
+                for (SemanticGraphEdge grandchildEdge : sgCopy.outgoingEdgeIterable(childEdge.getDependent())) {
                     if (relativizingWordPattern.matcher(grandchildEdge.getDependent().value()).matches() &&
                             (leftGrandchildEdge == null || grandchildEdge.getDependent().index() < leftGrandchildEdge.getDependent().index())) {
                         leftGrandchildEdge = grandchildEdge;
@@ -125,7 +129,11 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
 
     public static void addExtraNSubj(SemanticGraph sg) {
 
-        for (SemanticGraphEdge xcomp : sg.findAllRelns("xcomp")) {
+        // as in addRef, the subjects and objects are looked up in the graph
+        // as it was when the method was entered, so that a subject added for
+        // one xcomp does not decide what happens to the next one
+        SemanticGraph sgCopy = sg.makeSoftCopy();
+        for (SemanticGraphEdge xcomp : sgCopy.findAllRelns("xcomp")) {
             IndexedWord modifier = xcomp.getDependent();
             IndexedWord head = xcomp.getGovernor();
 
@@ -135,7 +143,7 @@ public class UniversalGrammaticalStructure extends GrammaticalStructure {
             //boolean hasAux = false;
             List<IndexedWord> subjects = Generics.newArrayList();
             List<IndexedWord> objects = Generics.newArrayList();
-            for (SemanticGraphEdge dep : sg.edgeIterable()) {
+            for (SemanticGraphEdge dep : sgCopy.edgeIterable()) {
                 // already have a subject dependency
                 if ((dep.getRelation().getShortName().startsWith("nsubj")) && dep.getGovernor().equals(modifier)) {
                     hasSubjectDaughter = true;
