@@ -195,7 +195,10 @@ public class CoNLLUReader {
     try {
       clazz = Class.forName(className);
     } catch (ClassNotFoundException e) {
-      int lastDot = className.lastIndexOf('.');
+      // a name which already has a $ in it has been given one by the
+      // shorthand above, and replacing a dot as well would only break the
+      // package it is in
+      int lastDot = className.indexOf('$') < 0 ? className.lastIndexOf('.') : -1;
       if (lastDot < 0) {
         throw e;
       }
