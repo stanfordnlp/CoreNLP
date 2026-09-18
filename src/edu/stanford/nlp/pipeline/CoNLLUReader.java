@@ -152,11 +152,11 @@ public class CoNLLUReader {
    */
   private final Map<Integer, Class<? extends CoreAnnotation<String>>> extraColumns = new HashMap<>();
 
-  public CoNLLUReader() throws ClassNotFoundException {
+  public CoNLLUReader() {
     this(new Properties());
   }
 
-  public CoNLLUReader(Properties props) throws ClassNotFoundException {
+  public CoNLLUReader(Properties props) {
     // set up defaults for extraColumns
     if (props.getProperty("conllu.extraColumns", "").equals("")) {
       extraColumns.put(10, CoreAnnotations.NamedEntityTagAnnotation.class);
@@ -183,7 +183,7 @@ public class CoNLLUReader {
    * as well as one written the way it would be written in Java.
    */
   @SuppressWarnings("unchecked")
-  static Class<? extends CoreAnnotation<String>> findExtraColumnClass(String className) throws ClassNotFoundException {
+  static Class<? extends CoreAnnotation<String>> findExtraColumnClass(String className) {
     int firstDot = className.indexOf('.');
     if (firstDot >= 0) {
       String packageName = classShorthandToFull.get(className.substring(0, firstDot));
@@ -200,9 +200,13 @@ public class CoNLLUReader {
       // package it is in
       int lastDot = className.indexOf('$') < 0 ? className.lastIndexOf('.') : -1;
       if (lastDot < 0) {
-        throw e;
+        throw new RuntimeClassNotFoundException(e);
       }
-      clazz = Class.forName(className.substring(0, lastDot) + '$' + className.substring(lastDot + 1));
+      try {
+        clazz = Class.forName(className.substring(0, lastDot) + '$' + className.substring(lastDot + 1));
+      } catch (ClassNotFoundException e2) {
+        throw new RuntimeClassNotFoundException(e);
+      }
     }
     if (!CoreAnnotation.class.isAssignableFrom(clazz)) {
       throw new IllegalArgumentException("Cannot use " + clazz.getName() +

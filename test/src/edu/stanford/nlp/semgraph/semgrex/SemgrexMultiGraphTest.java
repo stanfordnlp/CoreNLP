@@ -334,12 +334,8 @@ public class SemgrexMultiGraphTest {
       out.write(conllu);
     }
     List<CoreMap> sentences = new ArrayList<>();
-    try {
-      for (Annotation doc : new CoNLLUReader().readCoNLLUFile(file.toString())) {
-        sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
-      }
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
+    for (Annotation doc : new CoNLLUReader().readCoNLLUFile(file.toString())) {
+      sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
     }
     return sentences;
   }

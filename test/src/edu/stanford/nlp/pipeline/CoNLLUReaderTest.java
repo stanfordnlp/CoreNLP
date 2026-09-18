@@ -26,6 +26,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.RuntimeClassNotFoundException;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -1278,14 +1279,32 @@ public class CoNLLUReaderTest {
   }
 
   @Test
-  public void testUnknownExtraColumnClass() throws Exception {
+  public void testUnknownExtraColumnClass() {
     Properties props = new Properties();
     props.setProperty("conllu.extraColumns", "CoreAnnotations.NoSuchAnnotation");
     try {
       new CoNLLUReader(props);
       fail("Expected an unknown annotation to be reported");
-    } catch (ClassNotFoundException e) {
-      // expected
+    } catch (RuntimeClassNotFoundException e) {
+      // the name it could not find is the one the shorthand asked for, not
+      // a guess at some other spelling of it
+      assertTrue(e.getMessage(), e.getMessage().contains("CoreAnnotations$NoSuchAnnotation"));
+      assertFalse(e.getMessage(), e.getMessage().contains("ling$CoreAnnotations"));
+    }
+  }
+
+  @Test
+  public void testUnknownExtraColumnClassWithAFullName() {
+    Properties props = new Properties();
+    props.setProperty("conllu.extraColumns", "com.example.NoSuchAnnotation");
+    try {
+      new CoNLLUReader(props);
+      fail("Expected an unknown annotation to be reported");
+    } catch (RuntimeClassNotFoundException e) {
+      // a top level name which is not found is reported as written, rather
+      // than as the nested class it might have been
+      assertTrue(e.getMessage(), e.getMessage().contains("com.example.NoSuchAnnotation"));
+      assertFalse(e.getMessage(), e.getMessage().contains("com.example$"));
     }
   }
 

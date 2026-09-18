@@ -666,18 +666,14 @@ public class SemgrexStats {
       }
 
       if (!conlluFiles.isEmpty()) {
-        try {
-          CoNLLUReader reader = new CoNLLUReader();
-          for (File conlluFile : conlluFiles) {
-            log.info("Loading file " + conlluFile);
-            List<CoreMap> sentences = new ArrayList<>();
-            for (Annotation doc : reader.readCoNLLUFile(conlluFile.toString())) {
-              sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
+        CoNLLUReader reader = new CoNLLUReader();
+        for (File conlluFile : conlluFiles) {
+          log.info("Loading file " + conlluFile);
+          List<CoreMap> sentences = new ArrayList<>();
+          for (Annotation doc : reader.readCoNLLUFile(conlluFile.toString())) {
+            sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
             }
-            stats.accumulate(stage, sentences);
-          }
-        } catch (ClassNotFoundException e) {
-          throw new RuntimeException(e);
+          stats.accumulate(stage, sentences);
         }
       }
     }

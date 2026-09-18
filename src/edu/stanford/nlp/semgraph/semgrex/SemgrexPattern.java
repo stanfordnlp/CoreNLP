@@ -897,21 +897,17 @@ public abstract class SemgrexPattern implements Serializable  {
     List<String> conlluPaths = new ArrayList<>(argsMap.getOrDefault(CONLLU_FILE, Collections.emptyList()));
     conlluPaths.addAll(argsMap.getOrDefault(null, Collections.emptyList()));
     if (!conlluPaths.isEmpty()) {
-      try {
-        CoNLLUReader reader = new CoNLLUReader();
-        for (File conlluFile : expandFiles(conlluPaths, ".conllu")) {
-          log.info("Loading file " + conlluFile);
-          List<Annotation> docs = reader.readCoNLLUFile(conlluFile.toString());
-          for (Annotation doc : docs) {
-            List<CoreMap> read = doc.get(CoreAnnotations.SentencesAnnotation.class);
-            for (CoreMap sentence : read) {
-              sentenceFiles.put(sentence, conlluFile.toString());
-            }
-            sentences.addAll(read);
+      CoNLLUReader reader = new CoNLLUReader();
+      for (File conlluFile : expandFiles(conlluPaths, ".conllu")) {
+        log.info("Loading file " + conlluFile);
+        List<Annotation> docs = reader.readCoNLLUFile(conlluFile.toString());
+        for (Annotation doc : docs) {
+          List<CoreMap> read = doc.get(CoreAnnotations.SentencesAnnotation.class);
+          for (CoreMap sentence : read) {
+            sentenceFiles.put(sentence, conlluFile.toString());
           }
+          sentences.addAll(read);
         }
-      } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
       }
     }
 
