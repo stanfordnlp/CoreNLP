@@ -1,19 +1,25 @@
 package edu.stanford.nlp.trees.ud;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -363,6 +369,90 @@ public class UniversalEnhancerTest {
                                    "punct(works-2, .-7)");
     assertEquals(expected, describeEdges(enhance(sentence(COORD), true)));
     assertEquals(expected, describeEdges(enhance(sentence(COORD), false)));
+  }
+
+  // ------------------------------------------------------------------
+  // the whole tool, from properties to written output
+  // ------------------------------------------------------------------
+
+  /** Run the tool over the text, with any extra properties given as name, value pairs */
+  private static String runEnhance(String conllu, String... properties) throws Exception {
+    File file = IOUtils.writeStringToTempFile(conllu, "enhancertest", "UTF-8");
+    file.deleteOnExit();
+    try {
+      Properties props = new Properties();
+      props.setProperty("conlluFile", file.getPath());
+      for (int i = 0; i < properties.length; i += 2) {
+        props.setProperty(properties[i], properties[i + 1]);
+      }
+      ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+      try (PrintStream out = new PrintStream(bytes, true, "UTF-8")) {
+        UniversalEnhancer.enhance(props, out);
+      }
+      return bytes.toString("UTF-8");
+    } finally {
+      file.delete();
+    }
+  }
+
+  /** How many sentences a written treebank holds, counted by the blank lines which end them */
+  private static int countSentences(String written) {
+    int count = 0;
+    for (String line : written.split("\\R", -1)) {
+      if (line.isEmpty()) {
+        ++count;
+      }
+    }
+    // the split leaves an empty piece after the final line separator
+    return count - 1;
+  }
+
+  @Test
+  public void testEnhanceWritesWhatEnhanceGraphProduces() throws Exception {
+    // the tool is the enhancement and the writer with the arguments read
+    // for it, so it should come out the same as doing those by hand
+    StringBuilder expected = new StringBuilder();
+    for (Pair<SemanticGraph, SemanticGraph> sentence : readWithCoNLLUReader(FIXTURE)) {
+      expected.append(enhanceAndWrite(sentence));
+    }
+    assertEquals(expected.toString(),
+                 runEnhance(FIXTURE,
+                            "relativePronouns", RELATIVE_PRONOUNS.pattern(),
+                            "keepEmpty", "true"));
+  }
+
+  @Test
+  public void testRelativePronounsAreOptional() throws Exception {
+    // without a pattern there is nothing to find a referent with, so those
+    // enhancements are skipped rather than the tool falling over
+    String withPattern = runEnhance(FIXTURE, "relativePronouns", RELATIVE_PRONOUNS.pattern());
+    String withoutPattern = runEnhance(FIXTURE);
+    assertTrue(withPattern, withPattern.contains(":ref"));
+    assertFalse(withoutPattern, withoutPattern.contains(":ref"));
+    // and every sentence is still written either way
+    assertEquals(3, countSentences(withPattern));
+    assertEquals(3, countSentences(withoutPattern));
+  }
+
+  @Test
+  public void testKeepEmptyKeepsTheEmptyWords() throws Exception {
+    String kept = runEnhance(FIXTURE, "keepEmpty", "true");
+    String dropped = runEnhance(FIXTURE, "keepEmpty", "false");
+    assertTrue(kept, kept.contains("5.1\tbought"));
+    assertFalse(dropped, dropped.contains("5.1\tbought"));
+    assertEquals(3, countSentences(kept));
+    assertEquals(3, countSentences(dropped));
+  }
+
+  @Test
+  public void testATreebankIsRequired() throws Exception {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    try (PrintStream out = new PrintStream(bytes, true, "UTF-8")) {
+      UniversalEnhancer.enhance(new Properties(), out);
+      fail("Expected a missing treebank to be reported");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("conlluFile"));
+    }
   }
 
   // ------------------------------------------------------------------

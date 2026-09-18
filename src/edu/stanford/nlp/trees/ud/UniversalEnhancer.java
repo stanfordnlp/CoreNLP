@@ -11,6 +11,7 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -80,9 +81,16 @@ public class UniversalEnhancer {
     return enhanced;
   }
 
-  public static void main(String[] args) throws IOException {
-    Properties props = StringUtils.argsToProperties(args);
-
+  /**
+   * Enhance the treebank the properties name, writing it to out
+   *<br>
+   * conlluFile is the treebank.  relativePronouns is a pattern which says
+   * which words introduce a relative clause, and embeddings is a file of
+   * word vectors for resolving gapped clauses; without either of them the
+   * enhancements which need them are skipped.  keepEmpty keeps the empty
+   * words of a gapped clause rather than replacing them.
+   */
+  public static void enhance(Properties props, PrintStream out) throws IOException {
     String conlluFileName = props.getProperty("conlluFile");
     String relativePronounsPatternStr = props.getProperty("relativePronouns");
     String embeddingsFilename = props.getProperty("embeddings");
@@ -108,9 +116,13 @@ public class UniversalEnhancer {
         SemanticGraph originalEnhanced = sgs.second();
 
         SemanticGraph enhanced = enhanceGraph(basic, originalEnhanced, keepEmptyNodes, embeddings, relativePronounsPattern);
-        System.out.print(writer.printSemanticGraph(basic, enhanced));
+        out.print(writer.printSemanticGraph(basic, enhanced));
       }
     }
+  }
+
+  public static void main(String[] args) throws IOException {
+    enhance(StringUtils.argsToProperties(args), System.out);
   } // end main()
 
 }
