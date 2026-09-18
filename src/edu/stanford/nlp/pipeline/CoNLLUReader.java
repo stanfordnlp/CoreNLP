@@ -316,13 +316,19 @@ public class CoNLLUReader {
     }
 
     /**
-     * True if no line has been read into this document yet
+     * True if any word has been read into this document
      *<br>
-     * A document is built with one sentence already waiting for lines, so
-     * having a single empty sentence is the same as having nothing at all.
+     * The comments which come before the first word of a document are read
+     * before it is known which document they belong to, so they do not
+     * count as the document having been started.
      **/
-    public boolean isEmpty() {
-      return sentences.isEmpty() || (sentences.size() == 1 && sentences.get(0).isEmpty());
+    public boolean hasWords() {
+      for (CoNLLUSentence sentence : sentences) {
+        if (sentence.hasWords()) {
+          return true;
+        }
+      }
+      return false;
     }
 
     /**
@@ -506,14 +512,19 @@ public class CoNLLUReader {
         // only a comment can be a newdoc line, so the rest are not tested at all
         if (lineType == LineType.COMMENT && DOCUMENT_LINE.matcher(line).matches()) {
           CoNLLUDocument current = docs.get(docs.size() - 1);
-          // a newdoc at the very top of the file names the document which is
-          // already open, rather than asking for another one after it
-          if (!current.isEmpty()) {
-            // the sentence waiting for lines belongs to neither document
-            current.removeTrailingEmptySentence();
-            // the new document comes prebuilt with a blank sentence, so,
-            // no need to add one here
-            docs.add(new CoNLLUDocument());
+          // a newdoc before any word of the file names the document which
+          // is already open, rather than asking for another one after it
+          if (current.hasWords()) {
+            CoNLLUDocument next = new CoNLLUDocument();
+            CoNLLUSentence pending = current.lastSentence();
+            if (!pending.hasWords()) {
+              // the sentence waiting for lines holds only the comments read
+              // since the last one ended, and a comment written above a
+              // newdoc line belongs to the document that line opens
+              current.sentences.remove(current.sentences.size() - 1);
+              next.sentences.set(0, pending);
+            }
+            docs.add(next);
           }
         }
         // read in current line
@@ -571,22 +582,22 @@ public class CoNLLUReader {
     private SentenceIterator(String filePath) throws IOException {
       this.reader = IOUtils.readerFromString(filePath);
       this.lines = IOUtils.getLineIterable(reader, false).iterator();
+      this.sentence = new CoNLLUSentence();
       startDocument();
       this.next = readSentence();
     }
 
     private void startDocument() {
       document = new CoNLLUDocument();
-      sentence = new CoNLLUSentence();
       documentHasSentences = false;
       sentenceIdx = 0;
       documentTokenIdx = 0;
       previousToken = null;
     }
 
-    /** Has anything been read into the document currently open? */
-    private boolean documentIsEmpty() {
-      return !documentHasSentences && sentence.isEmpty();
+    /** Has any word been read into the document currently open? */
+    private boolean documentHasWords() {
+      return documentHasSentences || sentence.hasWords();
     }
 
     /** Turn the sentence just read into a CoreMap and get ready for the next */
@@ -615,9 +626,11 @@ public class CoNLLUReader {
         ++lineNumber;
         LineType lineType = classifyLine(line);
         CoreMap finished = null;
-        if (lineType == LineType.COMMENT && DOCUMENT_LINE.matcher(line).matches() && !documentIsEmpty()) {
+        if (lineType == LineType.COMMENT && DOCUMENT_LINE.matcher(line).matches() && documentHasWords()) {
           // a sentence still being read when the newdoc arrives belongs to
-          // the document which is ending, not to the one being opened
+          // the document which is ending, not to the one being opened.  a
+          // sentence holding only comments is the other way about, and is
+          // carried over by being left alone
           if (sentence.hasWords()) {
             finished = finishSentence();
           }

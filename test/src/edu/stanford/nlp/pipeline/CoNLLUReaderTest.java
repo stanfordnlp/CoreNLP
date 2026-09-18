@@ -220,10 +220,10 @@ public class CoNLLUReaderTest {
     // the nested classes keep no reference to a reader, so they can be
     // built without one.  this will not compile if they stop being static
     CoNLLUReader.CoNLLUDocument document = new CoNLLUReader.CoNLLUDocument();
-    assertTrue(document.isEmpty());
+    assertFalse(document.hasWords());
     assertFalse(document.lastSentence().hasWords());
     document.lastSentence().processLine("1\tHola\thola", LineType.TOKEN);
-    assertFalse(document.isEmpty());
+    assertTrue(document.hasWords());
     assertTrue(document.lastSentence().hasWords());
   }
 
@@ -1389,6 +1389,53 @@ public class CoNLLUReaderTest {
     CoreMap sentence = readSentences(text).get(0);
     assertEquals(Collections.singletonList("# newdoc id = first"),
                  sentence.get(CoreAnnotations.CommentsAnnotation.class));
+  }
+
+  @Test
+  public void testCommentsAboveALeadingNewdoc() throws Exception {
+    // AnCora writes the file wide comments above the newdoc line of the
+    // first document, so the newdoc is not the first line of its block
+    String text = String.join("\n",
+        "# global.Entity = eid-etype-head-other",
+        "# newdoc id = 3LB-CAST-111_C-2",
+        "# sent_id = 3LB-CAST-111_C-2-s1",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    List<Annotation> documents = readDocuments(text);
+    assertEquals(1, documents.size());
+    List<CoreMap> sentences = documents.get(0).get(CoreAnnotations.SentencesAnnotation.class);
+    assertEquals(1, sentences.size());
+    assertEquals(java.util.Arrays.asList("# global.Entity = eid-etype-head-other",
+                                         "# newdoc id = 3LB-CAST-111_C-2",
+                                         "# sent_id = 3LB-CAST-111_C-2-s1"),
+                 sentences.get(0).get(CoreAnnotations.CommentsAnnotation.class));
+  }
+
+  @Test
+  public void testCommentsAboveALaterNewdoc() throws Exception {
+    // the same block in the middle of a file: the comments above the
+    // newdoc line belong to the document it opens, not to the one ending
+    String text = String.join("\n",
+        "# sent_id = first-1",
+        "1\tHola\thola\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "# global.Entity = eid-etype-head-other",
+        "# newdoc id = second",
+        "# sent_id = second-1",
+        "1\tAdiós\tadiós\tINTJ\t_\t_\t0\troot\t_\t_",
+        "",
+        "");
+    List<Annotation> documents = readDocuments(text);
+    assertEquals(2, documents.size());
+    assertEquals(java.util.Arrays.asList("# sent_id = first-1"),
+                 documents.get(0).get(CoreAnnotations.SentencesAnnotation.class)
+                 .get(0).get(CoreAnnotations.CommentsAnnotation.class));
+    assertEquals(java.util.Arrays.asList("# global.Entity = eid-etype-head-other",
+                                         "# newdoc id = second",
+                                         "# sent_id = second-1"),
+                 documents.get(1).get(CoreAnnotations.SentencesAnnotation.class)
+                 .get(0).get(CoreAnnotations.CommentsAnnotation.class));
   }
 
   @Test
