@@ -12,6 +12,8 @@ import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
+import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.*;
 import java.util.Iterator;
 import java.util.List;
@@ -254,8 +256,7 @@ public class UniversalDependenciesConverter {
    * {@code -combineMWTs}: "False" (default), "True" marks things like it's as MWT
    * {@code -correctPTB}: "False" (default), "True" runs the PTB Corrector over the trees
    */
-  public static void main(String[] args) {
-    Properties props = StringUtils.argsToProperties(args);
+  public static void convert(Properties props, PrintStream out) throws IOException {
 
     String treeFileName = props.getProperty("treeFile");
     String conlluFileName = props.getProperty("conlluFile");
@@ -359,11 +360,14 @@ public class UniversalDependenciesConverter {
         }
         addSpaceAfter(sg, text, graphIdx);
       }
-      System.out.println("# sent_id = " + graphIdx);
-      System.out.print(writer.printSemanticGraph(sg, enhanced));
+      out.println("# sent_id = " + graphIdx);
+      out.print(writer.printSemanticGraph(sg, enhanced));
       ++graphIdx;
     }
+  }
 
+  public static void main(String[] args) throws IOException {
+    convert(StringUtils.argsToProperties(args), System.out);
   }
 
 }
