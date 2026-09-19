@@ -4,6 +4,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.treebank.EnglishPTBTreebankCorrector;
@@ -147,10 +148,25 @@ public class UniversalDependenciesConverter {
 
   private static void addLemmata(SemanticGraph sg) {
     sg.vertexListSorted().forEach(w -> {
-      if(w.lemma() == null) {
+      if(w.lemma() == null && !isGoesWith(sg, w)) {
         w.setLemma(MORPH.lemma(w.word(), w.tag()));
       }
     });
+  }
+
+  /**
+   * True if this word carries on one which was split in two
+   *<br>
+   * The lemma of such a word belongs to the first piece, so the rest are
+   * left without one rather than being given a lemma of their own.
+   */
+  private static boolean isGoesWith(SemanticGraph sg, IndexedWord word) {
+    for (SemanticGraphEdge edge : sg.incomingEdgeIterable(word)) {
+      if (edge.getRelation().getShortName().equals("goeswith")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static void addLemmata(Tree tree) {
