@@ -1,6 +1,7 @@
 package edu.stanford.nlp.trees.ud;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -295,12 +296,7 @@ public class UniversalDependenciesConverter {
       }
       sgIterator = new TreeToSemanticGraphIterator(treeIterator, ptbCorrector);
     } else if (conlluFileName != null) {
-      CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
-      try {
-        sgIterator = reader.getIterator(IOUtils.readerFromString(conlluFileName));
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
+      sgIterator = new CoNLLUReader().graphIterator(conlluFileName);
     } else {
       System.err.println("No input file specified!");
       System.err.println();
