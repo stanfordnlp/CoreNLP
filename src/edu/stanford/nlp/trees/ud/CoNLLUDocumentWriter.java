@@ -11,8 +11,10 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IntPair;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Sebastian Schuster
@@ -25,6 +27,30 @@ public class CoNLLUDocumentWriter {
 
   public String printSemanticGraph(SemanticGraph basicSg) {
     return printSemanticGraph(basicSg, null, true);
+  }
+
+  /**
+   * A misc field with its keys in alphabetical order
+   *<br>
+   * The order of the keys means nothing, so they are put in one which does
+   * not depend on where they came from.  A file which has been through here
+   * once comes out of here again unchanged, and a key added along the way
+   * lands somewhere predictable rather than at the end.
+   *<br>
+   * Case is ignored first so that the order is the one a person would
+   * expect, then taken into account so that two keys differing only in case
+   * still have an order between them.
+   */
+  public static String sortMisc(String misc) {
+    if (misc == null || misc.equals("_") || misc.indexOf('|') < 0) {
+      return misc;
+    }
+    List<String> pieces = Arrays.asList(misc.split("\\|"));
+    pieces.sort((a, b) -> {
+        int compared = String.CASE_INSENSITIVE_ORDER.compare(a, b);
+        return compared != 0 ? compared : a.compareTo(b);
+      });
+    return String.join("|", pieces);
   }
 
   public String printSemanticGraph(SemanticGraph basicSg, SemanticGraph enhancedSg) {
@@ -166,7 +192,7 @@ public class CoNLLUDocumentWriter {
       }
 
       sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.toCopyOrEmptyIndex(), word,
-                              lemma, upos, pos, featuresString, govIdx, relnName, additionalDepsString, misc));
+                              lemma, upos, pos, featuresString, govIdx, relnName, additionalDepsString, sortMisc(misc)));
     }
     sb.append(System.lineSeparator());
 
@@ -239,7 +265,7 @@ public class CoNLLUDocumentWriter {
       }
     }
 
-    sb.append(String.format("%s\t%s\t_\t_\t_\t_\t_\t_\t_\t%s%n", range, token.get(CoreAnnotations.MWTTokenTextAnnotation.class), misc));
+    sb.append(String.format("%s\t%s\t_\t_\t_\t_\t_\t_\t_\t%s%n", range, token.get(CoreAnnotations.MWTTokenTextAnnotation.class), sortMisc(misc)));
   }
 
   /**
@@ -281,7 +307,7 @@ public class CoNLLUDocumentWriter {
       }
       index++;
       sb.append(String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", token.index(), token.word(),
-                              lemma, upos , pos, featuresString, head, rel, headrel, misc));
+                              lemma, upos , pos, featuresString, head, rel, headrel, sortMisc(misc)));
     }
     sb.append(System.lineSeparator());
 
