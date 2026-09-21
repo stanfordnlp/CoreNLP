@@ -20,7 +20,9 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.process.Morphology;
+import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.EnglishPatterns;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -32,7 +34,7 @@ import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.UniversalPOSMapper;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -521,33 +523,44 @@ public class UniversalDependenciesFeatureAnnotator  {
 
     UniversalDependenciesFeatureAnnotator featureAnnotator = new UniversalDependenciesFeatureAnnotator();
 
-    Reader r = IOUtils.readerFromString(coNLLUFile);
-    CoNLLUDocumentReader depReader = new CoNLLUDocumentReader();
     CoNLLUDocumentWriter depWriter = new CoNLLUDocumentWriter();
-    Iterator<Pair<SemanticGraph, SemanticGraph>> it = depReader.getIterator(r);
-
     Iterator<Tree> treeIt = noTrees ? null : treebankIterator(treeFile);
 
-    while (it.hasNext()) {
-      SemanticGraph sg = it.next().first();
-      Tree t = noTrees ? null : treeIt.next();
+    try (CoNLLUReader.SentenceIterator sentences = new CoNLLUReader().sentenceIterator(coNLLUFile)) {
+      while (sentences.hasNext()) {
+        CoreMap sentence = sentences.next();
+        SemanticGraph sg = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        // the enhanced graph is written back out as it was read, and is null
+        // for a sentence which had no DEPS column
+        SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+        Tree t = noTrees ? null : treeIt.next();
 
-      if (!noTrees && (t == null || t.yield().size() != sg.size())) {
+        if (!noTrees && (t == null || t.yield().size() != sg.size())) {
 
-        StringBuilder sentenceSb = new StringBuilder();
-        for (IndexedWord word : sg.vertexListSorted()) {
-          sentenceSb.append(word.get(CoreAnnotations.TextAnnotation.class));
-          sentenceSb.append(' ');
+          StringBuilder sentenceSb = new StringBuilder();
+          for (IndexedWord word : sg.vertexListSorted()) {
+            sentenceSb.append(word.get(CoreAnnotations.TextAnnotation.class));
+            sentenceSb.append(' ');
+          }
+
+          throw new RuntimeException("CoNLL-U file and tree file are not aligned. \n"
+                  + "Sentence: " + sentenceSb + '\n'
+                  + "Tree: " + ((t == null) ? "null" : t.pennString()));
         }
 
-        throw new RuntimeException("CoNLL-U file and tree file are not aligned. \n"
-                + "Sentence: " + sentenceSb + '\n'
-                + "Tree: " + ((t == null) ? "null" : t.pennString()));
+        featureAnnotator.addFeatures(sg, t, true, addUPOS);
+
+        // the rows are written from the enhanced graph whenever there is
+        // one, so it is only used if every word of the sentence is in it.  a
+        // word with no enhanced dependencies of its own is not in it, and
+        // would be left out of the file
+        if (enhanced != null && !enhanced.vertexSet().containsAll(sg.vertexSet())) {
+          enhanced = null;
+        }
+
+        out.print(depWriter.printSemanticGraph(sg, enhanced, !escapeParens,
+                                               sentence.get(CoreAnnotations.CommentsAnnotation.class)));
       }
-
-      featureAnnotator.addFeatures(sg, t, true, addUPOS);
-
-      out.print(depWriter.printSemanticGraph(sg, null, !escapeParens));
     }
   }
 

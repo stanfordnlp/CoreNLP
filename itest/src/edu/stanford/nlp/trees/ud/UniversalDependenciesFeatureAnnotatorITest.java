@@ -8,7 +8,7 @@ import java.util.Properties;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -18,9 +18,7 @@ import edu.stanford.nlp.io.IOUtils;
  * What UniversalDependenciesFeatureAnnotator writes for a few sentences.
  *<br>
  * These record the behavior rather than argue for it: the expected values
- * are what the annotator produced when the test was written, and some of
- * what they record is wrong.  The tests which pin something wrong say so,
- * so that fixing it shows up as that test changing and nothing else.
+ * are what the annotator produced when the test was written.
  *<br>
  * The annotator needs the constituency tree of each sentence as well as the
  * CoNLL-U, though all it takes from the tree is which verbs are imperative
@@ -42,11 +40,17 @@ public class UniversalDependenciesFeatureAnnotatorITest {
     }
   }
 
+  /** The sentence whose verb is imperative, which only the tree can say */
+  static final int IMPERATIVE = 2;
+
   /** The sentence with no XPOS, which is reported rather than featurized */
   static final int NO_XPOS = 4;
 
   /** The sentence with an empty word in its enhanced graph */
   static final int EMPTY_NODE = 6;
+
+  /** The sentence where one word has no enhanced dependencies */
+  static final int PARTIAL_DEPS = 7;
 
   static final Sentence[] SENTENCES = {
     // pronouns and a past tense verb, for Person, Case, Number, Tense
@@ -128,6 +132,17 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "5.1\tbought\tbuy\tVERB\tVBD\t_\t_\t_\t2:conj\t_",
         "6\tpears\tpear\tNOUN\tNNS\t_\t5\torphan\t5.1:obj\tSpaceAfter=No",
         "7\t.\t.\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_"),
+
+    // one word has DEPS and one does not, so the enhanced graph is missing
+    // a word of the sentence
+    new Sentence("partial-deps",
+        "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (PRP her))) (. .)))",
+        "# sent_id = partial-deps",
+        "# text = I saw her.",
+        "1\tI\tI\tPRON\tPRP\t_\t2\tnsubj\t2:nsubj\t_",
+        "2\tsaw\tsee\tVERB\tVBD\t_\t0\troot\t0:root\t_",
+        "3\ther\tshe\tPRON\tPRP\t_\t2\tobj\t_\tSpaceAfter=No",
+        "4\t.\t.\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_"),
   };
 
 
@@ -157,6 +172,27 @@ public class UniversalDependenciesFeatureAnnotatorITest {
 
   static String annotate(Sentence sentence, String... properties) throws Exception {
     return annotate(sentence.conllu, sentence.tree, properties);
+  }
+
+  /** Run the annotator over a sentence with -noTrees rather than a tree file */
+  static String annotateWithoutTrees(Sentence sentence, String... properties) throws Exception {
+    File conlluFile = IOUtils.writeStringToTempFile(sentence.conllu, "annotatortest", "UTF-8");
+    conlluFile.deleteOnExit();
+    try {
+      Properties props = new Properties();
+      props.setProperty("conlluFile", conlluFile.getPath());
+      props.setProperty("noTrees", "true");
+      for (int i = 0; i < properties.length; i += 2) {
+        props.setProperty(properties[i], properties[i + 1]);
+      }
+      ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+      try (PrintStream out = new PrintStream(bytes, true, "UTF-8")) {
+        UniversalDependenciesFeatureAnnotator.annotate(props, out);
+      }
+      return bytes.toString("UTF-8");
+    } finally {
+      conlluFile.delete();
+    }
   }
 
   /** The lines of one written sentence, ending with the blank line after it */
@@ -204,9 +240,9 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "1\tHe\the\tPRON\tPRP\tCase=Nom|Gender=Masc|Number=Sing|Person=3|PronType=Prs\t2\tnsubj\t2:nsubj\t_",
         "2\tworks\twork\tVERB\tVBZ\tMood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin\t0\troot\t0:root\t_",
         "3\tin\tin\tADP\tIN\t_\t4\tcase\t4:case\t_",
-        "4\tParis\tParis\tPROPN\tNNP\tNumber=Sing\t2\tobl\t2:obl\t_",
+        "4\tParis\tParis\tPROPN\tNNP\tNumber=Sing\t2\tobl\t2:obl:in\t_",
         "5\tand\tand\tCCONJ\tCC\t_\t6\tcc\t6:cc\t_",
-        "6\tLondon\tLondon\tPROPN\tNNP\tNumber=Sing\t4\tconj\t2:obl:in|4:conj\tSpaceAfter=No",
+        "6\tLondon\tLondon\tPROPN\tNNP\tNumber=Sing\t4\tconj\t2:obl:in|4:conj:and\tSpaceAfter=No",
         "7\t.\t.\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_"),
         annotate(SENTENCES[1]));
   }
@@ -252,7 +288,7 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "# sent_id = mwt",
         "# text = I don't know.",
         "1\tI\tI\tPRON\tPRP\tCase=Nom|Number=Sing|Person=1|PronType=Prs\t4\tnsubj\t4:nsubj\t_",
-        "2-3\tdon't\t_\t_\t_\t_\t_\t_\t_\t_",
+        "2-3\tdon't\t_\t_\t_\t_\t_\t_\t_\tGloss=do+not",
         "2\tdo\tdo\tAUX\tVBP\tMood=Ind|Tense=Pres|VerbForm=Fin\t4\taux\t4:aux\t_",
         "3\tn't\tnot\tPART\tRB\t_\t4\tadvmod\t4:advmod\t_",
         "4\tknow\tknow\tVERB\tVB\tVerbForm=Inf\t0\troot\t0:root\tSpaceAfter=No",
@@ -269,8 +305,9 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "2\tbought\tbuy\tVERB\tVBD\tMood=Ind|Tense=Past|VerbForm=Fin\t0\troot\t0:root\t_",
         "3\tapples\tapple\tNOUN\tNNS\tNumber=Plur\t2\tobj\t2:obj\t_",
         "4\tand\tand\tCCONJ\tCC\t_\t5\tcc\t5:cc\t_",
-        "5\tMary\tMary\tPROPN\tNNP\tNumber=Sing\t2\tconj\t2:conj|5.1:nsubj\t_",
-        "6\tpears\tpear\tNOUN\tNNS\tNumber=Plur\t5\torphan\t5:orphan|5.1:obj\tSpaceAfter=No",
+        "5\tMary\tMary\tPROPN\tNNP\tNumber=Sing\t2\tconj\t5.1:nsubj\t_",
+        "5.1\tbought\tbuy\tVERB\tVBD\t_\t_\t_\t2:conj\t_",
+        "6\tpears\tpear\tNOUN\tNNS\tNumber=Plur\t5\torphan\t5.1:obj\tSpaceAfter=No",
         "7\t.\t.\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_"),
         annotate(SENTENCES[EMPTY_NODE]));
   }
@@ -316,41 +353,113 @@ public class UniversalDependenciesFeatureAnnotatorITest {
   }
 
   // ------------------------------------------------------------------
-  // things these record which are wrong
+  // without trees
   // ------------------------------------------------------------------
 
   @Test
-  public void testSharedGovernorLosesTheSpecific() throws Exception {
-    // wrong.  the enhanced dependencies are written from what the reader
-    // left on each word, and the basic arc is then put over the top of
-    // whichever enhanced arc has the same governor, so obl:in becomes obl
-    // and conj:and becomes conj.  London's obl:in survives only because
-    // its governor is not London's basic governor
-    String written = annotate(SENTENCES[1]);
-    assertEquals("2:obl", column(written, "Paris", 8));
-    assertEquals("2:obl:in|4:conj", column(written, "London", 8));
-  }
-
-  @Test
-  public void testEmptyNodeLineIsDropped() throws Exception {
-    // wrong.  with no enhanced graph the rows are written from the basic
-    // graph, which has no empty words in it, so the 5.1 line is left out
-    // while the DEPS of Mary and pears still point at it.  a file written
-    // this way does not validate.  the basic arcs are then added to DEPS
-    // as well, which puts conj on Mary and orphan on pears, and orphan is
-    // never a relation of an enhanced graph
-    String written = annotate(SENTENCES[EMPTY_NODE]);
-    for (String line : written.split("\\R")) {
-      assertFalse(line, line.startsWith("5.1\t"));
+  public void testNoTreesGivesTheSameFeatures() throws Exception {
+    // the tree is only used to find imperatives, so a sentence without one
+    // comes out exactly the same whether or not the trees are there
+    for (int i = 0; i < SENTENCES.length; i++) {
+      if (i == IMPERATIVE || i == NO_XPOS) {
+        continue;
+      }
+      Sentence sentence = SENTENCES[i];
+      assertEquals(sentence.name, annotate(sentence), annotateWithoutTrees(sentence));
     }
-    assertEquals("2:conj|5.1:nsubj", column(written, "Mary", 8));
-    assertEquals("5:orphan|5.1:obj", column(written, "pears", 8));
   }
 
   @Test
-  public void testMultiWordTokenMiscIsDropped() throws Exception {
-    // wrong.  the misc of an MWT range line does not come through the
-    // reader, so the Gloss is gone
-    assertEquals("_", column(annotate(SENTENCES[5]), "don't", 9));
+  public void testNoTreesMarksImperativesAsInfinitives() throws Exception {
+    // the PTB tags an imperative VB the same as an infinitive, and only the
+    // S-IMP of the tree tells them apart, so without it Go is an infinitive
+    String feats = column(annotateWithoutTrees(SENTENCES[IMPERATIVE]), "Go", 5);
+    assertTrue(feats, feats.contains("VerbForm=Inf"));
+    assertTrue(feats, !feats.contains("Mood=Imp"));
+  }
+
+  @Test
+  public void testNoTreesWithATreeFile() throws Exception {
+    try {
+      annotate(SENTENCES[0], "noTrees", "true");
+      fail("Expected -treeFile with -noTrees to be reported");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("-noTrees"));
+    }
+  }
+
+  @Test
+  public void testNoTreesWithAddUPOS() throws Exception {
+    // addUPOS takes its tags from the trees, so there is nothing for it to use
+    try {
+      annotateWithoutTrees(SENTENCES[0], "addUPOS", "true");
+      fail("Expected -addUPOS with -noTrees to be reported");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("-addUPOS"));
+    }
+  }
+
+  @Test
+  public void testLeavingOutTheTreesIsNotNoTrees() throws Exception {
+    // a missing tree file is not taken as asking to annotate without trees:
+    // that has to be asked for, so nothing is written
+    File conlluFile = IOUtils.writeStringToTempFile(SENTENCES[0].conllu, "annotatortest", "UTF-8");
+    conlluFile.deleteOnExit();
+    try {
+      Properties props = new Properties();
+      props.setProperty("conlluFile", conlluFile.getPath());
+      ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+      try (PrintStream out = new PrintStream(bytes, true, "UTF-8")) {
+        UniversalDependenciesFeatureAnnotator.annotate(props, out);
+      }
+      assertEquals("", bytes.toString("UTF-8"));
+    } finally {
+      conlluFile.delete();
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // the enhanced dependencies go back out as they came in
+  // ------------------------------------------------------------------
+
+  @Test
+  public void testSharedGovernorKeepsTheSpecific() throws Exception {
+    // an enhanced arc which shares its governor with the basic arc keeps
+    // its own relation, not the basic one
+    String written = annotate(SENTENCES[1]);
+    assertEquals("2:obl:in", column(written, "Paris", 8));
+    assertEquals("2:obl:in|4:conj:and", column(written, "London", 8));
+  }
+
+  @Test
+  public void testEmptyNodeIsWritten() throws Exception {
+    // the empty word has a line of its own, and the words whose enhanced
+    // arcs point at it keep those arcs and no others
+    String written = annotate(SENTENCES[EMPTY_NODE]);
+    boolean found = false;
+    for (String line : written.split("\\R")) {
+      if (line.startsWith("5.1\t")) {
+        found = true;
+      }
+    }
+    assertTrue(written, found);
+    assertEquals("5.1:nsubj", column(written, "Mary", 8));
+    assertEquals("5.1:obj", column(written, "pears", 8));
+  }
+
+  @Test
+  public void testMultiWordTokenMiscIsKept() throws Exception {
+    assertEquals("Gloss=do+not", column(annotate(SENTENCES[5]), "don't", 9));
+  }
+
+  @Test
+  public void testPartialDepsKeepsEveryWord() throws Exception {
+    // her has no enhanced dependencies of its own, so it is not in the
+    // enhanced graph.  the rows are written from the basic graph instead,
+    // which has every word, rather than her being left out of the file
+    String written = annotate(SENTENCES[PARTIAL_DEPS]);
+    for (String word : new String[] {"I", "saw", "her", "."}) {
+      assertNotNull(word + " should have a line of its own", column(written, word, 1));
+    }
   }
 }
