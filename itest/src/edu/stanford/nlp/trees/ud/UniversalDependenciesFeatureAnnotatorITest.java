@@ -27,7 +27,7 @@ import edu.stanford.nlp.io.IOUtils;
  *
  * @author John Bauer
  */
-public class UniversalDependenciesFeatureAnnotatorTest {
+public class UniversalDependenciesFeatureAnnotatorITest {
 
   /** One sentence as CoNLL-U, with the tree for the same words */
   static final class Sentence {
