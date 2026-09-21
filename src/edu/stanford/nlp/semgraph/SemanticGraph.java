@@ -77,7 +77,7 @@ public class SemanticGraph implements Serializable  {
   private static final MapFactory<IndexedWord, List<SemanticGraphEdge>> innerMapFactory = MapFactory.linkedHashMapFactory();
   private static final MapFactory<IndexedWord, IndexedWord> wordMapFactory = MapFactory.linkedHashMapFactory();
 
-  private LinkedList<String> comments = new LinkedList<>();
+  private final LinkedList<String> comments = new LinkedList<>();
 
   public int edgeCount() {
     return graph.getNumEdges();
@@ -1772,6 +1772,7 @@ public class SemanticGraph implements Serializable  {
   public SemanticGraph(SemanticGraph g) {
     graph = new DirectedMultiGraph<>(g.graph);
     roots = wordMapFactory.newSet(g.roots);
+    this.comments.addAll(g.getComments());
   }
 
   /**
@@ -1801,6 +1802,8 @@ public class SemanticGraph implements Serializable  {
       IndexedWord newDep = prevToNewMap.get(edge.getDependent());
       addEdge(newGov, newDep, edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
+
+    this.comments.addAll(g.getComments());
   }
 
   /**
@@ -1876,6 +1879,7 @@ public class SemanticGraph implements Serializable  {
     for (SemanticGraphEdge edge : this.edgeIterable()) {
       newSg.addEdge(edge.getSource(), edge.getTarget(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
+    newSg.comments.addAll(this.getComments());
     return newSg;
   }
 
