@@ -385,6 +385,18 @@ public class UniversalDependenciesFeatureAnnotator  {
     return false;
   }
 
+  /** The words of a sentence separated by spaces, for an error message */
+  private static String sentenceText(SemanticGraph sg) {
+    StringBuilder text = new StringBuilder();
+    for (IndexedWord word : sg.vertexListSorted()) {
+      if (text.length() > 0) {
+        text.append(' ');
+      }
+      text.append(word.get(CoreAnnotations.TextAnnotation.class));
+    }
+    return text.toString();
+  }
+
   public void addFeatures(SemanticGraph sg, Tree tree, boolean addLemma, boolean addUPOS) {
 
     Set<Integer> imperatives = tree != null ? getImperatives(tree) : new HashSet<>();
@@ -394,6 +406,15 @@ public class UniversalDependenciesFeatureAnnotator  {
       String token = word.get(CoreAnnotations.TextAnnotation.class);
       Integer index = word.get(CoreAnnotations.IndexAnnotation.class);
       CoNLLUFeatures wordFeatures = word.get(CoreAnnotations.CoNLLUFeats.class);
+
+      // the features are worked out from the PTB tag, so a word without one
+      // cannot be featurized.  an empty XPOS column reaches here as null or
+      // as "_" depending on which reader the sentence came through
+      if (posTag == null || posTag.equals("_")) {
+        throw new IllegalArgumentException("Cannot add features to word " + index + ", " + token +
+                                           ": it has no XPOS, and the features are worked out from" +
+                                           " the PTB tag.  Sentence: " + sentenceText(sg));
+      }
 
       if (wordFeatures == null) {
         wordFeatures = new CoNLLUFeatures();

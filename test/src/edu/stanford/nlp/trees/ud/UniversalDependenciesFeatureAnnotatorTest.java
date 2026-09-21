@@ -8,6 +8,8 @@ import java.util.Properties;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import edu.stanford.nlp.io.IOUtils;
 
@@ -38,6 +40,9 @@ public class UniversalDependenciesFeatureAnnotatorTest {
       this.conllu = String.join("\n", conllu) + "\n\n";
     }
   }
+
+  /** The sentence with no XPOS, which is reported rather than featurized */
+  static final int NO_XPOS = 4;
 
   static final Sentence[] SENTENCES = {
     // pronouns and a past tense verb, for Person, Case, Number, Tense
@@ -210,13 +215,15 @@ public class UniversalDependenciesFeatureAnnotatorTest {
 
   @Test
   public void testNoXpos() throws Exception {
-    assertEquals(written(
-        "# sent_id = no-xpos",
-        "# text = Hello world.",
-        "1\tHello\thello\tINTJ\t_\t_\t0\troot\t0:root\t_",
-        "2\tworld\tworld\tNOUN\t_\t_\t1\tvocative\t1:vocative\tSpaceAfter=No",
-        "3\t.\t.\tPUNCT\t_\t_\t1\tpunct\t1:punct\t_"),
-        annotate(SENTENCES[4]));
+    // the features are worked out from the PTB tag, so a sentence without
+    // one is reported, naming the word, rather than coming out unfeaturized
+    try {
+      annotate(SENTENCES[NO_XPOS]);
+      fail("Expected a word with no XPOS to be reported");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("no XPOS"));
+      assertTrue(e.getMessage(), e.getMessage().contains("Hello"));
+    }
   }
 
   @Test
@@ -238,7 +245,11 @@ public class UniversalDependenciesFeatureAnnotatorTest {
     // the UPOS in these sentences is already what the trees would give, so
     // taking it from the trees changes nothing.  a sentence whose UPOS
     // disagreed with its tree would be needed to test the flag
-    for (Sentence sentence : SENTENCES) {
+    for (int i = 0; i < SENTENCES.length; i++) {
+      if (i == NO_XPOS) {
+        continue;
+      }
+      Sentence sentence = SENTENCES[i];
       assertEquals(sentence.name, annotate(sentence), annotate(sentence, "addUPOS", "true"));
     }
   }
@@ -250,7 +261,11 @@ public class UniversalDependenciesFeatureAnnotatorTest {
     StringBuilder conllu = new StringBuilder();
     StringBuilder trees = new StringBuilder();
     StringBuilder expected = new StringBuilder();
-    for (Sentence sentence : SENTENCES) {
+    for (int i = 0; i < SENTENCES.length; i++) {
+      if (i == NO_XPOS) {
+        continue;
+      }
+      Sentence sentence = SENTENCES[i];
       conllu.append(sentence.conllu);
       trees.append(sentence.tree).append('\n');
       expected.append(annotate(sentence));
@@ -287,12 +302,4 @@ public class UniversalDependenciesFeatureAnnotatorTest {
     // reader, so the Gloss is gone
     assertEquals("_", column(annotate(SENTENCES[5]), "don't", 9));
   }
-
-  @Test
-  public void testNoXposMeansNoFeatures() throws Exception {
-    // the features come from the PTB tag, so a word with no XPOS gets none,
-    // not even the Number of a noun whose UPOS says it is one
-    assertEquals("_", column(annotate(SENTENCES[4]), "world", 5));
-  }
 }
-
