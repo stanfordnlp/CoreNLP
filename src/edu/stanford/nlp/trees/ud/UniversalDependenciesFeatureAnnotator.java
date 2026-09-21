@@ -2,6 +2,7 @@ package edu.stanford.nlp.trees.ud;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -450,13 +451,15 @@ public class UniversalDependenciesFeatureAnnotator  {
                " -treeFile tree_file -conlluFile conllu_file [-addUPOS -escapeParenthesis]");
   }
 
-  public static void main(String[] args) throws IOException {
-
-    if (args.length < 2) {
-      return;
-    }
-
-    Properties props = StringUtils.argsToProperties(args);
+  /**
+   * Add features to the CoNLL-U file the properties name, writing it to out
+   *<br>
+   * conlluFile is the treebank and treeFile holds the constituency trees of
+   * the same sentences in the same order, which is where some of the
+   * features come from.  addUPOS takes the UPOS tags from the trees as
+   * well, and escapeParenthesis leaves parentheses escaped in the output.
+   */
+  public static void annotate(Properties props, PrintStream out) throws IOException {
     String treeFile = props.getProperty("treeFile");
     String coNLLUFile = props.getProperty("conlluFile");
     boolean addUPOS = PropertiesUtils.getBool(props, "addUPOS", false);
@@ -495,9 +498,15 @@ public class UniversalDependenciesFeatureAnnotator  {
 
       featureAnnotator.addFeatures(sg, t, true, addUPOS);
 
-      System.out.print(depWriter.printSemanticGraph(sg, null, !escapeParens));
+      out.print(depWriter.printSemanticGraph(sg, null, !escapeParens));
     }
   }
 
-}
+  public static void main(String[] args) throws IOException {
+    if (args.length < 2) {
+      return;
+    }
+    annotate(StringUtils.argsToProperties(args), System.out);
+  }
 
+}
