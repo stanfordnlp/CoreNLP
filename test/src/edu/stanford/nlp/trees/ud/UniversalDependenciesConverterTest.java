@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import edu.stanford.nlp.io.IOUtils;
 
@@ -200,6 +201,80 @@ public class UniversalDependenciesConverterTest {
     // writer.  SpaceAfter=No lives there in a great many treebanks
     for (String written : new String[] {convert(), convert("outputRepresentation", "enhanced")}) {
       assertTrue(written, written.contains("1-2\tit's\t_\t_\t_\t_\t_\t_\t_\tGloss=it+is"));
+    }
+  }
+
+  /**
+   * Run the converter with a text file as well, one line of text per sentence
+   */
+  static String convertWithText(String text, String... properties) throws Exception {
+    File textFile = IOUtils.writeStringToTempFile(text, "convertertext", "UTF-8");
+    textFile.deleteOnExit();
+    try {
+      String[] withText = new String[properties.length + 2];
+      System.arraycopy(properties, 0, withText, 0, properties.length);
+      withText[properties.length] = "textFile";
+      withText[properties.length + 1] = textFile.getPath();
+      return convert(withText);
+    } finally {
+      textFile.delete();
+    }
+  }
+
+  /** The misc of the word with this form, in the first sentence it turns up in */
+  private static String miscOf(String written, String word) {
+    for (String line : written.split("\\R")) {
+      String[] fields = line.split("\t");
+      if (fields.length == 10 && fields[1].equals(word)) {
+        return fields[9];
+      }
+    }
+    return null;
+  }
+
+  @Test
+  public void testTextFileSetsTheSpacing() throws Exception {
+    // the text says where the spaces are, and the spacing comes back out in
+    // the misc column.  the fixture's own SpaceAfter is replaced by what
+    // the text says, not added to it
+    String text = String.join("\n",
+        "the man who I saw left",
+        "He works in Paris and London.",
+        "it's fine",
+        "");
+    String written = convertWithText(text);
+    assertEquals("_", miscOf(written, "Paris"));
+    assertEquals("SpaceAfter=No", miscOf(written, "London"));
+    assertEquals("_", miscOf(written, "."));
+  }
+
+  @Test
+  public void testTextFileWithWiderSpacing() throws Exception {
+    // two spaces between two words is not the same as one, and says so
+    String text = String.join("\n",
+        "the man who I saw left",
+        "He works in  Paris and London.",
+        "it's fine",
+        "");
+    String written = convertWithText(text);
+    assertEquals("SpacesAfter=\\s\\s", miscOf(written, "in"));
+  }
+
+  @Test
+  public void testTextFileWhichDoesNotMatch() throws Exception {
+    // the second line of text is not the second sentence, so its words
+    // cannot be found there, and the converter stops with an error rather
+    // than taking the spacing of the sentence from the wrong text
+    String text = String.join("\n",
+        "the man who I saw left",
+        "something else entirely",
+        "it's fine",
+        "");
+    try {
+      convertWithText(text);
+      fail("Expected a text which does not match the sentence to be reported");
+    } catch (RuntimeException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("Cannot find word"));
     }
   }
 
