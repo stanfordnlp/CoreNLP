@@ -484,24 +484,37 @@ public class UniversalDependenciesFeatureAnnotator  {
       log.info("Usage: ");
       log.info("java " +
                UniversalDependenciesFeatureAnnotator.class.getCanonicalName() +
-               " -treeFile tree_file -conlluFile conllu_file [-addUPOS -escapeParenthesis]");
+               " -conlluFile conllu_file (-treeFile tree_file | -noTrees) [-addUPOS -escapeParenthesis]");
+      log.info("  -noTrees annotates without constituency trees.  The trees are how an imperative is");
+      log.info("  told apart from an infinitive, so without them every VB is marked as an infinitive.");
   }
 
   /**
    * Add features to the CoNLL-U file the properties name, writing it to out
    *<br>
    * conlluFile is the treebank and treeFile holds the constituency trees of
-   * the same sentences in the same order, which is where some of the
-   * features come from.  addUPOS takes the UPOS tags from the trees as
-   * well, and escapeParenthesis leaves parentheses escaped in the output.
+   * the same sentences in the same order.  The trees are how an imperative
+   * is told apart from an infinitive, which the PTB tags alone do not do.
+   * noTrees annotates without them instead, marking every VB as an
+   * infinitive; it is a flag of its own so that leaving out treeFile by
+   * accident is not taken as asking for that.  addUPOS takes the UPOS tags
+   * from the trees as well, and escapeParenthesis leaves parentheses
+   * escaped in the output.
    */
   public static void annotate(Properties props, PrintStream out) throws IOException {
     String treeFile = props.getProperty("treeFile");
     String coNLLUFile = props.getProperty("conlluFile");
+    boolean noTrees = PropertiesUtils.getBool(props, "noTrees", false);
     boolean addUPOS = PropertiesUtils.getBool(props, "addUPOS", false);
     boolean escapeParens = PropertiesUtils.getBool(props, "escapeParenthesis", false);
 
-    if (treeFile == null || coNLLUFile == null) {
+    if (treeFile != null && noTrees) {
+      throw new IllegalArgumentException("Give either -treeFile or -noTrees, not both");
+    }
+    if (noTrees && addUPOS) {
+      throw new IllegalArgumentException("-addUPOS takes the UPOS tags from the trees, so it cannot be used with -noTrees");
+    }
+    if (coNLLUFile == null || (treeFile == null && !noTrees)) {
       help();
       return;
     }
@@ -513,13 +526,13 @@ public class UniversalDependenciesFeatureAnnotator  {
     CoNLLUDocumentWriter depWriter = new CoNLLUDocumentWriter();
     Iterator<Pair<SemanticGraph, SemanticGraph>> it = depReader.getIterator(r);
 
-    Iterator<Tree> treeIt = treebankIterator(treeFile);
+    Iterator<Tree> treeIt = noTrees ? null : treebankIterator(treeFile);
 
     while (it.hasNext()) {
       SemanticGraph sg = it.next().first();
-      Tree t = treeIt.next();
+      Tree t = noTrees ? null : treeIt.next();
 
-      if (t == null || t.yield().size() != sg.size()) {
+      if (!noTrees && (t == null || t.yield().size() != sg.size())) {
 
         StringBuilder sentenceSb = new StringBuilder();
         for (IndexedWord word : sg.vertexListSorted()) {
