@@ -553,6 +553,7 @@ public class UniversalDependenciesFeatureAnnotator  {
 
   public static void main(String[] args) throws IOException {
     if (args.length < 2) {
+      help();
       return;
     }
     annotate(StringUtils.argsToProperties(args), System.out);
