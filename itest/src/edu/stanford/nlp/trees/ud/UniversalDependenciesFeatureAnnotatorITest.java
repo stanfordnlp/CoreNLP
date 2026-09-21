@@ -229,7 +229,7 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "# text = the web site",
         "1\tthe\tthe\tDET\tDT\tDefinite=Def|PronType=Art\t2\tdet\t2:det\t_",
         "2\tweb\tweb\tNOUN\tNN\tNumber=Sing\t0\troot\t0:root\t_",
-        "3\tsite\tsite\tX\tGW\t_\t2\tgoeswith\t2:goeswith\tSpaceAfter=No"),
+        "3\tsite\t_\tX\tGW\t_\t2\tgoeswith\t2:goeswith\tSpaceAfter=No"),
         annotate(SENTENCES[3]));
   }
 
@@ -290,6 +290,13 @@ public class UniversalDependenciesFeatureAnnotatorITest {
   }
 
   @Test
+  public void testGoeswithHasNoLemma() throws Exception {
+    // the second half of a split word has no lemma of its own in UD, so an
+    // empty lemma there is left empty rather than filled in
+    assertEquals("_", column(annotate(SENTENCES[3]), "site", 2));
+  }
+
+  @Test
   public void testSentencesTogether() throws Exception {
     // the trees and the sentences are walked in step, so a file of all of
     // them comes out as each of them would on its own
@@ -322,13 +329,6 @@ public class UniversalDependenciesFeatureAnnotatorITest {
     String written = annotate(SENTENCES[1]);
     assertEquals("2:obl", column(written, "Paris", 8));
     assertEquals("2:obl:in|4:conj", column(written, "London", 8));
-  }
-
-  @Test
-  public void testGoeswithGetsALemma() throws Exception {
-    // wrong.  the second half of a split word has no lemma of its own in
-    // UD, but an empty lemma is filled in like any other
-    assertEquals("site", column(annotate(SENTENCES[3]), "site", 2));
   }
 
   @Test

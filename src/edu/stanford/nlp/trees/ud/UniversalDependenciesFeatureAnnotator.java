@@ -385,6 +385,21 @@ public class UniversalDependenciesFeatureAnnotator  {
     return false;
   }
 
+  /**
+   * True if this word carries on one which was split in two
+   *<br>
+   * The lemma of such a word belongs to the first piece, so the rest are
+   * left without one rather than being given a lemma of their own.
+   */
+  private static boolean isGoesWith(SemanticGraph sg, IndexedWord word) {
+    for (SemanticGraphEdge edge : sg.incomingEdgeIterable(word)) {
+      if (edge.getRelation().getShortName().equals("goeswith")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /** The words of a sentence separated by spaces, for an error message */
   private static String sentenceText(SemanticGraph sg) {
     StringBuilder text = new StringBuilder();
@@ -448,7 +463,7 @@ public class UniversalDependenciesFeatureAnnotator  {
 
 
       String lemma = word.get(CoreAnnotations.LemmaAnnotation.class);
-      if (addLemma && (lemma == null || lemma.equals("_"))) {
+      if (addLemma && (lemma == null || lemma.equals("_")) && !isGoesWith(sg, word)) {
         word.set(CoreAnnotations.LemmaAnnotation.class, morphology.lemma(token, posTag));
       }
     }
