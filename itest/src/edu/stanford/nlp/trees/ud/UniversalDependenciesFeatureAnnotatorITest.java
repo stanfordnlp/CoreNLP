@@ -8,6 +8,7 @@ import java.util.Properties;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -43,6 +44,9 @@ public class UniversalDependenciesFeatureAnnotatorITest {
 
   /** The sentence with no XPOS, which is reported rather than featurized */
   static final int NO_XPOS = 4;
+
+  /** The sentence with an empty word in its enhanced graph */
+  static final int EMPTY_NODE = 6;
 
   static final Sentence[] SENTENCES = {
     // pronouns and a past tense verb, for Person, Case, Number, Tense
@@ -108,6 +112,22 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "3\tn't\tnot\tPART\tRB\t_\t4\tadvmod\t4:advmod\t_",
         "4\tknow\tknow\tVERB\tVB\t_\t0\troot\t0:root\tSpaceAfter=No",
         "5\t.\t.\tPUNCT\t.\t_\t4\tpunct\t4:punct\t_"),
+
+    // an empty word, which is only in the enhanced graph, so whether its
+    // line is written depends on which graph the rows are taken from.  the
+    // tree has no leaf for it, since it is not a word of the text
+    new Sentence("empty-node",
+        "(ROOT (S (S (NP (NNP John)) (VP (VBD bought) (NP (NNS apples)))) (CC and) (S (NP (NNP Mary)) (VP (NP (NNS pears)))) (. .)))",
+        "# sent_id = empty-node",
+        "# text = John bought apples and Mary pears.",
+        "1\tJohn\tJohn\tPROPN\tNNP\t_\t2\tnsubj\t2:nsubj\t_",
+        "2\tbought\tbuy\tVERB\tVBD\t_\t0\troot\t0:root\t_",
+        "3\tapples\tapple\tNOUN\tNNS\t_\t2\tobj\t2:obj\t_",
+        "4\tand\tand\tCCONJ\tCC\t_\t5\tcc\t5:cc\t_",
+        "5\tMary\tMary\tPROPN\tNNP\t_\t2\tconj\t5.1:nsubj\t_",
+        "5.1\tbought\tbuy\tVERB\tVBD\t_\t_\t_\t2:conj\t_",
+        "6\tpears\tpear\tNOUN\tNNS\t_\t5\torphan\t5.1:obj\tSpaceAfter=No",
+        "7\t.\t.\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_"),
   };
 
 
@@ -241,6 +261,21 @@ public class UniversalDependenciesFeatureAnnotatorITest {
   }
 
   @Test
+  public void testEmptyNode() throws Exception {
+    assertEquals(written(
+        "# sent_id = empty-node",
+        "# text = John bought apples and Mary pears.",
+        "1\tJohn\tJohn\tPROPN\tNNP\tNumber=Sing\t2\tnsubj\t2:nsubj\t_",
+        "2\tbought\tbuy\tVERB\tVBD\tMood=Ind|Tense=Past|VerbForm=Fin\t0\troot\t0:root\t_",
+        "3\tapples\tapple\tNOUN\tNNS\tNumber=Plur\t2\tobj\t2:obj\t_",
+        "4\tand\tand\tCCONJ\tCC\t_\t5\tcc\t5:cc\t_",
+        "5\tMary\tMary\tPROPN\tNNP\tNumber=Sing\t2\tconj\t2:conj|5.1:nsubj\t_",
+        "6\tpears\tpear\tNOUN\tNNS\tNumber=Plur\t5\torphan\t5:orphan|5.1:obj\tSpaceAfter=No",
+        "7\t.\t.\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_"),
+        annotate(SENTENCES[EMPTY_NODE]));
+  }
+
+  @Test
   public void testAddUPOSChangesNothingHere() throws Exception {
     // the UPOS in these sentences is already what the trees would give, so
     // taking it from the trees changes nothing.  a sentence whose UPOS
@@ -294,6 +329,22 @@ public class UniversalDependenciesFeatureAnnotatorITest {
     // wrong.  the second half of a split word has no lemma of its own in
     // UD, but an empty lemma is filled in like any other
     assertEquals("site", column(annotate(SENTENCES[3]), "site", 2));
+  }
+
+  @Test
+  public void testEmptyNodeLineIsDropped() throws Exception {
+    // wrong.  with no enhanced graph the rows are written from the basic
+    // graph, which has no empty words in it, so the 5.1 line is left out
+    // while the DEPS of Mary and pears still point at it.  a file written
+    // this way does not validate.  the basic arcs are then added to DEPS
+    // as well, which puts conj on Mary and orphan on pears, and orphan is
+    // never a relation of an enhanced graph
+    String written = annotate(SENTENCES[EMPTY_NODE]);
+    for (String line : written.split("\\R")) {
+      assertFalse(line, line.startsWith("5.1\t"));
+    }
+    assertEquals("2:conj|5.1:nsubj", column(written, "Mary", 8));
+    assertEquals("5:orphan|5.1:obj", column(written, "pears", 8));
   }
 
   @Test
