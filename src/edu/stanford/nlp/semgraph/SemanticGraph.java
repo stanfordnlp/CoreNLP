@@ -1765,9 +1765,14 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Returns a new SemanticGraph which is a copy of the supplied SemanticGraph.
-   * Both the nodes ({@link IndexedWord}s) and the edges (SemanticGraphEdges)
-   * are copied.
+   * Returns a new SemanticGraph with the same structure, roots and comments
+   * as the supplied one.
+   *<br>
+   * The graph is copied, so edges can be added to or removed from either
+   * without affecting the other, but the {@link IndexedWord}s and
+   * {@link SemanticGraphEdge}s in it are the same objects as in the
+   * original: changing a word through one graph changes it in both.
+   * {@link #SemanticGraph(SemanticGraph, Map)} makes new ones.
    */
   public SemanticGraph(SemanticGraph g) {
     graph = new DirectedMultiGraph<>(g.graph);
@@ -1776,8 +1781,10 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Copies a the current graph, but also sets the mapping from the old to new
-   * graph.
+   * Copies a the current graph, but also sets the mapping from the old to new graph.
+   *<br>
+   * TODO: items in the new words are copied by reference - in particular,
+   * the features map can be mutated and would mutate the original words
    */
   public SemanticGraph(SemanticGraph g,
                        Map<IndexedWord, IndexedWord> prevToNewMap) {
