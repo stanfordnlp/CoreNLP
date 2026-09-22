@@ -1879,6 +1879,23 @@ public class SemanticGraph implements Serializable  {
     return graph.getShortestPathEdges(source, target, true);
   }
 
+  /**
+   * A new graph with the same edges as this one, between the same
+   * IndexedWords.
+   *<br>
+   * The edges are new objects, so edges can be added to or removed from
+   * either graph without affecting the other, but the words are shared:
+   * changing a word through one graph changes it in both.  That makes this
+   * the copy to walk while editing the graph it came from.
+   *<br>
+   * Only the words at either end of an edge are copied, and only the first
+   * root is kept.  A word with no edges is left out, so the copy of a
+   * one-word sentence keeps its root as the root but has no vertices, and
+   * any other roots of a graph with several are not roots of the copy.  The
+   * comments are not copied.  Whatever matches against a copy sees it this
+   * way: scenegraph.SemanticGraphEnhancer.resolvePlurals, for one, never
+   * sees the word of a one-word sentence.
+   */
   public SemanticGraph makeSoftCopy() {
     SemanticGraph newSg = new SemanticGraph();
     if ( ! this.roots.isEmpty())
