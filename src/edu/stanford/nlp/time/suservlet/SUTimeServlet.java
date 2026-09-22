@@ -3,6 +3,7 @@ package edu.stanford.nlp.time.suservlet;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -32,8 +33,59 @@ public class SUTimeServlet extends HttpServlet {
     Properties pipelineProps = new Properties();
     pipelineProps.setProperty("pos.model", taggerFilename);
     pipeline = new SUTimePipeline(pipelineProps);
-    System.setProperty("de.jollyday.config",
-            getServletContext().getRealPath("/WEB-INF/classes/holidays/jollyday.properties"));
+    checkHolidayResources();
+  }
+
+  /** Where the holiday calendar is expected, relative to the deployed application. */
+  private static final String HOLIDAY_XML = "/WEB-INF/data/holidays/Holidays_sutime.xml";
+
+  /**
+   * Refuse to start unless the holiday calendar can be loaded.
+   * <p>
+   * SUTime resolves holidays through JollyDayHolidays, which needs two things: the
+   * calendar itself under WEB-INF, and jollyday.properties, which ships inside the
+   * jollyday jar and is read from the classpath. When either is missing, the binder fails
+   * inside the annotator and the servlet goes on answering queries with holidays quietly
+   * unrecognised. Checking here turns that into a deployment failure the container logs.
+   */
+  private void checkHolidayResources() throws ServletException {
+    List<String> problems = new ArrayList<>();
+
+    String xmlPath = getServletContext().getRealPath(HOLIDAY_XML);
+    if (xmlPath == null) {
+      problems.add("cannot resolve " + HOLIDAY_XML + " to a real path;"
+              + " the application may be running from an unexpanded war");
+    } else {
+      File xml = new File(xmlPath);
+      if ( ! xml.isFile()) {
+        problems.add("holiday calendar not found at " + xml.getAbsolutePath());
+      } else if ( ! xml.canRead()) {
+        problems.add("holiday calendar is not readable at " + xml.getAbsolutePath());
+      }
+    }
+
+    if (getClass().getClassLoader().getResource("jollyday.properties") == null) {
+      problems.add("jollyday.properties is not on the classpath; it ships inside the"
+              + " jollyday jar, so this usually means that jar is missing from WEB-INF/lib");
+    }
+
+    if ( ! problems.isEmpty()) {
+      StringBuilder message = new StringBuilder();
+      String line = System.lineSeparator();
+      message.append(line)
+             .append("**********************************************************************")
+             .append(line)
+             .append("SUTimeServlet cannot start: the holiday calendar is unavailable.")
+             .append(line);
+      for (String problem : problems) {
+        message.append("  - ").append(problem).append(line);
+      }
+      message.append("Holiday expressions such as \"Thanksgiving\" would go unrecognised.")
+             .append(line)
+             .append("**********************************************************************");
+      log(message.toString());
+      throw new ServletException(message.toString());
+    }
   }
 
   public static boolean parseBoolean(String value) {
