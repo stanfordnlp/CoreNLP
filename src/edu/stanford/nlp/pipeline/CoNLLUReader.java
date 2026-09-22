@@ -693,10 +693,8 @@ public class CoNLLUReader {
   /**
    * The basic and enhanced graph of each sentence of a file, one sentence at a time.
    *<br>
-   * This is the shape trees.ud.CoNLLUDocumentReader hands its sentences
-   * out in, and CoNLLUDocumentWriter reads them back from, so a tool built
-   * around that pair can read its input here instead.  Two things are done
-   * to match what those two expect of each other:
+   * This is the pair of graphs CoNLLUDocumentWriter writes a sentence
+   * from, and two things are done to match what it expects of them:
    *<br>
    * The comments are put on the graphs.  A sentence keeps them in its
    * CommentsAnnotation, but printSemanticGraph asks the basic graph for

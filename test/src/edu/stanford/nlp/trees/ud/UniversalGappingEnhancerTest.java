@@ -1,17 +1,20 @@
 package edu.stanford.nlp.trees.ud;
 
-import java.io.StringReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.Pair;
@@ -75,14 +78,22 @@ public class UniversalGappingEnhancerTest {
   /** The graph enhanceGraph would hand to the gapping enhancer, read fresh */
   private static SemanticGraph readyToEnhance(int which, boolean keepEmptyNodes) {
     List<Pair<SemanticGraph, SemanticGraph>> sentences = new ArrayList<>();
-    Iterator<Pair<SemanticGraph, SemanticGraph>> iterator =
-        new CoNLLUDocumentReader().getIterator(new StringReader(FIXTURE));
-    while (iterator.hasNext()) {
-      sentences.add(iterator.next());
+    try {
+      File file = IOUtils.writeStringToTempFile(FIXTURE, "gappingtest", "UTF-8");
+      file.deleteOnExit();
+      try (CoNLLUReader.GraphIterator graphs = new CoNLLUReader().graphIterator(file.getPath())) {
+        while (graphs.hasNext()) {
+          sentences.add(graphs.next());
+        }
+      } finally {
+        file.delete();
+      }
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
     }
     Pair<SemanticGraph, SemanticGraph> sentence = sentences.get(which);
     SemanticGraph graph = new SemanticGraph(sentence.first().typedDependencies());
-    if (keepEmptyNodes && sentence.second() != null) {
+    if (keepEmptyNodes) {
       UniversalEnhancer.copyEmptyNodes(sentence.second(), graph);
     }
     return graph;
