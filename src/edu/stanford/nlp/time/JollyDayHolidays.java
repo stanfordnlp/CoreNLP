@@ -203,12 +203,12 @@ public class JollyDayHolidays implements Env.Binder {
     }
 
     /** A holiday's date is fully specified, so it maps onto a year/month/day partial. */
-    private static Partial toPartial(org.joda.time.LocalDate date) {
+    private static Partial toPartial(java.time.LocalDate date) {
       return new Partial(
           new DateTimeFieldType[] { DateTimeFieldType.year(),
                                     DateTimeFieldType.monthOfYear(),
                                     DateTimeFieldType.dayOfMonth() },
-          new int[] { date.getYear(), date.getMonthOfYear(), date.getDayOfMonth() });
+          new int[] { date.getYear(), date.getMonthValue(), date.getDayOfMonth() });
     }
 
     private SUTime.Time resolveWithYear(int year) {
