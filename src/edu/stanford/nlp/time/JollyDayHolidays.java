@@ -2,6 +2,7 @@ package edu.stanford.nlp.time;
 
 import de.jollyday.HolidayManager;
 import de.jollyday.config.Configuration;
+import de.jollyday.config.Holiday;
 import de.jollyday.config.Holidays;
 // import de.jollyday.configuration.ConfigurationProvider;
 import de.jollyday.impl.DefaultHolidayManager;
@@ -75,9 +76,9 @@ public class JollyDayHolidays implements Env.Binder {
     }
   }
 
-  public Map<String, JollyHoliday> getAllHolidaysMap(Set<de.jollyday.config.Holiday> allHolidays) {
+  public Map<String, JollyHoliday> getAllHolidaysMap(Set<Holiday> allHolidays) {
     Map<String, JollyHoliday> map = Generics.newHashMap();
-    for (de.jollyday.config.Holiday h : allHolidays) {
+    for (Holiday h : allHolidays) {
       String descKey = h.getDescriptionPropertiesKey();
       if (descKey != null) {
         descKey = descKey.replaceAll(".*\\.","");
@@ -89,13 +90,49 @@ public class JollyDayHolidays implements Env.Binder {
   }
 
   public Map<String, JollyHoliday> getAllHolidaysMap(Configuration config) {
-    Set<de.jollyday.config.Holiday> s = getAllHolidays(config);
-    return getAllHolidaysMap(s);
+    Map<String, JollyHoliday> map = Generics.newHashMap();
+    for (Map.Entry<Holiday, String[]> entry : getAllHolidaysByHierarchy(config).entrySet()) {
+      String descKey = entry.getKey().getDescriptionPropertiesKey();
+      if (descKey != null) {
+        descKey = descKey.replaceAll(".*\\.", "");
+        JollyHoliday jh = new JollyHoliday(descKey, holidayManager, entry.getKey(), entry.getValue());
+        map.put(jh.label, jh);
+      }
+    }
+    return map;
   }
 
-  public CollectionValuedMap<String, JollyHoliday> getAllHolidaysCVMap(Set<de.jollyday.config.Holiday> allHolidays) {
+  /**
+   * Every holiday in the configuration, each mapped to the hierarchy path it was found
+   * under. A holiday declared at the top level has an empty path; one inside nested
+   * SubConfigurations has the hierarchy name of each enclosing configuration, outermost
+   * first. The path is what the holiday manager needs in order to compute a date for it.
+   */
+  public static Map<Holiday, String[]> getAllHolidaysByHierarchy(Configuration config) {
+    Map<Holiday, String[]> byHierarchy = new IdentityHashMap<>();
+    collectHolidaysByHierarchy(config, EMPTY_HIERARCHY, byHierarchy);
+    return byHierarchy;
+  }
+
+  private static void collectHolidaysByHierarchy(Configuration config, String[] path,
+                                                 Map<Holiday, String[]> byHierarchy) {
+    Set<Holiday> here = Generics.newHashSet();
+    getAllHolidays(config.getHolidays(), here);
+    for (Holiday h : here) {
+      byHierarchy.put(h, path);
+    }
+    for (Configuration sub : config.getSubConfigurations()) {
+      String[] subPath = Arrays.copyOf(path, path.length + 1);
+      subPath[path.length] = sub.getHierarchy();
+      collectHolidaysByHierarchy(sub, subPath, byHierarchy);
+    }
+  }
+
+  static final String[] EMPTY_HIERARCHY = new String[0];
+
+  public CollectionValuedMap<String, JollyHoliday> getAllHolidaysCVMap(Set<Holiday> allHolidays) {
     CollectionValuedMap<String, JollyHoliday> map = new CollectionValuedMap<>();
-    for (de.jollyday.config.Holiday h:allHolidays) {
+    for (Holiday h:allHolidays) {
       String descKey = h.getDescriptionPropertiesKey();
       if (descKey != null) {
         descKey = descKey.replaceAll(".*\\.","");
@@ -107,15 +144,15 @@ public class JollyDayHolidays implements Env.Binder {
   }
 
   public CollectionValuedMap<String, JollyHoliday> getAllHolidaysCVMap(Configuration config) {
-    Set<de.jollyday.config.Holiday> s = getAllHolidays(config);
+    Set<Holiday> s = getAllHolidays(config);
     return getAllHolidaysCVMap(s);
   }
 
-  public static void getAllHolidays(Holidays holidays, Set<de.jollyday.config.Holiday> allHolidays) {
+  public static void getAllHolidays(Holidays holidays, Set<Holiday> allHolidays) {
     for (Method m : holidays.getClass().getMethods()) {
       if (isGetter(m) && m.getReturnType() == List.class) {
         try {
-          List<de.jollyday.config.Holiday> l = (List<de.jollyday.config.Holiday>) m.invoke(holidays);
+          List<Holiday> l = (List<Holiday>) m.invoke(holidays);
           allHolidays.addAll(l);
         } catch (Exception e) {
           throw new RuntimeException("Cannot create set of holidays.", e);
@@ -124,7 +161,7 @@ public class JollyDayHolidays implements Env.Binder {
     }
   }
 
-  public static void getAllHolidays(Configuration config, Set<de.jollyday.config.Holiday> allHolidays) {
+  public static void getAllHolidays(Configuration config, Set<Holiday> allHolidays) {
     Holidays holidays = config.getHolidays();
     getAllHolidays(holidays, allHolidays);
     List<Configuration> subConfigs = config.getSubConfigurations();
@@ -133,8 +170,8 @@ public class JollyDayHolidays implements Env.Binder {
     }
   }
 
-  public static Set<de.jollyday.config.Holiday> getAllHolidays(Configuration config) {
-    Set<de.jollyday.config.Holiday> allHolidays = Generics.newHashSet();
+  public static Set<Holiday> getAllHolidays(Configuration config) {
+    Set<Holiday> allHolidays = Generics.newHashSet();
     getAllHolidays(config, allHolidays);
     return allHolidays;
   }
@@ -156,13 +193,21 @@ public class JollyDayHolidays implements Env.Binder {
     private static final long serialVersionUID = -1479143694893729803L;
 
     private final HolidayManager holidayManager;
-    private final de.jollyday.config.Holiday base;
+    private final Holiday base;
     private final String label;
+    /** Hierarchy path of the configuration this holiday was declared in, outermost first. */
+    private final String[] hierarchy;
 
-    public JollyHoliday(String label, HolidayManager holidayManager, de.jollyday.config.Holiday base) {
+    public JollyHoliday(String label, HolidayManager holidayManager, Holiday base) {
+      this(label, holidayManager, base, EMPTY_HIERARCHY);
+    }
+
+    public JollyHoliday(String label, HolidayManager holidayManager, Holiday base,
+                        String[] hierarchy) {
       this.label = label;
       this.holidayManager = holidayManager;
       this.base = base;
+      this.hierarchy = (hierarchy != null) ? hierarchy : EMPTY_HIERARCHY;
     }
 
     @Override
@@ -213,7 +258,9 @@ public class JollyDayHolidays implements Env.Binder {
 
     private SUTime.Time resolveWithYear(int year) {
       // TODO: If we knew location of article, can use that information to resolve holidays better
-      Set<de.jollyday.Holiday> holidays = holidayManager.getHolidays(year);
+      // de.jollyday.Holiday is the computed occurrence with a date on it, as distinct from
+      // the config Holiday imported above, which is the declaration read from the XML.
+      Set<de.jollyday.Holiday> holidays = holidayManager.getHolidays(year, hierarchy);
       // Try to find this holiday
       for (de.jollyday.Holiday h : holidays) {
         if (h.getPropertiesKey().equals(base.getDescriptionPropertiesKey())) {
