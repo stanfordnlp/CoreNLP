@@ -42,6 +42,9 @@
     </path>
   </target>
 
+  <property name="tagger.resource"
+            value="edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger" />
+
   <target name="clean" description="Delete old classes">
     <echo message="${ant.project.name}" />
     <delete dir="${build.path}"/>
@@ -431,6 +434,10 @@
     </java>
   </target>
 
+  <property name="models.home"     value="${env.CORENLP_MODELS_HOME}" />
+  <property name="tagger.resource"
+            value="edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger" />
+
   <target name="jar" depends="compile">
     <jar destfile="javanlp-core.jar">
       <fileset dir="${project.core}/classes" />
@@ -508,7 +515,23 @@
     </sequential>
   </macrodef>
 
-  <target name="sutime.war" depends="compile,jar"
+  <target name="sutime.war.models" depends="models.classpath"
+          description="extract the POS tagger from the models jars for sutime.war">
+    <mkdir dir="${build.path}/sutime-war-models"/>
+    <unzip dest="${build.path}/sutime-war-models">
+      <path refid="models.classpath"/>
+      <patternset>
+        <include name="${tagger.resource}"/>
+      </patternset>
+    </unzip>
+    <fail message="${tagger.resource} not found in any jar on models.classpath">
+      <condition>
+        <not><available file="${build.path}/sutime-war-models/${tagger.resource}"/></not>
+      </condition>
+    </fail>
+  </target>
+
+  <target name="sutime.war" depends="compile,jar,sutime.war.models"
           description="build the sutime webapp">
     <war destfile="sutime.war"
          webxml="${source.path}/edu/stanford/nlp/time/suservlet/WEB-INF/web.xml">
@@ -521,12 +544,13 @@
         <include name="joda-time-2.14.0.jar"/>
         <include name="jollyday-0.5.10.jar"/>
       </lib>
+      <!-- file="/u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger" -->
       <zipfileset prefix="WEB-INF/data"
-                  file="/u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger"/>
+                  file="${build.path}/sutime-war-models/${tagger.resource}"/>
       <zipfileset prefix="WEB-INF/data/rules"
                   file="${source.path}/edu/stanford/nlp/time/rules/*"/>
       <zipfileset prefix="WEB-INF/data/holidays"
-                    file="${source.path}/edu/stanford/nlp/time/holidays/*"/>
+                  file="${source.path}/edu/stanford/nlp/time/holidays/*"/>
       <zipfileset file="${data.path}/webapps/favicon.ico"/>
       <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/header.jsp"/>
       <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/footer.jsp"/>
