@@ -169,6 +169,14 @@
       <version>2.4.0-b180830.0438</version>
     </dependency>
 
+    <!-- Source: https://mvnrepository.com/artifact/org.threeten/threeten-extra -->
+    <dependency>
+      <groupId>org.threeten</groupId>
+      <artifactId>threeten-extra</artifactId>
+      <version>1.10.0</version>
+      <scope>runtime</scope>
+    </dependency>
+
   </dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>

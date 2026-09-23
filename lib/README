@@ -391,6 +391,17 @@ DESCRIPTION: replaced jaxb-core-2.3.0.1 with suitable istack
 LAST UPDATE BY: Stephan (outside user) & John Bauer
 
 -----------------------------------------------------------------
+threeten-extra
+
+VERSION: 1.1.10
+SOURCE AVAILABLE: yes
+URL: https://repo1.maven.org/maven2/org/threeten/threeten-extra/1.10.0/
+
+DESCRIPTION: eventually replaces parts of joda-time which were
+  not ported to java.time
+
+LAST UPDATE: 2026-09-22
+LAST UPDATE BY: John Bauer
 
 
 foo.jar

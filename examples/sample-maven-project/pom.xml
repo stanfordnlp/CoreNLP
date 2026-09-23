@@ -79,5 +79,12 @@
         <version>4.5.10</version>
         <classifier>models-spanish</classifier>
     </dependency>
+    <!-- Source: https://mvnrepository.com/artifact/org.threeten/threeten-extra -->
+    <dependency>
+      <groupId>org.threeten</groupId>
+      <artifactId>threeten-extra</artifactId>
+      <version>1.10.0</version>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 </project>
