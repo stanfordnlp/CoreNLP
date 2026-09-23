@@ -45,6 +45,12 @@ public final class SUTimeFields {
   /** Which year within its decade, 0 to 9. */
   public static final TemporalField YEAR_OF_DECADE = Field.YEAR_OF_DECADE;
 
+  /** Which year within its century, 0 to 99. The 17 of 2017. */
+  public static final TemporalField YEAR_OF_CENTURY = Field.YEAR_OF_CENTURY;
+
+  /** Which century, counting from zero. The 20 of 2017. */
+  public static final TemporalField CENTURY_OF_ERA = Field.CENTURY_OF_ERA;
+
   private enum Field implements TemporalField {
 
     MONTH_OF_QUARTER("MonthOfQuarter", ChronoUnit.MONTHS, IsoFields.QUARTER_YEARS,
@@ -144,6 +150,47 @@ public final class SUTimeFields {
         long value = range().checkValidValue(newValue, this);
         long year = temporal.getLong(ChronoField.YEAR);
         return withYear(temporal, Math.floorDiv(year, 10) * 10 + value);
+      }
+
+      @Override
+      boolean supportedBy(TemporalAccessor temporal) {
+        return temporal.isSupported(ChronoField.YEAR);
+      }
+    },
+
+    YEAR_OF_CENTURY("YearOfCentury", ChronoUnit.YEARS, ChronoUnit.CENTURIES,
+            ValueRange.of(0, 99)) {
+      @Override
+      public long getFrom(TemporalAccessor temporal) {
+        check(temporal);
+        return yearOfCentury(temporal);
+      }
+
+      @Override
+      public <R extends Temporal> R adjustInto(R temporal, long newValue) {
+        long value = range().checkValidValue(newValue, this);
+        long year = temporal.getLong(ChronoField.YEAR);
+        return withYear(temporal, Math.floorDiv(year, 100) * 100 + value);
+      }
+
+      @Override
+      boolean supportedBy(TemporalAccessor temporal) {
+        return temporal.isSupported(ChronoField.YEAR);
+      }
+    },
+
+    CENTURY_OF_ERA("CenturyOfEra", ChronoUnit.CENTURIES, ChronoUnit.ERAS,
+            ValueRange.of(0, 2922789)) {
+      @Override
+      public long getFrom(TemporalAccessor temporal) {
+        check(temporal);
+        return Math.floorDiv(temporal.getLong(ChronoField.YEAR), 100);
+      }
+
+      @Override
+      public <R extends Temporal> R adjustInto(R temporal, long newValue) {
+        long year = temporal.getLong(ChronoField.YEAR);
+        return withYear(temporal, newValue * 100 + Math.floorMod(year, 100));
       }
 
       @Override
