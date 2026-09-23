@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -34,22 +35,81 @@ import edu.stanford.nlp.util.ProcessProtobufRequest;
 
 public class ProcessSemgrexRequest extends ProcessProtobufRequest {
   /**
-   * Builds the PatternResult for one SemgrexPattern and one sentence
+   * The proto version of a graph name.
+   *<br>
+   * Each graph name has to be listed here and in the proto; a name
+   * missing from this switch is an error, not a quiet BASIC.
    */
-  public static CoreNLPProtos.SemgrexResponse.PatternResult matchSentence(SemgrexPattern pattern, SemanticGraph graph, List<SemgrexMatch> matches, int patternIdx, int sentenceIdx) {
+  static CoreNLPProtos.SemgrexResponse.GraphName toProto(SemgrexGraphName name) {
+    switch (name) {
+    case BASIC:
+      return CoreNLPProtos.SemgrexResponse.GraphName.BASIC;
+    case ENHANCED:
+      return CoreNLPProtos.SemgrexResponse.GraphName.ENHANCED;
+    default:
+      throw new IllegalArgumentException("No proto GraphName for " + name);
+    }
+  }
+
+  /**
+   * Which graph of the sentence an edge was matched in, or null if it
+   * is in none of them.
+   *<br>
+   * The edges a match names are the graph's own edge objects, so this
+   * checks for that very object.  An edge which is in both the basic
+   * and the enhanced graph is still reported as the one it was
+   * matched in.
+   */
+  static SemgrexGraphName graphOfEdge(CoreMap sentence, SemanticGraphEdge edge) {
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph graph = sentence.get(name.annotation);
+      if (graph == null || !graph.containsVertex(edge.getSource())) {
+        continue;
+      }
+      for (SemanticGraphEdge candidate : graph.getAllEdges(edge.getSource(), edge.getTarget())) {
+        if (candidate == edge) {
+          return name;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Builds the PatternResult for one SemgrexPattern and one sentence
+   *<br>
+   * The sentence is used to tell which of its graphs each named edge came from.
+   */
+  public static CoreNLPProtos.SemgrexResponse.PatternResult matchSentence(SemgrexPattern pattern, CoreMap sentence, List<SemgrexMatch> matches, int patternIdx, int sentenceIdx) {
     CoreNLPProtos.SemgrexResponse.PatternResult.Builder patternResultBuilder = CoreNLPProtos.SemgrexResponse.PatternResult.newBuilder();
     patternResultBuilder.setSemgrexIndex(patternIdx);
     for (SemgrexMatch matcher : matches) {
       CoreNLPProtos.SemgrexResponse.Match.Builder matchBuilder = CoreNLPProtos.SemgrexResponse.Match.newBuilder();
-      matchBuilder.setMatchIndex(matcher.getMatch().index());
+      // the root of the match can be a copy or empty node if the
+      // pattern starts in the enhanced graph
+      IndexedWord root = matcher.getMatch();
+      matchBuilder.setMatchIndex(root.index());
+      if (root.copyCount() != 0) {
+        matchBuilder.setMatchCopy(root.copyCount());
+      }
+      if (root.getEmptyIndex() != 0) {
+        matchBuilder.setMatchEmptyIndex(root.getEmptyIndex());
+      }
       matchBuilder.setSemgrexIndex(patternIdx);
       matchBuilder.setSentenceIndex(sentenceIdx);
 
       // add descriptions of the named nodes
       for (String nodeName : matcher.getNodeNames()) {
         CoreNLPProtos.SemgrexResponse.NamedNode.Builder nodeBuilder = CoreNLPProtos.SemgrexResponse.NamedNode.newBuilder();
+        IndexedWord node = matcher.getNode(nodeName);
         nodeBuilder.setName(nodeName);
-        nodeBuilder.setMatchIndex(matcher.getNode(nodeName).index());
+        nodeBuilder.setMatchIndex(node.index());
+        if (node.copyCount() != 0) {
+          nodeBuilder.setCopy(node.copyCount());
+        }
+        if (node.getEmptyIndex() != 0) {
+          nodeBuilder.setEmptyIndex(node.getEmptyIndex());
+        }
         matchBuilder.addNode(nodeBuilder.build());
       }
 
@@ -75,6 +135,16 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
         }
         if (edge.getTarget().copyCount() != 0) {
           edgeBuilder.setTargetCopy(edge.getTarget().copyCount());
+        }
+        if (edge.getSource().getEmptyIndex() != 0) {
+          edgeBuilder.setSourceEmpty(edge.getSource().getEmptyIndex());
+        }
+        if (edge.getTarget().getEmptyIndex() != 0) {
+          edgeBuilder.setTargetEmpty(edge.getTarget().getEmptyIndex());
+        }
+        SemgrexGraphName graphName = graphOfEdge(sentence, edge);
+        if (graphName != null) {
+          edgeBuilder.setGraph(toProto(graphName));
         }
         matchBuilder.addEdge(edgeBuilder.build());
       }
@@ -144,13 +214,13 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
       CoreNLPProtos.SemgrexResponse.SentenceResult.Builder sentenceResultBuilder = CoreNLPProtos.SemgrexResponse.SentenceResult.newBuilder();
       sentenceResultBuilder.setSentenceIndex(sentenceIdx);
 
-      SemanticGraph graph = sentences.get(sentenceIdx).get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+      CoreMap sentence = sentences.get(sentenceIdx);
       if (allMatches.containsKey(sentenceIdx)) {
         List<Pair<SemgrexPattern, List<SemgrexMatch>>> sentenceMatches = allMatches.get(sentenceIdx);
         for (Pair<SemgrexPattern, List<SemgrexMatch>> patternMatches : sentenceMatches) {
           SemgrexPattern pattern = patternMatches.first();
           int patternIdx = semgrexIndices.get(pattern);
-          sentenceResultBuilder.addPattern(matchSentence(pattern, graph, patternMatches.second(), patternIdx, sentenceIdx));
+          sentenceResultBuilder.addPattern(matchSentence(pattern, sentence, patternMatches.second(), patternIdx, sentenceIdx));
         }
       }
 
@@ -160,9 +230,13 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
   }
 
   /**
-   * For a single request, iterate through the SemanticGraphs it
-   * includes, and add the results of each Semgrex operation included
-   * in the request.
+   * For a single request, iterate through the sentences it includes,
+   * and add the results of each Semgrex operation included in the
+   * request.
+   *<br>
+   * Each sentence has a basic graph and optionally an enhanced graph.
+   * Both are built over the same list of tokens, so a node reached in
+   * one graph is the same node when a relation moves to the other.
    */
   public static CoreNLPProtos.SemgrexResponse processRequest(CoreNLPProtos.SemgrexRequest request) {
     ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
@@ -178,6 +252,10 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
       SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, "semgrex");
       CoreMap coremap = new ArrayCoreMap();
       coremap.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
+      if (sentence.hasEnhancedGraph()) {
+        SemanticGraph enhanced = ProtobufAnnotationSerializer.fromProto(sentence.getEnhancedGraph(), tokens, "semgrex");
+        coremap.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, enhanced);
+      }
       coremap.set(CoreAnnotations.TokensAnnotation.class, tokens);
       sentences.add(coremap);
     }

@@ -634,15 +634,21 @@ message Section {
 
 
 // A message for requesting a semgrex
-// Each sentence stores information about the tokens making up the
-// corresponding graph
+// Each sentence stores the tokens making up that sentence, its basic
+// dependency graph, and optionally its enhanced dependency graph.
 // An alternative would have been to use the existing Document or
 // Sentence classes, but the problem with that is it would be
 // ambiguous which dependency object to use.
 message SemgrexRequest {
   message Dependencies {
-    repeated Token           token       = 1;
-    required DependencyGraph graph       = 2;
+    repeated Token           token         = 1;
+    // The basic dependency graph.  Semgrex matching starts here
+    // unless the pattern names the graph it searches
+    required DependencyGraph graph         = 2;
+    // The enhanced dependency graph, searched by relations written
+    // with @enhanced, such as >nsubj@enhanced.  Built over the same
+    // tokens as graph, including any empty nodes
+    optional DependencyGraph enhancedGraph = 3;
   }
 
   repeated string            semgrex     = 1;
@@ -665,9 +671,22 @@ message SemgrexRequest {
 // translating large numbers of dependency graphs to protobufs
 // will be expensive, so doing several queries at once will save time
 message SemgrexResponse {
+  // The graphs a semgrex can search, the same as SemgrexGraphName
+  // and the @basic and @enhanced names used in a pattern.
+  // BASIC is first so that it is the default: a CoreNLP too old to
+  // set NamedEdge.graph only ever searched the basic graph
+  enum GraphName {
+    BASIC    = 0;
+    ENHANCED = 1;
+  }
+
   message NamedNode {
     required string          name        = 1;
     required int32           matchIndex  = 2;
+    // set when the node is a copy node, as in enhanced++ graphs
+    optional uint32          copy        = 3;
+    // set when the node is an empty node, such as 8.1 in an enhanced graph
+    optional uint32          emptyIndex  = 4;
   }
 
   message NamedRelation {
@@ -683,6 +702,10 @@ message SemgrexResponse {
     optional bool            isExtra     = 5;
     optional uint32          sourceCopy  = 6;
     optional uint32          targetCopy  = 7;
+    optional uint32          sourceEmpty = 8;
+    optional uint32          targetEmpty = 9;
+    // the graph this edge was matched in
+    optional GraphName       graph       = 10;
   }
 
   message VariableString {
@@ -691,18 +714,23 @@ message SemgrexResponse {
   }
 
   message Match {
-    required int32           matchIndex   = 1;
-    repeated NamedNode       node         = 2;
-    repeated NamedRelation   reln         = 3;
-    repeated NamedEdge       edge         = 6;
-    repeated VariableString  varstring    = 7;
+    // the node the match starts at.  This can be a copy or empty node
+    // when the pattern starts in the enhanced graph
+    required int32           matchIndex      = 1;
+    optional uint32          matchCopy       = 8;
+    optional uint32          matchEmptyIndex = 9;
+
+    repeated NamedNode       node            = 2;
+    repeated NamedRelation   reln            = 3;
+    repeated NamedEdge       edge            = 6;
+    repeated VariableString  varstring       = 7;
 
     // which sentence this match applies to
     // indexed from 0
-    optional int32           sentenceIndex  = 4;
+    optional int32           sentenceIndex   = 4;
     // index of the semgrex expression this match applies to
     // indexed from 0
-    optional int32           semgrexIndex = 5;
+    optional int32           semgrexIndex    = 5;
   }
 
   // The matches of one semgrex expression against one sentence
