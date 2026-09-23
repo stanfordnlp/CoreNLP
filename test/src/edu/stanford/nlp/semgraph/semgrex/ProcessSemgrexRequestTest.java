@@ -88,6 +88,7 @@ sentence {
         target: 2
         reln: "dobj"
         isExtra: false
+        graph: BASIC
       }
       sentenceIndex: 0
       semgrexIndex: 0
@@ -130,6 +131,8 @@ sentence {
         CoreNLPProtos.SemgrexResponse.Match match = patternResult.getMatchList().get(0);
 
         Assert.assertEquals("Match is supposed to be at the root", 1, match.getMatchIndex());
+        Assert.assertFalse("Match root is not a copy", match.hasMatchCopy());
+        Assert.assertFalse("Match root is not an empty node", match.hasMatchEmptyIndex());
         Assert.assertEquals("Expected exactly 2 named nodes", 2, match.getNodeList().size());
         Assert.assertEquals("Expected exactly 1 named reln", 1, match.getRelnList().size());
         Assert.assertEquals("Expected exactly 1 named edge", 1, match.getEdgeList().size());
@@ -138,6 +141,10 @@ sentence {
         Assert.assertEquals("Node 1 should be source", "source", match.getNodeList().get(0).getName());
         Assert.assertEquals("Node 2 should be target", 2, match.getNodeList().get(1).getMatchIndex());
         Assert.assertEquals("Node 2 should be target", "target", match.getNodeList().get(1).getName());
+        for (CoreNLPProtos.SemgrexResponse.NamedNode node : match.getNodeList()) {
+          Assert.assertFalse("Named node is not a copy", node.hasCopy());
+          Assert.assertFalse("Named node is not an empty node", node.hasEmptyIndex());
+        }
 
         Assert.assertEquals("Reln dobj should be named foo", "foo", match.getRelnList().get(0).getName());
         Assert.assertEquals("Reln dobj should be have reln dobj", "dobj", match.getRelnList().get(0).getReln());
@@ -147,6 +154,8 @@ sentence {
         Assert.assertEquals("Edge dobj should have reln dobj", "dobj", edge.getReln());
         Assert.assertEquals("Edge dobj source should be 1", 1, edge.getSource());
         Assert.assertEquals("Edge dobj source should be 2", 2, edge.getTarget());
+        Assert.assertTrue("Edge dobj should say which graph it is in", edge.hasGraph());
+        Assert.assertEquals("Edge dobj is in the basic graph", CoreNLPProtos.SemgrexResponse.GraphName.BASIC, edge.getGraph());
 
         Assert.assertEquals("Sentence idx was off", sentenceIdx, match.getSentenceIndex());
         Assert.assertEquals("Semgrex pattern count was off", semgrexIdx, match.getSemgrexIndex());
@@ -288,7 +297,7 @@ sentence {
 
   /**
    * Builds a graph from nodes such as "5" or "5.1" and edges such as
-   * {"2", "5", "conj"}.  The root is always node 2
+   * {"5.1", "6", "obj"}.  The root is always node 2
    */
   private static CoreNLPProtos.DependencyGraph buildGraph(String[] nodes, String[][] edges) {
     CoreNLPProtos.DependencyGraph.Builder graphBuilder = CoreNLPProtos.DependencyGraph.newBuilder();
@@ -319,6 +328,137 @@ sentence {
     }
     graphBuilder.addRoot(2);
     return graphBuilder.build();
+  }
+
+  /**
+   * "Sue likes coffee and Bill tea", where the enhanced graph has an
+   * empty node 5.1 for the elided "likes"
+   */
+  public static CoreNLPProtos.SemgrexRequest buildEnhancedRequest(String ... semgrexPatterns) {
+    CoreNLPProtos.SemgrexRequest.Builder request = CoreNLPProtos.SemgrexRequest.newBuilder();
+    for (String semgrex : semgrexPatterns) {
+      request.addSemgrex(semgrex);
+    }
+
+    CoreNLPProtos.SemgrexRequest.Dependencies.Builder queryBuilder = CoreNLPProtos.SemgrexRequest.Dependencies.newBuilder();
+    addTokens(queryBuilder,
+              new String[] {"1", "2", "3", "4", "5", "5.1", "6"},
+              new String[] {"Sue", "likes", "coffee", "and", "Bill", "likes", "tea"});
+    queryBuilder.setGraph(buildGraph(new String[] {"1", "2", "3", "4", "5", "6"},
+                                     new String[][] {{"2", "1", "nsubj"},
+                                                     {"2", "3", "obj"},
+                                                     {"5", "4", "cc"},
+                                                     {"2", "5", "conj"},
+                                                     {"5", "6", "orphan"}}));
+    queryBuilder.setEnhancedGraph(buildGraph(new String[] {"1", "2", "3", "4", "5", "5.1", "6"},
+                                             new String[][] {{"2", "1", "nsubj"},
+                                                             {"2", "3", "obj"},
+                                                             {"5.1", "4", "cc"},
+                                                             {"5.1", "5", "nsubj"},
+                                                             {"5.1", "6", "obj"},
+                                                             {"2", "5.1", "conj:and"}}));
+    request.addQuery(queryBuilder.build());
+    return request.build();
+  }
+
+  private static CoreNLPProtos.SemgrexResponse.Match onlyMatch(CoreNLPProtos.SemgrexResponse response, int semgrexIdx) {
+    Assert.assertEquals(1, response.getSentenceCount());
+    CoreNLPProtos.SemgrexResponse.PatternResult result = response.getSentence(0).getPattern(semgrexIdx);
+    Assert.assertEquals(semgrexIdx, result.getSemgrexIndex());
+    Assert.assertEquals("Expected exactly 1 match", 1, result.getMatchCount());
+    return result.getMatch(0);
+  }
+
+  private static CoreNLPProtos.SemgrexResponse.NamedNode namedNode(CoreNLPProtos.SemgrexResponse.Match match, String name) {
+    for (CoreNLPProtos.SemgrexResponse.NamedNode node : match.getNodeList()) {
+      if (node.getName().equals(name)) {
+        return node;
+      }
+    }
+    throw new AssertionError("No node named " + name);
+  }
+
+  private static CoreNLPProtos.SemgrexResponse.NamedEdge namedEdge(CoreNLPProtos.SemgrexResponse.Match match, String name) {
+    for (CoreNLPProtos.SemgrexResponse.NamedEdge edge : match.getEdgeList()) {
+      if (edge.getName().equals(name)) {
+        return edge;
+      }
+    }
+    throw new AssertionError("No edge named " + name);
+  }
+
+  /**
+   * A match can start at a node which is only in the enhanced graph,
+   * and the response has to say it is 5.1 rather than 5
+   */
+  @Test
+  public void testEnhancedOnlyRoot() {
+    CoreNLPProtos.SemgrexRequest request = buildEnhancedRequest("{} !< {} <@enhanced {}");
+    CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
+
+    CoreNLPProtos.SemgrexResponse.Match match = onlyMatch(response, 0);
+    Assert.assertEquals(5, match.getMatchIndex());
+    Assert.assertEquals(1, match.getMatchEmptyIndex());
+    Assert.assertFalse(match.hasMatchCopy());
+  }
+
+  /**
+   * Named nodes and edges in the enhanced graph report their empty
+   * nodes, and each edge says which graph it was matched in
+   */
+  @Test
+  public void testEnhancedNodesAndEdges() {
+    CoreNLPProtos.SemgrexRequest request = buildEnhancedRequest("{word:likes}=l >nsubj=e1 {}=s >/conj.*/@enhanced=e2 {}=c");
+    CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
+
+    CoreNLPProtos.SemgrexResponse.Match match = onlyMatch(response, 0);
+    Assert.assertEquals(2, match.getMatchIndex());
+    Assert.assertFalse(match.hasMatchEmptyIndex());
+
+    CoreNLPProtos.SemgrexResponse.NamedNode subject = namedNode(match, "s");
+    Assert.assertEquals(1, subject.getMatchIndex());
+    Assert.assertFalse(subject.hasEmptyIndex());
+
+    CoreNLPProtos.SemgrexResponse.NamedNode conj = namedNode(match, "c");
+    Assert.assertEquals(5, conj.getMatchIndex());
+    Assert.assertEquals(1, conj.getEmptyIndex());
+
+    CoreNLPProtos.SemgrexResponse.NamedEdge nsubj = namedEdge(match, "e1");
+    Assert.assertEquals("nsubj", nsubj.getReln());
+    Assert.assertEquals(CoreNLPProtos.SemgrexResponse.GraphName.BASIC, nsubj.getGraph());
+
+    CoreNLPProtos.SemgrexResponse.NamedEdge conjEdge = namedEdge(match, "e2");
+    Assert.assertEquals("conj:and", conjEdge.getReln());
+    Assert.assertEquals(2, conjEdge.getSource());
+    Assert.assertFalse(conjEdge.hasSourceEmpty());
+    Assert.assertEquals(5, conjEdge.getTarget());
+    Assert.assertEquals(1, conjEdge.getTargetEmpty());
+    Assert.assertEquals(CoreNLPProtos.SemgrexResponse.GraphName.ENHANCED, conjEdge.getGraph());
+  }
+
+  /**
+   * nsubj(likes, Sue) is in both graphs.  The edge is reported as
+   * being in the graph the pattern searched, not the first graph
+   * which happens to have an equal edge
+   */
+  @Test
+  public void testEdgeInBothGraphs() {
+    CoreNLPProtos.SemgrexRequest request = buildEnhancedRequest("{word:Sue} <nsubj@enhanced=e {}",
+                                                                "{word:Sue} <nsubj=e {}");
+    CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
+
+    Assert.assertEquals(CoreNLPProtos.SemgrexResponse.GraphName.ENHANCED, namedEdge(onlyMatch(response, 0), "e").getGraph());
+    Assert.assertEquals(CoreNLPProtos.SemgrexResponse.GraphName.BASIC, namedEdge(onlyMatch(response, 1), "e").getGraph());
+  }
+
+  /**
+   * A pattern which needs the enhanced graph fails loudly on a
+   * request which only sent the basic graph
+   */
+  @Test
+  public void testEnhancedPatternWithoutEnhancedGraph() {
+    CoreNLPProtos.SemgrexRequest request = buildFakeRequest(1, 1, "{}=source >dobj@enhanced=foo {}=target");
+    Assert.assertThrows(IllegalStateException.class, () -> ProcessSemgrexRequest.processRequest(request));
   }
 
   /**
@@ -357,5 +497,15 @@ sentence {
     Assert.assertEquals(1, second.getPatternCount());
     Assert.assertEquals(1, second.getPattern(0).getSemgrexIndex());
     Assert.assertEquals(3, second.getPattern(0).getMatch(0).getMatchIndex());
+  }
+
+  /**
+   * Every graph semgrex knows about has a proto GraphName of the same name
+   */
+  @Test
+  public void testGraphNamesToProto() {
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      Assert.assertEquals(name.name(), ProcessSemgrexRequest.toProto(name).name());
+    }
   }
 }

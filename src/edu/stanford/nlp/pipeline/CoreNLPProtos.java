@@ -69880,8 +69880,8 @@ public final class CoreNLPProtos {
   /**
    * <pre>
    * A message for requesting a semgrex
-   * Each sentence stores information about the tokens making up the
-   * corresponding graph
+   * Each sentence stores the tokens making up that sentence, its basic
+   * dependency graph, and optionally its enhanced dependency graph.
    * An alternative would have been to use the existing Document or
    * Sentence classes, but the problem with that is it would be
    * ambiguous which dependency object to use.
@@ -69953,19 +69953,67 @@ public final class CoreNLPProtos {
           int index);
 
       /**
+       * <pre>
+       * The basic dependency graph.  Semgrex matching starts here
+       * unless the pattern names the graph it searches
+       * </pre>
+       *
        * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
        * @return Whether the graph field is set.
        */
       boolean hasGraph();
       /**
+       * <pre>
+       * The basic dependency graph.  Semgrex matching starts here
+       * unless the pattern names the graph it searches
+       * </pre>
+       *
        * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
        * @return The graph.
        */
       edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getGraph();
       /**
+       * <pre>
+       * The basic dependency graph.  Semgrex matching starts here
+       * unless the pattern names the graph it searches
+       * </pre>
+       *
        * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
        */
       edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder();
+
+      /**
+       * <pre>
+       * The enhanced dependency graph, searched by relations written
+       * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+       * tokens as graph, including any empty nodes
+       * </pre>
+       *
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+       * @return Whether the enhancedGraph field is set.
+       */
+      boolean hasEnhancedGraph();
+      /**
+       * <pre>
+       * The enhanced dependency graph, searched by relations written
+       * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+       * tokens as graph, including any empty nodes
+       * </pre>
+       *
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+       * @return The enhancedGraph.
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedGraph();
+      /**
+       * <pre>
+       * The enhanced dependency graph, searched by relations written
+       * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+       * tokens as graph, including any empty nodes
+       * </pre>
+       *
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getEnhancedGraphOrBuilder();
     }
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexRequest.Dependencies}
@@ -70048,6 +70096,11 @@ public final class CoreNLPProtos {
       public static final int GRAPH_FIELD_NUMBER = 2;
       private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph graph_;
       /**
+       * <pre>
+       * The basic dependency graph.  Semgrex matching starts here
+       * unless the pattern names the graph it searches
+       * </pre>
+       *
        * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
        * @return Whether the graph field is set.
        */
@@ -70056,6 +70109,11 @@ public final class CoreNLPProtos {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
+       * <pre>
+       * The basic dependency graph.  Semgrex matching starts here
+       * unless the pattern names the graph it searches
+       * </pre>
+       *
        * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
        * @return The graph.
        */
@@ -70064,11 +70122,60 @@ public final class CoreNLPProtos {
         return graph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
       }
       /**
+       * <pre>
+       * The basic dependency graph.  Semgrex matching starts here
+       * unless the pattern names the graph it searches
+       * </pre>
+       *
        * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
        */
       @java.lang.Override
       public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder() {
         return graph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : graph_;
+      }
+
+      public static final int ENHANCEDGRAPH_FIELD_NUMBER = 3;
+      private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph enhancedGraph_;
+      /**
+       * <pre>
+       * The enhanced dependency graph, searched by relations written
+       * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+       * tokens as graph, including any empty nodes
+       * </pre>
+       *
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+       * @return Whether the enhancedGraph field is set.
+       */
+      @java.lang.Override
+      public boolean hasEnhancedGraph() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <pre>
+       * The enhanced dependency graph, searched by relations written
+       * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+       * tokens as graph, including any empty nodes
+       * </pre>
+       *
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+       * @return The enhancedGraph.
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedGraph() {
+        return enhancedGraph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : enhancedGraph_;
+      }
+      /**
+       * <pre>
+       * The enhanced dependency graph, searched by relations written
+       * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+       * tokens as graph, including any empty nodes
+       * </pre>
+       *
+       * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getEnhancedGraphOrBuilder() {
+        return enhancedGraph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : enhancedGraph_;
       }
 
       private byte memoizedIsInitialized = -1;
@@ -70092,6 +70199,12 @@ public final class CoreNLPProtos {
           memoizedIsInitialized = 0;
           return false;
         }
+        if (hasEnhancedGraph()) {
+          if (!getEnhancedGraph().isInitialized()) {
+            memoizedIsInitialized = 0;
+            return false;
+          }
+        }
         memoizedIsInitialized = 1;
         return true;
       }
@@ -70104,6 +70217,9 @@ public final class CoreNLPProtos {
         }
         if (((bitField0_ & 0x00000001) != 0)) {
           output.writeMessage(2, getGraph());
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          output.writeMessage(3, getEnhancedGraph());
         }
         getUnknownFields().writeTo(output);
       }
@@ -70121,6 +70237,10 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000001) != 0)) {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(2, getGraph());
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(3, getEnhancedGraph());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
@@ -70144,6 +70264,11 @@ public final class CoreNLPProtos {
           if (!getGraph()
               .equals(other.getGraph())) return false;
         }
+        if (hasEnhancedGraph() != other.hasEnhancedGraph()) return false;
+        if (hasEnhancedGraph()) {
+          if (!getEnhancedGraph()
+              .equals(other.getEnhancedGraph())) return false;
+        }
         if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
@@ -70162,6 +70287,10 @@ public final class CoreNLPProtos {
         if (hasGraph()) {
           hash = (37 * hash) + GRAPH_FIELD_NUMBER;
           hash = (53 * hash) + getGraph().hashCode();
+        }
+        if (hasEnhancedGraph()) {
+          hash = (37 * hash) + ENHANCEDGRAPH_FIELD_NUMBER;
+          hash = (53 * hash) + getEnhancedGraph().hashCode();
         }
         hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
@@ -70295,6 +70424,7 @@ public final class CoreNLPProtos {
                   .alwaysUseFieldBuilders) {
             getTokenFieldBuilder();
             getGraphFieldBuilder();
+            getEnhancedGraphFieldBuilder();
           }
         }
         @java.lang.Override
@@ -70312,6 +70442,11 @@ public final class CoreNLPProtos {
           if (graphBuilder_ != null) {
             graphBuilder_.dispose();
             graphBuilder_ = null;
+          }
+          enhancedGraph_ = null;
+          if (enhancedGraphBuilder_ != null) {
+            enhancedGraphBuilder_.dispose();
+            enhancedGraphBuilder_ = null;
           }
           return this;
         }
@@ -70365,6 +70500,12 @@ public final class CoreNLPProtos {
                 ? graph_
                 : graphBuilder_.build();
             to_bitField0_ |= 0x00000001;
+          }
+          if (((from_bitField0_ & 0x00000004) != 0)) {
+            result.enhancedGraph_ = enhancedGraphBuilder_ == null
+                ? enhancedGraph_
+                : enhancedGraphBuilder_.build();
+            to_bitField0_ |= 0x00000002;
           }
           result.bitField0_ |= to_bitField0_;
         }
@@ -70442,6 +70583,9 @@ public final class CoreNLPProtos {
           if (other.hasGraph()) {
             mergeGraph(other.getGraph());
           }
+          if (other.hasEnhancedGraph()) {
+            mergeEnhancedGraph(other.getEnhancedGraph());
+          }
           this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
@@ -70459,6 +70603,11 @@ public final class CoreNLPProtos {
           }
           if (!getGraph().isInitialized()) {
             return false;
+          }
+          if (hasEnhancedGraph()) {
+            if (!getEnhancedGraph().isInitialized()) {
+              return false;
+            }
           }
           return true;
         }
@@ -70499,6 +70648,13 @@ public final class CoreNLPProtos {
                   bitField0_ |= 0x00000002;
                   break;
                 } // case 18
+                case 26: {
+                  input.readMessage(
+                      getEnhancedGraphFieldBuilder().getBuilder(),
+                      extensionRegistry);
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 26
                 default: {
                   if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                     done = true; // was an endgroup tag
@@ -70760,6 +70916,11 @@ public final class CoreNLPProtos {
         private com.google.protobuf.SingleFieldBuilderV3<
             edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> graphBuilder_;
         /**
+         * <pre>
+         * The basic dependency graph.  Semgrex matching starts here
+         * unless the pattern names the graph it searches
+         * </pre>
+         *
          * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
          * @return Whether the graph field is set.
          */
@@ -70767,6 +70928,11 @@ public final class CoreNLPProtos {
           return ((bitField0_ & 0x00000002) != 0);
         }
         /**
+         * <pre>
+         * The basic dependency graph.  Semgrex matching starts here
+         * unless the pattern names the graph it searches
+         * </pre>
+         *
          * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
          * @return The graph.
          */
@@ -70778,6 +70944,11 @@ public final class CoreNLPProtos {
           }
         }
         /**
+         * <pre>
+         * The basic dependency graph.  Semgrex matching starts here
+         * unless the pattern names the graph it searches
+         * </pre>
+         *
          * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
          */
         public Builder setGraph(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
@@ -70794,6 +70965,11 @@ public final class CoreNLPProtos {
           return this;
         }
         /**
+         * <pre>
+         * The basic dependency graph.  Semgrex matching starts here
+         * unless the pattern names the graph it searches
+         * </pre>
+         *
          * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
          */
         public Builder setGraph(
@@ -70808,6 +70984,11 @@ public final class CoreNLPProtos {
           return this;
         }
         /**
+         * <pre>
+         * The basic dependency graph.  Semgrex matching starts here
+         * unless the pattern names the graph it searches
+         * </pre>
+         *
          * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
          */
         public Builder mergeGraph(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
@@ -70829,6 +71010,11 @@ public final class CoreNLPProtos {
           return this;
         }
         /**
+         * <pre>
+         * The basic dependency graph.  Semgrex matching starts here
+         * unless the pattern names the graph it searches
+         * </pre>
+         *
          * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
          */
         public Builder clearGraph() {
@@ -70842,6 +71028,11 @@ public final class CoreNLPProtos {
           return this;
         }
         /**
+         * <pre>
+         * The basic dependency graph.  Semgrex matching starts here
+         * unless the pattern names the graph it searches
+         * </pre>
+         *
          * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
          */
         public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder getGraphBuilder() {
@@ -70850,6 +71041,11 @@ public final class CoreNLPProtos {
           return getGraphFieldBuilder().getBuilder();
         }
         /**
+         * <pre>
+         * The basic dependency graph.  Semgrex matching starts here
+         * unless the pattern names the graph it searches
+         * </pre>
+         *
          * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
          */
         public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getGraphOrBuilder() {
@@ -70861,6 +71057,11 @@ public final class CoreNLPProtos {
           }
         }
         /**
+         * <pre>
+         * The basic dependency graph.  Semgrex matching starts here
+         * unless the pattern names the graph it searches
+         * </pre>
+         *
          * <code>required .edu.stanford.nlp.pipeline.DependencyGraph graph = 2;</code>
          */
         private com.google.protobuf.SingleFieldBuilderV3<
@@ -70875,6 +71076,181 @@ public final class CoreNLPProtos {
             graph_ = null;
           }
           return graphBuilder_;
+        }
+
+        private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph enhancedGraph_;
+        private com.google.protobuf.SingleFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> enhancedGraphBuilder_;
+        /**
+         * <pre>
+         * The enhanced dependency graph, searched by relations written
+         * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+         * tokens as graph, including any empty nodes
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+         * @return Whether the enhancedGraph field is set.
+         */
+        public boolean hasEnhancedGraph() {
+          return ((bitField0_ & 0x00000004) != 0);
+        }
+        /**
+         * <pre>
+         * The enhanced dependency graph, searched by relations written
+         * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+         * tokens as graph, including any empty nodes
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+         * @return The enhancedGraph.
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph getEnhancedGraph() {
+          if (enhancedGraphBuilder_ == null) {
+            return enhancedGraph_ == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : enhancedGraph_;
+          } else {
+            return enhancedGraphBuilder_.getMessage();
+          }
+        }
+        /**
+         * <pre>
+         * The enhanced dependency graph, searched by relations written
+         * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+         * tokens as graph, including any empty nodes
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+         */
+        public Builder setEnhancedGraph(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
+          if (enhancedGraphBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            enhancedGraph_ = value;
+          } else {
+            enhancedGraphBuilder_.setMessage(value);
+          }
+          bitField0_ |= 0x00000004;
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * The enhanced dependency graph, searched by relations written
+         * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+         * tokens as graph, including any empty nodes
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+         */
+        public Builder setEnhancedGraph(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder builderForValue) {
+          if (enhancedGraphBuilder_ == null) {
+            enhancedGraph_ = builderForValue.build();
+          } else {
+            enhancedGraphBuilder_.setMessage(builderForValue.build());
+          }
+          bitField0_ |= 0x00000004;
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * The enhanced dependency graph, searched by relations written
+         * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+         * tokens as graph, including any empty nodes
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+         */
+        public Builder mergeEnhancedGraph(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph value) {
+          if (enhancedGraphBuilder_ == null) {
+            if (((bitField0_ & 0x00000004) != 0) &&
+              enhancedGraph_ != null &&
+              enhancedGraph_ != edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance()) {
+              getEnhancedGraphBuilder().mergeFrom(value);
+            } else {
+              enhancedGraph_ = value;
+            }
+          } else {
+            enhancedGraphBuilder_.mergeFrom(value);
+          }
+          if (enhancedGraph_ != null) {
+            bitField0_ |= 0x00000004;
+            onChanged();
+          }
+          return this;
+        }
+        /**
+         * <pre>
+         * The enhanced dependency graph, searched by relations written
+         * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+         * tokens as graph, including any empty nodes
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+         */
+        public Builder clearEnhancedGraph() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          enhancedGraph_ = null;
+          if (enhancedGraphBuilder_ != null) {
+            enhancedGraphBuilder_.dispose();
+            enhancedGraphBuilder_ = null;
+          }
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * The enhanced dependency graph, searched by relations written
+         * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+         * tokens as graph, including any empty nodes
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder getEnhancedGraphBuilder() {
+          bitField0_ |= 0x00000004;
+          onChanged();
+          return getEnhancedGraphFieldBuilder().getBuilder();
+        }
+        /**
+         * <pre>
+         * The enhanced dependency graph, searched by relations written
+         * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+         * tokens as graph, including any empty nodes
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getEnhancedGraphOrBuilder() {
+          if (enhancedGraphBuilder_ != null) {
+            return enhancedGraphBuilder_.getMessageOrBuilder();
+          } else {
+            return enhancedGraph_ == null ?
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance() : enhancedGraph_;
+          }
+        }
+        /**
+         * <pre>
+         * The enhanced dependency graph, searched by relations written
+         * with &#64;enhanced, such as &gt;nsubj&#64;enhanced.  Built over the same
+         * tokens as graph, including any empty nodes
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph enhancedGraph = 3;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
+            getEnhancedGraphFieldBuilder() {
+          if (enhancedGraphBuilder_ == null) {
+            enhancedGraphBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder>(
+                    getEnhancedGraph(),
+                    getParentForChildren(),
+                    isClean());
+            enhancedGraph_ = null;
+          }
+          return enhancedGraphBuilder_;
         }
         @java.lang.Override
         public final Builder setUnknownFields(
@@ -71203,8 +71579,8 @@ public final class CoreNLPProtos {
     /**
      * <pre>
      * A message for requesting a semgrex
-     * Each sentence stores information about the tokens making up the
-     * corresponding graph
+     * Each sentence stores the tokens making up that sentence, its basic
+     * dependency graph, and optionally its enhanced dependency graph.
      * An alternative would have been to use the existing Document or
      * Sentence classes, but the problem with that is it would be
      * ambiguous which dependency object to use.
@@ -71946,6 +72322,109 @@ public final class CoreNLPProtos {
               edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Builder.class);
     }
 
+    /**
+     * <pre>
+     * The graphs a semgrex can search, the same as SemgrexGraphName
+     * and the &#64;basic and &#64;enhanced names used in a pattern.
+     * BASIC is first so that it is the default: a CoreNLP too old to
+     * set NamedEdge.graph only ever searched the basic graph
+     * </pre>
+     *
+     * Protobuf enum {@code edu.stanford.nlp.pipeline.SemgrexResponse.GraphName}
+     */
+    public enum GraphName
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>BASIC = 0;</code>
+       */
+      BASIC(0),
+      /**
+       * <code>ENHANCED = 1;</code>
+       */
+      ENHANCED(1),
+      ;
+
+      /**
+       * <code>BASIC = 0;</code>
+       */
+      public static final int BASIC_VALUE = 0;
+      /**
+       * <code>ENHANCED = 1;</code>
+       */
+      public static final int ENHANCED_VALUE = 1;
+
+
+      public final int getNumber() {
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static GraphName valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static GraphName forNumber(int value) {
+        switch (value) {
+          case 0: return BASIC;
+          case 1: return ENHANCED;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<GraphName>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          GraphName> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<GraphName>() {
+              public GraphName findValueByNumber(int number) {
+                return GraphName.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final GraphName[] VALUES = values();
+
+      public static GraphName valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private GraphName(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:edu.stanford.nlp.pipeline.SemgrexResponse.GraphName)
+    }
+
     public interface NamedNodeOrBuilder extends
         // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SemgrexResponse.NamedNode)
         com.google.protobuf.MessageOrBuilder {
@@ -71977,6 +72456,44 @@ public final class CoreNLPProtos {
        * @return The matchIndex.
        */
       int getMatchIndex();
+
+      /**
+       * <pre>
+       * set when the node is a copy node, as in enhanced++ graphs
+       * </pre>
+       *
+       * <code>optional uint32 copy = 3;</code>
+       * @return Whether the copy field is set.
+       */
+      boolean hasCopy();
+      /**
+       * <pre>
+       * set when the node is a copy node, as in enhanced++ graphs
+       * </pre>
+       *
+       * <code>optional uint32 copy = 3;</code>
+       * @return The copy.
+       */
+      int getCopy();
+
+      /**
+       * <pre>
+       * set when the node is an empty node, such as 8.1 in an enhanced graph
+       * </pre>
+       *
+       * <code>optional uint32 emptyIndex = 4;</code>
+       * @return Whether the emptyIndex field is set.
+       */
+      boolean hasEmptyIndex();
+      /**
+       * <pre>
+       * set when the node is an empty node, such as 8.1 in an enhanced graph
+       * </pre>
+       *
+       * <code>optional uint32 emptyIndex = 4;</code>
+       * @return The emptyIndex.
+       */
+      int getEmptyIndex();
     }
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.NamedNode}
@@ -72083,6 +72600,60 @@ public final class CoreNLPProtos {
         return matchIndex_;
       }
 
+      public static final int COPY_FIELD_NUMBER = 3;
+      private int copy_ = 0;
+      /**
+       * <pre>
+       * set when the node is a copy node, as in enhanced++ graphs
+       * </pre>
+       *
+       * <code>optional uint32 copy = 3;</code>
+       * @return Whether the copy field is set.
+       */
+      @java.lang.Override
+      public boolean hasCopy() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <pre>
+       * set when the node is a copy node, as in enhanced++ graphs
+       * </pre>
+       *
+       * <code>optional uint32 copy = 3;</code>
+       * @return The copy.
+       */
+      @java.lang.Override
+      public int getCopy() {
+        return copy_;
+      }
+
+      public static final int EMPTYINDEX_FIELD_NUMBER = 4;
+      private int emptyIndex_ = 0;
+      /**
+       * <pre>
+       * set when the node is an empty node, such as 8.1 in an enhanced graph
+       * </pre>
+       *
+       * <code>optional uint32 emptyIndex = 4;</code>
+       * @return Whether the emptyIndex field is set.
+       */
+      @java.lang.Override
+      public boolean hasEmptyIndex() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <pre>
+       * set when the node is an empty node, such as 8.1 in an enhanced graph
+       * </pre>
+       *
+       * <code>optional uint32 emptyIndex = 4;</code>
+       * @return The emptyIndex.
+       */
+      @java.lang.Override
+      public int getEmptyIndex() {
+        return emptyIndex_;
+      }
+
       private byte memoizedIsInitialized = -1;
       @java.lang.Override
       public final boolean isInitialized() {
@@ -72111,6 +72682,12 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000002) != 0)) {
           output.writeInt32(2, matchIndex_);
         }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          output.writeUInt32(3, copy_);
+        }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          output.writeUInt32(4, emptyIndex_);
+        }
         getUnknownFields().writeTo(output);
       }
 
@@ -72126,6 +72703,14 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000002) != 0)) {
           size += com.google.protobuf.CodedOutputStream
             .computeInt32Size(2, matchIndex_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeUInt32Size(3, copy_);
+        }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeUInt32Size(4, emptyIndex_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
@@ -72152,6 +72737,16 @@ public final class CoreNLPProtos {
           if (getMatchIndex()
               != other.getMatchIndex()) return false;
         }
+        if (hasCopy() != other.hasCopy()) return false;
+        if (hasCopy()) {
+          if (getCopy()
+              != other.getCopy()) return false;
+        }
+        if (hasEmptyIndex() != other.hasEmptyIndex()) return false;
+        if (hasEmptyIndex()) {
+          if (getEmptyIndex()
+              != other.getEmptyIndex()) return false;
+        }
         if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
@@ -72170,6 +72765,14 @@ public final class CoreNLPProtos {
         if (hasMatchIndex()) {
           hash = (37 * hash) + MATCHINDEX_FIELD_NUMBER;
           hash = (53 * hash) + getMatchIndex();
+        }
+        if (hasCopy()) {
+          hash = (37 * hash) + COPY_FIELD_NUMBER;
+          hash = (53 * hash) + getCopy();
+        }
+        if (hasEmptyIndex()) {
+          hash = (37 * hash) + EMPTYINDEX_FIELD_NUMBER;
+          hash = (53 * hash) + getEmptyIndex();
         }
         hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
@@ -72304,6 +72907,8 @@ public final class CoreNLPProtos {
           bitField0_ = 0;
           name_ = "";
           matchIndex_ = 0;
+          copy_ = 0;
+          emptyIndex_ = 0;
           return this;
         }
 
@@ -72345,6 +72950,14 @@ public final class CoreNLPProtos {
           if (((from_bitField0_ & 0x00000002) != 0)) {
             result.matchIndex_ = matchIndex_;
             to_bitField0_ |= 0x00000002;
+          }
+          if (((from_bitField0_ & 0x00000004) != 0)) {
+            result.copy_ = copy_;
+            to_bitField0_ |= 0x00000004;
+          }
+          if (((from_bitField0_ & 0x00000008) != 0)) {
+            result.emptyIndex_ = emptyIndex_;
+            to_bitField0_ |= 0x00000008;
           }
           result.bitField0_ |= to_bitField0_;
         }
@@ -72401,6 +73014,12 @@ public final class CoreNLPProtos {
           if (other.hasMatchIndex()) {
             setMatchIndex(other.getMatchIndex());
           }
+          if (other.hasCopy()) {
+            setCopy(other.getCopy());
+          }
+          if (other.hasEmptyIndex()) {
+            setEmptyIndex(other.getEmptyIndex());
+          }
           this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
@@ -72443,6 +73062,16 @@ public final class CoreNLPProtos {
                   bitField0_ |= 0x00000002;
                   break;
                 } // case 16
+                case 24: {
+                  copy_ = input.readUInt32();
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 24
+                case 32: {
+                  emptyIndex_ = input.readUInt32();
+                  bitField0_ |= 0x00000008;
+                  break;
+                } // case 32
                 default: {
                   if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                     done = true; // was an endgroup tag
@@ -72576,6 +73205,118 @@ public final class CoreNLPProtos {
         public Builder clearMatchIndex() {
           bitField0_ = (bitField0_ & ~0x00000002);
           matchIndex_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private int copy_ ;
+        /**
+         * <pre>
+         * set when the node is a copy node, as in enhanced++ graphs
+         * </pre>
+         *
+         * <code>optional uint32 copy = 3;</code>
+         * @return Whether the copy field is set.
+         */
+        @java.lang.Override
+        public boolean hasCopy() {
+          return ((bitField0_ & 0x00000004) != 0);
+        }
+        /**
+         * <pre>
+         * set when the node is a copy node, as in enhanced++ graphs
+         * </pre>
+         *
+         * <code>optional uint32 copy = 3;</code>
+         * @return The copy.
+         */
+        @java.lang.Override
+        public int getCopy() {
+          return copy_;
+        }
+        /**
+         * <pre>
+         * set when the node is a copy node, as in enhanced++ graphs
+         * </pre>
+         *
+         * <code>optional uint32 copy = 3;</code>
+         * @param value The copy to set.
+         * @return This builder for chaining.
+         */
+        public Builder setCopy(int value) {
+
+          copy_ = value;
+          bitField0_ |= 0x00000004;
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * set when the node is a copy node, as in enhanced++ graphs
+         * </pre>
+         *
+         * <code>optional uint32 copy = 3;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearCopy() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          copy_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private int emptyIndex_ ;
+        /**
+         * <pre>
+         * set when the node is an empty node, such as 8.1 in an enhanced graph
+         * </pre>
+         *
+         * <code>optional uint32 emptyIndex = 4;</code>
+         * @return Whether the emptyIndex field is set.
+         */
+        @java.lang.Override
+        public boolean hasEmptyIndex() {
+          return ((bitField0_ & 0x00000008) != 0);
+        }
+        /**
+         * <pre>
+         * set when the node is an empty node, such as 8.1 in an enhanced graph
+         * </pre>
+         *
+         * <code>optional uint32 emptyIndex = 4;</code>
+         * @return The emptyIndex.
+         */
+        @java.lang.Override
+        public int getEmptyIndex() {
+          return emptyIndex_;
+        }
+        /**
+         * <pre>
+         * set when the node is an empty node, such as 8.1 in an enhanced graph
+         * </pre>
+         *
+         * <code>optional uint32 emptyIndex = 4;</code>
+         * @param value The emptyIndex to set.
+         * @return This builder for chaining.
+         */
+        public Builder setEmptyIndex(int value) {
+
+          emptyIndex_ = value;
+          bitField0_ |= 0x00000008;
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * set when the node is an empty node, such as 8.1 in an enhanced graph
+         * </pre>
+         *
+         * <code>optional uint32 emptyIndex = 4;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearEmptyIndex() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          emptyIndex_ = 0;
           onChanged();
           return this;
         }
@@ -73510,6 +74251,47 @@ public final class CoreNLPProtos {
        * @return The targetCopy.
        */
       int getTargetCopy();
+
+      /**
+       * <code>optional uint32 sourceEmpty = 8;</code>
+       * @return Whether the sourceEmpty field is set.
+       */
+      boolean hasSourceEmpty();
+      /**
+       * <code>optional uint32 sourceEmpty = 8;</code>
+       * @return The sourceEmpty.
+       */
+      int getSourceEmpty();
+
+      /**
+       * <code>optional uint32 targetEmpty = 9;</code>
+       * @return Whether the targetEmpty field is set.
+       */
+      boolean hasTargetEmpty();
+      /**
+       * <code>optional uint32 targetEmpty = 9;</code>
+       * @return The targetEmpty.
+       */
+      int getTargetEmpty();
+
+      /**
+       * <pre>
+       * the graph this edge was matched in
+       * </pre>
+       *
+       * <code>optional .edu.stanford.nlp.pipeline.SemgrexResponse.GraphName graph = 10;</code>
+       * @return Whether the graph field is set.
+       */
+      boolean hasGraph();
+      /**
+       * <pre>
+       * the graph this edge was matched in
+       * </pre>
+       *
+       * <code>optional .edu.stanford.nlp.pipeline.SemgrexResponse.GraphName graph = 10;</code>
+       * @return The graph.
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName getGraph();
     }
     /**
      * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.NamedEdge}
@@ -73526,6 +74308,7 @@ public final class CoreNLPProtos {
       private NamedEdge() {
         name_ = "";
         reln_ = "";
+        graph_ = 0;
       }
 
       @java.lang.Override
@@ -73742,6 +74525,70 @@ public final class CoreNLPProtos {
         return targetCopy_;
       }
 
+      public static final int SOURCEEMPTY_FIELD_NUMBER = 8;
+      private int sourceEmpty_ = 0;
+      /**
+       * <code>optional uint32 sourceEmpty = 8;</code>
+       * @return Whether the sourceEmpty field is set.
+       */
+      @java.lang.Override
+      public boolean hasSourceEmpty() {
+        return ((bitField0_ & 0x00000080) != 0);
+      }
+      /**
+       * <code>optional uint32 sourceEmpty = 8;</code>
+       * @return The sourceEmpty.
+       */
+      @java.lang.Override
+      public int getSourceEmpty() {
+        return sourceEmpty_;
+      }
+
+      public static final int TARGETEMPTY_FIELD_NUMBER = 9;
+      private int targetEmpty_ = 0;
+      /**
+       * <code>optional uint32 targetEmpty = 9;</code>
+       * @return Whether the targetEmpty field is set.
+       */
+      @java.lang.Override
+      public boolean hasTargetEmpty() {
+        return ((bitField0_ & 0x00000100) != 0);
+      }
+      /**
+       * <code>optional uint32 targetEmpty = 9;</code>
+       * @return The targetEmpty.
+       */
+      @java.lang.Override
+      public int getTargetEmpty() {
+        return targetEmpty_;
+      }
+
+      public static final int GRAPH_FIELD_NUMBER = 10;
+      private int graph_ = 0;
+      /**
+       * <pre>
+       * the graph this edge was matched in
+       * </pre>
+       *
+       * <code>optional .edu.stanford.nlp.pipeline.SemgrexResponse.GraphName graph = 10;</code>
+       * @return Whether the graph field is set.
+       */
+      @java.lang.Override public boolean hasGraph() {
+        return ((bitField0_ & 0x00000200) != 0);
+      }
+      /**
+       * <pre>
+       * the graph this edge was matched in
+       * </pre>
+       *
+       * <code>optional .edu.stanford.nlp.pipeline.SemgrexResponse.GraphName graph = 10;</code>
+       * @return The graph.
+       */
+      @java.lang.Override public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName getGraph() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName result = edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName.forNumber(graph_);
+        return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName.BASIC : result;
+      }
+
       private byte memoizedIsInitialized = -1;
       @java.lang.Override
       public final boolean isInitialized() {
@@ -73789,6 +74636,15 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000040) != 0)) {
           output.writeUInt32(7, targetCopy_);
         }
+        if (((bitField0_ & 0x00000080) != 0)) {
+          output.writeUInt32(8, sourceEmpty_);
+        }
+        if (((bitField0_ & 0x00000100) != 0)) {
+          output.writeUInt32(9, targetEmpty_);
+        }
+        if (((bitField0_ & 0x00000200) != 0)) {
+          output.writeEnum(10, graph_);
+        }
         getUnknownFields().writeTo(output);
       }
 
@@ -73823,6 +74679,18 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000040) != 0)) {
           size += com.google.protobuf.CodedOutputStream
             .computeUInt32Size(7, targetCopy_);
+        }
+        if (((bitField0_ & 0x00000080) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeUInt32Size(8, sourceEmpty_);
+        }
+        if (((bitField0_ & 0x00000100) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeUInt32Size(9, targetEmpty_);
+        }
+        if (((bitField0_ & 0x00000200) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeEnumSize(10, graph_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
@@ -73874,6 +74742,20 @@ public final class CoreNLPProtos {
           if (getTargetCopy()
               != other.getTargetCopy()) return false;
         }
+        if (hasSourceEmpty() != other.hasSourceEmpty()) return false;
+        if (hasSourceEmpty()) {
+          if (getSourceEmpty()
+              != other.getSourceEmpty()) return false;
+        }
+        if (hasTargetEmpty() != other.hasTargetEmpty()) return false;
+        if (hasTargetEmpty()) {
+          if (getTargetEmpty()
+              != other.getTargetEmpty()) return false;
+        }
+        if (hasGraph() != other.hasGraph()) return false;
+        if (hasGraph()) {
+          if (graph_ != other.graph_) return false;
+        }
         if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
@@ -73913,6 +74795,18 @@ public final class CoreNLPProtos {
         if (hasTargetCopy()) {
           hash = (37 * hash) + TARGETCOPY_FIELD_NUMBER;
           hash = (53 * hash) + getTargetCopy();
+        }
+        if (hasSourceEmpty()) {
+          hash = (37 * hash) + SOURCEEMPTY_FIELD_NUMBER;
+          hash = (53 * hash) + getSourceEmpty();
+        }
+        if (hasTargetEmpty()) {
+          hash = (37 * hash) + TARGETEMPTY_FIELD_NUMBER;
+          hash = (53 * hash) + getTargetEmpty();
+        }
+        if (hasGraph()) {
+          hash = (37 * hash) + GRAPH_FIELD_NUMBER;
+          hash = (53 * hash) + graph_;
         }
         hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
@@ -74052,6 +74946,9 @@ public final class CoreNLPProtos {
           isExtra_ = false;
           sourceCopy_ = 0;
           targetCopy_ = 0;
+          sourceEmpty_ = 0;
+          targetEmpty_ = 0;
+          graph_ = 0;
           return this;
         }
 
@@ -74113,6 +75010,18 @@ public final class CoreNLPProtos {
           if (((from_bitField0_ & 0x00000040) != 0)) {
             result.targetCopy_ = targetCopy_;
             to_bitField0_ |= 0x00000040;
+          }
+          if (((from_bitField0_ & 0x00000080) != 0)) {
+            result.sourceEmpty_ = sourceEmpty_;
+            to_bitField0_ |= 0x00000080;
+          }
+          if (((from_bitField0_ & 0x00000100) != 0)) {
+            result.targetEmpty_ = targetEmpty_;
+            to_bitField0_ |= 0x00000100;
+          }
+          if (((from_bitField0_ & 0x00000200) != 0)) {
+            result.graph_ = graph_;
+            to_bitField0_ |= 0x00000200;
           }
           result.bitField0_ |= to_bitField0_;
         }
@@ -74186,6 +75095,15 @@ public final class CoreNLPProtos {
           if (other.hasTargetCopy()) {
             setTargetCopy(other.getTargetCopy());
           }
+          if (other.hasSourceEmpty()) {
+            setSourceEmpty(other.getSourceEmpty());
+          }
+          if (other.hasTargetEmpty()) {
+            setTargetEmpty(other.getTargetEmpty());
+          }
+          if (other.hasGraph()) {
+            setGraph(other.getGraph());
+          }
           this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
           return this;
@@ -74256,6 +75174,28 @@ public final class CoreNLPProtos {
                   bitField0_ |= 0x00000040;
                   break;
                 } // case 56
+                case 64: {
+                  sourceEmpty_ = input.readUInt32();
+                  bitField0_ |= 0x00000080;
+                  break;
+                } // case 64
+                case 72: {
+                  targetEmpty_ = input.readUInt32();
+                  bitField0_ |= 0x00000100;
+                  break;
+                } // case 72
+                case 80: {
+                  int tmpRaw = input.readEnum();
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName tmpValue =
+                      edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName.forNumber(tmpRaw);
+                  if (tmpValue == null) {
+                    mergeUnknownVarintField(10, tmpRaw);
+                  } else {
+                    graph_ = tmpRaw;
+                    bitField0_ |= 0x00000200;
+                  }
+                  break;
+                } // case 80
                 default: {
                   if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                     done = true; // was an endgroup tag
@@ -74629,6 +75569,144 @@ public final class CoreNLPProtos {
         public Builder clearTargetCopy() {
           bitField0_ = (bitField0_ & ~0x00000040);
           targetCopy_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private int sourceEmpty_ ;
+        /**
+         * <code>optional uint32 sourceEmpty = 8;</code>
+         * @return Whether the sourceEmpty field is set.
+         */
+        @java.lang.Override
+        public boolean hasSourceEmpty() {
+          return ((bitField0_ & 0x00000080) != 0);
+        }
+        /**
+         * <code>optional uint32 sourceEmpty = 8;</code>
+         * @return The sourceEmpty.
+         */
+        @java.lang.Override
+        public int getSourceEmpty() {
+          return sourceEmpty_;
+        }
+        /**
+         * <code>optional uint32 sourceEmpty = 8;</code>
+         * @param value The sourceEmpty to set.
+         * @return This builder for chaining.
+         */
+        public Builder setSourceEmpty(int value) {
+
+          sourceEmpty_ = value;
+          bitField0_ |= 0x00000080;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional uint32 sourceEmpty = 8;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearSourceEmpty() {
+          bitField0_ = (bitField0_ & ~0x00000080);
+          sourceEmpty_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private int targetEmpty_ ;
+        /**
+         * <code>optional uint32 targetEmpty = 9;</code>
+         * @return Whether the targetEmpty field is set.
+         */
+        @java.lang.Override
+        public boolean hasTargetEmpty() {
+          return ((bitField0_ & 0x00000100) != 0);
+        }
+        /**
+         * <code>optional uint32 targetEmpty = 9;</code>
+         * @return The targetEmpty.
+         */
+        @java.lang.Override
+        public int getTargetEmpty() {
+          return targetEmpty_;
+        }
+        /**
+         * <code>optional uint32 targetEmpty = 9;</code>
+         * @param value The targetEmpty to set.
+         * @return This builder for chaining.
+         */
+        public Builder setTargetEmpty(int value) {
+
+          targetEmpty_ = value;
+          bitField0_ |= 0x00000100;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional uint32 targetEmpty = 9;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearTargetEmpty() {
+          bitField0_ = (bitField0_ & ~0x00000100);
+          targetEmpty_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private int graph_ = 0;
+        /**
+         * <pre>
+         * the graph this edge was matched in
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.SemgrexResponse.GraphName graph = 10;</code>
+         * @return Whether the graph field is set.
+         */
+        @java.lang.Override public boolean hasGraph() {
+          return ((bitField0_ & 0x00000200) != 0);
+        }
+        /**
+         * <pre>
+         * the graph this edge was matched in
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.SemgrexResponse.GraphName graph = 10;</code>
+         * @return The graph.
+         */
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName getGraph() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName result = edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName.forNumber(graph_);
+          return result == null ? edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName.BASIC : result;
+        }
+        /**
+         * <pre>
+         * the graph this edge was matched in
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.SemgrexResponse.GraphName graph = 10;</code>
+         * @param value The graph to set.
+         * @return This builder for chaining.
+         */
+        public Builder setGraph(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphName value) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          bitField0_ |= 0x00000200;
+          graph_ = value.getNumber();
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * the graph this edge was matched in
+         * </pre>
+         *
+         * <code>optional .edu.stanford.nlp.pipeline.SemgrexResponse.GraphName graph = 10;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearGraph() {
+          bitField0_ = (bitField0_ & ~0x00000200);
+          graph_ = 0;
           onChanged();
           return this;
         }
@@ -75476,15 +76554,47 @@ public final class CoreNLPProtos {
         com.google.protobuf.MessageOrBuilder {
 
       /**
+       * <pre>
+       * the node the match starts at.  This can be a copy or empty node
+       * when the pattern starts in the enhanced graph
+       * </pre>
+       *
        * <code>required int32 matchIndex = 1;</code>
        * @return Whether the matchIndex field is set.
        */
       boolean hasMatchIndex();
       /**
+       * <pre>
+       * the node the match starts at.  This can be a copy or empty node
+       * when the pattern starts in the enhanced graph
+       * </pre>
+       *
        * <code>required int32 matchIndex = 1;</code>
        * @return The matchIndex.
        */
       int getMatchIndex();
+
+      /**
+       * <code>optional uint32 matchCopy = 8;</code>
+       * @return Whether the matchCopy field is set.
+       */
+      boolean hasMatchCopy();
+      /**
+       * <code>optional uint32 matchCopy = 8;</code>
+       * @return The matchCopy.
+       */
+      int getMatchCopy();
+
+      /**
+       * <code>optional uint32 matchEmptyIndex = 9;</code>
+       * @return Whether the matchEmptyIndex field is set.
+       */
+      boolean hasMatchEmptyIndex();
+      /**
+       * <code>optional uint32 matchEmptyIndex = 9;</code>
+       * @return The matchEmptyIndex.
+       */
+      int getMatchEmptyIndex();
 
       /**
        * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.NamedNode node = 2;</code>
@@ -75667,6 +76777,11 @@ public final class CoreNLPProtos {
       public static final int MATCHINDEX_FIELD_NUMBER = 1;
       private int matchIndex_ = 0;
       /**
+       * <pre>
+       * the node the match starts at.  This can be a copy or empty node
+       * when the pattern starts in the enhanced graph
+       * </pre>
+       *
        * <code>required int32 matchIndex = 1;</code>
        * @return Whether the matchIndex field is set.
        */
@@ -75675,12 +76790,55 @@ public final class CoreNLPProtos {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
+       * <pre>
+       * the node the match starts at.  This can be a copy or empty node
+       * when the pattern starts in the enhanced graph
+       * </pre>
+       *
        * <code>required int32 matchIndex = 1;</code>
        * @return The matchIndex.
        */
       @java.lang.Override
       public int getMatchIndex() {
         return matchIndex_;
+      }
+
+      public static final int MATCHCOPY_FIELD_NUMBER = 8;
+      private int matchCopy_ = 0;
+      /**
+       * <code>optional uint32 matchCopy = 8;</code>
+       * @return Whether the matchCopy field is set.
+       */
+      @java.lang.Override
+      public boolean hasMatchCopy() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional uint32 matchCopy = 8;</code>
+       * @return The matchCopy.
+       */
+      @java.lang.Override
+      public int getMatchCopy() {
+        return matchCopy_;
+      }
+
+      public static final int MATCHEMPTYINDEX_FIELD_NUMBER = 9;
+      private int matchEmptyIndex_ = 0;
+      /**
+       * <code>optional uint32 matchEmptyIndex = 9;</code>
+       * @return Whether the matchEmptyIndex field is set.
+       */
+      @java.lang.Override
+      public boolean hasMatchEmptyIndex() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>optional uint32 matchEmptyIndex = 9;</code>
+       * @return The matchEmptyIndex.
+       */
+      @java.lang.Override
+      public int getMatchEmptyIndex() {
+        return matchEmptyIndex_;
       }
 
       public static final int NODE_FIELD_NUMBER = 2;
@@ -75860,7 +77018,7 @@ public final class CoreNLPProtos {
        */
       @java.lang.Override
       public boolean hasSentenceIndex() {
-        return ((bitField0_ & 0x00000002) != 0);
+        return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <pre>
@@ -75889,7 +77047,7 @@ public final class CoreNLPProtos {
        */
       @java.lang.Override
       public boolean hasSemgrexIndex() {
-        return ((bitField0_ & 0x00000004) != 0);
+        return ((bitField0_ & 0x00000010) != 0);
       }
       /**
        * <pre>
@@ -75956,10 +77114,10 @@ public final class CoreNLPProtos {
         for (int i = 0; i < reln_.size(); i++) {
           output.writeMessage(3, reln_.get(i));
         }
-        if (((bitField0_ & 0x00000002) != 0)) {
+        if (((bitField0_ & 0x00000008) != 0)) {
           output.writeInt32(4, sentenceIndex_);
         }
-        if (((bitField0_ & 0x00000004) != 0)) {
+        if (((bitField0_ & 0x00000010) != 0)) {
           output.writeInt32(5, semgrexIndex_);
         }
         for (int i = 0; i < edge_.size(); i++) {
@@ -75967,6 +77125,12 @@ public final class CoreNLPProtos {
         }
         for (int i = 0; i < varstring_.size(); i++) {
           output.writeMessage(7, varstring_.get(i));
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          output.writeUInt32(8, matchCopy_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          output.writeUInt32(9, matchEmptyIndex_);
         }
         getUnknownFields().writeTo(output);
       }
@@ -75989,11 +77153,11 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(3, reln_.get(i));
         }
-        if (((bitField0_ & 0x00000002) != 0)) {
+        if (((bitField0_ & 0x00000008) != 0)) {
           size += com.google.protobuf.CodedOutputStream
             .computeInt32Size(4, sentenceIndex_);
         }
-        if (((bitField0_ & 0x00000004) != 0)) {
+        if (((bitField0_ & 0x00000010) != 0)) {
           size += com.google.protobuf.CodedOutputStream
             .computeInt32Size(5, semgrexIndex_);
         }
@@ -76004,6 +77168,14 @@ public final class CoreNLPProtos {
         for (int i = 0; i < varstring_.size(); i++) {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(7, varstring_.get(i));
+        }
+        if (((bitField0_ & 0x00000002) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeUInt32Size(8, matchCopy_);
+        }
+        if (((bitField0_ & 0x00000004) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeUInt32Size(9, matchEmptyIndex_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
@@ -76024,6 +77196,16 @@ public final class CoreNLPProtos {
         if (hasMatchIndex()) {
           if (getMatchIndex()
               != other.getMatchIndex()) return false;
+        }
+        if (hasMatchCopy() != other.hasMatchCopy()) return false;
+        if (hasMatchCopy()) {
+          if (getMatchCopy()
+              != other.getMatchCopy()) return false;
+        }
+        if (hasMatchEmptyIndex() != other.hasMatchEmptyIndex()) return false;
+        if (hasMatchEmptyIndex()) {
+          if (getMatchEmptyIndex()
+              != other.getMatchEmptyIndex()) return false;
         }
         if (!getNodeList()
             .equals(other.getNodeList())) return false;
@@ -76057,6 +77239,14 @@ public final class CoreNLPProtos {
         if (hasMatchIndex()) {
           hash = (37 * hash) + MATCHINDEX_FIELD_NUMBER;
           hash = (53 * hash) + getMatchIndex();
+        }
+        if (hasMatchCopy()) {
+          hash = (37 * hash) + MATCHCOPY_FIELD_NUMBER;
+          hash = (53 * hash) + getMatchCopy();
+        }
+        if (hasMatchEmptyIndex()) {
+          hash = (37 * hash) + MATCHEMPTYINDEX_FIELD_NUMBER;
+          hash = (53 * hash) + getMatchEmptyIndex();
         }
         if (getNodeCount() > 0) {
           hash = (37 * hash) + NODE_FIELD_NUMBER;
@@ -76214,34 +77404,36 @@ public final class CoreNLPProtos {
           super.clear();
           bitField0_ = 0;
           matchIndex_ = 0;
+          matchCopy_ = 0;
+          matchEmptyIndex_ = 0;
           if (nodeBuilder_ == null) {
             node_ = java.util.Collections.emptyList();
           } else {
             node_ = null;
             nodeBuilder_.clear();
           }
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000008);
           if (relnBuilder_ == null) {
             reln_ = java.util.Collections.emptyList();
           } else {
             reln_ = null;
             relnBuilder_.clear();
           }
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000010);
           if (edgeBuilder_ == null) {
             edge_ = java.util.Collections.emptyList();
           } else {
             edge_ = null;
             edgeBuilder_.clear();
           }
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000020);
           if (varstringBuilder_ == null) {
             varstring_ = java.util.Collections.emptyList();
           } else {
             varstring_ = null;
             varstringBuilder_.clear();
           }
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000040);
           sentenceIndex_ = 0;
           semgrexIndex_ = 0;
           return this;
@@ -76278,36 +77470,36 @@ public final class CoreNLPProtos {
 
         private void buildPartialRepeatedFields(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match result) {
           if (nodeBuilder_ == null) {
-            if (((bitField0_ & 0x00000002) != 0)) {
+            if (((bitField0_ & 0x00000008) != 0)) {
               node_ = java.util.Collections.unmodifiableList(node_);
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000008);
             }
             result.node_ = node_;
           } else {
             result.node_ = nodeBuilder_.build();
           }
           if (relnBuilder_ == null) {
-            if (((bitField0_ & 0x00000004) != 0)) {
+            if (((bitField0_ & 0x00000010) != 0)) {
               reln_ = java.util.Collections.unmodifiableList(reln_);
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000010);
             }
             result.reln_ = reln_;
           } else {
             result.reln_ = relnBuilder_.build();
           }
           if (edgeBuilder_ == null) {
-            if (((bitField0_ & 0x00000008) != 0)) {
+            if (((bitField0_ & 0x00000020) != 0)) {
               edge_ = java.util.Collections.unmodifiableList(edge_);
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000020);
             }
             result.edge_ = edge_;
           } else {
             result.edge_ = edgeBuilder_.build();
           }
           if (varstringBuilder_ == null) {
-            if (((bitField0_ & 0x00000010) != 0)) {
+            if (((bitField0_ & 0x00000040) != 0)) {
               varstring_ = java.util.Collections.unmodifiableList(varstring_);
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000040);
             }
             result.varstring_ = varstring_;
           } else {
@@ -76322,13 +77514,21 @@ public final class CoreNLPProtos {
             result.matchIndex_ = matchIndex_;
             to_bitField0_ |= 0x00000001;
           }
-          if (((from_bitField0_ & 0x00000020) != 0)) {
-            result.sentenceIndex_ = sentenceIndex_;
+          if (((from_bitField0_ & 0x00000002) != 0)) {
+            result.matchCopy_ = matchCopy_;
             to_bitField0_ |= 0x00000002;
           }
-          if (((from_bitField0_ & 0x00000040) != 0)) {
-            result.semgrexIndex_ = semgrexIndex_;
+          if (((from_bitField0_ & 0x00000004) != 0)) {
+            result.matchEmptyIndex_ = matchEmptyIndex_;
             to_bitField0_ |= 0x00000004;
+          }
+          if (((from_bitField0_ & 0x00000080) != 0)) {
+            result.sentenceIndex_ = sentenceIndex_;
+            to_bitField0_ |= 0x00000008;
+          }
+          if (((from_bitField0_ & 0x00000100) != 0)) {
+            result.semgrexIndex_ = semgrexIndex_;
+            to_bitField0_ |= 0x00000010;
           }
           result.bitField0_ |= to_bitField0_;
         }
@@ -76380,11 +77580,17 @@ public final class CoreNLPProtos {
           if (other.hasMatchIndex()) {
             setMatchIndex(other.getMatchIndex());
           }
+          if (other.hasMatchCopy()) {
+            setMatchCopy(other.getMatchCopy());
+          }
+          if (other.hasMatchEmptyIndex()) {
+            setMatchEmptyIndex(other.getMatchEmptyIndex());
+          }
           if (nodeBuilder_ == null) {
             if (!other.node_.isEmpty()) {
               if (node_.isEmpty()) {
                 node_ = other.node_;
-                bitField0_ = (bitField0_ & ~0x00000002);
+                bitField0_ = (bitField0_ & ~0x00000008);
               } else {
                 ensureNodeIsMutable();
                 node_.addAll(other.node_);
@@ -76397,7 +77603,7 @@ public final class CoreNLPProtos {
                 nodeBuilder_.dispose();
                 nodeBuilder_ = null;
                 node_ = other.node_;
-                bitField0_ = (bitField0_ & ~0x00000002);
+                bitField0_ = (bitField0_ & ~0x00000008);
                 nodeBuilder_ = 
                   com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                      getNodeFieldBuilder() : null;
@@ -76410,7 +77616,7 @@ public final class CoreNLPProtos {
             if (!other.reln_.isEmpty()) {
               if (reln_.isEmpty()) {
                 reln_ = other.reln_;
-                bitField0_ = (bitField0_ & ~0x00000004);
+                bitField0_ = (bitField0_ & ~0x00000010);
               } else {
                 ensureRelnIsMutable();
                 reln_.addAll(other.reln_);
@@ -76423,7 +77629,7 @@ public final class CoreNLPProtos {
                 relnBuilder_.dispose();
                 relnBuilder_ = null;
                 reln_ = other.reln_;
-                bitField0_ = (bitField0_ & ~0x00000004);
+                bitField0_ = (bitField0_ & ~0x00000010);
                 relnBuilder_ = 
                   com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                      getRelnFieldBuilder() : null;
@@ -76436,7 +77642,7 @@ public final class CoreNLPProtos {
             if (!other.edge_.isEmpty()) {
               if (edge_.isEmpty()) {
                 edge_ = other.edge_;
-                bitField0_ = (bitField0_ & ~0x00000008);
+                bitField0_ = (bitField0_ & ~0x00000020);
               } else {
                 ensureEdgeIsMutable();
                 edge_.addAll(other.edge_);
@@ -76449,7 +77655,7 @@ public final class CoreNLPProtos {
                 edgeBuilder_.dispose();
                 edgeBuilder_ = null;
                 edge_ = other.edge_;
-                bitField0_ = (bitField0_ & ~0x00000008);
+                bitField0_ = (bitField0_ & ~0x00000020);
                 edgeBuilder_ = 
                   com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                      getEdgeFieldBuilder() : null;
@@ -76462,7 +77668,7 @@ public final class CoreNLPProtos {
             if (!other.varstring_.isEmpty()) {
               if (varstring_.isEmpty()) {
                 varstring_ = other.varstring_;
-                bitField0_ = (bitField0_ & ~0x00000010);
+                bitField0_ = (bitField0_ & ~0x00000040);
               } else {
                 ensureVarstringIsMutable();
                 varstring_.addAll(other.varstring_);
@@ -76475,7 +77681,7 @@ public final class CoreNLPProtos {
                 varstringBuilder_.dispose();
                 varstringBuilder_ = null;
                 varstring_ = other.varstring_;
-                bitField0_ = (bitField0_ & ~0x00000010);
+                bitField0_ = (bitField0_ & ~0x00000040);
                 varstringBuilder_ = 
                   com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                      getVarstringFieldBuilder() : null;
@@ -76572,12 +77778,12 @@ public final class CoreNLPProtos {
                 } // case 26
                 case 32: {
                   sentenceIndex_ = input.readInt32();
-                  bitField0_ |= 0x00000020;
+                  bitField0_ |= 0x00000080;
                   break;
                 } // case 32
                 case 40: {
                   semgrexIndex_ = input.readInt32();
-                  bitField0_ |= 0x00000040;
+                  bitField0_ |= 0x00000100;
                   break;
                 } // case 40
                 case 50: {
@@ -76606,6 +77812,16 @@ public final class CoreNLPProtos {
                   }
                   break;
                 } // case 58
+                case 64: {
+                  matchCopy_ = input.readUInt32();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 64
+                case 72: {
+                  matchEmptyIndex_ = input.readUInt32();
+                  bitField0_ |= 0x00000004;
+                  break;
+                } // case 72
                 default: {
                   if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                     done = true; // was an endgroup tag
@@ -76625,6 +77841,11 @@ public final class CoreNLPProtos {
 
         private int matchIndex_ ;
         /**
+         * <pre>
+         * the node the match starts at.  This can be a copy or empty node
+         * when the pattern starts in the enhanced graph
+         * </pre>
+         *
          * <code>required int32 matchIndex = 1;</code>
          * @return Whether the matchIndex field is set.
          */
@@ -76633,6 +77854,11 @@ public final class CoreNLPProtos {
           return ((bitField0_ & 0x00000001) != 0);
         }
         /**
+         * <pre>
+         * the node the match starts at.  This can be a copy or empty node
+         * when the pattern starts in the enhanced graph
+         * </pre>
+         *
          * <code>required int32 matchIndex = 1;</code>
          * @return The matchIndex.
          */
@@ -76641,6 +77867,11 @@ public final class CoreNLPProtos {
           return matchIndex_;
         }
         /**
+         * <pre>
+         * the node the match starts at.  This can be a copy or empty node
+         * when the pattern starts in the enhanced graph
+         * </pre>
+         *
          * <code>required int32 matchIndex = 1;</code>
          * @param value The matchIndex to set.
          * @return This builder for chaining.
@@ -76653,6 +77884,11 @@ public final class CoreNLPProtos {
           return this;
         }
         /**
+         * <pre>
+         * the node the match starts at.  This can be a copy or empty node
+         * when the pattern starts in the enhanced graph
+         * </pre>
+         *
          * <code>required int32 matchIndex = 1;</code>
          * @return This builder for chaining.
          */
@@ -76663,12 +77899,92 @@ public final class CoreNLPProtos {
           return this;
         }
 
+        private int matchCopy_ ;
+        /**
+         * <code>optional uint32 matchCopy = 8;</code>
+         * @return Whether the matchCopy field is set.
+         */
+        @java.lang.Override
+        public boolean hasMatchCopy() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <code>optional uint32 matchCopy = 8;</code>
+         * @return The matchCopy.
+         */
+        @java.lang.Override
+        public int getMatchCopy() {
+          return matchCopy_;
+        }
+        /**
+         * <code>optional uint32 matchCopy = 8;</code>
+         * @param value The matchCopy to set.
+         * @return This builder for chaining.
+         */
+        public Builder setMatchCopy(int value) {
+
+          matchCopy_ = value;
+          bitField0_ |= 0x00000002;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional uint32 matchCopy = 8;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearMatchCopy() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          matchCopy_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private int matchEmptyIndex_ ;
+        /**
+         * <code>optional uint32 matchEmptyIndex = 9;</code>
+         * @return Whether the matchEmptyIndex field is set.
+         */
+        @java.lang.Override
+        public boolean hasMatchEmptyIndex() {
+          return ((bitField0_ & 0x00000004) != 0);
+        }
+        /**
+         * <code>optional uint32 matchEmptyIndex = 9;</code>
+         * @return The matchEmptyIndex.
+         */
+        @java.lang.Override
+        public int getMatchEmptyIndex() {
+          return matchEmptyIndex_;
+        }
+        /**
+         * <code>optional uint32 matchEmptyIndex = 9;</code>
+         * @param value The matchEmptyIndex to set.
+         * @return This builder for chaining.
+         */
+        public Builder setMatchEmptyIndex(int value) {
+
+          matchEmptyIndex_ = value;
+          bitField0_ |= 0x00000004;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional uint32 matchEmptyIndex = 9;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearMatchEmptyIndex() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          matchEmptyIndex_ = 0;
+          onChanged();
+          return this;
+        }
+
         private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode> node_ =
           java.util.Collections.emptyList();
         private void ensureNodeIsMutable() {
-          if (!((bitField0_ & 0x00000002) != 0)) {
+          if (!((bitField0_ & 0x00000008) != 0)) {
             node_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode>(node_);
-            bitField0_ |= 0x00000002;
+            bitField0_ |= 0x00000008;
            }
         }
 
@@ -76818,7 +78134,7 @@ public final class CoreNLPProtos {
         public Builder clearNode() {
           if (nodeBuilder_ == null) {
             node_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000008);
             onChanged();
           } else {
             nodeBuilder_.clear();
@@ -76895,7 +78211,7 @@ public final class CoreNLPProtos {
             nodeBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
                 edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNode.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedNodeOrBuilder>(
                     node_,
-                    ((bitField0_ & 0x00000002) != 0),
+                    ((bitField0_ & 0x00000008) != 0),
                     getParentForChildren(),
                     isClean());
             node_ = null;
@@ -76906,9 +78222,9 @@ public final class CoreNLPProtos {
         private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation> reln_ =
           java.util.Collections.emptyList();
         private void ensureRelnIsMutable() {
-          if (!((bitField0_ & 0x00000004) != 0)) {
+          if (!((bitField0_ & 0x00000010) != 0)) {
             reln_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation>(reln_);
-            bitField0_ |= 0x00000004;
+            bitField0_ |= 0x00000010;
            }
         }
 
@@ -77058,7 +78374,7 @@ public final class CoreNLPProtos {
         public Builder clearReln() {
           if (relnBuilder_ == null) {
             reln_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000010);
             onChanged();
           } else {
             relnBuilder_.clear();
@@ -77135,7 +78451,7 @@ public final class CoreNLPProtos {
             relnBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
                 edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedRelationOrBuilder>(
                     reln_,
-                    ((bitField0_ & 0x00000004) != 0),
+                    ((bitField0_ & 0x00000010) != 0),
                     getParentForChildren(),
                     isClean());
             reln_ = null;
@@ -77146,9 +78462,9 @@ public final class CoreNLPProtos {
         private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge> edge_ =
           java.util.Collections.emptyList();
         private void ensureEdgeIsMutable() {
-          if (!((bitField0_ & 0x00000008) != 0)) {
+          if (!((bitField0_ & 0x00000020) != 0)) {
             edge_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge>(edge_);
-            bitField0_ |= 0x00000008;
+            bitField0_ |= 0x00000020;
            }
         }
 
@@ -77298,7 +78614,7 @@ public final class CoreNLPProtos {
         public Builder clearEdge() {
           if (edgeBuilder_ == null) {
             edge_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000020);
             onChanged();
           } else {
             edgeBuilder_.clear();
@@ -77375,7 +78691,7 @@ public final class CoreNLPProtos {
             edgeBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
                 edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdge.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.NamedEdgeOrBuilder>(
                     edge_,
-                    ((bitField0_ & 0x00000008) != 0),
+                    ((bitField0_ & 0x00000020) != 0),
                     getParentForChildren(),
                     isClean());
             edge_ = null;
@@ -77386,9 +78702,9 @@ public final class CoreNLPProtos {
         private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.VariableString> varstring_ =
           java.util.Collections.emptyList();
         private void ensureVarstringIsMutable() {
-          if (!((bitField0_ & 0x00000010) != 0)) {
+          if (!((bitField0_ & 0x00000040) != 0)) {
             varstring_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.VariableString>(varstring_);
-            bitField0_ |= 0x00000010;
+            bitField0_ |= 0x00000040;
            }
         }
 
@@ -77538,7 +78854,7 @@ public final class CoreNLPProtos {
         public Builder clearVarstring() {
           if (varstringBuilder_ == null) {
             varstring_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000010);
+            bitField0_ = (bitField0_ & ~0x00000040);
             onChanged();
           } else {
             varstringBuilder_.clear();
@@ -77615,7 +78931,7 @@ public final class CoreNLPProtos {
             varstringBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
                 edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.VariableString, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.VariableString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.VariableStringOrBuilder>(
                     varstring_,
-                    ((bitField0_ & 0x00000010) != 0),
+                    ((bitField0_ & 0x00000040) != 0),
                     getParentForChildren(),
                     isClean());
             varstring_ = null;
@@ -77635,7 +78951,7 @@ public final class CoreNLPProtos {
          */
         @java.lang.Override
         public boolean hasSentenceIndex() {
-          return ((bitField0_ & 0x00000020) != 0);
+          return ((bitField0_ & 0x00000080) != 0);
         }
         /**
          * <pre>
@@ -77663,7 +78979,7 @@ public final class CoreNLPProtos {
         public Builder setSentenceIndex(int value) {
 
           sentenceIndex_ = value;
-          bitField0_ |= 0x00000020;
+          bitField0_ |= 0x00000080;
           onChanged();
           return this;
         }
@@ -77677,7 +78993,7 @@ public final class CoreNLPProtos {
          * @return This builder for chaining.
          */
         public Builder clearSentenceIndex() {
-          bitField0_ = (bitField0_ & ~0x00000020);
+          bitField0_ = (bitField0_ & ~0x00000080);
           sentenceIndex_ = 0;
           onChanged();
           return this;
@@ -77695,7 +79011,7 @@ public final class CoreNLPProtos {
          */
         @java.lang.Override
         public boolean hasSemgrexIndex() {
-          return ((bitField0_ & 0x00000040) != 0);
+          return ((bitField0_ & 0x00000100) != 0);
         }
         /**
          * <pre>
@@ -77723,7 +79039,7 @@ public final class CoreNLPProtos {
         public Builder setSemgrexIndex(int value) {
 
           semgrexIndex_ = value;
-          bitField0_ |= 0x00000040;
+          bitField0_ |= 0x00000100;
           onChanged();
           return this;
         }
@@ -77737,7 +79053,7 @@ public final class CoreNLPProtos {
          * @return This builder for chaining.
          */
         public Builder clearSemgrexIndex() {
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000100);
           semgrexIndex_ = 0;
           onChanged();
           return this;
@@ -103501,112 +104817,119 @@ public final class CoreNLPProtos {
       "anford.nlp.pipeline.Quote\022\027\n\017authorCharB" +
       "egin\030\007 \001(\r\022\025\n\rauthorCharEnd\030\010 \001(\r\0220\n\006xml" +
       "Tag\030\t \002(\0132 .edu.stanford.nlp.pipeline.To" +
-      "ken\"\344\001\n\016SemgrexRequest\022\017\n\007semgrex\030\001 \003(\t\022" +
+      "ken\"\250\002\n\016SemgrexRequest\022\017\n\007semgrex\030\001 \003(\t\022" +
       "E\n\005query\030\002 \003(\01326.edu.stanford.nlp.pipeli" +
-      "ne.SemgrexRequest.Dependencies\032z\n\014Depend" +
-      "encies\022/\n\005token\030\001 \003(\0132 .edu.stanford.nlp" +
-      ".pipeline.Token\0229\n\005graph\030\002 \002(\0132*.edu.sta" +
-      "nford.nlp.pipeline.DependencyGraph\"\261\007\n\017S" +
-      "emgrexResponse\022K\n\010sentence\030\001 \003(\01329.edu.s" +
-      "tanford.nlp.pipeline.SemgrexResponse.Sen" +
-      "tenceResult\032-\n\tNamedNode\022\014\n\004name\030\001 \002(\t\022\022" +
-      "\n\nmatchIndex\030\002 \002(\005\032+\n\rNamedRelation\022\014\n\004n" +
-      "ame\030\001 \002(\t\022\014\n\004reln\030\002 \002(\t\032\200\001\n\tNamedEdge\022\014\n" +
-      "\004name\030\001 \002(\t\022\016\n\006source\030\002 \002(\005\022\016\n\006target\030\003 " +
-      "\002(\005\022\014\n\004reln\030\004 \001(\t\022\017\n\007isExtra\030\005 \001(\010\022\022\n\nso" +
-      "urceCopy\030\006 \001(\r\022\022\n\ntargetCopy\030\007 \001(\r\032-\n\016Va" +
-      "riableString\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(" +
-      "\t\032\346\002\n\005Match\022\022\n\nmatchIndex\030\001 \002(\005\022B\n\004node\030" +
-      "\002 \003(\01324.edu.stanford.nlp.pipeline.Semgre" +
-      "xResponse.NamedNode\022F\n\004reln\030\003 \003(\01328.edu." +
-      "stanford.nlp.pipeline.SemgrexResponse.Na" +
-      "medRelation\022B\n\004edge\030\006 \003(\01324.edu.stanford" +
-      ".nlp.pipeline.SemgrexResponse.NamedEdge\022" +
-      "L\n\tvarstring\030\007 \003(\01329.edu.stanford.nlp.pi" +
-      "peline.SemgrexResponse.VariableString\022\025\n" +
-      "\rsentenceIndex\030\004 \001(\005\022\024\n\014semgrexIndex\030\005 \001" +
-      "(\005\032f\n\rPatternResult\022?\n\005match\030\001 \003(\01320.edu" +
-      ".stanford.nlp.pipeline.SemgrexResponse.M" +
-      "atch\022\024\n\014semgrexIndex\030\002 \001(\005\032r\n\016SentenceRe" +
-      "sult\022I\n\007pattern\030\001 \003(\01328.edu.stanford.nlp" +
-      ".pipeline.SemgrexResponse.PatternResult\022" +
-      "\025\n\rsentenceIndex\030\002 \001(\005\"\360\001\n\017SsurgeonReque" +
-      "st\022E\n\010ssurgeon\030\001 \003(\01323.edu.stanford.nlp." +
-      "pipeline.SsurgeonRequest.Ssurgeon\0229\n\005gra" +
-      "ph\030\002 \003(\0132*.edu.stanford.nlp.pipeline.Dep" +
-      "endencyGraph\032[\n\010Ssurgeon\022\017\n\007semgrex\030\001 \001(" +
-      "\t\022\021\n\toperation\030\002 \003(\t\022\n\n\002id\030\003 \001(\t\022\r\n\005note" +
-      "s\030\004 \001(\t\022\020\n\010language\030\005 \001(\t\"\274\001\n\020SsurgeonRe" +
-      "sponse\022J\n\006result\030\001 \003(\0132:.edu.stanford.nl" +
-      "p.pipeline.SsurgeonResponse.SsurgeonResu" +
-      "lt\032\\\n\016SsurgeonResult\0229\n\005graph\030\001 \001(\0132*.ed" +
-      "u.stanford.nlp.pipeline.DependencyGraph\022" +
-      "\017\n\007changed\030\002 \001(\010\"W\n\022TokensRegexRequest\0220" +
-      "\n\003doc\030\001 \002(\0132#.edu.stanford.nlp.pipeline." +
-      "Document\022\017\n\007pattern\030\002 \003(\t\"\247\003\n\023TokensRege" +
-      "xResponse\022J\n\005match\030\001 \003(\0132;.edu.stanford." +
-      "nlp.pipeline.TokensRegexResponse.Pattern" +
-      "Match\0329\n\rMatchLocation\022\014\n\004text\030\001 \001(\t\022\r\n\005" +
-      "begin\030\002 \001(\005\022\013\n\003end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010se" +
-      "ntence\030\001 \002(\005\022K\n\005match\030\002 \002(\0132<.edu.stanfo" +
-      "rd.nlp.pipeline.TokensRegexResponse.Matc" +
-      "hLocation\022K\n\005group\030\003 \003(\0132<.edu.stanford." +
-      "nlp.pipeline.TokensRegexResponse.MatchLo" +
-      "cation\032S\n\014PatternMatch\022C\n\005match\030\001 \003(\01324." +
-      "edu.stanford.nlp.pipeline.TokensRegexRes" +
-      "ponse.Match\"\256\001\n\031DependencyEnhancerReques" +
-      "t\0225\n\010document\030\001 \002(\0132#.edu.stanford.nlp.p" +
-      "ipeline.Document\0227\n\010language\030\002 \001(\0162#.edu" +
-      ".stanford.nlp.pipeline.LanguageH\000\022\032\n\020rel" +
-      "ativePronouns\030\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022Flatten" +
-      "edParseTree\022A\n\005nodes\030\001 \003(\01322.edu.stanfor" +
-      "d.nlp.pipeline.FlattenedParseTree.Node\032[" +
-      "\n\004Node\022\022\n\010openNode\030\001 \001(\010H\000\022\023\n\tcloseNode\030" +
-      "\002 \001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B" +
-      "\n\n\010contents\"\366\001\n\025EvaluateParserRequest\022N\n" +
-      "\010treebank\030\001 \003(\0132<.edu.stanford.nlp.pipel" +
-      "ine.EvaluateParserRequest.ParseResult\032\214\001" +
-      "\n\013ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stanfo" +
-      "rd.nlp.pipeline.FlattenedParseTree\022@\n\tpr" +
-      "edicted\030\002 \003(\0132-.edu.stanford.nlp.pipelin" +
-      "e.FlattenedParseTree\"E\n\026EvaluateParserRe" +
-      "sponse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\022\016\n\006t" +
-      "reeF1\030\003 \003(\001\"\310\001\n\017TsurgeonRequest\022H\n\nopera" +
-      "tions\030\001 \003(\01324.edu.stanford.nlp.pipeline." +
-      "TsurgeonRequest.Operation\022<\n\005trees\030\002 \003(\013" +
-      "2-.edu.stanford.nlp.pipeline.FlattenedPa" +
-      "rseTree\032-\n\tOperation\022\016\n\006tregex\030\001 \002(\t\022\020\n\010" +
-      "tsurgeon\030\002 \003(\t\"P\n\020TsurgeonResponse\022<\n\005tr" +
+      "ne.SemgrexRequest.Dependencies\032\275\001\n\014Depen" +
+      "dencies\022/\n\005token\030\001 \003(\0132 .edu.stanford.nl" +
+      "p.pipeline.Token\0229\n\005graph\030\002 \002(\0132*.edu.st" +
+      "anford.nlp.pipeline.DependencyGraph\022A\n\re" +
+      "nhancedGraph\030\003 \001(\0132*.edu.stanford.nlp.pi" +
+      "peline.DependencyGraph\"\224\t\n\017SemgrexRespon" +
+      "se\022K\n\010sentence\030\001 \003(\01329.edu.stanford.nlp." +
+      "pipeline.SemgrexResponse.SentenceResult\032" +
+      "O\n\tNamedNode\022\014\n\004name\030\001 \002(\t\022\022\n\nmatchIndex" +
+      "\030\002 \002(\005\022\014\n\004copy\030\003 \001(\r\022\022\n\nemptyIndex\030\004 \001(\r" +
+      "\032+\n\rNamedRelation\022\014\n\004name\030\001 \002(\t\022\014\n\004reln\030" +
+      "\002 \002(\t\032\357\001\n\tNamedEdge\022\014\n\004name\030\001 \002(\t\022\016\n\006sou" +
+      "rce\030\002 \002(\005\022\016\n\006target\030\003 \002(\005\022\014\n\004reln\030\004 \001(\t\022" +
+      "\017\n\007isExtra\030\005 \001(\010\022\022\n\nsourceCopy\030\006 \001(\r\022\022\n\n" +
+      "targetCopy\030\007 \001(\r\022\023\n\013sourceEmpty\030\010 \001(\r\022\023\n" +
+      "\013targetEmpty\030\t \001(\r\022C\n\005graph\030\n \001(\01624.edu." +
+      "stanford.nlp.pipeline.SemgrexResponse.Gr" +
+      "aphName\032-\n\016VariableString\022\014\n\004name\030\001 \002(\t\022" +
+      "\r\n\005value\030\002 \002(\t\032\222\003\n\005Match\022\022\n\nmatchIndex\030\001" +
+      " \002(\005\022\021\n\tmatchCopy\030\010 \001(\r\022\027\n\017matchEmptyInd" +
+      "ex\030\t \001(\r\022B\n\004node\030\002 \003(\01324.edu.stanford.nl" +
+      "p.pipeline.SemgrexResponse.NamedNode\022F\n\004" +
+      "reln\030\003 \003(\01328.edu.stanford.nlp.pipeline.S" +
+      "emgrexResponse.NamedRelation\022B\n\004edge\030\006 \003" +
+      "(\01324.edu.stanford.nlp.pipeline.SemgrexRe" +
+      "sponse.NamedEdge\022L\n\tvarstring\030\007 \003(\01329.ed" +
+      "u.stanford.nlp.pipeline.SemgrexResponse." +
+      "VariableString\022\025\n\rsentenceIndex\030\004 \001(\005\022\024\n" +
+      "\014semgrexIndex\030\005 \001(\005\032f\n\rPatternResult\022?\n\005" +
+      "match\030\001 \003(\01320.edu.stanford.nlp.pipeline." +
+      "SemgrexResponse.Match\022\024\n\014semgrexIndex\030\002 " +
+      "\001(\005\032r\n\016SentenceResult\022I\n\007pattern\030\001 \003(\01328" +
+      ".edu.stanford.nlp.pipeline.SemgrexRespon" +
+      "se.PatternResult\022\025\n\rsentenceIndex\030\002 \001(\005\"" +
+      "$\n\tGraphName\022\t\n\005BASIC\020\000\022\014\n\010ENHANCED\020\001\"\360\001" +
+      "\n\017SsurgeonRequest\022E\n\010ssurgeon\030\001 \003(\01323.ed" +
+      "u.stanford.nlp.pipeline.SsurgeonRequest." +
+      "Ssurgeon\0229\n\005graph\030\002 \003(\0132*.edu.stanford.n" +
+      "lp.pipeline.DependencyGraph\032[\n\010Ssurgeon\022" +
+      "\017\n\007semgrex\030\001 \001(\t\022\021\n\toperation\030\002 \003(\t\022\n\n\002i" +
+      "d\030\003 \001(\t\022\r\n\005notes\030\004 \001(\t\022\020\n\010language\030\005 \001(\t" +
+      "\"\274\001\n\020SsurgeonResponse\022J\n\006result\030\001 \003(\0132:." +
+      "edu.stanford.nlp.pipeline.SsurgeonRespon" +
+      "se.SsurgeonResult\032\\\n\016SsurgeonResult\0229\n\005g" +
+      "raph\030\001 \001(\0132*.edu.stanford.nlp.pipeline.D" +
+      "ependencyGraph\022\017\n\007changed\030\002 \001(\010\"W\n\022Token" +
+      "sRegexRequest\0220\n\003doc\030\001 \002(\0132#.edu.stanfor" +
+      "d.nlp.pipeline.Document\022\017\n\007pattern\030\002 \003(\t" +
+      "\"\247\003\n\023TokensRegexResponse\022J\n\005match\030\001 \003(\0132" +
+      ";.edu.stanford.nlp.pipeline.TokensRegexR" +
+      "esponse.PatternMatch\0329\n\rMatchLocation\022\014\n" +
+      "\004text\030\001 \001(\t\022\r\n\005begin\030\002 \001(\005\022\013\n\003end\030\003 \001(\005\032" +
+      "\263\001\n\005Match\022\020\n\010sentence\030\001 \002(\005\022K\n\005match\030\002 \002" +
+      "(\0132<.edu.stanford.nlp.pipeline.TokensReg" +
+      "exResponse.MatchLocation\022K\n\005group\030\003 \003(\0132" +
+      "<.edu.stanford.nlp.pipeline.TokensRegexR" +
+      "esponse.MatchLocation\032S\n\014PatternMatch\022C\n" +
+      "\005match\030\001 \003(\01324.edu.stanford.nlp.pipeline" +
+      ".TokensRegexResponse.Match\"\256\001\n\031Dependenc" +
+      "yEnhancerRequest\0225\n\010document\030\001 \002(\0132#.edu" +
+      ".stanford.nlp.pipeline.Document\0227\n\010langu" +
+      "age\030\002 \001(\0162#.edu.stanford.nlp.pipeline.La" +
+      "nguageH\000\022\032\n\020relativePronouns\030\003 \001(\tH\000B\005\n\003" +
+      "ref\"\264\001\n\022FlattenedParseTree\022A\n\005nodes\030\001 \003(" +
+      "\01322.edu.stanford.nlp.pipeline.FlattenedP" +
+      "arseTree.Node\032[\n\004Node\022\022\n\010openNode\030\001 \001(\010H" +
+      "\000\022\023\n\tcloseNode\030\002 \001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022" +
+      "\r\n\005score\030\004 \001(\001B\n\n\010contents\"\366\001\n\025EvaluateP" +
+      "arserRequest\022N\n\010treebank\030\001 \003(\0132<.edu.sta" +
+      "nford.nlp.pipeline.EvaluateParserRequest" +
+      ".ParseResult\032\214\001\n\013ParseResult\022;\n\004gold\030\001 \002" +
+      "(\0132-.edu.stanford.nlp.pipeline.Flattened" +
+      "ParseTree\022@\n\tpredicted\030\002 \003(\0132-.edu.stanf" +
+      "ord.nlp.pipeline.FlattenedParseTree\"E\n\026E" +
+      "valuateParserResponse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbe" +
+      "stF1\030\002 \001(\001\022\016\n\006treeF1\030\003 \003(\001\"\310\001\n\017TsurgeonR" +
+      "equest\022H\n\noperations\030\001 \003(\01324.edu.stanfor" +
+      "d.nlp.pipeline.TsurgeonRequest.Operation" +
+      "\022<\n\005trees\030\002 \003(\0132-.edu.stanford.nlp.pipel" +
+      "ine.FlattenedParseTree\032-\n\tOperation\022\016\n\006t" +
+      "regex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"P\n\020Tsurgeo" +
+      "nResponse\022<\n\005trees\030\001 \003(\0132-.edu.stanford." +
+      "nlp.pipeline.FlattenedParseTree\"\205\001\n\021Morp" +
+      "hologyRequest\022F\n\005words\030\001 \003(\01327.edu.stanf" +
+      "ord.nlp.pipeline.MorphologyRequest.Tagge" +
+      "dWord\032(\n\nTaggedWord\022\014\n\004word\030\001 \002(\t\022\014\n\004xpo" +
+      "s\030\002 \001(\t\"\232\001\n\022MorphologyResponse\022I\n\005words\030" +
+      "\001 \003(\0132:.edu.stanford.nlp.pipeline.Morpho" +
+      "logyResponse.WordTagLemma\0329\n\014WordTagLemm" +
+      "a\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\022\r\n\005lemma\030\003" +
+      " \002(\t\"Z\n\032DependencyConverterRequest\022<\n\005tr" +
       "ees\030\001 \003(\0132-.edu.stanford.nlp.pipeline.Fl" +
-      "attenedParseTree\"\205\001\n\021MorphologyRequest\022F" +
-      "\n\005words\030\001 \003(\01327.edu.stanford.nlp.pipelin" +
-      "e.MorphologyRequest.TaggedWord\032(\n\nTagged" +
-      "Word\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022Mor" +
-      "phologyResponse\022I\n\005words\030\001 \003(\0132:.edu.sta" +
-      "nford.nlp.pipeline.MorphologyResponse.Wo" +
-      "rdTagLemma\0329\n\014WordTagLemma\022\014\n\004word\030\001 \002(\t" +
-      "\022\014\n\004xpos\030\002 \001(\t\022\r\n\005lemma\030\003 \002(\t\"Z\n\032Depende" +
-      "ncyConverterRequest\022<\n\005trees\030\001 \003(\0132-.edu" +
-      ".stanford.nlp.pipeline.FlattenedParseTre" +
-      "e\"\220\002\n\033DependencyConverterResponse\022`\n\013con" +
-      "versions\030\001 \003(\0132K.edu.stanford.nlp.pipeli" +
-      "ne.DependencyConverterResponse.Dependenc" +
-      "yConversion\032\216\001\n\024DependencyConversion\0229\n\005" +
-      "graph\030\001 \002(\0132*.edu.stanford.nlp.pipeline." +
-      "DependencyGraph\022;\n\004tree\030\002 \001(\0132-.edu.stan" +
-      "ford.nlp.pipeline.FlattenedParseTree*\243\001\n" +
-      "\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabi" +
-      "c\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006German\020" +
-      "\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024" +
-      "\n\020UniversalEnglish\020\t\022\024\n\020UniversalChinese" +
-      "\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\r" +
-      "WEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POS" +
-      "ITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Natural" +
-      "LogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWAR" +
-      "D_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014" +
-      "\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005" +
-      "\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp.p" +
-      "ipelineB\rCoreNLPProtos"
+      "attenedParseTree\"\220\002\n\033DependencyConverter" +
+      "Response\022`\n\013conversions\030\001 \003(\0132K.edu.stan" +
+      "ford.nlp.pipeline.DependencyConverterRes" +
+      "ponse.DependencyConversion\032\216\001\n\024Dependenc" +
+      "yConversion\0229\n\005graph\030\001 \002(\0132*.edu.stanfor" +
+      "d.nlp.pipeline.DependencyGraph\022;\n\004tree\030\002" +
+      " \001(\0132-.edu.stanford.nlp.pipeline.Flatten" +
+      "edParseTree*\243\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n" +
+      "\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007Engli" +
+      "sh\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007" +
+      "\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglish\020\t\022\024\n\020U" +
+      "niversalChinese\020\n*h\n\tSentiment\022\023\n\017STRONG" +
+      "_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRA" +
+      "L\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_POSITIV" +
+      "E\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013EQUIVALE" +
+      "NCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REVERSE" +
+      "_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATI" +
+      "ON\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu" +
+      ".stanford.nlp.pipelineB\rCoreNLPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -103779,7 +105102,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_SemgrexRequest_Dependencies_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexRequest_Dependencies_descriptor,
-        new java.lang.String[] { "Token", "Graph", });
+        new java.lang.String[] { "Token", "Graph", "EnhancedGraph", });
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor =
       getDescriptor().getMessageTypes().get(24);
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_fieldAccessorTable = new
@@ -103791,7 +105114,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedNode_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedNode_descriptor,
-        new java.lang.String[] { "Name", "MatchIndex", });
+        new java.lang.String[] { "Name", "MatchIndex", "Copy", "EmptyIndex", });
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedRelation_descriptor =
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(1);
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedRelation_fieldAccessorTable = new
@@ -103803,7 +105126,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedEdge_descriptor,
-        new java.lang.String[] { "Name", "Source", "Target", "Reln", "IsExtra", "SourceCopy", "TargetCopy", });
+        new java.lang.String[] { "Name", "Source", "Target", "Reln", "IsExtra", "SourceCopy", "TargetCopy", "SourceEmpty", "TargetEmpty", "Graph", });
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_VariableString_descriptor =
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(3);
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_VariableString_fieldAccessorTable = new
@@ -103815,7 +105138,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_descriptor,
-        new java.lang.String[] { "MatchIndex", "Node", "Reln", "Edge", "Varstring", "SentenceIndex", "SemgrexIndex", });
+        new java.lang.String[] { "MatchIndex", "MatchCopy", "MatchEmptyIndex", "Node", "Reln", "Edge", "Varstring", "SentenceIndex", "SemgrexIndex", });
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_descriptor =
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(5);
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_fieldAccessorTable = new
