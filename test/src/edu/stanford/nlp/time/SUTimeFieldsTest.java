@@ -145,6 +145,44 @@ public class SUTimeFieldsTest {
     assertEquals(date(1990, 6, 15), date(1997, 6, 15).with(SUTimeFields.YEAR_OF_DECADE, 0));
   }
 
+  // ------------------------------------------------ year and century of era
+
+  @Test
+  public void testYearOfCentury() {
+    assertEquals(97, date(1997, 6, 15).getLong(SUTimeFields.YEAR_OF_CENTURY));
+    assertEquals(0, date(2000, 2, 29).getLong(SUTimeFields.YEAR_OF_CENTURY));
+    assertEquals(17, date(2017, 1, 15).getLong(SUTimeFields.YEAR_OF_CENTURY));
+  }
+
+  @Test
+  public void testCenturyOfEra() {
+    // Counted from zero, so 1997 is in century 19 rather than the twentieth century.
+    assertEquals(19, date(1997, 6, 15).getLong(SUTimeFields.CENTURY_OF_ERA));
+    assertEquals(20, date(2000, 2, 29).getLong(SUTimeFields.CENTURY_OF_ERA));
+    assertEquals(20, date(2017, 1, 15).getLong(SUTimeFields.CENTURY_OF_ERA));
+  }
+
+  @Test
+  public void testYearOfCenturyAndCenturyReconstructTheYear() {
+    for (int year : new int[] {1900, 1997, 2000, 2017, 2100}) {
+      LocalDate day = date(year, 6, 15);
+      assertEquals(year, day.getLong(SUTimeFields.CENTURY_OF_ERA) * 100
+              + day.getLong(SUTimeFields.YEAR_OF_CENTURY));
+    }
+  }
+
+  @Test
+  public void testSettingYearOfCenturyKeepsTheCentury() {
+    assertEquals(date(1903, 6, 15), date(1997, 6, 15).with(SUTimeFields.YEAR_OF_CENTURY, 3));
+    assertEquals(date(2045, 6, 15), date(2017, 6, 15).with(SUTimeFields.YEAR_OF_CENTURY, 45));
+  }
+
+  @Test
+  public void testSettingTheCenturyKeepsTheYearWithinIt() {
+    assertEquals(date(1897, 6, 15), date(1997, 6, 15).with(SUTimeFields.CENTURY_OF_ERA, 18));
+    assertEquals(date(2097, 6, 15), date(1997, 6, 15).with(SUTimeFields.CENTURY_OF_ERA, 20));
+  }
+
   // --------------------------------------------------------------- field metadata
 
   @Test
@@ -154,6 +192,7 @@ public class SUTimeFieldsTest {
     assertEquals(ValueRange.of(1, 4), SUTimeFields.WEEK_OF_MONTH.range());
     assertEquals(ValueRange.of(0, 9), SUTimeFields.DECADE_OF_CENTURY.range());
     assertEquals(ValueRange.of(0, 9), SUTimeFields.YEAR_OF_DECADE.range());
+    assertEquals(ValueRange.of(0, 99), SUTimeFields.YEAR_OF_CENTURY.range());
   }
 
   @Test
@@ -165,6 +204,36 @@ public class SUTimeFieldsTest {
     assertEquals(java.time.temporal.ChronoUnit.CENTURIES,
             SUTimeFields.DECADE_OF_CENTURY.getRangeUnit());
     assertEquals(java.time.temporal.ChronoUnit.DECADES, SUTimeFields.YEAR_OF_DECADE.getRangeUnit());
+    assertEquals(java.time.temporal.ChronoUnit.CENTURIES, SUTimeFields.YEAR_OF_CENTURY.getRangeUnit());
+    assertEquals(java.time.temporal.ChronoUnit.ERAS, SUTimeFields.CENTURY_OF_ERA.getRangeUnit());
+  }
+
+  @Test
+  public void testBaseUnits() {
+    assertEquals(java.time.temporal.ChronoUnit.MONTHS, SUTimeFields.MONTH_OF_QUARTER.getBaseUnit());
+    assertEquals(java.time.temporal.ChronoUnit.MONTHS, SUTimeFields.MONTH_OF_HALF_YEAR.getBaseUnit());
+    assertEquals(java.time.temporal.ChronoUnit.WEEKS, SUTimeFields.WEEK_OF_MONTH.getBaseUnit());
+    assertEquals(java.time.temporal.ChronoUnit.DECADES, SUTimeFields.DECADE_OF_CENTURY.getBaseUnit());
+    assertEquals(java.time.temporal.ChronoUnit.YEARS, SUTimeFields.YEAR_OF_DECADE.getBaseUnit());
+    assertEquals(java.time.temporal.ChronoUnit.YEARS, SUTimeFields.YEAR_OF_CENTURY.getBaseUnit());
+    assertEquals(java.time.temporal.ChronoUnit.CENTURIES, SUTimeFields.CENTURY_OF_ERA.getBaseUnit());
+  }
+
+  @Test
+  public void testOnlyAYearIsBoundedByNothing() {
+    // The generality comparison in PartialTemporalUtils treats a field bounded by nothing
+    // as incomparable, which is what stops a century being ranked above a year. Only the
+    // year itself should have that property; a field given FOREVER by mistake would drop
+    // out of the ordering silently.
+    assertEquals(java.time.temporal.ChronoUnit.FOREVER, java.time.temporal.ChronoField.YEAR.getRangeUnit());
+    for (java.time.temporal.TemporalField field : new java.time.temporal.TemporalField[] {
+            SUTimeFields.MONTH_OF_QUARTER, SUTimeFields.MONTH_OF_HALF_YEAR,
+            SUTimeFields.WEEK_OF_MONTH, SUTimeFields.DECADE_OF_CENTURY,
+            SUTimeFields.YEAR_OF_DECADE, SUTimeFields.YEAR_OF_CENTURY,
+            SUTimeFields.CENTURY_OF_ERA }) {
+      assertFalse(field + " should be bounded by some larger unit",
+              field.getRangeUnit() == java.time.temporal.ChronoUnit.FOREVER);
+    }
   }
 
   @Test
@@ -195,6 +264,8 @@ public class SUTimeFieldsTest {
     assertEquals("WeekOfMonth", SUTimeFields.WEEK_OF_MONTH.toString());
     assertEquals("DecadeOfCentury", SUTimeFields.DECADE_OF_CENTURY.toString());
     assertEquals("YearOfDecade", SUTimeFields.YEAR_OF_DECADE.toString());
+    assertEquals("YearOfCentury", SUTimeFields.YEAR_OF_CENTURY.toString());
+    assertEquals("CenturyOfEra", SUTimeFields.CENTURY_OF_ERA.toString());
   }
 
 }
