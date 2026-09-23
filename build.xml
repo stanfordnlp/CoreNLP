@@ -539,10 +539,15 @@
         <include name="javanlp-core.jar"/>
       </lib>
       <lib dir="${basedir}/lib">
+        <include name="jaxb-api-2.4.0-b180830.0359.jar"/>
+        <include name="jaxb-impl-2.4.0-b180830.0438.jar"/>
+        <include name="javax.activation-api-1.2.0.jar"/>
+        <include name="istack-commons-runtime-3.0.7.jar"/>
         <include name="commons-lang3-3.20.0.jar"/>
         <include name="xom-1.4.1.jar"/>
         <include name="joda-time-2.14.0.jar"/>
         <include name="jollyday-0.5.10.jar"/>
+        <include name="threeten-extra-1.10.0.jar"/>
       </lib>
       <!-- file="/u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger" -->
       <zipfileset prefix="WEB-INF/data"
