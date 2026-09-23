@@ -63,34 +63,47 @@ public class ProcessSemgrexRequestTest {
     return request.build();
   }
 
-    /**
-     * Result should look like this:
-     * <code>
-result {
-  match {
-    index: 1
-    node {
-      name: "source"
-      index: 1
+  /**
+   * Result should look like this:
+   * <pre>
+sentence {
+  pattern {
+    match {
+      matchIndex: 1
+      node {
+        name: "source"
+        matchIndex: 1
+      }
+      node {
+        name: "target"
+        matchIndex: 2
+      }
+      reln {
+        name: "foo"
+        reln: "dobj"
+      }
+      edge {
+        name: "foo"
+        source: 1
+        target: 2
+        reln: "dobj"
+        isExtra: false
+      }
+      sentenceIndex: 0
+      semgrexIndex: 0
     }
-    node {
-      name: "target"
-      index: 2
-    }
-    reln {
-      name: "foo"
-      reln: "dobj"
-    }
+    semgrexIndex: 0
   }
+  sentenceIndex: 0
 }
-    * </code>
-    */
+   * </pre>
+   */
   @Test
   public void testSimpleRequest() {
     CoreNLPProtos.SemgrexRequest request = buildFakeRequest(1, 1);
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
-    Assert.assertEquals("Expected exactly 1 reply", 1, response.getResultList().size());
+    Assert.assertEquals("Expected exactly 1 reply", 1, response.getSentenceList().size());
     checkResult(response, 1, 0, true);
   }
 
@@ -99,20 +112,22 @@ result {
     CoreNLPProtos.SemgrexRequest request = buildFakeRequest(1, 2);
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
-    Assert.assertEquals("Expected exactly 1 reply", 1, response.getResultList().size());
+    Assert.assertEquals("Expected exactly 1 reply", 1, response.getSentenceList().size());
     checkResult(response, 2, 0, true);
   }
 
   public static void checkResult(CoreNLPProtos.SemgrexResponse response, int numSemgrex, int sentenceIdx, boolean shouldMatch) {
-    CoreNLPProtos.SemgrexResponse.GraphResult result = response.getResultList().get(sentenceIdx);
+    CoreNLPProtos.SemgrexResponse.SentenceResult result = response.getSentenceList().get(sentenceIdx);
+    Assert.assertEquals("Sentence result has the wrong index", sentenceIdx, result.getSentenceIndex());
 
-    Assert.assertEquals("Expected exactly " + numSemgrex + " semgrex result(s)", numSemgrex, result.getResultList().size());
+    Assert.assertEquals("Expected exactly " + numSemgrex + " semgrex result(s)", numSemgrex, result.getPatternList().size());
 
     int semgrexIdx = 0;
-    for (CoreNLPProtos.SemgrexResponse.SemgrexResult semgrexResult : result.getResultList()) {
+    for (CoreNLPProtos.SemgrexResponse.PatternResult patternResult : result.getPatternList()) {
+      Assert.assertEquals("Pattern result has the wrong index", semgrexIdx, patternResult.getSemgrexIndex());
       if (shouldMatch) {
-        Assert.assertEquals("Expected exactly 1 match", 1, semgrexResult.getMatchList().size());
-        CoreNLPProtos.SemgrexResponse.Match match = semgrexResult.getMatchList().get(0);
+        Assert.assertEquals("Expected exactly 1 match", 1, patternResult.getMatchList().size());
+        CoreNLPProtos.SemgrexResponse.Match match = patternResult.getMatchList().get(0);
 
         Assert.assertEquals("Match is supposed to be at the root", 1, match.getMatchIndex());
         Assert.assertEquals("Expected exactly 2 named nodes", 2, match.getNodeList().size());
@@ -127,15 +142,16 @@ result {
         Assert.assertEquals("Reln dobj should be named foo", "foo", match.getRelnList().get(0).getName());
         Assert.assertEquals("Reln dobj should be have reln dobj", "dobj", match.getRelnList().get(0).getReln());
 
-        Assert.assertEquals("Edge dobj should be named foo", "foo", match.getEdgeList().get(0).getName());
-        Assert.assertEquals("Edge dobj should have reln dobj", "dobj", match.getEdgeList().get(0).getReln());
-        Assert.assertEquals("Edge dobj source should be 1", 1, match.getEdgeList().get(0).getSource());
-        Assert.assertEquals("Edge dobj source should be 2", 2, match.getEdgeList().get(0).getTarget());
+        CoreNLPProtos.SemgrexResponse.NamedEdge edge = match.getEdgeList().get(0);
+        Assert.assertEquals("Edge dobj should be named foo", "foo", edge.getName());
+        Assert.assertEquals("Edge dobj should have reln dobj", "dobj", edge.getReln());
+        Assert.assertEquals("Edge dobj source should be 1", 1, edge.getSource());
+        Assert.assertEquals("Edge dobj source should be 2", 2, edge.getTarget());
 
         Assert.assertEquals("Sentence idx was off", sentenceIdx, match.getSentenceIndex());
         Assert.assertEquals("Semgrex pattern count was off", semgrexIdx, match.getSemgrexIndex());
       } else {
-        Assert.assertEquals("Expected exactly 0 match", 0, semgrexResult.getMatchList().size());
+        Assert.assertEquals("Expected exactly 0 match", 0, patternResult.getMatchList().size());
       }
       ++semgrexIdx;
     }
@@ -146,7 +162,7 @@ result {
     CoreNLPProtos.SemgrexRequest request = buildFakeRequest(0, 1);
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
-    Assert.assertEquals("Expected exactly 0 replies", 0, response.getResultList().size());
+    Assert.assertEquals("Expected exactly 0 replies", 0, response.getSentenceList().size());
   }
 
   @Test
@@ -154,7 +170,7 @@ result {
     CoreNLPProtos.SemgrexRequest request = buildFakeRequest(2, 1);
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
-    Assert.assertEquals("Expected exactly 2 replies", 2, response.getResultList().size());
+    Assert.assertEquals("Expected exactly 2 replies", 2, response.getSentenceList().size());
     checkResult(response, 1, 0, true);
     checkResult(response, 1, 1, true);
   }
@@ -170,7 +186,7 @@ result {
     CoreNLPProtos.SemgrexRequest request = buildFakeRequest(2, 1, "{}=source >dobj=foo {}=target :: uniq source");
     CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
 
-    Assert.assertEquals("Expected exactly 2 replies", 2, response.getResultList().size());
+    Assert.assertEquals("Expected exactly 2 replies", 2, response.getSentenceList().size());
     checkResult(response, 1, 0, true);
     checkResult(response, 1, 1, false);
   }
@@ -250,5 +266,96 @@ result {
     ProcessSemgrexRequest processor = new ProcessSemgrexRequest();
     processor.processMultipleInputs(bin, bout);
     checkRepeatedResults(bout.toByteArray(), 1);
+  }
+
+  /**
+   * Adds a token for each word to a query.  An index with a decimal
+   * part, such as 5.1, is an empty node
+   */
+  private static void addTokens(CoreNLPProtos.SemgrexRequest.Dependencies.Builder queryBuilder, String[] indices, String[] words) {
+    for (int i = 0; i < words.length; ++i) {
+      CoreNLPProtos.Token.Builder tokenBuilder = CoreNLPProtos.Token.newBuilder();
+      tokenBuilder.setWord(words[i]);
+      tokenBuilder.setValue(words[i]);
+      String[] pieces = indices[i].split("[.]");
+      tokenBuilder.setIndex(Integer.parseInt(pieces[0]));
+      if (pieces.length > 1) {
+        tokenBuilder.setEmptyIndex(Integer.parseInt(pieces[1]));
+      }
+      queryBuilder.addToken(tokenBuilder.build());
+    }
+  }
+
+  /**
+   * Builds a graph from nodes such as "5" or "5.1" and edges such as
+   * {"2", "5", "conj"}.  The root is always node 2
+   */
+  private static CoreNLPProtos.DependencyGraph buildGraph(String[] nodes, String[][] edges) {
+    CoreNLPProtos.DependencyGraph.Builder graphBuilder = CoreNLPProtos.DependencyGraph.newBuilder();
+    for (String node : nodes) {
+      String[] pieces = node.split("[.]");
+      CoreNLPProtos.DependencyGraph.Node.Builder nodeBuilder = CoreNLPProtos.DependencyGraph.Node.newBuilder();
+      nodeBuilder.setSentenceIndex(0);
+      nodeBuilder.setIndex(Integer.parseInt(pieces[0]));
+      if (pieces.length > 1) {
+        nodeBuilder.setEmptyIndex(Integer.parseInt(pieces[1]));
+      }
+      graphBuilder.addNode(nodeBuilder.build());
+    }
+    for (String[] edge : edges) {
+      String[] source = edge[0].split("[.]");
+      String[] target = edge[1].split("[.]");
+      CoreNLPProtos.DependencyGraph.Edge.Builder edgeBuilder = CoreNLPProtos.DependencyGraph.Edge.newBuilder();
+      edgeBuilder.setSource(Integer.parseInt(source[0]));
+      edgeBuilder.setTarget(Integer.parseInt(target[0]));
+      if (source.length > 1) {
+        edgeBuilder.setSourceEmpty(Integer.parseInt(source[1]));
+      }
+      if (target.length > 1) {
+        edgeBuilder.setTargetEmpty(Integer.parseInt(target[1]));
+      }
+      edgeBuilder.setDep(edge[2]);
+      graphBuilder.addEdge(edgeBuilder.build());
+    }
+    graphBuilder.addRoot(2);
+    return graphBuilder.build();
+  }
+
+  /**
+   * With a sorted pattern, only sentences with matches come back, and
+   * each only has the patterns which matched it, so the indices on the
+   * containers are what say which is which.
+   *<br>
+   * The sentences come back in the order the matches were found,
+   * the sorted pattern first
+   */
+  @Test
+  public void testSortedIndices() {
+    CoreNLPProtos.SemgrexRequest.Builder request = CoreNLPProtos.SemgrexRequest.newBuilder();
+    request.addSemgrex("{word:Diamond}=x :: sort x");
+    request.addSemgrex("{word:Opal}=y");
+    String[][] sentences = {{"Unban", "Mox", "Opal"}, {"Unban", "Mox", "Diamond"}};
+    for (String[] words : sentences) {
+      CoreNLPProtos.SemgrexRequest.Dependencies.Builder queryBuilder = CoreNLPProtos.SemgrexRequest.Dependencies.newBuilder();
+      addTokens(queryBuilder, new String[] {"1", "2", "3"}, words);
+      queryBuilder.setGraph(buildGraph(new String[] {"1", "2", "3"},
+                                       new String[][] {{"2", "1", "amod"}, {"2", "3", "flat"}}));
+      request.addQuery(queryBuilder.build());
+    }
+    CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request.build());
+
+    Assert.assertEquals(2, response.getSentenceCount());
+
+    CoreNLPProtos.SemgrexResponse.SentenceResult first = response.getSentence(0);
+    Assert.assertEquals(1, first.getSentenceIndex());
+    Assert.assertEquals(1, first.getPatternCount());
+    Assert.assertEquals(0, first.getPattern(0).getSemgrexIndex());
+    Assert.assertEquals(3, first.getPattern(0).getMatch(0).getMatchIndex());
+
+    CoreNLPProtos.SemgrexResponse.SentenceResult second = response.getSentence(1);
+    Assert.assertEquals(0, second.getSentenceIndex());
+    Assert.assertEquals(1, second.getPatternCount());
+    Assert.assertEquals(1, second.getPattern(0).getSemgrexIndex());
+    Assert.assertEquals(3, second.getPattern(0).getMatch(0).getMatchIndex());
   }
 }

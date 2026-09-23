@@ -34,15 +34,16 @@ import edu.stanford.nlp.util.ProcessProtobufRequest;
 
 public class ProcessSemgrexRequest extends ProcessProtobufRequest {
   /**
-   * Builds a single inner SemgrexResult structure from the pair of a SemgrexPattern and a SemanticGraph
+   * Builds the PatternResult for one SemgrexPattern and one sentence
    */
-  public static CoreNLPProtos.SemgrexResponse.SemgrexResult matchSentence(SemgrexPattern pattern, SemanticGraph graph, List<SemgrexMatch> matches, int patternIdx, int graphIdx) {
-    CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder semgrexResultBuilder = CoreNLPProtos.SemgrexResponse.SemgrexResult.newBuilder();
+  public static CoreNLPProtos.SemgrexResponse.PatternResult matchSentence(SemgrexPattern pattern, SemanticGraph graph, List<SemgrexMatch> matches, int patternIdx, int sentenceIdx) {
+    CoreNLPProtos.SemgrexResponse.PatternResult.Builder patternResultBuilder = CoreNLPProtos.SemgrexResponse.PatternResult.newBuilder();
+    patternResultBuilder.setSemgrexIndex(patternIdx);
     for (SemgrexMatch matcher : matches) {
       CoreNLPProtos.SemgrexResponse.Match.Builder matchBuilder = CoreNLPProtos.SemgrexResponse.Match.newBuilder();
       matchBuilder.setMatchIndex(matcher.getMatch().index());
       matchBuilder.setSemgrexIndex(patternIdx);
-      matchBuilder.setSentenceIndex(graphIdx);
+      matchBuilder.setSentenceIndex(sentenceIdx);
 
       // add descriptions of the named nodes
       for (String nodeName : matcher.getNodeNames()) {
@@ -86,9 +87,9 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
         matchBuilder.addVarstring(varBuilder.build());
       }
 
-      semgrexResultBuilder.addMatch(matchBuilder.build());
+      patternResultBuilder.addMatch(matchBuilder.build());
     }
-    return semgrexResultBuilder.build();
+    return patternResultBuilder.build();
   }
 
   public static CoreNLPProtos.SemgrexResponse processRequest(List<CoreMap> sentences, List<SemgrexPattern> patterns) {
@@ -140,7 +141,8 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
     }
 
     for (int sentenceIdx : sentenceIterable) {
-      CoreNLPProtos.SemgrexResponse.GraphResult.Builder graphResultBuilder = CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder();
+      CoreNLPProtos.SemgrexResponse.SentenceResult.Builder sentenceResultBuilder = CoreNLPProtos.SemgrexResponse.SentenceResult.newBuilder();
+      sentenceResultBuilder.setSentenceIndex(sentenceIdx);
 
       SemanticGraph graph = sentences.get(sentenceIdx).get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       if (allMatches.containsKey(sentenceIdx)) {
@@ -148,11 +150,11 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
         for (Pair<SemgrexPattern, List<SemgrexMatch>> patternMatches : sentenceMatches) {
           SemgrexPattern pattern = patternMatches.first();
           int patternIdx = semgrexIndices.get(pattern);
-          graphResultBuilder.addResult(matchSentence(pattern, graph, patternMatches.second(), patternIdx, sentenceIdx));
+          sentenceResultBuilder.addPattern(matchSentence(pattern, graph, patternMatches.second(), patternIdx, sentenceIdx));
         }
       }
 
-      responseBuilder.addResult(graphResultBuilder.build());
+      responseBuilder.addSentence(sentenceResultBuilder.build());
     }
     return responseBuilder.build();
   }
