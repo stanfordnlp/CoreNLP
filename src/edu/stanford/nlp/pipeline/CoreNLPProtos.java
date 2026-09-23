@@ -71869,35 +71869,42 @@ public final class CoreNLPProtos {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
      */
-    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult> 
-        getResultList();
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult> 
+        getSentenceList();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
      */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult getResult(int index);
+    edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult getSentence(int index);
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
      */
-    int getResultCount();
+    int getSentenceCount();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
      */
-    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder> 
-        getResultOrBuilderList();
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResultOrBuilder> 
+        getSentenceOrBuilderList();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
      */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder getResultOrBuilder(
+    edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResultOrBuilder getSentenceOrBuilder(
         int index);
   }
   /**
    * <pre>
    * The response from running a semgrex
-   * If you pass in M semgrex expressions and N dependency graphs,
-   * this returns MxN nested results.  Each SemgrexResult can match
-   * multiple times in one graph
+   * If you pass in M semgrex expressions and N sentences, this returns
+   * N SentenceResults, each of which has M PatternResults, each of which
+   * may have any number of Matches.
+   *
+   * If any of the semgrex expressions is sorted, only the sentences with
+   * at least one match are returned, and each sentence only has
+   * PatternResults for the expressions which matched it.  The sentences
+   * are in the order the matches were found, which for a single sorted
+   * expression is the order of the sort.  Use sentenceIndex and
+   * semgrexIndex to tell which is which.
    *
    * You may want to send multiple semgrexes per query because
    * translating large numbers of dependency graphs to protobufs
@@ -71916,7 +71923,7 @@ public final class CoreNLPProtos {
       super(builder);
     }
     private SemgrexResponse() {
-      result_ = java.util.Collections.emptyList();
+      sentence_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -75577,8 +75584,7 @@ public final class CoreNLPProtos {
 
       /**
        * <pre>
-       * when processing multiple sentences at once,
-       * which sentence this applies to
+       * which sentence this match applies to
        * indexed from 0
        * </pre>
        *
@@ -75588,8 +75594,7 @@ public final class CoreNLPProtos {
       boolean hasSentenceIndex();
       /**
        * <pre>
-       * when processing multiple sentences at once,
-       * which sentence this applies to
+       * which sentence this match applies to
        * indexed from 0
        * </pre>
        *
@@ -75846,8 +75851,7 @@ public final class CoreNLPProtos {
       private int sentenceIndex_ = 0;
       /**
        * <pre>
-       * when processing multiple sentences at once,
-       * which sentence this applies to
+       * which sentence this match applies to
        * indexed from 0
        * </pre>
        *
@@ -75860,8 +75864,7 @@ public final class CoreNLPProtos {
       }
       /**
        * <pre>
-       * when processing multiple sentences at once,
-       * which sentence this applies to
+       * which sentence this match applies to
        * indexed from 0
        * </pre>
        *
@@ -77623,8 +77626,7 @@ public final class CoreNLPProtos {
         private int sentenceIndex_ ;
         /**
          * <pre>
-         * when processing multiple sentences at once,
-         * which sentence this applies to
+         * which sentence this match applies to
          * indexed from 0
          * </pre>
          *
@@ -77637,8 +77639,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <pre>
-         * when processing multiple sentences at once,
-         * which sentence this applies to
+         * which sentence this match applies to
          * indexed from 0
          * </pre>
          *
@@ -77651,8 +77652,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <pre>
-         * when processing multiple sentences at once,
-         * which sentence this applies to
+         * which sentence this match applies to
          * indexed from 0
          * </pre>
          *
@@ -77669,8 +77669,7 @@ public final class CoreNLPProtos {
         }
         /**
          * <pre>
-         * when processing multiple sentences at once,
-         * which sentence this applies to
+         * which sentence this match applies to
          * indexed from 0
          * </pre>
          *
@@ -77807,8 +77806,8 @@ public final class CoreNLPProtos {
 
     }
 
-    public interface SemgrexResultOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult)
+    public interface PatternResultOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult)
         com.google.protobuf.MessageOrBuilder {
 
       /**
@@ -77834,20 +77833,43 @@ public final class CoreNLPProtos {
        */
       edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.MatchOrBuilder getMatchOrBuilder(
           int index);
+
+      /**
+       * <pre>
+       * index of the semgrex expression, indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 semgrexIndex = 2;</code>
+       * @return Whether the semgrexIndex field is set.
+       */
+      boolean hasSemgrexIndex();
+      /**
+       * <pre>
+       * index of the semgrex expression, indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 semgrexIndex = 2;</code>
+       * @return The semgrexIndex.
+       */
+      int getSemgrexIndex();
     }
     /**
-     * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult}
+     * <pre>
+     * The matches of one semgrex expression against one sentence
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult}
      */
-    public static final class SemgrexResult extends
+    public static final class PatternResult extends
         com.google.protobuf.GeneratedMessageV3 implements
-        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult)
-        SemgrexResultOrBuilder {
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult)
+        PatternResultOrBuilder {
     private static final long serialVersionUID = 0L;
-      // Use SemgrexResult.newBuilder() to construct.
-      private SemgrexResult(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      // Use PatternResult.newBuilder() to construct.
+      private PatternResult(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
         super(builder);
       }
-      private SemgrexResult() {
+      private PatternResult() {
         match_ = java.util.Collections.emptyList();
       }
 
@@ -77855,22 +77877,23 @@ public final class CoreNLPProtos {
       @SuppressWarnings({"unused"})
       protected java.lang.Object newInstance(
           UnusedPrivateParameter unused) {
-        return new SemgrexResult();
+        return new PatternResult();
       }
 
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_descriptor;
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_fieldAccessorTable
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder.class);
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder.class);
       }
 
+      private int bitField0_;
       public static final int MATCH_FIELD_NUMBER = 1;
       @SuppressWarnings("serial")
       private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.Match> match_;
@@ -77912,6 +77935,33 @@ public final class CoreNLPProtos {
         return match_.get(index);
       }
 
+      public static final int SEMGREXINDEX_FIELD_NUMBER = 2;
+      private int semgrexIndex_ = 0;
+      /**
+       * <pre>
+       * index of the semgrex expression, indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 semgrexIndex = 2;</code>
+       * @return Whether the semgrexIndex field is set.
+       */
+      @java.lang.Override
+      public boolean hasSemgrexIndex() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <pre>
+       * index of the semgrex expression, indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 semgrexIndex = 2;</code>
+       * @return The semgrexIndex.
+       */
+      @java.lang.Override
+      public int getSemgrexIndex() {
+        return semgrexIndex_;
+      }
+
       private byte memoizedIsInitialized = -1;
       @java.lang.Override
       public final boolean isInitialized() {
@@ -77935,6 +77985,9 @@ public final class CoreNLPProtos {
         for (int i = 0; i < match_.size(); i++) {
           output.writeMessage(1, match_.get(i));
         }
+        if (((bitField0_ & 0x00000001) != 0)) {
+          output.writeInt32(2, semgrexIndex_);
+        }
         getUnknownFields().writeTo(output);
       }
 
@@ -77948,6 +78001,10 @@ public final class CoreNLPProtos {
           size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(1, match_.get(i));
         }
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(2, semgrexIndex_);
+        }
         size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
         return size;
@@ -77958,13 +78015,18 @@ public final class CoreNLPProtos {
         if (obj == this) {
          return true;
         }
-        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult)) {
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult)) {
           return super.equals(obj);
         }
-        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult) obj;
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult) obj;
 
         if (!getMatchList()
             .equals(other.getMatchList())) return false;
+        if (hasSemgrexIndex() != other.hasSemgrexIndex()) return false;
+        if (hasSemgrexIndex()) {
+          if (getSemgrexIndex()
+              != other.getSemgrexIndex()) return false;
+        }
         if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
@@ -77980,49 +78042,53 @@ public final class CoreNLPProtos {
           hash = (37 * hash) + MATCH_FIELD_NUMBER;
           hash = (53 * hash) + getMatchList().hashCode();
         }
+        if (hasSemgrexIndex()) {
+          hash = (37 * hash) + SEMGREXINDEX_FIELD_NUMBER;
+          hash = (53 * hash) + getSemgrexIndex();
+        }
         hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
 
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseFrom(
           java.nio.ByteBuffer data)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseFrom(
           java.nio.ByteBuffer data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseFrom(byte[] data)
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseFrom(java.io.InputStream input)
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseFrom(java.io.InputStream input)
           throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseWithIOException(PARSER, input);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -78030,26 +78096,26 @@ public final class CoreNLPProtos {
             .parseWithIOException(PARSER, input, extensionRegistry);
       }
 
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseDelimitedFrom(java.io.InputStream input)
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseDelimitedWithIOException(PARSER, input);
       }
 
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseDelimitedFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseWithIOException(PARSER, input);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -78062,7 +78128,7 @@ public final class CoreNLPProtos {
       public static Builder newBuilder() {
         return DEFAULT_INSTANCE.toBuilder();
       }
-      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult prototype) {
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult prototype) {
         return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
       }
       @java.lang.Override
@@ -78078,26 +78144,30 @@ public final class CoreNLPProtos {
         return builder;
       }
       /**
-       * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult}
+       * <pre>
+       * The matches of one semgrex expression against one sentence
+       * </pre>
+       *
+       * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult}
        */
       public static final class Builder extends
           com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult)
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder {
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResultOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_descriptor;
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_descriptor;
         }
 
         @java.lang.Override
         protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_fieldAccessorTable
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_fieldAccessorTable
               .ensureFieldAccessorsInitialized(
-                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder.class);
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder.class);
         }
 
-        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.newBuilder()
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.newBuilder()
         private Builder() {
 
         }
@@ -78118,23 +78188,24 @@ public final class CoreNLPProtos {
             matchBuilder_.clear();
           }
           bitField0_ = (bitField0_ & ~0x00000001);
+          semgrexIndex_ = 0;
           return this;
         }
 
         @java.lang.Override
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_descriptor;
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_descriptor;
         }
 
         @java.lang.Override
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult getDefaultInstanceForType() {
-          return edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.getDefaultInstance();
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.getDefaultInstance();
         }
 
         @java.lang.Override
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult build() {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult result = buildPartial();
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult result = buildPartial();
           if (!result.isInitialized()) {
             throw newUninitializedMessageException(result);
           }
@@ -78142,15 +78213,15 @@ public final class CoreNLPProtos {
         }
 
         @java.lang.Override
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult buildPartial() {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult(this);
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult(this);
           buildPartialRepeatedFields(result);
           if (bitField0_ != 0) { buildPartial0(result); }
           onBuilt();
           return result;
         }
 
-        private void buildPartialRepeatedFields(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult result) {
+        private void buildPartialRepeatedFields(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult result) {
           if (matchBuilder_ == null) {
             if (((bitField0_ & 0x00000001) != 0)) {
               match_ = java.util.Collections.unmodifiableList(match_);
@@ -78162,8 +78233,14 @@ public final class CoreNLPProtos {
           }
         }
 
-        private void buildPartial0(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult result) {
+        private void buildPartial0(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult result) {
           int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000002) != 0)) {
+            result.semgrexIndex_ = semgrexIndex_;
+            to_bitField0_ |= 0x00000001;
+          }
+          result.bitField0_ |= to_bitField0_;
         }
 
         @java.lang.Override
@@ -78200,16 +78277,16 @@ public final class CoreNLPProtos {
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
-          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult) {
-            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult)other);
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult)other);
           } else {
             super.mergeFrom(other);
             return this;
           }
         }
 
-        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult other) {
-          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.getDefaultInstance()) return this;
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.getDefaultInstance()) return this;
           if (matchBuilder_ == null) {
             if (!other.match_.isEmpty()) {
               if (match_.isEmpty()) {
@@ -78235,6 +78312,9 @@ public final class CoreNLPProtos {
                 matchBuilder_.addAllMessages(other.match_);
               }
             }
+          }
+          if (other.hasSemgrexIndex()) {
+            setSemgrexIndex(other.getSemgrexIndex());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
@@ -78280,6 +78360,11 @@ public final class CoreNLPProtos {
                   }
                   break;
                 } // case 10
+                case 16: {
+                  semgrexIndex_ = input.readInt32();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 16
                 default: {
                   if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                     done = true; // was an endgroup tag
@@ -78536,6 +78621,62 @@ public final class CoreNLPProtos {
           }
           return matchBuilder_;
         }
+
+        private int semgrexIndex_ ;
+        /**
+         * <pre>
+         * index of the semgrex expression, indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 semgrexIndex = 2;</code>
+         * @return Whether the semgrexIndex field is set.
+         */
+        @java.lang.Override
+        public boolean hasSemgrexIndex() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <pre>
+         * index of the semgrex expression, indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 semgrexIndex = 2;</code>
+         * @return The semgrexIndex.
+         */
+        @java.lang.Override
+        public int getSemgrexIndex() {
+          return semgrexIndex_;
+        }
+        /**
+         * <pre>
+         * index of the semgrex expression, indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 semgrexIndex = 2;</code>
+         * @param value The semgrexIndex to set.
+         * @return This builder for chaining.
+         */
+        public Builder setSemgrexIndex(int value) {
+
+          semgrexIndex_ = value;
+          bitField0_ |= 0x00000002;
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * index of the semgrex expression, indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 semgrexIndex = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearSemgrexIndex() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          semgrexIndex_ = 0;
+          onChanged();
+          return this;
+        }
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -78549,23 +78690,23 @@ public final class CoreNLPProtos {
         }
 
 
-        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult)
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult)
       }
 
-      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult)
-      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult DEFAULT_INSTANCE;
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult DEFAULT_INSTANCE;
       static {
-        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult();
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult();
       }
 
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult getDefaultInstance() {
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult getDefaultInstance() {
         return DEFAULT_INSTANCE;
       }
 
-      @java.lang.Deprecated public static final com.google.protobuf.Parser<SemgrexResult>
-          PARSER = new com.google.protobuf.AbstractParser<SemgrexResult>() {
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<PatternResult>
+          PARSER = new com.google.protobuf.AbstractParser<PatternResult>() {
         @java.lang.Override
-        public SemgrexResult parsePartialFrom(
+        public PatternResult parsePartialFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
@@ -78584,125 +78725,176 @@ public final class CoreNLPProtos {
         }
       };
 
-      public static com.google.protobuf.Parser<SemgrexResult> parser() {
+      public static com.google.protobuf.Parser<PatternResult> parser() {
         return PARSER;
       }
 
       @java.lang.Override
-      public com.google.protobuf.Parser<SemgrexResult> getParserForType() {
+      public com.google.protobuf.Parser<PatternResult> getParserForType() {
         return PARSER;
       }
 
       @java.lang.Override
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult getDefaultInstanceForType() {
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult getDefaultInstanceForType() {
         return DEFAULT_INSTANCE;
       }
 
     }
 
-    public interface GraphResultOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult)
+    public interface SentenceResultOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult)
         com.google.protobuf.MessageOrBuilder {
 
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
        */
-      java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult> 
-          getResultList();
+      java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult> 
+          getPatternList();
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
        */
-      edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult getResult(int index);
+      edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult getPattern(int index);
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
        */
-      int getResultCount();
+      int getPatternCount();
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
        */
-      java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder> 
-          getResultOrBuilderList();
+      java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResultOrBuilder> 
+          getPatternOrBuilderList();
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
        */
-      edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder getResultOrBuilder(
+      edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResultOrBuilder getPatternOrBuilder(
           int index);
+
+      /**
+       * <pre>
+       * index of the sentence in the request, indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 sentenceIndex = 2;</code>
+       * @return Whether the sentenceIndex field is set.
+       */
+      boolean hasSentenceIndex();
+      /**
+       * <pre>
+       * index of the sentence in the request, indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 sentenceIndex = 2;</code>
+       * @return The sentenceIndex.
+       */
+      int getSentenceIndex();
     }
     /**
-     * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult}
+     * <pre>
+     * The results of all of the semgrex expressions for one sentence
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult}
      */
-    public static final class GraphResult extends
+    public static final class SentenceResult extends
         com.google.protobuf.GeneratedMessageV3 implements
-        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult)
-        GraphResultOrBuilder {
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult)
+        SentenceResultOrBuilder {
     private static final long serialVersionUID = 0L;
-      // Use GraphResult.newBuilder() to construct.
-      private GraphResult(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      // Use SentenceResult.newBuilder() to construct.
+      private SentenceResult(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
         super(builder);
       }
-      private GraphResult() {
-        result_ = java.util.Collections.emptyList();
+      private SentenceResult() {
+        pattern_ = java.util.Collections.emptyList();
       }
 
       @java.lang.Override
       @SuppressWarnings({"unused"})
       protected java.lang.Object newInstance(
           UnusedPrivateParameter unused) {
-        return new GraphResult();
+        return new SentenceResult();
       }
 
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_descriptor;
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SentenceResult_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_fieldAccessorTable
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SentenceResult_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder.class);
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder.class);
       }
 
-      public static final int RESULT_FIELD_NUMBER = 1;
+      private int bitField0_;
+      public static final int PATTERN_FIELD_NUMBER = 1;
       @SuppressWarnings("serial")
-      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult> result_;
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult> pattern_;
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
        */
       @java.lang.Override
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult> getResultList() {
-        return result_;
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult> getPatternList() {
+        return pattern_;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
        */
       @java.lang.Override
-      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder> 
-          getResultOrBuilderList() {
-        return result_;
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResultOrBuilder> 
+          getPatternOrBuilderList() {
+        return pattern_;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
        */
       @java.lang.Override
-      public int getResultCount() {
-        return result_.size();
+      public int getPatternCount() {
+        return pattern_.size();
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
        */
       @java.lang.Override
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult getResult(int index) {
-        return result_.get(index);
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult getPattern(int index) {
+        return pattern_.get(index);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
        */
       @java.lang.Override
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder getResultOrBuilder(
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResultOrBuilder getPatternOrBuilder(
           int index) {
-        return result_.get(index);
+        return pattern_.get(index);
+      }
+
+      public static final int SENTENCEINDEX_FIELD_NUMBER = 2;
+      private int sentenceIndex_ = 0;
+      /**
+       * <pre>
+       * index of the sentence in the request, indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 sentenceIndex = 2;</code>
+       * @return Whether the sentenceIndex field is set.
+       */
+      @java.lang.Override
+      public boolean hasSentenceIndex() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <pre>
+       * index of the sentence in the request, indexed from 0
+       * </pre>
+       *
+       * <code>optional int32 sentenceIndex = 2;</code>
+       * @return The sentenceIndex.
+       */
+      @java.lang.Override
+      public int getSentenceIndex() {
+        return sentenceIndex_;
       }
 
       private byte memoizedIsInitialized = -1;
@@ -78712,8 +78904,8 @@ public final class CoreNLPProtos {
         if (isInitialized == 1) return true;
         if (isInitialized == 0) return false;
 
-        for (int i = 0; i < getResultCount(); i++) {
-          if (!getResult(i).isInitialized()) {
+        for (int i = 0; i < getPatternCount(); i++) {
+          if (!getPattern(i).isInitialized()) {
             memoizedIsInitialized = 0;
             return false;
           }
@@ -78725,8 +78917,11 @@ public final class CoreNLPProtos {
       @java.lang.Override
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
-        for (int i = 0; i < result_.size(); i++) {
-          output.writeMessage(1, result_.get(i));
+        for (int i = 0; i < pattern_.size(); i++) {
+          output.writeMessage(1, pattern_.get(i));
+        }
+        if (((bitField0_ & 0x00000001) != 0)) {
+          output.writeInt32(2, sentenceIndex_);
         }
         getUnknownFields().writeTo(output);
       }
@@ -78737,9 +78932,13 @@ public final class CoreNLPProtos {
         if (size != -1) return size;
 
         size = 0;
-        for (int i = 0; i < result_.size(); i++) {
+        for (int i = 0; i < pattern_.size(); i++) {
           size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(1, result_.get(i));
+            .computeMessageSize(1, pattern_.get(i));
+        }
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(2, sentenceIndex_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSize = size;
@@ -78751,13 +78950,18 @@ public final class CoreNLPProtos {
         if (obj == this) {
          return true;
         }
-        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult)) {
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult)) {
           return super.equals(obj);
         }
-        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult) obj;
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult) obj;
 
-        if (!getResultList()
-            .equals(other.getResultList())) return false;
+        if (!getPatternList()
+            .equals(other.getPatternList())) return false;
+        if (hasSentenceIndex() != other.hasSentenceIndex()) return false;
+        if (hasSentenceIndex()) {
+          if (getSentenceIndex()
+              != other.getSentenceIndex()) return false;
+        }
         if (!getUnknownFields().equals(other.getUnknownFields())) return false;
         return true;
       }
@@ -78769,53 +78973,57 @@ public final class CoreNLPProtos {
         }
         int hash = 41;
         hash = (19 * hash) + getDescriptor().hashCode();
-        if (getResultCount() > 0) {
-          hash = (37 * hash) + RESULT_FIELD_NUMBER;
-          hash = (53 * hash) + getResultList().hashCode();
+        if (getPatternCount() > 0) {
+          hash = (37 * hash) + PATTERN_FIELD_NUMBER;
+          hash = (53 * hash) + getPatternList().hashCode();
+        }
+        if (hasSentenceIndex()) {
+          hash = (37 * hash) + SENTENCEINDEX_FIELD_NUMBER;
+          hash = (53 * hash) + getSentenceIndex();
         }
         hash = (29 * hash) + getUnknownFields().hashCode();
         memoizedHashCode = hash;
         return hash;
       }
 
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseFrom(
           java.nio.ByteBuffer data)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseFrom(
           java.nio.ByteBuffer data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseFrom(byte[] data)
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseFrom(java.io.InputStream input)
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseFrom(java.io.InputStream input)
           throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseWithIOException(PARSER, input);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -78823,26 +79031,26 @@ public final class CoreNLPProtos {
             .parseWithIOException(PARSER, input, extensionRegistry);
       }
 
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseDelimitedFrom(java.io.InputStream input)
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseDelimitedWithIOException(PARSER, input);
       }
 
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseDelimitedFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseWithIOException(PARSER, input);
       }
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult parseFrom(
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -78855,7 +79063,7 @@ public final class CoreNLPProtos {
       public static Builder newBuilder() {
         return DEFAULT_INSTANCE.toBuilder();
       }
-      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult prototype) {
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult prototype) {
         return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
       }
       @java.lang.Override
@@ -78871,26 +79079,30 @@ public final class CoreNLPProtos {
         return builder;
       }
       /**
-       * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult}
+       * <pre>
+       * The results of all of the semgrex expressions for one sentence
+       * </pre>
+       *
+       * Protobuf type {@code edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult}
        */
       public static final class Builder extends
           com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult)
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder {
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResultOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_descriptor;
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SentenceResult_descriptor;
         }
 
         @java.lang.Override
         protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_fieldAccessorTable
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SentenceResult_fieldAccessorTable
               .ensureFieldAccessorsInitialized(
-                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder.class);
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder.class);
         }
 
-        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.newBuilder()
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.newBuilder()
         private Builder() {
 
         }
@@ -78904,30 +79116,31 @@ public final class CoreNLPProtos {
         public Builder clear() {
           super.clear();
           bitField0_ = 0;
-          if (resultBuilder_ == null) {
-            result_ = java.util.Collections.emptyList();
+          if (patternBuilder_ == null) {
+            pattern_ = java.util.Collections.emptyList();
           } else {
-            result_ = null;
-            resultBuilder_.clear();
+            pattern_ = null;
+            patternBuilder_.clear();
           }
           bitField0_ = (bitField0_ & ~0x00000001);
+          sentenceIndex_ = 0;
           return this;
         }
 
         @java.lang.Override
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_descriptor;
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SentenceResult_descriptor;
         }
 
         @java.lang.Override
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult getDefaultInstanceForType() {
-          return edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.getDefaultInstance();
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.getDefaultInstance();
         }
 
         @java.lang.Override
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult build() {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult result = buildPartial();
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult result = buildPartial();
           if (!result.isInitialized()) {
             throw newUninitializedMessageException(result);
           }
@@ -78935,28 +79148,34 @@ public final class CoreNLPProtos {
         }
 
         @java.lang.Override
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult buildPartial() {
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult(this);
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult(this);
           buildPartialRepeatedFields(result);
           if (bitField0_ != 0) { buildPartial0(result); }
           onBuilt();
           return result;
         }
 
-        private void buildPartialRepeatedFields(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult result) {
-          if (resultBuilder_ == null) {
+        private void buildPartialRepeatedFields(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult result) {
+          if (patternBuilder_ == null) {
             if (((bitField0_ & 0x00000001) != 0)) {
-              result_ = java.util.Collections.unmodifiableList(result_);
+              pattern_ = java.util.Collections.unmodifiableList(pattern_);
               bitField0_ = (bitField0_ & ~0x00000001);
             }
-            result.result_ = result_;
+            result.pattern_ = pattern_;
           } else {
-            result.result_ = resultBuilder_.build();
+            result.pattern_ = patternBuilder_.build();
           }
         }
 
-        private void buildPartial0(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult result) {
+        private void buildPartial0(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult result) {
           int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000002) != 0)) {
+            result.sentenceIndex_ = sentenceIndex_;
+            to_bitField0_ |= 0x00000001;
+          }
+          result.bitField0_ |= to_bitField0_;
         }
 
         @java.lang.Override
@@ -78993,41 +79212,44 @@ public final class CoreNLPProtos {
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
-          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult) {
-            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult)other);
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult)other);
           } else {
             super.mergeFrom(other);
             return this;
           }
         }
 
-        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult other) {
-          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.getDefaultInstance()) return this;
-          if (resultBuilder_ == null) {
-            if (!other.result_.isEmpty()) {
-              if (result_.isEmpty()) {
-                result_ = other.result_;
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.getDefaultInstance()) return this;
+          if (patternBuilder_ == null) {
+            if (!other.pattern_.isEmpty()) {
+              if (pattern_.isEmpty()) {
+                pattern_ = other.pattern_;
                 bitField0_ = (bitField0_ & ~0x00000001);
               } else {
-                ensureResultIsMutable();
-                result_.addAll(other.result_);
+                ensurePatternIsMutable();
+                pattern_.addAll(other.pattern_);
               }
               onChanged();
             }
           } else {
-            if (!other.result_.isEmpty()) {
-              if (resultBuilder_.isEmpty()) {
-                resultBuilder_.dispose();
-                resultBuilder_ = null;
-                result_ = other.result_;
+            if (!other.pattern_.isEmpty()) {
+              if (patternBuilder_.isEmpty()) {
+                patternBuilder_.dispose();
+                patternBuilder_ = null;
+                pattern_ = other.pattern_;
                 bitField0_ = (bitField0_ & ~0x00000001);
-                resultBuilder_ = 
+                patternBuilder_ = 
                   com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                     getResultFieldBuilder() : null;
+                     getPatternFieldBuilder() : null;
               } else {
-                resultBuilder_.addAllMessages(other.result_);
+                patternBuilder_.addAllMessages(other.pattern_);
               }
             }
+          }
+          if (other.hasSentenceIndex()) {
+            setSentenceIndex(other.getSentenceIndex());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           onChanged();
@@ -79036,8 +79258,8 @@ public final class CoreNLPProtos {
 
         @java.lang.Override
         public final boolean isInitialized() {
-          for (int i = 0; i < getResultCount(); i++) {
-            if (!getResult(i).isInitialized()) {
+          for (int i = 0; i < getPatternCount(); i++) {
+            if (!getPattern(i).isInitialized()) {
               return false;
             }
           }
@@ -79061,18 +79283,23 @@ public final class CoreNLPProtos {
                   done = true;
                   break;
                 case 10: {
-                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult m =
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult m =
                       input.readMessage(
-                          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.PARSER,
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.PARSER,
                           extensionRegistry);
-                  if (resultBuilder_ == null) {
-                    ensureResultIsMutable();
-                    result_.add(m);
+                  if (patternBuilder_ == null) {
+                    ensurePatternIsMutable();
+                    pattern_.add(m);
                   } else {
-                    resultBuilder_.addMessage(m);
+                    patternBuilder_.addMessage(m);
                   }
                   break;
                 } // case 10
+                case 16: {
+                  sentenceIndex_ = input.readInt32();
+                  bitField0_ |= 0x00000002;
+                  break;
+                } // case 16
                 default: {
                   if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                     done = true; // was an endgroup tag
@@ -79090,244 +79317,300 @@ public final class CoreNLPProtos {
         }
         private int bitField0_;
 
-        private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult> result_ =
+        private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult> pattern_ =
           java.util.Collections.emptyList();
-        private void ensureResultIsMutable() {
+        private void ensurePatternIsMutable() {
           if (!((bitField0_ & 0x00000001) != 0)) {
-            result_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult>(result_);
+            pattern_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult>(pattern_);
             bitField0_ |= 0x00000001;
            }
         }
 
         private com.google.protobuf.RepeatedFieldBuilderV3<
-            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder> resultBuilder_;
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResultOrBuilder> patternBuilder_;
 
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult> getResultList() {
-          if (resultBuilder_ == null) {
-            return java.util.Collections.unmodifiableList(result_);
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult> getPatternList() {
+          if (patternBuilder_ == null) {
+            return java.util.Collections.unmodifiableList(pattern_);
           } else {
-            return resultBuilder_.getMessageList();
+            return patternBuilder_.getMessageList();
           }
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public int getResultCount() {
-          if (resultBuilder_ == null) {
-            return result_.size();
+        public int getPatternCount() {
+          if (patternBuilder_ == null) {
+            return pattern_.size();
           } else {
-            return resultBuilder_.getCount();
+            return patternBuilder_.getCount();
           }
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult getResult(int index) {
-          if (resultBuilder_ == null) {
-            return result_.get(index);
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult getPattern(int index) {
+          if (patternBuilder_ == null) {
+            return pattern_.get(index);
           } else {
-            return resultBuilder_.getMessage(index);
+            return patternBuilder_.getMessage(index);
           }
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public Builder setResult(
-            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult value) {
-          if (resultBuilder_ == null) {
+        public Builder setPattern(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult value) {
+          if (patternBuilder_ == null) {
             if (value == null) {
               throw new NullPointerException();
             }
-            ensureResultIsMutable();
-            result_.set(index, value);
+            ensurePatternIsMutable();
+            pattern_.set(index, value);
             onChanged();
           } else {
-            resultBuilder_.setMessage(index, value);
+            patternBuilder_.setMessage(index, value);
           }
           return this;
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public Builder setResult(
-            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder builderForValue) {
-          if (resultBuilder_ == null) {
-            ensureResultIsMutable();
-            result_.set(index, builderForValue.build());
+        public Builder setPattern(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder builderForValue) {
+          if (patternBuilder_ == null) {
+            ensurePatternIsMutable();
+            pattern_.set(index, builderForValue.build());
             onChanged();
           } else {
-            resultBuilder_.setMessage(index, builderForValue.build());
+            patternBuilder_.setMessage(index, builderForValue.build());
           }
           return this;
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public Builder addResult(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult value) {
-          if (resultBuilder_ == null) {
+        public Builder addPattern(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult value) {
+          if (patternBuilder_ == null) {
             if (value == null) {
               throw new NullPointerException();
             }
-            ensureResultIsMutable();
-            result_.add(value);
+            ensurePatternIsMutable();
+            pattern_.add(value);
             onChanged();
           } else {
-            resultBuilder_.addMessage(value);
+            patternBuilder_.addMessage(value);
           }
           return this;
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public Builder addResult(
-            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult value) {
-          if (resultBuilder_ == null) {
+        public Builder addPattern(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult value) {
+          if (patternBuilder_ == null) {
             if (value == null) {
               throw new NullPointerException();
             }
-            ensureResultIsMutable();
-            result_.add(index, value);
+            ensurePatternIsMutable();
+            pattern_.add(index, value);
             onChanged();
           } else {
-            resultBuilder_.addMessage(index, value);
+            patternBuilder_.addMessage(index, value);
           }
           return this;
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public Builder addResult(
-            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder builderForValue) {
-          if (resultBuilder_ == null) {
-            ensureResultIsMutable();
-            result_.add(builderForValue.build());
+        public Builder addPattern(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder builderForValue) {
+          if (patternBuilder_ == null) {
+            ensurePatternIsMutable();
+            pattern_.add(builderForValue.build());
             onChanged();
           } else {
-            resultBuilder_.addMessage(builderForValue.build());
+            patternBuilder_.addMessage(builderForValue.build());
           }
           return this;
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public Builder addResult(
-            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder builderForValue) {
-          if (resultBuilder_ == null) {
-            ensureResultIsMutable();
-            result_.add(index, builderForValue.build());
+        public Builder addPattern(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder builderForValue) {
+          if (patternBuilder_ == null) {
+            ensurePatternIsMutable();
+            pattern_.add(index, builderForValue.build());
             onChanged();
           } else {
-            resultBuilder_.addMessage(index, builderForValue.build());
+            patternBuilder_.addMessage(index, builderForValue.build());
           }
           return this;
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public Builder addAllResult(
-            java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult> values) {
-          if (resultBuilder_ == null) {
-            ensureResultIsMutable();
+        public Builder addAllPattern(
+            java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult> values) {
+          if (patternBuilder_ == null) {
+            ensurePatternIsMutable();
             com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                values, result_);
+                values, pattern_);
             onChanged();
           } else {
-            resultBuilder_.addAllMessages(values);
+            patternBuilder_.addAllMessages(values);
           }
           return this;
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public Builder clearResult() {
-          if (resultBuilder_ == null) {
-            result_ = java.util.Collections.emptyList();
+        public Builder clearPattern() {
+          if (patternBuilder_ == null) {
+            pattern_ = java.util.Collections.emptyList();
             bitField0_ = (bitField0_ & ~0x00000001);
             onChanged();
           } else {
-            resultBuilder_.clear();
+            patternBuilder_.clear();
           }
           return this;
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public Builder removeResult(int index) {
-          if (resultBuilder_ == null) {
-            ensureResultIsMutable();
-            result_.remove(index);
+        public Builder removePattern(int index) {
+          if (patternBuilder_ == null) {
+            ensurePatternIsMutable();
+            pattern_.remove(index);
             onChanged();
           } else {
-            resultBuilder_.remove(index);
+            patternBuilder_.remove(index);
           }
           return this;
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder getResultBuilder(
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder getPatternBuilder(
             int index) {
-          return getResultFieldBuilder().getBuilder(index);
+          return getPatternFieldBuilder().getBuilder(index);
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder getResultOrBuilder(
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResultOrBuilder getPatternOrBuilder(
             int index) {
-          if (resultBuilder_ == null) {
-            return result_.get(index);  } else {
-            return resultBuilder_.getMessageOrBuilder(index);
+          if (patternBuilder_ == null) {
+            return pattern_.get(index);  } else {
+            return patternBuilder_.getMessageOrBuilder(index);
           }
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder> 
-             getResultOrBuilderList() {
-          if (resultBuilder_ != null) {
-            return resultBuilder_.getMessageOrBuilderList();
+        public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResultOrBuilder> 
+             getPatternOrBuilderList() {
+          if (patternBuilder_ != null) {
+            return patternBuilder_.getMessageOrBuilderList();
           } else {
-            return java.util.Collections.unmodifiableList(result_);
+            return java.util.Collections.unmodifiableList(pattern_);
           }
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder addResultBuilder() {
-          return getResultFieldBuilder().addBuilder(
-              edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.getDefaultInstance());
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder addPatternBuilder() {
+          return getPatternFieldBuilder().addBuilder(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.getDefaultInstance());
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder addResultBuilder(
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder addPatternBuilder(
             int index) {
-          return getResultFieldBuilder().addBuilder(
-              index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.getDefaultInstance());
+          return getPatternFieldBuilder().addBuilder(
+              index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.getDefaultInstance());
         }
         /**
-         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SemgrexResult result = 1;</code>
+         * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.PatternResult pattern = 1;</code>
          */
-        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder> 
-             getResultBuilderList() {
-          return getResultFieldBuilder().getBuilderList();
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder> 
+             getPatternBuilderList() {
+          return getPatternFieldBuilder().getBuilderList();
         }
         private com.google.protobuf.RepeatedFieldBuilderV3<
-            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder> 
-            getResultFieldBuilder() {
-          if (resultBuilder_ == null) {
-            resultBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SemgrexResultOrBuilder>(
-                    result_,
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResultOrBuilder> 
+            getPatternFieldBuilder() {
+          if (patternBuilder_ == null) {
+            patternBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.PatternResultOrBuilder>(
+                    pattern_,
                     ((bitField0_ & 0x00000001) != 0),
                     getParentForChildren(),
                     isClean());
-            result_ = null;
+            pattern_ = null;
           }
-          return resultBuilder_;
+          return patternBuilder_;
+        }
+
+        private int sentenceIndex_ ;
+        /**
+         * <pre>
+         * index of the sentence in the request, indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 sentenceIndex = 2;</code>
+         * @return Whether the sentenceIndex field is set.
+         */
+        @java.lang.Override
+        public boolean hasSentenceIndex() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <pre>
+         * index of the sentence in the request, indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 sentenceIndex = 2;</code>
+         * @return The sentenceIndex.
+         */
+        @java.lang.Override
+        public int getSentenceIndex() {
+          return sentenceIndex_;
+        }
+        /**
+         * <pre>
+         * index of the sentence in the request, indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 sentenceIndex = 2;</code>
+         * @param value The sentenceIndex to set.
+         * @return This builder for chaining.
+         */
+        public Builder setSentenceIndex(int value) {
+
+          sentenceIndex_ = value;
+          bitField0_ |= 0x00000002;
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * index of the sentence in the request, indexed from 0
+         * </pre>
+         *
+         * <code>optional int32 sentenceIndex = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearSentenceIndex() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          sentenceIndex_ = 0;
+          onChanged();
+          return this;
         }
         @java.lang.Override
         public final Builder setUnknownFields(
@@ -79342,23 +79625,23 @@ public final class CoreNLPProtos {
         }
 
 
-        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult)
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult)
       }
 
-      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult)
-      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult DEFAULT_INSTANCE;
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult DEFAULT_INSTANCE;
       static {
-        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult();
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult();
       }
 
-      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult getDefaultInstance() {
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult getDefaultInstance() {
         return DEFAULT_INSTANCE;
       }
 
-      @java.lang.Deprecated public static final com.google.protobuf.Parser<GraphResult>
-          PARSER = new com.google.protobuf.AbstractParser<GraphResult>() {
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<SentenceResult>
+          PARSER = new com.google.protobuf.AbstractParser<SentenceResult>() {
         @java.lang.Override
-        public GraphResult parsePartialFrom(
+        public SentenceResult parsePartialFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws com.google.protobuf.InvalidProtocolBufferException {
@@ -79377,61 +79660,61 @@ public final class CoreNLPProtos {
         }
       };
 
-      public static com.google.protobuf.Parser<GraphResult> parser() {
+      public static com.google.protobuf.Parser<SentenceResult> parser() {
         return PARSER;
       }
 
       @java.lang.Override
-      public com.google.protobuf.Parser<GraphResult> getParserForType() {
+      public com.google.protobuf.Parser<SentenceResult> getParserForType() {
         return PARSER;
       }
 
       @java.lang.Override
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult getDefaultInstanceForType() {
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult getDefaultInstanceForType() {
         return DEFAULT_INSTANCE;
       }
 
     }
 
-    public static final int RESULT_FIELD_NUMBER = 1;
+    public static final int SENTENCE_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
-    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult> result_;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult> sentence_;
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult> getResultList() {
-      return result_;
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult> getSentenceList() {
+      return sentence_;
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder> 
-        getResultOrBuilderList() {
-      return result_;
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResultOrBuilder> 
+        getSentenceOrBuilderList() {
+      return sentence_;
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
      */
     @java.lang.Override
-    public int getResultCount() {
-      return result_.size();
+    public int getSentenceCount() {
+      return sentence_.size();
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
      */
     @java.lang.Override
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult getResult(int index) {
-      return result_.get(index);
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult getSentence(int index) {
+      return sentence_.get(index);
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
      */
     @java.lang.Override
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder getResultOrBuilder(
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResultOrBuilder getSentenceOrBuilder(
         int index) {
-      return result_.get(index);
+      return sentence_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
@@ -79441,8 +79724,8 @@ public final class CoreNLPProtos {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      for (int i = 0; i < getResultCount(); i++) {
-        if (!getResult(i).isInitialized()) {
+      for (int i = 0; i < getSentenceCount(); i++) {
+        if (!getSentence(i).isInitialized()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -79454,8 +79737,8 @@ public final class CoreNLPProtos {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      for (int i = 0; i < result_.size(); i++) {
-        output.writeMessage(1, result_.get(i));
+      for (int i = 0; i < sentence_.size(); i++) {
+        output.writeMessage(1, sentence_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -79466,9 +79749,9 @@ public final class CoreNLPProtos {
       if (size != -1) return size;
 
       size = 0;
-      for (int i = 0; i < result_.size(); i++) {
+      for (int i = 0; i < sentence_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, result_.get(i));
+          .computeMessageSize(1, sentence_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -79485,8 +79768,8 @@ public final class CoreNLPProtos {
       }
       edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse) obj;
 
-      if (!getResultList()
-          .equals(other.getResultList())) return false;
+      if (!getSentenceList()
+          .equals(other.getSentenceList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -79498,9 +79781,9 @@ public final class CoreNLPProtos {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (getResultCount() > 0) {
-        hash = (37 * hash) + RESULT_FIELD_NUMBER;
-        hash = (53 * hash) + getResultList().hashCode();
+      if (getSentenceCount() > 0) {
+        hash = (37 * hash) + SENTENCE_FIELD_NUMBER;
+        hash = (53 * hash) + getSentenceList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -79602,9 +79885,16 @@ public final class CoreNLPProtos {
     /**
      * <pre>
      * The response from running a semgrex
-     * If you pass in M semgrex expressions and N dependency graphs,
-     * this returns MxN nested results.  Each SemgrexResult can match
-     * multiple times in one graph
+     * If you pass in M semgrex expressions and N sentences, this returns
+     * N SentenceResults, each of which has M PatternResults, each of which
+     * may have any number of Matches.
+     *
+     * If any of the semgrex expressions is sorted, only the sentences with
+     * at least one match are returned, and each sentence only has
+     * PatternResults for the expressions which matched it.  The sentences
+     * are in the order the matches were found, which for a single sorted
+     * expression is the order of the sort.  Use sentenceIndex and
+     * semgrexIndex to tell which is which.
      *
      * You may want to send multiple semgrexes per query because
      * translating large numbers of dependency graphs to protobufs
@@ -79644,11 +79934,11 @@ public final class CoreNLPProtos {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        if (resultBuilder_ == null) {
-          result_ = java.util.Collections.emptyList();
+        if (sentenceBuilder_ == null) {
+          sentence_ = java.util.Collections.emptyList();
         } else {
-          result_ = null;
-          resultBuilder_.clear();
+          sentence_ = null;
+          sentenceBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
@@ -79684,14 +79974,14 @@ public final class CoreNLPProtos {
       }
 
       private void buildPartialRepeatedFields(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse result) {
-        if (resultBuilder_ == null) {
+        if (sentenceBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
-            result_ = java.util.Collections.unmodifiableList(result_);
+            sentence_ = java.util.Collections.unmodifiableList(sentence_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
-          result.result_ = result_;
+          result.sentence_ = sentence_;
         } else {
-          result.result_ = resultBuilder_.build();
+          result.sentence_ = sentenceBuilder_.build();
         }
       }
 
@@ -79743,29 +80033,29 @@ public final class CoreNLPProtos {
 
       public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse other) {
         if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.getDefaultInstance()) return this;
-        if (resultBuilder_ == null) {
-          if (!other.result_.isEmpty()) {
-            if (result_.isEmpty()) {
-              result_ = other.result_;
+        if (sentenceBuilder_ == null) {
+          if (!other.sentence_.isEmpty()) {
+            if (sentence_.isEmpty()) {
+              sentence_ = other.sentence_;
               bitField0_ = (bitField0_ & ~0x00000001);
             } else {
-              ensureResultIsMutable();
-              result_.addAll(other.result_);
+              ensureSentenceIsMutable();
+              sentence_.addAll(other.sentence_);
             }
             onChanged();
           }
         } else {
-          if (!other.result_.isEmpty()) {
-            if (resultBuilder_.isEmpty()) {
-              resultBuilder_.dispose();
-              resultBuilder_ = null;
-              result_ = other.result_;
+          if (!other.sentence_.isEmpty()) {
+            if (sentenceBuilder_.isEmpty()) {
+              sentenceBuilder_.dispose();
+              sentenceBuilder_ = null;
+              sentence_ = other.sentence_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              resultBuilder_ = 
+              sentenceBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getResultFieldBuilder() : null;
+                   getSentenceFieldBuilder() : null;
             } else {
-              resultBuilder_.addAllMessages(other.result_);
+              sentenceBuilder_.addAllMessages(other.sentence_);
             }
           }
         }
@@ -79776,8 +80066,8 @@ public final class CoreNLPProtos {
 
       @java.lang.Override
       public final boolean isInitialized() {
-        for (int i = 0; i < getResultCount(); i++) {
-          if (!getResult(i).isInitialized()) {
+        for (int i = 0; i < getSentenceCount(); i++) {
+          if (!getSentence(i).isInitialized()) {
             return false;
           }
         }
@@ -79801,15 +80091,15 @@ public final class CoreNLPProtos {
                 done = true;
                 break;
               case 10: {
-                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult m =
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult m =
                     input.readMessage(
-                        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.PARSER,
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.PARSER,
                         extensionRegistry);
-                if (resultBuilder_ == null) {
-                  ensureResultIsMutable();
-                  result_.add(m);
+                if (sentenceBuilder_ == null) {
+                  ensureSentenceIsMutable();
+                  sentence_.add(m);
                 } else {
-                  resultBuilder_.addMessage(m);
+                  sentenceBuilder_.addMessage(m);
                 }
                 break;
               } // case 10
@@ -79830,244 +80120,244 @@ public final class CoreNLPProtos {
       }
       private int bitField0_;
 
-      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult> result_ =
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult> sentence_ =
         java.util.Collections.emptyList();
-      private void ensureResultIsMutable() {
+      private void ensureSentenceIsMutable() {
         if (!((bitField0_ & 0x00000001) != 0)) {
-          result_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult>(result_);
+          sentence_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult>(sentence_);
           bitField0_ |= 0x00000001;
          }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder> resultBuilder_;
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResultOrBuilder> sentenceBuilder_;
 
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult> getResultList() {
-        if (resultBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(result_);
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult> getSentenceList() {
+        if (sentenceBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(sentence_);
         } else {
-          return resultBuilder_.getMessageList();
+          return sentenceBuilder_.getMessageList();
         }
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public int getResultCount() {
-        if (resultBuilder_ == null) {
-          return result_.size();
+      public int getSentenceCount() {
+        if (sentenceBuilder_ == null) {
+          return sentence_.size();
         } else {
-          return resultBuilder_.getCount();
+          return sentenceBuilder_.getCount();
         }
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult getResult(int index) {
-        if (resultBuilder_ == null) {
-          return result_.get(index);
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult getSentence(int index) {
+        if (sentenceBuilder_ == null) {
+          return sentence_.get(index);
         } else {
-          return resultBuilder_.getMessage(index);
+          return sentenceBuilder_.getMessage(index);
         }
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public Builder setResult(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult value) {
-        if (resultBuilder_ == null) {
+      public Builder setSentence(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult value) {
+        if (sentenceBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureResultIsMutable();
-          result_.set(index, value);
+          ensureSentenceIsMutable();
+          sentence_.set(index, value);
           onChanged();
         } else {
-          resultBuilder_.setMessage(index, value);
+          sentenceBuilder_.setMessage(index, value);
         }
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public Builder setResult(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder builderForValue) {
-        if (resultBuilder_ == null) {
-          ensureResultIsMutable();
-          result_.set(index, builderForValue.build());
+      public Builder setSentence(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder builderForValue) {
+        if (sentenceBuilder_ == null) {
+          ensureSentenceIsMutable();
+          sentence_.set(index, builderForValue.build());
           onChanged();
         } else {
-          resultBuilder_.setMessage(index, builderForValue.build());
+          sentenceBuilder_.setMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public Builder addResult(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult value) {
-        if (resultBuilder_ == null) {
+      public Builder addSentence(edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult value) {
+        if (sentenceBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureResultIsMutable();
-          result_.add(value);
+          ensureSentenceIsMutable();
+          sentence_.add(value);
           onChanged();
         } else {
-          resultBuilder_.addMessage(value);
+          sentenceBuilder_.addMessage(value);
         }
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public Builder addResult(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult value) {
-        if (resultBuilder_ == null) {
+      public Builder addSentence(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult value) {
+        if (sentenceBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureResultIsMutable();
-          result_.add(index, value);
+          ensureSentenceIsMutable();
+          sentence_.add(index, value);
           onChanged();
         } else {
-          resultBuilder_.addMessage(index, value);
+          sentenceBuilder_.addMessage(index, value);
         }
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public Builder addResult(
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder builderForValue) {
-        if (resultBuilder_ == null) {
-          ensureResultIsMutable();
-          result_.add(builderForValue.build());
+      public Builder addSentence(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder builderForValue) {
+        if (sentenceBuilder_ == null) {
+          ensureSentenceIsMutable();
+          sentence_.add(builderForValue.build());
           onChanged();
         } else {
-          resultBuilder_.addMessage(builderForValue.build());
+          sentenceBuilder_.addMessage(builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public Builder addResult(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder builderForValue) {
-        if (resultBuilder_ == null) {
-          ensureResultIsMutable();
-          result_.add(index, builderForValue.build());
+      public Builder addSentence(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder builderForValue) {
+        if (sentenceBuilder_ == null) {
+          ensureSentenceIsMutable();
+          sentence_.add(index, builderForValue.build());
           onChanged();
         } else {
-          resultBuilder_.addMessage(index, builderForValue.build());
+          sentenceBuilder_.addMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public Builder addAllResult(
-          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult> values) {
-        if (resultBuilder_ == null) {
-          ensureResultIsMutable();
+      public Builder addAllSentence(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult> values) {
+        if (sentenceBuilder_ == null) {
+          ensureSentenceIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, result_);
+              values, sentence_);
           onChanged();
         } else {
-          resultBuilder_.addAllMessages(values);
+          sentenceBuilder_.addAllMessages(values);
         }
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public Builder clearResult() {
-        if (resultBuilder_ == null) {
-          result_ = java.util.Collections.emptyList();
+      public Builder clearSentence() {
+        if (sentenceBuilder_ == null) {
+          sentence_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
-          resultBuilder_.clear();
+          sentenceBuilder_.clear();
         }
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public Builder removeResult(int index) {
-        if (resultBuilder_ == null) {
-          ensureResultIsMutable();
-          result_.remove(index);
+      public Builder removeSentence(int index) {
+        if (sentenceBuilder_ == null) {
+          ensureSentenceIsMutable();
+          sentence_.remove(index);
           onChanged();
         } else {
-          resultBuilder_.remove(index);
+          sentenceBuilder_.remove(index);
         }
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder getResultBuilder(
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder getSentenceBuilder(
           int index) {
-        return getResultFieldBuilder().getBuilder(index);
+        return getSentenceFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder getResultOrBuilder(
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResultOrBuilder getSentenceOrBuilder(
           int index) {
-        if (resultBuilder_ == null) {
-          return result_.get(index);  } else {
-          return resultBuilder_.getMessageOrBuilder(index);
+        if (sentenceBuilder_ == null) {
+          return sentence_.get(index);  } else {
+          return sentenceBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder> 
-           getResultOrBuilderList() {
-        if (resultBuilder_ != null) {
-          return resultBuilder_.getMessageOrBuilderList();
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResultOrBuilder> 
+           getSentenceOrBuilderList() {
+        if (sentenceBuilder_ != null) {
+          return sentenceBuilder_.getMessageOrBuilderList();
         } else {
-          return java.util.Collections.unmodifiableList(result_);
+          return java.util.Collections.unmodifiableList(sentence_);
         }
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder addResultBuilder() {
-        return getResultFieldBuilder().addBuilder(
-            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.getDefaultInstance());
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder addSentenceBuilder() {
+        return getSentenceFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.getDefaultInstance());
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder addResultBuilder(
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder addSentenceBuilder(
           int index) {
-        return getResultFieldBuilder().addBuilder(
-            index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.getDefaultInstance());
+        return getSentenceFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.getDefaultInstance());
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.GraphResult result = 1;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.SemgrexResponse.SentenceResult sentence = 1;</code>
        */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder> 
-           getResultBuilderList() {
-        return getResultFieldBuilder().getBuilderList();
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder> 
+           getSentenceBuilderList() {
+        return getSentenceFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder> 
-          getResultFieldBuilder() {
-        if (resultBuilder_ == null) {
-          resultBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.GraphResultOrBuilder>(
-                  result_,
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResultOrBuilder> 
+          getSentenceFieldBuilder() {
+        if (sentenceBuilder_ == null) {
+          sentenceBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResult.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexResponse.SentenceResultOrBuilder>(
+                  sentence_,
                   ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
-          result_ = null;
+          sentence_ = null;
         }
-        return resultBuilder_;
+        return sentenceBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -102821,15 +103111,15 @@ public final class CoreNLPProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_descriptor;
+    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_fieldAccessorTable;
+      internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_descriptor;
+    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SentenceResult_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_fieldAccessorTable;
+      internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SentenceResult_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor;
   private static final 
@@ -103216,106 +103506,107 @@ public final class CoreNLPProtos {
       "ne.SemgrexRequest.Dependencies\032z\n\014Depend" +
       "encies\022/\n\005token\030\001 \003(\0132 .edu.stanford.nlp" +
       ".pipeline.Token\0229\n\005graph\030\002 \002(\0132*.edu.sta" +
-      "nford.nlp.pipeline.DependencyGraph\"\373\006\n\017S" +
-      "emgrexResponse\022F\n\006result\030\001 \003(\01326.edu.sta" +
-      "nford.nlp.pipeline.SemgrexResponse.Graph" +
-      "Result\032-\n\tNamedNode\022\014\n\004name\030\001 \002(\t\022\022\n\nmat" +
-      "chIndex\030\002 \002(\005\032+\n\rNamedRelation\022\014\n\004name\030\001" +
-      " \002(\t\022\014\n\004reln\030\002 \002(\t\032\200\001\n\tNamedEdge\022\014\n\004name" +
-      "\030\001 \002(\t\022\016\n\006source\030\002 \002(\005\022\016\n\006target\030\003 \002(\005\022\014" +
-      "\n\004reln\030\004 \001(\t\022\017\n\007isExtra\030\005 \001(\010\022\022\n\nsourceC" +
-      "opy\030\006 \001(\r\022\022\n\ntargetCopy\030\007 \001(\r\032-\n\016Variabl" +
-      "eString\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\032\346\002\n" +
-      "\005Match\022\022\n\nmatchIndex\030\001 \002(\005\022B\n\004node\030\002 \003(\013" +
-      "24.edu.stanford.nlp.pipeline.SemgrexResp" +
-      "onse.NamedNode\022F\n\004reln\030\003 \003(\01328.edu.stanf" +
-      "ord.nlp.pipeline.SemgrexResponse.NamedRe" +
-      "lation\022B\n\004edge\030\006 \003(\01324.edu.stanford.nlp." +
-      "pipeline.SemgrexResponse.NamedEdge\022L\n\tva" +
-      "rstring\030\007 \003(\01329.edu.stanford.nlp.pipelin" +
-      "e.SemgrexResponse.VariableString\022\025\n\rsent" +
-      "enceIndex\030\004 \001(\005\022\024\n\014semgrexIndex\030\005 \001(\005\032P\n" +
-      "\rSemgrexResult\022?\n\005match\030\001 \003(\01320.edu.stan" +
-      "ford.nlp.pipeline.SemgrexResponse.Match\032" +
-      "W\n\013GraphResult\022H\n\006result\030\001 \003(\01328.edu.sta" +
-      "nford.nlp.pipeline.SemgrexResponse.Semgr" +
-      "exResult\"\360\001\n\017SsurgeonRequest\022E\n\010ssurgeon" +
-      "\030\001 \003(\01323.edu.stanford.nlp.pipeline.Ssurg" +
-      "eonRequest.Ssurgeon\0229\n\005graph\030\002 \003(\0132*.edu" +
-      ".stanford.nlp.pipeline.DependencyGraph\032[" +
-      "\n\010Ssurgeon\022\017\n\007semgrex\030\001 \001(\t\022\021\n\toperation" +
-      "\030\002 \003(\t\022\n\n\002id\030\003 \001(\t\022\r\n\005notes\030\004 \001(\t\022\020\n\010lan" +
-      "guage\030\005 \001(\t\"\274\001\n\020SsurgeonResponse\022J\n\006resu" +
-      "lt\030\001 \003(\0132:.edu.stanford.nlp.pipeline.Ssu" +
-      "rgeonResponse.SsurgeonResult\032\\\n\016Ssurgeon" +
-      "Result\0229\n\005graph\030\001 \001(\0132*.edu.stanford.nlp" +
-      ".pipeline.DependencyGraph\022\017\n\007changed\030\002 \001" +
-      "(\010\"W\n\022TokensRegexRequest\0220\n\003doc\030\001 \002(\0132#." +
-      "edu.stanford.nlp.pipeline.Document\022\017\n\007pa" +
-      "ttern\030\002 \003(\t\"\247\003\n\023TokensRegexResponse\022J\n\005m" +
-      "atch\030\001 \003(\0132;.edu.stanford.nlp.pipeline.T" +
-      "okensRegexResponse.PatternMatch\0329\n\rMatch" +
-      "Location\022\014\n\004text\030\001 \001(\t\022\r\n\005begin\030\002 \001(\005\022\013\n" +
-      "\003end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010sentence\030\001 \002(\005\022K" +
-      "\n\005match\030\002 \002(\0132<.edu.stanford.nlp.pipelin" +
-      "e.TokensRegexResponse.MatchLocation\022K\n\005g" +
-      "roup\030\003 \003(\0132<.edu.stanford.nlp.pipeline.T" +
-      "okensRegexResponse.MatchLocation\032S\n\014Patt" +
-      "ernMatch\022C\n\005match\030\001 \003(\01324.edu.stanford.n" +
-      "lp.pipeline.TokensRegexResponse.Match\"\256\001" +
-      "\n\031DependencyEnhancerRequest\0225\n\010document\030" +
-      "\001 \002(\0132#.edu.stanford.nlp.pipeline.Docume" +
-      "nt\0227\n\010language\030\002 \001(\0162#.edu.stanford.nlp." +
-      "pipeline.LanguageH\000\022\032\n\020relativePronouns\030" +
-      "\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022FlattenedParseTree\022A\n" +
-      "\005nodes\030\001 \003(\01322.edu.stanford.nlp.pipeline" +
-      ".FlattenedParseTree.Node\032[\n\004Node\022\022\n\010open" +
-      "Node\030\001 \001(\010H\000\022\023\n\tcloseNode\030\002 \001(\010H\000\022\017\n\005val" +
-      "ue\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B\n\n\010contents\"\366\001" +
-      "\n\025EvaluateParserRequest\022N\n\010treebank\030\001 \003(" +
-      "\0132<.edu.stanford.nlp.pipeline.EvaluatePa" +
-      "rserRequest.ParseResult\032\214\001\n\013ParseResult\022" +
-      ";\n\004gold\030\001 \002(\0132-.edu.stanford.nlp.pipelin" +
-      "e.FlattenedParseTree\022@\n\tpredicted\030\002 \003(\0132" +
-      "-.edu.stanford.nlp.pipeline.FlattenedPar" +
-      "seTree\"E\n\026EvaluateParserResponse\022\n\n\002f1\030\001" +
-      " \002(\001\022\017\n\007kbestF1\030\002 \001(\001\022\016\n\006treeF1\030\003 \003(\001\"\310\001" +
-      "\n\017TsurgeonRequest\022H\n\noperations\030\001 \003(\01324." +
-      "edu.stanford.nlp.pipeline.TsurgeonReques" +
-      "t.Operation\022<\n\005trees\030\002 \003(\0132-.edu.stanfor" +
-      "d.nlp.pipeline.FlattenedParseTree\032-\n\tOpe" +
-      "ration\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t" +
-      "\"P\n\020TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.ed" +
-      "u.stanford.nlp.pipeline.FlattenedParseTr" +
-      "ee\"\205\001\n\021MorphologyRequest\022F\n\005words\030\001 \003(\0132" +
-      "7.edu.stanford.nlp.pipeline.MorphologyRe" +
-      "quest.TaggedWord\032(\n\nTaggedWord\022\014\n\004word\030\001" +
-      " \002(\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022MorphologyRespons" +
-      "e\022I\n\005words\030\001 \003(\0132:.edu.stanford.nlp.pipe" +
-      "line.MorphologyResponse.WordTagLemma\0329\n\014" +
-      "WordTagLemma\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t" +
-      "\022\r\n\005lemma\030\003 \002(\t\"Z\n\032DependencyConverterRe" +
-      "quest\022<\n\005trees\030\001 \003(\0132-.edu.stanford.nlp." +
-      "pipeline.FlattenedParseTree\"\220\002\n\033Dependen" +
-      "cyConverterResponse\022`\n\013conversions\030\001 \003(\013" +
-      "2K.edu.stanford.nlp.pipeline.DependencyC" +
-      "onverterResponse.DependencyConversion\032\216\001" +
-      "\n\024DependencyConversion\0229\n\005graph\030\001 \002(\0132*." +
-      "edu.stanford.nlp.pipeline.DependencyGrap" +
-      "h\022;\n\004tree\030\002 \001(\0132-.edu.stanford.nlp.pipel" +
-      "ine.FlattenedParseTree*\243\001\n\010Language\022\013\n\007U" +
-      "nknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese" +
-      "\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022" +
-      "\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEng" +
-      "lish\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentimen" +
-      "t\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020" +
-      "\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STR" +
-      "ONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelation\022" +
-      "\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001" +
-      "\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017" +
-      "\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDEN" +
-      "CE\020\006B*\n\031edu.stanford.nlp.pipelineB\rCoreN" +
-      "LPProtos"
+      "nford.nlp.pipeline.DependencyGraph\"\261\007\n\017S" +
+      "emgrexResponse\022K\n\010sentence\030\001 \003(\01329.edu.s" +
+      "tanford.nlp.pipeline.SemgrexResponse.Sen" +
+      "tenceResult\032-\n\tNamedNode\022\014\n\004name\030\001 \002(\t\022\022" +
+      "\n\nmatchIndex\030\002 \002(\005\032+\n\rNamedRelation\022\014\n\004n" +
+      "ame\030\001 \002(\t\022\014\n\004reln\030\002 \002(\t\032\200\001\n\tNamedEdge\022\014\n" +
+      "\004name\030\001 \002(\t\022\016\n\006source\030\002 \002(\005\022\016\n\006target\030\003 " +
+      "\002(\005\022\014\n\004reln\030\004 \001(\t\022\017\n\007isExtra\030\005 \001(\010\022\022\n\nso" +
+      "urceCopy\030\006 \001(\r\022\022\n\ntargetCopy\030\007 \001(\r\032-\n\016Va" +
+      "riableString\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(" +
+      "\t\032\346\002\n\005Match\022\022\n\nmatchIndex\030\001 \002(\005\022B\n\004node\030" +
+      "\002 \003(\01324.edu.stanford.nlp.pipeline.Semgre" +
+      "xResponse.NamedNode\022F\n\004reln\030\003 \003(\01328.edu." +
+      "stanford.nlp.pipeline.SemgrexResponse.Na" +
+      "medRelation\022B\n\004edge\030\006 \003(\01324.edu.stanford" +
+      ".nlp.pipeline.SemgrexResponse.NamedEdge\022" +
+      "L\n\tvarstring\030\007 \003(\01329.edu.stanford.nlp.pi" +
+      "peline.SemgrexResponse.VariableString\022\025\n" +
+      "\rsentenceIndex\030\004 \001(\005\022\024\n\014semgrexIndex\030\005 \001" +
+      "(\005\032f\n\rPatternResult\022?\n\005match\030\001 \003(\01320.edu" +
+      ".stanford.nlp.pipeline.SemgrexResponse.M" +
+      "atch\022\024\n\014semgrexIndex\030\002 \001(\005\032r\n\016SentenceRe" +
+      "sult\022I\n\007pattern\030\001 \003(\01328.edu.stanford.nlp" +
+      ".pipeline.SemgrexResponse.PatternResult\022" +
+      "\025\n\rsentenceIndex\030\002 \001(\005\"\360\001\n\017SsurgeonReque" +
+      "st\022E\n\010ssurgeon\030\001 \003(\01323.edu.stanford.nlp." +
+      "pipeline.SsurgeonRequest.Ssurgeon\0229\n\005gra" +
+      "ph\030\002 \003(\0132*.edu.stanford.nlp.pipeline.Dep" +
+      "endencyGraph\032[\n\010Ssurgeon\022\017\n\007semgrex\030\001 \001(" +
+      "\t\022\021\n\toperation\030\002 \003(\t\022\n\n\002id\030\003 \001(\t\022\r\n\005note" +
+      "s\030\004 \001(\t\022\020\n\010language\030\005 \001(\t\"\274\001\n\020SsurgeonRe" +
+      "sponse\022J\n\006result\030\001 \003(\0132:.edu.stanford.nl" +
+      "p.pipeline.SsurgeonResponse.SsurgeonResu" +
+      "lt\032\\\n\016SsurgeonResult\0229\n\005graph\030\001 \001(\0132*.ed" +
+      "u.stanford.nlp.pipeline.DependencyGraph\022" +
+      "\017\n\007changed\030\002 \001(\010\"W\n\022TokensRegexRequest\0220" +
+      "\n\003doc\030\001 \002(\0132#.edu.stanford.nlp.pipeline." +
+      "Document\022\017\n\007pattern\030\002 \003(\t\"\247\003\n\023TokensRege" +
+      "xResponse\022J\n\005match\030\001 \003(\0132;.edu.stanford." +
+      "nlp.pipeline.TokensRegexResponse.Pattern" +
+      "Match\0329\n\rMatchLocation\022\014\n\004text\030\001 \001(\t\022\r\n\005" +
+      "begin\030\002 \001(\005\022\013\n\003end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010se" +
+      "ntence\030\001 \002(\005\022K\n\005match\030\002 \002(\0132<.edu.stanfo" +
+      "rd.nlp.pipeline.TokensRegexResponse.Matc" +
+      "hLocation\022K\n\005group\030\003 \003(\0132<.edu.stanford." +
+      "nlp.pipeline.TokensRegexResponse.MatchLo" +
+      "cation\032S\n\014PatternMatch\022C\n\005match\030\001 \003(\01324." +
+      "edu.stanford.nlp.pipeline.TokensRegexRes" +
+      "ponse.Match\"\256\001\n\031DependencyEnhancerReques" +
+      "t\0225\n\010document\030\001 \002(\0132#.edu.stanford.nlp.p" +
+      "ipeline.Document\0227\n\010language\030\002 \001(\0162#.edu" +
+      ".stanford.nlp.pipeline.LanguageH\000\022\032\n\020rel" +
+      "ativePronouns\030\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022Flatten" +
+      "edParseTree\022A\n\005nodes\030\001 \003(\01322.edu.stanfor" +
+      "d.nlp.pipeline.FlattenedParseTree.Node\032[" +
+      "\n\004Node\022\022\n\010openNode\030\001 \001(\010H\000\022\023\n\tcloseNode\030" +
+      "\002 \001(\010H\000\022\017\n\005value\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B" +
+      "\n\n\010contents\"\366\001\n\025EvaluateParserRequest\022N\n" +
+      "\010treebank\030\001 \003(\0132<.edu.stanford.nlp.pipel" +
+      "ine.EvaluateParserRequest.ParseResult\032\214\001" +
+      "\n\013ParseResult\022;\n\004gold\030\001 \002(\0132-.edu.stanfo" +
+      "rd.nlp.pipeline.FlattenedParseTree\022@\n\tpr" +
+      "edicted\030\002 \003(\0132-.edu.stanford.nlp.pipelin" +
+      "e.FlattenedParseTree\"E\n\026EvaluateParserRe" +
+      "sponse\022\n\n\002f1\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\022\016\n\006t" +
+      "reeF1\030\003 \003(\001\"\310\001\n\017TsurgeonRequest\022H\n\nopera" +
+      "tions\030\001 \003(\01324.edu.stanford.nlp.pipeline." +
+      "TsurgeonRequest.Operation\022<\n\005trees\030\002 \003(\013" +
+      "2-.edu.stanford.nlp.pipeline.FlattenedPa" +
+      "rseTree\032-\n\tOperation\022\016\n\006tregex\030\001 \002(\t\022\020\n\010" +
+      "tsurgeon\030\002 \003(\t\"P\n\020TsurgeonResponse\022<\n\005tr" +
+      "ees\030\001 \003(\0132-.edu.stanford.nlp.pipeline.Fl" +
+      "attenedParseTree\"\205\001\n\021MorphologyRequest\022F" +
+      "\n\005words\030\001 \003(\01327.edu.stanford.nlp.pipelin" +
+      "e.MorphologyRequest.TaggedWord\032(\n\nTagged" +
+      "Word\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022Mor" +
+      "phologyResponse\022I\n\005words\030\001 \003(\0132:.edu.sta" +
+      "nford.nlp.pipeline.MorphologyResponse.Wo" +
+      "rdTagLemma\0329\n\014WordTagLemma\022\014\n\004word\030\001 \002(\t" +
+      "\022\014\n\004xpos\030\002 \001(\t\022\r\n\005lemma\030\003 \002(\t\"Z\n\032Depende" +
+      "ncyConverterRequest\022<\n\005trees\030\001 \003(\0132-.edu" +
+      ".stanford.nlp.pipeline.FlattenedParseTre" +
+      "e\"\220\002\n\033DependencyConverterResponse\022`\n\013con" +
+      "versions\030\001 \003(\0132K.edu.stanford.nlp.pipeli" +
+      "ne.DependencyConverterResponse.Dependenc" +
+      "yConversion\032\216\001\n\024DependencyConversion\0229\n\005" +
+      "graph\030\001 \002(\0132*.edu.stanford.nlp.pipeline." +
+      "DependencyGraph\022;\n\004tree\030\002 \001(\0132-.edu.stan" +
+      "ford.nlp.pipeline.FlattenedParseTree*\243\001\n" +
+      "\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabi" +
+      "c\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006German\020" +
+      "\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024" +
+      "\n\020UniversalEnglish\020\t\022\024\n\020UniversalChinese" +
+      "\020\n*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\r" +
+      "WEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POS" +
+      "ITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Natural" +
+      "LogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWAR" +
+      "D_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014" +
+      "\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005" +
+      "\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp.p" +
+      "ipelineB\rCoreNLPProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -103494,7 +103785,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor,
-        new java.lang.String[] { "Result", });
+        new java.lang.String[] { "Sentence", });
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedNode_descriptor =
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(0);
     internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_NamedNode_fieldAccessorTable = new
@@ -103525,18 +103816,18 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_Match_descriptor,
         new java.lang.String[] { "MatchIndex", "Node", "Reln", "Edge", "Varstring", "SentenceIndex", "SemgrexIndex", });
-    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_descriptor =
+    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_descriptor =
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(5);
-    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_fieldAccessorTable = new
+    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SemgrexResult_descriptor,
-        new java.lang.String[] { "Match", });
-    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_descriptor =
+        internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_PatternResult_descriptor,
+        new java.lang.String[] { "Match", "SemgrexIndex", });
+    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SentenceResult_descriptor =
       internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_descriptor.getNestedTypes().get(6);
-    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_fieldAccessorTable = new
+    internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SentenceResult_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_GraphResult_descriptor,
-        new java.lang.String[] { "Result", });
+        internal_static_edu_stanford_nlp_pipeline_SemgrexResponse_SentenceResult_descriptor,
+        new java.lang.String[] { "Pattern", "SentenceIndex", });
     internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor =
       getDescriptor().getMessageTypes().get(25);
     internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_fieldAccessorTable = new

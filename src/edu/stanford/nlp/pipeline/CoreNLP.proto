@@ -650,9 +650,16 @@ message SemgrexRequest {
 }
 
 // The response from running a semgrex
-// If you pass in M semgrex expressions and N dependency graphs,
-// this returns MxN nested results.  Each SemgrexResult can match
-// multiple times in one graph
+// If you pass in M semgrex expressions and N sentences, this returns
+// N SentenceResults, each of which has M PatternResults, each of which
+// may have any number of Matches.
+//
+// If any of the semgrex expressions is sorted, only the sentences with
+// at least one match are returned, and each sentence only has
+// PatternResults for the expressions which matched it.  The sentences
+// are in the order the matches were found, which for a single sorted
+// expression is the order of the sort.  Use sentenceIndex and
+// semgrexIndex to tell which is which.
 //
 // You may want to send multiple semgrexes per query because
 // translating large numbers of dependency graphs to protobufs
@@ -690,8 +697,7 @@ message SemgrexResponse {
     repeated NamedEdge       edge         = 6;
     repeated VariableString  varstring    = 7;
 
-    // when processing multiple sentences at once,
-    // which sentence this applies to
+    // which sentence this match applies to
     // indexed from 0
     optional int32           sentenceIndex  = 4;
     // index of the semgrex expression this match applies to
@@ -699,15 +705,21 @@ message SemgrexResponse {
     optional int32           semgrexIndex = 5;
   }
 
-  message SemgrexResult {
-    repeated Match           match       = 1;
+  // The matches of one semgrex expression against one sentence
+  message PatternResult {
+    repeated Match           match         = 1;
+    // index of the semgrex expression, indexed from 0
+    optional int32           semgrexIndex  = 2;
   }
 
-  message GraphResult {
-    repeated SemgrexResult   result      = 1;
+  // The results of all of the semgrex expressions for one sentence
+  message SentenceResult {
+    repeated PatternResult   pattern       = 1;
+    // index of the sentence in the request, indexed from 0
+    optional int32           sentenceIndex = 2;
   }
 
-  repeated GraphResult       result      = 1;
+  repeated SentenceResult    sentence      = 1;
 }
 
 
