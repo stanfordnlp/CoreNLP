@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -21,9 +22,11 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoNLLUReader;
+import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -373,6 +376,62 @@ public class SemgrexMultiGraphTest {
     // whereas one which stays in the basic graph sees only the two words
     SemgrexPattern basicOnly = SemgrexPattern.compile("{} <<{}");
     assertEquals(1, basicOnly.matchSentences(sentences, false).get(0).second().size());
+  }
+
+  /**
+   * A sentence from a CoNLL-U file which is missing a graph is named by its sent_id
+   */
+  @Test
+  public void testMissingGraphNamesTheSentId() throws IOException {
+    String conllu = String.join("\n",
+        "# sent_id = no-enhanced",
+        "# text = Unban Mox Opal",
+        "1\tUnban\tunban\tVERB\t_\t_\t0\troot\t_\t_",
+        "2\tMox\tMox\tPROPN\t_\t_\t3\tcompound\t_\t_",
+        "3\tOpal\tOpal\tPROPN\t_\t_\t1\tobj\t_\t_",
+        "", "");
+    List<CoreMap> sentences = readSentences(EMPTY_NODE_SENTENCE + conllu);
+    assertEquals(2, sentences.size());
+
+    SemgrexPattern pattern = SemgrexPattern.compile("{} <@enhanced {}");
+    IllegalStateException e = assertThrows(IllegalStateException.class,
+                                           () -> pattern.matchSentences(sentences, false));
+    assertTrue(e.getMessage(), e.getMessage().contains("|# sent_id = no-enhanced|"));
+  }
+
+  /**
+   * How a sentence is named when it has not got a sent_id
+   *<br>
+   * Its index and its words, with any empty words left out, as they are
+   * not part of the text; the text itself when there are no tokens.
+   */
+  @Test
+  public void testDescribeSentence() {
+    CoreLabel sue = new CoreLabel();
+    sue.setWord("Sue");
+    CoreLabel likes = new CoreLabel();
+    likes.setWord("likes");
+    CoreLabel empty = new CoreLabel();
+    empty.setWord("likes");
+    empty.setEmptyIndex(1);
+    CoreLabel tea = new CoreLabel();
+    tea.setWord("tea");
+
+    CoreMap sentence = new ArrayCoreMap();
+    assertEquals("a sentence", SemgrexPattern.describe(sentence));
+
+    sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, 3);
+    assertEquals("the sentence at index 3", SemgrexPattern.describe(sentence));
+
+    sentence.set(CoreAnnotations.TokensAnnotation.class, Arrays.asList(sue, likes, empty, tea));
+    assertEquals("the sentence at index 3, |Sue likes tea|,", SemgrexPattern.describe(sentence));
+
+    CoreMap text = new ArrayCoreMap();
+    text.set(CoreAnnotations.TextAnnotation.class, "Sue likes tea.");
+    assertEquals("the sentence |Sue likes tea.|", SemgrexPattern.describe(text));
+
+    sentence.set(CoreAnnotations.CommentsAnnotation.class, Arrays.asList("# sent_id = sue-1"));
+    assertEquals("the sentence at |# sent_id = sue-1|", SemgrexPattern.describe(sentence));
   }
 
   /**

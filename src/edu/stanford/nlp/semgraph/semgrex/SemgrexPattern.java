@@ -539,18 +539,14 @@ public abstract class SemgrexPattern implements Serializable  {
   }
 
   /**
-   * Returns a list of matching sentences and each of the matches from those sentences.
-   *<br>
-   * Non-matching sentences are currently not returned (may change in the future to return an empty list).
-   */
-  /**
    * A sentence as it would be named in a complaint about it.
    *<br>
    * The sent_id comment if the sentence came from a CoNLL-U file, since
-   * that is what someone would search the file for, and the text of the
-   * sentence otherwise.
+   * that is what someone would search the file for.  Otherwise the
+   * sentence's index, if it has one, and its text, which is put together
+   * from its words if the sentence does not have its text.
    */
-  private static String describe(CoreMap sentence) {
+  static String describe(CoreMap sentence) {
     List<String> comments = sentence.get(CoreAnnotations.CommentsAnnotation.class);
     if (comments != null) {
       for (String comment : comments) {
@@ -560,13 +556,58 @@ public abstract class SemgrexPattern implements Serializable  {
         }
       }
     }
+
+    Integer index = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
     String text = sentence.get(CoreAnnotations.TextAnnotation.class);
+    if (text == null) {
+      text = wordsOf(sentence);
+    }
+    if (index != null && text != null) {
+      return "the sentence at index " + index + ", |" + text + "|,";
+    }
+    if (index != null) {
+      return "the sentence at index " + index;
+    }
     if (text != null) {
       return "the sentence |" + text + "|";
     }
     return "a sentence";
   }
 
+  /**
+   * The words of a sentence's tokens, separated by spaces, or null if it has none.
+   *<br>
+   * Empty words are left out, as they are not part of the text.
+   */
+  private static String wordsOf(CoreMap sentence) {
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    if (tokens == null) {
+      return null;
+    }
+    StringBuilder words = new StringBuilder();
+    for (CoreLabel token : tokens) {
+      if (token.getEmptyIndex() != 0 || token.word() == null) {
+        continue;
+      }
+      if (words.length() > 0) {
+        words.append(' ');
+      }
+      words.append(token.word());
+    }
+    if (words.length() == 0) {
+      return null;
+    }
+    return words.toString();
+  }
+
+  /**
+   * Returns a list of sentences and each of the matches from those sentences.
+   *<br>
+   * A sentence with no matches is only in the list if keepEmptyMatches is set.
+   *<br>
+   * A sentence which is missing a graph the pattern needs is an
+   * IllegalStateException, which names the sentence.
+   */
   public List<Pair<CoreMap, List<SemgrexMatch>>> matchSentences(List<CoreMap> sentences, boolean keepEmptyMatches) {
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = new ArrayList<>();
     for (CoreMap sentence : sentences) {

@@ -257,6 +257,8 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
         coremap.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, enhanced);
       }
       coremap.set(CoreAnnotations.TokensAnnotation.class, tokens);
+      // the position in the request, so an error about this sentence can say which one it is
+      coremap.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
       sentences.add(coremap);
     }
 
