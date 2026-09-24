@@ -404,6 +404,7 @@ public class SemgrexMultiGraphTest {
    *<br>
    * Its index and its words, with any empty words left out, as they are
    * not part of the text; the text itself when there are no tokens.
+   * A sent_id, either kind, comes before any of that.
    */
   @Test
   public void testDescribeSentence() {
@@ -430,6 +431,11 @@ public class SemgrexMultiGraphTest {
     text.set(CoreAnnotations.TextAnnotation.class, "Sue likes tea.");
     assertEquals("the sentence |Sue likes tea.|", SemgrexPattern.describe(text));
 
+    // a sent_id, such as a Stanza request sends, is used before the index
+    sentence.set(CoreAnnotations.SentenceIDAnnotation.class, "sue-1");
+    assertEquals("the sentence with sent_id |sue-1|", SemgrexPattern.describe(sentence));
+
+    // and the sent_id comment of a CoNLL-U file before that
     sentence.set(CoreAnnotations.CommentsAnnotation.class, Arrays.asList("# sent_id = sue-1"));
     assertEquals("the sentence at |# sent_id = sue-1|", SemgrexPattern.describe(sentence));
   }

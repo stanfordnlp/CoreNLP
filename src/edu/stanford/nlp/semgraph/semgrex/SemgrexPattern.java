@@ -541,10 +541,11 @@ public abstract class SemgrexPattern implements Serializable  {
   /**
    * A sentence as it would be named in a complaint about it.
    *<br>
-   * The sent_id comment if the sentence came from a CoNLL-U file, since
-   * that is what someone would search the file for.  Otherwise the
-   * sentence's index, if it has one, and its text, which is put together
-   * from its words if the sentence does not have its text.
+   * The sent_id comment if the sentence came from a CoNLL-U file, or
+   * its SentenceIDAnnotation, such as the sent_id a Stanza request
+   * sends, since that is what someone would search the file for.
+   * Otherwise the sentence's index, if it has one, and its text, which
+   * is put together from its words if the sentence does not have its text.
    */
   static String describe(CoreMap sentence) {
     List<String> comments = sentence.get(CoreAnnotations.CommentsAnnotation.class);
@@ -555,6 +556,10 @@ public abstract class SemgrexPattern implements Serializable  {
           return "the sentence at |" + trimmed + "|";
         }
       }
+    }
+    String sentenceID = sentence.get(CoreAnnotations.SentenceIDAnnotation.class);
+    if (sentenceID != null) {
+      return "the sentence with sent_id |" + sentenceID + "|";
     }
 
     Integer index = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);

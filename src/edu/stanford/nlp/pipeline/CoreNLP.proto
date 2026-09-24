@@ -649,6 +649,9 @@ message SemgrexRequest {
     // with @enhanced, such as >nsubj@enhanced.  Built over the same
     // tokens as graph, including any empty nodes
     optional DependencyGraph enhancedGraph = 3;
+    // The sent_id of the sentence, if it has one.  An error about the
+    // sentence names it by this, rather than by its place in the request
+    optional string          sentenceID    = 4;
   }
 
   repeated string            semgrex     = 1;

@@ -470,6 +470,25 @@ sentence {
   }
 
   /**
+   * A sentence which was sent with its sent_id is named by that instead
+   */
+  @Test
+  public void testMissingGraphNamesTheSentId() {
+    CoreNLPProtos.SemgrexRequest.Builder request = buildEnhancedRequest("{} <@enhanced {}").toBuilder();
+    request.setQuery(0, request.getQuery(0).toBuilder().setSentenceID("sue-1").build());
+    CoreNLPProtos.SemgrexRequest.Dependencies.Builder queryBuilder = CoreNLPProtos.SemgrexRequest.Dependencies.newBuilder();
+    addTokens(queryBuilder, new String[] {"1", "2", "3"}, new String[] {"Unban", "Mox", "Opal"});
+    queryBuilder.setGraph(buildGraph(new String[] {"1", "2", "3"},
+                                     new String[][] {{"2", "1", "amod"}, {"2", "3", "flat"}}));
+    queryBuilder.setSentenceID("mox-opal");
+    request.addQuery(queryBuilder.build());
+
+    IllegalStateException e = Assert.assertThrows(IllegalStateException.class,
+                                                  () -> ProcessSemgrexRequest.processRequest(request.build()));
+    Assert.assertTrue(e.getMessage(), e.getMessage().contains("the sentence with sent_id |mox-opal|"));
+  }
+
+  /**
    * A pattern which needs the enhanced graph fails loudly on a
    * request which only sent the basic graph
    */
