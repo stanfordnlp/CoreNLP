@@ -13,7 +13,7 @@ homepage: true
    <img src="assets/images/corenlp-title.png">
 </p>
 
-[<i class="fab fa-java"></i> Download CoreNLP 4.5.10](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
+[<i class="fab fa-java"></i> Download CoreNLP 4.6.0](https://nlp.stanford.edu/software/stanford-corenlp-4.6.0.zip){: .btn .fs-5 .mr-2 .mb-md-0 }
 [<i class="fab fa-github"></i> CoreNLP on GitHub](https://github.com/stanfordnlp/CoreNLP){: .btn .fs-5 .mr-2 .mb-md-0 }
 [CoreNLP on 🤗](https://huggingface.co/stanfordnlp/CoreNLP/tree/main){: .btn .fs-5 .mr-2 .mb-md-0 }
 
@@ -21,7 +21,7 @@ homepage: true
 
 {: .no_toc }
 
-> [**What's new:** The v4.5.3 release adds an Ssurgeon interface](https://stanfordnlp.github.io/CoreNLP/history.html).  4.5.10 removes the patterns package to remove the Lucene dependency, as the latest Java 8 version of Lucene has an unpatched security issue.  If you want the patterns package restored for a later Java 11 release, please [file an issue on github](https://github.com/stanfordnlp/CoreNLP)
+> [**What's new:** The v4.5.3 release adds an Ssurgeon interface](https://stanfordnlp.github.io/CoreNLP/history.html).  4.5.10 removes the patterns package to remove the Lucene dependency, as the latest Java 8 version of Lucene has an unpatched security issue.  If you want the patterns package restored for a later Java 11 release, please [file an issue on github](https://github.com/stanfordnlp/CoreNLP).  The v4.6.0 release fixes a couple security problems, adds a Stats interface for Semgrex, and fixes some SUTime issues.
 
 ## About
 
@@ -77,7 +77,7 @@ CoreNLP generates a variety of linguistic annotations, including:
 
 ## Quickstart
 
-* Download and unzip [CoreNLP 4.5.10](https://nlp.stanford.edu/software/stanford-corenlp-4.5.10.zip) [(HF Hub)](https://huggingface.co/stanfordnlp/CoreNLP/tree/main)
+* Download and unzip [CoreNLP 4.6.0](https://nlp.stanford.edu/software/stanford-corenlp-4.6.0.zip) [(HF Hub)](https://huggingface.co/stanfordnlp/CoreNLP/tree/main)
 
 * Download model jars for the language you want to work on and move the jars to the distribution directory. Jars are available directly from us, from Maven, and from Hugging Face.
 
