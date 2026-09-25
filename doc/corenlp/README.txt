@@ -41,6 +41,10 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2026-09-24    4.6.0     Security fixes, enhanced-graph Semgrex
+                        queries, SemgrexStats, SUTime bugfixes, and
+                        dependency upgrades
+
 2025-06-06   4.5.10     Additional Semgrex / SSurgeon features and
                         remove patterns/lucene because of security
                         warning
