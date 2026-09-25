@@ -1042,7 +1042,7 @@ public class JodaTimeUtils {
         value.append("NI");
       } else if(hrDiff == 1 || opts.forceDate){
         //(case: an hour)
-        value.append(zeroPad(begin.getHourOfDay()+1,2));
+        value.append(zeroPad(begin.getHourOfDay(),2));
       } else {
         //(case: treat as duration)
         return timexDurationValue(begin,end);
