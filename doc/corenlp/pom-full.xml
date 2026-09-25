@@ -42,12 +42,6 @@
   <dependencies>
 
     <dependency>
-      <groupId>com.apple</groupId>
-      <artifactId>AppleJavaExtensions</artifactId>
-      <version>1.4</version>
-    </dependency>
-
-    <dependency>
       <groupId>de.jollyday</groupId>
       <artifactId>jollyday</artifactId>
       <version>0.5.10</version>
@@ -56,7 +50,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.3.1</version>
+      <version>3.3.20</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
@@ -87,7 +81,7 @@
     <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
-      <version>2.13.0</version>
+      <version>2.14.0</version>
     </dependency>
 
     <dependency>
