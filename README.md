@@ -38,9 +38,9 @@ At present, [the current released version of the code](https://stanfordnlp.githu
 #### Build with Maven
 
 1. Make sure you have Maven installed, details here: [https://maven.apache.org/](https://maven.apache.org/)
-2. If you run this command in the CoreNLP directory: `mvn package` , it should run the tests and build this jar file: `CoreNLP/target/stanford-corenlp-4.5.4.jar`
+2. If you run this command in the CoreNLP directory: `mvn package` , it should run the tests and build this jar file: `CoreNLP/target/stanford-corenlp-4.6.0.jar`
 3. When using the latest version of the code make sure to download the latest versions of the [corenlp-models](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar), [english-extra-models](http://nlp.stanford.edu/software/stanford-english-extra-corenlp-models-current.jar), and [english-kbp-models](http://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) and include them in your CLASSPATH.  If you are processing languages other than English, make sure to download the latest version of the models jar for the language you are interested in.  
-4. If you want to use Stanford CoreNLP as part of a Maven project you need to install the models jars into your Maven repository.  Below is a sample command for installing the Spanish models jar.  For other languages just change the language name in the command.  To install `stanford-corenlp-models-current.jar` you will need to set `-Dclassifier=models`.  Here is the sample command for Spanish: `mvn install:install-file -Dfile=/location/of/stanford-spanish-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=4.5.4 -Dclassifier=models-spanish -Dpackaging=jar`
+4. If you want to use Stanford CoreNLP as part of a Maven project you need to install the models jars into your Maven repository.  Below is a sample command for installing the Spanish models jar.  For other languages just change the language name in the command.  To install `stanford-corenlp-models-current.jar` you will need to set `-Dclassifier=models`.  Here is the sample command for Spanish: `mvn install:install-file -Dfile=/location/of/stanford-spanish-corenlp-models-current.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp -Dversion=4.6.0 -Dclassifier=models-spanish -Dpackaging=jar`
 
 #### Models
 
@@ -66,15 +66,15 @@ The jars can be directly downloaded from the links below or the Hugging Face Hub
 
 | Language | Model Jar | Last Updated |
 | --- | --- | --- |
-| Arabic  | [download](https://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-arabic/tree/main) | 4.5.6 |
-| Chinese | [download](https://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-chinese/tree/main)| 4.5.6 |
-| English (extra) | [download](https://nlp.stanford.edu/software/stanford-english-extra-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-extra/tree/main) | 4.5.6 |
-| English (KBP) | [download](https://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-kbp/tree/main) | 4.5.6 |
-| French | [download](https://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-french/tree/main) | 4.5.6 |
-| German | [download](https://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-german/tree/main) | 4.5.6 |
-| Hungarian | [download](https://nlp.stanford.edu/software/stanford-hungarian-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-hungarian/tree/main) | 4.5.6 |
-| Italian | [download](https://nlp.stanford.edu/software/stanford-italian-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-italian/tree/main)| 4.5.6 |
-| Spanish | [download](https://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-spanish/tree/main)| 4.5.6 |
+| Arabic  | [download](https://nlp.stanford.edu/software/stanford-arabic-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-arabic/tree/main) | 4.6.0 |
+| Chinese | [download](https://nlp.stanford.edu/software/stanford-chinese-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-chinese/tree/main)| 4.6.0 |
+| English (extra) | [download](https://nlp.stanford.edu/software/stanford-english-extra-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-extra/tree/main) | 4.6.0 |
+| English (KBP) | [download](https://nlp.stanford.edu/software/stanford-english-kbp-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-english-kbp/tree/main) | 4.6.0 |
+| French | [download](https://nlp.stanford.edu/software/stanford-french-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-french/tree/main) | 4.6.0 |
+| German | [download](https://nlp.stanford.edu/software/stanford-german-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-german/tree/main) | 4.6.0 |
+| Hungarian | [download](https://nlp.stanford.edu/software/stanford-hungarian-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-hungarian/tree/main) | 4.6.0 |
+| Italian | [download](https://nlp.stanford.edu/software/stanford-italian-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-italian/tree/main)| 4.6.0 |
+| Spanish | [download](https://nlp.stanford.edu/software/stanford-spanish-corenlp-models-current.jar) [(HF Hub)](https://huggingface.co/stanfordnlp/corenlp-spanish/tree/main)| 4.6.0 |
 
 Thank you to [Hugging Face](https://huggingface.co/) for helping with our hosting!
 
