@@ -41,19 +41,18 @@ Previous releases can be found on [the release history page](history.html).
 [Maven Central](https://central.sonatype.com/artifact/edu.stanford.nlp/stanford-corenlp). The
 crucial thing to know is that CoreNLP needs its models to run (most
 parts beyond the tokenizer and sentence splitter) and so you need to specify both the code jar and the models jar in your `pom.xml`, as follows:
-(Note: Maven releases are usually made several days after a release on the website - currently the most recent is 4.5.10)
 
 ``` xml
 <dependencies>
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>4.5.10</version>
+    <version>4.6.0</version>
 </dependency>
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>4.5.10</version>
+    <version>4.6.0</version>
     <classifier>models</classifier>
 </dependency>
 </dependencies>
@@ -66,12 +65,12 @@ Chinese, German, or Spanish, also add this inside `dependencies` to your `pom.xm
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>4.5.10</version>
+    <version>4.6.0</version>
     <classifier>models-chinese</classifier>
 </dependency>
 ```
 
-Replace "models-chinese" with one or more of "models-english", "models-english-kbp", "models-arabic", "models-french", "models-german" or "models-spanish" for resources for other languages!
+Replace "models-chinese" with one or more of "models-english", "models-english-kbp", "models-arabic", "models-chinese-extra", "models-french", "models-german" or "models-spanish" for resources for other languages!
 
 There is an example Maven project using Stanford CoreNLP available with the GitHub release.
 
@@ -97,7 +96,7 @@ This example goes over how to set up CoreNLP from the latest official release. T
 
 ### Prerequisites
 
-* Java 8. The command `java -version` should complete successfully with a line like: java version "1.8.0_92".
+* Java 11. The command `java -version` should complete successfully with a line like: openjdk version "11.0.20.1" 2023-08-24 LTS
 * Zip tool
 * For following exactly the steps below: bash or a similar shell, and
   wget or a similar downloader.
@@ -118,7 +117,7 @@ unzip stanford-corenlp-latest.zip
 ```
 1. Enter the newly unzipped directory:
 ```
-cd stanford-corenlp-4.5.10
+cd stanford-corenlp-4.6.0
 ```
 1. Set up your classpath. If you're using an IDE, you should set the
    classpath in your IDE. If you are using bash or a bash-like shell,
@@ -145,7 +144,7 @@ java -mx3g edu.stanford.nlp.pipeline.StanfordCoreNLP -outputFormat json -file in
 
 ### Prerequisites
 
-* Java 8. The command `java -version` should complete successfully with a line like: java version "1.8.0_92".
+* Java 11. The command `java -version` should complete successfully with a line like: openjdk version "11.0.20.1" 2023-08-24 LTS
 * [Apache Ant](http://ant.apache.org/)
 * Zip tool
 * For following exactly the steps below: bash or a similar shell, and
