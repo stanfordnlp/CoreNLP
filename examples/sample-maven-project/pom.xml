@@ -53,6 +53,12 @@
         <groupId>edu.stanford.nlp</groupId>
         <artifactId>stanford-corenlp</artifactId>
         <version>4.6.0</version>
+        <classifier>models-chinese-extra</classifier>
+    </dependency>
+    <dependency>
+        <groupId>edu.stanford.nlp</groupId>
+        <artifactId>stanford-corenlp</artifactId>
+        <version>4.6.0</version>
         <classifier>models-english</classifier>
     </dependency>
     <dependency>
@@ -77,14 +83,19 @@
         <groupId>edu.stanford.nlp</groupId>
         <artifactId>stanford-corenlp</artifactId>
         <version>4.6.0</version>
-        <classifier>models-spanish</classifier>
+        <classifier>models-hungarian</classifier>
     </dependency>
-    <!-- Source: https://mvnrepository.com/artifact/org.threeten/threeten-extra -->
     <dependency>
-      <groupId>org.threeten</groupId>
-      <artifactId>threeten-extra</artifactId>
-      <version>1.10.0</version>
-      <scope>runtime</scope>
+        <groupId>edu.stanford.nlp</groupId>
+        <artifactId>stanford-corenlp</artifactId>
+        <version>4.6.0</version>
+        <classifier>models-italian</classifier>
+    </dependency>
+    <dependency>
+        <groupId>edu.stanford.nlp</groupId>
+        <artifactId>stanford-corenlp</artifactId>
+        <version>4.6.0</version>
+        <classifier>models-spanish</classifier>
     </dependency>
   </dependencies>
 </project>
