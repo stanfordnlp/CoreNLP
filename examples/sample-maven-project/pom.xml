@@ -7,12 +7,30 @@
   <version>1.0-SNAPSHOT</version>
   <name>stanford-corenlp-test-app</name>
   <url>http://maven.apache.org</url>
+
+  <properties>
+    <corenlp.version>4.6.0</corenlp.version>
+    <maven.compiler.release>11</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.13.1</version>
       <scope>test</scope>
+    </dependency>
+    <!-- CoreNLP logs some messages through the SLF4J API, and leaves the
+         choice of logging backend to the application.  slf4j-simple prints
+         them to stderr.  It must be a 1.7.x version, to match the
+         slf4j-api version CoreNLP uses -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.36</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
         <groupId>edu.stanford.nlp</groupId>
