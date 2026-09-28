@@ -23,8 +23,10 @@ import java.util.stream.Stream;
  */
 public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
 
+  /** The map whose keys are the elements of the set. */
   private final ConcurrentMap<E, Boolean> m;
   private transient Set<E> s; // the keySet of the Map
+  /** The maximum size for {@link #add}; negative means no maximum. */
   private int maxSize;
 
   /** Create a ConcurrentHashSet with no maximum size. */
@@ -32,7 +34,10 @@ public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
     this(-1);
   }
 
-  /** Create a ConcurrentHashSet with the maximum size given. */
+  /** Create a ConcurrentHashSet with the maximum size given.
+   *
+   *  @param maxSize The maximum size; a negative value means there is no maximum
+   */
   public MaxSizeConcurrentHashSet(int maxSize) {
     this.m = new ConcurrentHashMap<>();
     this.maxSize = maxSize;
@@ -41,6 +46,8 @@ public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
 
   /** Create a ConcurrentHashSet with the elements in s.
    *  This set has no maximum size.
+   *
+   *  @param s The elements to add
    */
   public MaxSizeConcurrentHashSet(Set<? extends E> s) {
     this.m = new ConcurrentHashMap<>(Math.max(s.size(), 16));
@@ -53,10 +60,20 @@ public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
     this.s = m.keySet();
   }
 
+  /**
+   * Returns the maximum size for {@link #add}.
+   *
+   * @return The maximum size; a negative value means there is no maximum
+   */
   public int getMaxSize() {
     return maxSize;
   }
 
+  /**
+   * Sets the maximum size for {@link #add}. Elements already in the set are not removed.
+   *
+   * @param maxSize The maximum size; a negative value means there is no maximum
+   */
   public void setMaxSize(int maxSize) {
     this.maxSize = maxSize;
   }
@@ -119,6 +136,13 @@ public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Reads the set and restores its (transient) key set view.
+   *
+   * @param stream The stream to read from
+   * @throws IOException If reading from the stream fails
+   * @throws ClassNotFoundException If the class of a serialized object cannot be found
+   */
   private void readObject(java.io.ObjectInputStream stream)
           throws IOException, ClassNotFoundException {
     stream.defaultReadObject();

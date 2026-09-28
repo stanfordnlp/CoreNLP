@@ -19,10 +19,13 @@ final public class ScoredComparator implements Comparator<Scored>, Serializable 
   private static final boolean ASCENDING = true;
   private static final boolean DESCENDING = false;
 
+  /** Orders Scored objects from lowest to highest score. */
   public static final ScoredComparator ASCENDING_COMPARATOR = new ScoredComparator(ASCENDING);
 
+  /** Orders Scored objects from highest to lowest score. */
   public static final ScoredComparator DESCENDING_COMPARATOR = new ScoredComparator(DESCENDING);
 
+  /** Whether this comparator orders by ascending score. */
   private final boolean ascending;
 
   private ScoredComparator(boolean ascending) {

@@ -19,6 +19,8 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * Many applications use a lot of Pairs so it's good to keep this
  * number small.
  *
+ * @param <T1> The type of the first element
+ * @param <T2> The type of the second element
  * @author Dan Klein
  * @author Christopher Manning (added stuff from Kristina's, rounded out)
  * @version 2002/08/25
@@ -40,27 +42,54 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    */
   public T2 second;
 
+  /** Creates a Pair whose elements are both null. */
   public Pair() {
     // first = null; second = null; -- default initialization
   }
 
+  /**
+   * Creates a Pair of the given elements.
+   *
+   * @param first The first element
+   * @param second The second element
+   */
   public Pair(T1 first, T2 second) {
     this.first = first;
     this.second = second;
   }
 
+  /**
+   * Returns the first element.
+   *
+   * @return The first element
+   */
   public T1 first() {
     return first;
   }
 
+  /**
+   * Returns the second element.
+   *
+   * @return The second element
+   */
   public T2 second() {
     return second;
   }
 
+  /**
+   * Sets the first element.
+   *
+   * @param o The new first element
+   */
   public void setFirst(T1 o) {
     first = o;
   }
 
+  /**
+   * Sets the second element.
+   *
+   * @param o The new second element
+   */
   public void setSecond(T2 o) {
     second = o;
   }
@@ -89,6 +118,11 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
     return firstHash*31 + secondHash;
   }
 
+  /**
+   * Returns the two elements as a list.
+   *
+   * @return A new list containing first and second
+   */
   public List<Object> asList() {
     return CollectionUtils.makeList(first, second);
   }
@@ -97,6 +131,12 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * Returns a Pair constructed from X and Y.  Convenience method; the
    * compiler will disambiguate the classes used for you so that you
    * don't have to write out potentially long class names.
+   *
+   * @param <X> The type of the first element
+   * @param <Y> The type of the second element
+   * @param x The first element
+   * @param y The second element
+   * @return A new Pair of x and y
    */
   public static <X, Y> Pair<X, Y> makePair(X x, Y y) {
     return new Pair<>(x, y);
@@ -108,6 +148,9 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * of objects and a {@code String} representation is written.
    * This might not allow one to recover the pair of objects unless they
    * are of type {@code String}.
+   * Any exception (including an IOException) is caught and its stack trace printed.
+   *
+   * @param out The stream to write to
    */
   public void save(DataOutputStream out) {
     try {
@@ -123,8 +166,8 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * If the object is a {@code Pair}, this function will work providing
    * the elements of the {@code Pair} are themselves comparable.
    * It will then return a value based on the pair of objects, where
-   * <code>p &gt; q iff p.first() &gt; q.first() ||
-   * (p.first().equals(q.first()) && p.second() &gt; q.second())</code>.
+   * {@code p > q iff p.first() > q.first() ||
+   * (p.first().equals(q.first()) && p.second() > q.second())}.
    * If the other object is not a {@code Pair}, it throws a
    * {@code ClassCastException}.
    *
@@ -241,9 +284,14 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * This function will work providing the first element of the {@code Pair} is comparable,
    * otherwise will throw a {@code ClassCastException}.
    *
+   * @param <T1> The type of the first element
+   * @param <T2> The type of the second element
    * @author jonathanberant
    */
   public static class ByFirstPairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
+
+    /** Creates the comparator. */
+    public ByFirstPairComparator() { }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -256,9 +304,14 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * Compares a {@code Pair} to another {@code Pair} according to the first object of the pair only in decreasing order
    * This function will work providing
    * the first element of the {@code Pair} is comparable, otherwise will throw a {@code ClassCastException}
+   * @param <T1> The type of the first element
+   * @param <T2> The type of the second element
    * @author jonathanberant
    */
   public static class ByFirstReversePairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
+
+    /** Creates the comparator. */
+    public ByFirstReversePairComparator() { }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -270,10 +323,15 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   /**
    * Compares a {@code Pair} to another {@code Pair} according to the second object of the pair only
    * This function will work providing
-   * the first element of the {@code Pair} is comparable, otherwise will throw a {@code ClassCastException}
+   * the second element of the {@code Pair} is comparable, otherwise will throw a {@code ClassCastException}
+   * @param <T1> The type of the first element
+   * @param <T2> The type of the second element
    * @author jonathanberant
    */
   public static class BySecondPairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
+
+    /** Creates the comparator. */
+    public BySecondPairComparator() { }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -285,11 +343,16 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
   /**
    * Compares a {@code Pair} to another {@code Pair} according to the second object of the pair only in decreasing order
    * This function will work providing
-   * the first element of the {@code Pair} is comparable, otherwise will throw a {@code ClassCastException}
+   * the second element of the {@code Pair} is comparable, otherwise will throw a {@code ClassCastException}
    *
+   * @param <T1> The type of the first element
+   * @param <T2> The type of the second element
    * @author jonathanberant
    */
   public static class BySecondReversePairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
+
+    /** Creates the comparator. */
+    public BySecondReversePairComparator() { }
 
     @SuppressWarnings("unchecked")
     @Override

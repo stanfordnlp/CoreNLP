@@ -7,6 +7,7 @@ import java.util.Optional;
  * A pointer to an object, to get around not being able to access non-final
  * variables within an anonymous function.
  *
+ * @param <T> the type of the object pointed to
  * @author Gabor Angeli
  */
 public class Pointer<T> implements Serializable {
@@ -39,6 +40,8 @@ public class Pointer<T> implements Serializable {
    * Dereference the pointer.
    * If the pointer is pointing somewhere, the {@linkplain Optional optional} will be set.
    * Otherwise, the optional will be {@linkplain Optional#empty() empty}.
+   *
+   * @return the value pointed to, if any
    */
   public Optional<T> dereference() {
     return Optional.ofNullable(impl);

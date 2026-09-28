@@ -7,9 +7,15 @@ package edu.stanford.nlp.util;
  */
 public final class MutableDouble extends Number implements Comparable<MutableDouble> {
 
+  /** The current value. */
   private double d;
 
   // Mutable
+  /**
+   * Sets the value.
+   *
+   * @param d The new value
+   */
   public void set(double d) {
     this.d = d;
   }
@@ -93,14 +99,25 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     return d;
   }
 
+  /** Creates a MutableDouble with value 0.0. */
   public MutableDouble() {
     this(0.0);
   }
 
+  /**
+   * Creates a MutableDouble with the given value.
+   *
+   * @param d The initial value
+   */
   public MutableDouble(double d) {
     this.d = d;
   }
 
+  /**
+   * Creates a MutableDouble with the double value of the given number.
+   *
+   * @param num The number whose {@code doubleValue()} is the initial value
+   */
   public MutableDouble(Number num) {
     this.d = num.doubleValue();
   }

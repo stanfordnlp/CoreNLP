@@ -11,6 +11,14 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A {@link MulticoreWrapper} with a timeout.  Waiting for a free thread in
+ * {@link #put} gives up after the timeout, and {@link #joinWithTimeout} can
+ * interrupt the running jobs and return the ones that never started.
+ *
+ * @param <I> input type
+ * @param <O> output type
+ */
 public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
 
   private final long timeout;
@@ -122,6 +130,11 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
    * After a shutdown request, await for the final termination of all
    * threads.  Note that if the threads don't actually obey the
    * interruption, this may take some time.
+   *
+   * @param timeout The maximum time to wait
+   * @param unit The unit of {@code timeout}
+   * @return true if the thread pool terminated, false if the timeout elapsed first
+   * @throws InterruptedException if interrupted while waiting
    */
   public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
     return threadPool.awaitTermination(timeout, unit);

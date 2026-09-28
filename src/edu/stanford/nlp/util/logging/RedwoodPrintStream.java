@@ -17,6 +17,12 @@ public class RedwoodPrintStream extends PrintStream {
   private StringBuilder buffer = new StringBuilder();
   private boolean checkForThrowable = false;
 
+  /**
+   * Creates a PrintStream which logs what is printed to Redwood.
+   *
+   * @param tag The channel to log to, or null to log without a channel
+   * @param realStream The underlying stream, also passed to the PrintStream constructor
+   */
   public RedwoodPrintStream(Redwood.Flag tag, PrintStream realStream) {
     super(realStream);
     this.tag = tag;

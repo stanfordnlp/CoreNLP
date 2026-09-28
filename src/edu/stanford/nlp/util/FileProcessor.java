@@ -16,6 +16,7 @@ public interface FileProcessor {
    * Apply this predicate to a <code>File</code>.  This method can
    * assume the <code>file</code> is a file and not a directory.
    *
+   * @param file The file to process
    * @see FilePathProcessor for traversing directories
    */
   public void processFile(File file);

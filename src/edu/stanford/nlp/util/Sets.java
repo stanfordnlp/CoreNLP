@@ -18,6 +18,15 @@ public class Sets {
   // private to prevent instantiation
   private Sets() {}
 
+  /**
+   * Returns a new HashSet of the results of applying a function to each element of a set.
+   *
+   * @param <E> the type of the elements of {@code oldSet}
+   * @param <F> the type of the results of {@code lambda}
+   * @param oldSet the set to map over
+   * @param lambda the function to apply to each element
+   * @return a new set of the function's results
+   */
   public static <E, F> Set<F> map(Set<E> oldSet, Function<E, F> lambda) {
     Set<F> newSet = new HashSet<>();
     for (E e : oldSet) {
@@ -28,6 +37,12 @@ public class Sets {
 
   /**
    * Returns the set cross product of s1 and s2, as <code>Pair</code>s
+   *
+   * @param <E> the type of the elements of {@code s1}
+   * @param <F> the type of the elements of {@code s2}
+   * @param s1 the set of first elements
+   * @param s2 the set of second elements
+   * @return a new set of all pairs of an element of {@code s1} and an element of {@code s2}
    */
   public static <E,F> Set<Pair<E,F>> cross(Set<E> s1, Set<F> s2) {
     Set<Pair<E,F>> s = Generics.newHashSet();
@@ -41,6 +56,11 @@ public class Sets {
 
   /**
    * Returns the difference of sets s1 and s2.
+   *
+   * @param <E> the type of the elements
+   * @param s1 the first set
+   * @param s2 the second set
+   * @return a new set of the elements of {@code s1} which are not in {@code s2}
    */
   public static <E> Set<E> diff(Set<E> s1, Set<E> s2) {
     Set<E> s = Generics.newHashSet();
@@ -54,6 +74,11 @@ public class Sets {
 
   /**
    * Returns the symmetric difference of sets s1 and s2 (i.e. all elements that are in only one of the two sets)
+   *
+   * @param <E> the type of the elements
+   * @param s1 the first set
+   * @param s2 the second set
+   * @return a new set of the symmetric difference
    */
   public static <E> Set<E> symmetricDiff(Set<E> s1, Set<E> s2) {
     Set<E> s = Generics.newHashSet();
@@ -72,6 +97,11 @@ public class Sets {
 
   /**
    * Returns the union of sets s1 and s2.
+   *
+   * @param <E> the type of the elements
+   * @param s1 the first set
+   * @param s2 the second set
+   * @return a new set of the union
    */
   public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
     Set<E> s = Generics.newHashSet();
@@ -82,6 +112,11 @@ public class Sets {
 
   /**
    * Returns the intersection of sets s1 and s2.
+   *
+   * @param <E> the type of the elements
+   * @param s1 the first set
+   * @param s2 the second set
+   * @return a new set of the intersection
    */
   public static <E> Set<E> intersection(Set<E> s1, Set<E> s2) {
     Set<E> s = Generics.newHashSet();
@@ -94,6 +129,11 @@ public class Sets {
    * Returns true if there is at least element that is in both s1 and s2. Faster
    * than calling intersection(Set,Set) if you don't need the contents of the
    * intersection.
+   *
+   * @param <E> the type of the elements
+   * @param s1 the first set
+   * @param s2 the second set
+   * @return true if the sets share at least one element
    */
   public static <E> boolean intersects(Set<E> s1, Set<E> s2) {
     // *ahem* It would seem that Java already had this method. Hopefully this
@@ -103,6 +143,12 @@ public class Sets {
 
   /**
    * Returns the powerset (the set of all subsets) of set s.
+   * The elements of {@code s} are temporarily removed and re-added while
+   * this runs, so {@code s} must be modifiable.
+   *
+   * @param <E> the type of the elements
+   * @param s the set whose subsets to generate
+   * @return a new set of new sets, one for each subset of {@code s}
    */
   public static <E> Set<Set<E>> powerSet(Set<E> s) {
     if (s.isEmpty()) {
@@ -138,6 +184,8 @@ public class Sets {
    * @param secondName the name of the second set, used if an error occurs
    * @param outputShared output the common values for the two sets
    * @param errorMessage a Supplier of an error message, in case it is expensive to generate
+   * @param <E> the type of the elements
+   * @throws AssertionError if the two sets are not equal
    */
   public static <E> void assertEquals(Set<E> first, Set<E> second,
                                       String firstName, String secondName,
@@ -181,6 +229,11 @@ public class Sets {
     throw new AssertionError(builder.toString());
   }
 
+  /**
+   * Prints the powerset of the set {a, b, c}, as a quick demonstration.
+   *
+   * @param args ignored
+   */
   public static void main(String[] args) {
     Set<String> h = Generics.newHashSet();
     h.add("a");

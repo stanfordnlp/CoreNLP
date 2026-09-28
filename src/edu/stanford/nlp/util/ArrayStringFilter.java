@@ -17,14 +17,30 @@ import java.util.function.Predicate;
  * @author John Bauer
  */
 public class ArrayStringFilter implements Predicate<String>, Serializable {
+  /** A copy of the strings to match against. */
   private final String[] words;
+  /** The number of strings in {@code words}. */
   private final int length;
+  /** How the input is compared to the words. */
   private final Mode mode;
 
+  /** How an input string is compared to the words of the filter. */
   public enum Mode {
-    EXACT, PREFIX, CASE_INSENSITIVE
+    /** Accepts the input if it equals one of the words. */
+    EXACT,
+    /** Accepts the input if it starts with one of the words; null input is rejected. */
+    PREFIX,
+    /** Accepts the input if it equals one of the words, ignoring case. */
+    CASE_INSENSITIVE
   }
 
+  /**
+   * Creates a filter which accepts strings matching any of the given words.
+   *
+   * @param mode how input strings are compared to the words
+   * @param words the words to accept; the array is copied
+   * @throws NullPointerException if {@code mode} is null
+   */
   public ArrayStringFilter(Mode mode, String ... words) {
     if (mode == null) {
       throw new NullPointerException("Cannot handle null mode");

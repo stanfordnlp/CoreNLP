@@ -9,8 +9,9 @@ package edu.stanford.nlp.util.logging;
  */
 public enum Style {
 
-  NONE(""), BOLD("\033[1m"), DIM("\033[2m"), ITALIC("\033[3m"), UNDERLINE("\033[4m"), BLINK("\033[5m"), CROSS_OUT("\033[9m");
+  /** No style. */ NONE(""), /** Bold. */ BOLD("\033[1m"), /** Dim. */ DIM("\033[2m"), /** Italic. */ ITALIC("\033[3m"), /** Underline. */ UNDERLINE("\033[4m"), /** Blinking. */ BLINK("\033[5m"), /** Crossed out. */ CROSS_OUT("\033[9m");
 
+  /** The ANSI escape sequence which starts this style (empty for {@link #NONE}). */
   public final String ansiCode;
 
   Style(String ansiCode){
@@ -18,6 +19,13 @@ public enum Style {
   }
 
 
+  /**
+   * Wraps the string in this style's ANSI code and a reset code, if
+   * {@link Redwood#supportsAnsi} is set.
+   *
+   * @param toColor The string to style
+   * @return The styled string, or {@code toColor} unchanged if ANSI codes are not supported
+   */
   public String apply(String toColor) {
     StringBuilder b = new StringBuilder();
     if (Redwood.supportsAnsi) { b.append(ansiCode); }

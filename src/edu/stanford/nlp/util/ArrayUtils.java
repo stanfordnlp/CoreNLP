@@ -26,6 +26,14 @@ public class ArrayUtils  {
    */
   private ArrayUtils() {}
 
+  /**
+   * Gap-encodes a sorted array of ints into bytes, using the scheme
+   * described in {@link #gapEncodeList(int[])}.
+   *
+   * @param orig The values to encode, sorted in nondecreasing order
+   * @return The encoded bytes
+   * @throws IllegalArgumentException if {@code orig} is not sorted
+   */
   public static byte[] gapEncode(int[] orig) {
     List<Byte> encodedList = gapEncodeList(orig);
     byte[] arr = new byte[encodedList.size()];
@@ -34,6 +42,17 @@ public class ArrayUtils  {
     return arr;
   }
 
+  /**
+   * Gap-encodes a sorted array of ints as a list of bytes.  Each value is stored
+   * as its difference from the previous value (the first from 0): the number of
+   * binary digits of the gap in unary (1s followed by a 0), then the binary digits
+   * of the gap after the leading 1.  A repeated value is stored as a single 0 bit.
+   * The last byte is padded with 1 bits.
+   *
+   * @param orig The values to encode, sorted in nondecreasing order
+   * @return The encoded bytes
+   * @throws IllegalArgumentException if {@code orig} is not sorted
+   */
   public static List<Byte> gapEncodeList(int[] orig) {
     for (int i = 1; i < orig.length; i++) {
       if (orig[i] < orig[i-1]) {
@@ -96,10 +115,25 @@ public class ArrayUtils  {
     return bytes;
   }
 
+  /**
+   * Decodes an array produced by {@link #gapEncode(int[])}.
+   *
+   * @param gapEncoded The encoded bytes
+   * @return The decoded values
+   */
   public static int[] gapDecode(byte[] gapEncoded) {
     return gapDecode(gapEncoded, 0, gapEncoded.length);
   }
 
+  /**
+   * Decodes the bytes in the range [startIndex, endIndex) of an array
+   * produced by {@link #gapEncode(int[])}.
+   *
+   * @param gapEncoded The encoded bytes
+   * @param startIndex Index of the first byte to decode
+   * @param endIndex Index one past the last byte to decode
+   * @return The decoded values
+   */
   public static int[] gapDecode(byte[] gapEncoded, int startIndex, int endIndex) {
     List<Integer> ints = gapDecodeList(gapEncoded, startIndex, endIndex);
     int[] arr = new int[ints.size()];
@@ -108,10 +142,25 @@ public class ArrayUtils  {
     return arr;
   }
 
+  /**
+   * Decodes an array produced by {@link #gapEncode(int[])} into a list.
+   *
+   * @param gapEncoded The encoded bytes
+   * @return The decoded values
+   */
   public static List<Integer> gapDecodeList(byte[] gapEncoded) {
     return gapDecodeList(gapEncoded, 0, gapEncoded.length);
   }
 
+  /**
+   * Decodes the bytes in the range [startIndex, endIndex) of an array
+   * produced by {@link #gapEncode(int[])} into a list.
+   *
+   * @param gapEncoded The encoded bytes
+   * @param startIndex Index of the first byte to decode
+   * @param endIndex Index one past the last byte to decode
+   * @return The decoded values
+   */
   public static List<Integer> gapDecodeList(byte[] gapEncoded, int startIndex, int endIndex) {
 
     boolean gettingSize = true;
@@ -156,6 +205,14 @@ public class ArrayUtils  {
     return ints;
   }
 
+  /**
+   * Delta-encodes a sorted array of ints into bytes, using the scheme
+   * described in {@link #deltaEncodeList(int[])}.
+   *
+   * @param orig The values to encode, sorted in nondecreasing order
+   * @return The encoded bytes
+   * @throws IllegalArgumentException if {@code orig} is not sorted
+   */
   public static byte[] deltaEncode(int[] orig) {
     List<Byte> encodedList = deltaEncodeList(orig);
     byte[] arr = new byte[encodedList.size()];
@@ -164,6 +221,18 @@ public class ArrayUtils  {
     return arr;
   }
 
+  /**
+   * Delta-encodes a sorted array of ints as a list of bytes.  Like
+   * {@link #gapEncodeList(int[])}, each value is stored as its gap from the
+   * previous value, but the length of the gap is itself written in the gap
+   * encoding (unary length of the length, then its remaining binary digits),
+   * followed by the binary digits of the gap after the leading 1.  A repeated
+   * value is stored as a single 0 bit.  The last byte is padded with 1 bits.
+   *
+   * @param orig The values to encode, sorted in nondecreasing order
+   * @return The encoded bytes
+   * @throws IllegalArgumentException if {@code orig} is not sorted
+   */
   public static List<Byte> deltaEncodeList(int[] orig) {
 
     for (int i = 1; i < orig.length; i++) {
@@ -244,10 +313,26 @@ public class ArrayUtils  {
   }
 
 
+  /**
+   * Decodes an array produced by {@link #deltaEncode(int[])}.
+   *
+   * @param deltaEncoded The encoded bytes
+   * @return The decoded values
+   */
   public static int[] deltaDecode(byte[] deltaEncoded) {
     return deltaDecode(deltaEncoded, 0, deltaEncoded.length);
   }
 
+  /**
+   * Decodes an array produced by {@link #deltaEncode(int[])}.
+   * Note that {@code startIndex} and {@code endIndex} are ignored:
+   * the whole array is always decoded.
+   *
+   * @param deltaEncoded The encoded bytes
+   * @param startIndex Ignored
+   * @param endIndex Ignored
+   * @return The decoded values
+   */
   public static int[] deltaDecode(byte[] deltaEncoded, int startIndex, int endIndex) {
     List<Integer> ints = deltaDecodeList(deltaEncoded);
     int[] arr = new int[ints.size()];
@@ -256,10 +341,25 @@ public class ArrayUtils  {
     return arr;
   }
 
+  /**
+   * Decodes an array produced by {@link #deltaEncode(int[])} into a list.
+   *
+   * @param deltaEncoded The encoded bytes
+   * @return The decoded values
+   */
   public static List<Integer> deltaDecodeList(byte[] deltaEncoded) {
     return deltaDecodeList(deltaEncoded, 0, deltaEncoded.length);
   }
 
+  /**
+   * Decodes the bytes in the range [startIndex, endIndex) of an array
+   * produced by {@link #deltaEncode(int[])} into a list.
+   *
+   * @param deltaEncoded The encoded bytes
+   * @param startIndex Index of the first byte to decode
+   * @param endIndex Index one past the last byte to decode
+   * @return The decoded values
+   */
   public static List<Integer> deltaDecodeList(byte[] deltaEncoded, int startIndex, int endIndex) {
 
     boolean gettingSize1 = true;
@@ -382,6 +482,12 @@ public class ArrayUtils  {
 
 
 
+  /**
+   * Concatenates the rows of a 2D array into a new 1D array.
+   *
+   * @param array The 2D array (rows may have different lengths)
+   * @return A new array holding all the elements in row-major order
+   */
   public static double[] flatten(double[][] array) {
     int size = 0;
     for (double[] a : array) {
@@ -397,11 +503,29 @@ public class ArrayUtils  {
     return newArray;
   }
 
+  /**
+   * Reshapes a 1D array into a new 2D array with {@code dim1Size} rows,
+   * each of length {@code array.length / dim1Size}.  Any leftover elements are dropped.
+   *
+   * @param array The values, in row-major order
+   * @param dim1Size The number of rows
+   * @return A new 2D array
+   */
   public static double[][] to2D(double[] array, int dim1Size) {
     int dim2Size = array.length/dim1Size;
     return to2D(array, dim1Size, dim2Size);
   }
 
+  /**
+   * Reshapes a 1D array into a new {@code dim1Size} by {@code dim2Size} 2D array,
+   * filled in row-major order.
+   *
+   * @param array The values, in row-major order; must have at least
+   *     {@code dim1Size * dim2Size} elements
+   * @param dim1Size The number of rows
+   * @param dim2Size The number of columns
+   * @return A new 2D array
+   */
   public static double[][] to2D(double[] array, int dim1Size, int dim2Size) {
     double[][] newArray = new double[dim1Size][dim2Size];
     int k = 0;
@@ -415,8 +539,13 @@ public class ArrayUtils  {
 
   /**
    * Removes the element at the specified index from the array, and returns
-   * a new array containing the remaining elements.  If <tt>index</tt> is
-   * invalid, returns <tt>array</tt> unchanged.
+   * a new array containing the remaining elements.  If {@code index} is
+   * invalid, returns {@code array} unchanged.
+   *
+   * @param array The array (may be null)
+   * @param index The index of the element to remove
+   * @return A new array without that element, {@code array} itself if
+   *     {@code index} is out of range, or null if {@code array} is null
    */
   public static double[] removeAt(double[] array, int index) {
     if (array == null) {
@@ -439,9 +568,16 @@ public class ArrayUtils  {
 
   /**
    * Removes the element at the specified index from the array, and returns
-   * a new array containing the remaining elements.  If <tt>index</tt> is
-   * invalid, returns <tt>array</tt> unchanged.  Uses reflection to determine
+   * a new array containing the remaining elements.  If {@code index} is
+   * invalid, returns {@code array} unchanged.  Uses reflection to determine
    * the type of the array and returns an array of the appropriate type.
+   * The type used is the runtime class of {@code array[0]}, not the
+   * component type of {@code array}.
+   *
+   * @param array The array (may be null)
+   * @param index The index of the element to remove
+   * @return A new array without that element, {@code array} itself if
+   *     {@code index} is out of range, or null if {@code array} is null
    */
   public static Object[] removeAt(Object[] array, int index) {
     if (array == null) {
@@ -462,6 +598,13 @@ public class ArrayUtils  {
     return retVal;
   }
 
+  /**
+   * Returns a string representation of a 2D int array, with each row
+   * formatted by {@link Arrays#toString(int[])}.
+   *
+   * @param a The array
+   * @return A string such as {@code [[1, 2],[3]]}
+   */
   public static String toString(int[][] a) {
     StringBuilder result = new StringBuilder("[");
     for (int i = 0; i < a.length; i++) {
@@ -475,6 +618,10 @@ public class ArrayUtils  {
 
   /**
    * Tests two int[][] arrays for having equal contents.
+   * Two null arrays are considered equal.
+   *
+   * @param xs The first array
+   * @param ys The second array
    * @return true iff for each i, <code>equalContents(xs[i],ys[i])</code> is true
    */
   public static boolean equalContents(int[][] xs, int[][] ys) {
@@ -493,6 +640,10 @@ public class ArrayUtils  {
 
   /**
    * Tests two double[][] arrays for having equal contents.
+   * Two null arrays are considered equal.
+   *
+   * @param xs The first array
+   * @param ys The second array
    * @return true iff for each i, <code>equals(xs[i],ys[i])</code> is true
    */
   public static boolean equals(double[][] xs, double[][] ys) {
@@ -512,6 +663,9 @@ public class ArrayUtils  {
 
   /**
    * tests two int[] arrays for having equal contents
+   *
+   * @param xs The first array (must not be null)
+   * @param ys The second array (must not be null)
    * @return true iff xs and ys have equal length, and for each i, <code>xs[i]==ys[i]</code>
    */
   public static boolean equalContents(int[] xs, int[] ys) {
@@ -526,6 +680,10 @@ public class ArrayUtils  {
 
   /**
    * Tests two boolean[][] arrays for having equal contents.
+   * Returns false if either array is null, including when both are.
+   *
+   * @param xs The first array
+   * @param ys The second array
    * @return true iff for each i, <code>Arrays.equals(xs[i],ys[i])</code> is true
    */
   @SuppressWarnings("null")
@@ -544,7 +702,16 @@ public class ArrayUtils  {
   }
 
 
-  /** Returns true iff object o equals (not ==) some element of array a. */
+  /**
+   * Returns true iff object o equals (not ==) some element of array a.
+   * Calls {@code equals} on the array elements, so null elements cause a
+   * {@link NullPointerException}.
+   *
+   * @param <T> The element type
+   * @param a The array to search
+   * @param o The object to look for
+   * @return Whether some element of {@code a} equals {@code o}
+   */
   public static <T> boolean contains(T[] a, T o) {
     for (T item : a) {
       if (item.equals(o)) return true;
@@ -556,6 +723,12 @@ public class ArrayUtils  {
   //  http://stackoverflow.com/questions/80476/how-to-concatenate-two-arrays-in-java
   /**
    * Concatenates two arrays and returns the result
+   *
+   * @param <T> The element type
+   * @param first The first array
+   * @param second The second array
+   * @return A new array, of the same runtime type as {@code first}, holding the
+   *     elements of {@code first} followed by those of {@code second}
    */
   public static <T> T[] concatenate(T[] first, T[] second) {
     T[] result = Arrays.copyOf(first, first.length + second.length);
@@ -568,6 +741,11 @@ public class ArrayUtils  {
    * <br>
    * Implementation notes: creates two arrays, calls <code>filter</code>
    * once for each element, does not alter <code>original</code>
+   *
+   * @param <T> The element type
+   * @param original The array to filter
+   * @param filter The test an element must pass to be kept
+   * @return A new array holding the accepted elements, in their original order
    */
   public static <T> T[] filter(T[] original, Predicate<? super T> filter) {
     T[] result = Arrays.copyOf(original, original.length); // avoids generic array creation compile error
@@ -585,6 +763,10 @@ public class ArrayUtils  {
   }
 
   /** Return a Set containing the same elements as the specified array.
+   *
+   * @param <T> The element type
+   * @param a The array
+   * @return A new (mutable) HashSet of the elements
    */
   public static <T> Set<T> asSet(T[] a) {
     return Generics.newHashSet(Arrays.asList(a));
@@ -593,6 +775,10 @@ public class ArrayUtils  {
   /** Return an immutable Set containing the same elements as the specified
    *  array. Arrays with 0 or 1 elements are special cased to return the
    *  efficient small sets from the Collections class.
+   *
+   * @param <T> The element type
+   * @param a The array
+   * @return An unmodifiable Set of the elements
    */
   public static <T> Set<T> asImmutableSet(T[] a) {
     if (a.length == 0) {
@@ -604,36 +790,72 @@ public class ArrayUtils  {
     }
   }
 
+  /**
+   * Sets every element of a 2D array to {@code val}.
+   *
+   * @param d The array to fill (modified in place)
+   * @param val The value to store
+   */
   public static void fill(double[][] d, double val) {
     for (double[] aD : d) {
       Arrays.fill(aD, val);
     }
   }
 
+  /**
+   * Sets every element of a 3D array to {@code val}.
+   *
+   * @param d The array to fill (modified in place)
+   * @param val The value to store
+   */
   public static void fill(double[][][] d, double val) {
     for (double[][] aD : d) {
       fill(aD, val);
     }
   }
 
+  /**
+   * Sets every element of a 4D array to {@code val}.
+   *
+   * @param d The array to fill (modified in place)
+   * @param val The value to store
+   */
   public static void fill(double[][][][] d, double val) {
     for (double[][][] aD : d) {
       fill(aD, val);
     }
   }
 
+  /**
+   * Sets every element of a 2D array to {@code val}.
+   *
+   * @param d The array to fill (modified in place)
+   * @param val The value to store
+   */
   public static void fill(boolean[][] d, boolean val) {
     for (boolean[] aD : d) {
       Arrays.fill(aD, val);
     }
   }
 
+  /**
+   * Sets every element of a 3D array to {@code val}.
+   *
+   * @param d The array to fill (modified in place)
+   * @param val The value to store
+   */
   public static void fill(boolean[][][] d, boolean val) {
     for (boolean[][] aD : d) {
       fill(aD, val);
     }
   }
 
+  /**
+   * Sets every element of a 4D array to {@code val}.
+   *
+   * @param d The array to fill (modified in place)
+   * @param val The value to store
+   */
   public static void fill(boolean[][][][] d, boolean val) {
     for (boolean[][][] aD : d) {
       fill(aD, val);
@@ -644,6 +866,9 @@ public class ArrayUtils  {
 
   /**
   * Casts to a double array
+  *
+  * @param a The array to convert
+  * @return A new double array with the same values
   */
   public static double[] toDouble(float[] a) {
     double[] d = new double[a.length];
@@ -655,6 +880,9 @@ public class ArrayUtils  {
 
   /**
    * Casts to a double array.
+   *
+   * @param array The array to convert
+   * @return A new double array with the same values
    */
   public static double[] toDouble(int[] array) {
     double[] rv = new double[array.length];
@@ -667,6 +895,9 @@ public class ArrayUtils  {
   /** needed because Arrays.asList() won't to autoboxing,
    * so if you give it a primitive array you get a
    * singleton list back with just that array as an element.
+   *
+   * @param array The values
+   * @return A new (mutable) list of the boxed values
    */
   public static List<Integer> asList(int[] array) {
     List<Integer> l = new ArrayList<>();
@@ -677,6 +908,12 @@ public class ArrayUtils  {
   }
 
 
+  /**
+   * Copies a collection of Doubles into a new primitive array, in iteration order.
+   *
+   * @param d The values; must not contain null
+   * @return A new double array
+   */
   public static double[] asPrimitiveDoubleArray(Collection<Double> d) {
     double[] newD = new double[d.size()];
     int i = 0;
@@ -687,6 +924,12 @@ public class ArrayUtils  {
   }
 
 
+  /**
+   * Copies a collection of Integers into a new primitive array, in iteration order.
+   *
+   * @param d The values; must not contain null
+   * @return A new int array
+   */
   public static int[] asPrimitiveIntArray(Collection<Integer> d) {
     int[] newI = new int[d.size()];
     int i = 0;
@@ -696,6 +939,12 @@ public class ArrayUtils  {
     return newI;
   }
 
+  /**
+   * Returns a copy of the array.
+   *
+   * @param arr The array to copy
+   * @return A new array with the same contents, or null if {@code arr} is null
+   */
   public static long[] copy(long[] arr) {
     if (arr == null) { return null; }
     long[] newArr = new long[arr.length];
@@ -703,6 +952,12 @@ public class ArrayUtils  {
     return newArr;
   }
 
+  /**
+   * Returns a copy of the array.
+   *
+   * @param i The array to copy
+   * @return A new array with the same contents, or null if {@code i} is null
+   */
   public static int[] copy(int[] i) {
     if (i == null) { return null; }
     int[] newI = new int[i.length];
@@ -710,6 +965,12 @@ public class ArrayUtils  {
     return newI;
   }
 
+  /**
+   * Returns a deep copy of the 2D array.
+   *
+   * @param i The array to copy
+   * @return A new array with copies of each row, or null if {@code i} is null
+   */
   public static int[][] copy(int[][] i) {
     if (i == null) { return null; }
     int[][] newI = new int[i.length][];
@@ -720,6 +981,12 @@ public class ArrayUtils  {
   }
 
 
+  /**
+   * Returns a copy of the array.
+   *
+   * @param arr The array to copy
+   * @return A new array with the same contents, or null if {@code arr} is null
+   */
   public static short[] copy(short[] arr) {
     if (arr == null) { return null; }
     short[] newArr = new short[arr.length];
@@ -727,6 +994,12 @@ public class ArrayUtils  {
     return newArr;
   }
 
+  /**
+   * Returns a copy of the array.
+   *
+   * @param d The array to copy
+   * @return A new array with the same contents, or null if {@code d} is null
+   */
   public static double[] copy(double[] d) {
     if (d == null) { return null; }
     double[] newD = new double[d.length];
@@ -734,6 +1007,12 @@ public class ArrayUtils  {
     return newD;
   }
 
+  /**
+   * Returns a deep copy of the 2D array.
+   *
+   * @param d The array to copy
+   * @return A new array with copies of each row, or null if {@code d} is null
+   */
   public static double[][] copy(double[][] d) {
     if (d == null) { return null; }
     double[][] newD = new double[d.length][];
@@ -743,6 +1022,12 @@ public class ArrayUtils  {
     return newD;
   }
 
+  /**
+   * Returns a deep copy of the 3D array.
+   *
+   * @param d The array to copy
+   * @return A new array with deep copies of each element, or null if {@code d} is null
+   */
   public static double[][][] copy(double[][][] d) {
     if (d == null) { return null; }
     double[][][] newD = new double[d.length][][];
@@ -752,6 +1037,12 @@ public class ArrayUtils  {
     return newD;
   }
 
+  /**
+   * Returns a copy of the array.
+   *
+   * @param d The array to copy
+   * @return A new array with the same contents, or null if {@code d} is null
+   */
   public static float[] copy(float[] d) {
     if (d == null) { return null; }
     float[] newD = new float[d.length];
@@ -759,6 +1050,12 @@ public class ArrayUtils  {
     return newD;
   }
 
+  /**
+   * Returns a deep copy of the 2D array.
+   *
+   * @param d The array to copy
+   * @return A new array with copies of each row, or null if {@code d} is null
+   */
   public static float[][] copy(float[][] d) {
     if (d == null) { return null; }
     float[][] newD = new float[d.length][];
@@ -768,6 +1065,12 @@ public class ArrayUtils  {
     return newD;
   }
 
+  /**
+   * Returns a deep copy of the 3D array.
+   *
+   * @param d The array to copy
+   * @return A new array with deep copies of each element, or null if {@code d} is null
+   */
   public static float[][][] copy(float[][][] d) {
     if (d == null) { return null; }
     float[][][] newD = new float[d.length][][];
@@ -777,6 +1080,13 @@ public class ArrayUtils  {
     return newD;
   }
 
+  /**
+   * Returns a string representation of a 2D double array, with each row
+   * formatted by {@link Arrays#toString(double[])}.
+   *
+   * @param b The array
+   * @return A string such as {@code [[1.0, 2.0],[3.0]]}
+   */
   public static String toString(double[][] b) {
     StringBuilder result = new StringBuilder("[");
     for (int i = 0; i < b.length; i++) {
@@ -788,6 +1098,13 @@ public class ArrayUtils  {
     return result.toString();
   }
 
+  /**
+   * Returns a string representation of a 2D boolean array, with each row
+   * formatted by {@link Arrays#toString(boolean[])}.
+   *
+   * @param b The array
+   * @return A string such as {@code [[true, false],[true]]}
+   */
   public static String toString(boolean[][] b) {
     StringBuilder result = new StringBuilder("[");
     for (int i = 0; i < b.length; i++) {
@@ -799,26 +1116,63 @@ public class ArrayUtils  {
     return result.toString();
   }
 
+  /**
+   * Converts an array of Longs to primitives, mapping null elements to 0.
+   *
+   * @param in The array to convert
+   * @return A new primitive array, or null if {@code in} is null
+   */
   public static long[] toPrimitive(Long[] in) {
     return toPrimitive(in,0L);
   }
 
+  /**
+   * Converts an array of Integers to primitives, mapping null elements to 0.
+   *
+   * @param in The array to convert
+   * @return A new primitive array, or null if {@code in} is null
+   */
   public static int[] toPrimitive(Integer[] in) {
     return toPrimitive(in,0);
   }
 
+  /**
+   * Converts an array of Shorts to primitives, mapping null elements to 0.
+   *
+   * @param in The array to convert
+   * @return A new primitive array, or null if {@code in} is null
+   */
   public static short[] toPrimitive(Short[] in) {
     return toPrimitive(in,(short)0);
   }
 
+  /**
+   * Converts an array of Characters to primitives, mapping null elements to {@code (char) 0}.
+   *
+   * @param in The array to convert
+   * @return A new primitive array, or null if {@code in} is null
+   */
   public static char[] toPrimitive(Character[] in) {
     return toPrimitive(in,(char)0);
   }
 
+  /**
+   * Converts an array of Doubles to primitives, mapping null elements to 0.0.
+   *
+   * @param in The array to convert
+   * @return A new primitive array, or null if {@code in} is null
+   */
   public static double[] toPrimitive(Double[] in) {
     return toPrimitive(in,0.0);
   }
 
+  /**
+   * Converts an array of Longs to primitives.
+   *
+   * @param in The array to convert
+   * @param valueForNull The value to use for null elements
+   * @return A new primitive array, or null if {@code in} is null
+   */
   public static long[] toPrimitive(Long[] in, long valueForNull) {
     if (in == null)
       return null;
@@ -830,6 +1184,13 @@ public class ArrayUtils  {
     return out;
   }
 
+  /**
+   * Converts an array of Integers to primitives.
+   *
+   * @param in The array to convert
+   * @param valueForNull The value to use for null elements
+   * @return A new primitive array, or null if {@code in} is null
+   */
   public static int[] toPrimitive(Integer[] in, int valueForNull) {
     if (in == null)
       return null;
@@ -841,6 +1202,13 @@ public class ArrayUtils  {
     return out;
   }
 
+   /**
+    * Converts an array of Shorts to primitives.
+    *
+    * @param in The array to convert
+    * @param valueForNull The value to use for null elements
+    * @return A new primitive array, or null if {@code in} is null
+    */
    public static short[] toPrimitive(Short[] in, short valueForNull) {
     if (in == null)
       return null;
@@ -852,6 +1220,13 @@ public class ArrayUtils  {
     return out;
   }
 
+   /**
+    * Converts an array of Characters to primitives.
+    *
+    * @param in The array to convert
+    * @param valueForNull The value to use for null elements
+    * @return A new primitive array, or null if {@code in} is null
+    */
    public static char[] toPrimitive(Character[] in, char valueForNull) {
     if (in == null)
       return null;
@@ -863,6 +1238,13 @@ public class ArrayUtils  {
     return out;
   }
 
+  /**
+   * Parses each string with {@link Double#parseDouble(String)}.
+   *
+   * @param in The strings to parse
+   * @return A new array of the parsed values
+   * @throws NumberFormatException if a string is not a parsable double
+   */
   public static double[] toDoubleArray(String[] in) {
     double[] ret = new double[in.length];
     for (int i = 0; i < in.length; i++)
@@ -871,6 +1253,13 @@ public class ArrayUtils  {
     return ret;
   }
 
+  /**
+   * Converts an array of Doubles to primitives.
+   *
+   * @param in The array to convert
+   * @param valueForNull The value to use for null elements
+   * @return A new primitive array, or null if {@code in} is null
+   */
   public static double[] toPrimitive(Double[] in, double valueForNull) {
     if (in == null)
       return null;
@@ -888,6 +1277,12 @@ public class ArrayUtils  {
    * considered, and so on. This is the array version of
    * {@link edu.stanford.nlp.util.CollectionUtils#compareLists}
    * and uses the same logic when the arrays are of different lengths.
+   *
+   * @param <T> The element type
+   * @param first The first array
+   * @param second The second array
+   * @return A negative number, zero, or a positive number as {@code first} is
+   *     less than, equal to, or greater than {@code second}
    */
   public static <T extends Comparable<T>> int compareArrays(T[] first, T[] second) {
     List<T> firstAsList = Arrays.asList(first);
@@ -912,6 +1307,7 @@ public class ArrayUtils  {
   /**
    * Returns the index of the first occurrence of the specified element in this array starting at the specified index,
    *   or -1 if this array does not contain the element.
+   * @param <T> The element type
    * @param array Array to search
    * @param object Object to look for
    * @param startIndex Start index
@@ -929,6 +1325,7 @@ public class ArrayUtils  {
   /**
    * Returns the index of the first occurrence of the specified element in this array,
    *   or -1 if this array does not contain the element.
+   * @param <T> The element type
    * @param array Array to search
    * @param object Object to look for
    * @return index of the specified element in the array, or -1 if the array does not contain the element
@@ -937,18 +1334,30 @@ public class ArrayUtils  {
     return indexOf(array, object, 0);
   }
 
+  /**
+   * Finds the starting indices of occurrences of {@code tofind} in {@code tokens},
+   * comparing elements with {@code equals}.  See
+   * {@link #getSubListIndex(Object[], Object[], Predicate)}.
+   *
+   * @param tofind The array to search for
+   * @param tokens The array to search in
+   * @return The starting indices of the matches, or null if {@code tofind} is
+   *     longer than {@code tokens}
+   */
   public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens){
      return getSubListIndex(tofind, tokens, (o1) -> o1.first().equals(o1.second()));
   }
 
   /**
    * If tofind is a part of tokens, it finds the ****starting index***** of tofind in tokens
-   * If tofind is not a sub-array of tokens, then it returns null
+   * of each occurrence.
+   * If tofind is longer than tokens, it returns null; otherwise, if tofind is not
+   * a sub-array of tokens, it returns an empty list.
    * note that tokens sublist should have the exact elements and order as in tofind
    * @param tofind array you want to find in tokens
-   * @param tokens
+   * @param tokens array to search in
    * @param matchingFunction function that takes (tofindtoken, token) pair and returns whether they match
-   * @return starting index of the sublist
+   * @return starting indices of the matching sublists
    */
   public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens, Predicate<Pair> matchingFunction){
     if(tofind.length > tokens.length)
@@ -1014,6 +1423,17 @@ public class ArrayUtils  {
     return ar2;
   }
 
+  /**
+   * Returns a new array, of the same component type, holding the elements of
+   * {@code arr} from {@code startindexInclusive} to {@code endindexExclusive}.
+   * Indices out of range are clipped to the array bounds; an empty array is
+   * returned if the range is empty or starts past the end.
+   *
+   * @param arr The array to copy from
+   * @param startindexInclusive Index of the first element to copy
+   * @param endindexExclusive Index one past the last element to copy
+   * @return The subarray, or null if {@code arr} is null
+   */
   public static Object[] subArray(Object[] arr, int startindexInclusive, int endindexExclusive){
     if(arr == null)
       return arr;
@@ -1029,6 +1449,15 @@ public class ArrayUtils  {
     return b;
   }
 
+  /**
+   * Compares two boolean arrays lexicographically, with false before true.
+   * If one array is a prefix of the other, the shorter one comes first.
+   *
+   * @param a1 The first array
+   * @param a2 The second array
+   * @return A negative number, zero, or a positive number as {@code a1} is less than,
+   *     equal to, or greater than {@code a2}
+   */
   public static int compareBooleanArrays(boolean[] a1, boolean[] a2) {
     int len = Math.min(a1.length, a2.length);
     for (int i = 0; i < len; i++) {
@@ -1041,6 +1470,13 @@ public class ArrayUtils  {
     return 0;
   }
 
+  /**
+   * Joins the values of the array into a string, separated by {@code glue}.
+   *
+   * @param doubles The values
+   * @param glue The separator to put between values
+   * @return The joined string (empty for an empty array)
+   */
   public static String toString(double[] doubles, String glue) {
     String s = "";
     for(int i = 0; i < doubles.length; i++){

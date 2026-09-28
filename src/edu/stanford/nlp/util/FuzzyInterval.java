@@ -19,7 +19,7 @@ public class FuzzyInterval<E extends FuzzyInterval.FuzzyComparable<E>> extends I
   public static interface FuzzyComparable<T> extends Comparable<T> {
     /**
      * Returns whether this object is comparable with another object
-     * @param other
+     * @param other The object to compare with
      * @return Returns true if two objects are comparable, false otherwise
      */
     boolean isComparable(T other);
@@ -29,10 +29,30 @@ public class FuzzyInterval<E extends FuzzyInterval.FuzzyComparable<E>> extends I
     super(a,b,flags);
   }
 
+  /**
+   * Create an interval with the specified endpoints in the specified order.
+   * Returns null if a does not come before b according to compareTo.
+   *
+   * @param a start endpoint
+   * @param b end endpoint
+   * @param <E> type of the interval endpoints
+   * @return FuzzyInterval with endpoints in specified order, null if a comes after b
+   */
   public static <E extends FuzzyComparable<E>> FuzzyInterval<E> toInterval(E a, E b) {
     return toInterval(a,b,0);
   }
 
+  /**
+   * Create an interval with the specified endpoints in the specified order,
+   * using the specified flags.  Returns null if a does not come before b
+   * according to compareTo.
+   *
+   * @param a start endpoint
+   * @param b end endpoint
+   * @param flags flags characterizing the interval
+   * @param <E> type of the interval endpoints
+   * @return FuzzyInterval with endpoints in specified order, null if a comes after b
+   */
   public static <E extends FuzzyComparable<E>> FuzzyInterval<E> toInterval(E a, E b, int flags) {
     int comp = a.compareTo(b);
     if (comp <= 0) {
@@ -42,10 +62,28 @@ public class FuzzyInterval<E extends FuzzyInterval.FuzzyComparable<E>> extends I
     }
   }
 
+  /**
+   * Create an interval with the specified endpoints, reordering them as needed.
+   *
+   * @param a one of the endpoints
+   * @param b the other endpoint
+   * @param <E> type of the interval endpoints
+   * @return FuzzyInterval with endpoints re-ordered as needed
+   */
   public static <E extends FuzzyComparable<E>> FuzzyInterval<E> toValidInterval(E a, E b) {
     return toValidInterval(a,b,0);
   }
 
+  /**
+   * Create an interval with the specified endpoints, reordering them as needed,
+   * using the specified flags.
+   *
+   * @param a one of the endpoints
+   * @param b the other endpoint
+   * @param flags flags characterizing the interval
+   * @param <E> type of the interval endpoints
+   * @return FuzzyInterval with endpoints re-ordered as needed
+   */
   public static <E extends FuzzyComparable<E>> FuzzyInterval<E> toValidInterval(E a, E b, int flags) {
     int comp = a.compareTo(b);
     if (comp <= 0) {

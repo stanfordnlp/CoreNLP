@@ -10,8 +10,14 @@ import java.util.regex.Pattern;
  * @author John Bauer
  */
 public class RegexStringFilter implements Predicate<String>, Serializable {
+  /** The compiled regex, which must match the whole of an accepted string. */
   final Pattern pattern;
 
+  /**
+   * Creates a filter accepting strings which entirely match the given regex.
+   *
+   * @param pattern the regex to compile
+   */
   public RegexStringFilter(String pattern) {
     this.pattern = Pattern.compile(pattern);
   }

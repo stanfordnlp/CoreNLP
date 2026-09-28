@@ -9,18 +9,26 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Dan Klein (klein@cs.stanford.edu)
  * @author Kayur Patel (kdpatel@cs)
+ * @param <K> The key type of the maps made
+ * @param <V> The value type of the maps made
  */
 public abstract class MapFactory<K,V> implements Serializable {
 
   // allow people to write subclasses
+  /** Constructor for subclasses. */
   protected MapFactory() {
   }
 
   private static final long serialVersionUID = 4529666940763477360L;
 
+  /** A MapFactory that makes HashMaps.  See {@link #hashMapFactory()} for a typed version. */
   @SuppressWarnings("unchecked")
   public static final MapFactory HASH_MAP_FACTORY = new HashMapFactory();
 
+  /**
+   * A MapFactory that makes IdentityHashMaps.  See {@link #identityHashMapFactory()}
+   * for a typed version.
+   */
   @SuppressWarnings("unchecked")
   public static final MapFactory IDENTITY_HASH_MAP_FACTORY = new IdentityHashMapFactory();
 
@@ -36,6 +44,7 @@ public abstract class MapFactory<K,V> implements Serializable {
   @SuppressWarnings("unchecked")
   private static final MapFactory ARRAY_MAP_FACTORY = new ArrayMapFactory();
 
+  /** A MapFactory that makes ConcurrentHashMaps. */
   public static final MapFactory CONCURRENT_MAP_FACTORY = new ConcurrentMapFactory();
 
   /** Return a MapFactory that returns a HashMap.
@@ -44,6 +53,8 @@ public abstract class MapFactory<K,V> implements Serializable {
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
    *
+   *  @param <K> The key type of the maps made
+   *  @param <V> The value type of the maps made
    *  @return A MapFactory that makes a HashMap.
    */
   @SuppressWarnings("unchecked")
@@ -57,7 +68,9 @@ public abstract class MapFactory<K,V> implements Serializable {
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
    *
-   *  @return A MapFactory that makes a HashMap.
+   *  @param <K> The key type of the maps made
+   *  @param <V> The value type of the maps made
+   *  @return A MapFactory that makes an IdentityHashMap.
    */
   @SuppressWarnings("unchecked")
   public static <K,V> MapFactory<K,V> identityHashMapFactory() {
@@ -70,6 +83,8 @@ public abstract class MapFactory<K,V> implements Serializable {
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
    *
+   *  @param <K> The key type of the maps made
+   *  @param <V> The value type of the maps made
    *  @return A MapFactory that makes a WeakHashMap.
    */
   @SuppressWarnings("unchecked")
@@ -83,6 +98,8 @@ public abstract class MapFactory<K,V> implements Serializable {
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
    *
+   *  @param <K> The key type of the maps made
+   *  @param <V> The value type of the maps made
    *  @return A MapFactory that makes an TreeMap.
    */
   @SuppressWarnings("unchecked")
@@ -92,6 +109,11 @@ public abstract class MapFactory<K,V> implements Serializable {
 
   /**
    * Return a MapFactory that returns a TreeMap with the given Comparator.
+   *
+   * @param <K> The key type of the maps made
+   * @param <V> The value type of the maps made
+   * @param comparator The comparator used to order the keys of the maps and sets made
+   * @return A MapFactory that makes a TreeMap with the given Comparator
    */
   public static <K,V> MapFactory<K,V> treeMapFactory(Comparator<? super K> comparator) {
     return new TreeMapFactory<>(comparator);
@@ -103,6 +125,8 @@ public abstract class MapFactory<K,V> implements Serializable {
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
    *
+   *  @param <K> The key type of the maps made
+   *  @param <V> The value type of the maps made
    *  @return A MapFactory that makes an LinkedHashMap.
    */
   @SuppressWarnings("unchecked")
@@ -116,6 +140,8 @@ public abstract class MapFactory<K,V> implements Serializable {
    *  callers can call this method with apparent type safety because this
    *  method takes the hit for the cast.
    *
+   *  @param <K> The key type of the maps made
+   *  @param <V> The value type of the maps made
    *  @return A MapFactory that makes an ArrayMap.
    */
   @SuppressWarnings("unchecked")
@@ -436,23 +462,44 @@ public abstract class MapFactory<K,V> implements Serializable {
 
   /**
    * A set with the same {@code K} parameterization of the Maps.
+   *
+   * @return A new empty set of the sort corresponding to this factory's maps
    */
   public abstract Set<K> newSet();
 
   /**
    * A set with the same {@code K} parameterization, but initialized to the given collection.
+   *
+   * @param init The elements to put in the set
+   * @return A new set of the sort corresponding to this factory's maps
    */
   public abstract Set<K> newSet(Collection<K> init);
 
   /**
    * A method to get a parameterized (genericized) map out.
+   * The argument is not modified or copied: a new empty map of this factory's
+   * sort is returned.
    *
+   * @param <K1> The key type of the map
+   * @param <V1> The value type of the map
    * @param map A type-parameterized {@link Map} argument
    * @return A {@link Map} with type-parameterization identical to that of
    *         the argument.
    */
   public abstract <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map);
 
+  /**
+   * A method to get a parameterized (genericized) map out, with an initial capacity.
+   * The argument is not modified or copied: a new empty map of this factory's
+   * sort is returned.
+   *
+   * @param <K1> The key type of the map
+   * @param <V1> The value type of the map
+   * @param map A type-parameterized {@link Map} argument
+   * @param initCapacity The initial capacity of the map
+   * @return A new {@link Map} with type-parameterization identical to that of
+   *         the argument.
+   */
   public abstract <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map, int initCapacity);
 
 }

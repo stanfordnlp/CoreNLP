@@ -37,6 +37,12 @@ public class Iterables {
    * Transformed view of the given iterable.  Returns the output
    * of the given function when applied to each element of the
    * iterable.
+   *
+   * @param <K> the element type of the input iterable
+   * @param <V> the element type of the transformed view
+   * @param iterable the underlying iterable
+   * @param function the function applied to each element
+   * @return a lazily transformed view of {@code iterable}
    */
   public static <K,V> Iterable<V> transform(
       final Iterable<K> iterable, final Function<? super K,? extends V> function) {
@@ -60,7 +66,12 @@ public class Iterables {
 
   /**
    * Filtered view of the given iterable.  Returns only those elements
-   * from the iterable for which the given Function returns true.
+   * from the iterable for which the given Predicate returns true.
+   *
+   * @param <T> the element type
+   * @param iterable the underlying iterable
+   * @param accept the predicate an element must satisfy to be returned
+   * @return a lazily filtered view of {@code iterable}
    */
   public static <T> Iterable<T> filter(
       final Iterable<T> iterable, final Predicate<T> accept) {
@@ -114,6 +125,11 @@ public class Iterables {
 
   /**
    * Casts all values in the given Iterable to the given type.
+   *
+   * @param <T> the target type
+   * @param iterable the underlying iterable
+   * @param type the class to cast each element to
+   * @return a view of {@code iterable} whose iterator throws ClassCastException on an element not of {@code type}
    */
   public static <T> Iterable<T> cast(
       final Iterable<?> iterable, final Class<? extends T> type) {
@@ -137,6 +153,11 @@ public class Iterables {
 
   /**
    * Returns a shortened view of an iterator.  Returns at most <code>max</code> elements.
+   *
+   * @param <T> the element type
+   * @param array the underlying array
+   * @param max the maximum number of elements to return
+   * @return a view of the first (up to) {@code max} elements; see {@link #take(Iterable, int)}
    */
   public static <T> Iterable<T> take(T[] array, int max) {
     return take(Arrays.asList(array),max);
@@ -144,6 +165,14 @@ public class Iterables {
 
   /**
    * Returns a shortened view of an iterator.  Returns at most <code>max</code> elements.
+   * The returned Iterable wraps a single iterator of {@code iterable}, so it
+   * can only be iterated through once; each call to {@code iterator()} continues
+   * from where the previous one stopped (and may return up to {@code max} more elements).
+   *
+   * @param <T> the element type
+   * @param iterable the underlying iterable
+   * @param max the maximum number of elements to return
+   * @return a view of the first (up to) {@code max} elements
    */
   public static <T> Iterable<T> take(
       final Iterable<T> iterable, final int max) {
@@ -178,6 +207,11 @@ public class Iterables {
 
   /**
    * Returns a view of the given data, ignoring the first toDrop elements.
+   *
+   * @param <T> the element type
+   * @param array the underlying array
+   * @param toDrop the number of leading elements to skip
+   * @return a view of the elements after the first {@code toDrop}; see {@link #drop(Iterable, int)}
    */
   public static <T> Iterable<T> drop(T[] array, int toDrop) {
     return drop(Arrays.asList(array),toDrop);
@@ -185,6 +219,13 @@ public class Iterables {
 
   /**
    * Returns a view of the given data, ignoring the first toDrop elements.
+   * The returned Iterable wraps a single iterator of {@code iterable}, so it
+   * can only be iterated through once.
+   *
+   * @param <T> the element type
+   * @param iterable the underlying iterable
+   * @param toDrop the number of leading elements to skip
+   * @return a view of the elements after the first {@code toDrop}
    */
   public static <T> Iterable<T> drop(
       final Iterable<T> iterable, final int toDrop) {
@@ -227,6 +268,12 @@ public class Iterables {
   /**
    * Chains together an Iterable of Iterables after transforming each one.
    * Equivalent to Iterables.transform(Iterables.chain(iterables),trans);
+   *
+   * @param <T> the element type of the inner iterables
+   * @param <U> the element type of the result
+   * @param iterables the iterables to chain
+   * @param trans the function applied to each element
+   * @return a lazily chained and transformed view
    */
   public static <T,U> Iterable<U> flatMap(final Iterable<? extends Iterable<T>> iterables, Function<? super T,U> trans) {
     return transform(chain(iterables),trans);
@@ -236,6 +283,10 @@ public class Iterables {
    * Chains together a set of Iterables of compatible types.  Returns all
    * elements of the first iterable, then all of the second, then the third,
    * etc.
+   *
+   * @param <T> the element type
+   * @param iterables the iterables to chain, in order
+   * @return a lazily chained view of all the elements
    */
   public static <T> Iterable<T> chain(final Iterable<? extends Iterable<T>> iterables) {
     return new Iterable<T>() {
@@ -272,6 +323,10 @@ public class Iterables {
   /**
    * Chains together all Iterables of type T as given in an array or
    * varargs parameter.
+   *
+   * @param <T> the element type
+   * @param iterables the iterables to chain, in order
+   * @return a lazily chained view of all the elements
    */
   public static <T> Iterable<T> chain(final Iterable<T> ... iterables) {
     return chain(Arrays.asList(iterables));
@@ -280,6 +335,10 @@ public class Iterables {
   /**
    * Chains together all arrays of type T[] as given in an array or
    * varargs parameter.
+   *
+   * @param <T> the element type
+   * @param arrays the arrays to chain, in order
+   * @return a lazily chained view of all the elements
    */
   public static <T> Iterable<T> chain(final T[] ... arrays) {
     LinkedList<Iterable<T>> iterables = new LinkedList<>();
@@ -293,6 +352,12 @@ public class Iterables {
    * Zips two iterables into one iterable over Pairs of corresponding
    * elements in the two underlying iterables.  Ends when the shorter
    * iterable ends.
+   *
+   * @param <T1> the type of the first elements
+   * @param <T2> the type of the second elements
+   * @param iter1 the source of the first elements
+   * @param iter2 the source of the second elements
+   * @return an iterable over Pairs of corresponding elements
    */
   public static <T1, T2> Iterable<Pair<T1,T2>> zip(
       final Iterable<T1> iter1, final Iterable<T2> iter2) {
@@ -304,6 +369,12 @@ public class Iterables {
    * Zips two iterables into one iterable over Pairs of corresponding
    * elements in the two underlying iterables.  Ends when the shorter
    * iterable ends.
+   *
+   * @param <T1> the type of the first elements
+   * @param <T2> the type of the second elements
+   * @param iter the source of the first elements
+   * @param array the source of the second elements
+   * @return an iterable over Pairs of corresponding elements
    */
   public static <T1,T2> Iterable<Pair<T1,T2>> zip(
       Iterable<T1> iter, T2 array[]) {
@@ -315,6 +386,12 @@ public class Iterables {
    * Zips two iterables into one iterable over Pairs of corresponding
    * elements in the two underlying iterables.  Ends when the shorter
    * iterable ends.
+   *
+   * @param <T1> the type of the first elements
+   * @param <T2> the type of the second elements
+   * @param array the source of the first elements
+   * @param iter the source of the second elements
+   * @return an iterable over Pairs of corresponding elements
    */
   public static <T1, T2> Iterable<Pair<T1,T2>> zip(
       T1 array[], Iterable<T2> iter) {
@@ -326,6 +403,12 @@ public class Iterables {
    * Zips two iterables into one iterable over Pairs of corresponding
    * elements in the two underlying iterables.  Ends when the shorter
    * iterable ends.
+   *
+   * @param <T1> the type of the first elements
+   * @param <T2> the type of the second elements
+   * @param array1 the source of the first elements
+   * @param array2 the source of the second elements
+   * @return an iterable over Pairs of corresponding elements
    */
   public static <T1, T2> Iterable<Pair<T1,T2>> zip(
       T1 array1[], T2 array2[]) {
@@ -336,6 +419,12 @@ public class Iterables {
   /**
    * Zips up two iterators into one iterator over Pairs of corresponding
    * elements.  Ends when the shorter iterator ends.
+   *
+   * @param <T1> the type of the first elements
+   * @param <T2> the type of the second elements
+   * @param iter1 the source of the first elements
+   * @param iter2 the source of the second elements
+   * @return an iterator over Pairs of corresponding elements; {@code remove()} removes from both iterators
    */
   public static <T1,T2> Iterator<Pair<T1,T2>> zip(
       final Iterator<T1> iter1, final Iterator<T2> iter2) {
@@ -368,6 +457,10 @@ public class Iterables {
      * Returns -1 if the value of a should come before the value of b,
      * +1 if the value of b should come before the value of a, or 0 if
      * the two should be merged together.
+     *
+     * @param a a value from the first iterator
+     * @param b a value from the second iterator
+     * @return a negative, positive or zero value as described above
      */
     public int compare(V1 a, V2 b);
   }
@@ -384,6 +477,16 @@ public class Iterables {
    *
    * The comparator will always be passed elements from the first iter as
    * the first argument.
+   *
+   * The returned Iterable wraps a single iterator of each input, so it can only
+   * be iterated through once.
+   *
+   * @param <V1> the element type of the first iterable
+   * @param <V2> the element type of the second iterable
+   * @param iter1 the first sorted iterable
+   * @param iter2 the second sorted iterable
+   * @param comparator decides which iterator to advance, or that the elements match
+   * @return an iterable over the matching pairs
    */
   public static <V1,V2> Iterable<Pair<V1,V2>> merge(
       final Iterable<V1> iter1, final Iterable<V2> iter2,
@@ -452,6 +555,12 @@ public class Iterables {
   /**
    * Same as {@link #merge(Iterable, Iterable, IncrementComparator)} but using
    * the given (symmetric) comparator.
+   *
+   * @param <V> the element type
+   * @param iter1 the first sorted iterable
+   * @param iter2 the second sorted iterable
+   * @param comparator decides which iterator to advance, or that the elements match
+   * @return an iterable over the matching pairs
    */
   public static <V> Iterable<Pair<V,V>> merge(
       final Iterable<V> iter1, final Iterable<V> iter2,
@@ -472,6 +581,16 @@ public class Iterables {
    *
    * This is used, e.g. to return lines from three input files that have
    * the same "key" as determined by the given comparator.
+   *
+   * @param <V1> the element type of the first iterable
+   * @param <V2> the element type of the second iterable
+   * @param <V3> the element type of the third iterable
+   * @param iter1 the first sorted iterable
+   * @param iter2 the second sorted iterable
+   * @param iter3 the third sorted iterable
+   * @param comparatorA compares elements of {@code iter1} with elements of {@code iter2}
+   * @param comparatorB compares elements of {@code iter1} with elements of {@code iter3}
+   * @return an iterable over the matching triples
    */
   public static <V1,V2,V3> Iterable<Triple<V1,V2,V3>> merge(
       final Iterable<V1> iter1, final Iterable<V2> iter2, final Iterable<V3> iter3,
@@ -498,6 +617,13 @@ public class Iterables {
   /**
    * Same as {@link #merge(Iterable, Iterable, Iterable, IncrementComparator, IncrementComparator)}
    * but using the given (symmetric) comparator.
+   *
+   * @param <V> the element type
+   * @param iter1 the first sorted iterable
+   * @param iter2 the second sorted iterable
+   * @param iter3 the third sorted iterable
+   * @param comparator decides which iterator to advance, or that the elements match
+   * @return an iterable over the matching triples
    */
   public static <V> Iterable<Triple<V,V,V>> merge(
       final Iterable<V> iter1, final Iterable<V> iter2, Iterable<V> iter3,
@@ -513,6 +639,13 @@ public class Iterables {
    * in the given comparator.  Each inner iterable will iterate over consecutive
    * items from the input until the comparator says that the next item is not
    * equal to the previous.
+   *
+   * A null element ends the current group and is itself dropped.
+   *
+   * @param <V> the element type
+   * @param iterable the input
+   * @param comparator determines whether consecutive elements belong in the same group
+   * @return an iterable over the groups, each of which should be fully consumed before moving to the next
    */
   public static <V> Iterable<Iterable<V>> group(final Iterable<V> iterable,
       final Comparator<V> comparator) {
@@ -577,6 +710,11 @@ public class Iterables {
    * Returns a string representation of the contents of calling toString
    * on each element of the given iterable, joining the elements together
    * with the given glue.
+   *
+   * @param <E> the element type
+   * @param iter the elements to join
+   * @param glue the separator placed between elements
+   * @return the joined string
    */
   public static <E> String toString(Iterable<E> iter, String glue) {
     StringBuilder builder = new StringBuilder();
@@ -592,6 +730,7 @@ public class Iterables {
   /**
    * Sample k items uniformly from an Iterable of size n (without replacement).
    *
+   * @param <T>    The element type.
    * @param items  The items from which to sample.
    * @param n      The total number of items in the Iterable.
    * @param k      The number of items to sample.
@@ -658,6 +797,10 @@ public class Iterables {
 
   /**
    * Creates an ArrayList containing all of the Objects returned by the given Iterator.
+   *
+   * @param <T> the element type
+   * @param iter the iterator, which is exhausted
+   * @return a new ArrayList of the iterator's elements
    */
   public static <T> ArrayList<T> asArrayList(Iterator<? extends T> iter) {
     ArrayList<T> al = new ArrayList<>();
@@ -666,6 +809,10 @@ public class Iterables {
 
   /**
    * Creates a HashSet containing all of the Objects returned by the given Iterator.
+   *
+   * @param <T> the element type
+   * @param iter the iterator, which is exhausted
+   * @return a new HashSet of the iterator's elements
    */
   public static <T> HashSet<T> asHashSet(Iterator<? extends T> iter) {
     HashSet<T> hs = new HashSet<>();
@@ -675,6 +822,11 @@ public class Iterables {
   /**
    * Creates a new Collection from the given CollectionFactory, and adds all of the Objects
    * returned by the given Iterator.
+   *
+   * @param <E> the element type
+   * @param iter the iterator, which is exhausted
+   * @param cf the factory used to create the Collection
+   * @return the new Collection containing the iterator's elements
    */
   public static <E> Collection<E> asCollection(Iterator<? extends E> iter, CollectionFactory<E> cf) {
     Collection<E> c = cf.newCollection();
@@ -684,6 +836,9 @@ public class Iterables {
   /**
    * Adds all of the Objects returned by the given Iterator into the given Collection.
    *
+   * @param <T> the element type
+   * @param iter the iterator, which is exhausted
+   * @param c the Collection to add to
    * @return the given Collection
    */
   public static <T> Collection<T> addAll(Iterator<? extends T> iter, Collection<T> c) {
@@ -695,6 +850,8 @@ public class Iterables {
 
   /**
    * For internal debugging purposes only.
+   *
+   * @param args ignored
    */
   public static void main(String[] args) {
     String[] test = {"a", "b", "c"};

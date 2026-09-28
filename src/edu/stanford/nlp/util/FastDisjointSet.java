@@ -8,6 +8,7 @@ import java.util.*;
  *
  * @author Dan Klein
  * @version 4/17/01
+ * @param <T> the type of the set elements
  */
 public class FastDisjointSet<T> implements DisjointSet<T> {
 
@@ -68,6 +69,11 @@ public class FastDisjointSet<T> implements DisjointSet<T> {
     linkElements(findElement(e), findElement(f));
   }
 
+  /**
+   * Creates a disjoint set in which each given object starts in its own singleton set.
+   *
+   * @param objectSet the objects in the disjoint set; no others can be added later
+   */
   public FastDisjointSet(Set<? extends T> objectSet) {
     objectToElement = Generics.newHashMap();
     for (T o : objectSet) {

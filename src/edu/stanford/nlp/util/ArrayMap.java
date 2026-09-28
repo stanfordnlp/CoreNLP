@@ -8,13 +8,19 @@ import java.util.*;
  *
  * @author Dan Klein
  * @author Roger Levy
+ *
+ * @param <K> The type of the keys
+ * @param <V> The type of the values
  */
 public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  /** The entries; only the first {@code size} slots are in use. */
   private Entry<K,V>[] entryArray;
+  /** The length of {@code entryArray}. */
   private int capacity;
+  /** The number of entries in the map. */
   private int size;
 
   static final class Entry<K,V> implements Map.Entry<K,V>, Serializable {
@@ -69,6 +75,7 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
   }
 
 
+  /** Creates an empty map with an initial capacity of 2. */
   @SuppressWarnings("unchecked")
   public ArrayMap() {
     size = 0;
@@ -76,6 +83,11 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
     entryArray = new Entry[2];
   }
 
+  /**
+   * Creates an empty map with the given initial capacity.
+   *
+   * @param capacity The initial length of the backing array
+   */
   @SuppressWarnings("unchecked")
   public ArrayMap(int capacity) {
     size = 0;
@@ -83,6 +95,11 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
     entryArray = new Entry[capacity];
   }
 
+  /**
+   * Creates a map containing the entries of {@code m}.
+   *
+   * @param m The map whose entries are copied
+   */
   @SuppressWarnings("unchecked")
   public ArrayMap(Map<? extends K, ? extends V> m) {
 	  size = 0;
@@ -91,6 +108,14 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
 	  this.putAll(m);
   }
 
+  /**
+   * Creates a map from parallel arrays of keys and values.
+   * The keys are not checked for duplicates.
+   *
+   * @param keys The keys
+   * @param values The values; {@code values[i]} is the value for {@code keys[i]}
+   * @throws IllegalArgumentException if the arrays have different lengths
+   */
   @SuppressWarnings("unchecked")
   public ArrayMap(K[] keys, V[] values) {
     if (keys.length!=values.length) throw new IllegalArgumentException("different number of keys and values.");
@@ -102,10 +127,25 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
     }
   }
 
+  /**
+   * Creates an empty map with the default initial capacity.
+   *
+   * @param <K> The type of the keys
+   * @param <V> The type of the values
+   * @return A new empty ArrayMap
+   */
   public static <K, V> ArrayMap<K, V> newArrayMap() {
     return new ArrayMap<>();
   }
 
+  /**
+   * Creates an empty map with the given initial capacity.
+   *
+   * @param <K> The type of the keys
+   * @param <V> The type of the values
+   * @param capacity The initial length of the backing array
+   * @return A new empty ArrayMap
+   */
   public static <K, V> ArrayMap<K, V> newArrayMap(int capacity) {
     return new ArrayMap<>(capacity);
   }
@@ -198,6 +238,10 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
     return null;
   }
 
+  /**
+   * Cached value of {@link #hashCode()}; 0 means not yet computed.
+   * It is not reset when the map is modified.
+   */
   protected int hashCodeCache; // = 0;
 
   @Override

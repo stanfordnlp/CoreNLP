@@ -40,6 +40,14 @@ public class XMLUtils  {
 
   private XMLUtils() {} // only static methods
 
+  /**
+   * Returns a DocumentBuilderFactory configured against XXE attacks: DOCTYPE
+   * declarations are disallowed, external entities and DTDs are not loaded, and
+   * secure processing is on.  If a feature cannot be set, the error is logged
+   * and the factory is returned anyway.
+   *
+   * @return A new DocumentBuilderFactory
+   */
   public static DocumentBuilderFactory safeDocumentBuilderFactory() {
     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     try {
@@ -58,7 +66,10 @@ public class XMLUtils  {
 
   /**
    * Returns the text content of all nodes in the given file with the given tag.
+   * Parse errors are logged and give an empty or partial list.
    *
+   * @param f The XML file
+   * @param tag The element name to look for
    * @return List of String text contents of tags.
    */
   public static List<String> getTextContentFromTagsFromFile(File f, String tag) {
@@ -118,9 +129,12 @@ public class XMLUtils  {
 
 
   /**
-   * Returns the text content of all nodes in the given file with the given tag.
+   * Returns all elements in the given file with the given tag.
+   * Parse errors are logged and give an empty list.
    *
-   * @return List of String text contents of tags.
+   * @param f The XML file
+   * @param tag The element name to look for
+   * @return List of the matching elements
    */
   public static List<Element> getTagElementsFromFile(File f, String tag) {
     List<Element> sents = Generics.newArrayList();
@@ -166,7 +180,11 @@ public class XMLUtils  {
   /**
    * Returns the elements in the given file with the given tag associated with
    * the text content of the two previous siblings and two next siblings.
+   * This is {@link #getTagElementTriplesFromFileSAXException} with parse errors
+   * logged instead of thrown.
    *
+   * @param f The XML file
+   * @param tag The element name to look for
    * @return List of {@code Triple<String, Element, String>} Targeted elements surrounded
    * by the text content of the two previous siblings and two next siblings.
    */
@@ -183,9 +201,14 @@ public class XMLUtils  {
   /**
    * Returns the elements in the given file with the given tag associated with
    * the text content of the previous and next siblings up to max numIncludedSiblings.
+   * This is {@link #getTagElementTriplesFromFileNumBoundedSAXException} with parse
+   * errors logged instead of thrown.
    *
+   * @param f The XML file
+   * @param tag The element name to look for
+   * @param num The sibling bound, as for {@link #getTagElementTriplesFromFileNumBoundedSAXException}
    * @return List of {@code Triple<String, Element, String>} Targeted elements surrounded
-   * by the text content of the two previous siblings and two next siblings.
+   * by the text content of their previous and next siblings.
    */
   public static List<Triple<String, Element, String>> getTagElementTriplesFromFileNumBounded(File f,
                                                                                              String tag,
@@ -202,8 +225,11 @@ public class XMLUtils  {
   /**
    * Returns the elements in the given file with the given tag associated with
    * the text content of the two previous siblings and two next siblings.
+   * This calls {@link #getTagElementTriplesFromFileNumBoundedSAXException} with a bound of 2.
    *
-   * @throws SAXException if tag doesn't exist in the file.
+   * @param f The XML file
+   * @param tag The element name to look for
+   * @throws SAXException if the file cannot be parsed
    * @return List of {@code Triple<String, Element, String>} Targeted elements surrounded
    * by the text content of the two previous siblings and two next siblings.
    */
@@ -215,10 +241,15 @@ public class XMLUtils  {
   /**
    * Returns the elements in the given file with the given tag associated with
    * the text content of the previous and next siblings up to max numIncludedSiblings.
+   * The loops stop after {@code numIncludedSiblings + 1} siblings on each side.
+   * I/O and parser configuration errors are logged and give an empty or partial list.
    *
-   * @throws SAXException if tag doesn't exist in the file.
+   * @param f The XML file
+   * @param tag The element name to look for
+   * @param numIncludedSiblings The bound on the number of siblings used on each side
+   * @throws SAXException if the file cannot be parsed
    * @return List of {@code Triple<String, Element, String>} Targeted elements surrounded
-   * by the text content of the two previous siblings and two next siblings.
+   * by the concatenated text content of their previous and next siblings.
    */
   public static List<Triple<String, Element, String>> getTagElementTriplesFromFileNumBoundedSAXException(
       File f, String tag, int numIncludedSiblings) throws SAXException {
@@ -332,9 +363,16 @@ public class XMLUtils  {
   private static final Set<String> breakingTags = Generics.newHashSet(Arrays.asList(new String[] {"blockquote", "br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "li", "ol", "p", "pre", "ul", "tr", "td"}));
 
   /**
+   * Removes the tags from XML/HTML text, keeping the text between them.
+   * Read errors are logged and the text read so far is returned.
+   *
    * @param r       the reader to read the XML/HTML from
    * @param mapBack a List of Integers mapping the positions in the result buffer
-   *                to positions in the original Reader, will be cleared on receipt
+   *                to positions in the original Reader, will be cleared on receipt.
+   *                May be null.  An inserted line break maps to the negated
+   *                position of the tag that caused it.
+   * @param markLineBreaks If true, a newline is output for each block-level
+   *                tag such as {@code <p>} or {@code <br>}
    * @return the String containing the resulting text
    */
   public static String stripTags(Reader r, List<Integer> mapBack, boolean markLineBreaks) {
@@ -377,18 +415,36 @@ public class XMLUtils  {
     return result.toString();
   }
 
+  /**
+   * Returns whether a tag name is one of the block-level HTML tags
+   * that get a line break in {@link #stripTags}.  The check is case sensitive.
+   *
+   * @param tag The tag name, such as "p"
+   * @return Whether the tag is a breaking tag
+   */
   public static boolean isBreaking(String tag) {
     return breakingTags.contains(tag);
   }
 
+  /**
+   * Returns whether a tag is one of the block-level HTML tags
+   * that get a line break in {@link #stripTags}.  The check is case sensitive.
+   *
+   * @param tag The tag; must not be null
+   * @return Whether the tag's name is a breaking tag
+   */
   public static boolean isBreaking(XMLTag tag) {
     return breakingTags.contains(tag.name);
   }
 
   /**
    * Reads all text up to next XML tag and returns it as a String.
+   * The {@code '<'} that starts the tag is consumed but not returned.
+   * If the reader is not ready, nothing is read.
    *
+   * @param r The reader to read from
    * @return the String of the text read, which may be empty.
+   * @throws IOException if reading fails
    */
   public static String readUntilTag(Reader r) throws IOException {
     if (!r.ready()) {
@@ -404,7 +460,13 @@ public class XMLUtils  {
   }
 
   /**
+   * Reads a tag with {@link #readTag} and parses it into an XMLTag.
+   * Assumes that the tag's {@code '<'} character has already been read.
+   *
+   * @param r The reader to read from
    * @return the new XMLTag object, or null if couldn't be created
+   *         (at end of input, or if the tag failed to parse, which is logged)
+   * @throws IOException if reading fails
    */
   public static XMLTag readAndParseTag(Reader r) throws IOException {
     String s = readTag(r);
@@ -424,6 +486,14 @@ public class XMLUtils  {
   // on the Pattern javadoc.  Therefore, this should be safe as a static final variable.
   private static final Pattern xmlEscapingPattern = Pattern.compile("&.+?;");
 
+  /**
+   * Replaces named XML and HTML character entities with the characters they
+   * stand for.  Any text from an {@code &} to the next {@code ;} is treated
+   * as an entity; unrecognized entities, including numeric ones, become a space.
+   *
+   * @param s The string to unescape
+   * @return The unescaped string
+   */
   public static String unescapeStringForXML(String s) {
     StringBuilder result = new StringBuilder();
     Matcher m = xmlEscapingPattern.matcher(s);
@@ -1004,7 +1074,7 @@ public class XMLUtils  {
   /** Returns a String in which some XML special characters have been
    *  escaped. This just escapes attribute value ones, assuming that
    *  you're going to quote with double quotes.
-   *  That is, only " and & are escaped.
+   *  That is, only {@code "} and {@code &} are escaped.
    *
    *  @param in The String to escape
    *  @return The escaped String
@@ -1026,6 +1096,14 @@ public class XMLUtils  {
   }
 
 
+  /**
+   * Escapes the text between tags with {@link #escapeXML}, leaving the tags
+   * themselves unchanged.  If a tag cannot be parsed, the rest of the string
+   * after it is dropped.
+   *
+   * @param s A string containing text and XML tags
+   * @return The string with its text escaped
+   */
   public static String escapeTextAroundXMLTags(String s) {
     StringBuilder result = new StringBuilder();
     Reader r = new StringReader(s);
@@ -1050,6 +1128,10 @@ public class XMLUtils  {
 
   /**
    * return either the first space or the first nbsp
+   *
+   * @param haystack The string to search
+   * @param begin The index to start searching from
+   * @return The index of the first space or U+00A0 at or after {@code begin}, or -1 if there is none
    */
   public static int findSpace(String haystack, int begin) {
     int space = haystack.indexOf(' ', begin);
@@ -1064,6 +1146,9 @@ public class XMLUtils  {
     }
   }
 
+  /**
+   * A simple parse of a single XML tag string into its name and attributes.
+   */
   public static class XMLTag {
 
     /** Stores the complete string passed in as the tag on construction. */
@@ -1171,6 +1256,9 @@ public class XMLUtils  {
 
     /**
      * Given a list of attributes, return the first one that is non-null
+     *
+     * @param attributesList The attribute names to try, in order
+     * @return The value of the first attribute that has a non-null value, or null if none do
      */
     public String getFirstNonNullAttributeFromList(List<String> attributesList) {
       for (String attribute : attributesList) {
@@ -1185,12 +1273,13 @@ public class XMLUtils  {
 
   /**
    * Reads all text of the XML tag and returns it as a String.
-   * Assumes that a '<' character has already been read.
+   * Assumes that a {@code '<'} character has already been read.
    *
    * @param r The reader to read from
    * @return The String representing the tag, or null if one couldn't be read
    *         (i.e., EOF).  The returned item is a complete tag including angle
    *         brackets, such as {@code <TXT>}
+   * @throws IOException if reading fails
    */
   public static String readTag(Reader r) throws IOException {
     if ( ! r.ready()) {
@@ -1211,6 +1300,13 @@ public class XMLUtils  {
     return b.toString();
   }
 
+  /**
+   * Parses a tag string into an XMLTag.
+   *
+   * @param tagString The tag, including the angle brackets
+   * @return The parsed tag, or null if {@code tagString} is null, empty,
+   *     or does not start with {@code '<'} and end with {@code '>'}
+   */
   public static XMLTag parseTag(String tagString) {
     if (tagString == null || tagString.isEmpty()) {
       return null;
@@ -1222,6 +1318,17 @@ public class XMLUtils  {
     return new XMLTag(tagString);
   }
 
+  /**
+   * Parses an XML file into a DOM Document, using a factory from
+   * {@link #safeDocumentBuilderFactory} without namespace awareness.
+   * The file is read with the platform default encoding.
+   *
+   * @param filename The file to read
+   * @return The parsed document
+   * @throws ParserConfigurationException if a DocumentBuilder cannot be created
+   * @throws SAXException if the file cannot be parsed
+   * @throws RuntimeIOException if the file cannot be read
+   */
   public static Document readDocumentFromFile(String filename) throws ParserConfigurationException, SAXException {
     try {
       InputSource in = new InputSource(new FileReader(filename));
@@ -1278,6 +1385,15 @@ public class XMLUtils  {
 
   } // end class SAXErrorHandler
 
+  /**
+   * Parses a string of XML into a DOM Document, using a factory from
+   * {@link #safeDocumentBuilderFactory} without namespace awareness.
+   *
+   * @param s The XML text
+   * @return The parsed document
+   * @throws ParserConfigurationException if a DocumentBuilder cannot be created
+   * @throws SAXException if the string cannot be parsed
+   */
   public static Document readDocumentFromString(String s) throws ParserConfigurationException, SAXException {
     InputSource in = new InputSource(new StringReader(s));
     DocumentBuilderFactory factory = safeDocumentBuilderFactory();
@@ -1293,6 +1409,9 @@ public class XMLUtils  {
    *  If the first arg is -readDoc then this method tests
    *  readDocumentFromFile.
    *  Otherwise, it tests readTag/readUntilTag and slurpFile.
+   *
+   *  @param args Either {@code -readDoc filename} or a single filename
+   *  @throws Exception if the file cannot be read or parsed
    */
   public static void main(String[] args) throws Exception {
     if (args[0].equals("-readDoc")) {

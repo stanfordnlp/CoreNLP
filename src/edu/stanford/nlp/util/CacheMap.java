@@ -11,6 +11,8 @@ import java.util.Map;
  * dump itself out to a file as the cache grows.
  *
  * @author Ari Steinberg (ari.steinberg@stanford.edu)
+ * @param <K> The key type
+ * @param <V> The value type
  */
 
 public class CacheMap<K,V> extends LinkedHashMap<K,V> {
@@ -19,12 +21,21 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
   private static final Redwood.RedwoodChannels log = Redwood.channels(CacheMap.class);
 
   private static final long serialVersionUID = 1L;
+  /** The file the cache is written to, or null if it is not backed by a file. */
   private String backingFile;
+  /** The maximum number of entries kept before the eldest is evicted. */
   private int CACHE_ENTRIES;
+  /** Number of puts since the cache was last written. */
   private int entriesSinceLastWritten;
+  /**
+   * Number of puts between writes; doubles after each write, up to a quarter of the capacity.
+   */
   private int frequencyToWrite;
+  /** Number of {@code get} calls that returned a non-null value. */
   private int hits;
+  /** Number of {@code get} calls that returned null. */
   private int misses;
+  /** Number of {@code put} calls. */
   private int puts;
 
   /**
@@ -34,6 +45,7 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
    *                   CacheMap.  This is not the same as the number of
    *                   buckets - that is effected by this and the target
    *                   loadFactor.
+   * @param loadFactor The load factor of the underlying hash map
    * @param accessOrder is the same as in LinkedHashMap.
    * @param backingFile is the name of the file to dump this to, if desired.
    * @see java.util.LinkedHashMap
@@ -51,14 +63,33 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
     hits = misses = puts = 0;
   }
 
+  /**
+   * Constructor for a CacheMap that is not backed by a file.
+   *
+   * @param numEntries The maximum number of entries to store
+   * @param loadFactor The load factor of the underlying hash map
+   * @param accessOrder is the same as in LinkedHashMap.
+   */
   public CacheMap(int numEntries, float loadFactor, boolean accessOrder) {
     this(numEntries, loadFactor, accessOrder, null);
   }
 
+  /**
+   * Constructor for an insertion-ordered CacheMap that is not backed by a file.
+   *
+   * @param numEntries The maximum number of entries to store
+   * @param loadFactor The load factor of the underlying hash map
+   */
   public CacheMap(int numEntries, float loadFactor) {
     this(numEntries, loadFactor, false, null);
   }
 
+  /**
+   * Constructor for an insertion-ordered CacheMap with load factor 0.75
+   * that is not backed by a file.
+   *
+   * @param numEntries The maximum number of entries to store
+   */
   public CacheMap(int numEntries) {
     this(numEntries, 0.75f, false, null);
   }
@@ -71,6 +102,18 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
    * itself).  If useFileParams is false then we override the settings in the
    * file with the ones you specify (except loadFactor and accessOrder) and
    * reset the stats.
+   * If the file does not exist, a new cache backed by it is created; if it
+   * exists but cannot be read, a new cache that is not backed by any file is
+   * returned.
+   *
+   * @param <K> The key type
+   * @param <V> The value type
+   * @param numEntries The maximum number of entries to store
+   * @param loadFactor The load factor of the underlying hash map (used only for a new cache)
+   * @param accessOrder is the same as in LinkedHashMap (used only for a new cache)
+   * @param file The backing file to read from and write to
+   * @param useFileParams Whether to keep the parameters stored in the file
+   * @return The loaded or newly created CacheMap
    */
   public static <K,V> CacheMap<K,V> create(int numEntries, float loadFactor,
                                 boolean accessOrder, String file,
@@ -94,15 +137,49 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
     }
   }
 
+  /**
+   * Creates or loads an insertion-ordered file-backed CacheMap.
+   * See {@link #create(int, float, boolean, String, boolean)}.
+   *
+   * @param <K> The key type
+   * @param <V> The value type
+   * @param numEntries The maximum number of entries to store
+   * @param loadFactor The load factor of the underlying hash map (used only for a new cache)
+   * @param file The backing file to read from and write to
+   * @param useFileParams Whether to keep the parameters stored in the file
+   * @return The loaded or newly created CacheMap
+   */
   public static <K,V> CacheMap<K,V> create(int numEntries, float loadFactor, String file,
                                 boolean useFileParams) {
     return create(numEntries, loadFactor, false, file, useFileParams);
   }
 
+  /**
+   * Creates or loads an insertion-ordered file-backed CacheMap with load factor 0.75.
+   * See {@link #create(int, float, boolean, String, boolean)}.
+   *
+   * @param <K> The key type
+   * @param <V> The value type
+   * @param numEntries The maximum number of entries to store
+   * @param file The backing file to read from and write to
+   * @param useFileParams Whether to keep the parameters stored in the file
+   * @return The loaded or newly created CacheMap
+   */
   public static <K,V> CacheMap<K,V> create(int numEntries, String file, boolean useFileParams) {
     return create(numEntries, .75f, false, file, useFileParams);
   }
 
+  /**
+   * Creates or loads an insertion-ordered file-backed CacheMap with load factor 0.75
+   * and room for 1000 entries.
+   * See {@link #create(int, float, boolean, String, boolean)}.
+   *
+   * @param <K> The key type
+   * @param <V> The value type
+   * @param file The backing file to read from and write to
+   * @param useFileParams Whether to keep the parameters stored in the file
+   * @return The loaded or newly created CacheMap
+   */
   public static <K,V> CacheMap<K,V> create(String file, boolean useFileParams) {
     return create(1000, .75f, false, file, useFileParams);
   }
@@ -169,6 +246,8 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> {
    * because you wind up choosing not to cache the particular value (we output
    * both versions).  Stats are reset when the cache is loaded in from disk
    * but are otherwise cumulative.
+   *
+   * @param out The stream to print to
    */
   public void printStats(PrintStream out) {
     out.println("cache stats: size: " + size() + ", hits: " + hits +

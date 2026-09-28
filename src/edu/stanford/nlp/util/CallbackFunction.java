@@ -9,5 +9,14 @@ package edu.stanford.nlp.util;
  * Created by sonalg on 2/4/15.
  */
 public abstract class CallbackFunction {
+  /** Constructor for use by subclasses. */
+  public CallbackFunction() { }
+
+  /**
+   * Called with whatever values the caller chooses to pass (in the optimization package,
+   * the values of the current iteration).
+   *
+   * @param args The values passed by the caller
+   */
   public abstract void callback(Object... args);
 }

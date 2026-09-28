@@ -14,6 +14,13 @@ public class FilterHandler extends BooleanLogRecordHandler {
   private List<LogFilter> filters;
   private boolean disjunctiveMode;
   
+  /**
+   * Creates a handler which propagates the records that match the filters.
+   *
+   * @param filters The filters to apply (the list is used directly, not copied)
+   * @param disjunctiveMode If true, a record is propagated if any filter matches it;
+   *     if false, only if all the filters match it
+   */
   public FilterHandler(List<LogFilter> filters, boolean disjunctiveMode) {
     this.filters = filters;
     this.disjunctiveMode = disjunctiveMode;

@@ -9,6 +9,7 @@ import java.util.function.Predicate;
  * Iterator that suppresses items in another iterator based on a filter function.
  *
  * @author Dan Klein (klein@cs.stanford.edu)
+ * @param <T> The type of the elements being iterated over
  */
 public class FilteredIterator<T> implements Iterator<T> {
   Iterator<T> iterator = null;
@@ -59,6 +60,13 @@ public class FilteredIterator<T> implements Iterator<T> {
     throw new UnsupportedOperationException();
   }
 
+  /**
+   * Wraps {@code iterator}, returning only the items accepted by {@code filter}.
+   * The underlying iterator is advanced to the first acceptable item immediately.
+   *
+   * @param iterator The iterator to filter
+   * @param filter The test an item must pass to be returned
+   */
   public FilteredIterator(Iterator<T> iterator, Predicate<T> filter) {
     this.iterator = iterator;
     this.filter = filter;
@@ -66,6 +74,11 @@ public class FilteredIterator<T> implements Iterator<T> {
     skipUnacceptableCandidates();
   }
 
+  /**
+   * Demonstrates the iterator by printing the one-character strings from a fixed list.
+   *
+   * @param args Ignored
+   */
   public static void main(String[] args) {
     Collection<String> c = Arrays.asList(new String[]{"a", "aa", "b", "bb", "cc"});
     Iterator<String> i = new FilteredIterator<>(c.iterator(), new Predicate<String>() {

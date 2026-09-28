@@ -68,16 +68,37 @@ public class ArgumentParser  {
 
   private ArgumentParser() {} // static class
 
+  /** Marks a field as an option which can be filled from properties or command-line arguments. */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface Option {
+    /**
+     * The name of the option (matched case-insensitively).
+     *
+     * @return The option name; if empty, the field name is used
+     */
     String name() default "";
 
+    /**
+     * A description of the option, shown in usage messages.
+     *
+     * @return The description of the option
+     */
     String gloss() default "";
 
+    /**
+     * Whether the option must be set; if a required option is missing, filling options throws an exception.
+     *
+     * @return true if the option is required
+     */
     boolean required() default false;
 
+    /**
+     * Alternate names for the option.
+     *
+     * @return A comma-separated list of alternate names, or empty for none
+     */
     String alt() default "";
   }
 
@@ -89,10 +110,13 @@ public class ArgumentParser  {
       ArgumentParser.class,
   };
 
+  /** The classes to fill options in; if null, all classes visible on the classpath are searched. */
   @Option(name = "option_classes", gloss = "Fill options from these classes")
   public static Class<?>[] optionClasses; // = null;
+  /** The number of threads to use; defaults to the number of available processors. */
   @Option(name = "threads", gloss = "Number of threads on machine")
   public static int threads = Runtime.getRuntime().availableProcessors();
+  /** The host name of this machine, or "(unknown)" if it could not be determined. */
   @Option(name = "host", gloss = "Name of computer we are running on")
   public static String host = "(unknown)";
   @SuppressWarnings({"FieldCanBeLocal", "RedundantFieldInitialization"})

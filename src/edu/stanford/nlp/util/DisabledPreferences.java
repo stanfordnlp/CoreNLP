@@ -13,6 +13,7 @@ import java.util.prefs.BackingStoreException;
  */
 public class DisabledPreferences extends AbstractPreferences {
 
+  /** Creates a root preferences node that stores nothing. */
   public DisabledPreferences() {
     super(null, "");
   }

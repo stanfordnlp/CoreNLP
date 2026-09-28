@@ -13,6 +13,9 @@ import edu.stanford.nlp.util.logging.Redwood.Record;
  */
 public abstract class BooleanLogRecordHandler extends LogRecordHandler {
 
+  /** Constructor for use by subclasses. */
+  public BooleanLogRecordHandler() { }
+
   /**
    * For BooleanLogRecordHandler, you should leave this alone and implement propagateRecord instead.
    */
@@ -29,6 +32,9 @@ public abstract class BooleanLogRecordHandler extends LogRecordHandler {
 
   /**
    * Given a record, return true if it should be propagated to later handlers.
+   *
+   * @param record The record to check
+   * @return Whether the record should be propagated
    */
   public abstract boolean propagateRecord(Record record);
 }

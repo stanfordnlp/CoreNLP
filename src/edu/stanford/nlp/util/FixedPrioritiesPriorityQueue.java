@@ -19,25 +19,38 @@ import java.util.NoSuchElementException;
  * constant.
  *
  * @author Dan Klein, Bill MacCartney
+ *
+ * @param <E> The type of the elements
  */
 public class FixedPrioritiesPriorityQueue<E>
   extends AbstractSet<E>
   implements PriorityQueue<E>, Iterator<E>, Serializable, Cloneable {
 
   private static final long serialVersionUID = 1L;
+  /** The number of elements in the queue. */
   private int size;
+  /** The allocated length of {@code priorities}. */
   private int capacity;
+  /** The elements, stored as a binary max-heap parallel to {@code priorities}. */
   @SuppressWarnings("serial")
   private List<E> elements;
+  /** The priority of each element; {@code priorities[i]} belongs to {@code elements.get(i)}. */
   private double[] priorities;
 
 
   // constructors ----------------------------------------------------------
 
+  /** Creates an empty queue with an initial capacity of 15. */
   public FixedPrioritiesPriorityQueue() {
     this(15);
   }
 
+  /**
+   * Creates an empty queue.  The initial capacity is the smallest
+   * number of the form {@code 2^k - 1} that is at least {@code capacity}.
+   *
+   * @param capacity The minimum initial capacity
+   */
   public FixedPrioritiesPriorityQueue(int capacity) {
     int legalCapacity = 0;
     while (legalCapacity < capacity) {
@@ -278,6 +291,9 @@ public class FixedPrioritiesPriorityQueue<E>
    * Returns a representation of the queue in decreasing priority order,
    * displaying at most maxKeysToPrint elements.
    *
+   * @param maxKeysToPrint The maximum number of elements to show; if not positive, all are shown
+   * @param dblFmt A {@link String#format} pattern for the priorities, or null to use {@code String.valueOf}
+   * @return A string of the form {@code [e1=p1, e2=p2, ...]}
    */
   public String toString(int maxKeysToPrint, String dblFmt) {
     if (maxKeysToPrint <= 0) maxKeysToPrint = Integer.MAX_VALUE;

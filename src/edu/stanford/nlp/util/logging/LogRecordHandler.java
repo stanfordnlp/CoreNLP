@@ -20,6 +20,10 @@ import java.util.List;
  * @see BooleanLogRecordHandler
  */
 public abstract class LogRecordHandler {
+
+  /** Constructor for subclasses. */
+  public LogRecordHandler() { }
+
   /**
    * An empty list to serve as the FALSE token for filters
    */
@@ -47,6 +51,7 @@ public abstract class LogRecordHandler {
   /**
    * Signal the end of a track, i.e. that we have popped up to a higher level.
    * @param newDepth The new depth; that is, the current depth - 1.
+   * @param timeEnded The time the track ended, in milliseconds since the epoch
     * @return A list of records to pass down the pipeline.
    *         The returned records are passed to handle(), not endTrack().
    *         and are sent before the startTrack() signal.
@@ -55,6 +60,10 @@ public abstract class LogRecordHandler {
     return EMPTY;
   }
 
+  /**
+   * Signal that the logger is shutting down.
+   * @return A list of records to pass down the pipeline.  By default, an empty list.
+   */
   public List<Record> signalShutdown(){
     return EMPTY;
   }

@@ -14,41 +14,84 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * triples of objects in a Collection or Map. equals() and hashcode() should
  * work properly.
  *
+ * @param <T1> The type of the first element
+ * @param <T2> The type of the second element
+ * @param <T3> The type of the third element
  * @author Teg Grenager (grenager@stanford.edu)
  */
 public class Triple<T1,T2,T3> implements Comparable<Triple<T1,T2,T3>>, Serializable, PrettyLoggable {
 
   private static final long serialVersionUID = -4182871682751645440L;
+  /** The first element. */
   public T1 first;
+  /** The second element. */
   public T2 second;
+  /** The third element. */
   public T3 third;
 
+  /**
+   * Creates a Triple of the given elements.
+   *
+   * @param first The first element
+   * @param second The second element
+   * @param third The third element
+   */
   public Triple(T1 first, T2 second, T3 third) {
     this.first = first;
     this.second = second;
     this.third = third;
   }
 
+  /**
+   * Returns the first element.
+   *
+   * @return The first element
+   */
   public T1 first() {
     return first;
   }
 
+  /**
+   * Returns the second element.
+   *
+   * @return The second element
+   */
   public T2 second() {
     return second;
   }
 
+  /**
+   * Returns the third element.
+   *
+   * @return The third element
+   */
   public T3 third() {
     return third;
   }
 
+  /**
+   * Sets the first element.
+   *
+   * @param o The new first element
+   */
   public void setFirst(T1 o) {
     first = o;
   }
 
+  /**
+   * Sets the second element.
+   *
+   * @param o The new second element
+   */
   public void setSecond(T2 o) {
     second = o;
   }
 
+  /**
+   * Sets the third element.
+   *
+   * @param o The new third element
+   */
   public void setThird(T3 o) {
     third = o;
   }
@@ -86,6 +129,11 @@ public class Triple<T1,T2,T3> implements Comparable<Triple<T1,T2,T3>>, Serializa
   }
   
 
+  /**
+   * Returns the three elements as a list.
+   *
+   * @return A new list containing the three elements in order
+   */
   public List<Object> asList() {
     return CollectionUtils.makeList(first, second, third);
   }
@@ -94,6 +142,14 @@ public class Triple<T1,T2,T3> implements Comparable<Triple<T1,T2,T3>>, Serializa
    * Returns a Triple constructed from X, Y, and Z. Convenience method; the
    * compiler will disambiguate the classes used for you so that you don't have
    * to write out potentially long class names.
+   *
+   * @param <X> The type of the first element
+   * @param <Y> The type of the second element
+   * @param <Z> The type of the third element
+   * @param x The first element
+   * @param y The second element
+   * @param z The third element
+   * @return A new Triple of x, y, and z
    */
   public static <X, Y, Z> Triple<X, Y, Z> makeTriple(X x, Y y, Z z) {
     return new Triple<>(x, y, z);

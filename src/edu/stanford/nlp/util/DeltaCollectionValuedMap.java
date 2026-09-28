@@ -12,6 +12,8 @@ import java.util.function.Predicate;
  * Implementation of CollectionValuedMap that appears to store an "original"
  * map and changes to that map. No one currently uses it. See {@link DeltaMap}.
  *
+ * @param <K> the key type
+ * @param <V> the type of the values in each key's collection
  * @author Teg Grenager (grenager@cs.stanford.edu)
  * @version Jan 14, 2004
  */
@@ -19,7 +21,9 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
 
   private static final long serialVersionUID = 1L;
 
+  /** The underlying map, which is never modified by this class. */
   private final CollectionValuedMap<K, V> originalMap;
+  /** Changed collections for keys, or a marker object for keys that have been removed. */
   @SuppressWarnings("serial")
   private final Map<K, Collection<V>> deltaMap;
 
@@ -239,6 +243,13 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
     };
   }
 
+  /**
+   * Creates a map which initially has the same contents as the given map,
+   * and records later changes without modifying it.  The map and collection
+   * factories are taken from {@code originalMap}.
+   *
+   * @param originalMap the map to wrap; it is not copied
+   */
   public DeltaCollectionValuedMap(CollectionValuedMap<K, V> originalMap) {
     super(originalMap.mf, originalMap.cf, originalMap.treatCollectionsAsImmutable);
     this.originalMap = originalMap;

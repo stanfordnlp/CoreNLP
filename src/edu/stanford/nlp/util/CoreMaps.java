@@ -40,7 +40,12 @@ public class CoreMaps {
   }
 
   /**
-   * see merge(CoreMap base, CoreMap toBeMerged)
+   * Merges one CoreLabel into another, returning a new CoreLabel; see
+   * {@link #merge(CoreMap, CoreMap)}.  Neither argument is changed.
+   *
+   * @param base The CoreLabel to serve as the base (keys in this are lower priority)
+   * @param toBeMerged The CoreLabel to merge in (keys in this are higher priority)
+   * @return A new CoreLabel representing the merge of the two inputs
    */
   public static CoreLabel merge(CoreLabel base, CoreLabel toBeMerged){
     //(variables)
@@ -64,6 +69,13 @@ public class CoreMaps {
    * the case of removal operations.  Keys added or removed from the given
    * collection by anything other than the returned map will leave the map
    * in an undefined state.
+   *
+   * @param <V> the type of the values stored under {@code valueKey}
+   * @param <CM> the type of the CoreMaps
+   * @param <COLL> the type of the collection of CoreMaps
+   * @param coremaps the collection of CoreMaps backing the view
+   * @param valueKey the key whose values in each CoreMap become the map's values
+   * @return a Map view from each CoreMap to its value for {@code valueKey}
    */
   public static <V, CM extends CoreMap, COLL extends Collection<CM>> Map<CM,V>
     asMap(final COLL coremaps, final Class<? extends TypesafeMap.Key<V>> valueKey) {
@@ -161,6 +173,9 @@ public class CoreMaps {
 
   /**
    * Utility function for dumping all the keys and values of a CoreMap to a String.
+   *
+   * @param cm the CoreMap to dump
+   * @return one line per key, as the key's simple class name, a colon, and the value
    */
   public static String dumpCoreMap(CoreMap cm) {
     StringBuilder sb = new StringBuilder();
@@ -168,6 +183,13 @@ public class CoreMaps {
     return sb.toString();
   }
 
+  /**
+   * Appends all the keys and values of a CoreMap to a StringBuilder, one
+   * line per key, as the key's simple class name, a colon, and the value.
+   *
+   * @param cm the CoreMap to dump
+   * @param sb the StringBuilder to append to
+   */
   @SuppressWarnings("unchecked")
   public static void dumpCoreMapToStringBuilder(CoreMap cm, StringBuilder sb) {
     for (Class<?> rawKey : cm.keySet()) {

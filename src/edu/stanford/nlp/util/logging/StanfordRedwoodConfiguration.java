@@ -4,6 +4,8 @@ package edu.stanford.nlp.util.logging;
 import java.util.Properties;
 
 /**
+ * Static methods which configure Redwood with Stanford's default settings.
+ *
  * @author Gabor Angeli (angeli at cs.stanford)
  */
 public class StanfordRedwoodConfiguration extends RedwoodConfiguration {
@@ -18,6 +20,8 @@ public class StanfordRedwoodConfiguration extends RedwoodConfiguration {
   /**
    * Configures the Redwood logger using a reasonable set of defaults,
    * which can be overruled by the supplied Properties file.
+   * Default values for {@code log.output} and {@code log.captureStderr} are
+   * added to {@code props} itself if not already present.
    *
    * @param props The properties file to overrule or augment the default configuration
    */
@@ -46,6 +50,10 @@ public class StanfordRedwoodConfiguration extends RedwoodConfiguration {
     apply(new Properties());
   }
 
+  /**
+   * Set up the Redwood logger to send output to stderr, without the other
+   * defaults applied by {@link #setup()}.
+   */
   public static void minimalSetup(){
     Properties props = new Properties();
     props.setProperty("log.output", "stderr");

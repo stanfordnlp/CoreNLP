@@ -140,7 +140,10 @@ public class Timing  {
     return elapsed;
   }
 
-  /** Returns the number of seconds passed since the timer started in the form "d.d". */
+  /** Returns the number of seconds passed since the timer started in the form "d.d".
+   *
+   * @return The elapsed time in seconds, formatted with one decimal place
+   */
   public String toSecondsString() {
     return toSecondsString(report());
   }
@@ -216,6 +219,8 @@ public class Timing  {
   /**
    * Print the timing done message with elapsed time in x.y seconds.
    * Restart the timer too.
+   *
+   * @param msg The message to log before " done"
    */
   public void end(String msg) {
     long elapsed = System.nanoTime() - start;
@@ -318,7 +323,10 @@ public class Timing  {
   // chris' new preferred methods 2006 for loading things etc.
 
 
-  /** Print the start of timing message to stderr and start the timer. */
+  /** Print the start of timing message to stderr and start the timer.
+   *
+   * @param str The message to log
+   */
   public void doing(String str) {
     log.info(str + " ... ");
     start();
@@ -332,11 +340,18 @@ public class Timing  {
   }
 
   /** Give a line saying that something is " done".
+   *
+   * @param msg The message to log before " done"
    */
   public void done(String msg) {
     log.info(msg + " done [" + toSecondsString() + " sec].");
   }
 
+  /** Give a line saying that something is " done", with the elapsed time.
+   *  The text is appended to {@code msg}, which is modified.
+   *
+   * @param msg The message to log before " done"
+   */
   public void done(StringBuilder msg) {
     msg.append(" done [").append(toSecondsString()).append(" sec].");
     log.info(msg.toString());
@@ -353,11 +368,20 @@ public class Timing  {
     logger.info(msg.toString());
   }
 
+  /** This method allows you to show the results of timing according to another class' logger.
+   *  E.g., {@code timing.done(logger, "Loading lexicon")}.
+   *
+   *  @param logger Logger to log a timed operation with
+   *  @param msg Message to report.
+   */
   public void done(Redwood.RedwoodChannels logger, String msg) {
     logger.info(msg + " ... done [" + toSecondsString() + " sec].");
   }
 
-  /** Print the start of timing message to stderr and start the timer. */
+  /** Print the start of timing message to stderr and start the (static) timer.
+   *
+   * @param str The message to log
+   */
   public static void startDoing(String str) {
     log.info(str + " ... ");
     startTime();
@@ -374,6 +398,8 @@ public class Timing  {
 
   /** Finish the line from startDoing with the end of the timing done message
    *  and elapsed time in x.y seconds.
+   *
+   * @param msg The message to log before " done"
    */
   public static void endDoing(String msg) {
     long elapsed = System.nanoTime() - startTime;

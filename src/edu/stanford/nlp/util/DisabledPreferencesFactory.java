@@ -15,6 +15,9 @@ import java.util.prefs.PreferencesFactory;
  */
 public class DisabledPreferencesFactory implements PreferencesFactory {
 
+  /** Creates a factory which returns do-nothing Preferences. */
+  public DisabledPreferencesFactory() { }
+
   public Preferences systemRoot() {
     return new DisabledPreferences();
   }
@@ -23,6 +26,11 @@ public class DisabledPreferencesFactory implements PreferencesFactory {
     return new DisabledPreferences();
   }
 
+  /**
+   * Sets the {@code java.util.prefs.PreferencesFactory} system property to this class,
+   * so that the JVM uses do-nothing Preferences.  Silently does nothing if a
+   * SecurityManager forbids setting the property.
+   */
   public static void install() {
     try {
       System.setProperty("java.util.prefs.PreferencesFactory", "edu.stanford.nlp.util.DisabledPreferencesFactory");

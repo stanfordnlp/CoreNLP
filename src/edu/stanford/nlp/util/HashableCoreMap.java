@@ -20,6 +20,9 @@ public class HashableCoreMap extends ArrayCoreMap {
   /**
    * Creates an instance of HashableCoreMap with initial key,value pairs
    * for the immutable, hashable keys as provided in the given map.
+   *
+   * @param hashkey The immutable keys and their values.  The key set of this
+   *   map (a live view, not a copy) is kept as the set of immutable keys.
    */
   @SuppressWarnings("unchecked")
   public HashableCoreMap(Map<Class<? extends TypesafeMap.Key<?>>,Object> hashkey) {
@@ -43,6 +46,9 @@ public class HashableCoreMap extends ArrayCoreMap {
    * Creates an instance by copying values from the given other CoreMap,
    * using the values it associates with the given set of hashkeys for
    * the immutable, hashable keys used by hashcode and equals.
+   *
+   * @param other The CoreMap to copy values from
+   * @param hashkey The set of immutable, hashable keys; each must have a non-null value in {@code other}
    */
   @SuppressWarnings("unchecked")
   public HashableCoreMap(ArrayCoreMap other, Set<Class<? extends TypesafeMap.Key<?>>> hashkey) {
@@ -127,6 +133,11 @@ public class HashableCoreMap extends ArrayCoreMap {
    */
   public static class HashableCoreMapException extends RuntimeException {
 
+    /**
+     * Creates an exception with the given message.
+     *
+     * @param message The detail message
+     */
     public HashableCoreMapException(String message) {
       super(message);
     }

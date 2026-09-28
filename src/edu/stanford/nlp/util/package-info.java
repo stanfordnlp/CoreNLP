@@ -2,7 +2,6 @@
  * A collection of useful general-purpose utility classes. Below is a selection
  * of some of the most useful utility classes. Consult the class comments for
  * more details on any of these classes.
- * <p>
  * <ul>
  *   <li>{@link edu.stanford.nlp.util.Filters}: Defines general useful {@link java.util.function.Predicate}
  *   and utility functions for dealing with predicates.</li>
@@ -29,9 +28,6 @@
  * <dd>Contains utilities for working with Swing GUIs, e.g. adding icons to your
  * buttons, representing a GUI for properties, adding undo/redo support, adding
  * smart text selection, etc.</dd>
- * <dt>{@link edu.stanford.nlp.web}</dt>
- * <dd>Contains some classes for doing programmatic web searches and parsing web
- * pages.</dd>
  * </dl>
  */
 package edu.stanford.nlp.util;

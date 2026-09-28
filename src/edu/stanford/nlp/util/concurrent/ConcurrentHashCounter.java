@@ -32,14 +32,23 @@ public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Itera
 
   private static final int DEFAULT_CAPACITY = 100;
   
+  /** The counts of each key. */
   private final ConcurrentMap<E,AtomicDouble> map;
+  /** The sum of all the counts. */
   private final AtomicDouble totalCount;
+  /** The count returned for keys that are not in the counter. */
   private double defaultReturnValue = 0.0;
   
+  /** Creates an empty counter with the default initial capacity (100). */
   public ConcurrentHashCounter() {
     this(DEFAULT_CAPACITY);
   }
   
+  /**
+   * Creates an empty counter.
+   *
+   * @param initialCapacity The initial capacity of the underlying map
+   */
   public ConcurrentHashCounter(int initialCapacity) {
     map = new ConcurrentHashMap<>(initialCapacity);
     totalCount = new AtomicDouble();

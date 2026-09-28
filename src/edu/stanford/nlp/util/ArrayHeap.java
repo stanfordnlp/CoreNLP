@@ -18,6 +18,7 @@ import java.util.*;
  * @author Dan Klein
  * @author Christopher Manning
  * @version 1.2, 07/31/02
+ * @param <E> the type of elements held in the heap
  */
 public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E>  {
 
@@ -283,12 +284,21 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E>  {
     objectToEntry.clear();
   }
 
+  /**
+   * Logs each array position with the score of its entry, in array order.
+   * All elements must implement {@link Scored}, or a ClassCastException is thrown.
+   */
   public void dump() {
     for (int j = 0; j < indexToEntry.size(); j++) {
       log.info(" " + j + " " + ((Scored) indexToEntry.get(j).object).score());
     }
   }
 
+  /**
+   * Checks the heap ordering and the stored array positions, logging any problems.
+   * If the ordering is violated, the heap is dumped and the JVM is exited
+   * (with status 0).
+   */
   public void verify() {
     for (int i = 0; i < indexToEntry.size(); i++) {
       if (i != 0) {
@@ -316,12 +326,22 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E>  {
     objectToEntry = Generics.newHashMap();
   }
 
+  /** Create an ArrayHeap with the given initial capacity.
+   *
+   *  @param cmp The objects added will be ordered using the {@code Comparator}.
+   *  @param initCapacity The initial capacity of the backing list and map
+   */
   public ArrayHeap(Comparator<? super E> cmp, int initCapacity) {
     this.cmp = cmp;
     indexToEntry = new ArrayList<>(initCapacity);
     objectToEntry = Generics.newHashMap(initCapacity);
   }
 
+  /**
+   * Returns the elements in a new LinkedList, in the heap's iteration (sorted) order.
+   *
+   * @return A new list of the heap's elements in sorted order
+   */
   public List<E> asList() {
     return new LinkedList<>(this);
   }

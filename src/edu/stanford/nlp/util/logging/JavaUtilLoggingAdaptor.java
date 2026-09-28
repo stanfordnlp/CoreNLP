@@ -19,6 +19,12 @@ public class JavaUtilLoggingAdaptor {
   private JavaUtilLoggingAdaptor() {
   }
 
+  /**
+   * Reroutes java.util.logging messages to Redwood: removes the first console handler
+   * (other than a {@link RedwoodHandler}) from the root java.util.logging Logger and,
+   * the first time this is called, adds a {@link RedwoodHandler} to it.
+   * It is safe to call this more than once.
+   */
   public static void adapt() {
     // get the top Logger:
     Logger topLogger = Logger.getLogger("");
@@ -51,6 +57,9 @@ public class JavaUtilLoggingAdaptor {
    * This is the bridge class which actually adapts java.util.logging calls to Redwood calls.
    */
   public static class RedwoodHandler extends ConsoleHandler {
+
+    /** Creates a handler which passes java.util.logging records on to Redwood. */
+    public RedwoodHandler() { }
 
     /**
      * This is a no-op since Redwood doesn't have this.
@@ -95,6 +104,9 @@ public class JavaUtilLoggingAdaptor {
 
   /**
    * Simple test case.
+   *
+   * @param args If the first argument is "redwood", tests routing java.util.logging
+   *     messages to Redwood; otherwise tests routing Redwood messages to java.util.logging
    */
   public static void main(String[] args) {
     if (args.length > 0 && args[0].equals("redwood")) {

@@ -21,9 +21,19 @@ public class SystemUtils {
    */
   public static class ProcessException extends RuntimeException {
     private static final long serialVersionUID = 1L;
+    /**
+     * Creates an exception with the given message.
+     *
+     * @param string The detail message
+     */
     public ProcessException(String string) {
       super(string);
     }
+    /**
+     * Wraps another exception.
+     *
+     * @param cause The cause
+     */
     public ProcessException(Throwable cause) {
       super(cause);
     }
@@ -131,18 +141,49 @@ public class SystemUtils {
     private Thread outWriterThread;
     private Thread errWriterThread;
 
+    /**
+     * Starts the given command, copying its output to {@code System.out} and
+     * its error output to {@code System.err}.
+     *
+     * @param cmd The command and its arguments
+     * @throws IOException If the process cannot be started
+     */
     public ProcessOutputStream(String[] cmd) throws IOException {
       this(new ProcessBuilder(cmd), new PrintWriter(System.out), new PrintWriter(System.err));
     }
 
+    /**
+     * Starts the given command, copying both its output and its error output to {@code writer}.
+     *
+     * @param cmd The command and its arguments
+     * @param writer Where the process output and error output are written
+     * @throws IOException If the process cannot be started
+     */
     public ProcessOutputStream(String[] cmd, Writer writer) throws IOException {
       this(new ProcessBuilder(cmd), writer, writer);
     }
 
+    /**
+     * Starts the given command, copying its output and error output to the given writers.
+     *
+     * @param cmd The command and its arguments
+     * @param output Where the process output is written
+     * @param error Where the process error output is written
+     * @throws IOException If the process cannot be started
+     */
     public ProcessOutputStream(String[] cmd, Writer output, Writer error) throws IOException {
       this(new ProcessBuilder(cmd), output, error);
     }
 
+    /**
+     * Starts the process defined by {@code builder}, copying its output and error
+     * output to the given writers using {@link StreamGobbler} threads.
+     *
+     * @param builder The ProcessBuilder defining the process to run
+     * @param output Where the process output is written
+     * @param error Where the process error output is written
+     * @throws IOException If the process cannot be started
+     */
     public ProcessOutputStream(ProcessBuilder builder, Writer output, Writer error) throws IOException {
       this.process = builder.start();
 
@@ -180,6 +221,11 @@ public class SystemUtils {
    * Runs the shell command which is specified, along with its arguments, in the
    * given {@code String} array.  If there is any regular output or error
    * output, it is appended to the given {@code StringBuilder}s.
+   *
+   * @param cmd The command and its arguments
+   * @param outputLines Where the standard output is appended, or null to not read it
+   * @param errorLines Where the error output is appended, or null to not read it
+   * @throws IOException If the process cannot be started or its output cannot be read
    */
   public static void runShellCommand(String[] cmd,
                                      StringBuilder outputLines,
@@ -192,6 +238,12 @@ public class SystemUtils {
    * Runs the shell command which is specified, along with its arguments, in the
    * given {@code String} array.  If there is any regular output or error
    * output, it is appended to the given {@code StringBuilder}s.
+   *
+   * @param cmd The command and its arguments
+   * @param dir The working directory of the process, or null to use the current one
+   * @param outputLines Where the standard output is appended, or null to not read it
+   * @param errorLines Where the error output is appended, or null to not read it
+   * @throws IOException If the process cannot be started or its output cannot be read
    */
   public static void runShellCommand(String[] cmd,
                                      File dir,
@@ -220,6 +272,12 @@ public class SystemUtils {
    * Runs the shell command which is specified, along with its arguments, in the
    * given {@code String}.  If there is any regular output or error output,
    * it is appended to the given {@code StringBuilder}s.
+   *
+   * @param cmd The command, which is passed to {@link Runtime#exec(String[], String[], File)}
+   *            as a single array element, so it is not split into arguments
+   * @param outputLines Where the standard output is appended, or null to not read it
+   * @param errorLines Where the error output is appended, or null to not read it
+   * @throws IOException If the process cannot be started or its output cannot be read
    */
   public static void runShellCommand(String cmd,
                                      StringBuilder outputLines,
@@ -234,6 +292,10 @@ public class SystemUtils {
    * given {@code String} array.  If there is any regular output, it is
    * appended to the given {@code StringBuilder}.  If there is any error
    * output, it is swallowed (!).
+   *
+   * @param cmd The command and its arguments
+   * @param outputLines Where the standard output is appended, or null to not read it
+   * @throws IOException If the process cannot be started or its output cannot be read
    */
   public static void runShellCommand(String[] cmd,
                                      StringBuilder outputLines)
@@ -247,6 +309,11 @@ public class SystemUtils {
    * given {@code String}.  If there is any regular output, it is appended
    * to the given {@code StringBuilder}.  If there is any error output, it
    * is swallowed (!).
+   *
+   * @param cmd The command, which is passed to {@link Runtime#exec(String[], String[], File)}
+   *            as a single array element, so it is not split into arguments
+   * @param outputLines Where the standard output is appended, or null to not read it
+   * @throws IOException If the process cannot be started or its output cannot be read
    */
   public static void runShellCommand(String cmd,
                                      StringBuilder outputLines)
@@ -258,6 +325,9 @@ public class SystemUtils {
   /**
    * Runs the shell command which is specified, along with its arguments, in the
    * given {@code String} array.  If there is any output, it is swallowed (!).
+   *
+   * @param cmd The command and its arguments
+   * @throws IOException If the process cannot be started or its output cannot be read
    */
   public static void runShellCommand(String[] cmd)
           throws IOException {
@@ -268,6 +338,10 @@ public class SystemUtils {
   /**
    * Runs the shell command which is specified, along with its arguments, in the
    * given {@code String}.  If there is any output, it is swallowed (!).
+   *
+   * @param cmd The command, which is passed to {@link Runtime#exec(String[], String[], File)}
+   *            as a single array element, so it is not split into arguments
+   * @throws IOException If the process cannot be started or its output cannot be read
    */
   public static void runShellCommand(String cmd)
           throws IOException {
@@ -276,7 +350,10 @@ public class SystemUtils {
 
 
   /**
-   * Returns the process ID, via an awful hack.
+   * Returns the process ID, via an awful hack: runs {@code perl} and asks for its parent's PID.
+   *
+   * @return The process ID of this JVM
+   * @throws IOException If perl cannot be run
    */
   public static int getPID() throws IOException {
     // note that we ask Perl for "ppid" -- process ID of parent -- that's us
@@ -290,6 +367,8 @@ public class SystemUtils {
 
   /**
    * Returns the process ID, via an awful hack, or else -1.
+   *
+   * @return The process ID of this JVM, or -1 if {@link #getPID()} throws an {@code IOException}
    */
   public static int getPIDNoExceptions() {
     try {
@@ -302,6 +381,8 @@ public class SystemUtils {
 
   /**
    * Returns the number of megabytes (MB) of memory in use.
+   *
+   * @return The allocated heap memory minus the free heap memory, in MB
    */
   public static int getMemoryInUse() {
     Runtime runtime = Runtime.getRuntime();
@@ -313,6 +394,9 @@ public class SystemUtils {
 
   /**
    * Returns the string value of the stack trace for the given Throwable.
+   *
+   * @param t The Throwable whose stack trace is wanted
+   * @return The stack trace, as printed by {@link Throwable#printStackTrace(PrintStream)}
    */
   public static String getStackTraceString(Throwable t) {
     ByteArrayOutputStream bs = new ByteArrayOutputStream();
@@ -326,6 +410,8 @@ public class SystemUtils {
    * Returns a String representing the current date and time in the given
    * format.
    *
+   * @param fmt A {@link SimpleDateFormat} pattern
+   * @return The current date and time, formatted with {@code fmt}
    * @see <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/text/SimpleDateFormat.html">SimpleDateFormat</a>
    */
   public static String getTimestampString(String fmt) {
@@ -335,12 +421,21 @@ public class SystemUtils {
   /**
    * Returns a String representing the current date and time in the format
    * "20071022-140522".
+   *
+   * @return The current date and time
    */
   public static String getTimestampString() {
     return getTimestampString("yyyyMMdd-HHmmss");
   }
 
 
+  /**
+   * Demonstrates the methods of this class by printing the date, the PID,
+   * and the memory in use before and after allocating and freeing a large list.
+   *
+   * @param args Ignored
+   * @throws Exception If running a shell command fails
+   */
   public static void main(String[] args) throws Exception {
     StringBuilder out = new StringBuilder();
     runShellCommand("date", out);

@@ -28,6 +28,12 @@ public class ReflectionLoading {
    *  {@code Integer i = ReflectionLoading.loadByReflection("java.lang.String"); }
    * <br>
    * and it will compile just fine, but will result in a ClassCastException.
+   *
+   * @param <T> The type to return the new object as
+   * @param className The fully qualified name of the class to instantiate
+   * @param arguments The arguments to pass to the constructor
+   * @return The newly created object
+   * @throws ReflectionLoadingException if the object cannot be created for any reason
    */
   @SuppressWarnings("unchecked")
   public static <T> T loadByReflection(String className,
@@ -48,6 +54,12 @@ public class ReflectionLoading {
     private static final long serialVersionUID = -3324911744277952585L;
 
 
+    /**
+     * Creates an exception wrapping the reason reflection loading failed.
+     *
+     * @param message The error message
+     * @param reason The underlying exception
+     */
     public ReflectionLoadingException(String message, Throwable reason) {
       super(message, reason);
     }

@@ -12,11 +12,23 @@ import edu.stanford.nlp.util.logging.Redwood.Record;
  */
 public interface LogFilter {
 
+  /**
+   * Returns whether the record matches the criteria of this filter.
+   *
+   * @param message The record to check
+   * @return Whether the record matches
+   */
   boolean matches(Record message);
 
+  /** Propagate records which have a certain channel (compared with equals()). */
   class HasChannel implements LogFilter {
     private Object matchingChannel;
 
+    /**
+     * Create a filter matching records which have the given channel.
+     *
+     * @param message The channel to look for
+     */
     public HasChannel(Object message) {
       this.matchingChannel = message;
     }
@@ -40,6 +52,11 @@ public interface LogFilter {
   class ContainsMessage implements LogFilter {
     private String substring;
 
+    /**
+     * Create a filter matching records whose content's toString() contains the given substring.
+     *
+     * @param message The substring to look for
+     */
     public ContainsMessage(String message) {
       this.substring = message;
     }
@@ -57,6 +74,11 @@ public interface LogFilter {
   class MatchesMessage implements LogFilter {
     private Object message;
 
+    /**
+     * Create a filter matching records whose content equals the given message.
+     *
+     * @param message The message to match
+     */
     public MatchesMessage(Object message) {
       this.message = message;
     }

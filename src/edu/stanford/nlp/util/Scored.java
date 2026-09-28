@@ -14,6 +14,8 @@ package edu.stanford.nlp.util;
 public interface Scored {
 
   /**
+   * Returns the score of this object.
+   *
    * @return The score of this thing.
    */
   public double score();

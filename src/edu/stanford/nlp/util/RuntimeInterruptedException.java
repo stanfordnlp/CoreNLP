@@ -8,10 +8,16 @@ package edu.stanford.nlp.util;
  * @author John Bauer
  */
 public class RuntimeInterruptedException extends RuntimeException {
+  /** Creates an exception with no cause. */
   public RuntimeInterruptedException() {
     super();
   }
 
+  /**
+   * Wraps an {@link InterruptedException}.
+   *
+   * @param e The interruption being wrapped
+   */
   public RuntimeInterruptedException(InterruptedException e) {
     super(e);
   }

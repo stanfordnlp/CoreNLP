@@ -76,6 +76,14 @@ public class RedwoodConfiguration  {
     return this;
   }
 
+  /**
+   * Stop capturing a system stream, restoring it to its original destination
+   * (when the configuration is applied).
+   *
+   * @param stream The stream to restore; one of System.out or System.err
+   * @return this
+   * @throws IllegalArgumentException If the stream is neither System.out nor System.err
+   */
   public RedwoodConfiguration restore(final OutputStream stream) {
     if (stream == System.out) {
       tasks.add(() -> Redwood.captureSystemStreams(false, Redwood.realSysErr == System.err));
@@ -89,6 +97,13 @@ public class RedwoodConfiguration  {
 
 
 
+  /**
+   * Add a handler which passes every record logged on any of the given channels to the listener.
+   *
+   * @param listener The function to call on each matching record
+   * @param channels The channels to listen on
+   * @return this
+   */
   public RedwoodConfiguration listenOnChannels(Consumer<Redwood.Record> listener, Object... channels) {
     return this.handlers(
         Handlers.chain(new FilterHandler(Collections.singletonList(new LogFilter() {
@@ -164,12 +179,29 @@ public class RedwoodConfiguration  {
 
 
 
+  /**
+   * A deferred step in configuring Redwood, which adds handlers to the handler tree when the
+   * configuration is applied.
+   */
   public interface Thunk {
+    /**
+     * Add handlers to the given node of the handler tree.
+     *
+     * @param config The configuration being applied
+     * @param root The node to add handlers under
+     */
     void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root);
   }
 
+  /**
+   * Building blocks for {@link RedwoodConfiguration#handlers(Thunk...)}: destinations, filters, and
+   * combinators for them.
+   */
   @SuppressWarnings("UnusedDeclaration")
   public static class Handlers {
+
+    /** Creates a Handlers object; all of its members are static. */
+    public Handlers() { }
     //
     // Leaf destinations
     //
@@ -177,6 +209,7 @@ public class RedwoodConfiguration  {
      * Output to a file. This is a leaf node.
      * Consider using "defaultFile" instead.
      * @param path The file to write to
+     * @return A thunk which adds a handler writing to the file
      */
     public static Thunk file(final String path) {
       return new Thunk() {
@@ -190,6 +223,7 @@ public class RedwoodConfiguration  {
      * Output to a file. This is a leaf node.
      * Consider using "defaultFile" instead.
      * @param path The file to write to
+     * @return A thunk which adds a handler writing to the file
      */
     public static Thunk file(File path) { return file(path.getPath()); }
     /**
@@ -279,6 +313,9 @@ public class RedwoodConfiguration  {
 
     /**
      * Hide these channels, in addition to anything already hidden by upstream handlers.
+     *
+     * @param channelsToHide The channels to hide
+     * @return A handler which hides the given channels and shows all others
      */
     public static LogRecordHandler hideChannels(final Object... channelsToHide) {
       return new VisibilityHandler() {{
@@ -290,6 +327,8 @@ public class RedwoodConfiguration  {
 
     /**
      * Show all channels (with this handler, there may be upstream handlers).
+     *
+     * @return A handler which shows all channels
      */
     public static LogRecordHandler showAllChannels() {
       return new VisibilityHandler();
@@ -297,6 +336,9 @@ public class RedwoodConfiguration  {
 
     /**
      * Show only these channels, as far as downstream handlers are concerned.
+     *
+     * @param channelsToShow The channels to show
+     * @return A handler which shows only records on at least one of the given channels
      */
     public static LogRecordHandler showOnlyChannels(final Object... channelsToShow) {
       return new VisibilityHandler() {{
@@ -308,6 +350,10 @@ public class RedwoodConfiguration  {
     }
     /**
      * Rename a channel to be something else
+     *
+     * @param src The channel to rename
+     * @param dst The new name of the channel
+     * @return A handler which reroutes records from src to dst
      */
     public static LogRecordHandler reroute(final Object src, final Object dst) {
       return new RerouteChannel(src, dst);
@@ -331,6 +377,7 @@ public class RedwoodConfiguration  {
      * Send any incoming messages multiple ways.
      * For example, you may want to send the same output to console and a file.
      * @param destinations The destinations for log messages coming into this node.
+     * @return A thunk which applies each of the destinations to the same node
      */
     public static Thunk branch(final Thunk... destinations) {
       return (config, root) -> {
@@ -344,6 +391,7 @@ public class RedwoodConfiguration  {
      * Apply each of the handlers to incoming log messages, in sequence.
      * @param handlers The handlers to apply
      * @param destination The final destination of the messages, after processing
+     * @return A thunk which adds the chain of handlers, ending in the destination
      */
     public static Thunk chain(final LogRecordHandler[] handlers, final Thunk destination) {
       return new Thunk() {
@@ -367,15 +415,60 @@ public class RedwoodConfiguration  {
       };
     }
 
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
+    /**
+     * Apply each of the handlers to incoming log messages, in sequence.
+     *
+     * @param handler1 The first handler to apply
+     * @param destination The final destination of the messages, after processing
+     * @return A thunk which adds the chain of handlers, ending in the destination
+     * @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk)
+     */
     public static Thunk chain(LogRecordHandler handler1, Thunk destination) { return chain(new LogRecordHandler[]{ handler1 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
+    /**
+     * Apply each of the handlers to incoming log messages, in sequence.
+     *
+     * @param handler1 The first handler to apply
+     * @param handler2 The second handler to apply
+     * @param destination The final destination of the messages, after processing
+     * @return A thunk which adds the chain of handlers, ending in the destination
+     * @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk)
+     */
     public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
+    /**
+     * Apply each of the handlers to incoming log messages, in sequence.
+     *
+     * @param handler1 The first handler to apply
+     * @param handler2 The second handler to apply
+     * @param handler3 The third handler to apply
+     * @param destination The final destination of the messages, after processing
+     * @return A thunk which adds the chain of handlers, ending in the destination
+     * @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk)
+     */
     public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, LogRecordHandler handler3, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2, handler3 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
+    /**
+     * Apply each of the handlers to incoming log messages, in sequence.
+     *
+     * @param handler1 The first handler to apply
+     * @param handler2 The second handler to apply
+     * @param handler3 The third handler to apply
+     * @param handler4 The fourth handler to apply
+     * @param destination The final destination of the messages, after processing
+     * @return A thunk which adds the chain of handlers, ending in the destination
+     * @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk)
+     */
     public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, LogRecordHandler handler3, LogRecordHandler handler4, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2, handler3, handler4 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
+    /**
+     * Apply each of the handlers to incoming log messages, in sequence.
+     *
+     * @param handler1 The first handler to apply
+     * @param handler2 The second handler to apply
+     * @param handler3 The third handler to apply
+     * @param handler4 The fourth handler to apply
+     * @param handler5 The fifth handler to apply
+     * @param destination The final destination of the messages, after processing
+     * @return A thunk which adds the chain of handlers, ending in the destination
+     * @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk)
+     */
     public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, LogRecordHandler handler3, LogRecordHandler handler4, LogRecordHandler handler5, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2, handler3, handler4, handler5 }, destination); }
 
 

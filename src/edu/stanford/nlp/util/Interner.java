@@ -27,24 +27,34 @@ import java.util.Set;
  * Date: 9/28/03
  *
  * @author Dan Klein
+ * @param <T> The type of the objects interned
  */
 public class Interner<T>  {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(Interner.class);
 
+  /** The interner used by the global methods. */
   protected static Interner<Object> interner = new Interner<>();
 
+  /** Create an empty interner. */
   public Interner() {
     map = Generics.newWeakHashMap();
   }
 
+  /**
+   * Create an empty interner.
+   *
+   * @param initialCapacity The initial capacity of the backing map
+   */
   public Interner(int initialCapacity) {
     map = Generics.newWeakHashMap(initialCapacity);
   }
 
   /**
    * For getting the instance that global methods use.
+   *
+   * @return The global interner
    */
   public static Interner<Object> getGlobal() {
     return interner;
@@ -53,6 +63,7 @@ public class Interner<T>  {
   /**
    * For supplying a new instance for the global methods to use.
    * 
+   * @param interner The interner for the global methods to use
    * @return the previous global interner.
    */
   public static Interner<Object> setGlobal(Interner<Object> interner) {
@@ -64,7 +75,11 @@ public class Interner<T>  {
   /**
    * Returns a unique object o' that .equals the argument o.  If o
    * itself is returned, this is the first request for an object
-   * .equals to o.
+   * .equals to o.  This uses the global interner.
+   *
+   * @param <T> The type of the object
+   * @param o The object to intern
+   * @return The interned object which .equals o
    */
   @SuppressWarnings("unchecked")
   public static <T> T globalIntern(T o) {
@@ -72,15 +87,25 @@ public class Interner<T>  {
   }
 
 
+  /** The backing map from each interned object to a weak reference to itself. */
   protected Map<T,WeakReference<T>> map;
 
+  /** Remove all the interned objects, by replacing the backing map with a new empty one. */
   public void clear() { map = Generics.newWeakHashMap(); }
+  /**
+   * Remove all the interned objects, by replacing the backing map with a new empty one.
+   *
+   * @param initialCapacity The initial capacity of the new backing map
+   */
   public void clear(int initialCapacity) { map = Generics.newWeakHashMap(initialCapacity); }
   
   /**
    * Returns a unique object o' that .equals the argument o.  If o
    * itself is returned, this is the first request for an object
    * .equals to o.
+   *
+   * @param o The object to intern
+   * @return The interned object which .equals o
    */
   public synchronized T intern(T o) {
     WeakReference<T> ref = map.get(o);
@@ -98,6 +123,9 @@ public class Interner<T>  {
    * Returns a <code>Set</code> such that each element in the returned set
    * is a unique object e' that .equals the corresponding element e in the
    * original set.
+   *
+   * @param s The set of objects to intern
+   * @return A new set of the interned objects
    */
   public Set<T> internAll(Set<T> s) {
     Set<T> result = Generics.newHashSet();
@@ -107,12 +135,19 @@ public class Interner<T>  {
     return result;
   }
 
+  /**
+   * Returns the number of interned objects which have not been garbage collected.
+   *
+   * @return The size of the backing map
+   */
   public int size() {
     return map.size();
   }
 
   /**
    * Test method: interns its arguments and says whether they == themselves.
+   *
+   * @param args The Strings to intern
    */
   public static void main(String[] args) {
     for (String str : args) {

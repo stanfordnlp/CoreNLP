@@ -261,6 +261,12 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     }
   }
 
+  /**
+   * Reallocates the internal arrays to hold exactly newSize entries.
+   *
+   * @param newSize The new capacity
+   * @throws RuntimeException if newSize is smaller than the current size
+   */
   public void setCapacity(int newSize) {
     if (size > newSize) { throw new RuntimeException("You cannot set capacity to smaller than the current size."); }
     Class[] newKeys = new Class[newSize];

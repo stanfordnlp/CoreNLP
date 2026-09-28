@@ -6,6 +6,8 @@ import java.io.Serializable;
  * A generified factory class which creates instances of a particular type.
  *
  * @author dramage
+ *
+ * @param <T> The type of object created
  */
 @FunctionalInterface
 public interface Factory<T> extends Serializable {

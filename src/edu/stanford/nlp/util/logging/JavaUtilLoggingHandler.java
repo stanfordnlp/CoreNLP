@@ -13,6 +13,9 @@ import edu.stanford.nlp.util.Pair;
  */
 public class JavaUtilLoggingHandler extends OutputHandler {
 
+  /** Create a handler which writes to Java Util Logging logs. */
+  public JavaUtilLoggingHandler() { }
+
   @Override
   public void print(Object[] channel, String line) {
     // Parse the channels

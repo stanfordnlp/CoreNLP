@@ -10,13 +10,21 @@ import java.io.Serializable;
  * value.  Note that <code>size()</code> returns the true size, but
  * <code>get()</code> works for any number.
  *
+ * @param <E> The type of the list elements
  * @author Christopher Manning
  */
 public class PaddedList<E> extends AbstractList<E> implements Serializable {
 
+  /** The wrapped list. */
   private final List<E> l;
+  /** The value returned for indices outside the wrapped list. */
   private final E padding;
 
+  /**
+   * Returns the padding value, which get() returns for indices outside the real list.
+   *
+   * @return The padding value (may be null)
+   */
   public E getPad() {
     return padding;
   }
@@ -41,11 +49,20 @@ public class PaddedList<E> extends AbstractList<E> implements Serializable {
 
   /** With this constructor, get() will return <code>null</code> for
    *  elements outside the real list.
+   *
+   *  @param l The list to wrap (not copied)
    */
   public PaddedList(List<E> l) {
     this(l, null);
   }
 
+  /**
+   * Creates a PaddedList wrapping the given list (not a copy), whose get()
+   * returns the given padding for elements outside the real list.
+   *
+   * @param l The list to wrap
+   * @param padding The padding element (may be null)
+   */
   public PaddedList(List<E> l, E padding) {
     this.l = l;
     this.padding = padding;
@@ -66,6 +83,7 @@ public class PaddedList<E> extends AbstractList<E> implements Serializable {
    *  certain parametric type.
    *  This static constructor works better with generics.
    *
+   *  @param <IN> The type of the list elements
    *  @param list The list to pad
    *  @param padding The padding element (may be null)
    *  @return The padded list
@@ -77,6 +95,9 @@ public class PaddedList<E> extends AbstractList<E> implements Serializable {
   /** Returns true if this PaddedList and another are wrapping the
    *  same list.  This is tested as ==. Kinda yucky, but sometimes you
    *  want to know.
+   *
+   *  @param p The other PaddedList
+   *  @return true if p is non-null and wraps the identical inner list
    */
   public boolean sameInnerList(PaddedList<E> p) {
     return p != null && l == p.l;

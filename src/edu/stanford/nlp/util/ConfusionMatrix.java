@@ -24,15 +24,15 @@ import java.util.stream.Collectors;
  *
  * Example usage:
  * <pre>{@code
- * Confusion<String> myConf = new Confusion<String>();
+ * ConfusionMatrix<String> myConf = new ConfusionMatrix<>();
  * myConf.add("l1", "l1");
  * myConf.add("l1", "l2");
  * myConf.add("l2", "l2");
  * System.out.println(myConf.toString());
  * }</pre>
  *
- * NOTES: - This sorts by the toString() of the guess and gold labels. Thus the
- * label.toString() values should be distinct!
+ * NOTES: - Unless all labels are Comparable, this sorts by the toString() of the
+ * guess and gold labels. Thus the label.toString() values should be distinct!
  *
  * @author yeh1@cs.stanford.edu
  *
@@ -43,15 +43,22 @@ public class ConfusionMatrix<U> {
   private static final String CLASS_PREFIX = "C";
 
   private static final String FORMAT = "#.#####";
+  /** The format used for the statistics printed by {@link Contingency#toString()}. */
   protected DecimalFormat format;
   private int leftPadSize = 16;
   private int delimPadSize = 8;
   private boolean useRealLabels = false;
 
+  /** Creates an empty confusion matrix that formats numbers using the default locale. */
   public ConfusionMatrix() {
     format = new DecimalFormat(FORMAT);
   }
 
+  /**
+   * Creates an empty confusion matrix that formats numbers using the given locale.
+   *
+   * @param locale The locale for the decimal format symbols
+   */
   public ConfusionMatrix(Locale locale) {
     format = new DecimalFormat(FORMAT, new DecimalFormatSymbols(locale));
   }
@@ -63,7 +70,7 @@ public class ConfusionMatrix<U> {
 
   /**
    * This sets the lefthand side pad width for displaying the text table.
-   * @param newPadSize
+   * @param newPadSize The width of the label column
    */
   public void setLeftPadSize(int newPadSize) {
     this.leftPadSize = newPadSize;
@@ -71,11 +78,19 @@ public class ConfusionMatrix<U> {
 
   /**
    * Sets the width used to separate cells in the table.
+   *
+   * @param newPadSize The width of each cell
    */
   public void setDelimPadSize(int newPadSize) {
     this.delimPadSize = newPadSize;
   }
 
+  /**
+   * Sets whether the text table uses the labels themselves as row and column
+   * headers, instead of placeholders C1, C2, ... with a key below the table.
+   *
+   * @param useRealLabels Whether to print the real labels in the table
+   */
   public void setUseRealLabels(boolean useRealLabels) {
     this.useRealLabels = useRealLabels;
   }
@@ -98,6 +113,15 @@ public class ConfusionMatrix<U> {
     private double spec = 0.0;
     private double f1 = 0.0;
 
+    /**
+     * Computes the statistics from the counts.  A statistic whose denominator
+     * is zero comes out as NaN.
+     *
+     * @param tp_ The number of true positives
+     * @param fp_ The number of false positives
+     * @param tn_ The number of true negatives
+     * @param fn_ The number of false negatives
+     */
     public Contingency(int tp_, int fp_, int tn_, int fn_) {
       tp = tp_;
       fp = fp_;
@@ -118,18 +142,38 @@ public class ConfusionMatrix<U> {
                               ", ");
     }
 
+    /**
+     * Returns the F1 score.
+     *
+     * @return The harmonic mean of precision and recall
+     */
     public double f1(){
       return f1;
     }
 
+    /**
+     * Returns the precision.
+     *
+     * @return tp / (tp + fp)
+     */
     public double precision(){
       return prec;
     }
 
+    /**
+     * Returns the recall.
+     *
+     * @return tp / (tp + fn)
+     */
     public double recall(){
       return recall;
     }
 
+    /**
+     * Returns the specificity.
+     *
+     * @return tn / (fp + tn)
+     */
     public double spec(){
       return spec;
     }
@@ -140,6 +184,9 @@ public class ConfusionMatrix<U> {
 
   /**
    * Increments the entry for this guess and gold by 1.
+   *
+   * @param guess The guessed label
+   * @param gold The gold label
    */
   public void add(U guess, U gold) {
     add(guess, gold, 1);
@@ -147,6 +194,10 @@ public class ConfusionMatrix<U> {
 
   /**
    * Increments the entry for this guess and gold by the given increment amount.
+   *
+   * @param guess The guessed label
+   * @param gold The gold label
+   * @param increment The amount to add
    */
   public synchronized void add(U guess, U gold, int increment) {
       Pair<U, U> pair = new Pair<>(guess, gold);
@@ -159,6 +210,10 @@ public class ConfusionMatrix<U> {
 
   /**
    * Retrieves the number of entries with this guess and gold.
+   *
+   * @param guess The guessed label
+   * @param gold The gold label
+   * @return The count, or 0 if this pair was never added
    */
   public Integer get(U guess, U gold) {
     Pair<U, U> pair = new Pair<>(guess, gold);
@@ -172,6 +227,8 @@ public class ConfusionMatrix<U> {
   /**
    * Returns the set of distinct class labels
    * entered into this confusion table.
+   *
+   * @return A new set of every label used as a guess or a gold label
    */
   public Set<U> uniqueLabels() {
     HashSet<U> ret = new HashSet<>();
@@ -185,6 +242,9 @@ public class ConfusionMatrix<U> {
   /**
    * Returns the contingency table for the given class label, where all other
    * class labels are treated as negative.
+   *
+   * @param positiveLabel The label treated as positive
+   * @return The contingency statistics for that label
    */
   public Contingency getContingency(U positiveLabel) {
     int tp = 0;
@@ -288,6 +348,8 @@ public class ConfusionMatrix<U> {
 
   /**
    * Prints the current confusion in table form to a string, with contingency
+   *
+   * @return The table, or "Empty table!" if nothing has been added
    */
   public String printTable() {
     List<U> sortedLabels = sortKeys();
@@ -348,9 +410,13 @@ public class ConfusionMatrix<U> {
   private class ConfusionGrid extends Canvas {
 
     public class Grid extends JPanel {
+      /** The number of columns: one per label plus a header column. */
       private int columnCount = uniqueLabels().size() + 1;
+      /** The number of rows: one per label plus a header row. */
       private int rowCount = uniqueLabels().size() + 1;
+      /** The cell rectangles, in row-major order, as drawn by {@link #paintComponent}. */
       private List<Rectangle> cells;
+      /** The (column, row) of the cell under the mouse, or null. */
       private Point selectedCell;
 
       public Grid() {
@@ -531,6 +597,11 @@ public class ConfusionMatrix<U> {
     gui.setVisible(true);
   }
 
+  /**
+   * Shows a small example confusion matrix in a GUI.
+   *
+   * @param args Ignored
+   */
   public static void main(String[] args) {
     ConfusionMatrix<String> confusion = new ConfusionMatrix<>();
     confusion.add("a", "a");

@@ -35,6 +35,12 @@ public class CollectionUtils  {
 
   // Utils for making collections out of arrays of primitive types.
 
+  /**
+   * Returns a new list containing the elements of an int array, boxed.
+   *
+   * @param a The array
+   * @return A new modifiable list of the values
+   */
   public static List<Integer> asList(int[] a) {
     List<Integer> result = new ArrayList<>(a.length);
     for (int j : a) {
@@ -43,6 +49,12 @@ public class CollectionUtils  {
     return result;
   }
 
+  /**
+   * Returns a new list containing the elements of a double array, boxed.
+   *
+   * @param a The array
+   * @return A new modifiable list of the values
+   */
   public static List<Double> asList(double[] a) {
     List<Double> result = new ArrayList<>(a.length);
     for (double v : a) {
@@ -53,6 +65,12 @@ public class CollectionUtils  {
 
   // Inverses of the above
 
+  /**
+   * Returns the elements of a collection as an int array, in iteration order.
+   *
+   * @param coll The collection; it must not contain null
+   * @return A new array of the values
+   */
   public static int[] asIntArray(Collection<Integer> coll) {
     int[] result = new int[coll.size()];
     int index = 0;
@@ -64,6 +82,12 @@ public class CollectionUtils  {
     return result;
   }
 
+  /**
+   * Returns the elements of a collection as a double array, in iteration order.
+   *
+   * @param coll The collection; it must not contain null
+   * @return A new array of the values
+   */
   public static double[] asDoubleArray(Collection<Double> coll) {
     double[] result = new double[coll.size()];
     int index = 0;
@@ -75,18 +99,38 @@ public class CollectionUtils  {
     return result;
   }
 
-  /** Returns a new List containing the given objects. */
+  /**
+   * Returns a new List containing the given objects.
+   *
+   * @param <T> The type of the items
+   * @param items The items
+   * @return A new modifiable ArrayList of the items
+   */
   @SafeVarargs
   public static <T> List<T> makeList(T... items) {
     return new ArrayList<>(Arrays.asList(items));
   }
 
-  /** Returns a new Set containing all the objects in the specified array. */
+  /**
+   * Returns a new Set containing all the objects in the specified array.
+   *
+   * @param <T> The type of the items
+   * @param o The items
+   * @return A new HashSet of the items
+   */
   @SafeVarargs
   public static <T> Set<T> asSet(T... o) {
     return Generics.newHashSet(Arrays.asList(o));
   }
 
+  /**
+   * Returns the intersection of two sets.
+   *
+   * @param <T> The type of the items
+   * @param set1 The first set
+   * @param set2 The second set
+   * @return A new set of the items of {@code set1} that are also in {@code set2}
+   */
   public static <T> Set<T> intersection(Set<T> set1, Set<T> set2) {
     Set<T> intersect = Generics.newHashSet();
     for (T t : set1) {
@@ -97,6 +141,14 @@ public class CollectionUtils  {
     return intersect;
   }
 
+  /**
+   * Returns the concatenation of two collections.  Duplicates are kept.
+   *
+   * @param <T> The type of the items
+   * @param set1 The first collection
+   * @param set2 The second collection
+   * @return A new list of the items of {@code set1} followed by those of {@code set2}
+   */
   public static <T> Collection<T> union(Collection<T> set1, Collection<T> set2) {
     Collection<T> union = new ArrayList<>();
     for (T t : set1) {
@@ -108,6 +160,14 @@ public class CollectionUtils  {
     return union;
   }
 
+  /**
+   * Returns the union of two collections as a set.
+   *
+   * @param <T> The type of the items
+   * @param set1 The first collection
+   * @param set2 The second collection
+   * @return A new set of the items in either collection
+   */
   public static <T> Set<T> unionAsSet(Collection<T> set1, Collection<T> set2) {
     Set<T> union = Generics.newHashSet();
     for (T t : set1) {
@@ -119,6 +179,13 @@ public class CollectionUtils  {
     return union;
   }
 
+  /**
+   * Returns the union of any number of collections as a set.
+   *
+   * @param <T> The type of the items
+   * @param sets The collections
+   * @return A new set of the items in any of the collections
+   */
   @SafeVarargs
   public static <T> Set<T> unionAsSet(Collection<T>... sets) {
     Set<T> union = Generics.newHashSet();
@@ -169,18 +236,36 @@ public class CollectionUtils  {
   // Utils for loading and saving Collections to/from text files
 
   /**
+   * Loads a collection from a file with one item per line, constructing each
+   * item by passing the line to the String constructor of {@code c}.
+   * Reading stops at the first empty line.  Lines that fail to construct are
+   * logged and skipped.
+   *
+   * @param <T> The type of the items
    * @param filename The path to the file to load the List from
    * @param c The Class to instantiate each member of the List. Must have a
    *          String constructor.
+   * @param cf The factory for the collection to return
+   * @return The new collection
+   * @throws Exception if {@code c} has no public String constructor or the file cannot be read
    */
   public static <T> Collection<T> loadCollection(String filename, Class<T> c, CollectionFactory<T> cf) throws Exception {
     return loadCollection(new File(filename), c, cf);
   }
 
   /**
+   * Loads a collection from a file with one item per line, constructing each
+   * item by passing the line to the String constructor of {@code c}.
+   * Reading stops at the first empty line.  Lines that fail to construct are
+   * logged and skipped.
+   *
+   * @param <T> The type of the items
    * @param file The file to load the List from
    * @param c The Class to instantiate each member of the List. Must have a
    *          String constructor.
+   * @param cf The factory for the collection to return
+   * @return The new collection
+   * @throws Exception if {@code c} has no public String constructor or the file cannot be read
    */
   public static <T> Collection<T> loadCollection(File file, Class<T> c, CollectionFactory<T> cf) throws Exception {
     Constructor<T> m = c.getConstructor(new Class[] { String.class });
@@ -203,11 +288,17 @@ public class CollectionUtils  {
 
   /**
    * Adds the items from the file to the collection.
+   * Reading stops at the first empty line.
    *
    * @param <T> The type of the items.
    * @param fileName The name of the file from which items should be loaded.
    * @param itemClass The class of the items (must have a constructor that accepts a String).
    * @param collection The collection to which items should be added.
+   * @throws NoSuchMethodException if {@code itemClass} has no public String constructor
+   * @throws InstantiationException if {@code itemClass} is abstract
+   * @throws IllegalAccessException if the constructor is inaccessible
+   * @throws InvocationTargetException if the constructor throws an exception
+   * @throws IOException if the file cannot be read
    */
   public static <T> void loadCollection(String fileName, Class<T> itemClass, Collection<T> collection) throws NoSuchMethodException, InstantiationException,
       IllegalAccessException, InvocationTargetException, IOException {
@@ -216,11 +307,17 @@ public class CollectionUtils  {
 
   /**
    * Adds the items from the file to the collection.
+   * Reading stops at the first empty line.
    *
    * @param <T> The type of the items.
    * @param file The file from which items should be loaded.
    * @param itemClass The class of the items (must have a constructor that accepts a String).
    * @param collection The collection to which items should be added.
+   * @throws NoSuchMethodException if {@code itemClass} has no public String constructor
+   * @throws InstantiationException if {@code itemClass} is abstract
+   * @throws IllegalAccessException if the constructor is inaccessible
+   * @throws InvocationTargetException if the constructor throws an exception
+   * @throws IOException if the file cannot be read
    */
   public static <T> void loadCollection(File file, Class<T> itemClass, Collection<T> collection) throws NoSuchMethodException, InstantiationException, IllegalAccessException,
       InvocationTargetException, IOException {
@@ -235,6 +332,27 @@ public class CollectionUtils  {
     in.close();
   }
 
+  /**
+   * Parses a map from a string in the format of {@link AbstractMap#toString()},
+   * such as {@code {a=1, b=2}}.  The string is split on whitespace and the last
+   * character of each field (the comma or closing brace) is dropped, so keys
+   * and values must not contain whitespace or '='.  A field with no '=' gets
+   * a value constructed from the empty string.
+   *
+   * @param <K> The type of the keys
+   * @param <V> The type of the values
+   * @param s The string to parse
+   * @param keyClass The key class, which must have a public String constructor
+   * @param valueClass The value class, which must have a public String constructor
+   * @param mapFactory The factory for the map to return
+   * @return The new map
+   * @throws RuntimeException if {@code s} does not start with '{'
+   * @throws ClassNotFoundException never; it is declared but not thrown
+   * @throws NoSuchMethodException if either class lacks a public String constructor
+   * @throws IllegalAccessException if a constructor is inaccessible
+   * @throws InvocationTargetException if a constructor throws an exception
+   * @throws InstantiationException if either class is abstract
+   */
   public static <K, V> Map<K, V> getMapFromString(String s, Class<K> keyClass, Class<V> valueClass, MapFactory<K, V> mapFactory) throws ClassNotFoundException,
       NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
     Constructor<K> keyC = keyClass.getConstructor(new Class[] { String.class });
@@ -267,6 +385,11 @@ public class CollectionUtils  {
   /**
    * Checks whether a Collection contains a specified Object. Object equality
    * (==), rather than .equals(), is used.
+   *
+   * @param <T> The type of the items
+   * @param c The collection to search
+   * @param o The object to look for
+   * @return Whether {@code c} contains {@code o} itself
    */
   public static <T> boolean containsObject(Collection<T> c, T o) {
     for (Object o1 : c) {
@@ -282,6 +405,7 @@ public class CollectionUtils  {
    * object identity (==) not equality as the criterion for object presence. If
    * this list does not contain the element, it is unchanged.
    *
+   * @param <T> The type of the items
    * @param l The {@link List} from which to remove the object
    * @param o The object to be removed.
    * @return Whether or not the List was changed.
@@ -303,9 +427,10 @@ public class CollectionUtils  {
    * object, using object identity (==) not equality as the criterion for object
    * presence. If this list does not contain the element, return -1.
    *
+   * @param <T> The type of the items
    * @param l The {@link List} to find the object in.
    * @param o The sought-after object.
-   * @return Whether or not the List was changed.
+   * @return The index of {@code o}, or -1 if it is not in the list
    */
   public static <T> int getIndex(List<T> l, T o) {
     int i = 0;
@@ -319,14 +444,15 @@ public class CollectionUtils  {
   }
 
   /**
-   * Returns the index of the first occurrence after the startIndex (exclusive)
+   * Returns the index of the first occurrence at or after fromIndex (inclusive)
    * in the list of the specified object, using object equals function. If this
    * list does not contain the element, return -1.
    *
+   * @param <T> The type of the items
    * @param l The {@link List} to find the object in.
-   * @param o The sought-after object.
+   * @param o The sought-after object; must not be null
    * @param fromIndex The start index
-   * @return Whether or not the List was changed.
+   * @return The index of the first match at or after {@code fromIndex}, or -1
    */
   public static <T> int getIndex(List<T> l, T o, int fromIndex) {
     int i = -1;
@@ -345,6 +471,7 @@ public class CollectionUtils  {
   /**
    * Samples without replacement from a collection.
    *
+   * @param <E> The type of the items
    * @param c The collection to be sampled from
    * @param n The number of samples to take
    * @return a new collection with the sample
@@ -357,10 +484,12 @@ public class CollectionUtils  {
    * Samples without replacement from a collection, using your own
    * {@link Random} number generator.
    *
+   * @param <E> The type of the items
    * @param c The collection to be sampled from
    * @param n The number of samples to take
    * @param r The random number generator
    * @return a new collection with the sample
+   * @throws IllegalArgumentException if {@code n} is negative or larger than the collection
    */
   public static <E> Collection<E> sampleWithoutReplacement(Collection<E> c, int n, Random r) {
     if (n < 0)
@@ -378,6 +507,14 @@ public class CollectionUtils  {
     return result;
   }
 
+  /**
+   * Returns a uniformly random element of a list.
+   *
+   * @param <E> The type of the items
+   * @param l The list; must not be empty
+   * @param r The random number generator
+   * @return A random element of {@code l}
+   */
   public static <E> E sample(List<E> l, Random r) {
     int i = r.nextInt(l.size());
     return l.get(i);
@@ -386,6 +523,7 @@ public class CollectionUtils  {
   /**
    * Samples with replacement from a collection.
    *
+   * @param <E> The type of the items
    * @param c The collection to be sampled from
    * @param n The number of samples to take
    * @return a new collection with the sample
@@ -398,6 +536,7 @@ public class CollectionUtils  {
    * Samples with replacement from a collection, using your own {@link Random}
    * number generator.
    *
+   * @param <E> The type of the items
    * @param c The collection to be sampled from
    * @param n The number of samples to take
    * @param r The random number generator
@@ -420,6 +559,11 @@ public class CollectionUtils  {
   /**
    * Returns true iff l1 is a sublist of l (i.e., every member of l1 is in l,
    * and for every e1 &lt; e2 in l1, there is an e1 &lt; e2 occurrence in l).
+   *
+   * @param <T> The type of the items
+   * @param l1 The candidate subsequence
+   * @param l The list to search in
+   * @return Whether the items of {@code l1} occur in {@code l} in the same order
    */
   public static <T> boolean isSubList(List<T> l1, List<? super T> l) {
     Iterator<? super T> it = l.iterator();
@@ -438,6 +582,14 @@ public class CollectionUtils  {
     return true;
   }
 
+  /**
+   * Returns the entries of a map as {@code key=value} lines, each ending in a newline.
+   *
+   * @param <K> The type of the keys
+   * @param <V> The type of the values
+   * @param m The map
+   * @return The string of entries, in the map's iteration order
+   */
   public static <K, V> String toVerticalString(Map<K, V> m) {
     StringBuilder b = new StringBuilder();
     Set<Map.Entry<K, V>> entries = m.entrySet();
@@ -450,7 +602,14 @@ public class CollectionUtils  {
   /**
    * Provides a consistent ordering over lists. First compares by the first
    * element. If that element is equal, the next element is considered, and so
-   * on.
+   * on.  A list that is a prefix of the other comes first.
+   *
+   * @param <T> The type of the items
+   * @param list1 The first list
+   * @param list2 The second list
+   * @return A negative number, zero, or a positive number as {@code list1} is
+   *     less than, equal to, or greater than {@code list2}
+   * @throws IllegalArgumentException if exactly one of the lists is null
    */
   public static <T extends Comparable<T>> int compareLists(List<T> list1, List<T> list2) {
     if (list1 == null && list2 == null)
@@ -473,6 +632,12 @@ public class CollectionUtils  {
     return 0;
   }
 
+  /**
+   * Returns a comparator that orders lists by {@link #compareLists}.
+   *
+   * @param <C> The type of the list items
+   * @return A lexicographic list comparator
+   */
   public static <C extends Comparable<C>> Comparator<List<C>> getListComparator() {
     return CollectionUtils::compareLists;
   }
@@ -495,6 +660,7 @@ public class CollectionUtils  {
    *
    * @param <T> The type of items in the Iterable.
    * @param items The collection to be sorted.
+   * @param comparator The comparator that determines the order
    * @return A list containing the same items as the Iterable, but sorted.
    */
   public static <T> List<T> sorted(Iterable<T> items, Comparator<T> comparator) {
@@ -656,6 +822,19 @@ public class CollectionUtils  {
     return prefixesAndSuffixes;
   }
 
+  /**
+   * Replaces spans of a list with aggregated items.  Each matched object is
+   * converted to a token interval by {@code toIntervalFunc} and then the list
+   * is merged as by {@link #mergeList(List, List, Function)}.
+   *
+   * @param <T> The type of the list items
+   * @param <M> The type of the matched objects
+   * @param list The items to merge
+   * @param matched The matched objects giving the spans to merge
+   * @param toIntervalFunc Converts a matched object to a span {@code [begin, end)} of {@code list}
+   * @param aggregator Combines the items in a span into one item
+   * @return A new list with each span replaced by its aggregate
+   */
   public static <T, M> List<T> mergeList(List<? extends T> list, Collection<M> matched, Function<M, Interval<Integer>> toIntervalFunc, Function<List<? extends T>, T> aggregator) {
     List<Interval<Integer>> matchedIntervals = new ArrayList<>(matched.size());
     for (M m : matched) {
@@ -664,11 +843,33 @@ public class CollectionUtils  {
     return mergeList(list, matchedIntervals, aggregator);
   }
 
+  /**
+   * Replaces spans of a list with aggregated items.  Sorts {@code matched} in
+   * place by {@link HasInterval#ENDPOINTS_COMPARATOR} and then merges as by
+   * {@link #mergeListWithSortedMatched}.
+   *
+   * @param <T> The type of the list items
+   * @param list The items to merge
+   * @param matched The spans {@code [begin, end)} of {@code list} to merge; this list is sorted
+   * @param aggregator Combines the items in a span into one item
+   * @return A new list with each span replaced by its aggregate
+   */
   public static <T> List<T> mergeList(List<? extends T> list, List<? extends HasInterval<Integer>> matched, Function<List<? extends T>, T> aggregator) {
     Collections.sort(matched, HasInterval.ENDPOINTS_COMPARATOR);
     return mergeListWithSortedMatched(list, matched, aggregator);
   }
 
+  /**
+   * Replaces spans of a list with aggregated items.  Items outside the spans
+   * are copied unchanged.  A span that starts before the end of the previous
+   * merged span is skipped.
+   *
+   * @param <T> The type of the list items
+   * @param list The items to merge
+   * @param matched The spans {@code [begin, end)} of {@code list} to merge, sorted by start
+   * @param aggregator Combines the items in a span into one item
+   * @return A new list with each span replaced by its aggregate
+   */
   public static <T> List<T> mergeListWithSortedMatched(List<? extends T> list, List<? extends HasInterval<Integer>> matched, Function<List<? extends T>, T> aggregator) {
     List<T> merged = new ArrayList<>(list.size()); // Approximate size
     int last = 0;
@@ -690,6 +891,17 @@ public class CollectionUtils  {
     return merged;
   }
 
+  /**
+   * Replaces spans of a list with items that have already been aggregated.
+   * Items outside the spans are copied unchanged.  A matched item whose span
+   * starts before the end of the previous merged span is skipped.
+   *
+   * @param <T> The type of the list items
+   * @param list The items to merge
+   * @param matched The aggregated items, sorted by the start of their spans
+   * @param toIntervalFunc Gives the span {@code [begin, end)} of {@code list} that a matched item replaces
+   * @return A new list with each span replaced by its matched item
+   */
   public static <T> List<T> mergeListWithSortedMatchedPreAggregated(List<? extends T> list, List<? extends T> matched, Function<T, Interval<Integer>> toIntervalFunc) {
     List<T> merged = new ArrayList<>(list.size()); // Approximate size
     int last = 0;
@@ -712,6 +924,10 @@ public class CollectionUtils  {
 
   /**
    * Combines all the lists in a collection to a single list.
+   *
+   * @param <T> The type of the items
+   * @param nestedList The lists to combine
+   * @return A new list of all the items, in order
    */
   public static <T> List<T> flatten(Collection<List<T>> nestedList) {
     List<T> result = new ArrayList<>();
@@ -725,6 +941,13 @@ public class CollectionUtils  {
    * Makes it possible to uniquify a collection of objects which are normally
    * non-hashable. Alternatively, it lets you define an alternate hash function
    * for them for limited-use hashing.
+   * When several objects have the same hash, the last one is kept.
+   *
+   * @param <ObjType> The type of the objects
+   * @param <Hashable> The type of the keys computed by {@code customHasher}
+   * @param objects The objects to uniquify
+   * @param customHasher Computes the key that determines whether two objects are the same
+   * @return The values view of an internal map, with one object per distinct key
    */
   public static <ObjType, Hashable> Collection<ObjType> uniqueNonhashableObjects(Collection<ObjType> objects, Function<ObjType, Hashable> customHasher) {
     Map<Hashable, ObjType> hashesToObjects = Generics.newHashMap();
@@ -737,8 +960,10 @@ public class CollectionUtils  {
   /**
    * if any item in toCheck is present in collection
    *
-   * @param collection
-   * @param toCheck
+   * @param <T> The type of the items
+   * @param collection The collection to search
+   * @param toCheck The items to look for
+   * @return true if any item of {@code toCheck} is in {@code collection}
    */
   public static <T> boolean containsAny(Collection<T> collection, Collection<T> toCheck){
     for(T c: toCheck){
@@ -756,6 +981,11 @@ public class CollectionUtils  {
    * The lists returned are subList()s of the original list.
    * Therefore, don't try to modify the sublists, and don't modify the
    * original list while the sublists are in use.
+   *
+   * @param <T> The type of the items
+   * @param values The list to split
+   * @param numFolds The number of folds
+   * @return A list of numFolds sublists covering {@code values} in order
    */
   public static <T> List<List<T>> partitionIntoFolds(List<T> values, int numFolds) {
     List<List<T>> folds = Generics.newArrayList();
@@ -784,6 +1014,12 @@ public class CollectionUtils  {
    * returns a list of numFold (train, test) pairs where each train list will
    * contain (numFolds-1)/numFolds of the original values and the test list will
    * contain the remaining 1/numFolds of the original values.
+   * The folds are made by {@link #partitionIntoFolds}.
+   *
+   * @param <T> The type of the items
+   * @param values The list to split
+   * @param numFolds The number of folds
+   * @return The (train, test) pairs; each test collection is a sublist view of {@code values}
    */
   public static <T> Collection<Pair<Collection<T>, Collection<T>>> trainTestFoldsForCV(List<T> values, int numFolds) {
     Collection<Pair<Collection<T>, Collection<T>>> trainTestPairs = new ArrayList<>();
@@ -806,6 +1042,10 @@ public class CollectionUtils  {
   /**
    * Returns a list of all modes in the Collection.  (If the Collection has multiple items with the
    * highest frequency, all of them will be returned.)
+   *
+   * @param <T> The type of the items
+   * @param values The collection; must not be empty
+   * @return The set of the most frequent items
    */
   public static <T> Set<T> modes(Collection<T> values) {
     Counter<T> counter = new ClassicCounter<>(values);
@@ -818,6 +1058,10 @@ public class CollectionUtils  {
   /**
    * Returns the mode in the Collection.  If the Collection has multiple modes, this method picks one
    * arbitrarily.
+   *
+   * @param <T> The type of the items
+   * @param values The collection; must not be empty
+   * @return A most frequent item
    */
   public static <T> T mode(Collection<T> values) {
     Set<T> modes = modes(values);
@@ -828,6 +1072,11 @@ public class CollectionUtils  {
   /**
    * Transforms the keyset of collection according to the given Function and returns a set of the keys.
    *
+   * @param <T1> The type of the original items
+   * @param <T2> The type of the transformed items
+   * @param original The items to transform
+   * @param f The function to apply to each item
+   * @return A new set of the transformed items
    */
   public static<T1, T2> Set<T2> transformAsSet(Collection<? extends T1> original, Function<T1, ? extends T2> f){
     Set<T2> transformed = Generics.newHashSet();
@@ -841,6 +1090,11 @@ public class CollectionUtils  {
   /**
    * Transforms the keyset of collection according to the given Function and returns a list.
    *
+   * @param <T1> The type of the original items
+   * @param <T2> The type of the transformed items
+   * @param original The items to transform
+   * @param f The function to apply to each item
+   * @return A new list of the transformed items, in iteration order
    */
   public static<T1, T2> List<T2> transformAsList(Collection<? extends T1> original, Function<T1, ? extends T2> f){
     List<T2> transformed = new ArrayList<>();
@@ -853,6 +1107,10 @@ public class CollectionUtils  {
   /**
    * Filters the objects in the collection according to the given Filter and returns a list.
    *
+   * @param <T> The type of the items
+   * @param original The items to filter
+   * @param f The predicate that items must satisfy to be kept
+   * @return A new list of the items that satisfy {@code f}, in iteration order
    */
   public static<T> List<T> filterAsList(Collection<? extends T> original, Predicate<? super T> f){
     List<T> transformed = new ArrayList<>();
@@ -867,6 +1125,8 @@ public class CollectionUtils  {
   /**
    * Get all values corresponding to the indices (if they exist in the map).
    *
+   * @param <T> The type of the keys
+   * @param <V> The type of the values
    * @param map Any map from T to V
    * @param indices A collection of indices of type T
    * @return The corresponding list of values of type V
@@ -880,6 +1140,13 @@ public class CollectionUtils  {
     return result;
   }
 
+  /**
+   * Returns the index of the largest item in a list.  Ties go to the earliest.
+   *
+   * @param <T> The type of the items
+   * @param list The list
+   * @return The index of the maximum, or -1 if the list is empty
+   */
   public static<T extends Comparable<? super T>> int maxIndex(List<T> list){
    T max = null;
    int i = 0;
@@ -936,6 +1203,13 @@ public class CollectionUtils  {
     };
   }
 
+  /**
+   * Wraps an Enumeration as an Iterator.  The iterator does not support remove.
+   *
+   * @param <E> The type of the elements
+   * @param lst_ The enumeration
+   * @return An iterator over the enumeration's elements
+   */
   public static <E> Iterator<E> iteratorFromEnumerator(final Enumeration<E> lst_) {
     return new Iterator<E>() {
       private final Enumeration<E> lst = lst_;
@@ -951,6 +1225,14 @@ public class CollectionUtils  {
     };
   }
 
+  /**
+   * Wraps an Enumeration as an Iterable.  The Iterable reads from the same
+   * enumeration each time, so it can only be iterated once.
+   *
+   * @param <E> The type of the elements
+   * @param lst The enumeration
+   * @return An iterable over the enumeration's elements
+   */
   public static <E> Iterable<E> iterableFromEnumerator(final Enumeration<E> lst) {
     return new IterableIterator<>(iteratorFromEnumerator(lst));
   }

@@ -6,11 +6,21 @@ import java.util.List;
 
 import edu.stanford.nlp.util.logging.Redwood.Record;
 
+/**
+ * A LogRecordHandler which replaces the first occurrence of one channel name
+ * in each record with another channel name.
+ */
 public class RerouteChannel extends LogRecordHandler {
   
   private Object oldChannelName;
   private Object newChannelName;
 
+  /**
+   * Creates a handler that reroutes records from one channel to another.
+   *
+   * @param oldChannelName the channel to reroute from
+   * @param newChannelName the channel to reroute to
+   */
   public RerouteChannel(Object oldChannelName, Object newChannelName) {
     this.oldChannelName = oldChannelName;
     this.newChannelName = newChannelName;

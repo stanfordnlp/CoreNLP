@@ -6,6 +6,8 @@ package edu.stanford.nlp.util;
  *
  * @author Dan Klein
  * @version 2/7/01
+ * @param <T1> The type of the first object
+ * @param <T2> The type of the second object
  */
 public class UnorderedPair<T1,T2> extends Pair<T1,T2> {
 
@@ -72,11 +74,18 @@ public class UnorderedPair<T1,T2> extends Pair<T1,T2> {
     return 0; // must be equal
   }
 
+  /** Creates a pair with both elements null. */
   public UnorderedPair() {
     first = null;
     second = null;
   }
 
+  /**
+   * Creates a pair of the given objects.
+   *
+   * @param first The first object
+   * @param second The second object
+   */
   public UnorderedPair(T1 first, T2 second) {
     this.first = first;
     this.second = second;

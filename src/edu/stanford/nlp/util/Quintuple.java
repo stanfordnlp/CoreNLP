@@ -10,18 +10,37 @@ import java.util.List;
 /**
  * A quintuple (length five) of ordered objects.
  * 
+ * @param <T1> The type of the first element
+ * @param <T2> The type of the second element
+ * @param <T3> The type of the third element
+ * @param <T4> The type of the fourth element
+ * @param <T5> The type of the fifth element
  * @author Spence Green
  */
 public class Quintuple<T1,T2,T3,T4, T5> implements Comparable<Quintuple<T1,T2,T3,T4,T5>>, Serializable, PrettyLoggable {
 
   private static final long serialVersionUID = 6295043666955910662L;
 
+  /** The first element. */
   public T1 first;
+  /** The second element. */
   public T2 second;
+  /** The third element. */
   public T3 third;
+  /** The fourth element. */
   public T4 fourth;
+  /** The fifth element. */
   public T5 fifth;
 
+  /**
+   * Creates a Quintuple of the given elements.
+   *
+   * @param first The first element
+   * @param second The second element
+   * @param third The third element
+   * @param fourth The fourth element
+   * @param fifth The fifth element
+   */
   public Quintuple(T1 first, T2 second, T3 third, T4 fourth, T5 fifth) {
     this.first = first;
     this.second = second;
@@ -30,43 +49,93 @@ public class Quintuple<T1,T2,T3,T4, T5> implements Comparable<Quintuple<T1,T2,T3
     this.fifth = fifth;
   }
 
+  /**
+   * Returns the first element.
+   *
+   * @return The first element
+   */
   public T1 first() {
     return first;
   }
 
+  /**
+   * Returns the second element.
+   *
+   * @return The second element
+   */
   public T2 second() {
     return second;
   }
 
+  /**
+   * Returns the third element.
+   *
+   * @return The third element
+   */
   public T3 third() {
     return third;
   }
 
+  /**
+   * Returns the fourth element.
+   *
+   * @return The fourth element
+   */
   public T4 fourth() {
     return fourth;
   }
 
+  /**
+   * Returns the fifth element.
+   *
+   * @return The fifth element
+   */
   public T5 fifth() {
     return fifth;
   }
 
 
+  /**
+   * Sets the first element.
+   *
+   * @param o The new first element
+   */
   public void setFirst(T1 o) {
     first = o;
   }
 
+  /**
+   * Sets the second element.
+   *
+   * @param o The new second element
+   */
   public void setSecond(T2 o) {
     second = o;
   }
 
+  /**
+   * Sets the third element.
+   *
+   * @param o The new third element
+   */
   public void setThird(T3 o) {
     third = o;
   }
   
+  /**
+   * Sets the fourth element.
+   *
+   * @param o The new fourth element
+   */
   public void setFourth(T4 o) {
     fourth = o;
   }
 
+  /**
+   * Sets the fifth element.
+   *
+   * @param fifth The new fifth element
+   */
   public void setFifth(T5 fifth) {
     this.fifth = fifth;
   }
@@ -119,14 +188,31 @@ public class Quintuple<T1,T2,T3,T4, T5> implements Comparable<Quintuple<T1,T2,T3
   }
 
   /**
-   * Returns a Quadruple constructed from T1, T2, T3, and T4. Convenience
+   * Returns a Quintuple constructed from T1, T2, T3, T4, and T5. Convenience
    * method; the compiler will disambiguate the classes used for you so that you
    * don't have to write out potentially long class names.
+   *
+   * @param <T1> The type of the first element
+   * @param <T2> The type of the second element
+   * @param <T3> The type of the third element
+   * @param <T4> The type of the fourth element
+   * @param <T5> The type of the fifth element
+   * @param t1 The first element
+   * @param t2 The second element
+   * @param t3 The third element
+   * @param t4 The fourth element
+   * @param t5 The fifth element
+   * @return A new Quintuple of the given elements
    */
   public static <T1, T2, T3, T4, T5> Quintuple<T1, T2, T3, T4, T5> makeQuadruple(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5) {
     return new Quintuple<>(t1, t2, t3, t4, t5);
   }
 
+  /**
+   * Returns the five elements as a list.
+   *
+   * @return A new list containing the five elements in order
+   */
   public List<Object> asList() {
     return CollectionUtils.makeList(first, second, third, fourth, fifth);
   }

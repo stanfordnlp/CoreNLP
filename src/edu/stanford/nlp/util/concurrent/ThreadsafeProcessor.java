@@ -22,6 +22,8 @@ public interface ThreadsafeProcessor<I,O> {
 
   /**
    * Return a new threadsafe instance.
+   *
+   * @return a new instance of this processor
    */
   ThreadsafeProcessor<I,O> newInstance();
 

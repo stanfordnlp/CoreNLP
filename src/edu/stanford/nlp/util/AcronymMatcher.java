@@ -208,18 +208,44 @@ public class AcronymMatcher {
     return mainTokenStrs;
   }
 
+  /**
+   * Filters a list of tokens down to the "main" tokens: the nonempty ones
+   * which are at least 4 characters long or start with an uppercase letter.
+   *
+   * @param tokens The tokens to filter
+   * @return A new list containing the main tokens, in their original order
+   */
   public static List<String> getMainStrs(List<String> tokens) {
     List<String> mainTokenStrs = new ArrayList<>(tokens.size());
     mainTokenStrs.addAll(tokens.stream().filter(text -> !text.isEmpty() && (text.length() >= 4 || Character.isUpperCase(text.charAt(0)))).collect(Collectors.toList()));
     return mainTokenStrs;
   }
 
+  /**
+   * Returns true if the given string is an acronym of the given tokens.
+   *
+   * @param str The candidate acronym
+   * @param tokens The tokens of the candidate expansion
+   * @return true if {@code str} is an acronym of {@code tokens}
+   * @see AcronymMatcher#isAcronymImpl(String, List)
+   */
   public static boolean isAcronym(String str, String[] tokens) {
     return isAcronymImpl(str, Arrays.asList(tokens));
   }
 
   // Public static utility methods
 
+  /**
+   * Returns true if the given string is an acronym of the given tokens.
+   * The characters '-', '.' and '_' are first removed from {@code str}; if its length
+   * then differs from the number of tokens, stopwords are removed from the tokens.
+   * It is an acronym if each character matches (case-insensitively) the first
+   * character of the corresponding token. Empty tokens match any character.
+   *
+   * @param str The candidate acronym
+   * @param tokens The tokens of the candidate expansion
+   * @return true if {@code str} is an acronym of {@code tokens}
+   */
   public static boolean isAcronymImpl(String str, List<String> tokens) {
     // Remove some words from the candidate acronym
     str = discardPattern.matcher(str).replaceAll("");
@@ -242,6 +268,16 @@ public class AcronymMatcher {
     }
   }
 
+  /**
+   * Returns true if the given string is an acronym of the given tokens.
+   * Tokens which are {@link CoreMap}s contribute their text annotation;
+   * any other object contributes its {@code toString()}.
+   *
+   * @param str The candidate acronym
+   * @param tokens The tokens of the candidate expansion
+   * @return true if {@code str} is an acronym of {@code tokens}
+   * @see AcronymMatcher#isAcronymImpl(String, List)
+   */
   public static boolean isAcronym(String str, List<?> tokens) {
     List<String> strs = new ArrayList<>(tokens.size());
     for (Object tok : tokens) {
@@ -259,6 +295,8 @@ public class AcronymMatcher {
   /**
    * Returns true if either chunk1 or chunk2 is acronym of the other.
    *
+   * @param chunk1 The first chunk, with text and tokens annotations
+   * @param chunk2 The second chunk, with text and tokens annotations
    * @return true if either chunk1 or chunk2 is acronym of the other
    */
   public static boolean isAcronym(CoreMap chunk1, CoreMap chunk2) {
@@ -276,7 +314,15 @@ public class AcronymMatcher {
     return isAcro;
   }
 
-  /** @see AcronymMatcher#isAcronym(edu.stanford.nlp.util.CoreMap, edu.stanford.nlp.util.CoreMap) */
+  /**
+   * Returns true if either chunk1 or chunk2 is acronym of the other.
+   * The text of each chunk is its tokens joined with spaces.
+   *
+   * @param chunk1 The tokens of the first chunk
+   * @param chunk2 The tokens of the second chunk
+   * @return true if either chunk1 or chunk2 is acronym of the other
+   * @see AcronymMatcher#isAcronym(edu.stanford.nlp.util.CoreMap, edu.stanford.nlp.util.CoreMap)
+   */
   public static boolean isAcronym(String[] chunk1, String[] chunk2) {
     String text1 = StringUtils.join(chunk1);
     String text2 = StringUtils.join(chunk2);
@@ -292,6 +338,15 @@ public class AcronymMatcher {
     return isAcro;
   }
 
+  /**
+   * Returns true if either chunk1 or chunk2 is a "fancy" acronym of the other,
+   * as determined by {@link #isFancyAcronymImpl(String, List)}.
+   * The text of each chunk is its tokens joined with spaces.
+   *
+   * @param chunk1 The tokens of the first chunk
+   * @param chunk2 The tokens of the second chunk
+   * @return true if either chunk is a fancy acronym of the other
+   */
   public static boolean isFancyAcronym(String[] chunk1, String[] chunk2) {
     String text1 = StringUtils.join(chunk1);
     String text2 = StringUtils.join(chunk2);
@@ -301,6 +356,14 @@ public class AcronymMatcher {
     return isFancyAcronymImpl(text1, tokenStrs2) || isFancyAcronymImpl(text2, tokenStrs1);
   }
 
+  /**
+   * Returns true if the characters of {@code str} (after removing '-', '.' and '_')
+   * occur in order, case-sensitively, in the space-joined text of the tokens.
+   *
+   * @param str The candidate acronym
+   * @param tokens The tokens of the candidate expansion
+   * @return true if {@code str} is a fancy acronym of {@code tokens}
+   */
   public static boolean isFancyAcronymImpl(String str, List<String> tokens) {
     str = discardPattern.matcher(str).replaceAll("");
     String text = StringUtils.join(tokens);

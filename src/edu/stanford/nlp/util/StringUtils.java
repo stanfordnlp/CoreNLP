@@ -62,6 +62,7 @@ public class StringUtils  {
    */
   private StringUtils() {}
 
+  /** A shared zero-length String array. */
   public static final String[] EMPTY_STRING_ARRAY = new String[0];
   private static final String LANG = "lang";
   private static final String PROP = "prop";
@@ -164,6 +165,12 @@ public class StringUtils  {
     return res;
   }
 
+  /**
+   * Compiles each of the given regular expressions.
+   *
+   * @param regexes The regular expressions to compile
+   * @return A new list of the compiled Patterns, in the same order
+   */
   public static List<Pattern> regexesToPatterns(Iterable<String> regexes) {
     List<Pattern> patterns = new ArrayList<>();
     for (String regex:regexes) {
@@ -178,6 +185,10 @@ public class StringUtils  {
    * captured groups in the pattern. If the pattern does not match, returns
    * null. Note that this uses Matcher.find() rather than Matcher.matches().
    * If str is null, returns null.
+   *
+   * @param regex The pattern to search for
+   * @param str The String to search in
+   * @return The captured groups of the first match, or null if there is no match
    */
   public static List<String> regexGroups(Pattern regex, String str) {
     if (str == null) {
@@ -212,6 +223,13 @@ public class StringUtils  {
   }
 
 
+  /**
+   * Splits a String on a delimiter and returns the set of trimmed fields.
+   *
+   * @param str The String to split
+   * @param delimiter The regular expression to split on
+   * @return A set of the trimmed fields, or null if str is null
+   */
   public static Set<String> stringToSet(String str, String delimiter)
   {
     Set<String> ret = null;
@@ -227,6 +245,13 @@ public class StringUtils  {
   }
 
 
+  /**
+   * Joins the words of the given items with the given glue.
+   *
+   * @param l The items whose words are joined
+   * @param glue The String put between words
+   * @return The joined words
+   */
   public static String joinWords(Iterable<? extends HasWord> l, String glue) {
     StringBuilder sb = new StringBuilder(l instanceof Collection ? ((Collection) l).size() : 64);
     boolean first = true;
@@ -242,6 +267,18 @@ public class StringUtils  {
   }
 
 
+  /**
+   * Joins the String forms of the elements of a list in a given span.
+   * start and end are clipped to the bounds of the list.
+   *
+   * @param l The list of elements
+   * @param glue The String put between elements
+   * @param toStringFunc The function used to convert each element to a String
+   * @param start The first index to join
+   * @param end The end (non-inclusive) index to join until
+   * @param <E> The type of the elements
+   * @return The joined String
+   */
   public static <E> String join(List<? extends E> l, String glue, Function<E,String> toStringFunc, int start, int end) {
     StringBuilder sb = new StringBuilder();
     boolean first = true;
@@ -258,12 +295,35 @@ public class StringUtils  {
     return sb.toString();
   }
 
+  /**
+   * Joins the words of the items of a list in a given span.
+   * start and end are clipped to the bounds of the list.
+   *
+   * @param l The items whose words are joined
+   * @param glue The String put between words
+   * @param start The first index to join
+   * @param end The end (non-inclusive) index to join until
+   * @return The joined words
+   */
   public static String joinWords(List<? extends HasWord> l, String glue, int start, int end) {
     return join(l, glue, HasWord::word, start, end);
   }
 
   private static final Function<Object,String> DEFAULT_TOSTRING = Object::toString;
 
+  /**
+   * Joins the values of one field of the CoreMaps of a list in a given span.
+   * start and end are clipped to the bounds of the list.
+   *
+   * @param l The list of CoreMaps
+   * @param field The key of the field to join
+   * @param defaultFieldValue The String used when the field is null
+   * @param glue The String put between values
+   * @param start The first index to join
+   * @param end The end (non-inclusive) index to join until
+   * @param toStringFunc The function used to convert each non-null value to a String
+   * @return The joined values
+   */
   public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
                                   String glue, int start, int end, final Function<Object,String> toStringFunc) {
     return join(l, glue, (Function<CoreMap, String>) in -> {
@@ -272,19 +332,62 @@ public class StringUtils  {
     }, start, end);
   }
 
+  /**
+   * Joins the toString values of one field of the CoreMaps of a list in a given span.
+   * start and end are clipped to the bounds of the list.
+   *
+   * @param l The list of CoreMaps
+   * @param field The key of the field to join
+   * @param defaultFieldValue The String used when the field is null
+   * @param glue The String put between values
+   * @param start The first index to join
+   * @param end The end (non-inclusive) index to join until
+   * @return The joined values
+   */
   public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
                                   String glue, int start, int end) {
     return joinFields(l, field, defaultFieldValue, glue, start, end, DEFAULT_TOSTRING);
   }
 
+  /**
+   * Joins the values of one field of all the CoreMaps of a list with spaces,
+   * using "-" for null values.
+   *
+   * @param l The list of CoreMaps
+   * @param field The key of the field to join
+   * @param toStringFunc The function used to convert each non-null value to a String
+   * @return The joined values
+   */
   public static String joinFields(List<? extends CoreMap> l, final Class field, final Function<Object,String> toStringFunc) {
     return joinFields(l, field, "-", " ", 0, l.size(), toStringFunc);
   }
 
+  /**
+   * Joins the toString values of one field of all the CoreMaps of a list with spaces,
+   * using "-" for null values.
+   *
+   * @param l The list of CoreMaps
+   * @param field The key of the field to join
+   * @return The joined values
+   */
   public static String joinFields(List<? extends CoreMap> l, final Class field) {
     return joinFields(l, field, "-", " ", 0, l.size());
   }
 
+  /**
+   * Joins the values of several fields of the CoreMaps of a list in a given span.
+   * start and end are clipped to the bounds of the list.
+   *
+   * @param l The list of CoreMaps
+   * @param fields The keys of the fields to join for each CoreMap
+   * @param defaultFieldValue The String used when a field is null
+   * @param fieldGlue The String put between the fields of one CoreMap
+   * @param glue The String put between CoreMaps
+   * @param start The first index to join
+   * @param end The end (non-inclusive) index to join until
+   * @param toStringFunc The function used to convert each non-null value to a String
+   * @return The joined values
+   */
   public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
                                           final String fieldGlue, String glue, int start, int end, final Function<Object,String> toStringFunc) {
     return join(l, glue, (Function<CoreMap, String>) in -> {
@@ -301,15 +404,45 @@ public class StringUtils  {
     }, start, end);
   }
 
+  /**
+   * Joins the values of several fields of all the CoreMaps of a list,
+   * with "/" between fields, spaces between CoreMaps and "-" for null values.
+   *
+   * @param l The list of CoreMaps
+   * @param fields The keys of the fields to join for each CoreMap
+   * @param toStringFunc The function used to convert each non-null value to a String
+   * @return The joined values
+   */
   public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final Function<Object,String> toStringFunc) {
     return joinMultipleFields(l, fields, "-", "/", " ", 0, l.size(), toStringFunc);
   }
 
+  /**
+   * Joins the toString values of several fields of the CoreMaps of a list in a given span.
+   * start and end are clipped to the bounds of the list.
+   *
+   * @param l The list of CoreMaps
+   * @param fields The keys of the fields to join for each CoreMap
+   * @param defaultFieldValue The String used when a field is null
+   * @param fieldGlue The String put between the fields of one CoreMap
+   * @param glue The String put between CoreMaps
+   * @param start The first index to join
+   * @param end The end (non-inclusive) index to join until
+   * @return The joined values
+   */
   public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
                                           final String fieldGlue, String glue, int start, int end) {
     return joinMultipleFields(l, fields, defaultFieldValue, fieldGlue, glue, start, end, DEFAULT_TOSTRING);
   }
 
+  /**
+   * Joins the toString values of several fields of all the CoreMaps of a list,
+   * with "/" between fields, spaces between CoreMaps and "-" for null values.
+   *
+   * @param l The list of CoreMaps
+   * @param fields The keys of the fields to join for each CoreMap
+   * @return The joined values
+   */
   public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields) {
     return joinMultipleFields(l, fields, "-", "/", " ", 0, l.size());
   }
@@ -348,6 +481,10 @@ public class StringUtils  {
    * For example, given a list of {@code Integers}, you can create
    * a comma-separated list by calling {@code join(numbers, ", ")}.
    *
+   * @param l The elements to join
+   * @param glue The String put between elements
+   * @param <X> The type of the elements
+   * @return The String forms of the elements joined by glue
    * @see StringUtils#join(Stream, String)
    */
   public static <X> String join(Iterable<X> l, String glue) {
@@ -369,6 +506,10 @@ public class StringUtils  {
    * For example, given a list of {@code Integers}, you can create
    * a comma-separated list by calling {@code join(numbers, ", ")}.
    *
+   * @param l The elements to join
+   * @param glue The String put between elements
+   * @param <X> The type of the elements
+   * @return The String forms of the elements joined by glue
    * @see StringUtils#join(Iterable, String)
    */
   public static <X> String join(Stream<X> l, String glue) {
@@ -390,6 +531,10 @@ public class StringUtils  {
    * Joins each elem in the array with the given glue. For example, given a
    * list of ints, you can create a comma-separated list by calling
    * {@code join(numbers, ", ")}.
+   *
+   * @param elements The elements to join
+   * @param glue The String put between elements
+   * @return The String forms of the elements joined by glue
    */
   public static String join(Object[] elements, String glue) {
     return (join(Arrays.asList(elements), glue));
@@ -421,6 +566,10 @@ public class StringUtils  {
    * Joins each element in the given array with the given glue. For example,
    * given an array of Integers, you can create a comma-separated list by calling
    * {@code join(numbers, ", ")}.
+   *
+   * @param items The Strings to join
+   * @param glue The String put between elements
+   * @return The items joined by glue
    */
   public static String join(String[] items, String glue) {
     return join(Arrays.asList(items), glue);
@@ -429,6 +578,9 @@ public class StringUtils  {
 
   /**
    * Joins elements with a space.
+   *
+   * @param l The elements to join
+   * @return The String forms of the elements joined by spaces
    */
   public static String join(Iterable<?> l) {
     return join(l, " ");
@@ -436,6 +588,9 @@ public class StringUtils  {
 
   /**
    * Joins elements with a space.
+   *
+   * @param elements The elements to join
+   * @return The String forms of the elements joined by spaces
    */
   public static String join(Object[] elements) {
     return (join(elements, " "));
@@ -473,6 +628,7 @@ public class StringUtils  {
    * Split the text into pieces based on newlines.  Include the newline tokens in the pieces.
    *
    * @param s String to splits
+   * @return The pieces of s, with each newline (including \r\n) as a separate piece
    */
   public static List<String> splitLinesKeepNewlines(String s) {
     List<String> pieces = StringUtils.splitKeepDelimiter(s, "\\R");
@@ -544,6 +700,7 @@ public class StringUtils  {
    * the delimiter "|". This method uses the old StringTokenizer class, which is up to
    * 3x faster than the regex-based "split()" methods.
    *
+   * @param str String to split
    * @param delimiter String to split on
    * @return List of lists of strings.
    */
@@ -642,6 +799,10 @@ public class StringUtils  {
    * padding the input String str at the right end with spaces.
    * If str is already longer
    * than totalChars, it is returned unchanged.
+   *
+   * @param str The String to pad; null is treated as "null"
+   * @param totalChars The minimum length of the result
+   * @return The padded String
    */
   public static String pad(String str, int totalChars) {
     return pad(str, totalChars, ' ');
@@ -649,9 +810,14 @@ public class StringUtils  {
 
   /**
    * Return a String of length a minimum of totalChars characters by
-   * padding the input String str at the right end with spaces.
+   * padding the input String str at the right end with the character pad.
    * If str is already longer
    * than totalChars, it is returned unchanged.
+   *
+   * @param str The String to pad; null is treated as "null"
+   * @param totalChars The minimum length of the result
+   * @param pad The character to pad with
+   * @return The padded String
    */
   public static String pad(String str, int totalChars, char pad) {
     if (str == null) {
@@ -666,7 +832,11 @@ public class StringUtils  {
   }
 
   /**
-   * Pads the toString value of the given Object.
+   * Pads the toString value of the given Object at the right end with spaces.
+   *
+   * @param obj The Object to pad the String form of
+   * @param totalChars The minimum length of the result
+   * @return The padded String
    */
   public static String pad(Object obj, int totalChars) {
     return pad(obj.toString(), totalChars);
@@ -678,6 +848,8 @@ public class StringUtils  {
    *
    * @param str The String to be padded or truncated
    * @param num The desired length
+   * @return str padded with spaces at the right or truncated at the right to length num;
+   *     null is treated as "null"
    */
   public static String padOrTrim(String str, int num) {
     if (str == null) {
@@ -702,6 +874,8 @@ public class StringUtils  {
    *
    * @param str The String to be padded or truncated
    * @param num The desired length
+   * @return str padded with spaces at the left or truncated at the left (keeping
+   *     its last num characters) to length num; null is treated as "null"
    */
   public static String padLeftOrTrim(String str, int num) {
     if (str == null) {
@@ -724,6 +898,10 @@ public class StringUtils  {
 
   /**
    * Pad or trim the toString value of the given Object.
+   *
+   * @param obj The Object to pad or trim the String form of
+   * @param totalChars The desired length
+   * @return The String form of obj padded or truncated at the right to length totalChars
    */
   public static String padOrTrim(Object obj, int totalChars) {
     return padOrTrim(obj.toString(), totalChars);
@@ -733,6 +911,11 @@ public class StringUtils  {
   /**
    * Pads the given String to the left with the given character ch to ensure that
    * it's at least totalChars long.
+   *
+   * @param str The String to pad; null is treated as "null"
+   * @param totalChars The minimum length of the result
+   * @param ch The character to pad with
+   * @return The padded String
    */
   public static String padLeft(String str, int totalChars, char ch) {
     if (str == null) {
@@ -750,26 +933,55 @@ public class StringUtils  {
   /**
    * Pads the given String to the left with spaces to ensure that it's
    * at least totalChars long.
+   *
+   * @param str The String to pad; null is treated as "null"
+   * @param totalChars The minimum length of the result
+   * @return The padded String
    */
   public static String padLeft(String str, int totalChars) {
     return padLeft(str, totalChars, ' ');
   }
 
 
+  /**
+   * Pads the toString value of the given Object to the left with spaces.
+   *
+   * @param obj The Object to pad the String form of
+   * @param totalChars The minimum length of the result
+   * @return The padded String
+   */
   public static String padLeft(Object obj, int totalChars) {
     return padLeft(obj.toString(), totalChars);
   }
 
+  /**
+   * Pads the String form of the given int to the left with spaces.
+   *
+   * @param i The number to pad
+   * @param totalChars The minimum length of the result
+   * @return The padded String
+   */
   public static String padLeft(int i, int totalChars) {
     return padLeft(Integer.valueOf(i), totalChars);
   }
 
+  /**
+   * Pads the String form of the given double to the left with spaces.
+   *
+   * @param d The number to pad
+   * @param totalChars The minimum length of the result
+   * @return The padded String
+   */
   public static String padLeft(double d, int totalChars) {
     return padLeft(Double.valueOf(d), totalChars);
   }
 
   /**
    * Returns s if it's at most maxWidth chars, otherwise chops right side to fit.
+   *
+   * @param s The String to trim
+   * @param maxWidth The maximum length of the result
+   * @return s, or its first maxWidth characters
    */
   public static String trim(String s, int maxWidth) {
     if (s.length() <= maxWidth) {
@@ -778,20 +990,49 @@ public class StringUtils  {
     return s.substring(0, maxWidth);
   }
 
+  /**
+   * Returns the toString value of obj, chopping the right side to fit maxWidth chars.
+   *
+   * @param obj The Object to trim the String form of
+   * @param maxWidth The maximum length of the result
+   * @return The possibly trimmed String form of obj
+   */
   public static String trim(Object obj, int maxWidth) {
     return trim(obj.toString(), maxWidth);
   }
 
+  /**
+   * Returns s if it's at most width chars, otherwise its first width - 3
+   * characters followed by "...".
+   *
+   * @param s The String to trim
+   * @param width The maximum length of the result; must be at least 3 if s is longer
+   * @return The possibly trimmed String
+   */
   public static String trimWithEllipsis(String s, int width) {
     if (s.length() > width) s = s.substring(0, width - 3) + "...";
     return s;
   }
 
+  /**
+   * Trims the toString value of o as in {@link #trimWithEllipsis(String, int)}.
+   *
+   * @param o The Object to trim the String form of
+   * @param width The maximum length of the result
+   * @return The possibly trimmed String
+   */
   public static String trimWithEllipsis(Object o, int width) {
     return trimWithEllipsis(o.toString(), width);
   }
 
 
+  /**
+   * Returns a String consisting of s repeated the given number of times.
+   *
+   * @param s The String to repeat
+   * @param times The number of repetitions
+   * @return The repeated String
+   */
   public static String repeat(String s, int times) {
     if (times == 0) {
       return "";
@@ -803,6 +1044,13 @@ public class StringUtils  {
     return sb.toString();
   }
 
+  /**
+   * Returns a String consisting of ch repeated the given number of times.
+   *
+   * @param ch The character to repeat
+   * @param times The number of repetitions
+   * @return The repeated String
+   */
   public static String repeat(char ch, int times) {
     if (times == 0) {
       return "";
@@ -815,8 +1063,13 @@ public class StringUtils  {
   }
 
   /**
-   * Returns a "clean" version of the given filename in which spaces have
-   * been converted to dashes and all non-alphanumeric chars are underscores.
+   * Returns a "clean" version of the given filename in which spaces and
+   * dashes have been converted to underscores and every other character
+   * that is not an ASCII letter, digit or underscore is replaced by its
+   * decimal code point surrounded by x's (for example, "." becomes "x46x").
+   *
+   * @param s The filename to clean
+   * @return The cleaned filename
    */
   public static String fileNameClean(String s) {
     char[] chars = s.toCharArray();
@@ -838,6 +1091,12 @@ public class StringUtils  {
   /**
    * Returns the index of the <i>n</i>th occurrence of ch in s, or -1
    * if there are less than n occurrences of ch.
+   * The search starts at index 1, so an occurrence at index 0 is not counted.
+   *
+   * @param s The String to search
+   * @param ch The character to find
+   * @param n Which occurrence to find
+   * @return The index of the nth occurrence, or -1
    */
   public static int nthIndex(String s, char ch, int n) {
     int index = 0;
@@ -859,7 +1118,12 @@ public class StringUtils  {
   /**
    * This returns a string from decimal digit smallestDigit to decimal digit
    * biggest digit. Smallest digit is labeled 1, and the limits are
-   * inclusive.
+   * inclusive.  The result is padded with leading zeros if n has too few digits.
+   *
+   * @param n The (nonnegative) number to take digits from
+   * @param smallestDigit The position of the lowest digit to keep
+   * @param biggestDigit The position of the highest digit to keep
+   * @return The digits of n from biggestDigit down to smallestDigit
    */
   public static String truncate(int n, int smallestDigit, int biggestDigit) {
     int numDigits = biggestDigit - smallestDigit + 1;
@@ -1105,6 +1369,9 @@ public class StringUtils  {
    * to a Properties object.  Each property is "property=value".  The value
    * for properties without an explicitly given value is set to "true". This can be used for a 2nd level
    * of properties, for example, when you have a commandline argument like "-outputOptions style=xml,tags".
+   *
+   * @param str The comma-separated properties
+   * @return A new Properties object with the given properties
    */
   public static Properties stringToProperties(String str) {
     Properties result = new Properties();
@@ -1117,6 +1384,10 @@ public class StringUtils  {
    * optionally allowed after the comma) representing properties
    * to a Properties object.  Each property is "property=value".  The value
    * for properties without an explicitly given value is set to "true".
+   *
+   * @param str The comma-separated properties
+   * @param props The Properties object to update
+   * @return props, after it has been updated
    */
   public static Properties stringToProperties(String str, Properties props) {
     String[] propsStr = str.trim().split(",\\s*");
@@ -1144,6 +1415,9 @@ public class StringUtils  {
    * for properties without an explicitly given value is set to "true".
    *
    * TODO: remove the stringToProperties version
+   *
+   * @param str The comma-separated properties
+   * @return A new map of the properties, in the order they appear in str
    */
   public static LinkedHashMap<String, String> stringToPropertiesMap(String str) {
     LinkedHashMap<String, String> props = new LinkedHashMap<>();
@@ -1168,6 +1442,10 @@ public class StringUtils  {
   /**
    * If any of the given list of properties are not found, returns the
    * name of that property.  Otherwise, returns null.
+   *
+   * @param props The properties to check
+   * @param requiredProps The names of the required properties
+   * @return The name of the first missing property, or null if none are missing
    */
   public static String checkRequiredProperties(Properties props,
                                                String ... requiredProps) {
@@ -1183,6 +1461,13 @@ public class StringUtils  {
   /**
    * Prints to a file.  If the file already exists, appends if
    * {@code append=true}, and overwrites if {@code append=false}.
+   * Any exception is logged as a warning rather than thrown.
+   *
+   * @param file The file to write to
+   * @param message The text to write
+   * @param append Whether to append to an existing file
+   * @param printLn Whether to write a newline after the message
+   * @param encoding The encoding to use, or null for the platform default
    */
   public static void printToFile(File file, String message, boolean append,
                                  boolean printLn, String encoding) {
@@ -1216,6 +1501,12 @@ public class StringUtils  {
   /**
    * Prints to a file.  If the file already exists, appends if
    * {@code append=true}, and overwrites if {@code append=false}.
+   * A newline is written after the message.
+   * Any exception is logged as a warning rather than thrown.
+   *
+   * @param file The file to write to
+   * @param message The text to write
+   * @param append Whether to append to an existing file
    */
   public static void printToFileLn(File file, String message, boolean append) {
     PrintWriter pw = null;
@@ -1237,6 +1528,11 @@ public class StringUtils  {
   /**
    * Prints to a file.  If the file already exists, appends if
    * {@code append=true}, and overwrites if {@code append=false}.
+   *
+   * @param file The file to write to
+   * @param message The text to write
+   * @param append Whether to append to an existing file
+   * @throws RuntimeIOException if the file cannot be written
    */
   public static void printToFile(File file, String message, boolean append) {
     PrintWriter pw = null;
@@ -1253,8 +1549,12 @@ public class StringUtils  {
 
 
   /**
-   * Prints to a file.  If the file does not exist, rewrites the file;
+   * Prints to a file.  If the file already exists, overwrites the file;
    * does not append.
+   *
+   * @param file The file to write to
+   * @param message The text to write
+   * @throws RuntimeIOException if the file cannot be written
    */
   public static void printToFile(File file, String message) {
     printToFile(file, message, false);
@@ -1263,6 +1563,11 @@ public class StringUtils  {
   /**
    * Prints to a file.  If the file already exists, appends if
    * {@code append=true}, and overwrites if {@code append=false}.
+   *
+   * @param filename The name of the file to write to
+   * @param message The text to write
+   * @param append Whether to append to an existing file
+   * @throws RuntimeIOException if the file cannot be written
    */
   public static void printToFile(String filename, String message, boolean append) {
     printToFile(new File(filename), message, append);
@@ -1271,6 +1576,12 @@ public class StringUtils  {
   /**
    * Prints to a file.  If the file already exists, appends if
    * {@code append=true}, and overwrites if {@code append=false}.
+   * A newline is written after the message.
+   * Any exception is logged as a warning rather than thrown.
+   *
+   * @param filename The name of the file to write to
+   * @param message The text to write
+   * @param append Whether to append to an existing file
    */
   public static void printToFileLn(String filename, String message, boolean append) {
     printToFileLn(new File(filename), message, append);
@@ -1278,14 +1589,24 @@ public class StringUtils  {
 
 
   /**
-   * Prints to a file.  If the file does not exist, rewrites the file;
+   * Prints to a file.  If the file already exists, overwrites the file;
    * does not append.
+   *
+   * @param filename The name of the file to write to
+   * @param message The text to write
+   * @throws RuntimeIOException if the file cannot be written
    */
   public static void printToFile(String filename, String message) {
     printToFile(new File(filename), message, false);
   }
 
 
+  /**
+   * Removes all characters which are not ASCII letters or digits.
+   *
+   * @param orig The String to strip
+   * @return The ASCII letters and digits of orig
+   */
   public static String stripNonAlphaNumerics(String orig) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < orig.length(); i++) {
@@ -1297,12 +1618,25 @@ public class StringUtils  {
     return sb.toString();
   }
 
+  /**
+   * Removes everything from a {@code <} to the next {@code >}, including
+   * across newlines.
+   *
+   * @param orig The String to strip
+   * @return orig without its SGML tags
+   */
   public static String stripSGML(String orig) {
       Pattern sgmlPattern = Pattern.compile("<.*?>", Pattern.DOTALL);
       Matcher sgmlMatcher = sgmlPattern.matcher(orig);
       return sgmlMatcher.replaceAll("");
   }
 
+  /**
+   * Prints each character of s to System.out on its own line, as its
+   * numeric value followed by the character in quotes.
+   *
+   * @param s The String to print
+   */
   public static void printStringOneCharPerLine(String s) {
     for (int i = 0; i < s.length(); i++) {
       int c = s.charAt(i);
@@ -1310,6 +1644,15 @@ public class StringUtils  {
     }
   }
 
+  /**
+   * Puts escapeChar before every occurrence of escapeChar and of each
+   * of the charsToEscape.
+   *
+   * @param s The String to escape
+   * @param charsToEscape The characters to escape
+   * @param escapeChar The escape character
+   * @return The escaped String
+   */
   public static String escapeString(String s, char[] charsToEscape, char escapeChar) {
     StringBuilder result = new StringBuilder();
     for (int i = 0; i < s.length(); i++) {
@@ -1396,6 +1739,10 @@ public class StringUtils  {
    * may have other extraneous characters along the way. This is like
    * edit distance but with no substitution and a higher number means
    * more similar. For example, the LCS of "abcD" and "aXbc" is 3 (abc).
+   *
+   * @param s A String
+   * @param t Another String
+   * @return The length of the longest common substring (in this sense)
    */
   public static int longestCommonSubstring(String s, String t) {
     int[][] d; // matrix
@@ -1464,6 +1811,10 @@ public class StringUtils  {
    * The LCCS is the longest run of characters that appear consecutively in
    * both s and t. For instance, the LCCS of "color" and "colour" is 4, because
    * of "colo".
+   *
+   * @param s A String
+   * @param t Another String
+   * @return The length of the longest common contiguous substring
    */
   public static int longestCommonContiguousSubstring(String s, String t) {
     if (s.isEmpty() || t.isEmpty()) {
@@ -1501,6 +1852,10 @@ public class StringUtils  {
    * Computes the Levenshtein (edit) distance of the two given Strings.
    * This method doesn't allow transposition, so one character transposed between two strings has a cost of 2 (one insertion, one deletion).
    * The EditDistance class also implements the Levenshtein distance, but does allow transposition.
+   *
+   * @param s A String
+   * @param t Another String
+   * @return The edit distance between s and t
    */
   public static int editDistance(String s, String t) {
     // Step 1
@@ -1547,6 +1902,7 @@ public class StringUtils  {
    * Computes the WordNet 2.0 POS tag corresponding to the PTB POS tag s.
    *
    * @param s a Penn TreeBank POS tag.
+   * @return "noun", "verb", "adjective" or "adverb", or null for any other tag
    */
   public static String pennPOSToWordnetPOS(String s) {
     if (s.matches("NN|NNP|NNS|NNPS")) {
@@ -1568,6 +1924,7 @@ public class StringUtils  {
    * Returns a short class name for an object.
    * This is the class name stripped of any package name.
    *
+   * @param o The object whose class is named
    * @return The name of the class minus a package name, for example {@code ArrayList}
    */
   public static String getShortClassName(Object o) {
@@ -1593,6 +1950,12 @@ public class StringUtils  {
    * @param fieldNames fieldnames
    * @param <T> type to return
    * @return Object created from string
+   * @throws InstantiationException if objClass cannot be instantiated (for example, it is abstract)
+   * @throws IllegalAccessException if the constructor or a setter is not accessible
+   * @throws NoSuchFieldException if objClass has no field with one of the field names
+   * @throws NoSuchMethodException if objClass has no no-argument constructor, or a field
+   *     is not accessible and there is no matching setter
+   * @throws InvocationTargetException if the constructor or a setter throws an exception
    */
   public static <T> T columnStringToObject(Class objClass, String str, String delimiterRegex, String[] fieldNames)
           throws InstantiationException, IllegalAccessException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
@@ -1610,6 +1973,12 @@ public class StringUtils  {
    * @param fieldNames fieldnames
    * @param <T> type to return
    * @return Object created from string
+   * @throws InstantiationException if objClass cannot be instantiated (for example, it is abstract)
+   * @throws IllegalAccessException if the constructor or a setter is not accessible
+   * @throws NoSuchFieldException if objClass has no field with one of the field names
+   * @throws NoSuchMethodException if objClass has no no-argument constructor, or a field
+   *     is not accessible and there is no matching setter
+   * @throws InvocationTargetException if the constructor or a setter throws an exception
    */
   public static <T> T columnStringToObject(Class<?> objClass, String str, Pattern delimiterPattern, String[] fieldNames)
           throws InstantiationException, IllegalAccessException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
@@ -1635,6 +2004,10 @@ public class StringUtils  {
    * @param delimiter delimiter
    * @param fieldNames fieldnames
    * @return String representing object
+   * @throws IllegalAccessException if a getter is not accessible
+   * @throws NoSuchFieldException if the object's class has no field with one of the field names
+   * @throws NoSuchMethodException if a field is not accessible and there is no matching getter
+   * @throws InvocationTargetException if a getter throws an exception
    */
   public static String objectToColumnString(Object object, String delimiter, String[] fieldNames)
           throws IllegalAccessException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException
@@ -1680,6 +2053,13 @@ public class StringUtils  {
     return (Character.isUpperCase(s.charAt(0)));
   }
 
+  /**
+   * Uppercases the first character of each whitespace-separated word and
+   * lowercases all the other characters.
+   *
+   * @param s The String to convert
+   * @return The title-cased String
+   */
   public static String toTitleCase(String s) {
     StringBuilder sb = new StringBuilder();
     int off = 0;
@@ -1736,6 +2116,17 @@ public class StringUtils  {
   }
 
 
+  /**
+   * Replaces every occurrence of from in text with to.  Only the characters
+   * {@code . [ ] \} in from are escaped, so any other regular expression
+   * syntax in from is interpreted as a regex, and to is a regex replacement
+   * String (so $ and \ in it are special).
+   *
+   * @param text The String to search in
+   * @param from The String to search for
+   * @param to The replacement
+   * @return text with the replacements made
+   */
   public static String searchAndReplace(String text, String from, String to) {
     from = escapeString(from, new char[]{'.', '[', ']', '\\'}, '\\'); // special chars in regex
     Pattern p = Pattern.compile(from);
@@ -1747,6 +2138,11 @@ public class StringUtils  {
    * Returns an HTML table containing the matrix of Strings passed in.
    * The first dimension of the matrix should represent the rows, and the
    * second dimension the columns.
+   *
+   * @param table The cells of the table; null cells are left empty
+   * @param rowLabels The labels for the rows
+   * @param colLabels The labels for the columns
+   * @return The HTML table
    */
   public static String makeHTMLTable(String[][] table, String[] rowLabels, String[] colLabels) {
     StringBuilder buff = new StringBuilder();
@@ -1782,6 +2178,12 @@ public class StringUtils  {
    * ensure that the String form is of length at least padLeft or padRight.
    * If tsv is true, a tab is put between columns.
    *
+   * @param table The cells of the table
+   * @param rowLabels The labels for the rows, or null for no row labels
+   * @param colLabels The labels for the columns, or null for no header row
+   * @param padLeft The minimum width to left pad each cell to, or 0 for none
+   * @param padRight The minimum width to right pad each cell to, or 0 for none
+   * @param tsv Whether to put a tab between columns
    * @return A String form of the table
    */
   public static String makeTextTable(Object[][] table, Object[] rowLabels, Object[] colLabels, int padLeft, int padRight, boolean tsv) {
@@ -1829,6 +2231,8 @@ public class StringUtils  {
 
   /**
    * Tests the string edit distance function.
+   *
+   * @param args Ignored
    */
   public static void main(String[] args) {
 
@@ -1845,6 +2249,13 @@ public class StringUtils  {
     }
   }
 
+  /**
+   * Converts a String to ASCII, mapping some accented Latin letters and
+   * punctuation to ASCII equivalents and every other non-ASCII char to "?".
+   *
+   * @param s The String to convert
+   * @return The ASCII version of s
+   */
   public static String toAscii(String s) {
     StringBuilder b = new StringBuilder();
     for (int i = 0; i < s.length(); i++) {
@@ -1913,6 +2324,13 @@ public class StringUtils  {
   }
 
 
+  /**
+   * Makes a CSV line from the given fields, quoting every field and
+   * doubling any double quotes within fields.
+   *
+   * @param fields The fields
+   * @return The CSV line, without a trailing newline
+   */
   public static String toCSVString(String[] fields) {
     StringBuilder b = new StringBuilder();
     for (String fld : fields) {
@@ -1933,6 +2351,11 @@ public class StringUtils  {
    * <p>
    * <i>Note:</i> This is now optimized to not allocate any objects if the
    * input is returned unchanged.
+   *
+   * @param input The String to translate
+   * @param from The characters to replace
+   * @param to The replacement for each character of from; must be the same length as from
+   * @return The translated String, or input itself if nothing was replaced
    */
   public static String tr(String input, String from, String to) {
     assert from.length() == to.length();
@@ -1956,6 +2379,9 @@ public class StringUtils  {
 
   /**
    * Returns the supplied string with any trailing '\n' or '\r\n' removed.
+   *
+   * @param s The String to chomp
+   * @return The chomped String, or null if s is null
    */
   public static String chomp(String s) {
     if (s == null) {
@@ -1977,6 +2403,9 @@ public class StringUtils  {
   /**
    * Returns the result of calling toString() on the supplied Object, but with
    * any trailing '\n' or '\r\n' removed.
+   *
+   * @param o The Object to convert to a String
+   * @return The chomped String form of o
    */
   public static String chomp(Object o) {
     return chomp(o.toString());
@@ -1987,6 +2416,9 @@ public class StringUtils  {
    * Strip directory from filename.  Like Unix 'basename'. <br>
    *
    * Example: {@code getBaseName("/u/wcmac/foo.txt") ==> "foo.txt"}
+   *
+   * @param fileName The filename
+   * @return The part of fileName after the last "/"
    */
   public static String getBaseName(String fileName) {
     return getBaseName(fileName, "");
@@ -1998,6 +2430,10 @@ public class StringUtils  {
    * Example: {@code getBaseName("/u/wcmac/foo.txt", "") ==> "foo.txt"}<br>
    * Example: {@code getBaseName("/u/wcmac/foo.txt", ".txt") ==> "foo"}<br>
    * Example: {@code getBaseName("/u/wcmac/foo.txt", ".pdf") ==> "foo.txt"}<br>
+   *
+   * @param fileName The filename
+   * @param suffix The suffix to remove, if present
+   * @return The part of fileName after the last "/", without the suffix
    */
   public static String getBaseName(String fileName, String suffix) {
     return getBaseName(fileName, suffix, "/");
@@ -2008,6 +2444,12 @@ public class StringUtils  {
    *
    * Example: {@code getBaseName("/tmp/foo/bar/foo", "", "/") ==> "foo"}<br>
    * Example: {@code getBaseName("edu.stanford.nlp", "", "\\.") ==> "nlp"}<br>
+   *
+   * @param fileName The name
+   * @param suffix The suffix to remove, if present
+   * @param sep A regular expression matching the separator
+   * @return The last piece of fileName when split on sep, without the suffix,
+   *     or "" if there are no pieces
    */
   public static String getBaseName(String fileName, String suffix, String sep) {
     String[] elts = fileName.split(sep);
@@ -2079,6 +2521,12 @@ public class StringUtils  {
     return m.matches();
   }
 
+  /**
+   * Returns s, or "" if s is null.
+   *
+   * @param s A String
+   * @return s, or "" if s is null
+   */
   public static String getNotNullString(String s) {
     if (s == null)
       return "";
@@ -2101,6 +2549,11 @@ public class StringUtils  {
    * Resolve variable. If it is the props file, then substitute that variable with
    * the value mentioned in the props file, otherwise look for the variable in the environment variables.
    * If the variable is not found then substitute it for empty string.
+   * Only variables written as {@code ${VAR_NAME}} are recognized.
+   *
+   * @param str The String to resolve variables in
+   * @param props The map to look for variable values in first
+   * @return str with its variables substituted, or null if str is null
    */
   public static String resolveVars(String str, Map props) {
     if (str == null)
@@ -2128,9 +2581,13 @@ public class StringUtils  {
 
   /**
    * convert args to properties with variable names resolved. for each value
-   * having a ${VAR} or $VAR, its value is first resolved using the variables
+   * having a {@code ${VAR}}, its value is first resolved using the variables
    * listed in the props file, and if not found then using the environment
    * variables. if the variable is not found then substitute it for empty string
+   *
+   * @param args The command line arguments; each flag takes at most one argument,
+   *     and a flag with no argument is set to "true"
+   * @return The resulting Properties
    */
   public static Properties argsToPropertiesWithResolve(String[] args) {
     LinkedHashMap<String, String> result = new LinkedHashMap<>();
@@ -2183,6 +2640,8 @@ public class StringUtils  {
    * Flags not having any arguments is set to "true".
    *
    * @param filename A properties file to read
+   * @param existingArgs Properties put in the result before those from the file,
+   *     which override them
    * @return The corresponding LinkedHashMap where the ordering is the same as in the
    *         props file
    */
@@ -2205,6 +2664,11 @@ public class StringUtils  {
 
   /**
    * n grams for already split string. the ngrams are joined with a single space
+   *
+   * @param words The words to make ngrams from
+   * @param minSize The minimum ngram size
+   * @param maxSize The maximum ngram size
+   * @return The ngrams, as in {@link CollectionUtils#getNGrams(List, int, int)}
    */
   public static Collection<String> getNgrams(List<String> words, int minSize, int maxSize){
     List<List<String>> ng = CollectionUtils.getNGrams(words, minSize, maxSize);
@@ -2217,6 +2681,11 @@ public class StringUtils  {
 
   /**
    * n grams for already split string. the ngrams are joined with a single space
+   *
+   * @param words The tokens whose words are used to make ngrams
+   * @param minSize The minimum ngram size
+   * @param maxSize The maximum ngram size
+   * @return The ngrams, as in {@link CollectionUtils#getNGrams(List, int, int)}
    */
   public static Collection<String> getNgramsFromTokens(List<CoreLabel> words, int minSize, int maxSize){
     List<String> wordsStr = new ArrayList<>();
@@ -2232,6 +2701,11 @@ public class StringUtils  {
 
   /**
    * The string is split on whitespace and the ngrams are joined with a single space
+   *
+   * @param s The String to make ngrams from
+   * @param minSize The minimum ngram size
+   * @param maxSize The maximum ngram size
+   * @return The ngrams, as in {@link CollectionUtils#getNGrams(List, int, int)}
    */
   public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
@@ -2239,6 +2713,12 @@ public class StringUtils  {
 
   /**
    * Build a list of character-based ngrams from the given string.
+   * The ngrams are ordered by start position, then by size.
+   *
+   * @param s The String to make ngrams from
+   * @param minSize The minimum ngram size; no ngrams are returned if it is not positive
+   * @param maxSize The maximum ngram size
+   * @return The character ngrams
    */
   public static Collection<String> getCharacterNgrams(String s, int minSize, int maxSize) {
     Collection<String> ngrams = new ArrayList<>();
@@ -2257,6 +2737,13 @@ public class StringUtils  {
 
   private static final Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
 
+  /**
+   * Strips diacritics from s by NFKD normalizing it, removing combining
+   * diacritical marks, and NFKC normalizing the result.
+   *
+   * @param s The String to normalize
+   * @return The normalized String
+   */
   public static String normalize(String s) {
     // Normalizes string and strips diacritics (map to ascii) by
     // 1. taking the NFKD (compatibility decomposition -
@@ -2293,7 +2780,15 @@ public class StringUtils  {
     return toString(sentence.get(CoreAnnotations.TokensAnnotation.class));
   }
 
-  /** I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor */
+  /**
+   * Computes the case-insensitive Levenshtein distance between two Strings
+   * (both are lowercased first).
+   * I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor
+   *
+   * @param s1 A String
+   * @param s2 Another String
+   * @return The edit distance between the lowercased Strings
+   */
   public static int levenshteinDistance(String s1, String s2) {
     s1 = s1.toLowerCase();
     s2 = s2.toLowerCase();
@@ -2320,7 +2815,15 @@ public class StringUtils  {
     return costs[s2.length()];
   }
 
-  /** I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor */
+  /**
+   * Computes the Levenshtein distance between two arrays, comparing elements with equals().
+   * I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor
+   *
+   * @param s1 An array
+   * @param s2 Another array
+   * @param <E> The type of the elements
+   * @return The edit distance between the arrays
+   */
   public static <E> int levenshteinDistance(E[] s1, E[] s2) {
 
     int[] costs = new int[s2.length + 1];
@@ -2770,6 +3273,16 @@ public class StringUtils  {
 
   private static final String escapeLetters = "btnvfr";
 
+  /**
+   * Escapes a String for use inside a JSON string literal: backslashes and
+   * double quotes are backslash-escaped, backspace, tab, newline, form feed
+   * and carriage return use their short escapes, and other control
+   * characters use six-character Unicode escapes.
+   * Returns str itself if nothing needs escaping.
+   *
+   * @param str The String to escape
+   * @return The escaped String
+   */
   public static String escapeJsonString(String str) {
      // check if there are any, else return same str without allocation
     if ( ! containsJsonEscape (str)) {
@@ -2797,13 +3310,26 @@ public class StringUtils  {
     return sb.toString();
   }
 
-  /** @return index of pattern (i.e., char position of start of pattern) in s or -1, if not found. */
+  /**
+   * Finds the first match of a pattern in a String.
+   *
+   * @param pattern The pattern to search for
+   * @param s The String to search in
+   * @return index of pattern (i.e., char position of start of pattern) in s or -1, if not found.
+   */
   public static int indexOfRegex(Pattern pattern, String s) {
     Matcher matcher = pattern.matcher(s);
     return matcher.find() ? matcher.start() : -1;
   }
 
-  /** @return index of pattern in s or -1, if not found, starting from index. */
+  /**
+   * Finds the first match of a pattern in a String at or after a given index.
+   *
+   * @param pattern The pattern to search for
+   * @param s The String to search in
+   * @param index The index to start searching from
+   * @return index of pattern in s or -1, if not found, starting from index.
+   */
   public static int indexOfRegex(Pattern pattern, String s, int index) {
     Matcher matcher = pattern.matcher(s);
     return matcher.find(index) ? matcher.start() : -1;

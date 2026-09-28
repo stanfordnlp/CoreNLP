@@ -11,6 +11,8 @@ import java.util.function.Predicate;
  * <br>
  * @author Teg Grenager (grenager@cs.stanford.edu)
  * @version Jan 9, 2004 9:19:06 AM
+ * @param <K> the key type
+ * @param <V> the value type
  */
 public class DeltaMap<K,V> extends AbstractMap<K,V> {
 
@@ -80,7 +82,7 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
    * This is more expensive.
    *
    * @param key key whose presence in this map is to be tested.
-   * @return <tt>true</tt> if this map contains a mapping for the specified
+   * @return {@code true} if this map contains a mapping for the specified
    *         key.
    */
   @SuppressWarnings("SuspiciousMethodCalls")
@@ -131,11 +133,11 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
    *
    * @param key   key with which the specified value is to be associated.
    * @param value value to be associated with the specified key.
-   * @return previous value associated with specified key, or <tt>null</tt>
-   *         if there was no mapping for key.  A <tt>null</tt> return can
-   *         also indicate that the map previously associated <tt>null</tt>
+   * @return previous value associated with specified key, or {@code null}
+   *         if there was no mapping for key.  A {@code null} return can
+   *         also indicate that the map previously associated {@code null}
    *         with the specified key, if the implementation supports
-   *         <tt>null</tt> values.
+   *         {@code null} values.
    */
   @Override
   @SuppressWarnings("unchecked")
@@ -256,12 +258,18 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
    * This is very cheap.
    *
    * @param originalMap will serve as the basis for this DeltaMap
+   * @param mf factory used to create the map which stores the changes
    */
   public DeltaMap(Map<K,V> originalMap, MapFactory<K,V> mf) {
     this.originalMap = Collections.unmodifiableMap(originalMap); // unmodifiable for debugging only
     this.deltaMap = mf.newMap();
   }
 
+  /**
+   * Creates a DeltaMap over the given map, storing the changes in a HashMap.
+   *
+   * @param originalMap will serve as the basis for this DeltaMap
+   */
   @SuppressWarnings("unchecked")
   public DeltaMap(Map<K,V> originalMap) {
     this(originalMap, MapFactory.hashMapFactory());

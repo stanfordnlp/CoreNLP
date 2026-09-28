@@ -29,12 +29,17 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   private static final long serialVersionUID = 6465313844985269109L;
 
+  /** The index returned for objects which are not in the index. */
   public static final int UNKNOWN_ID = -1;
   private static final int DEFAULT_INITIAL_CAPACITY = 100;
 
+  /** Map from each object to its index. */
   private final ConcurrentHashMap<E,Integer> item2Index;
+  /** The number of objects in the index. */
   private int indexSize;
+  /** Lock held by writers while adding new objects. */
   private final ReentrantLock lock;
+  /** Array from index to object; may be longer than the number of objects. */
   private final AtomicReference<Object[]> index2Item;
 
   /**
@@ -47,7 +52,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   /**
    * Constructor.
    *
-   * @param initialCapacity
+   * @param initialCapacity The initial capacity of the index
    */
   public ConcurrentHashIndex(int initialCapacity) {
     item2Index = new ConcurrentHashMap<>(initialCapacity);

@@ -11,10 +11,15 @@ import edu.stanford.nlp.util.Generics;
  *  e.g., java.util.logging.
  *
  *  @author Gabor Angeli
+ *  @param <LoggerClass> The type of the logger to redirect to
+ *  @param <ChannelEquivalent> The type the logger uses in place of Redwood channels,
+ *      such as java.util.logging.Level
  */
 public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends OutputHandler {
 
+  /** The logger to send output to. */
   public final LoggerClass logger;
+  /** The method invoked on {@link #logger} to log each line. */
   public final Method loggingMethod;
   private final Map<Object, ChannelEquivalent> channelMapping;
   private final ChannelEquivalent defaultChannel;
@@ -38,6 +43,10 @@ public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends Outpu
    * @param loggingMethod A method which takes a *single* String argument
    *                         and logs that string using the |logger| class.
    * @param channelMapping The mapping from Redwood channels, to the native Channel equivalent.
+   *                       If null, channels are ignored and loggingMethod is called with only the line.
+   * @param defaultChannel The native channel to use for a message whose channels
+   *                       are not in channelMapping.  If channelMapping is non-null, loggingMethod
+   *                       must take this channel type and a String.
    */
   public RedirectOutputHandler(LoggerClass logger, Method loggingMethod,
                                Map<Object, ChannelEquivalent> channelMapping,
@@ -98,7 +107,6 @@ public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends Outpu
 
   /**
    * Ensure that we don't print duplicate channels when adapting to another logging framework.
-   * @inheritDoc
    */
   @Override
   protected boolean formatChannel(StringBuilder b, String channelStr, Object channel){
@@ -109,6 +117,14 @@ public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends Outpu
   // LOGGER IMPLEMENTATIONS
   //
 
+  /**
+   * Creates a handler which redirects output to a java.util.logging Logger.
+   * Redwood's WARN, DBG and ERR channels map to the WARNING, FINE and SEVERE levels;
+   * other messages are logged at level INFO.
+   *
+   * @param logger The logger to send output to
+   * @return A new handler
+   */
   public static RedirectOutputHandler<java.util.logging.Logger, java.util.logging.Level> fromJavaUtilLogging(java.util.logging.Logger logger) {
     Map <Object, java.util.logging.Level> channelMapping = Generics.newHashMap();
     channelMapping.put(Redwood.WARN, java.util.logging.Level.WARNING);

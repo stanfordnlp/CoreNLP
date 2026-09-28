@@ -7,9 +7,15 @@ package edu.stanford.nlp.util;
  */
 public final class MutableLong extends Number implements Comparable<MutableLong> {
 
+  /** The current value. */
   private long i;
 
   // Mutable
+  /**
+   * Sets the value.
+   *
+   * @param i The new value
+   */
   public void set(long i) {
     this.i = i;
   }
@@ -107,10 +113,16 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     i += val;
   }
 
+  /** Creates a MutableLong with value 0. */
   public MutableLong() {
     this(0);
   }
 
+  /**
+   * Creates a MutableLong with the given value.
+   *
+   * @param i The initial value
+   */
   public MutableLong(long i) {
     this.i = i;
   }

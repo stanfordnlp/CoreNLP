@@ -54,6 +54,8 @@ import java.util.Set;
  *
  * @author Teg Grenager (grenager@cs.stanford.edu)
  * @author Bill MacCartney
+ *
+ * @param <E> The type of the elements
  */
 public interface PriorityQueue<E> extends Set<E> {
 
@@ -102,6 +104,8 @@ public interface PriorityQueue<E> extends Set<E> {
    * a lower priority, but that wasn't the historical behavior, and it seemed like
    * we'd need to do a lot of archeology before changing the behavior.
    *
+   * @param key The element to add
+   * @param priority The priority to give it
    * @return {@code true} if this set did not already contain the specified
    *         element.
    */
@@ -112,6 +116,7 @@ public interface PriorityQueue<E> extends Set<E> {
    * Changes a priority, either up or down, adding the key it if it wasn't there already.
    *
    * @param key an {@code E} value
+   * @param priority The new priority
    * @return whether the priority actually changed.
    */
   public boolean changePriority(E key, double priority);
@@ -120,9 +125,17 @@ public interface PriorityQueue<E> extends Set<E> {
    * Increases the priority of the E key to the new priority if the old priority
    * was lower than the new priority. Otherwise, does nothing.
    *
+   * @param key The element whose priority may be raised
+   * @param priority The new priority
+   * @return Whether the priority was changed
    */
   public boolean relaxPriority(E key, double priority);
 
+  /**
+   * Returns the elements of the queue in decreasing priority order.
+   *
+   * @return A list of the elements, highest priority first
+   */
   public List<E> toSortedList();
 
   /**

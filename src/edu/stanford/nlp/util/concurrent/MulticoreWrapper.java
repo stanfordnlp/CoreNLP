@@ -97,10 +97,22 @@ public class MulticoreWrapper<I,O> {
     processorList = Collections.unmodifiableList(procList);
   }
 
+  /**
+   * Creates the thread pool that runs the jobs.  Called from the constructor;
+   * subclasses may override it to supply a different executor.
+   *
+   * @param nThreads The number of threads
+   * @return A fixed-size thread pool
+   */
   protected ThreadPoolExecutor buildThreadPool(int nThreads) {
     return (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
   }
 
+  /**
+   * Returns the number of threads (and processors) in use.
+   *
+   * @return The number of threads
+   */
   public int nThreads() {
     return nThreads;
   }

@@ -7,8 +7,14 @@ package edu.stanford.nlp.util;
  */
 public final class MutableInteger extends Number implements Comparable<MutableInteger> {
 
+  /** The current value. */
   private int i;
 
+  /**
+   * Sets the value of this integer.
+   *
+   * @param i The new value
+   */
   // Mutable
   public void set(int i) {
     this.i = i;
@@ -104,10 +110,16 @@ public final class MutableInteger extends Number implements Comparable<MutableIn
     i += val;
   }
 
+  /** Creates a MutableInteger with value 0. */
   public MutableInteger() {
     this(0);
   }
 
+  /**
+   * Creates a MutableInteger with the given value.
+   *
+   * @param i The initial value
+   */
   public MutableInteger(int i) {
     this.i = i;
   }

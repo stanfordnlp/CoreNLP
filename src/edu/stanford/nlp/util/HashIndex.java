@@ -28,13 +28,17 @@ import edu.stanford.nlp.io.RuntimeIOException;
  * @see AbstractCollection
  * @since 1.0
  * @author <a href="mailto:yeh1@stanford.edu">Eric Yeh</a> (added write to/load from buffer)
+ * @param <E> The type of objects in the Index
  */
 // todo [cdm 2014]: Delete "extends AbstractCollection<E>" but this will break serialization....
 public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, RandomAccess {
 
   // these variables are also used in IntArrayIndex
+  /** The indexed objects, in index order. */
   private final List<E> objects;  // <-- Should really almost always be an ArrayList
+  /** The map from each indexed object to its index. */
   private final Map<E,Integer> indexes;
+  /** Whether new objects may not be added. */
   private boolean locked; // = false; // Mutable
 
   private static final long serialVersionUID = 5398562825928375260L;
@@ -183,8 +187,11 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * Add the given item to the index, but without taking any locks.
    * Use this method with care!
    * But, this offers a noticable performance improvement if it is safe to use.
+   * Note that if the Index is empty, the item is added even if the Index is locked.
    *
-   * @see Index#addToIndex(E)
+   * @param o The item to look up or add
+   * @return The index of the item, or -1 if it is not in the Index and the Index is locked
+   * @see Index#addToIndex(Object)
    */
   public int addToIndexUnsafe(E o) {
     if (indexes.isEmpty()) {  // a surprisingly common case in TokensRegex
@@ -230,6 +237,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     }
   }
 
+  /** Guards additions in {@link #addToIndex}. */
   private final Semaphore semaphore = new Semaphore(1);
 
   // TODO: delete this when breaking serialization because we can leach off of AbstractCollection
@@ -326,6 +334,11 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     addAll(c);
   }
 
+  /**
+   * Creates a new Index and adds every object of {@code index} to it, in index order.
+   *
+   * @param index The Index to copy
+   */
   public HashIndex(Index<? extends E> index) {
     this();
     // TODO: this assumes that no index supports deletion
@@ -392,6 +405,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * TODO: figure out how best to terminate: currently a blank line is considered to be a terminator.
    * @param br The Reader to read the index from
    * @return An Index read from a file
+   * @throws IOException If reading from {@code br} fails
    */
   public static Index<String> loadFromReader(BufferedReader br) throws IOException {
     HashIndex<String> index = new HashIndex<>();
@@ -418,6 +432,11 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   }
 
 
+  /**
+   * Returns the Index contents with one object per line (without the indices).
+   *
+   * @return A String showing the full index contents
+   */
   public String toStringOneEntryPerLine() {
     return toStringOneEntryPerLine(Integer.MAX_VALUE);
   }
@@ -445,6 +464,13 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     return buff.toString();
   }
 
+  /**
+   * Returns at least part of the Index contents, with one object per line (without the indices).
+   * If there are more than <i>n</i> objects, "..." is appended.
+   *
+   * @param n Show the first <i>n</i> items in the Index
+   * @return A String showing some of the index contents
+   */
   public String toStringOneEntryPerLine(int n) {
     StringBuilder buff = new StringBuilder();
     int sz = objects.size();

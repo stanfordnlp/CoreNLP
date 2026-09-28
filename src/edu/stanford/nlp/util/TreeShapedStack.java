@@ -14,6 +14,8 @@ import java.util.List;
  * Note that if you have an earlier node in the tree, you have no way
  * of recovering later nodes.  It is essential to keep the ends of the
  * stack you are interested in.
+ *
+ * @param <T> The type of the data stored in the stack
  */
 public class TreeShapedStack<T> {
   /**
@@ -33,6 +35,9 @@ public class TreeShapedStack<T> {
    * Returns the previous state.  If the size of the stack is 0, an
    * exception is thrown.  If the size is 1, an empty node is
    * returned.
+   *
+   * @return The stack before the top element was pushed
+   * @throws EmptyStackException If the stack is empty
    */
   public TreeShapedStack<T> pop() {
     if (size == 0) {
@@ -42,7 +47,10 @@ public class TreeShapedStack<T> {
   }
 
   /**
-   * Returns a new node with the new data attached.
+   * Returns a new node with the new data attached.  This node is not changed.
+   *
+   * @param data The data to put on top of the stack
+   * @return A new stack with {@code data} on top of this one
    */
   public TreeShapedStack<T> push(T data) {
     return new TreeShapedStack<>(this, data, size + 1);
@@ -51,6 +59,9 @@ public class TreeShapedStack<T> {
   /**
    * Returns the data in the top node of the stack.  If there is no
    * data, eg the stack size is 0, an exception is thrown.
+   *
+   * @return The data on top of the stack
+   * @throws EmptyStackException If the stack is empty
    */
   public T peek() {
     if (size == 0) {
@@ -61,6 +72,8 @@ public class TreeShapedStack<T> {
 
   /**
    * How many nodes in this branch of the stack
+   *
+   * @return The size of the stack
    */
   public int size() { 
     return size; 
@@ -68,6 +81,8 @@ public class TreeShapedStack<T> {
 
   /**
    * Returns the current stack as a list
+   *
+   * @return A new list of the stack's data, from bottom to top
    */
   public List<T> asList() {
     List<T> result = Generics.newArrayList(size);
@@ -85,6 +100,13 @@ public class TreeShapedStack<T> {
     return "[" + internalToString(" ") + "]";
   }
 
+  /**
+   * Returns the stack's data from bottom to top, in brackets and separated by a comma
+   * followed by {@code delimiter}.
+   *
+   * @param delimiter Text added after each comma
+   * @return A string representation of the stack
+   */
   public String toString(String delimiter) {
     return "[" + internalToString(delimiter) + "]";
   }

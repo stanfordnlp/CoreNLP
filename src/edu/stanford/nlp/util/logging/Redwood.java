@@ -49,11 +49,17 @@ public class Redwood  {
       ---------------------------------------------------------
    */
   // -- UTILITIES --
+  /** The error channel. */
   public static final Flag ERR    = Flag.ERROR;
+  /** The warning channel. */
   public static final Flag WARN   = Flag.WARN;
+  /** The debug channel. */
   public static final Flag DBG    = Flag.DEBUG;
+  /** The flag marking a record or track which should always be printed. */
   public static final Flag FORCE  = Flag.FORCE;
+  /** The channel for output captured from System.out. */
   public static final Flag STDOUT = Flag.STDOUT;
+  /** The channel for output captured from System.err. */
   public static final Flag STDERR = Flag.STDERR;
 
   // -- STREAMS --
@@ -207,6 +213,11 @@ public class Redwood  {
     assert control.isHeldByCurrentThread();
   }
 
+  /**
+   * Returns the root of the tree of handlers (the live tree, not a copy).
+   *
+   * @return The root handler tree
+   */
   protected static RecordHandlerTree rootHandler() {
     return handlers;
   }
@@ -507,6 +518,8 @@ public class Redwood  {
    * Create an object representing a group of channels.
    * {@link RedwoodChannels} contains a more complete description.
    *
+   * @param channelNames The channels to log to
+   * @return A new RedwoodChannels for the given channels
    * @see RedwoodChannels
    */
   public static RedwoodChannels channels(Object... channelNames) {
@@ -581,6 +594,12 @@ public class Redwood  {
     else b.append(" seconds");
   }
 
+  /**
+   * Formats a time difference, as {@link #formatTimeDifference(long, StringBuilder)} does.
+   *
+   * @param diff Time difference in milliseconds
+   * @return The formatted time difference
+   */
   public static String formatTimeDifference(long diff){
     StringBuilder b = new StringBuilder();
     formatTimeDifference(diff, b);
@@ -626,36 +645,71 @@ public class Redwood  {
     private final LogRecordHandler head;
     private final List<RecordHandlerTree> children = new ArrayList<>();
 
+    /** Creates a root node, which has no handler of its own. */
     public RecordHandlerTree() {
       isRoot = true;
       head = null;
     }
 
+    /**
+     * Creates a non-root node with the given handler.
+     *
+     * @param head The handler at this node
+     */
     public RecordHandlerTree(LogRecordHandler head) {
       this.isRoot = false;
       this.head = head;
     }
 
     // -- Core Tree Methods --
+    /**
+     * Returns the handler at this node.
+     *
+     * @return The handler, or null for the root
+     */
     public LogRecordHandler head(){
       return head;
     }
+    /**
+     * Returns an iterator over the direct children of this node.  It supports {@code remove()}.
+     *
+     * @return An iterator over the child trees
+     */
     public Iterator<RecordHandlerTree> children(){
       return children.iterator();
     }
     // -- Utility Methods --
+    /**
+     * Adds a new child node holding {@code handler}.
+     *
+     * @param handler The handler to add
+     * @throws IllegalStateException If Redwood is currently inside a track
+     */
     public void addChild(LogRecordHandler handler){
       if(Redwood.depth != 0){
         throw new IllegalStateException("Cannot modify Redwood when within a track");
       }
       children.add(new RecordHandlerTree(handler));
     }
+    /**
+     * Adds an existing tree as a child of this node.
+     *
+     * @param tree The tree to add
+     * @throws IllegalStateException If Redwood is currently inside a track
+     */
     protected void addChildTree(RecordHandlerTree tree){
       if(Redwood.depth != 0){
         throw new IllegalStateException("Cannot modify Redwood when within a track");
       }
       children.add(tree);
     }
+    /**
+     * Removes the first direct child whose handler is {@code handler} (compared by identity).
+     *
+     * @param handler The handler to remove
+     * @return The removed handler, or null if no direct child has it
+     * @throws IllegalStateException If Redwood is currently inside a track
+     */
     public LogRecordHandler removeChild(LogRecordHandler handler){
       if(Redwood.depth != 0){
         throw new IllegalStateException("Cannot modify Redwood when within a track");
@@ -670,6 +724,12 @@ public class Redwood  {
       }
       return null;
     }
+    /**
+     * Searches this tree depth first for the node holding {@code toFind} (compared by identity).
+     *
+     * @param toFind The handler to look for
+     * @return The node holding the handler, or null if it is not in this tree
+     */
     public RecordHandlerTree find(LogRecordHandler toFind){
       if(toFind == head()){
         return this;
@@ -817,11 +877,15 @@ public class Redwood  {
   public static class Record {
 
     //(filled in at construction)
+    /** The contents of the log message (usually a String). */
     public final Object content;
     private final Object[] channels;
+    /** The track depth at which the message was logged. */
     public final int depth;
+    /** The time the message was logged, in milliseconds since the epoch. */
     public final long timesstamp;
     //(known at creation)
+    /** The id of the thread which created this record. */
     public final long thread = Thread.currentThread().getId();
     //(state)
     private boolean channelsSorted = false;
@@ -832,6 +896,7 @@ public class Redwood  {
      * @param content An object (usually String) representing the log contents
      * @param channels A set of channels to publish this record to
      * @param depth The depth of the log message
+     * @param timestamp The time the message was logged, in milliseconds since the epoch
      */
     protected Record(Object content, Object[] channels, int depth, long timestamp) {
       this.content = content;
@@ -920,7 +985,17 @@ public class Redwood  {
       stream.print(line); stream.flush();
     }
     @Override public boolean supportsAnsi() { return true; }
+    /**
+     * Creates a handler which prints to the real System.out.
+     *
+     * @return A new ConsoleHandler for System.out
+     */
     public static ConsoleHandler out(){ return new ConsoleHandler(realSysOut); }
+    /**
+     * Creates a handler which prints to the real System.err.
+     *
+     * @return A new ConsoleHandler for System.err
+     */
     public static ConsoleHandler err(){ return new ConsoleHandler(realSysErr); }
   }
 
@@ -931,6 +1006,13 @@ public class Redwood  {
   public static class FileHandler extends OutputHandler {
     private PrintWriter printWriter;
 
+    /**
+     * Creates a handler which writes UTF-8 to the given file, replacing any existing contents.
+     * If the file cannot be opened, the error is logged and the handler is left
+     * without a writer, so later calls to {@link #print} will fail.
+     *
+     * @param filename The path of the file to write to
+     */
     public FileHandler(String filename) {
       try {
         printWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8")));
@@ -968,31 +1050,115 @@ public class Redwood  {
       return C;
     }
 
+    /** The error channel. */
     public static final Flag ERR    = Flag.ERROR;
+    /** The warning channel. */
     public static final Flag WARN   = Flag.WARN;
+    /** The debug channel. */
     public static final Flag DBG    = Flag.DEBUG;
+    /** The flag marking a record or track which should always be printed. */
     public static final Flag FORCE  = Flag.FORCE;
+    /** The channel for output captured from System.out. */
     public static final Flag STDOUT = Flag.STDOUT;
+    /** The channel for output captured from System.err. */
     public static final Flag STDERR = Flag.STDERR;
 
+    /**
+     * Pretty log an object, using its class name as the description.
+     *
+     * @param obj The object to log
+     * @see PrettyLogger#log(Object)
+     */
     public static void prettyLog(Object obj){ PrettyLogger.log(obj); }
+    /**
+     * Pretty log an object with a description.
+     *
+     * @param description The description of the object
+     * @param obj The object to log
+     * @see PrettyLogger#log(String, Object)
+     */
     public static void prettyLog(String description, Object obj){ PrettyLogger.log(description, obj); }
+    /**
+     * Log a message; see {@link Redwood#log(Object...)}.
+     *
+     * @param objs The channels, followed by the message
+     */
     public static void log(Object...objs){ Redwood.log(objs); }
+    /**
+     * Log a printf-style formatted message; see {@link Redwood#logf(String, Object...)}.
+     *
+     * @param format The format string
+     * @param args The arguments to format
+     */
     public static void logf(String format, Object... args){ Redwood.logf(format, args); }
+    /**
+     * Log a message on the warning channel.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public static void warn(Object...objs){ Redwood.log(revConcat(objs, WARN)); }
+    /**
+     * Log a message on the warning channel; the same as {@link #warn}.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public static void warning(Object...objs){ Redwood.log(revConcat(objs, WARN)); }
+    /**
+     * Log a message on the debug channel.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public static void debug(Object...objs){ Redwood.log(revConcat(objs, DBG)); }
+    /**
+     * Log a message on the error channel, with the FORCE flag.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public static void err(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); }
+    /**
+     * Log a message on the error channel, with the FORCE flag; the same as {@link #err}.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public static void error(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); }
+    /**
+     * Log a message as {@link #err} does, then call {@code System.exit(1)}
+     * without stopping Redwood.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public static void fatal(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); System.exit(1); }
+    /**
+     * Log a message as {@link #err} does, then throw a RuntimeException whose
+     * message is {@code Arrays.toString(objs)}.
+     *
+     * @param objs Any additional channels, followed by the message
+     * @throws RuntimeException Always
+     */
     public static void runtimeException(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); throw new RuntimeException(Arrays.toString(objs)); }
+    /**
+     * Print an object to System.out, which may be captured by Redwood.
+     *
+     * @param o The object to print
+     */
     public static void println(Object o){ System.out.println(o); }
 
-    /** Exits with a given status code */
+    /**
+     * Exits with a given status code, stopping Redwood first
+     *
+     * @param exitCode The status code to exit with
+     */
     public static void exit(int exitCode){ Redwood.stop(); System.exit(exitCode); }
     /** Exits with status code 0, stopping Redwood first */
     public static void exit(){ exit(0); }
-    /** Create a RuntimeException with arguments */
+    /**
+     * Create a RuntimeException with arguments.  A RuntimeException argument is
+     * returned as is, and another Throwable is wrapped.  For an argument which is
+     * neither a String nor a Throwable, a RuntimeException is thrown rather than returned.
+     *
+     * @param msg The message (a String) or cause (a Throwable) of the exception
+     * @return A RuntimeException for {@code msg}
+     */
     public static RuntimeException fail(Object msg){
       if(msg instanceof String){
         return new RuntimeException((String) msg);
@@ -1004,25 +1170,78 @@ public class Redwood  {
         throw new RuntimeException(msg.toString());
       }
     }
-    /** Create a new RuntimeException with no arguments */
+    /**
+     * Create a new RuntimeException with no arguments
+     *
+     * @return A new RuntimeException
+     */
     public static RuntimeException fail(){ return new RuntimeException(); }
 
+    /**
+     * Begin a track; see {@link Redwood#startTrack(Object...)}.
+     *
+     * @param objs The title of the track, optionally preceded by the FORCE flag
+     */
     public static void startTrack(Object...objs){ Redwood.startTrack(objs); }
+    /**
+     * Begin a track with the FORCE flag.
+     *
+     * @param title The title of the track
+     */
     public static void forceTrack(String title){ Redwood.startTrack(FORCE, title); }
+    /**
+     * End a track; see {@link Redwood#endTrack(String)}.
+     *
+     * @param check The title of the track being ended
+     */
     public static void endTrack(String check){ Redwood.endTrack(check); }
+    /** End an anonymous track; see {@link Redwood#endTrack()}. */
     public static void endTrack(){ Redwood.endTrack(); }
+    /**
+     * End the innermost track if its title is {@code check}; otherwise do nothing.
+     *
+     * @param check The title of the track to end
+     */
     public static void endTrackIfOpen(String check) {
       if (!Redwood.titleStack.empty() && Redwood.titleStack.peek().equals(check)) { Redwood.endTrack(check); }
     }
+    /**
+     * End tracks until the innermost open track is titled {@code check}, which is left open.
+     * If there is no such track, all tracks are ended.
+     *
+     * @param check The title of the track to stop at
+     */
     public static void endTracksUntil(String check) {
      while (!Redwood.titleStack.empty() && !Redwood.titleStack.peek().equals(check)) { Redwood.endTrack(Redwood.titleStack.peek()); }
     }
+    /**
+     * End tracks until the innermost open track is titled {@code check}, then end that track too.
+     *
+     * @param check The title of the last track to end
+     */
     public static void endTracksTo(String check) { endTracksUntil(check); endTrack(check); }
 
+    /**
+     * Start a multithreaded logging environment; see {@link Redwood#startThreads(String)}.
+     *
+     * @param title The name of the thread group being started
+     */
     public static void startThreads(String title){ Redwood.startThreads(title); }
+    /** Signal that this thread is done logging; see {@link Redwood#finishThread()}. */
     public static void finishThread(){ Redwood.finishThread(); }
+    /**
+     * End the multithreaded logging environment; see {@link Redwood#endThreads(String)}.
+     *
+     * @param check The name of the thread group passed to startThreads()
+     */
     public static void endThreads(String check){ Redwood.endThreads(check); }
 
+    /**
+     * Create an object representing a group of channels.
+     *
+     * @param channels The channels to log to
+     * @return A new RedwoodChannels for the given channels
+     */
     public static RedwoodChannels channels(Object... channels) { return new RedwoodChannels(channels); }
 
     /**
@@ -1115,6 +1334,13 @@ public class Redwood  {
       });
     }
 
+    /**
+     * Wrap a collection of Runnables to be logged by Redwood, with an empty title;
+     * see {@link #thread(String, Iterable)}.
+     *
+     * @param runnables The Runnables representing the tasks being run, without the Redwood overhead
+     * @return A new collection of Runnables with the Redwood overhead taken care of
+     */
     public static Iterable<Runnable> thread(Iterable<Runnable> runnables){ return thread("", runnables); }
 
     /**
@@ -1149,12 +1375,32 @@ public class Redwood  {
         throw new RuntimeInterruptedException(e);
       }
     }
+    /**
+     * Run a collection of Runnables with one thread per available processor;
+     * see {@link #threadAndRun(String, Iterable, int)}.
+     *
+     * @param title A title for the group of threads being run
+     * @param runnables The Runnables representing the tasks being run, without the Redwood overhead
+     */
     public static void threadAndRun(String title, Iterable<Runnable> runnables){
       threadAndRun(title,runnables,Runtime.getRuntime().availableProcessors());
     }
+    /**
+     * Run a collection of Runnables, using the number of threads as the title;
+     * see {@link #threadAndRun(String, Iterable, int)}.
+     *
+     * @param runnables The Runnables representing the tasks being run, without the Redwood overhead
+     * @param numThreads The number of threads to run on
+     */
     public static void threadAndRun(Iterable<Runnable> runnables, int numThreads){
       threadAndRun(String.valueOf(numThreads), runnables, numThreads);
     }
+    /**
+     * Run a collection of Runnables using {@code ArgumentParser.threads} threads;
+     * see {@link #threadAndRun(String, Iterable, int)}.
+     *
+     * @param runnables The Runnables representing the tasks being run, without the Redwood overhead
+     */
     public static void threadAndRun(Iterable<Runnable> runnables){
       threadAndRun(runnables, ArgumentParser.threads);
     }
@@ -1172,20 +1418,34 @@ public class Redwood  {
       }
     }
 
+    /** Style for bold text. */
     public static final Style BOLD      = Style.BOLD;
+    /** Style for dim text. */
     public static final Style DIM       = Style.DIM;
+    /** Style for italic text. */
     public static final Style ITALIC    = Style.ITALIC;
+    /** Style for underlined text. */
     public static final Style UNDERLINE = Style.UNDERLINE;
+    /** Style for blinking text. */
     public static final Style BLINK     = Style.BLINK;
+    /** Style for crossed out text. */
     public static final Style CROSS_OUT = Style.CROSS_OUT;
 
+    /** The color black. */
     public static final Color BLACK   = Color.BLACK;
+    /** The color red. */
     public static final Color RED     = Color.RED;
+    /** The color green. */
     public static final Color GREEN   = Color.GREEN;
+    /** The color yellow. */
     public static final Color YELLOW  = Color.YELLOW;
+    /** The color blue. */
     public static final Color BLUE    = Color.BLUE;
+    /** The color magenta. */
     public static final Color MAGENTA = Color.MAGENTA;
+    /** The color cyan. */
     public static final Color CYAN    = Color.CYAN;
+    /** The color white. */
     public static final Color WHITE   = Color.WHITE;
   }
 
@@ -1204,6 +1464,11 @@ public class Redwood  {
   public static class RedwoodChannels {
     private final Object[] channelNames;
 
+    /**
+     * Creates an object which logs to the given channels.  The array is not copied.
+     *
+     * @param channelNames The channels to log to
+     */
     public RedwoodChannels(Object... channelNames) {
       this.channelNames = channelNames;
     }
@@ -1253,22 +1518,46 @@ public class Redwood  {
       log(level, (Supplier<String>) () -> new Formatter().format(format, args).toString());
     }
 
-    /** Log to the info channel. @see RedwoodChannels#logf(Flag, String, Object...) */
+    /**
+     * Log a printf-style formatted message to the info channel.
+     *
+     * @param format The format string for the printf function
+     * @param args The arguments to the printf function
+     * @see RedwoodChannels#logf(Flag, String, Object...)
+     */
     public void infof(String format, Object... args) {
       info((Supplier<String>) () -> new Formatter().format(format, args).toString());
     }
 
-    /** Log to the debug channel. @see RedwoodChannels#logf(Flag, String, Object...) */
+    /**
+     * Log a printf-style formatted message to the debug channel.
+     *
+     * @param format The format string for the printf function
+     * @param args The arguments to the printf function
+     * @see RedwoodChannels#logf(Flag, String, Object...)
+     */
     public void debugf(String format, Object... args) {
       debug((Supplier<String>) () -> new Formatter().format(format, args).toString());
     }
 
-    /** Log to the warn channel. @see RedwoodChannels#logf(Flag, String, Object...) */
+    /**
+     * Log a printf-style formatted message to the warn channel.
+     *
+     * @param format The format string for the printf function
+     * @param args The arguments to the printf function
+     * @see RedwoodChannels#logf(Flag, String, Object...)
+     */
     public void warnf(String format, Object... args) {
       warn((Supplier<String>) () -> new Formatter().format(format, args).toString());
     }
 
-    /** Log to the error channel. @see RedwoodChannels#logf(Flag, String, Object...) */
+    /**
+     * Log a printf-style formatted message to the error channel.
+     *
+     * @param format The format string for the printf function
+     * @param args The arguments to the printf function
+     * @see RedwoodChannels#logf(Flag, String, Object...)
+     */
     public void errf(String format, Object... args) {
       err((Supplier<String>) () -> new Formatter().format(format, args).toString());
     }
@@ -1276,6 +1565,8 @@ public class Redwood  {
     /**
      * PrettyLog an object using these channels.  A default description will be created
      * based on the type of obj.
+     *
+     * @param obj The object to log
      */
     public void prettyLog(Object obj) {
       PrettyLogger.log(this, obj);
@@ -1283,17 +1574,57 @@ public class Redwood  {
 
     /**
      * PrettyLog an object with a description using these channels.
+     *
+     * @param description The description of the object
+     * @param obj The object to log
      */
     public void prettyLog(String description, Object obj) {
       PrettyLogger.log(this, description, obj);
     }
 
+    /**
+     * Log a message at the default (info) level to these channels.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public void info(Object... objs) { log(Util.revConcat(objs)); }
+    /**
+     * Log a message to these channels and the warning channel.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public void warn(Object... objs) { log(Util.revConcat(objs, WARN)); }
+    /**
+     * Log a message to these channels and the warning channel; the same as {@link #warn}.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public void warning(Object... objs) { log(Util.revConcat(objs, WARN)); }
+    /**
+     * Log a message to these channels and the debug channel.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public void debug(Object... objs) { log(Util.revConcat(objs, DBG)); }
+    /**
+     * Log a message to these channels and the error channel, with the FORCE flag.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public void err(Object... objs) { log(Util.revConcat(objs, ERR, FORCE)); }
+    /**
+     * Log a message to these channels and the error channel, with the FORCE flag;
+     * the same as {@link #err}.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public void error(Object... objs) { log(Util.revConcat(objs, ERR, FORCE)); }
+    /**
+     * Log a message as {@link #err} does, then call {@code System.exit(1)}
+     * without stopping Redwood.
+     *
+     * @param objs Any additional channels, followed by the message
+     */
     public void fatal(Object... objs) { log(Util.revConcat(objs, ERR, FORCE)); System.exit(1); }
   }
 
@@ -1301,11 +1632,17 @@ public class Redwood  {
    * Standard channels; enum for the sake of efficiency. "info" is the default level, shown by the lack of a Flag.
    */
   protected enum Flag {
+    /** Error messages. */
     ERROR,
+    /** Warnings. */
     WARN,
+    /** Debugging messages. */
     DEBUG,
+    /** Output captured from System.out. */
     STDOUT,
+    /** Output captured from System.err. */
     STDERR,
+    /** Marks a record or track which should always be printed. */
     FORCE
   }
 

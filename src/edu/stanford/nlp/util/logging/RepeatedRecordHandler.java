@@ -207,9 +207,37 @@ public class RepeatedRecordHandler extends LogRecordHandler {
    * Determines the semantics of what constitutes a repeated record
    */
   public interface RepeatSemantics {
+    /**
+     * Returns whether a record counts as a repeat of the previous one.
+     *
+     * @param lastRecord the previous record
+     * @param newRecord the record being handled
+     * @return true if {@code newRecord} is a repeat of {@code lastRecord}
+     */
     boolean equals(Record lastRecord, Record newRecord);
+
+    /**
+     * A repeated record is printed anyway if more than this many milliseconds
+     * have passed since the last printed record.
+     *
+     * @return the maximum time in milliseconds to suppress repeats for
+     */
     long maxWaitTimeInMillis();
+
+    /**
+     * Repeated records are printed until this many copies of the record (including
+     * the first) have been seen; later repeats are suppressed.
+     *
+     * @return the number of copies of a record to print before suppressing
+     */
     int numToForcePrint();
+
+    /**
+     * Returns the message logged in place of the suppressed repeats.
+     *
+     * @param linesOmitted the number of records which were suppressed
+     * @return the message to log
+     */
     String message(int linesOmitted);
   }
 
@@ -219,6 +247,9 @@ public class RepeatedRecordHandler extends LogRecordHandler {
    *  and begin with the same string, modulo numbers
    */
   public static class ApproximateRepeatSemantics implements RepeatSemantics {
+    /** Creates an ApproximateRepeatSemantics. */
+    public ApproximateRepeatSemantics() { }
+
     private static boolean sameMessage(String last, String current){
       String lastNoNumbers = last.replaceAll("[0-9\\.\\-]+","#");
       String currentNoNumbers = current.replaceAll("[0-9\\.\\-]+","#");
@@ -246,6 +277,11 @@ public class RepeatedRecordHandler extends LogRecordHandler {
     }
   }
 
+  /**
+   * Shared instance of {@link ApproximateRepeatSemantics}: the first 3 copies of a record
+   * are printed, and a repeat is also printed if more than 1 second has passed since
+   * the last printed record.
+   */
   public static final ApproximateRepeatSemantics APPROXIMATE = new ApproximateRepeatSemantics();
 
 
@@ -254,6 +290,9 @@ public class RepeatedRecordHandler extends LogRecordHandler {
    * and have the same message
    */
   public static class ExactRepeatSemantics implements RepeatSemantics {
+    /** Creates an ExactRepeatSemantics. */
+    public ExactRepeatSemantics() { }
+
     @Override
     public boolean equals(Record lastRecord, Record record) {
       return Arrays.equals(record.channels(), lastRecord.channels()) &&
@@ -274,6 +313,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
     }
   }
 
+  /** Shared instance of {@link ExactRepeatSemantics}: only the first copy of a repeated record is printed. */
   public static final ExactRepeatSemantics EXACT = new ExactRepeatSemantics();
 
 }

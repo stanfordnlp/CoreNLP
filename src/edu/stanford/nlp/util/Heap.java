@@ -15,6 +15,7 @@ import java.util.Iterator;
  *
  * @author Dan Klein
  * @version 12/14/00
+ * @param <E> The type of the objects in the heap
  */
 public interface Heap<E> {
 

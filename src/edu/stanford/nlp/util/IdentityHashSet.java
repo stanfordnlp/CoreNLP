@@ -20,6 +20,7 @@ import java.util.*;
  *  case (where all hashes collide), operations are O(n).
  *
  *  @author Bill MacCartney
+ *  @param <E> The type of the elements of the set
  */
 public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Serializable {
 
@@ -168,7 +169,10 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Ser
     return map.size();
   }
 
-  /** Just for testing. */
+  /** Just for testing.
+   *
+   *  @param args Ignored
+   */
   public static void main(String[] args) {
     Integer x = Integer.valueOf(3);
     Integer y = Integer.valueOf(4);
@@ -212,7 +216,10 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Ser
   }
 
   /** Serialize this Object in a manner which is binary-compatible with the
-   *  JDK.
+   *  JDK: the expected maximum size, the number of elements, then the elements.
+   *
+   *  @param s The stream to write to
+   *  @throws IOException If writing to the stream fails
    */
   private void writeObject(ObjectOutputStream s) throws IOException {
     Iterator<E> it = iterator();
@@ -224,6 +231,10 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Ser
 
   /** Deserialize this Object in a manner which is binary-compatible with
    *  the JDK.
+   *
+   *  @param s The stream to read from
+   *  @throws IOException If reading from the stream fails
+   *  @throws ClassNotFoundException If the class of a serialized element cannot be found
    */
   private void readObject(ObjectInputStream s)
     throws IOException, ClassNotFoundException {

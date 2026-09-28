@@ -22,6 +22,7 @@ import java.util.*;
  */
 public class MetaClass {
 
+  /** Thrown when a class, its constructor, or an instance of it cannot be created. */
   public static class ClassCreationException extends RuntimeException {
 
     private static final long serialVersionUID = -5980065992461870357L;
@@ -44,6 +45,7 @@ public class MetaClass {
 
   }
 
+  /** Thrown when no constructor of the class matches the given argument types. */
   public static final class ConstructorNotFoundException extends ClassCreationException {
     private static final long serialVersionUID = -5980065992461870357L;
 
@@ -66,6 +68,11 @@ public class MetaClass {
 
   }
 
+  /**
+   * A factory which creates instances of a class using a fixed constructor.
+   *
+   * @param <T> The type of the objects created
+   */
   public static final class ClassFactory<T> {
     private Class<?>[] classParams;
     private Class<T> cl;
@@ -379,6 +386,7 @@ public class MetaClass {
    * than the one which matches the signature passed to this function
    *
    * @param <E> The type of the object returned
+   * @param <F> The type the result is cast to (unchecked), a subtype of {@code E}
    * @param type The class of the object returned
    * @param params The arguments to the constructor of the class
    * @return An instance of the class
@@ -394,6 +402,14 @@ public class MetaClass {
     }
   }
 
+  /**
+   * Checks whether this class has a constructor for the given arguments, by
+   * actually creating (and discarding) an instance with them.
+   *
+   * @param params The arguments to the constructor of the class
+   * @return true if an instance was created; false if no matching constructor was found
+   * @throws ClassCreationException If a constructor was found but the instance could not be created
+   */
   public boolean checkConstructor(Object... params){
     try {
       createInstance(params);
@@ -717,6 +733,17 @@ public class MetaClass {
     }
   }
 
+  /**
+   * Casts a string to the first of these types for which {@link #cast(String, Type)} succeeds:
+   * Integer, Double, File (only if the file exists), Date, List, Set, Queue,
+   * Integer[], Double[], Character[], String.
+   * The collection types are tried only if the value contains a comma, and if the value
+   * contains a space, no type is tried at all.
+   *
+   * @param <E> The type of the result, cast unchecked
+   * @param value The string to cast
+   * @return The cast value, or null if no type succeeded (always null if the value contains a space)
+   */
   public static <E> E castWithoutKnowingType(String value){
     Class[] typesToTry = new Class[]{
       Integer.class, Double.class,

@@ -47,6 +47,8 @@ public class Trilean implements Serializable {
 
   /**
    * Returns true if this Trilean is true, and false if it is false or unknown.
+   *
+   * @return Whether this value is true
    */
   public boolean isTrue() {
     return value == 1;
@@ -54,6 +56,8 @@ public class Trilean implements Serializable {
 
   /**
    * Returns true if this Trilean is false, and false if it is true or unknown.
+   *
+   * @return Whether this value is false
    */
   public boolean isFalse() {
     return value == 0;
@@ -61,6 +65,8 @@ public class Trilean implements Serializable {
 
   /**
    * Returns true if this Trilean is either true or false, and false if it is unknown.
+   *
+   * @return Whether this value is known
    */
   public boolean isKnown() {
     return value != 2;
@@ -68,6 +74,8 @@ public class Trilean implements Serializable {
 
   /**
    * Returns true if this Trilean is neither true or false, and false if it is either true or false.
+   *
+   * @return Whether this value is unknown
    */
   public boolean isUnknown() {
     return value == 2;
@@ -111,6 +119,7 @@ public class Trilean implements Serializable {
   /**
    * Returns the logical and of this and the other value.
    * @param other The value to and this value with.
+   * @return FALSE if either is false, else UNKNOWN if either is unknown, else TRUE
    */
   public Trilean and(Trilean other) {
     if (this.value == 0 || other.value == 0) {
@@ -125,6 +134,7 @@ public class Trilean implements Serializable {
   /**
    * Returns the logical or of this and the other value.
    * @param other The value to or this value with.
+   * @return TRUE if either is true, else UNKNOWN if either is unknown, else FALSE
    */
   public Trilean or(Trilean other) {
     if (this.value == 1 || other.value == 1) {
@@ -138,6 +148,8 @@ public class Trilean implements Serializable {
 
   /**
    * Returns the logical not of this value.
+   *
+   * @return TRUE for false, FALSE for true, and UNKNOWN for unknown
    */
   public Trilean not() {
     switch (value) {
@@ -209,6 +221,14 @@ public class Trilean implements Serializable {
     }
   }
 
+  /**
+   * Parses a Trilean from a string, ignoring case.
+   * Accepts "true"/"t", "false"/"f", and "unknown"/"unk"/"u".
+   *
+   * @param value The string to parse
+   * @return One of {@link Trilean#TRUE}, {@link Trilean#FALSE}, or {@link Trilean#UNKNOWN}
+   * @throws IllegalArgumentException if the string is not one of the accepted forms
+   */
   public static Trilean fromString(String value) {
     switch(value.toLowerCase()) {
       case "true":

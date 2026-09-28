@@ -16,19 +16,32 @@ public class MemoryMonitor  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(MemoryMonitor.class);
 
+  /** The number of swaps per second above which {@link #systemIsSwapping} returns true. */
   public static final int MAX_SWAPS = 50;
 
+  /** The time (in milliseconds) of the last poll of the system. */
   protected long lastPoll;
+  /** The minimum time (in milliseconds) between unforced polls of the system. */
   protected long pollEvery;
+  /** The free system memory, in kilobytes, from the last poll. */
   protected int freeMem;
+  /** The used swap space, in kilobytes, from the last poll. */
   protected int usedSwap;
+  /** The swaps (in plus out) per second, from the last poll. */
   protected int swaps;
+  /** The Java runtime. */
   protected Runtime r;
 
+  /** Create a monitor which polls the system at most once a minute. This polls the system with vmstat immediately. */
   public MemoryMonitor() {
     this(60000); // 1 min default
   }
 
+  /**
+   * Create a monitor. This polls the system with vmstat immediately.
+   *
+   * @param millis The minimum time, in milliseconds, between unforced polls of the system
+   */
   public MemoryMonitor(long millis) {
     lastPoll = 0;
     pollEvery = millis;
@@ -40,19 +53,40 @@ public class MemoryMonitor  {
   }
 
   // TODO I don't think anyone uses this
+  /**
+   * Set the minimum time between unforced polls of the system.
+   *
+   * @param millis The minimum time, in milliseconds
+   */
   public void pollAtMostEvery(long millis) {
     pollEvery = millis;
   }
 
+  /**
+   * Returns the maximum memory the JVM will attempt to use.
+   *
+   * @return The maximum memory, in kilobytes
+   */
   public int getMaxMemory() {
     return (int) (r.maxMemory() / 1024);
   }
 
+  /**
+   * Returns the memory still available to the JVM (maximum memory minus memory in use), without garbage collecting first.
+   *
+   * @return The available memory, in kilobytes
+   */
   public int getMaxAvailableMemory() {
     return getMaxAvailableMemory(false);
   }
 
   // kilobytes
+  /**
+   * Returns the memory still available to the JVM (maximum memory minus memory in use).
+   *
+   * @param accurate Whether to call System.gc() first
+   * @return The available memory, in kilobytes
+   */
   public int getMaxAvailableMemory(boolean accurate) {
     if (accurate) {
       System.gc();
@@ -60,10 +94,21 @@ public class MemoryMonitor  {
     return (int) ((r.maxMemory() - r.totalMemory() + r.freeMemory()) / 1024);
   }
 
+  /**
+   * Returns the memory in use by the JVM, without garbage collecting first.
+   *
+   * @return The used memory, in kilobytes
+   */
   public int getUsedMemory() {
     return getUsedMemory(false);
   }
 
+  /**
+   * Returns the memory in use by the JVM.
+   *
+   * @param accurate Whether to call System.gc() first
+   * @return The used memory, in kilobytes
+   */
   public int getUsedMemory(boolean accurate) {
     if (accurate) {
       System.gc();
@@ -71,14 +116,30 @@ public class MemoryMonitor  {
     return getUsedMemoryStatic(r);
   }
 
+  /**
+   * Returns the memory in use by the current JVM.
+   *
+   * @return The used memory, in kilobytes
+   */
   public static int getUsedMemoryStatic() {
     return getUsedMemoryStatic(Runtime.getRuntime());
   }
 
+  /**
+   * Returns the memory in use according to the given runtime.
+   *
+   * @param r The runtime
+   * @return The used memory, in kilobytes
+   */
   public static int getUsedMemoryStatic(Runtime r) {
     return (int) ((r.totalMemory() - r.freeMemory()) / 1024);
   }
 
+  /**
+   * Returns the memory in use by the current JVM as a String, such as "512k" or "20m" (rounded down).
+   *
+   * @return The used memory as a String
+   */
   public static String getUsedMemoryString() {
     int usedK = getUsedMemoryStatic();
     if (usedK < 1024) {
@@ -89,6 +150,12 @@ public class MemoryMonitor  {
     }
   }
 
+  /**
+   * Returns the free system memory, polling the system with vmstat if the last poll is old enough.
+   *
+   * @param accurate Whether to call System.gc() first
+   * @return The free system memory, in kilobytes
+   */
   public int getSystemFreeMemory(boolean accurate) {
     if (accurate) {
       System.gc();
@@ -97,16 +164,38 @@ public class MemoryMonitor  {
     return freeMem;
   }
 
+  /**
+   * Returns the used swap space, polling the system with vmstat if the last poll is old enough.
+   *
+   * @return The used swap space, in kilobytes
+   */
   public int getSystemUsedSwap() {
     pollVMstat(false);
     return usedSwap;
   }
 
+  /**
+   * Returns the swaps (in plus out) per second, polling the system with vmstat if the last poll is old enough.
+   *
+   * @return The number of swaps per second
+   */
   public double getSystemSwapsPerSec() {
     pollVMstat(false);
     return swaps;
   }
 
+  /**
+   * Reads whitespace-separated fields from the given lines and positions of a reader.
+   * Field {@code i} to find is the {@code positions[i]}th non-empty field (counting from 1) of line
+   * {@code lineNums[i]} (counting from 1); the fields must be requested in order.
+   *
+   * @param br The reader to read from
+   * @param splitStr The regular expression used to split lines into fields
+   * @param lineNums The line of each field to find
+   * @param positions The position of each field to find
+   * @return The fields found, in order
+   * @throws IOException If reading fails
+   */
   protected static ArrayList<String> parseFields(BufferedReader br, String splitStr,
       int[] lineNums, int[] positions) throws IOException {
     int currLine = 0;
@@ -134,6 +223,12 @@ public class MemoryMonitor  {
     return found;
   }
 
+  /**
+   * Poll the system memory using the {@code free} command, unless the last poll was too recent and
+   * {@code force} is false. Any exception is logged rather than thrown.
+   *
+   * @param force Whether to poll even if the last poll was recent
+   */
   public void pollFree(boolean force) {
     if (!force) {
       long time = System.currentTimeMillis();
@@ -163,6 +258,12 @@ public class MemoryMonitor  {
     }
   }
 
+  /**
+   * Poll the system memory and swapping using the {@code vmstat} command, unless the last poll was too recent and
+   * {@code force} is false. Any exception is printed rather than thrown.
+   *
+   * @param force Whether to poll even if the last poll was recent
+   */
   public void pollVMstat(boolean force) {
     if (!force) {
       long time = System.currentTimeMillis();
@@ -194,6 +295,11 @@ public class MemoryMonitor  {
     }
   }
 
+  /**
+   * Returns whether the system is doing more than {@link #MAX_SWAPS} swaps per second.
+   *
+   * @return Whether the system is swapping
+   */
   public boolean systemIsSwapping() {
     return (getSystemSwapsPerSec() > MAX_SWAPS);
   }
@@ -256,11 +362,14 @@ public class MemoryMonitor  {
     private PrintStream outstream;
     private long peak = 0;
 
+    /** Create a monitor which polls every second and logs to System.err every minute. */
     public PeakMemoryMonitor() {
       this(DEFAULT_POLL_FREQUENCY, DEFAULT_LOG_FREQUENCY);
     }
 
     /**
+     * Create a monitor which logs to System.err.
+     *
      * @param pollFrequency frequency, in milliseconds, with which to poll
      * @param logFrequency frequency, in milliseconds, with which to log maximum memory
      *          used so far
@@ -269,6 +378,14 @@ public class MemoryMonitor  {
       this(pollFrequency, logFrequency, System.err);
     }
 
+    /**
+     * Create a monitor.
+     *
+     * @param pollFrequency frequency, in milliseconds, with which to poll
+     * @param logFrequency frequency, in milliseconds, with which to log maximum memory
+     *          used so far
+     * @param out The stream to log to
+     */
     public PeakMemoryMonitor(int pollFrequency, int logFrequency,
                              PrintStream out) {
       this.pollFrequency = pollFrequency;
@@ -297,11 +414,18 @@ public class MemoryMonitor  {
       }
     }
 
+    /** Prints the maximum memory used so far, in gigabytes, to the output stream. */
     public void log() {
       outstream.println(String.format("Maximum memory used: %.1f GB", peak / GIGABYTE));
     }
   }
 
+  /**
+   * Test method: creates a MemoryMonitor, polls it, and prints its state, while running a PeakMemoryMonitor.
+   *
+   * @param args Not used
+   * @throws InterruptedException If interrupted while waiting for the PeakMemoryMonitor to finish
+   */
   public static void main(String[] args) throws InterruptedException {
     Thread pmm = new Thread(new PeakMemoryMonitor());
     pmm.start();

@@ -22,8 +22,15 @@ public class VisibilityHandler extends LogRecordHandler {
   private VisibilityHandler.State defaultState = State.SHOW_ALL;
   private final Set<Object> deltaPool = new HashSet<>();  // replacing with Generics.newHashSet() makes classloader go haywire?
 
+  /** Creates a handler which shows all channels. */
   public VisibilityHandler() { }  // default is SHOW_ALL
 
+  /**
+   * Creates a handler which shows only the given channels, or all channels
+   * if the array is empty.
+   *
+   * @param channels The channels to show
+   */
   public VisibilityHandler(Object[] channels) {
     if (channels.length > 0) {
       defaultState = State.HIDE_ALL;
@@ -51,7 +58,7 @@ public class VisibilityHandler extends LogRecordHandler {
    * Show all the channels currently being printed, in addition
    * to a new one
    * @param filter The channel to also show
-   * @return true if this channel was already being shown.
+   * @return true if this channel was previously hidden (that is, the visibility changed).
    */
   public boolean alsoShow(Object filter) {
     switch(this.defaultState){
@@ -68,7 +75,7 @@ public class VisibilityHandler extends LogRecordHandler {
    * Show all the channels currently being printed, with the exception
    * of this new one
    * @param filter The channel to also hide
-   * @return true if this channel was already being hidden.
+   * @return true if this channel was previously shown (that is, the visibility changed).
    */
   public boolean alsoHide(Object filter) {
     switch(this.defaultState){

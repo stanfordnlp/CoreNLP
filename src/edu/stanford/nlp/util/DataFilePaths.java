@@ -34,6 +34,14 @@ public class DataFilePaths {
     ((System.getenv(JAVANLP_VARIABLE) != null) ?
      System.getenv(JAVANLP_VARIABLE) : ".");
 
+  /**
+   * Expands a leading {@code $NLP_DATA_HOME} (default {@code /u/nlp}) or
+   * {@code $JAVANLP_HOME} (default {@code .}) in the path to the value of that
+   * environment variable.  Other paths are returned unchanged.
+   *
+   * @param path the path to convert
+   * @return the path with a leading variable expanded
+   */
   public static String convert(String path) {
     if (path.startsWith(NLP_DATA_VARIABLE_PREFIX))
       return NLP_DATA_HOME + path.substring(NLP_DATA_VARIABLE_PREFIX.length());

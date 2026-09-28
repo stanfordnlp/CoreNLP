@@ -76,6 +76,8 @@ public class PrettyLogger {
   /**
    * Pretty log an object.
    *
+   * @param <T>
+   *          unused by this method
    * @param channels
    *          the channels to pretty log to
    * @param description

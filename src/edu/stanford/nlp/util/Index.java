@@ -133,12 +133,31 @@ public interface Index<E> extends Iterable<E>, Serializable {
 
   // Subset of the Collection interface.  These come from old uses of HashIndex. Avoid using these.
 
+  /**
+   * Returns whether the object is in the Index.
+   *
+   * @param o The object to look for
+   * @return Whether {@code o} is in the Index
+   */
   boolean contains(Object o);   // cdm: keep this, it seems reasonable
 
+  /**
+   * Adds an object to the Index, if it is not already present and the Index is not locked.
+   *
+   * @param e The object to add
+   * @return Whether the object was added (false if it was already present or the Index is locked)
+   */
   boolean add(E e);  // cdm: Many, many uses; could be replaced with indexOf, but why bother?
 
+  /**
+   * Adds each object in the collection to the Index, as {@link #add} does.
+   *
+   * @param c The objects to add
+   * @return Whether any object was added
+   */
   boolean addAll(Collection<? extends E> c);  // okay to have.
 
+  /** Removes all objects from the Index. */
   void clear();  // cdm: barely used.
 
 }

@@ -19,23 +19,41 @@ import java.util.List;
  * entries in the backing index will be ignored.
  *
  * @author John Bauer
+ * @param <E> The type of the objects in the index
  */
 public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
 
   private static final long serialVersionUID = -1459230891686013411L;
 
+  /** The index which is not modified by this DeltaIndex. */
   private final Index<E> backingIndex;
+  /** The index holding entries not found in the backing index. */
   private final Index<E> spilloverIndex;
 
+  /** The size of the backing index at construction; spillover indices are offset by this. */
   private final int backingIndexSize;
 
+  /** If true, addToIndex does not add new entries to the spillover index. */
   private boolean locked;
 
 
+  /**
+   * Creates a DeltaIndex over the given backing index, with a new
+   * HashIndex as the spillover index.
+   *
+   * @param backingIndex The index to leave unchanged
+   */
   public DeltaIndex(Index<E> backingIndex) {
     this(backingIndex, new HashIndex<>());
   }
 
+  /**
+   * Creates a DeltaIndex over the given backing index, putting new
+   * entries in the given spillover index.
+   *
+   * @param backingIndex The index to leave unchanged
+   * @param spilloverIndex The index which receives new entries
+   */
   public DeltaIndex(Index<E> backingIndex, Index<E> spilloverIndex) {
     this.backingIndex = backingIndex;
     this.spilloverIndex = spilloverIndex;

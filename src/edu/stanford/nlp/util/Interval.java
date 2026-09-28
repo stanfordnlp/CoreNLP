@@ -21,6 +21,7 @@ import java.util.function.ToDoubleFunction;
  * EE = relationship between end of first interval and end of second interval
  *
  * @author Angel Chang
+ * @param <E> The type of the interval endpoints
  */
 public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasInterval<E>, Serializable {
   /**
@@ -30,10 +31,13 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   public static final int INTERVAL_OPEN_BEGIN = 0x01;
   /**
    * Flag indicating that an interval's end point is not inclusive
-   * (by default, begin points are inclusive)
+   * (by default, end points are inclusive)
    */
   public static final int INTERVAL_OPEN_END = 0x02;
 
+  /**
+   * Flags characterizing the interval, such as {@link #INTERVAL_OPEN_BEGIN} and {@link #INTERVAL_OPEN_END}.
+   */
   private final int flags;
 
   /**
@@ -69,13 +73,31 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
      */
     NONE }
 
+  /** Unshifted subflag: the two endpoints compared are the same. */
   protected static final int REL_FLAGS_SAME = 0x0001;
+  /** Unshifted subflag: the endpoint of the first interval is before that of the second. */
   protected static final int REL_FLAGS_BEFORE = 0x0002;
+  /** Unshifted subflag: the endpoint of the first interval is after that of the second. */
   protected static final int REL_FLAGS_AFTER = 0x0004;
+  /**
+   * Unshifted subflags: the relationship of the two endpoints is unknown (all of SAME, BEFORE and AFTER set).
+   */
   protected static final int REL_FLAGS_UNKNOWN = 0x0007;
+  /**
+   * Bit shift for the subflags relating the start of the first interval to the start of the second.
+   */
   protected static final int REL_FLAGS_SS_SHIFT = 0;
+  /**
+   * Bit shift for the subflags relating the start of the first interval to the end of the second.
+   */
   protected static final int REL_FLAGS_SE_SHIFT = 1*4;
+  /**
+   * Bit shift for the subflags relating the end of the first interval to the start of the second.
+   */
   protected static final int REL_FLAGS_ES_SHIFT = 2*4;
+  /**
+   * Bit shift for the subflags relating the end of the first interval to the end of the second.
+   */
   protected static final int REL_FLAGS_EE_SHIFT = 3*4;
 
 
@@ -312,16 +334,43 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
    */
   public static final int REL_FLAGS_INTERVAL_UNKNOWN = 0x00770000;
 
+  /**
+   * Flag for intervals that are almost the same.  Not set by any method in this
+   * class, and has the same value as {@link #REL_FLAGS_INTERVAL_ALMOST_BEFORE}
+   * and {@link #REL_FLAGS_INTERVAL_ALMOST_AFTER}.
+   */
   public static final int REL_FLAGS_INTERVAL_ALMOST_SAME = 0x01000000;
+  /**
+   * Flag for a first interval that is almost before the second.  Not set by any
+   * method in this class, and has the same value as
+   * {@link #REL_FLAGS_INTERVAL_ALMOST_SAME}.
+   */
   public static final int REL_FLAGS_INTERVAL_ALMOST_BEFORE = 0x01000000;
+  /**
+   * Flag for a first interval that is almost after the second.  Not set by any
+   * method in this class, and has the same value as
+   * {@link #REL_FLAGS_INTERVAL_ALMOST_SAME}.
+   */
   public static final int REL_FLAGS_INTERVAL_ALMOST_AFTER = 0x01000000;
 
 //  public final static int REL_FLAGS_INTERVAL_ALMOST_OVERLAP = 0x10000000;
 //  public final static int REL_FLAGS_INTERVAL_ALMOST_INSIDE = 0x20000000;
 //  public final static int REL_FLAGS_INTERVAL_ALMOST_CONTAIN = 0x40000000;
 
+  /**
+   * Set by {@link #addIntervalRelationFlags(int, boolean)} when fuzzy checking is
+   * requested and some endpoint relationship has more than one possible value.
+   */
   public static final int REL_FLAGS_INTERVAL_FUZZY = 0x80000000;
 
+  /**
+   * Creates an interval from a to b.
+   *
+   * @param a The start point
+   * @param b The end point
+   * @param flags Flags characterizing the interval
+   * @throws IllegalArgumentException if {@code a} comes after {@code b}
+   */
   protected Interval(E a, E b, int flags) {
     super(a,b);
     this.flags = flags;
@@ -420,11 +469,27 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return second;
   }
 
+  /**
+   * Returns the larger of two values.
+   *
+   * @param <E> The type of the values
+   * @param a The first value
+   * @param b The second value
+   * @return The larger value ({@code b} if they compare equal)
+   */
   protected static <E extends Comparable<E>> E max(E a, E b) {
     int comp = a.compareTo(b);
     return (comp > 0)? a:b;
   }
 
+  /**
+   * Returns the smaller of two values.
+   *
+   * @param <E> The type of the values
+   * @param a The first value
+   * @param b The second value
+   * @return The smaller value ({@code b} if they compare equal)
+   */
   protected static <E extends Comparable<E>> E min(E a, E b) {
     int comp = a.compareTo(b);
     return (comp < 0)? a: b;
@@ -444,6 +509,13 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return (check1 && check2);
   }
 
+  /**
+   * Checks whether the point p lies between the endpoints of this interval,
+   * treating both endpoints as included regardless of this interval's flags.
+   *
+   * @param p point to check
+   * @return True if begin {@code <=} p {@code <=} end
+   */
   public boolean containsOpen(E p) {
     // Check that the start point is before p
     boolean check1 = first.compareTo(p) <= 0;
@@ -452,6 +524,15 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return (check1 && check2);
   }
 
+  /**
+   * Checks whether the other interval lies within this interval.  Each included
+   * endpoint of the other interval must be contained in this interval (see
+   * {@link #contains(Comparable)}); an excluded endpoint of the other interval
+   * need only lie between this interval's endpoints (see {@link #containsOpen(Comparable)}).
+   *
+   * @param other interval to check
+   * @return True if the other interval is contained within this interval
+   */
   public boolean contains(Interval<E> other) {
     boolean containsOtherBegin = (other.includesBegin())? contains(other.getBegin()): containsOpen(other.getBegin());
     boolean containsOtherEnd = (other.includesEnd())? contains(other.getEnd()): containsOpen(other.getEnd());
@@ -597,6 +678,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
    * Checks whether this interval is comparable with another interval
    *  comes before or after
    * @param other interval to compare with
+   * @return true if this interval is before or after the other interval
    */
   public boolean isIntervalComparable(Interval<E> other)
   {
@@ -625,6 +707,14 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     }
   }
 
+  /**
+   * Converts the result of a comparison of two endpoints into relation subflags.
+   *
+   * @param comp The result of {@code compareTo} between the two endpoints
+   * @param shift The bit shift for the pair of endpoints compared (e.g. {@link #REL_FLAGS_SS_SHIFT})
+   * @return {@link #REL_FLAGS_SAME}, {@link #REL_FLAGS_AFTER} or {@link #REL_FLAGS_BEFORE},
+   *     shifted left by {@code shift}
+   */
   protected static int toRelFlags(int comp, int shift)
   {
     int flags = 0;
@@ -662,6 +752,16 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return flags;
   }
 
+  /**
+   * Adds the interval relation flags (e.g. {@link #REL_FLAGS_INTERVAL_BEFORE},
+   * {@link #REL_FLAGS_INTERVAL_OVERLAP}) that are possible given the endpoint
+   * relation subflags already in {@code flags}.
+   *
+   * @param flags The endpoint relation flags (SS, SE, ES and EE subflags)
+   * @param checkFuzzy If true, also set {@link #REL_FLAGS_INTERVAL_FUZZY} when
+   *     {@link #checkMultipleBitSet(int)} reports multiple bits in some subflag
+   * @return {@code flags} with the interval relation flags added
+   */
   protected static int addIntervalRelationFlags(int flags, boolean checkFuzzy) {
     int f11 = extractRelationSubflags(flags, REL_FLAGS_SS_SHIFT);
     int f22 = extractRelationSubflags(flags, REL_FLAGS_EE_SHIFT);
@@ -712,6 +812,13 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return flags;
   }
 
+  /**
+   * Extracts the four relation subflags stored at the given shift.
+   *
+   * @param flags The relation flags
+   * @param shift The bit shift for the pair of endpoints of interest (e.g. {@link #REL_FLAGS_SS_SHIFT})
+   * @return The subflags for that pair of endpoints, in the low four bits
+   */
   public static int extractRelationSubflags(int flags, int shift)
   {
     return (flags >> shift) & 0xf;
@@ -879,24 +986,49 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return result;
   }
 
+  /**
+   * Returns the midpoint of an integer interval.
+   *
+   * @param interval The interval
+   * @return (begin + end) / 2
+   */
   public static double getMidPoint(Interval<Integer> interval) {
     return (interval.getBegin() + interval.getEnd())/2.0;
   }
 
+  /**
+   * Returns half the length of an integer interval.
+   *
+   * @param interval The interval
+   * @return (end - begin) / 2
+   */
   public static double getRadius(Interval<Integer> interval) {
     return (interval.getEnd() - interval.getBegin())/2.0;
   }
 
+  /**
+   * Returns {@link HasInterval#LENGTH_ENDPOINTS_COMPARATOR}, cast to the desired type.
+   *
+   * @param <T> The type of the objects to compare
+   * @return A comparator that orders by interval length (longest first), then by endpoints
+   */
   @SuppressWarnings("unchecked")
   public static <T extends HasInterval<Integer>> Comparator<T> lengthEndpointsComparator() {
     return ErasureUtils.uncheckedCast(HasInterval.LENGTH_ENDPOINTS_COMPARATOR);
   }
 
+  /**
+   * Returns {@link #LENGTH_SCORER}, cast to the desired type.
+   *
+   * @param <T> The type of the objects to score
+   * @return A function giving the length of an object's interval
+   */
   @SuppressWarnings("unchecked")
   public static <T extends HasInterval<Integer>> ToDoubleFunction<T> lengthScorer() {
     return ErasureUtils.uncheckedCast(LENGTH_SCORER);
   }
 
+  /** Scores an object with an integer interval by the interval's length (end - begin). */
   public static final ToDoubleFunction<HasInterval<Integer>> LENGTH_SCORER = in -> {
     Interval<Integer> interval = in.getInterval();
     return (double) (interval.getEnd() - interval.getBegin());

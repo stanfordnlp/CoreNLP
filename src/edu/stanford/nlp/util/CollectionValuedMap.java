@@ -19,7 +19,7 @@ import java.util.Set;
  * "HashSetValuedIdentityHashMap". The possibilities are endless!
  *
  * @param <K> Key type of map
- * @param <V> Type of the Collection that is the Map's value
+ * @param <V> Type of the elements of the Collections that are the Map's values
  * @author Teg Grenager (grenager@cs.stanford.edu)
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - cleanup and filling in
  *         types
@@ -28,10 +28,18 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   private static final long serialVersionUID = -9064664153962599076L;
 
+  /** The underlying map from keys to collections. */
   @SuppressWarnings("serial")
   private final Map<K, Collection<V>> map;
+  /** The factory used to create the collection for each key. */
   protected final CollectionFactory<V> cf;
+  /**
+   * If true, a new collection is created whenever values are added to or removed from a key's collection.
+   */
   protected final boolean treatCollectionsAsImmutable;
+  /**
+   * The factory used to create the underlying map (null for a map made by {@link #deltaCopy()}).
+   */
   protected final MapFactory<K, Collection<V>> mf;
 
   /**
@@ -73,6 +81,9 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   /**
    * Adds the value to the Collection mapped to by the key.
+   *
+   * @param key The key
+   * @param value The value to add to the key's Collection
    */
   public void add(K key, V value) {
     if (treatCollectionsAsImmutable) {
@@ -98,6 +109,9 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   /**
    * Adds the values to the Collection mapped to by the key.
+   *
+   * @param key The key
+   * @param values The values to add to the key's Collection
    */
   public void addAll(K key, Collection<V> values) {
     if (values.size() == 0) {
@@ -125,7 +139,11 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
     }
   }
 
-  /** Just add the key (empty collection, but key is in the keySet). */
+  /** Just add the key (empty collection, but key is in the keySet).
+   *  Does nothing if the key is already present.
+   *
+   *  @param key The key to add
+   */
   public void addKey(K key) {
     Collection<V> c = map.get(key);
     if (c == null) {
@@ -136,7 +154,10 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   /**
    * Adds all of the mappings in m to this CollectionValuedMap. If m is a
-   * CollectionValuedMap, it will behave strangely. Use the constructor instead.
+   * CollectionValuedMap, an {@link UnsupportedOperationException} is thrown.
+   * Use the constructor or {@link #addAll(CollectionValuedMap)} instead.
+   *
+   * @param m The map whose key/value pairs to add
    */
   public void addAll(Map<K, V> m) {
     if (m instanceof CollectionValuedMap<?, ?>) {
@@ -147,6 +168,12 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
     }
   }
 
+  /**
+   * Adds all of the values in each Collection of {@code cvm} to the Collection
+   * mapped to by the same key in this map.
+   *
+   * @param cvm The CollectionValuedMap whose mappings to add
+   */
   public void addAll(CollectionValuedMap<K, V> cvm) {
     for (Entry<K, Collection<V>> entry : cvm.entrySet()) {
       K key = entry.getKey();
@@ -297,6 +324,12 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
     return map.values();
   }
 
+  /**
+   * Returns all the values in all the Collections of this map, collected into a
+   * new Collection made by this map's CollectionFactory.
+   *
+   * @return A new Collection of all the values
+   */
   @SuppressWarnings("Convert2streamapi")
   public Collection<V> allValues() {
     Collection<V> c = cf.newCollection();
@@ -359,6 +392,9 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    * Creates a "delta copy" of this Map, where only the differences
    * from the original Map are represented. (This typically assumes
    * that this map will no longer be changed.)
+   *
+   * @return A new CollectionValuedMap backed by a {@link DeltaMap} over this
+   *     map's underlying map, which treats its Collections as immutable
    */
   public CollectionValuedMap<K, V> deltaCopy() {
     Map<K,Collection<V>> deltaMap = new DeltaMap<>(this.map);

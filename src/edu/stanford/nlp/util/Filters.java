@@ -28,6 +28,9 @@ public class Filters {
 
   /**
    * The acceptFilter accepts everything.
+   *
+   * @param <T> the type of objects tested
+   * @return a filter which accepts every object
    */
   public static <T> Predicate<T> acceptFilter() {
     return new CategoricalFilter<>(true);
@@ -35,6 +38,9 @@ public class Filters {
 
   /**
    * The rejectFilter accepts nothing.
+   *
+   * @param <T> the type of objects tested
+   * @return a filter which rejects every object
    */
   public static <T> Predicate<T> rejectFilter() {
     return new CategoricalFilter<>(false);
@@ -86,6 +92,10 @@ public class Filters {
 
   /**
    * The collectionAcceptFilter accepts a certain collection.
+   *
+   * @param <E> the type of objects tested
+   * @param objs the objects to accept; they are copied into a set
+   * @return a filter which accepts exactly the objects in {@code objs}
    */
   public static <E> Predicate<E> collectionAcceptFilter(E[] objs) {
     return new CollectionAcceptFilter<>(Arrays.asList(objs), true);
@@ -93,6 +103,10 @@ public class Filters {
 
   /**
    * The collectionAcceptFilter accepts a certain collection.
+   *
+   * @param <E> the type of objects tested
+   * @param objs the objects to accept; they are copied into a set
+   * @return a filter which accepts exactly the objects in {@code objs}
    */
   public static <E> Predicate<E> collectionAcceptFilter(Collection<E> objs) {
     return new CollectionAcceptFilter<>(objs, true);
@@ -100,6 +114,10 @@ public class Filters {
 
   /**
    * The collectionRejectFilter rejects a certain collection.
+   *
+   * @param <E> the type of objects tested
+   * @param objs the objects to reject; they are copied into a set
+   * @return a filter which accepts every object not in {@code objs}
    */
   public static <E> Predicate<E> collectionRejectFilter(E[] objs) {
     return new CollectionAcceptFilter<>(Arrays.asList(objs), false);
@@ -107,6 +125,10 @@ public class Filters {
 
   /**
    * The collectionRejectFilter rejects a certain collection.
+   *
+   * @param <E> the type of objects tested
+   * @param objs the objects to reject; they are copied into a set
+   * @return a filter which accepts every object not in {@code objs}
    */
   public static <E> Predicate<E> collectionRejectFilter(Collection<E> objs) {
     return new CollectionAcceptFilter<>(objs, false);
@@ -146,6 +168,12 @@ public class Filters {
 
   /**
    * Filter that accepts only when both filters accept (AND).
+   * {@code f2} is not called if {@code f1} rejects.
+   *
+   * @param <E> the type of objects tested
+   * @param f1 the first filter
+   * @param f2 the second filter
+   * @return the conjunction of the two filters
    */
   public static <E> Predicate<E> andFilter(Predicate<E> f1, Predicate<E> f2) {
     return (new CombinedFilter<>(f1, f2, true));
@@ -153,6 +181,12 @@ public class Filters {
 
   /**
    * Filter that accepts when either filter accepts (OR).
+   * {@code f2} is not called if {@code f1} accepts.
+   *
+   * @param <E> the type of objects tested
+   * @param f1 the first filter
+   * @param f2 the second filter
+   * @return the disjunction of the two filters
    */
   public static <E> Predicate<E> orFilter(Predicate<E> f1, Predicate<E> f2) {
     return (new CombinedFilter<>(f1, f2, false));
@@ -160,6 +194,8 @@ public class Filters {
 
   /**
    * Conjunction or disjunction of two filters.
+   *
+   * @param <E> the type of objects tested
    */
   private static class CombinedFilter<E> implements Predicate<E>, Serializable {
     private final Predicate<E> f1, f2;
@@ -184,21 +220,42 @@ public class Filters {
   }
 
   /**
-   * Disjunction of a list of filters.
+   * Disjunction of a list of filters.  Accepts an object if any filter
+   * accepts it, trying the filters in order; accepts nothing if there
+   * are no filters.
+   *
+   * @param <T> the type of objects tested
    */
   public static class DisjFilter<T> implements Predicate<T>, Serializable {
+    /** The filters, any of which may accept an object. */
     private final List<Predicate<T>> filters;
 
+    /**
+     * Creates a disjunction of the filters in the given list.
+     *
+     * @param filters the filters; the list is used directly, not copied,
+     *   and {@link #addFilter} adds to it
+     */
     public DisjFilter(List<Predicate<T>> filters) {
       this.filters = filters;
     }
 
+    /**
+     * Creates a disjunction of the given filters.
+     *
+     * @param filters the filters, copied into a new list
+     */
     @SafeVarargs
     public DisjFilter(Predicate<T>... filters) {
       this.filters = new ArrayList<>();
       this.filters.addAll(Arrays.asList(filters));
     }
 
+    /**
+     * Adds another filter to the disjunction.
+     *
+     * @param filter the filter to add
+     */
     public void addFilter(Predicate<T> filter) {
       filters.add(filter);
     }
@@ -215,21 +272,42 @@ public class Filters {
   }
 
   /**
-   * Conjunction of a list of filters.
+   * Conjunction of a list of filters.  Accepts an object if every filter
+   * accepts it, trying the filters in order; accepts everything if there
+   * are no filters.
+   *
+   * @param <T> the type of objects tested
    */
   public static class ConjFilter<T> implements Predicate<T>, Serializable {
+    /** The filters, all of which must accept an object. */
     private final List<Predicate<T>> filters;
 
+    /**
+     * Creates a conjunction of the filters in the given list.
+     *
+     * @param filters the filters; the list is used directly, not copied,
+     *   and {@link #addFilter} adds to it
+     */
     public ConjFilter(List<Predicate<T>> filters) {
       this.filters = filters;
     }
 
+    /**
+     * Creates a conjunction of the given filters.
+     *
+     * @param filters the filters, copied into a new list
+     */
     @SafeVarargs
     public ConjFilter(Predicate<T>... filters) {
       this.filters = new ArrayList<>();
       this.filters.addAll(Arrays.asList(filters));
     }
 
+    /**
+     * Adds another filter to the conjunction.
+     *
+     * @param filter the filter to add
+     */
     public void addFilter(Predicate<T> filter) {
       filters.add(filter);
     }
@@ -247,6 +325,10 @@ public class Filters {
 
   /**
    * Filter that does the opposite of given filter (NOT).
+   *
+   * @param <E> the type of objects tested
+   * @param filter the filter to negate
+   * @return a filter which accepts exactly what {@code filter} rejects
    */
   public static <E> Predicate<E> notFilter(Predicate<E> filter) {
     return (new NegatedFilter<>(filter));
@@ -254,6 +336,12 @@ public class Filters {
 
   /**
    * Filter that's either negated or normal as specified.
+   *
+   * @param <E> the type of objects tested
+   * @param filter the filter to wrap
+   * @param negated whether to negate {@code filter}
+   * @return a filter which gives the same answers as {@code filter}, or the
+   *   opposite answers if {@code negated} is true
    */
   public static <E> Predicate<E> switchedFilter(Predicate<E> filter, boolean negated) {
     return new NegatedFilter<>(filter, negated);
@@ -261,6 +349,8 @@ public class Filters {
 
   /**
    * Negation of a filter.
+   *
+   * @param <E> the type of objects tested
    */
   private static class NegatedFilter<E> implements Predicate<E>, Serializable {
     private final Predicate<E> filter;
@@ -290,20 +380,36 @@ public class Filters {
 
   /**
    * A filter that accepts a random fraction of the input it sees.
+   *
+   * @param <E> the type of objects tested
    */
   public static class RandomFilter<E> implements Predicate<E>, Serializable {
     private static final long serialVersionUID = -4885773582960355425L;
+    /** The source of randomness for deciding whether to accept. */
     private final Random random;
+    /** The probability of accepting each input. */
     private final double fraction;
 
+    /** Creates a filter which accepts 10% of its input, using a new {@code Random}. */
     public RandomFilter() {
       this(0.1, new Random());
     }
 
+    /**
+     * Creates a filter which accepts the given fraction of its input, using a new {@code Random}.
+     *
+     * @param fraction the probability of accepting each input
+     */
     public RandomFilter(double fraction) {
       this(fraction, new Random());
     }
 
+    /**
+     * Creates a filter which accepts the given fraction of its input.
+     *
+     * @param fraction the probability of accepting each input
+     * @param random the source of randomness
+     */
     public RandomFilter(double fraction, Random random) {
       this.fraction = fraction;
       this.random = random;
@@ -319,6 +425,11 @@ public class Filters {
    * Applies the given filter to each of the given elements, and returns the
    * array of elements that were accepted. The runtime type of the returned
    * array is the same as the passed in array.
+   *
+   * @param <E> the type of the elements
+   * @param elems the elements to filter
+   * @param filter the filter to apply
+   * @return a new array of the accepted elements, in their original order
    */
   @SuppressWarnings("unchecked")
   public static <E> E[] filter(E[] elems, Predicate<E> filter) {
@@ -333,6 +444,11 @@ public class Filters {
 
   /**
    * Removes all elements in the given Collection that aren't accepted by the given Filter.
+   * The collection's iterator must support {@code remove}.
+   *
+   * @param <E> the type of the elements
+   * @param elems the collection to modify in place
+   * @param filter the filter deciding which elements to keep
    */
   public static <E> void retainAll(Collection<E> elems, Predicate<? super E> filter) {
     for (Iterator<E> iter = elems.iterator(); iter.hasNext();) {

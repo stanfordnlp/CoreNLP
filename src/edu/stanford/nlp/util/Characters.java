@@ -15,6 +15,12 @@ public final class Characters {
   // TODO(spenceg) This method used to cache the lookup, in this package,
   // but actually the valueOf method performs internal caching. This method
   // should be removed.
+  /**
+   * Returns the Character for a char, as given by {@link Character#valueOf(char)}.
+   *
+   * @param c The char
+   * @return The boxed Character
+   */
   public static Character getCharacter(char c) {
     return Character.valueOf(c);
   }
@@ -37,8 +43,8 @@ public final class Characters {
    * Returns a string representation of a character's unicode
    * block.
    *
-   * @param c
-   * @return
+   * @param c The character
+   * @return The name of the character's Unicode block, or "Undefined" if it has none
    */
   public static String unicodeBlockStringOf(char c) {
     Character.Subset block = Character.UnicodeBlock.of(c);
@@ -49,8 +55,8 @@ public final class Characters {
    * Returns a string representation of a character's unicode
    * block.
    *
-   * @param c
-   * @return
+   * @param codePoint The character, as a Unicode code point
+   * @return The name of the character's Unicode block, or "Undefined" if it has none
    */
   public static String unicodeBlockStringOf(int codePoint) {
     Character.Subset block = Character.UnicodeBlock.of(codePoint);
@@ -61,8 +67,8 @@ public final class Characters {
    * Returns true if a character is punctuation, and false
    * otherwise.
    * 
-   * @param c
-   * @return
+   * @param c The character
+   * @return Whether the character's Unicode general category is one of the punctuation categories
    */
   public static boolean isPunctuation(char c) {
     int cType = Character.getType(c);
@@ -79,8 +85,8 @@ public final class Characters {
    * Returns true if a character is a symbol, and false
    * otherwise.
    * 
-   * @param c
-   * @return
+   * @param c The character
+   * @return Whether the character's Unicode general category is one of the symbol categories
    */
   public static boolean isSymbol(char c) {
     int cType = Character.getType(c);
@@ -94,8 +100,8 @@ public final class Characters {
    * Returns true if a character is a control character, and
    * false otherwise.
    * 
-   * @param c
-   * @return
+   * @param c The character
+   * @return Whether the character's Unicode general category is CONTROL
    */
   public static boolean isControl(char c) {
     return Character.getType(c) == Character.CONTROL;

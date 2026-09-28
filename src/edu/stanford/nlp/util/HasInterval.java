@@ -6,6 +6,7 @@ import java.util.Comparator;
  * HasInterval interface
  *
  * @author Angel Chang
+ * @param <E> The type of the interval endpoints
  */
 public interface HasInterval<E extends Comparable<E>> {
   /**
@@ -14,6 +15,7 @@ public interface HasInterval<E extends Comparable<E>> {
    */
   public Interval<E> getInterval();
 
+  /** Orders by interval length ({@code end - begin}), longest first. */
   public final static Comparator<HasInterval<Integer>> LENGTH_GT_COMPARATOR =
       (e1, e2) -> {
         int len1 = e1.getInterval().getEnd() - e1.getInterval().getBegin();
@@ -25,6 +27,7 @@ public interface HasInterval<E extends Comparable<E>> {
         }
       };
 
+  /** Orders by interval length ({@code end - begin}), shortest first. */
   public final static Comparator<HasInterval<Integer>> LENGTH_LT_COMPARATOR =
     (e1, e2) -> {
       int len1 = e1.getInterval().getEnd() - e1.getInterval().getBegin();
@@ -36,9 +39,14 @@ public interface HasInterval<E extends Comparable<E>> {
       }
     };
 
+  /** Orders by interval begin, then by interval end. */
   public final static Comparator<HasInterval> ENDPOINTS_COMPARATOR =
       (e1, e2) -> (e1.getInterval().compareTo(e2.getInterval()));
 
+  /**
+   * Puts an interval after any interval it contains; otherwise orders
+   * as {@link #ENDPOINTS_COMPARATOR} does.
+   */
   public final static Comparator<HasInterval> NESTED_FIRST_ENDPOINTS_COMPARATOR =
       (e1, e2) -> {
         Interval.RelType rel = e1.getInterval().getRelation(e2.getInterval());
@@ -51,6 +59,10 @@ public interface HasInterval<E extends Comparable<E>> {
         }
       };
 
+  /**
+   * Puts an interval before any interval it contains; otherwise orders
+   * as {@link #ENDPOINTS_COMPARATOR} does.
+   */
   public final static Comparator<HasInterval> CONTAINS_FIRST_ENDPOINTS_COMPARATOR =
       (e1, e2) -> {
         Interval.RelType rel = e1.getInterval().getRelation(e2.getInterval());
@@ -63,6 +75,9 @@ public interface HasInterval<E extends Comparable<E>> {
         }
       };
 
+  /**
+   * Orders by length, longest first, breaking ties with {@link #ENDPOINTS_COMPARATOR}.
+   */
   public final static Comparator<HasInterval<Integer>> LENGTH_ENDPOINTS_COMPARATOR =
           Comparators.chain(HasInterval.LENGTH_GT_COMPARATOR, HasInterval.ENDPOINTS_COMPARATOR);
 

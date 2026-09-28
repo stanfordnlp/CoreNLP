@@ -19,6 +19,8 @@ import java.util.Map;
  * so far only what was actually used has been implemented.
  *
  * @author John Bauer
+ * @param <K> The type of the keys
+ * @param <V> The type of the values
  */
 
 public class LeastRecentlyUsedCache<K, V> {
@@ -84,10 +86,22 @@ public class LeastRecentlyUsedCache<K, V> {
   private LinkedList<K, V> list = new LinkedList<>();
   private final int maxSize;
 
+  /**
+   * Creates an empty cache.
+   *
+   * @param maxSize The maximum number of entries to keep
+   */
   public LeastRecentlyUsedCache(int maxSize) {
     this.maxSize = maxSize;
   }
 
+  /**
+   * Returns the value for {@code key}, marking the entry as most recently used.
+   *
+   * @param key The key to look up
+   * @param defaultValue The value to return if {@code key} is not in the cache
+   * @return The cached value, or {@code defaultValue} if there is none
+   */
   public V getOrDefault(K key, V defaultValue) {
     Node<K, V> node = map.getOrDefault(key, null);
     if (node == null) {
@@ -99,6 +113,14 @@ public class LeastRecentlyUsedCache<K, V> {
     return node.value;
   }
 
+  /**
+   * Adds or replaces the value for {@code key}, marking the entry as most recently used.
+   * If the cache then holds more than the maximum number of entries,
+   * the least recently used entry is removed.
+   *
+   * @param key The key to store
+   * @param value The value to store
+   */
   public void add(K key, V value) {
     Node<K, V> node = map.getOrDefault(key, null);
     if (node != null) {
@@ -112,6 +134,11 @@ public class LeastRecentlyUsedCache<K, V> {
     }
   }
 
+  /**
+   * Returns the number of entries in the cache.
+   *
+   * @return The number of entries
+   */
   public int size() {
     return list.size;
   }

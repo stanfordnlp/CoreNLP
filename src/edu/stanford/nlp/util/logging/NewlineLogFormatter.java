@@ -9,6 +9,9 @@ import java.util.logging.LogRecord;
  */
 public class NewlineLogFormatter extends Formatter {
 
+  /** Creates the formatter. */
+  public NewlineLogFormatter() { }
+
   @Override
   public String format(LogRecord rec) {
     return formatMessage(rec) + '\n';

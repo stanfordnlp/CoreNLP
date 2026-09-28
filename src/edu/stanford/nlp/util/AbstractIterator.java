@@ -5,8 +5,13 @@ import java.util.Iterator;
 /**
  * Iterator with <code>remove()</code> defined to throw an
  * <code>UnsupportedOperationException</code>.
+ *
+ * @param <E> The type of the elements returned by this iterator
  */
 public abstract class AbstractIterator<E> implements Iterator<E> {
+
+  /** Constructor for subclasses. */
+  public AbstractIterator() { }
 
   /** {@inheritDoc} */
   @Override

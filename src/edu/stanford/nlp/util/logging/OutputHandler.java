@@ -26,6 +26,9 @@ import edu.stanford.nlp.util.Generics;
  */
 public abstract class OutputHandler extends LogRecordHandler {
 
+  /** Constructor for subclasses. */
+  public OutputHandler() { }
+
   /**
    * A list of tracks which have been started but not yet printed as no
    * log messages are in them yet.
@@ -49,7 +52,7 @@ public abstract class OutputHandler extends LogRecordHandler {
   protected char channelSeparatorChar = ' ';
   /**
    * The length of the left margin in which to print channel information.
-   * If this is set to a value < 3, then no channel information is printed.
+   * If this is set to a value less than 3, then no channel information is printed.
    */
   protected int leftMargin = 0;
   /**
@@ -67,13 +70,24 @@ public abstract class OutputHandler extends LogRecordHandler {
    * The color to use for track beginning and ends
    */
   protected Color trackColor = Color.NONE;
+  /**
+   * Colors for channel names, keyed by lowercased channel name, or null to not color channels
+   */
   protected Map<String,Color> channelColors = null;
+  /**
+   * If true, channels without an assigned color are given a color based on the hash
+   * of their name (red for errors and yellow for warnings), which is then stored in
+   * {@link #channelColors}
+   */
   protected boolean addRandomColors = false;
 
   /**
    * The style to use for track beginning and ends
    */
   protected Style trackStyle = Style.NONE;
+  /**
+   * Styles for channel names, keyed by lowercased channel name, or null to not style channels
+   */
   protected Map<String,Style> channelStyles = null;
 
   static Pair<String,Redwood.Flag> getSourceStringAndLevel(Object[] channel) {
@@ -143,6 +157,12 @@ public abstract class OutputHandler extends LogRecordHandler {
     this.channelStyles.put(channel.toLowerCase(Locale.ENGLISH),style);
   }
 
+  /**
+   * Sets whether channels without an assigned color get an automatically chosen color.
+   * Turning this on discards any colors already assigned with {@link #colorChannel}.
+   *
+   * @param colorChannels Whether to color channels automatically
+   */
   public void setColorChannels(boolean colorChannels){
     this.addRandomColors = colorChannels;
     if(colorChannels){ this.channelColors = Generics.newHashMap(); }

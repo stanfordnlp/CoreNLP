@@ -8,10 +8,13 @@ import java.util.List;
 
 /**
  * An array-backed set.
+ *
+ * @param <E> the type of elements in the set
  * @author Roger Levy (rog@stanford.edu)
  */
 public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 
+  /** The list holding the elements of the set. */
   private final List<E> backer;
 
   /**
@@ -24,6 +27,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
   /**
    * Constructs an ArraySet, using the given list as the backing collection.
    * Note that this is not a copy constructor!
+   * @param source the list to use (not copied) as the backing collection
    */
   public ArraySet(List<E> source) {
     this.backer = source;

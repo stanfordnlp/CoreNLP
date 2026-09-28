@@ -225,7 +225,8 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
    * Finds the E with the highest priority and returns it, without
    * modifying the queue.
    *
-   * @return the E with minimum key
+   * @return the E with highest priority
+   * @throws NoSuchElementException if the queue is empty
    */
   @Override
   public E getFirst() {
@@ -250,6 +251,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
    * but is not actually identical, or if you want to modify an object that is
    * in the queue.
    *
+   * @param key an object equal to the one to look up
    * @return null if the object is not in the queue, otherwise returns the
    * object.
    */
@@ -277,7 +279,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
    * a decreasePriority.
    *
    * @param key an <code>E</code> value
-   * @return whether the key was present before
+   * @return true if the key was added, false if it was already present
    */
   @Override
   public boolean add(E key) {
@@ -351,7 +353,8 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
    * Demotes a key in the queue, adding it if it wasn't there already.  If the specified priority is better than the current priority, nothing happens.  If you decrease the priority on a non-present key, it will get added, but at it's old implicit priority of Double.NEGATIVE_INFINITY.
    *
    * @param key an <code>Object</code> value
-   * @return whether the priority actually improved.
+   * @param priority the new priority for the key
+   * @return whether the priority was actually lowered.
    */
   public boolean decreasePriority(E key, double priority) {
     Entry<E> entry = getEntry(key);
@@ -425,6 +428,13 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
     return sortedList;
   }
 
+  /**
+   * Returns a new queue with the same keys and priorities.  The keys
+   * themselves are shared with this queue, not copied.
+   *
+   * @param mapFactory the factory for the new queue's key-to-entry map
+   * @return a copy of this queue
+   */
   public BinaryHeapPriorityQueue<E> deepCopy(MapFactory<E, Entry<E>> mapFactory) {
     BinaryHeapPriorityQueue<E> queue =
             new BinaryHeapPriorityQueue<>(mapFactory);
@@ -434,6 +444,12 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
     return queue;
   }
 
+  /**
+   * Returns a new hash-map-backed queue with the same keys and priorities.
+   * The keys themselves are shared with this queue, not copied.
+   *
+   * @return a copy of this queue
+   */
   public BinaryHeapPriorityQueue<E> deepCopy() {
     return deepCopy(MapFactory.<E,Entry<E>>hashMapFactory());
   }
@@ -489,6 +505,12 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
     return sb.toString();
   }
 
+  /**
+   * Returns the keys in priority order, highest first, one per line,
+   * each followed by a tab and its priority.
+   *
+   * @return a multi-line string representation of the queue
+   */
   public String toVerticalString() {
     List<E> sortedKeys = toSortedList();
     StringBuilder sb = new StringBuilder();
@@ -505,19 +527,36 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   }
 
 
+  /** Creates an empty queue backed by a {@code HashMap}. */
   public BinaryHeapPriorityQueue() {
     this(MapFactory.<E,Entry<E>>hashMapFactory());
   }
 
+  /**
+   * Creates an empty queue backed by a {@code HashMap}.
+   *
+   * @param initCapacity the initial capacity of the heap and map
+   */
   public BinaryHeapPriorityQueue(int initCapacity) {
 	  this(MapFactory.<E,Entry<E>>hashMapFactory(),initCapacity);
   }
 
+  /**
+   * Creates an empty queue.
+   *
+   * @param mapFactory the factory for the key-to-entry map
+   */
   public BinaryHeapPriorityQueue(MapFactory<E, Entry<E>> mapFactory) {
     indexToEntry = new ArrayList<>();
     keyToEntry = mapFactory.newMap();
   }
 
+  /**
+   * Creates an empty queue.
+   *
+   * @param mapFactory the factory for the key-to-entry map
+   * @param initCapacity the initial capacity of the heap and map
+   */
   public BinaryHeapPriorityQueue(MapFactory<E, Entry<E>> mapFactory, int initCapacity) {
 	indexToEntry = new ArrayList<>(initCapacity);
 	keyToEntry = mapFactory.newMap(initCapacity);
