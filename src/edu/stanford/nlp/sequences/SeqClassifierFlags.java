@@ -1144,1506 +1144,2132 @@ public class SeqClassifierFlags implements Serializable  {
         }
         sb.append(key).append('=').append(val).append('\n');
       }
-      if (key.equalsIgnoreCase("macro")) {
-        if (Boolean.parseBoolean(val)) {
-          useObservedSequencesOnly = true;
-          readerAndWriter = "edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter";
-          // useClassFeature = true;
-          // submit
-          useLongSequences = true;
-          useTaggySequences = true;
-          useNGrams = true;
-          usePrev = true;
-          useNext = true;
-          useTags = true;
-          useWordPairs = true;
-          useSequences = true;
-          usePrevSequences = true;
-          // noMidNGrams
-          noMidNGrams = true;
-          // reverse
-          useReverse = true;
-          // typeseqs3
-          useTypeSeqs = true;
-          useTypeSeqs2 = true;
-          useTypeySequences = true;
-          // wordtypes2 && known
-          wordShape = WordShapeClassifier.WORDSHAPEDAN2USELC;
-          // occurrence
-          useOccurrencePatterns = true;
-          // realword
-          useLastRealWord = true;
-          useNextRealWord = true;
-          // smooth
-          sigma = 3.0;
-          // normalize
-          normalize = true;
-          normalizeTimex = true;
-        }
-      } else if (key.equalsIgnoreCase("goodCoNLL")) {
-        // This was developed for CMMClassifier after the original 2003 CoNLL work.
-        // It is for an MEMM.  You shouldn't use it with CRFClassifier.
-        if (Boolean.parseBoolean(val)) {
-          // featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
-          readerAndWriter = "edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter";
-          useObservedSequencesOnly = true;
-          // useClassFeature = true;
-          useLongSequences = true;
-          useTaggySequences = true;
-          useNGrams = true;
-          usePrev = true;
-          useNext = true;
-          useTags = true;
-          useWordPairs = true;
-          useSequences = true;
-          usePrevSequences = true;
-          // noMidNGrams
-          noMidNGrams = true;
-          // should this be set?? maxNGramLeng = 6; No (to get best score).
-          // reverse
-          useReverse = false;
-          // typeseqs3
-          useTypeSeqs = true;
-          useTypeSeqs2 = true;
-          useTypeySequences = true;
-          // wordtypes2 && known
-          wordShape = WordShapeClassifier.WORDSHAPEDAN2USELC;
-          // occurrence
-          useOccurrencePatterns = true;
-          // realword
-          useLastRealWord = true;
-          useNextRealWord = true;
-          // smooth
-          // This was originally 20, but in Aug 2006 increased to 50, because that helped
-          // for English, but actually even smaller than 20 helps for languages like
-          // Spanish, so dropped in 2014 to 5.0.
-          sigma = 5.0;
-          // normalize
-          normalize = true;
-          normalizeTimex = true; // this was sort of wrong for German since it lowercases months, but didn't do too much harm
-          maxLeft = 2;
-          useDisjunctive = true;
-          disjunctionWidth = 4; // clearly optimal for CoNLL
-          useBoundarySequences = true;
-          useLemmas = true; // no-op except for German
-          usePrevNextLemmas = true; // no-op except for German
-          strictGoodCoNLL = true; // don't add some CpC features added later
-          removeStrictGoodCoNLLDuplicates = true; // added in 2014; the duplicated features don't help
-          inputEncoding = "iso-8859-1"; // needed for CoNLL German and Spanish files
-          // optimization
-          useQN = true;
-          QNsize = 15;
-        }
-      } else if (key.equalsIgnoreCase("conllNoTags")) {
-        if (Boolean.parseBoolean(val)) {
-          readerAndWriter = "edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter";
-          // trainMap=testMap="word=0,answer=1";
-          map = "word=0,answer=1";
-          useObservedSequencesOnly = true;
-          // useClassFeature = true;
-          useLongSequences = true;
-          // useTaggySequences = true;
-          useNGrams = true;
-          usePrev = true;
-          useNext = true;
-          // useTags = true;
-          useWordPairs = true;
-          useSequences = true;
-          usePrevSequences = true;
-          // noMidNGrams
-          noMidNGrams = true;
-          // reverse
-          useReverse = false;
-          // typeseqs3
-          useTypeSeqs = true;
-          useTypeSeqs2 = true;
-          useTypeySequences = true;
-          // wordtypes2 && known
-          wordShape = WordShapeClassifier.WORDSHAPEDAN2USELC;
-          // occurrence
-          // useOccurrencePatterns = true;
-          // realword
-          useLastRealWord = true;
-          useNextRealWord = true;
-          // smooth
-          sigma = 20.0;
-          adaptSigma = 20.0;
-          // normalize
-          normalize = true;
-          normalizeTimex = true;
-          maxLeft = 2;
-          useDisjunctive = true;
-          disjunctionWidth = 4;
-          useBoundarySequences = true;
-          // useLemmas = true; // no-op except for German
-          // usePrevNextLemmas = true; // no-op except for German
-          inputEncoding = "iso-8859-1";
-          // opt
-          useQN = true;
-          QNsize = 15;
-        }
-      } else if (key.equalsIgnoreCase("notags")) {
-        if (Boolean.parseBoolean(val)) {
-          // turn off all features that use POS tags
-          // this is slightly crude: it also turns off a few things that
-          // don't use tags in e.g., useTaggySequences
-          useTags = false;
-          useSymTags = false;
-          useTaggySequences = false;
-          useOccurrencePatterns = false;
-        }
-      } else if (key.equalsIgnoreCase("submit")) {
-        if (Boolean.parseBoolean(val)) {
-          useLongSequences = true;
-          useTaggySequences = true;
-          useNGrams = true;
-          usePrev = true;
-          useNext = true;
-          useTags = true;
-          useWordPairs = true;
-          wordShape = WordShapeClassifier.WORDSHAPEDAN1;
-          useSequences = true;
-          usePrevSequences = true;
-        }
-      } else if (key.equalsIgnoreCase("binnedLengths")) {
-        if (val != null) {
-          String[] binnedLengthStrs = val.split("[, ]+");
-          binnedLengths = new int[binnedLengthStrs.length];
-          for (int i = 0; i < binnedLengths.length; i++) {
-            binnedLengths[i] = Integer.parseInt(binnedLengthStrs[i]);
+      // Case labels are lowercase so that keys match case-insensitively.
+      switch (key.toLowerCase(Locale.ROOT)) {
+        case "macro":
+          if (Boolean.parseBoolean(val)) {
+            useObservedSequencesOnly = true;
+            readerAndWriter = "edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter";
+            // useClassFeature = true;
+            // submit
+            useLongSequences = true;
+            useTaggySequences = true;
+            useNGrams = true;
+            usePrev = true;
+            useNext = true;
+            useTags = true;
+            useWordPairs = true;
+            useSequences = true;
+            usePrevSequences = true;
+            // noMidNGrams
+            noMidNGrams = true;
+            // reverse
+            useReverse = true;
+            // typeseqs3
+            useTypeSeqs = true;
+            useTypeSeqs2 = true;
+            useTypeySequences = true;
+            // wordtypes2 && known
+            wordShape = WordShapeClassifier.WORDSHAPEDAN2USELC;
+            // occurrence
+            useOccurrencePatterns = true;
+            // realword
+            useLastRealWord = true;
+            useNextRealWord = true;
+            // smooth
+            sigma = 3.0;
+            // normalize
+            normalize = true;
+            normalizeTimex = true;
           }
+          break;
+        case "goodconll":
+          // This was developed for CMMClassifier after the original 2003 CoNLL work.
+          // It is for an MEMM.  You shouldn't use it with CRFClassifier.
+          if (Boolean.parseBoolean(val)) {
+            // featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
+            readerAndWriter = "edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter";
+            useObservedSequencesOnly = true;
+            // useClassFeature = true;
+            useLongSequences = true;
+            useTaggySequences = true;
+            useNGrams = true;
+            usePrev = true;
+            useNext = true;
+            useTags = true;
+            useWordPairs = true;
+            useSequences = true;
+            usePrevSequences = true;
+            // noMidNGrams
+            noMidNGrams = true;
+            // should this be set?? maxNGramLeng = 6; No (to get best score).
+            // reverse
+            useReverse = false;
+            // typeseqs3
+            useTypeSeqs = true;
+            useTypeSeqs2 = true;
+            useTypeySequences = true;
+            // wordtypes2 && known
+            wordShape = WordShapeClassifier.WORDSHAPEDAN2USELC;
+            // occurrence
+            useOccurrencePatterns = true;
+            // realword
+            useLastRealWord = true;
+            useNextRealWord = true;
+            // smooth
+            // This was originally 20, but in Aug 2006 increased to 50, because that helped
+            // for English, but actually even smaller than 20 helps for languages like
+            // Spanish, so dropped in 2014 to 5.0.
+            sigma = 5.0;
+            // normalize
+            normalize = true;
+            normalizeTimex = true; // this was sort of wrong for German since it lowercases months, but didn't do too much harm
+            maxLeft = 2;
+            useDisjunctive = true;
+            disjunctionWidth = 4; // clearly optimal for CoNLL
+            useBoundarySequences = true;
+            useLemmas = true; // no-op except for German
+            usePrevNextLemmas = true; // no-op except for German
+            strictGoodCoNLL = true; // don't add some CpC features added later
+            removeStrictGoodCoNLLDuplicates = true; // added in 2014; the duplicated features don't help
+            inputEncoding = "iso-8859-1"; // needed for CoNLL German and Spanish files
+            // optimization
+            useQN = true;
+            QNsize = 15;
+          }
+          break;
+        case "conllnotags":
+          if (Boolean.parseBoolean(val)) {
+            readerAndWriter = "edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter";
+            // trainMap=testMap="word=0,answer=1";
+            map = "word=0,answer=1";
+            useObservedSequencesOnly = true;
+            // useClassFeature = true;
+            useLongSequences = true;
+            // useTaggySequences = true;
+            useNGrams = true;
+            usePrev = true;
+            useNext = true;
+            // useTags = true;
+            useWordPairs = true;
+            useSequences = true;
+            usePrevSequences = true;
+            // noMidNGrams
+            noMidNGrams = true;
+            // reverse
+            useReverse = false;
+            // typeseqs3
+            useTypeSeqs = true;
+            useTypeSeqs2 = true;
+            useTypeySequences = true;
+            // wordtypes2 && known
+            wordShape = WordShapeClassifier.WORDSHAPEDAN2USELC;
+            // occurrence
+            // useOccurrencePatterns = true;
+            // realword
+            useLastRealWord = true;
+            useNextRealWord = true;
+            // smooth
+            sigma = 20.0;
+            adaptSigma = 20.0;
+            // normalize
+            normalize = true;
+            normalizeTimex = true;
+            maxLeft = 2;
+            useDisjunctive = true;
+            disjunctionWidth = 4;
+            useBoundarySequences = true;
+            // useLemmas = true; // no-op except for German
+            // usePrevNextLemmas = true; // no-op except for German
+            inputEncoding = "iso-8859-1";
+            // opt
+            useQN = true;
+            QNsize = 15;
+          }
+          break;
+        case "notags":
+          if (Boolean.parseBoolean(val)) {
+            // turn off all features that use POS tags
+            // this is slightly crude: it also turns off a few things that
+            // don't use tags in e.g., useTaggySequences
+            useTags = false;
+            useSymTags = false;
+            useTaggySequences = false;
+            useOccurrencePatterns = false;
+          }
+          break;
+        case "submit":
+          if (Boolean.parseBoolean(val)) {
+            useLongSequences = true;
+            useTaggySequences = true;
+            useNGrams = true;
+            usePrev = true;
+            useNext = true;
+            useTags = true;
+            useWordPairs = true;
+            wordShape = WordShapeClassifier.WORDSHAPEDAN1;
+            useSequences = true;
+            usePrevSequences = true;
+          }
+          break;
+        case "binnedlengths":
+          if (val != null) {
+            String[] binnedLengthStrs = val.split("[, ]+");
+            binnedLengths = new int[binnedLengthStrs.length];
+            for (int i = 0; i < binnedLengths.length; i++) {
+              binnedLengths[i] = Integer.parseInt(binnedLengthStrs[i]);
+            }
+          }
+          break;
+        case "makeconsistent":
+          makeConsistent = Boolean.parseBoolean(val);
+          break;
+        case "dump":
+          dump = Boolean.parseBoolean(val);
+          break;
+        case "usengrams":
+          useNGrams = Boolean.parseBoolean(val);
+          break;
+        case "useneighborngrams":
+          useNeighborNGrams = Boolean.parseBoolean(val);
+          break;
+        case "usemoreneighborngrams":
+          useMoreNeighborNGrams = Boolean.parseBoolean(val);
+          break;
+        case "wordfunction":
+          wordFunction = ReflectionLoading.loadByReflection(val);
+          break;
+        case "conjoinshapengrams":
+          conjoinShapeNGrams = Boolean.parseBoolean(val);
+          break;
+        case "lowercasengrams":
+          lowercaseNGrams = Boolean.parseBoolean(val);
+          break;
+        case "useisurl":
+          useIsURL = Boolean.parseBoolean(val);
+          break;
+        case "useurlsequences":
+          useURLSequences = Boolean.parseBoolean(val);
+          break;
+        case "useentitytypes":
+          useEntityTypes = Boolean.parseBoolean(val);
+          break;
+        case "useentityrule":
+          useEntityRule = Boolean.parseBoolean(val);
+          break;
+        case "useordinal":
+          useOrdinal = Boolean.parseBoolean(val);
+          break;
+        case "useentitytypesequences":
+          useEntityTypeSequences = Boolean.parseBoolean(val);
+          break;
+        case "useisdaterange":
+          useIsDateRange = Boolean.parseBoolean(val);
+          break;
+        case "dehyphenatengrams":
+          dehyphenateNGrams = Boolean.parseBoolean(val);
+          break;
+        case "lowernewgenethreshold":
+          lowerNewgeneThreshold = Boolean.parseBoolean(val);
+          break;
+        case "useprev":
+          usePrev = Boolean.parseBoolean(val);
+          break;
+        case "usenext":
+          useNext = Boolean.parseBoolean(val);
+          break;
+        case "usetags":
+          useTags = Boolean.parseBoolean(val);
+          break;
+        case "usewordpairs":
+          useWordPairs = Boolean.parseBoolean(val);
+          break;
+        case "usegazettes":
+          useGazettes = Boolean.parseBoolean(val);
+          break;
+        case "wordshape":
+          wordShape = WordShapeClassifier.lookupShaper(val);
+          if (wordShape == WordShapeClassifier.NOWORDSHAPE) {
+            log.warn("There is no word shaper called '" + val + "'; no word shape features will be used.");
+          }
+          break;
+        case "useshapestrings":
+          useShapeStrings = Boolean.parseBoolean(val);
+          break;
+        case "usegoodfornamescpc":
+          useGoodForNamesCpC = Boolean.parseBoolean(val);
+          break;
+        case "usedictionaryconjunctions":
+          useDictionaryConjunctions = Boolean.parseBoolean(val);
+          break;
+        case "usedictionaryconjunctions3":
+          useDictionaryConjunctions3 = Boolean.parseBoolean(val);
+          break;
+        case "expandmiddot":
+          expandMidDot = Boolean.parseBoolean(val);
+          break;
+        case "usesequences":
+          useSequences = Boolean.parseBoolean(val);
+          break;
+        case "useprevsequences":
+          usePrevSequences = Boolean.parseBoolean(val);
+          break;
+        case "usenextsequences":
+          useNextSequences = Boolean.parseBoolean(val);
+          break;
+        case "uselongsequences":
+          useLongSequences = Boolean.parseBoolean(val);
+          break;
+        case "useboundarysequences":
+          useBoundarySequences = Boolean.parseBoolean(val);
+          break;
+        case "usetaggysequences":
+          useTaggySequences = Boolean.parseBoolean(val);
+          break;
+        case "useextrataggysequences":
+          useExtraTaggySequences = Boolean.parseBoolean(val);
+          break;
+        case "usetaggysequencesshapeinteraction":
+          useTaggySequencesShapeInteraction = Boolean.parseBoolean(val);
+          break;
+        case "strictlyzeroethorder":
+          strictlyZeroethOrder = Boolean.parseBoolean(val);
+          break;
+        case "strictlyfirstorder":
+          strictlyFirstOrder = Boolean.parseBoolean(val);
+          break;
+        case "strictlysecondorder":
+          strictlySecondOrder = Boolean.parseBoolean(val);
+          break;
+        case "strictlythirdorder":
+          strictlyThirdOrder = Boolean.parseBoolean(val);
+          break;
+        case "dontextendtaggy":
+          dontExtendTaggy = Boolean.parseBoolean(val);
+          break;
+        case "entitysubclassification":
+          entitySubclassification = val;
+          break;
+        case "usegazettephrases":
+          useGazettePhrases = Boolean.parseBoolean(val);
+          break;
+        case "phrasegazettes": {
+          StringTokenizer st = new StringTokenizer(val, " ,;\t");
+          if (phraseGazettes == null) {
+            phraseGazettes = new ArrayList<>();
+          }
+          while (st.hasMoreTokens()) {
+            phraseGazettes.add(st.nextToken());
+          }
+          break;
         }
-      } else if (key.equalsIgnoreCase("makeConsistent")) {
-        makeConsistent = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dump")) {
-        dump = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNGrams")) {
-        useNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNeighborNGrams")) {
-        useNeighborNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMoreNeighborNGrams")) {
-        useMoreNeighborNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("wordFunction")) {
-        wordFunction = ReflectionLoading.loadByReflection(val);
-      } else if (key.equalsIgnoreCase("conjoinShapeNGrams")) {
-        conjoinShapeNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("lowercaseNGrams")) {
-        lowercaseNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useIsURL")) {
-        useIsURL = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useURLSequences")) {
-        useURLSequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useEntityTypes")) {
-        useEntityTypes = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useEntityRule")) {
-        useEntityRule = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useOrdinal")) {
-        useOrdinal = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useEntityTypeSequences")) {
-        useEntityTypeSequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useIsDateRange")) {
-        useIsDateRange = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dehyphenateNGrams")) {
-        dehyphenateNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("lowerNewgeneThreshold")) {
-        lowerNewgeneThreshold = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePrev")) {
-        usePrev = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNext")) {
-        useNext = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTags")) {
-        useTags = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWordPairs")) {
-        useWordPairs = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useGazettes")) {
-        useGazettes = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("wordShape")) {
-        wordShape = WordShapeClassifier.lookupShaper(val);
-        if (wordShape == WordShapeClassifier.NOWORDSHAPE) {
-          log.warn("There is no word shaper called '" + val + "'; no word shape features will be used.");
+        case "usesum":
+          useSum = Boolean.parseBoolean(val);
+          break;
+        case "verbose":
+          verboseMode = Boolean.parseBoolean(val);
+          break;
+        case "verbosemode":
+          verboseMode = Boolean.parseBoolean(val);
+          break;
+        case "tolerance":
+          tolerance = Double.parseDouble(val);
+          break;
+        case "maxiterations":
+          maxIterations = Integer.parseInt(val);
+          break;
+        case "exportfeatures":
+          exportFeatures = val;
+          break;
+        case "printfeatures":
+          printFeatures = val;
+          break;
+        case "printfeaturesupto":
+          printFeaturesUpto = Integer.parseInt(val);
+          break;
+        case "lastnamelist":
+          lastNameList = val;
+          break;
+        case "malenamelist":
+          maleNameList = val;
+          break;
+        case "femalenamelist":
+          femaleNameList = val;
+          break;
+        case "usesymtags":
+          useSymTags = Boolean.parseBoolean(val);
+          break;
+        case "usesymwordpairs":
+          useSymWordPairs = Boolean.parseBoolean(val);
+          break;
+        case "printclassifier":
+          printClassifier = val;
+          break;
+        case "printclassifierparam":
+          printClassifierParam = Integer.parseInt(val);
+          break;
+        case "intern":
+          intern = Boolean.parseBoolean(val);
+          break;
+        case "mergetags":
+          mergeTags = Boolean.parseBoolean(val);
+          break;
+        case "iobtags":
+          iobTags = Boolean.parseBoolean(val);
+          break;
+        case "useviterbi":
+          useViterbi = Boolean.parseBoolean(val);
+          break;
+        case "intern2":
+          intern2 = Boolean.parseBoolean(val);
+          break;
+        case "selftest":
+          selfTest = Boolean.parseBoolean(val);
+          break;
+        case "sloppygazette":
+          sloppyGazette = Boolean.parseBoolean(val);
+          break;
+        case "cleangazette":
+          cleanGazette = Boolean.parseBoolean(val);
+          break;
+        case "nomidngrams":
+          noMidNGrams = Boolean.parseBoolean(val);
+          break;
+        case "usereverse":
+          useReverse = Boolean.parseBoolean(val);
+          break;
+        case "retainentitysubclassification":
+          retainEntitySubclassification = Boolean.parseBoolean(val);
+          break;
+        case "uselemmas":
+          useLemmas = Boolean.parseBoolean(val);
+          break;
+        case "useprevnextlemmas":
+          usePrevNextLemmas = Boolean.parseBoolean(val);
+          break;
+        case "normalizeterms":
+          normalizeTerms = Boolean.parseBoolean(val);
+          break;
+        case "normalizetimex":
+          normalizeTimex = Boolean.parseBoolean(val);
+          break;
+        case "usenb":
+          useNB = Boolean.parseBoolean(val);
+          break;
+        case "useparenmatching":
+          useParenMatching = Boolean.parseBoolean(val);
+          break;
+        case "usetypeseqs":
+          useTypeSeqs = Boolean.parseBoolean(val);
+          break;
+        case "usetypeseqs2":
+          useTypeSeqs2 = Boolean.parseBoolean(val);
+          break;
+        case "usetypeseqs3":
+          useTypeSeqs3 = Boolean.parseBoolean(val);
+          break;
+        case "usedisjunctive":
+          useDisjunctive = Boolean.parseBoolean(val);
+          break;
+        case "useundirecteddisjunctive":
+          useUndirectedDisjunctive = Boolean.parseBoolean(val);
+          break;
+        case "splitslashhyphenwords":
+          try {
+            slashHyphenTreatment = SlashHyphenEnum.valueOf(val.trim().toUpperCase(Locale.ROOT));
+          } catch (IllegalArgumentException | NullPointerException iae) {
+            slashHyphenTreatment = SlashHyphenEnum.NONE;
+          }
+          break;
+        case "disjunctionwidth":
+          disjunctionWidth = Integer.parseInt(val);
+          break;
+        case "usedisjunctiveshapeinteraction":
+          useDisjunctiveShapeInteraction = Boolean.parseBoolean(val);
+          break;
+        case "usewidedisjunctive":
+          useWideDisjunctive = Boolean.parseBoolean(val);
+          break;
+        case "widedisjunctionwidth":
+          wideDisjunctionWidth = Integer.parseInt(val);
+          break;
+        case "usedisjshape":
+          useDisjShape = Boolean.parseBoolean(val);
+          break;
+        case "usetitle":
+          useTitle = Boolean.parseBoolean(val);
+          break;
+        case "usetitle2":
+          useTitle2 = Boolean.parseBoolean(val);
+          break;
+        case "booleanfeatures":
+          booleanFeatures = Boolean.parseBoolean(val);
+          break;
+        case "useclassfeature":
+          useClassFeature = Boolean.parseBoolean(val);
+          break;
+        case "useshapeconjunctions":
+          useShapeConjunctions = Boolean.parseBoolean(val);
+          break;
+        case "usewordtag":
+          useWordTag = Boolean.parseBoolean(val);
+          break;
+        case "usenphead":
+          useNPHead = Boolean.parseBoolean(val);
+          break;
+        case "usenpgovernor":
+          useNPGovernor = Boolean.parseBoolean(val);
+          break;
+        case "useheadgov":
+          useHeadGov = Boolean.parseBoolean(val);
+          break;
+        case "uselastrealword":
+          useLastRealWord = Boolean.parseBoolean(val);
+          break;
+        case "usenextrealword":
+          useNextRealWord = Boolean.parseBoolean(val);
+          break;
+        case "useoccurrencepatterns":
+          useOccurrencePatterns = Boolean.parseBoolean(val);
+          break;
+        case "usetypeysequences":
+          useTypeySequences = Boolean.parseBoolean(val);
+          break;
+        case "justify":
+          justify = Boolean.parseBoolean(val);
+          break;
+        case "normalize":
+          normalize = Boolean.parseBoolean(val);
+          break;
+        case "priortype":
+          priorType = val;
+          break;
+        case "sigma":
+          sigma = Double.parseDouble(val);
+          break;
+        case "epsilon":
+          epsilon = Double.parseDouble(val);
+          break;
+        case "beamsize":
+          beamSize = Integer.parseInt(val);
+          break;
+        case "removetopn":
+          removeTopN = Integer.parseInt(val);
+          break;
+        case "removetopnpercent":
+          removeTopNPercent = Double.parseDouble(val);
+          break;
+        case "randomizedratio":
+          randomizedRatio = Double.parseDouble(val);
+          break;
+        case "numtimesremovetopn":
+          numTimesRemoveTopN = Integer.parseInt(val);
+          break;
+        case "maxleft":
+          maxLeft = Integer.parseInt(val);
+          break;
+        case "maxright":
+          maxRight = Integer.parseInt(val);
+          break;
+        case "maxngramleng":
+          maxNGramLeng = Integer.parseInt(val);
+          break;
+        case "usegazfeatures":
+          useGazFeatures = Boolean.parseBoolean(val);
+          break;
+        case "usealtgazfeatures":
+          useAltGazFeatures = Boolean.parseBoolean(val);
+          break;
+        case "usemoregazfeatures":
+          useMoreGazFeatures = Boolean.parseBoolean(val);
+          break;
+        case "useabbr":
+          useAbbr = Boolean.parseBoolean(val);
+          break;
+        case "useminimalabbr":
+          useMinimalAbbr = Boolean.parseBoolean(val);
+          break;
+        case "useabbr1":
+          useAbbr1 = Boolean.parseBoolean(val);
+          break;
+        case "useminimalabbr1":
+          useMinimalAbbr1 = Boolean.parseBoolean(val);
+          break;
+        case "documentreader":
+          log.info("You are using an outdated flag: -documentReader " + val);
+          log.info("Please use -readerAndWriter instead.");
+          break;
+        case "deleteblanklines":
+          deleteBlankLines = Boolean.parseBoolean(val);
+          break;
+        case "answerfile":
+          answerFile = val;
+          break;
+        case "altanswerfile":
+          altAnswerFile = val;
+          break;
+        case "loadclassifier":
+        case "model":
+          loadClassifier = val;
+          break;
+        case "loadtextclassifier":
+          loadTextClassifier = val;
+          break;
+        case "loadjarclassifier":
+          loadJarClassifier = val;
+          break;
+        case "loadauxclassifier":
+          loadAuxClassifier = val;
+          break;
+        case "serializeto":
+          serializeTo = val;
+          break;
+        case "serializetotext":
+          serializeToText = val;
+          break;
+        case "serializedatasetsdir":
+          serializeDatasetsDir = val;
+          break;
+        case "loaddatasetsdir":
+          loadDatasetsDir = val;
+          break;
+        case "pushdir":
+          pushDir = val;
+          break;
+        case "purgedatasets":
+          purgeDatasets = Boolean.parseBoolean(val);
+          break;
+        case "keepobinmemory":
+          keepOBInMemory = Boolean.parseBoolean(val);
+          break;
+        case "fakedataset":
+          fakeDataset = Boolean.parseBoolean(val);
+          break;
+        case "numdatasetsperfile":
+          numDatasetsPerFile = Integer.parseInt(val);
+          break;
+        case "trainfile":
+          trainFile = val;
+          break;
+        case "biasedtrainfile":
+          biasedTrainFile = val;
+          break;
+        case "classbias":
+          classBias = val;
+          break;
+        case "confusionmatrix":
+          confusionMatrix = val;
+          break;
+        case "adaptfile":
+          adaptFile = val;
+          break;
+        case "devfile":
+          devFile = val;
+          break;
+        case "testfile":
+          testFile = val;
+          break;
+        case "outputfile":
+          outputFile = val;
+          break;
+        case "textfile":
+          textFile = val;
+          break;
+        case "readstdin":
+          readStdin = Boolean.parseBoolean(val);
+          break;
+        case "initialweights":
+          initialWeights = val;
+          break;
+        case "interimoutputfreq":
+          interimOutputFreq = Integer.parseInt(val);
+          break;
+        case "inputencoding":
+          inputEncoding = val;
+          break;
+        case "outputencoding":
+          outputEncoding = val;
+          break;
+        case "encoding":
+          inputEncoding = val;
+          outputEncoding = val;
+          break;
+        case "gazette": {
+          useGazettes = true;
+          StringTokenizer st = new StringTokenizer(val, " ,;\t");
+          if (gazettes == null) {
+            gazettes = new ArrayList<>();
+          } // for after deserialization, as gazettes is transient
+          while (st.hasMoreTokens()) {
+            gazettes.add(st.nextToken());
+          }
+          break;
         }
-      } else if (key.equalsIgnoreCase("useShapeStrings")) {
-        useShapeStrings = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useGoodForNamesCpC")) {
-        useGoodForNamesCpC = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useDictionaryConjunctions")) {
-        useDictionaryConjunctions = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useDictionaryConjunctions3")) {
-        useDictionaryConjunctions3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("expandMidDot")) {
-        expandMidDot = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useSequences")) {
-        useSequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePrevSequences")) {
-        usePrevSequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNextSequences")) {
-        useNextSequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useLongSequences")) {
-        useLongSequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useBoundarySequences")) {
-        useBoundarySequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTaggySequences")) {
-        useTaggySequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useExtraTaggySequences")) {
-        useExtraTaggySequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTaggySequencesShapeInteraction")) {
-        useTaggySequencesShapeInteraction = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("strictlyZeroethOrder")) {
-        strictlyZeroethOrder = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("strictlyFirstOrder")) {
-        strictlyFirstOrder = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("strictlySecondOrder")) {
-        strictlySecondOrder = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("strictlyThirdOrder")) {
-        strictlyThirdOrder = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dontExtendTaggy")) {
-        dontExtendTaggy = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("entitySubclassification")) {
-        entitySubclassification = val;
-      } else if (key.equalsIgnoreCase("useGazettePhrases")) {
-        useGazettePhrases = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("phraseGazettes")) {
-        StringTokenizer st = new StringTokenizer(val, " ,;\t");
-        if (phraseGazettes == null) {
-          phraseGazettes = new ArrayList<>();
-        }
-        while (st.hasMoreTokens()) {
-          phraseGazettes.add(st.nextToken());
-        }
-      } else if (key.equalsIgnoreCase("useSum")) {
-        useSum = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("verbose")) {
-        verboseMode = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("verboseMode")) {
-        verboseMode = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("tolerance")) {
-        tolerance = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("maxIterations")) {
-        maxIterations = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("exportFeatures")) {
-        exportFeatures = val;
-      } else if (key.equalsIgnoreCase("printFeatures")) {
-        printFeatures = val;
-      } else if (key.equalsIgnoreCase("printFeaturesUpto")) {
-        printFeaturesUpto = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("lastNameList")) {
-        lastNameList = val;
-      } else if (key.equalsIgnoreCase("maleNameList")) {
-        maleNameList = val;
-      } else if (key.equalsIgnoreCase("femaleNameList")) {
-        femaleNameList = val;
-      } else if (key.equalsIgnoreCase("useSymTags")) {
-        useSymTags = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useSymWordPairs")) {
-        useSymWordPairs = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("printClassifier")) {
-        printClassifier = val;
-      } else if (key.equalsIgnoreCase("printClassifierParam")) {
-        printClassifierParam = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("intern")) {
-        intern = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("mergetags")) {
-        mergeTags = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("iobTags")) {
-        iobTags = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useViterbi")) {
-        useViterbi = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("intern2")) {
-        intern2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("selfTest")) {
-        selfTest = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("sloppyGazette")) {
-        sloppyGazette = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("cleanGazette")) {
-        cleanGazette = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("noMidNGrams")) {
-        noMidNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useReverse")) {
-        useReverse = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("retainEntitySubclassification")) {
-        retainEntitySubclassification = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useLemmas")) {
-        useLemmas = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePrevNextLemmas")) {
-        usePrevNextLemmas = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("normalizeTerms")) {
-        normalizeTerms = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("normalizeTimex")) {
-        normalizeTimex = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNB")) {
-        useNB = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useParenMatching")) {
-        useParenMatching = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTypeSeqs")) {
-        useTypeSeqs = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTypeSeqs2")) {
-        useTypeSeqs2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTypeSeqs3")) {
-        useTypeSeqs3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useDisjunctive")) {
-        useDisjunctive = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useUndirectedDisjunctive")) {
-        useUndirectedDisjunctive = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("splitSlashHyphenWords")) {
-        try {
-          slashHyphenTreatment = SlashHyphenEnum.valueOf(val.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException | NullPointerException iae) {
-          slashHyphenTreatment = SlashHyphenEnum.NONE;
-        }
-      } else if (key.equalsIgnoreCase("disjunctionWidth")) {
-        disjunctionWidth = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useDisjunctiveShapeInteraction")) {
-        useDisjunctiveShapeInteraction = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWideDisjunctive")) {
-        useWideDisjunctive = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("wideDisjunctionWidth")) {
-        wideDisjunctionWidth = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useDisjShape")) {
-        useDisjShape = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTitle")) {
-        useTitle = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTitle2")) {
-        useTitle2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("booleanFeatures")) {
-        booleanFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useClassFeature")) {
-        useClassFeature = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useShapeConjunctions")) {
-        useShapeConjunctions = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWordTag")) {
-        useWordTag = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNPHead")) {
-        useNPHead = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNPGovernor")) {
-        useNPGovernor = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useHeadGov")) {
-        useHeadGov = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useLastRealWord")) {
-        useLastRealWord = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNextRealWord")) {
-        useNextRealWord = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useOccurrencePatterns")) {
-        useOccurrencePatterns = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTypeySequences")) {
-        useTypeySequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("justify")) {
-        justify = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("normalize")) {
-        normalize = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("priorType")) {
-        priorType = val;
-      } else if (key.equalsIgnoreCase("sigma")) {
-        sigma = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("epsilon")) {
-        epsilon = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("beamSize")) {
-        beamSize = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("removeTopN")) {
-        removeTopN = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("removeTopNPercent")) {
-        removeTopNPercent = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("randomizedRatio")) {
-        randomizedRatio = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("numTimesRemoveTopN")) {
-        numTimesRemoveTopN = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("maxLeft")) {
-        maxLeft = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("maxRight")) {
-        maxRight = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("maxNGramLeng")) {
-        maxNGramLeng = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useGazFeatures")) {
-        useGazFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAltGazFeatures")) {
-        useAltGazFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMoreGazFeatures")) {
-        useMoreGazFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAbbr")) {
-        useAbbr = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMinimalAbbr")) {
-        useMinimalAbbr = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAbbr1")) {
-        useAbbr1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMinimalAbbr1")) {
-        useMinimalAbbr1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("documentReader")) {
-        log.info("You are using an outdated flag: -documentReader " + val);
-        log.info("Please use -readerAndWriter instead.");
-      } else if (key.equalsIgnoreCase("deleteBlankLines")) {
-        deleteBlankLines = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("answerFile")) {
-        answerFile = val;
-      } else if (key.equalsIgnoreCase("altAnswerFile")) {
-        altAnswerFile = val;
-      } else if (key.equalsIgnoreCase("loadClassifier") ||
-                 key.equalsIgnoreCase("model")) {
-        loadClassifier = val;
-      } else if (key.equalsIgnoreCase("loadTextClassifier")) {
-        loadTextClassifier = val;
-      } else if (key.equalsIgnoreCase("loadJarClassifier")) {
-        loadJarClassifier = val;
-      } else if (key.equalsIgnoreCase("loadAuxClassifier")) {
-        loadAuxClassifier = val;
-      } else if (key.equalsIgnoreCase("serializeTo")) {
-        serializeTo = val;
-      } else if (key.equalsIgnoreCase("serializeToText")) {
-        serializeToText = val;
-      } else if (key.equalsIgnoreCase("serializeDatasetsDir")) {
-        serializeDatasetsDir = val;
-      } else if (key.equalsIgnoreCase("loadDatasetsDir")) {
-        loadDatasetsDir = val;
-      } else if (key.equalsIgnoreCase("pushDir")) {
-        pushDir = val;
-      } else if (key.equalsIgnoreCase("purgeDatasets")) {
-        purgeDatasets = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("keepOBInMemory")) {
-        keepOBInMemory = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("fakeDataset")) {
-        fakeDataset = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("numDatasetsPerFile")) {
-        numDatasetsPerFile = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("trainFile")) {
-        trainFile = val;
-      } else if (key.equalsIgnoreCase("biasedTrainFile")) {
-        biasedTrainFile = val;
-      } else if (key.equalsIgnoreCase("classBias")) {
-        classBias = val;
-      } else if (key.equalsIgnoreCase("confusionMatrix")) {
-        confusionMatrix = val;
-      } else if (key.equalsIgnoreCase("adaptFile")) {
-        adaptFile = val;
-      } else if (key.equalsIgnoreCase("devFile")) {
-        devFile = val;
-      } else if (key.equalsIgnoreCase("testFile")) {
-        testFile = val;
-      } else if (key.equalsIgnoreCase("outputFile")) {
-        outputFile = val;
-      } else if (key.equalsIgnoreCase("textFile")) {
-        textFile = val;
-      } else if (key.equalsIgnoreCase("readStdin")) {
-        readStdin = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("initialWeights")) {
-        initialWeights = val;
-      } else if (key.equalsIgnoreCase("interimOutputFreq")) {
-        interimOutputFreq = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("inputEncoding")) {
-        inputEncoding = val;
-      } else if (key.equalsIgnoreCase("outputEncoding")) {
-        outputEncoding = val;
-      } else if (key.equalsIgnoreCase("encoding")) {
-        inputEncoding = val;
-        outputEncoding = val;
-      } else if (key.equalsIgnoreCase("gazette")) {
-        useGazettes = true;
-        StringTokenizer st = new StringTokenizer(val, " ,;\t");
-        if (gazettes == null) {
-          gazettes = new ArrayList<>();
-        } // for after deserialization, as gazettes is transient
-        while (st.hasMoreTokens()) {
-          gazettes.add(st.nextToken());
-        }
-      } else if (key.equalsIgnoreCase("useQN")) {
-        useQN = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("QNsize")) {
-        QNsize = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("QNsize2")) {
-        QNsize2 = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("l1reg")) {
-        useQN = false;
-        l1reg = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("useFloat")) {
-        useFloat = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("trainMap")) {
-        log.info("trainMap and testMap are no longer valid options - please use map instead.");
-        throw new RuntimeException();
-      } else if (key.equalsIgnoreCase("testMap")) {
-        log.info("trainMap and testMap are no longer valid options - please use map instead.");
-        throw new RuntimeException();
-      } else if (key.equalsIgnoreCase("map")) {
-        map = val;
-      } else if (key.equalsIgnoreCase("useMoreAbbr")) {
-        useMoreAbbr = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePrevVB")) {
-        usePrevVB = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNextVB")) {
-        useNextVB = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useVB")) {
-        if (Boolean.parseBoolean(val)) {
-          useVB = true;
-          usePrevVB = true;
-          useNextVB = true;
-        }
-      } else if (key.equalsIgnoreCase("useChunks")) {
-        useChunks = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useChunkySequences")) {
-        useChunkySequences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("greekifyNGrams")) {
-        greekifyNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("restrictTransitionsTimit")) {
-        restrictTransitionsTimit = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMoreTags")) {
-        useMoreTags = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useBeginSent")) {
-        useBeginSent = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePosition")) {
-        usePosition = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useGenia")) {
-        useGENIA = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAbstr")) {
-        useABSTR = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWeb")) {
-        useWEB = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAnte")) {
-        useANTE = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAcr")) {
-        useACR = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTok")) {
-        useTOK = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAbgene")) {
-        useABGENE = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAbstrFreqDict")) {
-        useABSTRFreqDict = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAbstrFreq")) {
-        useABSTRFreq = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useFreq")) {
-        useFREQ = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usewebfreqdict")) {
-        useWEBFreqDict = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("bioSubmitOutput")) {
-        bioSubmitOutput = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("subCWGaz")) {
-        subCWGaz = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("splitOnHead")) {
-        splitOnHead = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("featureCountThreshold")) {
-        featureCountThreshold = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useWord")) {
-        useWord = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("memoryThrift")) {
-        memoryThrift = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("timitDatum")) {
-        timitDatum = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("splitDocuments")) {
-        log.info("You are using an outdated flag: -splitDocuments");
-        log.info("Please use -maxDocSize -1 instead.");
-        splitDocuments = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("featureWeightThreshold")) {
-        featureWeightThreshold = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("backgroundSymbol")) {
-        backgroundSymbol = val;
-      } else if (key.equalsIgnoreCase("featureFactory")) {
-        // handle multiple feature factories.
-        String[] tokens = val.split("\\s*,\\s*"); // multiple feature factories could be specified and are comma separated.
-        int numFactories = tokens.length;
-        if (numFactories==1){ // for compatible reason
-          featureFactory = getFeatureFactory(val);
-        }
+        case "useqn":
+          useQN = Boolean.parseBoolean(val);
+          break;
+        case "qnsize":
+          QNsize = Integer.parseInt(val);
+          break;
+        case "qnsize2":
+          QNsize2 = Integer.parseInt(val);
+          break;
+        case "l1reg":
+          useQN = false;
+          l1reg = Double.parseDouble(val);
+          break;
+        case "usefloat":
+          useFloat = Boolean.parseBoolean(val);
+          break;
+        case "trainmap":
+          log.info("trainMap and testMap are no longer valid options - please use map instead.");
+          throw new RuntimeException();
+        case "testmap":
+          log.info("trainMap and testMap are no longer valid options - please use map instead.");
+          throw new RuntimeException();
+        case "map":
+          map = val;
+          break;
+        case "usemoreabbr":
+          useMoreAbbr = Boolean.parseBoolean(val);
+          break;
+        case "useprevvb":
+          usePrevVB = Boolean.parseBoolean(val);
+          break;
+        case "usenextvb":
+          useNextVB = Boolean.parseBoolean(val);
+          break;
+        case "usevb":
+          if (Boolean.parseBoolean(val)) {
+            useVB = true;
+            usePrevVB = true;
+            useNextVB = true;
+          }
+          break;
+        case "usechunks":
+          useChunks = Boolean.parseBoolean(val);
+          break;
+        case "usechunkysequences":
+          useChunkySequences = Boolean.parseBoolean(val);
+          break;
+        case "greekifyngrams":
+          greekifyNGrams = Boolean.parseBoolean(val);
+          break;
+        case "restricttransitionstimit":
+          restrictTransitionsTimit = Boolean.parseBoolean(val);
+          break;
+        case "usemoretags":
+          useMoreTags = Boolean.parseBoolean(val);
+          break;
+        case "usebeginsent":
+          useBeginSent = Boolean.parseBoolean(val);
+          break;
+        case "useposition":
+          usePosition = Boolean.parseBoolean(val);
+          break;
+        case "usegenia":
+          useGENIA = Boolean.parseBoolean(val);
+          break;
+        case "useabstr":
+          useABSTR = Boolean.parseBoolean(val);
+          break;
+        case "useweb":
+          useWEB = Boolean.parseBoolean(val);
+          break;
+        case "useante":
+          useANTE = Boolean.parseBoolean(val);
+          break;
+        case "useacr":
+          useACR = Boolean.parseBoolean(val);
+          break;
+        case "usetok":
+          useTOK = Boolean.parseBoolean(val);
+          break;
+        case "useabgene":
+          useABGENE = Boolean.parseBoolean(val);
+          break;
+        case "useabstrfreqdict":
+          useABSTRFreqDict = Boolean.parseBoolean(val);
+          break;
+        case "useabstrfreq":
+          useABSTRFreq = Boolean.parseBoolean(val);
+          break;
+        case "usefreq":
+          useFREQ = Boolean.parseBoolean(val);
+          break;
+        case "usewebfreqdict":
+          useWEBFreqDict = Boolean.parseBoolean(val);
+          break;
+        case "biosubmitoutput":
+          bioSubmitOutput = Boolean.parseBoolean(val);
+          break;
+        case "subcwgaz":
+          subCWGaz = Boolean.parseBoolean(val);
+          break;
+        case "splitonhead":
+          splitOnHead = Boolean.parseBoolean(val);
+          break;
+        case "featurecountthreshold":
+          featureCountThreshold = Integer.parseInt(val);
+          break;
+        case "useword":
+          useWord = Boolean.parseBoolean(val);
+          break;
+        case "memorythrift":
+          memoryThrift = Boolean.parseBoolean(val);
+          break;
+        case "timitdatum":
+          timitDatum = Boolean.parseBoolean(val);
+          break;
+        case "splitdocuments":
+          log.info("You are using an outdated flag: -splitDocuments");
+          log.info("Please use -maxDocSize -1 instead.");
+          splitDocuments = Boolean.parseBoolean(val);
+          break;
+        case "featureweightthreshold":
+          featureWeightThreshold = Double.parseDouble(val);
+          break;
+        case "backgroundsymbol":
+          backgroundSymbol = val;
+          break;
+        case "featurefactory": {
+          // handle multiple feature factories.
+          String[] tokens = val.split("\\s*,\\s*"); // multiple feature factories could be specified and are comma separated.
+          int numFactories = tokens.length;
+          if (numFactories==1){ // for compatible reason
+            featureFactory = getFeatureFactory(val);
+          }
 
-        featureFactories = new String[numFactories];
-        featureFactoriesArgs = new ArrayList<>(numFactories);
-        for (int i = 0; i < numFactories; i++) {
-          featureFactories[i] = getFeatureFactory(tokens[i]);
-          featureFactoriesArgs.add(new Object[0]);
+          featureFactories = new String[numFactories];
+          featureFactoriesArgs = new ArrayList<>(numFactories);
+          for (int i = 0; i < numFactories; i++) {
+            featureFactories[i] = getFeatureFactory(tokens[i]);
+            featureFactoriesArgs.add(new Object[0]);
+          }
+          break;
         }
-      } else if (key.equalsIgnoreCase("printXML")) {
-        log.info("printXML is disused; perhaps try using the -outputFormat xml option.");
+        case "printxml":
+          log.info("printXML is disused; perhaps try using the -outputFormat xml option.");
 
-      } else if (key.equalsIgnoreCase("useSeenFeaturesOnly")) {
-        useSeenFeaturesOnly = Boolean.parseBoolean(val);
+          break;
+        case "useseenfeaturesonly":
+          useSeenFeaturesOnly = Boolean.parseBoolean(val);
 
-      } else if (key.equalsIgnoreCase("useBagOfWords")) {
-        useBagOfWords = Boolean.parseBoolean(val);
+          break;
+        case "usebagofwords":
+          useBagOfWords = Boolean.parseBoolean(val);
 
-        // chinese word-segmenter features
-      } else if (key.equalsIgnoreCase("useRadical")) {
-        useRadical = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useBigramInTwoClique")) {
-        useBigramInTwoClique = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useReverseAffix")) {
-        useReverseAffix = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("charHalfWindow")) {
-        charHalfWindow = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("purgeFeatures")) {
-        purgeFeatures = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("ocrFold")) {
-        ocrFold = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("morphFeatureFile")) {
-        morphFeatureFile = val;
-      } else if (key.equalsIgnoreCase("svmModelFile")) {
-        svmModelFile = val;
-        /* Dictionary */
-      } else if (key.equalsIgnoreCase("useDictleng")) {
-        useDictleng = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useDict2")) {
-        useDict2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useOutDict2")) {
-        useOutDict2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("outDict2")) {
-        outDict2 = val;
-      } else if (key.equalsIgnoreCase("useDictCTB2")) {
-        useDictCTB2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useDictASBC2")) {
-        useDictASBC2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useDictPK2")) {
-        useDictPK2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useDictHK2")) {
-        useDictHK2 = Boolean.parseBoolean(val);
-        /* N-gram flags */
-      } else if (key.equalsIgnoreCase("useWord1")) {
-        useWord1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWord2")) {
-        useWord2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWord3")) {
-        useWord3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWord4")) {
-        useWord4 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useRad1")) {
-        useRad1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useRad2")) {
-        useRad2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useRad2b")) {
-        useRad2b = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWordn")) {
-        useWordn = Boolean.parseBoolean(val);
-        /* affix flags */
-      } else if (key.equalsIgnoreCase("useCTBPre1")) {
-        useCTBPre1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCTBSuf1")) {
-        useCTBSuf1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useASBCPre1")) {
-        useASBCPre1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useASBCSuf1")) {
-        useASBCSuf1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useHKPre1")) {
-        useHKPre1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useHKSuf1")) {
-        useHKSuf1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePKPre1")) {
-        usePKPre1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePKSuf1")) {
-        usePKSuf1 = Boolean.parseBoolean(val);
-        /* POS flags */
-      } else if (key.equalsIgnoreCase("useCTBChar2")) {
-        useCTBChar2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePrediction")) {
-        usePrediction = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useASBCChar2")) {
-        useASBCChar2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useHKChar2")) {
-        useHKChar2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePKChar2")) {
-        usePKChar2 = Boolean.parseBoolean(val);
-        /* Rule flag */
-      } else if (key.equalsIgnoreCase("useRule2")) {
-        useRule2 = Boolean.parseBoolean(val);
-        /* ASBC and HK */
-      } else if (key.equalsIgnoreCase("useBig5")) {
-        useBig5 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegDict2")) {
-        useNegDict2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegDict3")) {
-        useNegDict3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegDict4")) {
-        useNegDict4 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegCTBDict2")) {
-        useNegCTBDict2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegCTBDict3")) {
-        useNegCTBDict3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegCTBDict4")) {
-        useNegCTBDict4 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegASBCDict2")) {
-        useNegASBCDict2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegASBCDict3")) {
-        useNegASBCDict3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegASBCDict4")) {
-        useNegASBCDict4 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegPKDict2")) {
-        useNegPKDict2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegPKDict3")) {
-        useNegPKDict3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegPKDict4")) {
-        useNegPKDict4 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegHKDict2")) {
-        useNegHKDict2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegHKDict3")) {
-        useNegHKDict3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNegHKDict4")) {
-        useNegHKDict4 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePre")) {
-        usePre = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useSuf")) {
-        useSuf = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useRule")) {
-        useRule = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAs")) {
-        useAs = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePk")) {
-        usePk = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useHk")) {
-        useHk = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMsr")) {
-        useMsr = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMSRChar2")) {
-        useMSRChar2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useFeaturesC4gram")) {
-        useFeaturesC4gram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useFeaturesC5gram")) {
-        useFeaturesC5gram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useFeaturesC6gram")) {
-        useFeaturesC6gram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useFeaturesCpC4gram")) {
-        useFeaturesCpC4gram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useFeaturesCpC5gram")) {
-        useFeaturesCpC5gram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useFeaturesCpC6gram")) {
-        useFeaturesCpC6gram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useUnicodeType")) {
-        useUnicodeType = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useUnicodeBlock")) {
-        useUnicodeBlock = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useUnicodeType4gram")) {
-        useUnicodeType4gram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useUnicodeType5gram")) {
-        useUnicodeType5gram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useShapeStrings1")) {
-        useShapeStrings1 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useShapeStrings3")) {
-        useShapeStrings3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useShapeStrings4")) {
-        useShapeStrings4 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useShapeStrings5")) {
-        useShapeStrings5 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWordUTypeConjunctions2")) {
-        useWordUTypeConjunctions2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWordUTypeConjunctions3")) {
-        useWordUTypeConjunctions3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWordShapeConjunctions2")) {
-        useWordShapeConjunctions2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWordShapeConjunctions3")) {
-        useWordShapeConjunctions3 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMidDotShape")) {
-        useMidDotShape = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("augmentedDateChars")) {
-        augmentedDateChars = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("suppressMidDotPostprocessing")) {
-        suppressMidDotPostprocessing = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("printNR")) {
-        printNR = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("use4Clique")) {
-        use4Clique = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useFilter")) {
-        useFilter = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("largeChSegFile")) {
-        largeChSegFile = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("keepEnglishWhitespaces")) {
-        keepEnglishWhitespaces = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("keepAllWhitespaces")) {
-        keepAllWhitespaces = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("sighanPostProcessing")) {
-        sighanPostProcessing = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useChPos")) {
-        useChPos = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("sighanCorporaDict")) {
-        sighanCorporaDict = val;
-        // end chinese word-segmenter features
-      } else if (key.equalsIgnoreCase("useObservedSequencesOnly")) {
-        useObservedSequencesOnly = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("maxDocSize")) {
-        maxDocSize = Integer.parseInt(val);
-        splitDocuments = true;
-      } else if (key.equalsIgnoreCase("printProbs")) {
-        printProbs = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("printFirstOrderProbs")) {
-        printFirstOrderProbs = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("saveFeatureIndexToDisk")) {
-        saveFeatureIndexToDisk = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("removeBackgroundSingletonFeatures")) {
-        removeBackgroundSingletonFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("doGibbs")) {
-        doGibbs = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMUCFeatures")) {
-        useMUCFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("initViterbi")) {
-        initViterbi = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("checkNameList")) {
-        checkNameList = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useFirstWord")) {
-        useFirstWord = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useUnknown")) {
-        useUnknown = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("cacheNGrams")) {
-        cacheNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNumberFeature")) {
-        useNumberFeature = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("annealingRate")) {
-        annealingRate = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("annealingType")) {
-        if (val.equalsIgnoreCase("linear") || val.equalsIgnoreCase("exp") || val.equalsIgnoreCase("exponential")) {
-          annealingType = val;
-        } else {
-          log.info("unknown annealingType: " + val + ".  Please use linear|exp|exponential");
-        }
-      } else if (key.equalsIgnoreCase("numSamples")) {
-        numSamples = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("inferenceType")) {
-        inferenceType = val;
-      } else if (key.equalsIgnoreCase("loadProcessedData")) {
-        loadProcessedData = val;
-      } else if (key.equalsIgnoreCase("normalizationTable")) {
-        normalizationTable = val;
-      } else if (key.equalsIgnoreCase("dictionary")) {
-        // don't set if empty string or spaces or true: revert it to null
-        // special case so can empty out dictionary list on command line!
-        val = val.trim();
-        if (val.length() > 0 && !"true".equals(val) && !"null".equals(val) && !"false".equals("val")) {
-          dictionary = val;
-        } else {
-          dictionary = null;
-        }
-      } else if (key.equalsIgnoreCase("serDictionary")) {
-        // don't set if empty string or spaces or true: revert it to null
-        // special case so can empty out dictionary list on command line!
-        val = val.trim();
-        if (val.length() > 0 && !"true".equals(val) && !"null".equals(val) && !"false".equals("val")) {
-          serializedDictionary = val;
-        } else {
-          serializedDictionary = null;
-        }
-      } else if (key.equalsIgnoreCase("dictionary2")) {
-        // don't set if empty string or spaces or true: revert it to null
-        // special case so can empty out dictionary list on command line!
-        val = val.trim();
-        if (val.length() > 0 && !"true".equals(val) && !"null".equals(val) && !"false".equals("val")) {
-          dictionary2 = val;
-        } else {
-          dictionary2 = null;
-        }
-      } else if (key.equalsIgnoreCase("normTableEncoding")) {
-        normTableEncoding = val;
-      } else if (key.equalsIgnoreCase("useLemmaAsWord")) {
-        useLemmaAsWord = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("type")) {
-        type = val;
-      } else if (key.equalsIgnoreCase("readerAndWriter")) {
-        readerAndWriter = val;
-      } else if (key.equalsIgnoreCase("plainTextDocumentReaderAndWriter")) {
-        plainTextDocumentReaderAndWriter = val;
-      } else if (key.equalsIgnoreCase("gazFilesFile")) {
-        gazFilesFile = val;
-      } else if (key.equalsIgnoreCase("baseTrainDir")) {
-        baseTrainDir = val;
-      } else if (key.equalsIgnoreCase("baseTestDir")) {
-        baseTestDir = val;
-      } else if (key.equalsIgnoreCase("trainFiles")) {
-        trainFiles = val;
-      } else if (key.equalsIgnoreCase("trainFileList")) {
-        trainFileList = val;
-      } else if (key.equalsIgnoreCase("trainDirs")) {
-        trainDirs = val;
-      } else if (key.equalsIgnoreCase("testDirs")) {
-        testDirs = val;
-      } else if (key.equalsIgnoreCase("testFiles")) {
-        testFiles = val;
-      } else if (key.equalsIgnoreCase("textFiles")) {
-        textFiles = val;
-      } else if (key.equalsIgnoreCase("usePrediction2")) {
-        usePrediction2 = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useObservedFeaturesOnly")) {
-        useObservedFeaturesOnly = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("iobWrapper")) {
-        iobWrapper = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useDistSim")) {
-        useDistSim = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("casedDistSim")) {
-        casedDistSim = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("distSimFileFormat")) {
-        distSimFileFormat = val;
-      } else if (key.equalsIgnoreCase("distSimMaxBits")) {
-        distSimMaxBits = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("numberEquivalenceDistSim")) {
-        numberEquivalenceDistSim = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("unknownWordDistSimClass")) {
-        unknownWordDistSimClass = val;
-      } else if (key.equalsIgnoreCase("useOnlySeenWeights")) {
-        useOnlySeenWeights = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("predProp")) {
-        predProp = val;
-      } else if (key.equalsIgnoreCase("distSimLexicon")) {
-        distSimLexicon = val;
-      } else if (key.equalsIgnoreCase("useSegmentation")) {
-        useSegmentation = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useInternal")) {
-        useInternal = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useExternal")) {
-        useExternal = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useEitherSideWord")) {
-        useEitherSideWord = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useEitherSideDisjunctive")) {
-        useEitherSideDisjunctive = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("featureDiffThresh")) {
-        featureDiffThresh = Double.parseDouble(val);
-        if (props.getProperty("numTimesPruneFeatures") == null) {
-          numTimesPruneFeatures = 1;
-        }
-      } else if (key.equalsIgnoreCase("numTimesPruneFeatures")) {
-        numTimesPruneFeatures = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("newgeneThreshold")) {
-        newgeneThreshold = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("adaptFile")) {
-        adaptFile = val;
-      } else if (key.equalsIgnoreCase("doAdaptation")) {
-        doAdaptation = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("selfTrainFile")) {
-        selfTrainFile = val;
-      } else if (key.equalsIgnoreCase("selfTrainIterations")) {
-        selfTrainIterations = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("selfTrainWindowSize")) {
-        selfTrainWindowSize = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("selfTrainConfidenceThreshold")) {
-        selfTrainConfidenceThreshold = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("numFolds")) {
-        numFolds = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("startFold")) {
-        startFold = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("endFold")) {
-        endFold = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("adaptSigma")) {
-        adaptSigma = Double.parseDouble(val);
-      } else if (key.startsWith("prop") && !key.equals("prop")) {
-        comboProps.add(val);
-      } else if (key.equalsIgnoreCase("outputFormat")) {
-        outputFormat = val;
-      } else if (key.equalsIgnoreCase("useSMD")) {
-        useSMD = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useScaledSGD")) {
-        useScaledSGD = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("scaledSGDMethod")) {
-        scaledSGDMethod = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("tuneSGD")) {
-        tuneSGD = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("StochasticCalculateMethod")) {
-        if (val.equalsIgnoreCase("AlgorithmicDifferentiation")) {
-          stochasticMethod = StochasticCalculateMethods.AlgorithmicDifferentiation;
-        } else if (val.equalsIgnoreCase("IncorporatedFiniteDifference")) {
-          stochasticMethod = StochasticCalculateMethods.IncorporatedFiniteDifference;
-        } else if (val.equalsIgnoreCase("ExternalFinitedifference")) {
-          stochasticMethod = StochasticCalculateMethods.ExternalFiniteDifference;
-        }
-      } else if (key.equalsIgnoreCase("initialGain")) {
-        initialGain = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("stochasticBatchSize")) {
-        stochasticBatchSize = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("SGD2QNhessSamples")) {
-        SGD2QNhessSamples = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useSGD")) {
-        useSGD = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useInPlaceSGD")) {
-        useInPlaceSGD = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useSGDtoQN")) {
-        useSGDtoQN = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("SGDPasses")) {
-        SGDPasses = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("QNPasses")) {
-        QNPasses = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("gainSGD")) {
-        gainSGD = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("useHybrid")) {
-        useHybrid = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("hybridCutoffIteration")) {
-        hybridCutoffIteration = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useStochasticQN")) {
-        useStochasticQN = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("outputIterationsToFile")) {
-        outputIterationsToFile = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("testObjFunction")) {
-        testObjFunction = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("testVariance")) {
-        testVariance = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("CRForder")) {
-        CRForder = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("CRFwindow")) {
-        CRFwindow = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("testHessSamples")) {
-        testHessSamples = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("estimateInitial")) {
-        estimateInitial = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("printLabelValue")) {
-        printLabelValue = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("searchGraphPrefix")) {
-        searchGraphPrefix = val;
-      } else if (key.equalsIgnoreCase("searchGraphPrune")) {
-        searchGraphPrune = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("kBest")) {
-        useKBest = true;
-        kBest = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useRobustQN")) {
-        useRobustQN = true;
-      } else if (key.equalsIgnoreCase("combo")) {
-        combo = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("verboseForTrueCasing")) {
-        verboseForTrueCasing = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("trainHierarchical")) {
-        trainHierarchical = val;
-      } else if (key.equalsIgnoreCase("domain")) {
-        domain = val;
-      } else if (key.equalsIgnoreCase("baseline")) {
-        baseline = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("doFE")) {
-        doFE = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("restrictLabels")) {
-        restrictLabels = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("transferSigmas")) {
-        transferSigmas = val;
-      } else if (key.equalsIgnoreCase("announceObjectBankEntries")) {
-        announceObjectBankEntries = true;
-      } else if (key.equalsIgnoreCase("mixedCaseMapFile")) {
-        mixedCaseMapFile = val;
-      } else if (key.equalsIgnoreCase("auxTrueCaseModels")) {
-        auxTrueCaseModels = val;
-      } else if (key.equalsIgnoreCase("use2W")) {
-        use2W = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useLC")) {
-        useLC = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useYetMoreCpCShapes")) {
-        useYetMoreCpCShapes = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useIfInteger")) {
-        useIfInteger = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("twoStage")) {
-        twoStage = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("evaluateIters")) {
-        evaluateIters = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("evalCmd")) {
-        evalCmd = val;
-      } else if (key.equalsIgnoreCase("evaluateTrain")) {
-        evaluateTrain = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("evaluateBackground")) {
-        evaluateBackground = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("tuneSampleSize")) {
-        tuneSampleSize = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useTopics")) {
-        useTopics = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePhraseFeatures")) {
-        usePhraseFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePhraseWords")) {
-        usePhraseWords = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePhraseWordTags")) {
-        usePhraseWordTags = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("usePhraseWordSpecialTags")) {
-        usePhraseWordSpecialTags = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useProtoFeatures")) {
-        useProtoFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useWordnetFeatures")) {
-        useWordnetFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("wikiFeatureDbFile")) {
-        wikiFeatureDbFile = val;
-      } else if (key.equalsIgnoreCase("tokenizerOptions")) {
-        tokenizerOptions = val;
-      } else if (key.equalsIgnoreCase("tokenizerFactory")) {
-        tokenizerFactory = val;
-      } else if (key.equalsIgnoreCase("useCommonWordsFeature")) {
-        useCommonWordsFeature = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useYear")) {
-        useYear = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useSentenceNumber")) {
-        useSentenceNumber = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useLabelSource")) {
-        useLabelSource = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("tokenFactory")) {
+          // chinese word-segmenter features
+          break;
+        case "useradical":
+          useRadical = Boolean.parseBoolean(val);
+          break;
+        case "usebigramintwoclique":
+          useBigramInTwoClique = Boolean.parseBoolean(val);
+          break;
+        case "usereverseaffix":
+          useReverseAffix = Boolean.parseBoolean(val);
+          break;
+        case "charhalfwindow":
+          charHalfWindow = Integer.parseInt(val);
+          break;
+        case "purgefeatures":
+          purgeFeatures = Integer.parseInt(val);
+          break;
+        case "ocrfold":
+          ocrFold = Integer.parseInt(val);
+          break;
+        case "morphfeaturefile":
+          morphFeatureFile = val;
+          break;
+        case "svmmodelfile":
+          svmModelFile = val;
+          /* Dictionary */
+          break;
+        case "usedictleng":
+          useDictleng = Boolean.parseBoolean(val);
+          break;
+        case "usedict2":
+          useDict2 = Boolean.parseBoolean(val);
+          break;
+        case "useoutdict2":
+          useOutDict2 = Boolean.parseBoolean(val);
+          break;
+        case "outdict2":
+          outDict2 = val;
+          break;
+        case "usedictctb2":
+          useDictCTB2 = Boolean.parseBoolean(val);
+          break;
+        case "usedictasbc2":
+          useDictASBC2 = Boolean.parseBoolean(val);
+          break;
+        case "usedictpk2":
+          useDictPK2 = Boolean.parseBoolean(val);
+          break;
+        case "usedicthk2":
+          useDictHK2 = Boolean.parseBoolean(val);
+          /* N-gram flags */
+          break;
+        case "useword1":
+          useWord1 = Boolean.parseBoolean(val);
+          break;
+        case "useword2":
+          useWord2 = Boolean.parseBoolean(val);
+          break;
+        case "useword3":
+          useWord3 = Boolean.parseBoolean(val);
+          break;
+        case "useword4":
+          useWord4 = Boolean.parseBoolean(val);
+          break;
+        case "userad1":
+          useRad1 = Boolean.parseBoolean(val);
+          break;
+        case "userad2":
+          useRad2 = Boolean.parseBoolean(val);
+          break;
+        case "userad2b":
+          useRad2b = Boolean.parseBoolean(val);
+          break;
+        case "usewordn":
+          useWordn = Boolean.parseBoolean(val);
+          /* affix flags */
+          break;
+        case "usectbpre1":
+          useCTBPre1 = Boolean.parseBoolean(val);
+          break;
+        case "usectbsuf1":
+          useCTBSuf1 = Boolean.parseBoolean(val);
+          break;
+        case "useasbcpre1":
+          useASBCPre1 = Boolean.parseBoolean(val);
+          break;
+        case "useasbcsuf1":
+          useASBCSuf1 = Boolean.parseBoolean(val);
+          break;
+        case "usehkpre1":
+          useHKPre1 = Boolean.parseBoolean(val);
+          break;
+        case "usehksuf1":
+          useHKSuf1 = Boolean.parseBoolean(val);
+          break;
+        case "usepkpre1":
+          usePKPre1 = Boolean.parseBoolean(val);
+          break;
+        case "usepksuf1":
+          usePKSuf1 = Boolean.parseBoolean(val);
+          /* POS flags */
+          break;
+        case "usectbchar2":
+          useCTBChar2 = Boolean.parseBoolean(val);
+          break;
+        case "useprediction":
+          usePrediction = Boolean.parseBoolean(val);
+          break;
+        case "useasbcchar2":
+          useASBCChar2 = Boolean.parseBoolean(val);
+          break;
+        case "usehkchar2":
+          useHKChar2 = Boolean.parseBoolean(val);
+          break;
+        case "usepkchar2":
+          usePKChar2 = Boolean.parseBoolean(val);
+          /* Rule flag */
+          break;
+        case "userule2":
+          useRule2 = Boolean.parseBoolean(val);
+          /* ASBC and HK */
+          break;
+        case "usebig5":
+          useBig5 = Boolean.parseBoolean(val);
+          break;
+        case "usenegdict2":
+          useNegDict2 = Boolean.parseBoolean(val);
+          break;
+        case "usenegdict3":
+          useNegDict3 = Boolean.parseBoolean(val);
+          break;
+        case "usenegdict4":
+          useNegDict4 = Boolean.parseBoolean(val);
+          break;
+        case "usenegctbdict2":
+          useNegCTBDict2 = Boolean.parseBoolean(val);
+          break;
+        case "usenegctbdict3":
+          useNegCTBDict3 = Boolean.parseBoolean(val);
+          break;
+        case "usenegctbdict4":
+          useNegCTBDict4 = Boolean.parseBoolean(val);
+          break;
+        case "usenegasbcdict2":
+          useNegASBCDict2 = Boolean.parseBoolean(val);
+          break;
+        case "usenegasbcdict3":
+          useNegASBCDict3 = Boolean.parseBoolean(val);
+          break;
+        case "usenegasbcdict4":
+          useNegASBCDict4 = Boolean.parseBoolean(val);
+          break;
+        case "usenegpkdict2":
+          useNegPKDict2 = Boolean.parseBoolean(val);
+          break;
+        case "usenegpkdict3":
+          useNegPKDict3 = Boolean.parseBoolean(val);
+          break;
+        case "usenegpkdict4":
+          useNegPKDict4 = Boolean.parseBoolean(val);
+          break;
+        case "useneghkdict2":
+          useNegHKDict2 = Boolean.parseBoolean(val);
+          break;
+        case "useneghkdict3":
+          useNegHKDict3 = Boolean.parseBoolean(val);
+          break;
+        case "useneghkdict4":
+          useNegHKDict4 = Boolean.parseBoolean(val);
+          break;
+        case "usepre":
+          usePre = Boolean.parseBoolean(val);
+          break;
+        case "usesuf":
+          useSuf = Boolean.parseBoolean(val);
+          break;
+        case "userule":
+          useRule = Boolean.parseBoolean(val);
+          break;
+        case "useas":
+          useAs = Boolean.parseBoolean(val);
+          break;
+        case "usepk":
+          usePk = Boolean.parseBoolean(val);
+          break;
+        case "usehk":
+          useHk = Boolean.parseBoolean(val);
+          break;
+        case "usemsr":
+          useMsr = Boolean.parseBoolean(val);
+          break;
+        case "usemsrchar2":
+          useMSRChar2 = Boolean.parseBoolean(val);
+          break;
+        case "usefeaturesc4gram":
+          useFeaturesC4gram = Boolean.parseBoolean(val);
+          break;
+        case "usefeaturesc5gram":
+          useFeaturesC5gram = Boolean.parseBoolean(val);
+          break;
+        case "usefeaturesc6gram":
+          useFeaturesC6gram = Boolean.parseBoolean(val);
+          break;
+        case "usefeaturescpc4gram":
+          useFeaturesCpC4gram = Boolean.parseBoolean(val);
+          break;
+        case "usefeaturescpc5gram":
+          useFeaturesCpC5gram = Boolean.parseBoolean(val);
+          break;
+        case "usefeaturescpc6gram":
+          useFeaturesCpC6gram = Boolean.parseBoolean(val);
+          break;
+        case "useunicodetype":
+          useUnicodeType = Boolean.parseBoolean(val);
+          break;
+        case "useunicodeblock":
+          useUnicodeBlock = Boolean.parseBoolean(val);
+          break;
+        case "useunicodetype4gram":
+          useUnicodeType4gram = Boolean.parseBoolean(val);
+          break;
+        case "useunicodetype5gram":
+          useUnicodeType5gram = Boolean.parseBoolean(val);
+          break;
+        case "useshapestrings1":
+          useShapeStrings1 = Boolean.parseBoolean(val);
+          break;
+        case "useshapestrings3":
+          useShapeStrings3 = Boolean.parseBoolean(val);
+          break;
+        case "useshapestrings4":
+          useShapeStrings4 = Boolean.parseBoolean(val);
+          break;
+        case "useshapestrings5":
+          useShapeStrings5 = Boolean.parseBoolean(val);
+          break;
+        case "usewordutypeconjunctions2":
+          useWordUTypeConjunctions2 = Boolean.parseBoolean(val);
+          break;
+        case "usewordutypeconjunctions3":
+          useWordUTypeConjunctions3 = Boolean.parseBoolean(val);
+          break;
+        case "usewordshapeconjunctions2":
+          useWordShapeConjunctions2 = Boolean.parseBoolean(val);
+          break;
+        case "usewordshapeconjunctions3":
+          useWordShapeConjunctions3 = Boolean.parseBoolean(val);
+          break;
+        case "usemiddotshape":
+          useMidDotShape = Boolean.parseBoolean(val);
+          break;
+        case "augmenteddatechars":
+          augmentedDateChars = Boolean.parseBoolean(val);
+          break;
+        case "suppressmiddotpostprocessing":
+          suppressMidDotPostprocessing = Boolean.parseBoolean(val);
+          break;
+        case "printnr":
+          printNR = Boolean.parseBoolean(val);
+          break;
+        case "use4clique":
+          use4Clique = Boolean.parseBoolean(val);
+          break;
+        case "usefilter":
+          useFilter = Boolean.parseBoolean(val);
+          break;
+        case "largechsegfile":
+          largeChSegFile = Boolean.parseBoolean(val);
+          break;
+        case "keepenglishwhitespaces":
+          keepEnglishWhitespaces = Boolean.parseBoolean(val);
+          break;
+        case "keepallwhitespaces":
+          keepAllWhitespaces = Boolean.parseBoolean(val);
+          break;
+        case "sighanpostprocessing":
+          sighanPostProcessing = Boolean.parseBoolean(val);
+          break;
+        case "usechpos":
+          useChPos = Boolean.parseBoolean(val);
+          break;
+        case "sighancorporadict":
+          sighanCorporaDict = val;
+          // end chinese word-segmenter features
+          break;
+        case "useobservedsequencesonly":
+          useObservedSequencesOnly = Boolean.parseBoolean(val);
+          break;
+        case "maxdocsize":
+          maxDocSize = Integer.parseInt(val);
+          splitDocuments = true;
+          break;
+        case "printprobs":
+          printProbs = Boolean.parseBoolean(val);
+          break;
+        case "printfirstorderprobs":
+          printFirstOrderProbs = Boolean.parseBoolean(val);
+          break;
+        case "savefeatureindextodisk":
+          saveFeatureIndexToDisk = Boolean.parseBoolean(val);
+          break;
+        case "removebackgroundsingletonfeatures":
+          removeBackgroundSingletonFeatures = Boolean.parseBoolean(val);
+          break;
+        case "dogibbs":
+          doGibbs = Boolean.parseBoolean(val);
+          break;
+        case "usemucfeatures":
+          useMUCFeatures = Boolean.parseBoolean(val);
+          break;
+        case "initviterbi":
+          initViterbi = Boolean.parseBoolean(val);
+          break;
+        case "checknamelist":
+          checkNameList = Boolean.parseBoolean(val);
+          break;
+        case "usefirstword":
+          useFirstWord = Boolean.parseBoolean(val);
+          break;
+        case "useunknown":
+          useUnknown = Boolean.parseBoolean(val);
+          break;
+        case "cachengrams":
+          cacheNGrams = Boolean.parseBoolean(val);
+          break;
+        case "usenumberfeature":
+          useNumberFeature = Boolean.parseBoolean(val);
+          break;
+        case "annealingrate":
+          annealingRate = Double.parseDouble(val);
+          break;
+        case "annealingtype":
+          if (val.equalsIgnoreCase("linear") || val.equalsIgnoreCase("exp") || val.equalsIgnoreCase("exponential")) {
+            annealingType = val;
+          } else {
+            log.info("unknown annealingType: " + val + ".  Please use linear|exp|exponential");
+          }
+          break;
+        case "numsamples":
+          numSamples = Integer.parseInt(val);
+          break;
+        case "inferencetype":
+          inferenceType = val;
+          break;
+        case "loadprocesseddata":
+          loadProcessedData = val;
+          break;
+        case "normalizationtable":
+          normalizationTable = val;
+          break;
+        case "dictionary":
+          // don't set if empty string or spaces or true: revert it to null
+          // special case so can empty out dictionary list on command line!
+          val = val.trim();
+          if (val.length() > 0 && !"true".equals(val) && !"null".equals(val) && !"false".equals("val")) {
+            dictionary = val;
+          } else {
+            dictionary = null;
+          }
+          break;
+        case "serdictionary":
+          // don't set if empty string or spaces or true: revert it to null
+          // special case so can empty out dictionary list on command line!
+          val = val.trim();
+          if (val.length() > 0 && !"true".equals(val) && !"null".equals(val) && !"false".equals("val")) {
+            serializedDictionary = val;
+          } else {
+            serializedDictionary = null;
+          }
+          break;
+        case "dictionary2":
+          // don't set if empty string or spaces or true: revert it to null
+          // special case so can empty out dictionary list on command line!
+          val = val.trim();
+          if (val.length() > 0 && !"true".equals(val) && !"null".equals(val) && !"false".equals("val")) {
+            dictionary2 = val;
+          } else {
+            dictionary2 = null;
+          }
+          break;
+        case "normtableencoding":
+          normTableEncoding = val;
+          break;
+        case "uselemmaasword":
+          useLemmaAsWord = Boolean.parseBoolean(val);
+          break;
+        case "type":
+          type = val;
+          break;
+        case "readerandwriter":
+          readerAndWriter = val;
+          break;
+        case "plaintextdocumentreaderandwriter":
+          plainTextDocumentReaderAndWriter = val;
+          break;
+        case "gazfilesfile":
+          gazFilesFile = val;
+          break;
+        case "basetraindir":
+          baseTrainDir = val;
+          break;
+        case "basetestdir":
+          baseTestDir = val;
+          break;
+        case "trainfiles":
+          trainFiles = val;
+          break;
+        case "trainfilelist":
+          trainFileList = val;
+          break;
+        case "traindirs":
+          trainDirs = val;
+          break;
+        case "testdirs":
+          testDirs = val;
+          break;
+        case "testfiles":
+          testFiles = val;
+          break;
+        case "textfiles":
+          textFiles = val;
+          break;
+        case "useprediction2":
+          usePrediction2 = Boolean.parseBoolean(val);
+          break;
+        case "useobservedfeaturesonly":
+          useObservedFeaturesOnly = Boolean.parseBoolean(val);
+          break;
+        case "iobwrapper":
+          iobWrapper = Boolean.parseBoolean(val);
+          break;
+        case "usedistsim":
+          useDistSim = Boolean.parseBoolean(val);
+          break;
+        case "caseddistsim":
+          casedDistSim = Boolean.parseBoolean(val);
+          break;
+        case "distsimfileformat":
+          distSimFileFormat = val;
+          break;
+        case "distsimmaxbits":
+          distSimMaxBits = Integer.parseInt(val);
+          break;
+        case "numberequivalencedistsim":
+          numberEquivalenceDistSim = Boolean.parseBoolean(val);
+          break;
+        case "unknownworddistsimclass":
+          unknownWordDistSimClass = val;
+          break;
+        case "useonlyseenweights":
+          useOnlySeenWeights = Boolean.parseBoolean(val);
+          break;
+        case "predprop":
+          predProp = val;
+          break;
+        case "distsimlexicon":
+          distSimLexicon = val;
+          break;
+        case "usesegmentation":
+          useSegmentation = Boolean.parseBoolean(val);
+          break;
+        case "useinternal":
+          useInternal = Boolean.parseBoolean(val);
+          break;
+        case "useexternal":
+          useExternal = Boolean.parseBoolean(val);
+          break;
+        case "useeithersideword":
+          useEitherSideWord = Boolean.parseBoolean(val);
+          break;
+        case "useeithersidedisjunctive":
+          useEitherSideDisjunctive = Boolean.parseBoolean(val);
+          break;
+        case "featurediffthresh":
+          featureDiffThresh = Double.parseDouble(val);
+          if (props.getProperty("numTimesPruneFeatures") == null) {
+            numTimesPruneFeatures = 1;
+          }
+          break;
+        case "numtimesprunefeatures":
+          numTimesPruneFeatures = Integer.parseInt(val);
+          break;
+        case "newgenethreshold":
+          newgeneThreshold = Double.parseDouble(val);
+          break;
+        case "doadaptation":
+          doAdaptation = Boolean.parseBoolean(val);
+          break;
+        case "selftrainfile":
+          selfTrainFile = val;
+          break;
+        case "selftrainiterations":
+          selfTrainIterations = Integer.parseInt(val);
+          break;
+        case "selftrainwindowsize":
+          selfTrainWindowSize = Integer.parseInt(val);
+          break;
+        case "selftrainconfidencethreshold":
+          selfTrainConfidenceThreshold = Double.parseDouble(val);
+          break;
+        case "numfolds":
+          numFolds = Integer.parseInt(val);
+          break;
+        case "startfold":
+          startFold = Integer.parseInt(val);
+          break;
+        case "endfold":
+          endFold = Integer.parseInt(val);
+          break;
+        case "adaptsigma":
+          adaptSigma = Double.parseDouble(val);
+          break;
+        case "outputformat":
+          outputFormat = val;
+          break;
+        case "usesmd":
+          useSMD = Boolean.parseBoolean(val);
+          break;
+        case "usescaledsgd":
+          useScaledSGD = Boolean.parseBoolean(val);
+          break;
+        case "scaledsgdmethod":
+          scaledSGDMethod = Integer.parseInt(val);
+          break;
+        case "tunesgd":
+          tuneSGD = Boolean.parseBoolean(val);
+          break;
+        case "stochasticcalculatemethod":
+          if (val.equalsIgnoreCase("AlgorithmicDifferentiation")) {
+            stochasticMethod = StochasticCalculateMethods.AlgorithmicDifferentiation;
+          } else if (val.equalsIgnoreCase("IncorporatedFiniteDifference")) {
+            stochasticMethod = StochasticCalculateMethods.IncorporatedFiniteDifference;
+          } else if (val.equalsIgnoreCase("ExternalFinitedifference")) {
+            stochasticMethod = StochasticCalculateMethods.ExternalFiniteDifference;
+          }
+          break;
+        case "initialgain":
+          initialGain = Double.parseDouble(val);
+          break;
+        case "stochasticbatchsize":
+          stochasticBatchSize = Integer.parseInt(val);
+          break;
+        case "sgd2qnhesssamples":
+          SGD2QNhessSamples = Integer.parseInt(val);
+          break;
+        case "usesgd":
+          useSGD = Boolean.parseBoolean(val);
+          break;
+        case "useinplacesgd":
+          useInPlaceSGD = Boolean.parseBoolean(val);
+          break;
+        case "usesgdtoqn":
+          useSGDtoQN = Boolean.parseBoolean(val);
+          break;
+        case "sgdpasses":
+          SGDPasses = Integer.parseInt(val);
+          break;
+        case "qnpasses":
+          QNPasses = Integer.parseInt(val);
+          break;
+        case "gainsgd":
+          gainSGD = Double.parseDouble(val);
+          break;
+        case "usehybrid":
+          useHybrid = Boolean.parseBoolean(val);
+          break;
+        case "hybridcutoffiteration":
+          hybridCutoffIteration = Integer.parseInt(val);
+          break;
+        case "usestochasticqn":
+          useStochasticQN = Boolean.parseBoolean(val);
+          break;
+        case "outputiterationstofile":
+          outputIterationsToFile = Boolean.parseBoolean(val);
+          break;
+        case "testobjfunction":
+          testObjFunction = Boolean.parseBoolean(val);
+          break;
+        case "testvariance":
+          testVariance = Boolean.parseBoolean(val);
+          break;
+        case "crforder":
+          CRForder = Integer.parseInt(val);
+          break;
+        case "crfwindow":
+          CRFwindow = Integer.parseInt(val);
+          break;
+        case "testhesssamples":
+          testHessSamples = Boolean.parseBoolean(val);
+          break;
+        case "estimateinitial":
+          estimateInitial = Boolean.parseBoolean(val);
+          break;
+        case "printlabelvalue":
+          printLabelValue = Boolean.parseBoolean(val);
+          break;
+        case "searchgraphprefix":
+          searchGraphPrefix = val;
+          break;
+        case "searchgraphprune":
+          searchGraphPrune = Double.parseDouble(val);
+          break;
+        case "kbest":
+          useKBest = true;
+          kBest = Integer.parseInt(val);
+          break;
+        case "userobustqn":
+          useRobustQN = true;
+          break;
+        case "combo":
+          combo = Boolean.parseBoolean(val);
+          break;
+        case "verbosefortruecasing":
+          verboseForTrueCasing = Boolean.parseBoolean(val);
+          break;
+        case "trainhierarchical":
+          trainHierarchical = val;
+          break;
+        case "domain":
+          domain = val;
+          break;
+        case "baseline":
+          baseline = Boolean.parseBoolean(val);
+          break;
+        case "dofe":
+          doFE = Boolean.parseBoolean(val);
+          break;
+        case "restrictlabels":
+          restrictLabels = Boolean.parseBoolean(val);
+          break;
+        case "transfersigmas":
+          transferSigmas = val;
+          break;
+        case "announceobjectbankentries":
+          announceObjectBankEntries = true;
+          break;
+        case "mixedcasemapfile":
+          mixedCaseMapFile = val;
+          break;
+        case "auxtruecasemodels":
+          auxTrueCaseModels = val;
+          break;
+        case "use2w":
+          use2W = Boolean.parseBoolean(val);
+          break;
+        case "uselc":
+          useLC = Boolean.parseBoolean(val);
+          break;
+        case "useyetmorecpcshapes":
+          useYetMoreCpCShapes = Boolean.parseBoolean(val);
+          break;
+        case "useifinteger":
+          useIfInteger = Boolean.parseBoolean(val);
+          break;
+        case "twostage":
+          twoStage = Boolean.parseBoolean(val);
+          break;
+        case "evaluateiters":
+          evaluateIters = Integer.parseInt(val);
+          break;
+        case "evalcmd":
+          evalCmd = val;
+          break;
+        case "evaluatetrain":
+          evaluateTrain = Boolean.parseBoolean(val);
+          break;
+        case "evaluatebackground":
+          evaluateBackground = Boolean.parseBoolean(val);
+          break;
+        case "tunesamplesize":
+          tuneSampleSize = Integer.parseInt(val);
+          break;
+        case "usetopics":
+          useTopics = Boolean.parseBoolean(val);
+          break;
+        case "usephrasefeatures":
+          usePhraseFeatures = Boolean.parseBoolean(val);
+          break;
+        case "usephrasewords":
+          usePhraseWords = Boolean.parseBoolean(val);
+          break;
+        case "usephrasewordtags":
+          usePhraseWordTags = Boolean.parseBoolean(val);
+          break;
+        case "usephrasewordspecialtags":
+          usePhraseWordSpecialTags = Boolean.parseBoolean(val);
+          break;
+        case "useprotofeatures":
+          useProtoFeatures = Boolean.parseBoolean(val);
+          break;
+        case "usewordnetfeatures":
+          useWordnetFeatures = Boolean.parseBoolean(val);
+          break;
+        case "wikifeaturedbfile":
+          wikiFeatureDbFile = val;
+          break;
+        case "tokenizeroptions":
+          tokenizerOptions = val;
+          break;
+        case "tokenizerfactory":
+          tokenizerFactory = val;
+          break;
+        case "usecommonwordsfeature":
+          useCommonWordsFeature = Boolean.parseBoolean(val);
+          break;
+        case "useyear":
+          useYear = Boolean.parseBoolean(val);
+          break;
+        case "usesentencenumber":
+          useSentenceNumber = Boolean.parseBoolean(val);
+          break;
+        case "uselabelsource":
+          useLabelSource = Boolean.parseBoolean(val);
+          break;
+        case "tokenfactory":
 
-        tokenFactory = val;
-      } else if (key.equalsIgnoreCase("tokensAnnotationClassName")) {
-        tokensAnnotationClassName = val;
-      } else if (key.equalsIgnoreCase("numLopExpert")) {
-        numLopExpert = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("initialLopScales")) {
-        initialLopScales = val;
-      } else if (key.equalsIgnoreCase("initialLopWeights")) {
-        initialLopWeights = val;
-      } else if (key.equalsIgnoreCase("includeFullCRFInLOP")) {
-        includeFullCRFInLOP = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("backpropLopTraining")) {
-        backpropLopTraining = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("randomLopWeights")) {
-        randomLopWeights = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("randomLopFeatureSplit")) {
-        randomLopFeatureSplit = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("nonLinearCRF")) {
-        nonLinearCRF = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("secondOrderNonLinear")) {
-        secondOrderNonLinear = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("numHiddenUnits")) {
-        numHiddenUnits = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useOutputLayer")) {
-        useOutputLayer = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useHiddenLayer")) {
-        useHiddenLayer = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("gradientDebug")) {
-        gradientDebug = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("checkGradient")) {
-        checkGradient = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useSigmoid")) {
-        useSigmoid = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("skipOutputRegularization")) {
-        skipOutputRegularization = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("sparseOutputLayer")) {
-        sparseOutputLayer = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("tieOutputLayer")) {
-        tieOutputLayer = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("blockInitialize")) {
-        blockInitialize = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("softmaxOutputLayer")) {
-        softmaxOutputLayer = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("loadBisequenceClassifierEn")) {
-        loadBisequenceClassifierEn = val;
-      } else if (key.equalsIgnoreCase("bisequenceClassifierPropEn")) {
-        bisequenceClassifierPropEn = val;
-      } else if (key.equalsIgnoreCase("loadBisequenceClassifierCh")) {
-        loadBisequenceClassifierCh = val;
-      } else if (key.equalsIgnoreCase("bisequenceClassifierPropCh")) {
-        bisequenceClassifierPropCh = val;
-      } else if (key.equalsIgnoreCase("bisequenceTestFileEn")) {
-        bisequenceTestFileEn = val;
-      } else if (key.equalsIgnoreCase("bisequenceTestFileCh")) {
-        bisequenceTestFileCh = val;
-      } else if (key.equalsIgnoreCase("bisequenceTestOutputEn")) {
-        bisequenceTestOutputEn = val;
-      } else if (key.equalsIgnoreCase("bisequenceTestOutputCh")) {
-        bisequenceTestOutputCh = val;
-      } else if (key.equalsIgnoreCase("bisequenceTestAlignmentFile")) {
-        bisequenceTestAlignmentFile = val;
-      } else if (key.equalsIgnoreCase("bisequenceAlignmentTestOutput")) {
-        bisequenceAlignmentTestOutput = val;
-      } else if (key.equalsIgnoreCase("bisequencePriorType")) {
-        bisequencePriorType = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("bisequenceAlignmentPriorPenaltyCh")) {
-        bisequenceAlignmentPriorPenaltyCh = val;
-      } else if (key.equalsIgnoreCase("bisequenceAlignmentPriorPenaltyEn")) {
-        bisequenceAlignmentPriorPenaltyEn = val;
-      } else if (key.equalsIgnoreCase("alignmentPruneThreshold")) {
-        alignmentPruneThreshold = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("alignmentDecodeThreshold")) {
-        alignmentDecodeThreshold = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("factorInAlignmentProb")) {
-        factorInAlignmentProb = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useChromaticSampling")) {
-        useChromaticSampling = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useSequentialScanSampling")) {
-        useSequentialScanSampling = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("maxAllowedChromaticSize")) {
-        maxAllowedChromaticSize = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("keepEmptySentences")) {
-        keepEmptySentences = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useBilingualNERPrior")) {
-        useBilingualNERPrior = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("samplingSpeedUpThreshold")) {
-        samplingSpeedUpThreshold = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("entityMatrixCh")) {
-        entityMatrixCh = val;
-      } else if (key.equalsIgnoreCase("entityMatrixEn")) {
-        entityMatrixEn = val;
-      } else if (key.equalsIgnoreCase("multiThreadGibbs")) {
-        multiThreadGibbs = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("matchNERIncentive")) {
-        matchNERIncentive = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useEmbedding")) {
-        useEmbedding = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("prependEmbedding")) {
-        prependEmbedding = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("embeddingWords")) {
-        embeddingWords = val;
-      } else if (key.equalsIgnoreCase("embeddingVectors")) {
-        embeddingVectors = val;
-      } else if (key.equalsIgnoreCase("transitionEdgeOnly")) {
-        transitionEdgeOnly = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("priorLambda")) {
-        priorLambda = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("addCapitalFeatures")) {
-        addCapitalFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("arbitraryInputLayerSize")) {
-        arbitraryInputLayerSize = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("noEdgeFeature")) {
-        noEdgeFeature = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("terminateOnEvalImprovement")) {
-        terminateOnEvalImprovement = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("terminateOnEvalImprovementNumOfEpoch")) {
-        terminateOnEvalImprovementNumOfEpoch = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useMemoryEvaluator")) {
-        useMemoryEvaluator = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("suppressTestDebug")) {
-        suppressTestDebug = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useOWLQN")) {
-        useOWLQN = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("printWeights")) {
-        printWeights = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("totalDataSlice")) {
-        totalDataSlice = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("numOfSlices")) {
-        numOfSlices = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("regularizeSoftmaxTieParam")) {
-        regularizeSoftmaxTieParam = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("softmaxTieLambda")) {
-        softmaxTieLambda = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("totalFeatureSlice")) {
-        totalFeatureSlice = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("numOfFeatureSlices")) {
-        numOfFeatureSlices = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("addBiasToEmbedding")) {
-        addBiasToEmbedding = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("hardcodeSoftmaxOutputWeights")) {
-        hardcodeSoftmaxOutputWeights = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("entityMatrix")) {
-        entityMatrix = val;
-      } else if (key.equalsIgnoreCase("multiThreadClassifier")) {
-        multiThreadClassifier = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useDualDecomp")) {
-        useDualDecomp = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("biAlignmentPriorIsPMI")) {
-        biAlignmentPriorIsPMI = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dampDDStepSizeWithAlignmentProb")) {
-        dampDDStepSizeWithAlignmentProb = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dualDecompAlignment")) {
-        dualDecompAlignment = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dualDecompInitialStepSizeAlignment")) {
-        dualDecompInitialStepSizeAlignment = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("dualDecompNotBIO")) {
-        dualDecompNotBIO = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("berkeleyAlignerLoadPath")) {
-        berkeleyAlignerLoadPath = val;
-      } else if (key.equalsIgnoreCase("useBerkeleyAlignerForViterbi")) {
-        useBerkeleyAlignerForViterbi = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useBerkeleyCompetitivePosterior")) {
-        useBerkeleyCompetitivePosterior = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useDenero")) {
-        useDenero = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("alignDDAlpha")) {
-        alignDDAlpha = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("factorInBiEdgePotential")) {
-        factorInBiEdgePotential = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("noNeighborConstraints")) {
-        noNeighborConstraints = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("includeC2EViterbi")) {
-        includeC2EViterbi = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("initWithPosterior")) {
-        initWithPosterior = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("nerSlowerTimes")) {
-        nerSlowerTimes = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("nerSkipFirstK")) {
-        nerSkipFirstK = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("powerAlignProb")) {
-        powerAlignProb = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("powerAlignProbAsAddition")) {
-        powerAlignProbAsAddition = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("initWithNERPosterior")) {
-        initWithNERPosterior = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("applyNERPenalty")) {
-        applyNERPenalty = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useGenericFeatures")) {
-        useGenericFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("printFactorTable")) {
-        printFactorTable = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAdaGradFOBOS")) {
-        useAdaGradFOBOS = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("initRate")) {
-        initRate = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("groupByFeatureTemplate")) {
-        groupByFeatureTemplate = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("groupByOutputClass")) {
-        groupByOutputClass = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("priorAlpha")) {
-        priorAlpha = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("splitWordRegex")){
-        splitWordRegex = val;
-      } else if (key.equalsIgnoreCase("groupByInput")){
-        groupByInput = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("groupByHiddenUnit")){
-        groupByHiddenUnit = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("unigramLM")){
-        unigramLM = val;
-      } else if (key.equalsIgnoreCase("bigramLM")){
-        bigramLM = val;
-      } else if (key.equalsIgnoreCase("wordSegBeamSize")){
-        wordSegBeamSize = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("vocabFile")){
-        vocabFile = val;
-      } else if (key.equalsIgnoreCase("normalizedFile")){
-        normalizedFile = val;
-      } else if (key.equalsIgnoreCase("averagePerceptron")){
-        averagePerceptron = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("loadCRFSegmenterPath")){
-        loadCRFSegmenterPath = val;
-      } else if (key.equalsIgnoreCase("loadPCTSegmenterPath")){
-        loadPCTSegmenterPath = val;
-      } else if (key.equalsIgnoreCase("crfSegmenterProp")){
-        crfSegmenterProp = val;
-      } else if (key.equalsIgnoreCase("pctSegmenterProp")){
-        pctSegmenterProp = val;
-      } else if (key.equalsIgnoreCase("dualDecompMaxItr")){
-        dualDecompMaxItr = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("dualDecompInitialStepSize")){
-        dualDecompInitialStepSize = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("dualDecompDebug")){
-        dualDecompDebug = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("intermediateSegmenterOut")){
-        intermediateSegmenterOut = val;
-      } else if (key.equalsIgnoreCase("intermediateSegmenterModel")){
-        intermediateSegmenterModel = val;
-      } else if (key.equalsIgnoreCase("useCWSWordFeatures")){
-        useCWSWordFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCWSWordFeaturesAll")){
-        useCWSWordFeaturesAll = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCWSWordFeaturesBigram")){
-        useCWSWordFeaturesBigram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("pctSegmenterLenAdjust")){
-        pctSegmenterLenAdjust = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTrainLexicon")){
-        useTrainLexicon = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCWSFeatures")){
-        useCWSFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("appendLC")){
-        appendLC = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("perceptronDebug")){
-        perceptronDebug = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("pctSegmenterScaleByCRF")){
-        pctSegmenterScaleByCRF = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("pctSegmenterScale")){
-        pctSegmenterScale = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("separateASCIIandRange")){
-        separateASCIIandRange = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dropoutRate")){
-        dropoutRate = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("dropoutScale")){
-        dropoutScale = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("multiThreadGrad")){
-        multiThreadGrad = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("maxQNItr")){
-        maxQNItr = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("dropoutApprox")){
-        dropoutApprox = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("unsupDropoutFile")){
-        unsupDropoutFile = val;
-      } else if (key.equalsIgnoreCase("unsupDropoutScale")){
-        unsupDropoutScale = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("startEvaluateIters")){
-        startEvaluateIters = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("multiThreadPerceptron")){
-        multiThreadPerceptron = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("lazyUpdate")){
-        lazyUpdate = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("featureCountThresh")){
-        featureCountThresh = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("serializeWeightsTo")) {
-        serializeWeightsTo = val;
-      } else if (key.equalsIgnoreCase("geDebug")){
-        geDebug = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("doFeatureDiscovery")){
-        doFeatureDiscovery = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("loadWeightsFrom")) {
-        loadWeightsFrom = val;
-      } else if (key.equalsIgnoreCase("loadClassIndexFrom")) {
-        loadClassIndexFrom = val;
-      } else if (key.equalsIgnoreCase("serializeClassIndexTo")) {
-        serializeClassIndexTo = val;
-      } else if (key.equalsIgnoreCase("learnCHBasedOnEN")){
-        learnCHBasedOnEN = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("learnENBasedOnCH")){
-        learnENBasedOnCH = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("loadWeightsFromEN")){
-        loadWeightsFromEN = val;
-      } else if (key.equalsIgnoreCase("loadWeightsFromCH")){
-        loadWeightsFromCH = val;
-      } else if (key.equalsIgnoreCase("serializeToEN")){
-        serializeToEN = val;
-      } else if (key.equalsIgnoreCase("serializeToCH")){
-        serializeToCH = val;
-      } else if (key.equalsIgnoreCase("testFileEN")){
-        testFileEN = val;
-      } else if (key.equalsIgnoreCase("testFileCH")){
-        testFileCH = val;
-      } else if (key.equalsIgnoreCase("unsupFileEN")){
-        unsupFileEN = val;
-      } else if (key.equalsIgnoreCase("unsupFileCH")){
-        unsupFileCH = val;
-      } else if (key.equalsIgnoreCase("unsupAlignFile")){
-        unsupAlignFile = val;
-      } else if (key.equalsIgnoreCase("supFileEN")){
-        supFileEN = val;
-      } else if (key.equalsIgnoreCase("supFileCH")){
-        supFileCH = val;
-      } else if (key.equalsIgnoreCase("serializeFeatureIndexTo")){
-        serializeFeatureIndexTo = val;
-      } else if (key.equalsIgnoreCase("serializeFeatureIndexToText")){
-        serializeFeatureIndexToText = val;
-      } else if (key.equalsIgnoreCase("loadFeatureIndexFromEN")){
-        loadFeatureIndexFromEN = val;
-      } else if (key.equalsIgnoreCase("loadFeatureIndexFromCH")){
-        loadFeatureIndexFromCH = val;
-      } else if (key.equalsIgnoreCase("lambdaEN")){
-        lambdaEN = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("lambdaCH")){
-        lambdaCH = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("alternateTraining")){
-        alternateTraining = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("weightByEntropy")){
-        weightByEntropy = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKL")){
-        useKL = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useHardGE")){
-        useHardGE = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCRFforUnsup")){
-        useCRFforUnsup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useGEforSup")){
-        useGEforSup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKnownLCWords")) {
-        log.info("useKnownLCWords is deprecated; see maxAdditionalKnownLCWords (true = -1, false = 0)");
-        maxAdditionalKnownLCWords = Boolean.parseBoolean(val) ? -1: 0;
-      } else if (key.equalsIgnoreCase("useNoisyLabel")) {
-        useNoisyLabel = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("errorMatrix")) {
-        errorMatrix = val;
-      } else if (key.equalsIgnoreCase("printTrainLabels")){
-        printTrainLabels = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("labelDictionaryCutoff")) {
-        labelDictionaryCutoff = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useAdaDelta")){
-        useAdaDelta = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAdaDiff")){
-        useAdaDiff = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("adaGradEps")){
-        adaGradEps = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("adaDeltaRho")){
-        adaDeltaRho = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("useRandomSeed")){
-        useRandomSeed = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("terminateOnAvgImprovement")){
-        terminateOnAvgImprovement = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("strictGoodCoNLL")) {
-        strictGoodCoNLL = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("removeStrictGoodCoNLLDuplicates")) {
-        removeStrictGoodCoNLLDuplicates = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("priorModelFactory")) {
-        priorModelFactory = val;
-      } else if (key.equalsIgnoreCase("maxAdditionalKnownLCWords")) {
-        maxAdditionalKnownLCWords = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("showNCCInfo")) {
-        showNCCInfo = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("showCCInfo")) {
-        showCCInfo = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("crfToExamine")) {
-        crfToExamine = val;
-      } else if (key.equalsIgnoreCase("ner.useSUTime")) {
-        useSUTime = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("ner.applyNumericClassifiers")) {
-        applyNumericClassifiers = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("ner.combinationMode")) {
-        combinationMode = val;
-      } else if (key.equalsIgnoreCase("ner.model")) {
-        nerModel = val;
-      } else if (key.equalsIgnoreCase("sutime.language")) {
-      } else if (key.equalsIgnoreCase("dict2name")) {
-        dict2name = val;
-        // ADD VALUE ABOVE HERE
-      } else if ( ! key.isEmpty() && ! key.equals("prop")) {
-        log.info("Unknown property: |" + key + '|');
+          tokenFactory = val;
+          break;
+        case "tokensannotationclassname":
+          tokensAnnotationClassName = val;
+          break;
+        case "numlopexpert":
+          numLopExpert = Integer.parseInt(val);
+          break;
+        case "initiallopscales":
+          initialLopScales = val;
+          break;
+        case "initiallopweights":
+          initialLopWeights = val;
+          break;
+        case "includefullcrfinlop":
+          includeFullCRFInLOP = Boolean.parseBoolean(val);
+          break;
+        case "backproploptraining":
+          backpropLopTraining = Boolean.parseBoolean(val);
+          break;
+        case "randomlopweights":
+          randomLopWeights = Boolean.parseBoolean(val);
+          break;
+        case "randomlopfeaturesplit":
+          randomLopFeatureSplit = Boolean.parseBoolean(val);
+          break;
+        case "nonlinearcrf":
+          nonLinearCRF = Boolean.parseBoolean(val);
+          break;
+        case "secondordernonlinear":
+          secondOrderNonLinear = Boolean.parseBoolean(val);
+          break;
+        case "numhiddenunits":
+          numHiddenUnits = Integer.parseInt(val);
+          break;
+        case "useoutputlayer":
+          useOutputLayer = Boolean.parseBoolean(val);
+          break;
+        case "usehiddenlayer":
+          useHiddenLayer = Boolean.parseBoolean(val);
+          break;
+        case "gradientdebug":
+          gradientDebug = Boolean.parseBoolean(val);
+          break;
+        case "checkgradient":
+          checkGradient = Boolean.parseBoolean(val);
+          break;
+        case "usesigmoid":
+          useSigmoid = Boolean.parseBoolean(val);
+          break;
+        case "skipoutputregularization":
+          skipOutputRegularization = Boolean.parseBoolean(val);
+          break;
+        case "sparseoutputlayer":
+          sparseOutputLayer = Boolean.parseBoolean(val);
+          break;
+        case "tieoutputlayer":
+          tieOutputLayer = Boolean.parseBoolean(val);
+          break;
+        case "blockinitialize":
+          blockInitialize = Boolean.parseBoolean(val);
+          break;
+        case "softmaxoutputlayer":
+          softmaxOutputLayer = Boolean.parseBoolean(val);
+          break;
+        case "loadbisequenceclassifieren":
+          loadBisequenceClassifierEn = val;
+          break;
+        case "bisequenceclassifierpropen":
+          bisequenceClassifierPropEn = val;
+          break;
+        case "loadbisequenceclassifierch":
+          loadBisequenceClassifierCh = val;
+          break;
+        case "bisequenceclassifierpropch":
+          bisequenceClassifierPropCh = val;
+          break;
+        case "bisequencetestfileen":
+          bisequenceTestFileEn = val;
+          break;
+        case "bisequencetestfilech":
+          bisequenceTestFileCh = val;
+          break;
+        case "bisequencetestoutputen":
+          bisequenceTestOutputEn = val;
+          break;
+        case "bisequencetestoutputch":
+          bisequenceTestOutputCh = val;
+          break;
+        case "bisequencetestalignmentfile":
+          bisequenceTestAlignmentFile = val;
+          break;
+        case "bisequencealignmenttestoutput":
+          bisequenceAlignmentTestOutput = val;
+          break;
+        case "bisequencepriortype":
+          bisequencePriorType = Integer.parseInt(val);
+          break;
+        case "bisequencealignmentpriorpenaltych":
+          bisequenceAlignmentPriorPenaltyCh = val;
+          break;
+        case "bisequencealignmentpriorpenaltyen":
+          bisequenceAlignmentPriorPenaltyEn = val;
+          break;
+        case "alignmentprunethreshold":
+          alignmentPruneThreshold = Double.parseDouble(val);
+          break;
+        case "alignmentdecodethreshold":
+          alignmentDecodeThreshold = Double.parseDouble(val);
+          break;
+        case "factorinalignmentprob":
+          factorInAlignmentProb = Boolean.parseBoolean(val);
+          break;
+        case "usechromaticsampling":
+          useChromaticSampling = Boolean.parseBoolean(val);
+          break;
+        case "usesequentialscansampling":
+          useSequentialScanSampling = Boolean.parseBoolean(val);
+          break;
+        case "maxallowedchromaticsize":
+          maxAllowedChromaticSize = Integer.parseInt(val);
+          break;
+        case "keepemptysentences":
+          keepEmptySentences = Boolean.parseBoolean(val);
+          break;
+        case "usebilingualnerprior":
+          useBilingualNERPrior = Boolean.parseBoolean(val);
+          break;
+        case "samplingspeedupthreshold":
+          samplingSpeedUpThreshold = Integer.parseInt(val);
+          break;
+        case "entitymatrixch":
+          entityMatrixCh = val;
+          break;
+        case "entitymatrixen":
+          entityMatrixEn = val;
+          break;
+        case "multithreadgibbs":
+          multiThreadGibbs = Integer.parseInt(val);
+          break;
+        case "matchnerincentive":
+          matchNERIncentive = Boolean.parseBoolean(val);
+          break;
+        case "useembedding":
+          useEmbedding = Boolean.parseBoolean(val);
+          break;
+        case "prependembedding":
+          prependEmbedding = Boolean.parseBoolean(val);
+          break;
+        case "embeddingwords":
+          embeddingWords = val;
+          break;
+        case "embeddingvectors":
+          embeddingVectors = val;
+          break;
+        case "transitionedgeonly":
+          transitionEdgeOnly = Boolean.parseBoolean(val);
+          break;
+        case "priorlambda":
+          priorLambda = Double.parseDouble(val);
+          break;
+        case "addcapitalfeatures":
+          addCapitalFeatures = Boolean.parseBoolean(val);
+          break;
+        case "arbitraryinputlayersize":
+          arbitraryInputLayerSize = Integer.parseInt(val);
+          break;
+        case "noedgefeature":
+          noEdgeFeature = Boolean.parseBoolean(val);
+          break;
+        case "terminateonevalimprovement":
+          terminateOnEvalImprovement = Boolean.parseBoolean(val);
+          break;
+        case "terminateonevalimprovementnumofepoch":
+          terminateOnEvalImprovementNumOfEpoch = Integer.parseInt(val);
+          break;
+        case "usememoryevaluator":
+          useMemoryEvaluator = Boolean.parseBoolean(val);
+          break;
+        case "suppresstestdebug":
+          suppressTestDebug = Boolean.parseBoolean(val);
+          break;
+        case "useowlqn":
+          useOWLQN = Boolean.parseBoolean(val);
+          break;
+        case "printweights":
+          printWeights = Boolean.parseBoolean(val);
+          break;
+        case "totaldataslice":
+          totalDataSlice = Integer.parseInt(val);
+          break;
+        case "numofslices":
+          numOfSlices = Integer.parseInt(val);
+          break;
+        case "regularizesoftmaxtieparam":
+          regularizeSoftmaxTieParam = Boolean.parseBoolean(val);
+          break;
+        case "softmaxtielambda":
+          softmaxTieLambda = Double.parseDouble(val);
+          break;
+        case "totalfeatureslice":
+          totalFeatureSlice = Integer.parseInt(val);
+          break;
+        case "numoffeatureslices":
+          numOfFeatureSlices = Integer.parseInt(val);
+          break;
+        case "addbiastoembedding":
+          addBiasToEmbedding = Boolean.parseBoolean(val);
+          break;
+        case "hardcodesoftmaxoutputweights":
+          hardcodeSoftmaxOutputWeights = Boolean.parseBoolean(val);
+          break;
+        case "entitymatrix":
+          entityMatrix = val;
+          break;
+        case "multithreadclassifier":
+          multiThreadClassifier = Integer.parseInt(val);
+          break;
+        case "usedualdecomp":
+          useDualDecomp = Boolean.parseBoolean(val);
+          break;
+        case "bialignmentpriorispmi":
+          biAlignmentPriorIsPMI = Boolean.parseBoolean(val);
+          break;
+        case "dampddstepsizewithalignmentprob":
+          dampDDStepSizeWithAlignmentProb = Boolean.parseBoolean(val);
+          break;
+        case "dualdecompalignment":
+          dualDecompAlignment = Boolean.parseBoolean(val);
+          break;
+        case "dualdecompinitialstepsizealignment":
+          dualDecompInitialStepSizeAlignment = Double.parseDouble(val);
+          break;
+        case "dualdecompnotbio":
+          dualDecompNotBIO = Boolean.parseBoolean(val);
+          break;
+        case "berkeleyalignerloadpath":
+          berkeleyAlignerLoadPath = val;
+          break;
+        case "useberkeleyalignerforviterbi":
+          useBerkeleyAlignerForViterbi = Boolean.parseBoolean(val);
+          break;
+        case "useberkeleycompetitiveposterior":
+          useBerkeleyCompetitivePosterior = Boolean.parseBoolean(val);
+          break;
+        case "usedenero":
+          useDenero = Boolean.parseBoolean(val);
+          break;
+        case "alignddalpha":
+          alignDDAlpha = Double.parseDouble(val);
+          break;
+        case "factorinbiedgepotential":
+          factorInBiEdgePotential = Boolean.parseBoolean(val);
+          break;
+        case "noneighborconstraints":
+          noNeighborConstraints = Boolean.parseBoolean(val);
+          break;
+        case "includec2eviterbi":
+          includeC2EViterbi = Boolean.parseBoolean(val);
+          break;
+        case "initwithposterior":
+          initWithPosterior = Boolean.parseBoolean(val);
+          break;
+        case "nerslowertimes":
+          nerSlowerTimes = Integer.parseInt(val);
+          break;
+        case "nerskipfirstk":
+          nerSkipFirstK = Integer.parseInt(val);
+          break;
+        case "poweralignprob":
+          powerAlignProb = Boolean.parseBoolean(val);
+          break;
+        case "poweralignprobasaddition":
+          powerAlignProbAsAddition = Boolean.parseBoolean(val);
+          break;
+        case "initwithnerposterior":
+          initWithNERPosterior = Boolean.parseBoolean(val);
+          break;
+        case "applynerpenalty":
+          applyNERPenalty = Boolean.parseBoolean(val);
+          break;
+        case "usegenericfeatures":
+          useGenericFeatures = Boolean.parseBoolean(val);
+          break;
+        case "printfactortable":
+          printFactorTable = Boolean.parseBoolean(val);
+          break;
+        case "useadagradfobos":
+          useAdaGradFOBOS = Boolean.parseBoolean(val);
+          break;
+        case "initrate":
+          initRate = Double.parseDouble(val);
+          break;
+        case "groupbyfeaturetemplate":
+          groupByFeatureTemplate = Boolean.parseBoolean(val);
+          break;
+        case "groupbyoutputclass":
+          groupByOutputClass = Boolean.parseBoolean(val);
+          break;
+        case "prioralpha":
+          priorAlpha = Double.parseDouble(val);
+          break;
+        case "splitwordregex":
+          splitWordRegex = val;
+          break;
+        case "groupbyinput":
+          groupByInput = Boolean.parseBoolean(val);
+          break;
+        case "groupbyhiddenunit":
+          groupByHiddenUnit = Boolean.parseBoolean(val);
+          break;
+        case "unigramlm":
+          unigramLM = val;
+          break;
+        case "bigramlm":
+          bigramLM = val;
+          break;
+        case "wordsegbeamsize":
+          wordSegBeamSize = Integer.parseInt(val);
+          break;
+        case "vocabfile":
+          vocabFile = val;
+          break;
+        case "normalizedfile":
+          normalizedFile = val;
+          break;
+        case "averageperceptron":
+          averagePerceptron = Boolean.parseBoolean(val);
+          break;
+        case "loadcrfsegmenterpath":
+          loadCRFSegmenterPath = val;
+          break;
+        case "loadpctsegmenterpath":
+          loadPCTSegmenterPath = val;
+          break;
+        case "crfsegmenterprop":
+          crfSegmenterProp = val;
+          break;
+        case "pctsegmenterprop":
+          pctSegmenterProp = val;
+          break;
+        case "dualdecompmaxitr":
+          dualDecompMaxItr = Integer.parseInt(val);
+          break;
+        case "dualdecompinitialstepsize":
+          dualDecompInitialStepSize = Double.parseDouble(val);
+          break;
+        case "dualdecompdebug":
+          dualDecompDebug = Boolean.parseBoolean(val);
+          break;
+        case "intermediatesegmenterout":
+          intermediateSegmenterOut = val;
+          break;
+        case "intermediatesegmentermodel":
+          intermediateSegmenterModel = val;
+          break;
+        case "usecwswordfeatures":
+          useCWSWordFeatures = Boolean.parseBoolean(val);
+          break;
+        case "usecwswordfeaturesall":
+          useCWSWordFeaturesAll = Boolean.parseBoolean(val);
+          break;
+        case "usecwswordfeaturesbigram":
+          useCWSWordFeaturesBigram = Boolean.parseBoolean(val);
+          break;
+        case "pctsegmenterlenadjust":
+          pctSegmenterLenAdjust = Boolean.parseBoolean(val);
+          break;
+        case "usetrainlexicon":
+          useTrainLexicon = Boolean.parseBoolean(val);
+          break;
+        case "usecwsfeatures":
+          useCWSFeatures = Boolean.parseBoolean(val);
+          break;
+        case "appendlc":
+          appendLC = Boolean.parseBoolean(val);
+          break;
+        case "perceptrondebug":
+          perceptronDebug = Boolean.parseBoolean(val);
+          break;
+        case "pctsegmenterscalebycrf":
+          pctSegmenterScaleByCRF = Boolean.parseBoolean(val);
+          break;
+        case "pctsegmenterscale":
+          pctSegmenterScale = Double.parseDouble(val);
+          break;
+        case "separateasciiandrange":
+          separateASCIIandRange = Boolean.parseBoolean(val);
+          break;
+        case "dropoutrate":
+          dropoutRate = Double.parseDouble(val);
+          break;
+        case "dropoutscale":
+          dropoutScale = Double.parseDouble(val);
+          break;
+        case "multithreadgrad":
+          multiThreadGrad = Integer.parseInt(val);
+          break;
+        case "maxqnitr":
+          maxQNItr = Integer.parseInt(val);
+          break;
+        case "dropoutapprox":
+          dropoutApprox = Boolean.parseBoolean(val);
+          break;
+        case "unsupdropoutfile":
+          unsupDropoutFile = val;
+          break;
+        case "unsupdropoutscale":
+          unsupDropoutScale = Double.parseDouble(val);
+          break;
+        case "startevaluateiters":
+          startEvaluateIters = Integer.parseInt(val);
+          break;
+        case "multithreadperceptron":
+          multiThreadPerceptron = Integer.parseInt(val);
+          break;
+        case "lazyupdate":
+          lazyUpdate = Boolean.parseBoolean(val);
+          break;
+        case "featurecountthresh":
+          featureCountThresh = Integer.parseInt(val);
+          break;
+        case "serializeweightsto":
+          serializeWeightsTo = val;
+          break;
+        case "gedebug":
+          geDebug = Boolean.parseBoolean(val);
+          break;
+        case "dofeaturediscovery":
+          doFeatureDiscovery = Boolean.parseBoolean(val);
+          break;
+        case "loadweightsfrom":
+          loadWeightsFrom = val;
+          break;
+        case "loadclassindexfrom":
+          loadClassIndexFrom = val;
+          break;
+        case "serializeclassindexto":
+          serializeClassIndexTo = val;
+          break;
+        case "learnchbasedonen":
+          learnCHBasedOnEN = Boolean.parseBoolean(val);
+          break;
+        case "learnenbasedonch":
+          learnENBasedOnCH = Boolean.parseBoolean(val);
+          break;
+        case "loadweightsfromen":
+          loadWeightsFromEN = val;
+          break;
+        case "loadweightsfromch":
+          loadWeightsFromCH = val;
+          break;
+        case "serializetoen":
+          serializeToEN = val;
+          break;
+        case "serializetoch":
+          serializeToCH = val;
+          break;
+        case "testfileen":
+          testFileEN = val;
+          break;
+        case "testfilech":
+          testFileCH = val;
+          break;
+        case "unsupfileen":
+          unsupFileEN = val;
+          break;
+        case "unsupfilech":
+          unsupFileCH = val;
+          break;
+        case "unsupalignfile":
+          unsupAlignFile = val;
+          break;
+        case "supfileen":
+          supFileEN = val;
+          break;
+        case "supfilech":
+          supFileCH = val;
+          break;
+        case "serializefeatureindexto":
+          serializeFeatureIndexTo = val;
+          break;
+        case "serializefeatureindextotext":
+          serializeFeatureIndexToText = val;
+          break;
+        case "loadfeatureindexfromen":
+          loadFeatureIndexFromEN = val;
+          break;
+        case "loadfeatureindexfromch":
+          loadFeatureIndexFromCH = val;
+          break;
+        case "lambdaen":
+          lambdaEN = Double.parseDouble(val);
+          break;
+        case "lambdach":
+          lambdaCH = Double.parseDouble(val);
+          break;
+        case "alternatetraining":
+          alternateTraining = Boolean.parseBoolean(val);
+          break;
+        case "weightbyentropy":
+          weightByEntropy = Boolean.parseBoolean(val);
+          break;
+        case "usekl":
+          useKL = Boolean.parseBoolean(val);
+          break;
+        case "usehardge":
+          useHardGE = Boolean.parseBoolean(val);
+          break;
+        case "usecrfforunsup":
+          useCRFforUnsup = Boolean.parseBoolean(val);
+          break;
+        case "usegeforsup":
+          useGEforSup = Boolean.parseBoolean(val);
+          break;
+        case "useknownlcwords":
+          log.info("useKnownLCWords is deprecated; see maxAdditionalKnownLCWords (true = -1, false = 0)");
+          maxAdditionalKnownLCWords = Boolean.parseBoolean(val) ? -1: 0;
+          break;
+        case "usenoisylabel":
+          useNoisyLabel = Boolean.parseBoolean(val);
+          break;
+        case "errormatrix":
+          errorMatrix = val;
+          break;
+        case "printtrainlabels":
+          printTrainLabels = Boolean.parseBoolean(val);
+          break;
+        case "labeldictionarycutoff":
+          labelDictionaryCutoff = Integer.parseInt(val);
+          break;
+        case "useadadelta":
+          useAdaDelta = Boolean.parseBoolean(val);
+          break;
+        case "useadadiff":
+          useAdaDiff = Boolean.parseBoolean(val);
+          break;
+        case "adagradeps":
+          adaGradEps = Double.parseDouble(val);
+          break;
+        case "adadeltarho":
+          adaDeltaRho = Double.parseDouble(val);
+          break;
+        case "userandomseed":
+          useRandomSeed = Boolean.parseBoolean(val);
+          break;
+        case "terminateonavgimprovement":
+          terminateOnAvgImprovement = Boolean.parseBoolean(val);
+          break;
+        case "strictgoodconll":
+          strictGoodCoNLL = Boolean.parseBoolean(val);
+          break;
+        case "removestrictgoodconllduplicates":
+          removeStrictGoodCoNLLDuplicates = Boolean.parseBoolean(val);
+          break;
+        case "priormodelfactory":
+          priorModelFactory = val;
+          break;
+        case "maxadditionalknownlcwords":
+          maxAdditionalKnownLCWords = Integer.parseInt(val);
+          break;
+        case "shownccinfo":
+          showNCCInfo = Boolean.parseBoolean(val);
+          break;
+        case "showccinfo":
+          showCCInfo = Boolean.parseBoolean(val);
+          break;
+        case "crftoexamine":
+          crfToExamine = val;
+          break;
+        case "ner.usesutime":
+          useSUTime = Boolean.parseBoolean(val);
+          break;
+        case "ner.applynumericclassifiers":
+          applyNumericClassifiers = Boolean.parseBoolean(val);
+          break;
+        case "ner.combinationmode":
+          combinationMode = val;
+          break;
+        case "ner.model":
+          nerModel = val;
+          break;
+        case "sutime.language":
+          break;
+        case "dict2name":
+          dict2name = val;
+          break;
+        // ADD VALUE ABOVE HERE.  Case labels must be all lowercase:
+        // keys are lowercased before the switch, so they match case-insensitively.
+        default:
+          if (key.startsWith("prop") && !key.equals("prop")) {
+            comboProps.add(val);
+          } else if (! key.isEmpty() && ! key.equals("prop")) {
+            log.info("Unknown property: |" + key + '|');
+          }
       }
     }
     if (startFold > numFolds) {
