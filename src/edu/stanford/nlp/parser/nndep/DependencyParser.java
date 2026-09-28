@@ -59,7 +59,7 @@ import static java.util.stream.Collectors.toList;
  * CoNLL-X format predictions; again see {@link #main} for available options.
  * (The options available for things like tokenization and sentence splitting
  * in this class are not as extensive as and not necessarily consistent with
- * the options of other classes like {@code LexicalizedParser} and {@code StanfordCoreNLP}.
+ * the options of other classes like {@code LexicalizedParser} and {@code StanfordCoreNLP}.)
  *
  * <p>
  * This parser can also be used programmatically. The easiest way to
@@ -75,6 +75,8 @@ public class DependencyParser  {
 
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(DependencyParser.class);
+
+  /** Classpath location of the default model, an English UD parser. */
   public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_UD.gz";
 
   /**
@@ -130,6 +132,13 @@ public class DependencyParser  {
     this(new Properties());
   }
 
+  /**
+   * Create a parser with the given configuration. The parser has no
+   * model yet; call {@link #loadModelFile(String)} or one of the
+   * {@code train} methods before parsing.
+   *
+   * @param properties Parser options; see {@link #main} for the available keys
+   */
   public DependencyParser(Properties properties) {
     config = new Config(properties);
 
@@ -140,8 +149,9 @@ public class DependencyParser  {
 
   /**
    * Get an integer ID for the given word. This ID can be used to index
-   * into the embeddings {@link Classifier} embeddings (E).
+   * into the {@link Classifier} embedding matrix (E).
    *
+   * @param s The word to look up
    * @return An ID for the given word, or an ID referring to a generic
    *         "unknown" word if the word is unknown
    */
@@ -149,14 +159,42 @@ public class DependencyParser  {
       return wordIDs.containsKey(s) ? wordIDs.get(s) : wordIDs.get(Config.UNKNOWN);
   }
 
+  /**
+   * Get an integer ID for the given part-of-speech tag, in the same ID
+   * space as {@link #getWordID(String)}.
+   *
+   * @param s The tag to look up
+   * @return An ID for the given tag, or the ID of the "unknown" tag
+   *         if the tag is unknown
+   */
   public int getPosID(String s) {
       return posIDs.containsKey(s) ? posIDs.get(s) : posIDs.get(Config.UNKNOWN);
   }
 
+  /**
+   * Get an integer ID for the given dependency label, in the same ID
+   * space as {@link #getWordID(String)}.
+   *
+   * @param s The label to look up; it must be known to the model
+   * @return An ID for the given label
+   */
   public int getLabelID(String s) {
     return labelIDs.get(s);
   }
 
+  /**
+   * Extract the feature vector for a parser configuration: the IDs of
+   * 18 words, their 18 part-of-speech tags, and 12 dependency labels.
+   * The words are the top three items on the stack, the first three
+   * items in the buffer, and six children of each of the top two stack
+   * items (leftmost and rightmost, second leftmost and second rightmost,
+   * and the leftmost child of the leftmost child and rightmost child of
+   * the rightmost child). The labels are the labels of those twelve
+   * children.
+   *
+   * @param c The configuration to featurize
+   * @return The 48 feature IDs, ordered as words, then tags, then labels
+   */
   public List<Integer> getFeatures(Configuration c) {
     // Presize the arrays for very slight speed gain. Hardcoded, but so is the current feature list.
     List<Integer> fWord = new ArrayList<>(18);
@@ -269,6 +307,20 @@ public class DependencyParser  {
     return feature;
   }
 
+  /**
+   * Generate training examples by running the oracle over each
+   * projective gold tree. Non-projective trees are skipped. Each
+   * example pairs the features of a configuration with a label for
+   * every transition: 1 for the oracle transition, 0 for other legal
+   * transitions, and -1 for illegal ones.
+   *
+   * Also records the most frequent feature / position pairs as the
+   * set of hidden-layer activations to precompute.
+   *
+   * @param sents The training sentences
+   * @param trees The gold dependency trees, parallel to {@code sents}
+   * @return The generated training examples
+   */
   public Dataset genTrainExamples(List<CoreMap> sents, List<DependencyTree> trees) {
     int numTrans = system.numTransitions();
     Dataset ret = new Dataset(config.numTokens, numTrans);
@@ -320,8 +372,8 @@ public class DependencyParser  {
    * tags / dependency relation labels.
    *
    * All three of the aforementioned types are assigned IDs from a
-   * continuous range of integers; all IDs 0 <= ID < n_w are word IDs,
-   * all IDs n_w <= ID < n_w + n_pos are POS tag IDs, and so on.
+   * continuous range of integers; all IDs {@code 0 <= ID < n_w} are word IDs,
+   * all IDs {@code n_w <= ID < n_w + n_pos} are POS tag IDs, and so on.
    */
   private void generateIDs() {
     wordIDs = new HashMap<>();
@@ -341,6 +393,9 @@ public class DependencyParser  {
    * Scan a corpus and store all words, part-of-speech tags, and
    * dependency relation labels observed. Prepare other structures
    * which support word / POS / label lookup at train- / run-time.
+   *
+   * @param sents The training sentences
+   * @param trees The gold dependency trees, parallel to {@code sents}
    */
   private void genDictionaries(List<CoreMap> sents, List<DependencyTree> trees) {
     // Collect all words (!), etc. in lists, tacking on one sentence
@@ -396,6 +451,14 @@ public class DependencyParser  {
     log.info("#Label: " + knownLabels.size());
   }
 
+  /**
+   * Save the current model in the text format read by
+   * {@link #loadModelFile(String)}.
+   *
+   * @param modelFile Path to write to; the output is gzipped if the
+   *                  path ends in {@code .gz}
+   * @throws RuntimeIOException If the file cannot be written
+   */
   public void writeModelFile(String modelFile) {
     try {
       float[][] W1 = classifier.getW1();
@@ -480,6 +543,8 @@ public class DependencyParser  {
   /**
    * Convenience method; see {@link #loadFromModelFile(String, java.util.Properties)}.
    *
+   * @param modelFile Path to serialized model (may be GZipped)
+   * @return Loaded and initialized model
    * @see #loadFromModelFile(String, java.util.Properties)
    */
   public static DependencyParser loadFromModelFile(String modelFile) {
@@ -492,7 +557,7 @@ public class DependencyParser  {
    * @param modelFile       Path to serialized model (may be GZipped)
    * @param extraProperties Extra test-time properties not already associated with model (may be null)
    *
-   * @return Loaded and initialized (see {@link #initialize(boolean)} model
+   * @return Loaded and initialized model, ready for {@link #predict(edu.stanford.nlp.util.CoreMap)}
    */
   public static DependencyParser loadFromModelFile(String modelFile, Properties extraProperties) {
     return DependencyParserCache.loadFromModelFile(modelFile, extraProperties);
@@ -678,6 +743,9 @@ public class DependencyParser  {
    * @param modelFile String to which model should be saved
    * @param embedFile File containing word embeddings for words used in
    *                  training corpus
+   * @param preModel Previously trained model file used to initialize
+   *                 the embeddings and weights, where their sizes match
+   *                 the current configuration (may be null)
    */
   public void train(String trainFile, String devFile, String modelFile, String embedFile, String preModel) {
     log.info("Train File: " + trainFile);
@@ -771,21 +839,39 @@ public class DependencyParser  {
   }
 
   /**
-  * @see #train(String, String, String, String, String)
-  */
+   * Train a new dependency parser model without a pre-trained model.
+   *
+   * @param trainFile Training data
+   * @param devFile Development data (may be null)
+   * @param modelFile String to which model should be saved
+   * @param embedFile File containing word embeddings (may be null)
+   * @see #train(String, String, String, String, String)
+   */
   public void train(String trainFile, String devFile, String modelFile, String embedFile) {
     train(trainFile, devFile, modelFile, embedFile, null);
   }
 
   /**
-   * @see #train(String, String, String, String)
+   * Train a new dependency parser model with randomly initialized
+   * embeddings.
+   *
+   * @param trainFile Training data
+   * @param devFile Development data (may be null)
+   * @param modelFile String to which model should be saved
+   * @see #train(String, String, String, String, String)
    */
   public void train(String trainFile, String devFile, String modelFile) {
     train(trainFile, devFile, modelFile, null);
   }
 
   /**
-   * @see #train(String, String, String)
+   * Train a new dependency parser model with randomly initialized
+   * embeddings and no dev set. The model is saved once, at the end
+   * of training.
+   *
+   * @param trainFile Training data
+   * @param modelFile String to which model should be saved
+   * @see #train(String, String, String, String, String)
    */
   public void train(String trainFile, String modelFile) {
     train(trainFile, null, modelFile);
@@ -793,6 +879,11 @@ public class DependencyParser  {
 
   /**
    * Prepare a classifier for training with the given dataset.
+   *
+   * @param trainSents The training sentences
+   * @param trainTrees The gold dependency trees, parallel to {@code trainSents}
+   * @param embedFile File containing word embeddings (may be null)
+   * @param preModel Previously trained model file used for initialization (may be null)
    */
   private void setupClassifierForTraining(List<CoreMap> trainSents, List<DependencyTree> trainTrees, String embedFile, String preModel) {
     float[][] E = new float[knownWords.size() + knownPos.size() + knownLabels.size()][config.embeddingSize];
@@ -937,6 +1028,9 @@ public class DependencyParser  {
    * <p>
    * This "inner" method returns a structure unique to this package; use {@link #predict(edu.stanford.nlp.util.CoreMap)}
    * for general parsing purposes.
+   *
+   * @param sentence A sentence whose tokens have part-of-speech tags
+   * @return The predicted dependency tree
    */
   private DependencyTree predictInner(CoreMap sentence) {
     int numTrans = system.numTransitions();
@@ -969,8 +1063,9 @@ public class DependencyParser  {
    * Determine the dependency parse of the given sentence using the loaded model.
    * You must first load a parser before calling this method.
    *
+   * @param sentence A sentence whose tokens have part-of-speech tags
+   * @return The dependency parse of the sentence
    * @throws java.lang.IllegalStateException If parser has not yet been loaded and initialized
-   *         (see {@link #initialize(boolean)}
    */
   public GrammaticalStructure predict(CoreMap sentence) {
     if (system == null)
@@ -1049,6 +1144,10 @@ public class DependencyParser  {
    * Convenience method for {@link #predict(edu.stanford.nlp.util.CoreMap)}. The tokens of the provided sentence must
    * also have tag annotations (the parser requires part-of-speech tags).
    *
+   * @param sentence The words of the sentence; each must be a {@link CoreLabel}
+   *                 with a tag or implement {@link HasTag}
+   * @return The dependency parse of the sentence
+   * @throws IllegalArgumentException If any word lacks a part-of-speech tag
    * @see #predict(edu.stanford.nlp.util.CoreMap)
    */
   public GrammaticalStructure predict(List<? extends HasWord> sentence) {
@@ -1087,7 +1186,12 @@ public class DependencyParser  {
   }
 
   /**
-   * Legacy version of testCoNLLReturnScores that only returns LAS for backwards compatibility
+   * Legacy version of {@link #testCoNLLReturnScores(String, String)} that
+   * only returns LAS, kept for backwards compatibility.
+   *
+   * @param testFile File to parse. In CoNLL-X format. Assumed to have gold answers included.
+   * @param outFile File to write results to in CoNLL-X format.  If null, no output is written
+   * @return The LAS score on the dataset
    */
   public double testCoNLL(String testFile, String outFile) {
     return testCoNLLReturnScores(testFile, outFile).second;
@@ -1189,6 +1293,8 @@ public class DependencyParser  {
 
   /**
    * Prepare for parsing after a model has been loaded.
+   *
+   * @param verbose Whether the transition system should log its setup
    */
   private void initialize(boolean verbose) {
     if (knownLabels == null)
@@ -1243,46 +1349,47 @@ public class DependencyParser  {
    * <p>
    * See below for more information on all of these training / test options and more.
    *
-   * <p>
-   * Input / output options:
    * <table>
+   *   <caption>Input / output options</caption>
    *   <tr><th>Option</th><th>Required for training</th><th>Required for testing / parsing</th><th>Description</th></tr>
-   *   <tr><td><tt>-devFile</tt></td><td>Optional</td><td>No</td><td>Path to a development-set treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a>. If provided, the dev set performance is monitored during training.</td></tr>
-   *   <tr><td><tt>-embedFile</tt></td><td>Optional (highly recommended!)</td><td>No</td><td>A word embedding file, containing distributed representations of English words. Each line of the provided file should contain a single word followed by the elements of the corresponding word embedding (space-delimited). It is not absolutely necessary that all words in the treebank be covered by this embedding file, though the parser's performance will generally improve if you are able to provide better embeddings for more words.</td></tr>
-   *   <tr><td><tt>-model</tt></td><td>Yes</td><td>Yes</td><td>Path to a model file. If the path ends in <tt>.gz</tt>, the model will be read as a Gzipped model file. During training, we write to this path; at test time we read a pre-trained model from this path.</td></tr>
-   *   <tr><td><tt>-textFile</tt></td><td>No</td><td>Yes (or <tt>testFile</tt>)</td><td>Path to a plaintext file containing sentences to be parsed.</td></tr>
-   *   <tr><td><tt>-testFile</tt></td><td>No</td><td>Yes (or <tt>textFile</tt>)</td><td>Path to a test-set treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a> for final evaluation of the parser.</td></tr>
-   *   <tr><td><tt>-trainFile</tt></td><td>Yes</td><td>No</td><td>Path to a training treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format.</a></td></tr>
+   *   <tr><td><code>-devFile</code></td><td>Optional</td><td>No</td><td>Path to a development-set treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a>. If provided, the dev set performance is monitored during training.</td></tr>
+   *   <tr><td><code>-embedFile</code></td><td>Optional (highly recommended!)</td><td>No</td><td>A word embedding file, containing distributed representations of English words. Each line of the provided file should contain a single word followed by the elements of the corresponding word embedding (space-delimited). It is not absolutely necessary that all words in the treebank be covered by this embedding file, though the parser's performance will generally improve if you are able to provide better embeddings for more words.</td></tr>
+   *   <tr><td><code>-model</code></td><td>Yes</td><td>Yes</td><td>Path to a model file. If the path ends in <code>.gz</code>, the model will be read as a Gzipped model file. During training, we write to this path; at test time we read a pre-trained model from this path.</td></tr>
+   *   <tr><td><code>-textFile</code></td><td>No</td><td>Yes (or <code>testFile</code>)</td><td>Path to a plaintext file containing sentences to be parsed.</td></tr>
+   *   <tr><td><code>-testFile</code></td><td>No</td><td>Yes (or <code>textFile</code>)</td><td>Path to a test-set treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a> for final evaluation of the parser.</td></tr>
+   *   <tr><td><code>-trainFile</code></td><td>Yes</td><td>No</td><td>Path to a training treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format.</a></td></tr>
    * </table>
    *
-   * Training options:
    * <table>
+   *   <caption>Training options</caption>
    *   <tr><th>Option</th><th>Default</th><th>Description</th></tr>
-   *   <tr><td><tt>-adaAlpha</tt></td><td>0.01</td><td>Global learning rate for AdaGrad training</td></tr>
-   *   <tr><td><tt>-adaEps</tt></td><td>1e-6</td><td>Epsilon value added to the denominator of AdaGrad update expression for numerical stability</td></tr>
-   *   <tr><td><tt>-batchSize</tt></td><td>10000</td><td>Size of mini-batch used for training</td></tr>
-   *   <tr><td><tt>-clearGradientsPerIter</tt></td><td>0</td><td>Clear AdaGrad gradient histories every <em>n</em> iterations. If zero, no gradient clearing is performed.</td></tr>
-   *   <tr><td><tt>-dropProb</tt></td><td>0.5</td><td>Dropout probability. For each training example we randomly choose some amount of units to disable in the neural network classifier. This parameter controls the proportion of units "dropped out."</td></tr>
-   *   <tr><td><tt>-embeddingSize</tt></td><td>50</td><td>Dimensionality of word embeddings provided</td></tr>
-   *   <tr><td><tt>-evalPerIter</tt></td><td>100</td><td>Run full UAS (unlabeled attachment score) evaluation every time we finish this number of iterations. (Only valid if a development treebank is provided with <tt>-devFile</tt>.)</td></tr>
-   *   <tr><td><tt>-hiddenSize</tt></td><td>200</td><td>Dimensionality of hidden layer in neural network classifier</td></tr>
-   *   <tr><td><tt>-initRange</tt></td><td>0.01</td><td>Bounds of range within which weight matrix elements should be initialized. Each element is drawn from a uniform distribution over the range <tt>[-initRange, initRange]</tt>.</td></tr>
-   *   <tr><td><tt>-maxIter</tt></td><td>20000</td><td>Number of training iterations to complete before stopping and saving the final model.</td></tr>
-   *   <tr><td><tt>-numPreComputed</tt></td><td>100000</td><td>The parser pre-computes hidden-layer unit activations for particular inputs words at both training and testing time in order to speed up feedforward computation in the neural network. This parameter determines how many words for which we should compute hidden-layer activations.</td></tr>
-   *   <tr><td><tt>-regParameter</tt></td><td>1e-8</td><td>Regularization parameter for training</td></tr>
-   *   <tr><td><tt>-saveIntermediate</tt></td><td><tt>true</tt></td><td>If <tt>true</tt>, continually save the model version which gets the highest UAS value on the dev set. (Only valid if a development treebank is provided with <tt>-devFile</tt>.)</td></tr>
-   *   <tr><td><tt>-trainingThreads</tt></td><td>1</td><td>Number of threads to use during training. Note that depending on training batch size, it may be unwise to simply choose the maximum amount of threads for your machine. On our 16-core test machines: a batch size of 10,000 runs fastest with around 6 threads; a batch size of 100,000 runs best with around 10 threads.</td></tr>
-   *   <tr><td><tt>-wordCutOff</tt></td><td>1</td><td>The parser can optionally ignore rare words by simply choosing an arbitrary "unknown" feature representation for words that appear with frequency less than <em>n</em> in the corpus. This <em>n</em> is controlled by the <tt>wordCutOff</tt> parameter.</td></tr>
+   *   <tr><td><code>-adaAlpha</code></td><td>0.01</td><td>Global learning rate for AdaGrad training</td></tr>
+   *   <tr><td><code>-adaEps</code></td><td>1e-6</td><td>Epsilon value added to the denominator of AdaGrad update expression for numerical stability</td></tr>
+   *   <tr><td><code>-batchSize</code></td><td>10000</td><td>Size of mini-batch used for training</td></tr>
+   *   <tr><td><code>-clearGradientsPerIter</code></td><td>0</td><td>Clear AdaGrad gradient histories every <em>n</em> iterations. If zero, no gradient clearing is performed.</td></tr>
+   *   <tr><td><code>-dropProb</code></td><td>0.5</td><td>Dropout probability. For each training example we randomly choose some amount of units to disable in the neural network classifier. This parameter controls the proportion of units "dropped out."</td></tr>
+   *   <tr><td><code>-embeddingSize</code></td><td>50</td><td>Dimensionality of word embeddings provided</td></tr>
+   *   <tr><td><code>-evalPerIter</code></td><td>100</td><td>Run full UAS (unlabeled attachment score) evaluation every time we finish this number of iterations. (Only valid if a development treebank is provided with <code>-devFile</code>.)</td></tr>
+   *   <tr><td><code>-hiddenSize</code></td><td>200</td><td>Dimensionality of hidden layer in neural network classifier</td></tr>
+   *   <tr><td><code>-initRange</code></td><td>0.01</td><td>Bounds of range within which weight matrix elements should be initialized. Each element is drawn from a uniform distribution over the range <code>[-initRange, initRange]</code>.</td></tr>
+   *   <tr><td><code>-maxIter</code></td><td>20000</td><td>Number of training iterations to complete before stopping and saving the final model.</td></tr>
+   *   <tr><td><code>-numPreComputed</code></td><td>100000</td><td>The parser pre-computes hidden-layer unit activations for particular inputs words at both training and testing time in order to speed up feedforward computation in the neural network. This parameter determines how many words for which we should compute hidden-layer activations.</td></tr>
+   *   <tr><td><code>-regParameter</code></td><td>1e-8</td><td>Regularization parameter for training</td></tr>
+   *   <tr><td><code>-saveIntermediate</code></td><td><code>true</code></td><td>If <code>true</code>, continually save the model version which gets the highest UAS value on the dev set. (Only valid if a development treebank is provided with <code>-devFile</code>.)</td></tr>
+   *   <tr><td><code>-trainingThreads</code></td><td>1</td><td>Number of threads to use during training. Note that depending on training batch size, it may be unwise to simply choose the maximum amount of threads for your machine. On our 16-core test machines: a batch size of 10,000 runs fastest with around 6 threads; a batch size of 100,000 runs best with around 10 threads.</td></tr>
+   *   <tr><td><code>-wordCutOff</code></td><td>1</td><td>The parser can optionally ignore rare words by simply choosing an arbitrary "unknown" feature representation for words that appear with frequency less than <em>n</em> in the corpus. This <em>n</em> is controlled by the <code>wordCutOff</code> parameter.</td></tr>
    * </table>
    *
-   * Runtime parsing options:
    * <table>
+   *   <caption>Runtime parsing options</caption>
    *   <tr><th>Option</th><th>Default</th><th>Description</th></tr>
-   *   <tr><td><tt>-escaper</tt></td><td>N/A</td><td>Only applicable for testing with <tt>-textFile</tt>. If provided, use this word-escaper when parsing raw sentences. Should be a fully-qualified class name like <tt>edu.stanford.nlp.trees.international.arabic.ATBEscaper</tt>.</td></tr>
-   *   <tr><td><tt>-numPreComputed</tt></td><td>100000</td><td>The parser pre-computes hidden-layer unit activations for particular inputs words at both training and testing time in order to speed up feedforward computation in the neural network. This parameter determines how many words for which we should compute hidden-layer activations.</td></tr>
-   *   <tr><td><tt>-sentenceDelimiter</tt></td><td>N/A</td><td>Only applicable for testing with <tt>-textFile</tt>.  If provided, assume that the given <tt>textFile</tt> has already been sentence-split, and that sentences are separated by this delimiter.</td></tr>
-   *   <tr><td><tt>-tagger.model</tt></td><td>edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger</td><td>Only applicable for testing with <tt>-textFile</tt>. Path to a part-of-speech tagger to use to pre-tag the raw sentences before parsing.</td></tr>
+   *   <tr><td><code>-escaper</code></td><td>N/A</td><td>Only applicable for testing with <code>-textFile</code>. If provided, use this word-escaper when parsing raw sentences. Should be a fully-qualified class name like <code>edu.stanford.nlp.trees.international.arabic.ATBEscaper</code>.</td></tr>
+   *   <tr><td><code>-numPreComputed</code></td><td>100000</td><td>The parser pre-computes hidden-layer unit activations for particular inputs words at both training and testing time in order to speed up feedforward computation in the neural network. This parameter determines how many words for which we should compute hidden-layer activations.</td></tr>
+   *   <tr><td><code>-sentenceDelimiter</code></td><td>N/A</td><td>Only applicable for testing with <code>-textFile</code>.  If provided, assume that the given <code>textFile</code> has already been sentence-split, and that sentences are separated by this delimiter.</td></tr>
+   *   <tr><td><code>-tagger.model</code></td><td>edu/stanford/nlp/models/pos-tagger/english-left3words-distsim.tagger</td><td>Only applicable for testing with <code>-textFile</code>. Path to a part-of-speech tagger to use to pre-tag the raw sentences before parsing.</td></tr>
    * </table>
+   *
+   * @param args Command-line options, as described above
    */
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args, numArgs);

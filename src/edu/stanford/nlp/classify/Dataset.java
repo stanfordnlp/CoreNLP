@@ -41,7 +41,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Roger Levy (rog@stanford.edu)
  * @author Anna Rafferty (various refactoring with GeneralDataset/RVFDataset)
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) (templatization)
- * @author nmramesh@cs.stanford.edu {@link #getL1NormalizedTFIDFDatum(Datum, Counter) and #getL1NormalizedTFIDFDataset()}
+ * @author nmramesh@cs.stanford.edu {@link #getL1NormalizedTFIDFDatum(Datum, Counter)} and {@link #getL1NormalizedTFIDFDataset()}
  *
  * @param <L> Label type
  * @param <F> Feature type
@@ -55,20 +55,40 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   /** we will multiply by this constant instead of divide by log(2) */
   private static final double LN_TO_LOG2 = 1. / Math.log(2);
 
+  /** Creates an empty Dataset with new indices and an initial capacity of 10. */
   public Dataset() {
     this(10);
   }
 
+  /**
+   * Creates an empty Dataset with new indices.
+   *
+   * @param numDatums initial capacity of dataset
+   */
   public Dataset(int numDatums) {
     initialize(numDatums);
   }
 
+  /**
+   * Creates an empty Dataset which uses the given indices.
+   *
+   * @param numDatums initial capacity of dataset
+   * @param featureIndex The feature index to use
+   * @param labelIndex The label index to use
+   */
   public Dataset(int numDatums, Index<F> featureIndex, Index<L> labelIndex) {
     initialize(numDatums);
     this.featureIndex = featureIndex;
     this.labelIndex = labelIndex;
   }
 
+  /**
+   * Creates an empty Dataset which uses the given indices, with an
+   * initial capacity of 10.
+   *
+   * @param featureIndex The feature index to use
+   * @param labelIndex The label index to use
+   */
   public Dataset(Index<F> featureIndex, Index<L> labelIndex) {
     this(10, featureIndex, labelIndex);
   }
@@ -76,6 +96,12 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   /**
    * Constructor that fully specifies a Dataset.  Needed this for MulticlassDataset.
+   * The arrays are used directly, not copied.
+   *
+   * @param labelIndex The label index
+   * @param labels The label index of each datum
+   * @param featureIndex The feature index
+   * @param data The feature indices of each datum; its length is the size of the dataset
    */
   public Dataset(Index<L> labelIndex, int[] labels, Index<F> featureIndex, int[][] data) {
     this (labelIndex, labels, featureIndex, data, data.length);
@@ -83,6 +109,13 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   /**
    * Constructor that fully specifies a Dataset.  Needed this for MulticlassDataset.
+   * The arrays are used directly, not copied.
+   *
+   * @param labelIndex The label index
+   * @param labels The label index of each datum
+   * @param featureIndex The feature index
+   * @param data The feature indices of each datum
+   * @param size The number of datums in use; the arrays may be longer
    */
   public Dataset(Index<L> labelIndex, int[] labels, Index<F> featureIndex, int[][] data, int size) {
     this.labelIndex = labelIndex;
@@ -144,6 +177,14 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   }
 
 
+  /**
+   * Returns a random subset of the datums, sampled without replacement.
+   * The subset shares this dataset's indices and per-datum feature arrays.
+   *
+   * @param p The size of the subset as a fraction of this dataset (rounded down)
+   * @param seed A seed for the Random object (allows you to reproduce the same subset)
+   * @return The subset
+   */
   public Dataset<L, F> getRandomSubDataset(double p, int seed) {
     int newSize = (int)(p * size());
     Set<Integer> indicesToKeep = Generics.newHashSet();
@@ -173,6 +214,10 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   /**
    * Constructs a Dataset by reading in a file in SVM light format.
+   *
+   * @param filename The file to read
+   * @return The dataset
+   * @see #svmLightLineToDatum(String)
    */
   public static Dataset<String, String> readSVMLightFormat(String filename) {
     return readSVMLightFormat(filename, new HashIndex<>(), new HashIndex<>());
@@ -182,6 +227,10 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    * Constructs a Dataset by reading in a file in SVM light format.
    * The lines parameter is filled with the lines of the file for further processing
    * (if lines is null, it is assumed no line information is desired)
+   *
+   * @param filename The file to read
+   * @param lines A list to which each line of the file is added (may be null)
+   * @return The dataset
    */
   public static Dataset<String, String> readSVMLightFormat(String filename, List<String> lines) {
     return readSVMLightFormat(filename, new HashIndex<>(), new HashIndex<>(), lines);
@@ -190,6 +239,11 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   /**
    * Constructs a Dataset by reading in a file in SVM light format.
    * the created dataset has the same feature and label index as given
+   *
+   * @param filename The file to read
+   * @param featureIndex The feature index to use
+   * @param labelIndex The label index to use
+   * @return The dataset
    */
   public static Dataset<String, String> readSVMLightFormat(String filename, Index<String> featureIndex, Index<String> labelIndex) {
     return readSVMLightFormat(filename, featureIndex, labelIndex, null);
@@ -197,6 +251,13 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   /**
    * Constructs a Dataset by reading in a file in SVM light format.
    * the created dataset has the same feature and label index as given
+   *
+   * @param filename The file to read
+   * @param featureIndex The feature index to use
+   * @param labelIndex The label index to use
+   * @param lines A list to which each line of the file is added (may be null)
+   * @return The dataset
+   * @throws RuntimeException If the file cannot be read or parsed
    */
   public static Dataset<String, String> readSVMLightFormat(String filename, Index<String> featureIndex, Index<String> labelIndex, List<String> lines) {
     Dataset<String, String> dataset;
@@ -216,6 +277,15 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   private static int line1 = 0;
 
+  /**
+   * Converts one line in SVM light format, {@code label feature:count ...},
+   * into a datum. Anything after a {@code #} is ignored. Each feature is
+   * repeated count times (truncated to an integer), and a constant
+   * feature is added to every datum.
+   *
+   * @param l The line to convert
+   * @return The datum
+   */
   public static Datum<String, String> svmLightLineToDatum(String l) {
     line1++;
     l = l.replaceAll("#.*", ""); // remove any trailing comments
@@ -238,6 +308,8 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   /**
    *  Get Number of datums a given feature appears in.
+   *
+   *  @return A counter from each feature to the number of datums containing it
    */
   public Counter<F> getFeatureCounter()
   {
@@ -300,10 +372,25 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     add(d.asFeatures(), d.label());
   }
 
+  /**
+   * Adds a datum defined by its features and label, adding them to the
+   * indices as needed.
+   *
+   * @param features The features of the datum
+   * @param label The label of the datum
+   */
   public void add(Collection<F> features, L label) {
     add(features, label, true);
   }
 
+  /**
+   * Adds a datum defined by its features and label.
+   *
+   * @param features The features of the datum
+   * @param label The label of the datum; it is always added to the label index
+   * @param addNewFeatures Whether to add unknown features to the feature
+   *                       index; if false, unknown features are dropped
+   */
   public void add(Collection<F> features, L label, boolean addNewFeatures) {
     ensureSize();
     addLabel(label);
@@ -312,10 +399,10 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   }
 
   /**
-   * Adds a datums defined by feature indices and label index
+   * Adds a datum defined by feature indices and label index.
    * Careful with this one! Make sure that all indices are valid!
-   * @param features
-   * @param label
+   * @param features The feature indices of the datum; the array is stored, not copied
+   * @param label The label index of the datum
    */
   public void add(int [] features, int label) {
     ensureSize();
@@ -324,6 +411,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     size++;
   }
 
+  /** Doubles the capacity of the labels and data arrays if they are full. */
   protected void ensureSize() {
     if (labels.length == size) {
       int[] newLabels = new int[size * 2];
@@ -337,19 +425,41 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     }
   }
 
+  /**
+   * Sets the label of the next datum, adding it to the label index.
+   *
+   * @param label The label
+   */
   protected void addLabel(L label) {
     labelIndex.add(label);
     labels[size] = labelIndex.indexOf(label);
   }
 
+  /**
+   * Sets the label of the next datum by its index.
+   *
+   * @param label The label index
+   */
   protected void addLabelIndex(int label) {
     labels[size] = label;
   }
 
+  /**
+   * Sets the features of the next datum, adding them to the feature index.
+   *
+   * @param features The features
+   */
   protected void addFeatures(Collection<F> features) {
     addFeatures(features, true);
   }
 
+  /**
+   * Sets the features of the next datum. Features not in the feature
+   * index are dropped.
+   *
+   * @param features The features
+   * @param addNewFeatures Whether to first add unknown features to the feature index
+   */
   protected void addFeatures(Collection<F> features, boolean addNewFeatures) {
     int[] intFeatures = new int[features.size()];
     int j = 0;
@@ -367,6 +477,11 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     }
   }
 
+  /**
+   * Sets the features of the next datum by their indices.
+   *
+   * @param features The feature indices; the array is stored, not copied
+   */
   protected void addFeatureIndices(int [] features) {
     data[size] = features;
   }
@@ -444,8 +559,10 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   /**
    * Applies feature count thresholds to the Dataset.
-   * Only features that match pattern_i and occur at
-   * least threshold_i times (for some i) are kept.
+   * Each feature is checked against the first pattern in the list that
+   * matches its {@code toString()}, and kept only if it occurs at least
+   * that pattern's threshold times.  Features that match no pattern are
+   * always kept.
    *
    * @param thresholds a list of pattern, threshold pairs
    */
@@ -501,6 +618,8 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   /**
    * prints the full feature matrix in tab-delimited form.  These can be BIG
    * matrices, so be careful!
+   *
+   * @param pw Where to print the matrix
    */
   public void printFullFeatureMatrix(PrintWriter pw) {
     String sep = "\t";
@@ -546,6 +665,12 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   }
 
 
+  /**
+   * Switches the dataset to a new label index, remapping each datum's
+   * label. Labels not in the new index get the index -1.
+   *
+   * @param newLabelIndex The label index to use
+   */
   public void changeLabelIndex(Index<L> newLabelIndex) {
 
     labels = trimToSize(labels);
@@ -556,6 +681,12 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     labelIndex = newLabelIndex;
   }
 
+  /**
+   * Switches the dataset to a new feature index, remapping each datum's
+   * features. Features not in the new index are dropped.
+   *
+   * @param newFeatureIndex The feature index to use
+   */
   public void changeFeatureIndex(Index<F> newFeatureIndex) {
 
     data = trimToSize(data);
@@ -580,6 +711,12 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     featureIndex = newFeatureIndex;
   }
 
+  /**
+   * Keeps only the features with the highest information gain; see
+   * {@link #getInformationGains()} and {@link #selectFeatures(int, double[])}.
+   *
+   * @param numFeatures number of features to be selected.
+   */
   public void selectFeaturesBinaryInformationGain(int numFeatures) {
     double[] scores = getInformationGains();
     selectFeatures(numFeatures,scores);
@@ -624,6 +761,13 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   }
 
 
+  /**
+   * Computes the information gain, in bits, of each feature's presence or
+   * absence with respect to the label. Features which appear in every
+   * datum or in none get a gain of 0.
+   *
+   * @return The information gain of each feature, indexed by feature index
+   */
   public double[] getInformationGains() {
 
 //    assert size > 0;
@@ -718,6 +862,12 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     return ig;
   }
 
+  /**
+   * Replaces the labels of all the datums.
+   *
+   * @param labels The new label index of each datum; the array is stored, not copied
+   * @throws IllegalArgumentException If the array is not the same size as the dataset
+   */
   public void updateLabels(int[] labels) {
     if (labels.length != size())
       throw new IllegalArgumentException(
@@ -741,8 +891,13 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   }
 
   /**
-   * Need to sort the counter by feature keys and dump it
+   * Prints one datum in SVM light format, {@code classNo fno:val ...},
+   * with the features sorted by index and each feature number
+   * increased by 1.
    *
+   * @param pw Where to print the datum
+   * @param c The count of each feature index
+   * @param classNo The label to print
    */
   public static void printSVMLightFormat(PrintWriter pw, ClassicCounter<Integer> c, int classNo) {
     Integer[] features = c.keySet().toArray(new Integer[c.keySet().size()]);

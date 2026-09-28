@@ -21,14 +21,43 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
 
   private double[] lastX; // = null;
   private int fEvaluations; // = 0;
+  /** The derivative at the last point evaluated; set by {@link #calculate(double[])}. */
   protected double[] derivative; // = null;
+  /** The value at the last point evaluated; set by {@link #calculate(double[])}. */
   protected double value; // = 0.0;
   private final Random generator = new Random(2147483647L);
 
+  /** Creates a function with an empty cache. */
+  public AbstractCachingDiffFunction() { }
+
+  /**
+   * Check the derivative against a finite difference approximation at
+   * the {@link #initial()} point, using 100 regular and 50 random checks.
+   *
+   * @return true if every checked component of the derivative is close
+   *         to the approximation
+   * @see #gradientCheck(int, int, double[])
+   */
   public boolean gradientCheck() {
     return gradientCheck(100, 50, initial());
   }
 
+  /**
+   * Check the derivative against a central finite difference
+   * approximation, one component at a time. The components checked are
+   * about {@code numOfChecks} evenly spaced indices, the first and last
+   * {@code numOfChecks} indices, and {@code numOfRandomChecks} random
+   * indices. A component fails if it differs from the approximation by
+   * more than 0.01 absolute and 10% relative. The result of each check
+   * is printed to stderr.
+   *
+   * @param numOfChecks Controls the number of regularly spaced and
+   *                    boundary indices checked
+   * @param numOfRandomChecks Number of randomly chosen indices to check
+   * @param x The point at which to check; it is modified during the
+   *          check and restored afterwards
+   * @return true if every checked component passes
+   */
   public boolean gradientCheck(int numOfChecks, int numOfRandomChecks, double[] x) {
     double epsilon = 1e-5;
     double diffThreshold = 0.01;
@@ -111,6 +140,11 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     return new double[domainDimension()]; // initialized with 0s.
   }
 
+  /**
+   * Returns a starting point with each component drawn uniformly from [0, 1).
+   *
+   * @return A new random point of size {@link #domainDimension()}
+   */
   public double[] randomInitial() {
     double[] initial = new double[domainDimension()];
     for (int i = 0; i < initial.length; i++) {
@@ -119,10 +153,23 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     return initial;
   }
 
+  /**
+   * Copy the contents of one array into another.
+   *
+   * @param copy The destination; must be at least as long as {@code orig}
+   * @param orig The source
+   */
   protected static void copy(double[] copy, double[] orig) {
     System.arraycopy(orig, 0, copy, 0, orig.length);
   }
 
+  /**
+   * Make sure {@link #value} and {@link #derivative} hold the results
+   * for {@code x}, calling {@link #calculate(double[])} unless {@code x}
+   * equals the last point evaluated.
+   *
+   * @param x The point at which to evaluate the function
+   */
   public void ensure(double[] x) {
     if (Arrays.equals(x, lastX)) {
       return;
@@ -150,10 +197,21 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     return derivative;
   }
 
+  /**
+   * Returns the value at the last point evaluated, without recalculating.
+   *
+   * @return The cached value
+   */
   public double lastValue() {
     return value;
   }
 
+  /**
+   * Returns the derivative at the last point evaluated, without
+   * recalculating. This is the cached array itself, not a copy.
+   *
+   * @return The cached derivative
+   */
   public double[] getDerivative() {
     return derivative;
   }

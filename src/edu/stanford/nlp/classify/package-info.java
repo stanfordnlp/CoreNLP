@@ -16,7 +16,7 @@
  *
  * Following is a set of examples outlining how to create, train, and use each of the different classifier types.
  *
- * <h3>Linear Classifiers</h3>
+ * <h2>Linear Classifiers</h2>
  *
  * To build a classifier, one first creates a {@code GeneralDataset}, which is a list to {@code Datum} objects.
  * A {@code Datum} is a list of descriptive features, along with a label; features and labels can be any object,
@@ -71,7 +71,7 @@
  * We can also train log-linear classifiers with real-valued features. In this case,
  * {@code RVFDatum} should be used.
  *
- * <h3>Real Valued Classifiers</h3>
+ * <h2>Real Valued Classifiers</h2>
  *
  * Real Valued Classifiers (RVF) operate over {@code RVFDatum} objects.  A RVFDatum is composed of a set of features
  * and real-value pairs.  RVFDatums are grouped using a {@code RVFDataset}.
@@ -93,7 +93,7 @@
  * if all {@code RVFDatum} objects have only features with value 1.0.  Since it is a subclass of {@code GeneralDataset},
  * the methods shown above as applied to the {@code GeneralDataset} can also be applied to the {@code RVFDataset}.
  *
- * <h3>Saving Classifiers</h3>
+ * <h2>Saving Classifiers</h2>
  *
  * You can write a Classifier using standard Java object serialization. There is a method that may help you in
  * doing this:

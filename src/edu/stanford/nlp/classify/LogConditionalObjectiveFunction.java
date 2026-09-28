@@ -27,6 +27,9 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
  * @author Angel Chang (support in place SGD - extend AbstractStochasticCachingDiffUpdateFunction)
  * @author Christopher Manning (cleaned out the cruft and sped it up in 2014)
  * @author Keenon Werling added some multithreading to the batch evaluations
+ *
+ * @param <L> The type of the labels
+ * @param <F> The type of the features
  */
 
 public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCachingDiffUpdateFunction  {
@@ -34,9 +37,12 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(LogConditionalObjectiveFunction.class);
 
+  /** The prior (regularizer) added to the objective. */
   protected final LogPrior prior;
 
+  /** The number of features. */
   protected final int numFeatures;
+  /** The number of classes. */
   protected final int numClasses;
 
   /** Normally, this contains the data. The first index is the datum number,
@@ -48,7 +54,9 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
    *  And then you need an index for both.
    */
   protected final Iterable<Datum<L, F>> dataIterable;
+  /** The label index for {@link #dataIterable}; null otherwise. */
   protected final Index<L> labelIndex;
+  /** The feature index for {@link #dataIterable}; null otherwise. */
   protected final Index<F> featureIndex;
 
   /** Same size as data if the features have values; null if the features are binary. */
@@ -56,8 +64,10 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   /** The label of each data index. */
   protected final int[] labels;
 
+  /** The weight of each datum, or null if all datums have weight 1. */
   protected final float[] dataWeights;
 
+  /** Whether to use summed conditional likelihood rather than (product) conditional likelihood. */
   protected final boolean useSummedConditionalLikelihood; //whether to use sumConditional or logConditional
 
   /** This is used to cache the numerator in batch methods. */
@@ -67,11 +77,11 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   protected double [] priorDerivative = null;
 
   /** The flag to tell the gradient computations to multithread over the data.
-   * keenon (june 2015): On my machine,
-   * */
+   *  Only used when {@link #threads} is greater than 1.
+   */
   protected boolean parallelGradientCalculation = true;
 
-  /** Multithreading gradient calculations is a bit cheaper if you reuse the threads. */
+  /** The number of threads to use when {@link #parallelGradientCalculation} is set. */
   protected int threads = ArgumentParser.threads;
 
   @Override
@@ -92,12 +102,24 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     return index / numClasses;
   }
 
-  /** Converts a Phi feature number and class index into an f(x,y) feature index. */
+  /**
+   * Converts a Phi feature number and class index into an f(x,y) feature index.
+   *
+   * @param f The feature number
+   * @param c The class index
+   * @return The index of that (feature, class) pair in the weight vector
+   */
   // [cdm2014: Tried inline this; no big gains.]
   protected int indexOf(int f, int c) {
     return f * numClasses + c;
   }
 
+  /**
+   * Reshapes a weight vector into a feature by class matrix.
+   *
+   * @param x A weight vector of size {@link #domainDimension()}
+   * @return A new {@code numFeatures x numClasses} array
+   */
   public double[][] to2D(double[] x) {
     double[][] x2 = new double[numFeatures][numClasses];
     for (int i = 0; i < numFeatures; i++) {
@@ -462,6 +484,18 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   }
 
 
+  /**
+   * Calculate the value and gradient on a batch of the data, along with
+   * an approximation of the Hessian-vector product {@code H.v},
+   * stored in {@code HdotV}, computed by finite differences.
+   * For real-valued features, this falls back to the full-data
+   * calculation of {@link #rvfcalculate(double[])} instead.
+   *
+   * @param x The point at which to calculate
+   * @param v The vector to multiply by the Hessian
+   * @param h The finite difference step size
+   * @param batch Indices of the datums to use
+   */
   public void calculateStochasticFiniteDifference(double[] x,double[] v, double h, int[] batch){
     //  THOUGHTS:
     //  does applying the renormalization (g(x+hv)-g(x)) / h at each step along the way
@@ -553,6 +587,15 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
 
 
 
+  /**
+   * Calculate the value and gradient on a batch of the data, with the
+   * prior scaled by the fraction of the data in the batch.
+   * For real-valued features, this falls back to the full-data
+   * calculation of {@link #rvfcalculate(double[])} instead.
+   *
+   * @param x The point at which to calculate
+   * @param batch Indices of the datums to use
+   */
   public void calculateStochasticGradientLocal(double[] x, int[] batch) {
     if (values != null) {
       rvfcalculate(x);
@@ -800,6 +843,17 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   }
 
 
+  /**
+   * Calculate the value and gradient on a batch of the data, along with
+   * the Hessian-vector product {@code H.v}, stored in {@code HdotV},
+   * computed by forward-mode algorithmic differentiation.
+   * Uses {@code batch.length} consecutive datums starting from the
+   * current batch position, rather than the indices in {@code batch}.
+   *
+   * @param x The point at which to calculate
+   * @param v The vector to multiply by the Hessian
+   * @param batch Determines the number of datums to use
+   */
   protected void calculateStochasticAlgorithmicDifferentiation(double[] x, double[] v, int[] batch) {
 
     log.info("*");
@@ -974,6 +1028,8 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
    * Calculate conditional likelihood for datasets with real-valued features.
    * Currently this can calculate CL only (no support for SCL).
    * TODO: sum-conditional obj. fun. with RVFs.
+   *
+   * @param x The point at which to calculate
    */
   protected void rvfcalculate(double[] x) {
     value = 0.0;
@@ -1073,23 +1129,57 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   }
 
 
+  /**
+   * Conditional likelihood of a dataset with a quadratic prior.
+   *
+   * @param dataset The training data
+   */
   public LogConditionalObjectiveFunction(GeneralDataset<L, F> dataset) {
     this(dataset, new LogPrior(LogPrior.LogPriorType.QUADRATIC));
   }
 
+  /**
+   * Conditional likelihood of a dataset with the given prior.
+   *
+   * @param dataset The training data
+   * @param prior The prior
+   */
   public LogConditionalObjectiveFunction(GeneralDataset<L, F> dataset, LogPrior prior) {
     this(dataset, prior, false);
   }
 
+  /**
+   * Conditional likelihood of a weighted dataset with the given prior.
+   *
+   * @param dataset The training data
+   * @param dataWeights The weight of each datum (may be null)
+   * @param prior The prior
+   */
   public LogConditionalObjectiveFunction(GeneralDataset<L, F> dataset, float[] dataWeights, LogPrior prior) {
     this(dataset, prior, false, dataWeights);
   }
 
+  /**
+   * Conditional or summed conditional likelihood of a dataset with the given prior.
+   *
+   * @param dataset The training data
+   * @param prior The prior
+   * @param useSumCondObjFun Whether to use summed conditional likelihood
+   */
   public LogConditionalObjectiveFunction(GeneralDataset<L, F> dataset, LogPrior prior, boolean useSumCondObjFun) {
     this(dataset, prior, useSumCondObjFun, null);
   }
 
-  /** Version passing in a GeneralDataset, which may be binary or real-valued features. */
+  /**
+   * Version passing in a GeneralDataset, which may be binary or real-valued features.
+   *
+   * @param dataset The training data
+   * @param prior The prior
+   * @param useSumCondObjFun Whether to use summed conditional likelihood
+   * @param dataWeights The weight of each datum; if null, the weights of a
+   *                    {@link WeightedDataset} or {@link WeightedRVFDataset}
+   *                    are used, and otherwise the data are unweighted
+   */
   public LogConditionalObjectiveFunction(GeneralDataset<L, F> dataset, LogPrior prior, boolean useSumCondObjFun,
                                          float[] dataWeights) {
     this.prior = prior;
@@ -1114,7 +1204,15 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   }
 
   //TODO: test this [none of our code actually even uses it].
-  /** Version where an Iterable is passed in for the data. Doesn't support dataWeights. */
+  /**
+   * Version where an Iterable is passed in for the data. Doesn't support dataWeights.
+   * Only the full-data calculation supports this form of data.
+   *
+   * @param dataIterable The training data
+   * @param logPrior The prior
+   * @param featureIndex Index used to look up the features of each datum
+   * @param labelIndex Index used to look up the label of each datum
+   */
   public LogConditionalObjectiveFunction(Iterable<Datum<L, F>> dataIterable, LogPrior logPrior, Index<F> featureIndex, Index<L> labelIndex) {
     this.prior = logPrior;
     this.useSummedConditionalLikelihood = false;
@@ -1130,27 +1228,82 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     this.dataWeights = null;
   }
 
+  /**
+   * For binary features, with a quadratic prior.
+   *
+   * @param numFeatures The number of features
+   * @param numClasses The number of classes
+   * @param data The feature indices of each datum
+   * @param labels The label index of each datum
+   * @param useSumCondObjFun Whether to use summed conditional likelihood
+   */
   public LogConditionalObjectiveFunction(int numFeatures, int numClasses, int[][] data, int[] labels, boolean useSumCondObjFun) {
     this(numFeatures, numClasses, data, labels, null, new LogPrior(LogPrior.LogPriorType.QUADRATIC), useSumCondObjFun);
   }
 
+  /**
+   * For binary features, with a quadratic prior.
+   *
+   * @param numFeatures The number of features
+   * @param numClasses The number of classes
+   * @param data The feature indices of each datum
+   * @param labels The label index of each datum
+   */
   public LogConditionalObjectiveFunction(int numFeatures, int numClasses, int[][] data, int[] labels) {
     this(numFeatures, numClasses, data, labels, new LogPrior(LogPrior.LogPriorType.QUADRATIC));
   }
 
+  /**
+   * For binary features.
+   *
+   * @param numFeatures The number of features
+   * @param numClasses The number of classes
+   * @param data The feature indices of each datum
+   * @param labels The label index of each datum
+   * @param prior The prior
+   */
   public LogConditionalObjectiveFunction(int numFeatures, int numClasses, int[][] data, int[] labels, LogPrior prior) {
     this(numFeatures, numClasses, data, labels, null, prior);
   }
 
+  /**
+   * For weighted binary features, with a quadratic prior.
+   *
+   * @param numFeatures The number of features
+   * @param numClasses The number of classes
+   * @param data The feature indices of each datum
+   * @param labels The label index of each datum
+   * @param dataWeights The weight of each datum (may be null)
+   */
   public LogConditionalObjectiveFunction(int numFeatures, int numClasses, int[][] data, int[] labels, float[] dataWeights) {
     this(numFeatures, numClasses, data, labels, dataWeights, new LogPrior(LogPrior.LogPriorType.QUADRATIC));
   }
 
+  /**
+   * For weighted binary features.
+   *
+   * @param numFeatures The number of features
+   * @param numClasses The number of classes
+   * @param data The feature indices of each datum
+   * @param labels The label index of each datum
+   * @param dataWeights The weight of each datum (may be null)
+   * @param prior The prior
+   */
   public LogConditionalObjectiveFunction(int numFeatures, int numClasses, int[][] data, int[] labels, float[] dataWeights, LogPrior prior) {
     this(numFeatures, numClasses, data, labels, dataWeights, prior, false);
   }
 
-  /* For binary features. Supports dataWeights. */
+  /**
+   * For binary features. Supports dataWeights.
+   *
+   * @param numFeatures The number of features
+   * @param numClasses The number of classes
+   * @param data The feature indices of each datum
+   * @param labels The label index of each datum
+   * @param dataWeights The weight of each datum (may be null)
+   * @param prior The prior
+   * @param useSummedConditionalLikelihood Whether to use summed conditional likelihood
+   */
   public LogConditionalObjectiveFunction(int numFeatures, int numClasses, int[][] data, int[] labels,
                                          float[] dataWeights, LogPrior prior, boolean useSummedConditionalLikelihood) {
     this.numFeatures = numFeatures;
@@ -1166,11 +1319,34 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     this.useSummedConditionalLikelihood = useSummedConditionalLikelihood;
   }
 
+  /**
+   * For binary features.
+   *
+   * @param numFeatures The number of features
+   * @param numClasses The number of classes
+   * @param data The feature indices of each datum
+   * @param labels The label index of each datum
+   * @param intPrior The prior type, as the ordinal of a {@link LogPrior.LogPriorType}
+   * @param sigma The sigma parameter of the prior
+   * @param epsilon The epsilon parameter of the prior
+   */
   public LogConditionalObjectiveFunction(int numFeatures, int numClasses, int[][] data, int[] labels, int intPrior, double sigma, double epsilon) {
     this(numFeatures, numClasses, data, null, labels, intPrior, sigma, epsilon);
   }
 
-  /** For real-valued features. Passing in processed data set. */
+  /**
+   * For real-valued features. Passing in processed data set.
+   *
+   * @param numFeatures The number of features
+   * @param numClasses The number of classes
+   * @param data The feature indices of each datum
+   * @param values The value of each feature, parallel to {@code data};
+   *               null for binary features
+   * @param labels The label index of each datum
+   * @param intPrior The prior type, as the ordinal of a {@link LogPrior.LogPriorType}
+   * @param sigma The sigma parameter of the prior
+   * @param epsilon The epsilon parameter of the prior
+   */
   public LogConditionalObjectiveFunction(int numFeatures, int numClasses, int[][] data, double[][] values, int[] labels, int intPrior, double sigma, double epsilon) {
     this.numFeatures = numFeatures;
     this.numClasses = numClasses;

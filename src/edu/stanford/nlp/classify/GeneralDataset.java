@@ -15,7 +15,9 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * The purpose of this interface is to unify {@link Dataset} and {@link RVFDataset}.
+ * The purpose of this abstract class is to unify {@link Dataset} and {@link RVFDataset}.
+ * Labels and features are stored as integer indices into {@link #labelIndex}
+ * and {@link #featureIndex}.
  * <p>
  * Note: Despite these being value classes, at present there are no equals() and hashCode() methods
  * defined so you just get the default ones from Object, so different objects aren't equal.
@@ -34,34 +36,78 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
   private static final long serialVersionUID = 19157757130054829L;
 
+  /** Index of the labels in this dataset. */
   public Index<L> labelIndex;
+  /** Index of the features in this dataset. */
   public Index<F> featureIndex;
 
+  /** The label index of each datum. May be longer than {@link #size}. */
   protected int[] labels;
+  /** The feature indices of each datum. May be longer than {@link #size}. */
   protected int[][] data;
 
+  /** The number of datums in the dataset. */
   protected int size;
 
+  /** Constructor for subclasses, which are responsible for initializing the fields. */
   public GeneralDataset() { }
 
+  /**
+   * Returns the index of the labels in this dataset.
+   *
+   * @return The label index
+   */
   public Index<L> labelIndex() { return labelIndex; }
 
+  /**
+   * Returns the index of the features in this dataset.
+   *
+   * @return The feature index
+   */
   public Index<F> featureIndex() { return featureIndex; }
 
+  /**
+   * Returns the number of distinct features in the feature index.
+   *
+   * @return The size of the feature index
+   */
   public int numFeatures() { return featureIndex.size(); }
 
+  /**
+   * Returns the number of distinct labels in the label index.
+   *
+   * @return The size of the label index
+   */
   public int numClasses() { return labelIndex.size(); }
 
+  /**
+   * Returns the label index of each datum, first trimming the
+   * internal array to the size of the dataset.
+   *
+   * @return The labels array itself, not a copy
+   */
   public int[] getLabelsArray() {
     labels = trimToSize(labels);
     return labels;
   }
 
+  /**
+   * Returns the feature indices of each datum, first trimming the
+   * internal array to the size of the dataset.
+   *
+   * @return The data array itself, not a copy
+   */
   public int[][] getDataArray() {
     data = trimToSize(data);
     return data;
   }
 
+  /**
+   * Returns the feature values of each datum, parallel to
+   * {@link #getDataArray()}.
+   *
+   * @return The values array, or null if the features are binary
+   */
   public abstract double[][] getValuesArray();
 
   /**
@@ -90,11 +136,29 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   protected abstract void initialize(int numDatums);
 
 
+  /**
+   * Returns a datum as an {@link RVFDatum}, with feature values.
+   *
+   * @param index The position of the datum in the dataset
+   * @return A new datum built from the stored indices
+   */
   public abstract RVFDatum<L, F> getRVFDatum(int index);
 
+  /**
+   * Returns a datum.
+   *
+   * @param index The position of the datum in the dataset
+   * @return A new datum built from the stored indices
+   */
   public abstract Datum<L,F> getDatum(int index);
 
 
+  /**
+   * Adds a datum to the dataset, adding its label and features to the
+   * indices as needed.
+   *
+   * @param d The datum to add
+   */
   public abstract void add(Datum<L, F> d);
 
   /**
@@ -115,6 +179,8 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   /**
    * Applies a feature count threshold to the Dataset.  All features that
    * occur fewer than <i>k</i> times are expunged.
+   *
+   * @param k The minimum count for a feature to be kept
    */
   public void applyFeatureCountThreshold(int k) {
     float[] counts = getFeatureCounts();
@@ -153,6 +219,8 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   /**
    * Retains the given features in the Dataset.  All features that
    * do not occur in features are expunged.
+   *
+   * @param features The features to keep
    */
   public void retainFeatures(Set<F> features) {
     //float[] counts = getFeatureCounts();
@@ -191,7 +259,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
   /**
    * Applies a max feature count threshold to the Dataset.  All features that
-   * occur greater than <i>k</i> times are expunged.
+   * occur more than <i>k</i> times are expunged.
+   *
+   * @param k The maximum count for a feature to be kept
    */
   public void applyFeatureMaxCountThreshold(int k) {
     float[] counts = getFeatureCounts();
@@ -229,7 +299,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
 
   /**
-   * returns the number of feature tokens in the Dataset.
+   * Returns the number of feature tokens in the Dataset.
+   *
+   * @return The total number of features over all datums
    */
   public int numFeatureTokens() {
     int x = 0;
@@ -240,7 +312,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   }
 
   /**
-   * returns the number of distinct feature types in the Dataset.
+   * Returns the number of distinct feature types in the Dataset.
+   *
+   * @return The size of the feature index
    */
   public int numFeatureTypes() {
     return featureIndex.size();
@@ -278,12 +352,14 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
   /** Divide out a (devtest) split of the dataset versus the rest of it (as a training set).
    *
-   *  @param fold The number of this fold (must be between 0 and (numFolds - 1)
-   *  @param numFolds The number of folds to divide the data into (must be greater than or equal to the
-   *                  size of the data set)
+   *  @param fold The number of this fold (must be between 0 and numFolds - 1)
+   *  @param numFolds The number of folds to divide the data into (must be at least 2 and no
+   *                  greater than the size of the data set)
    *  @return A Pair of data sets, the first being roughly (numFolds-1)/numFolds of the data items
-   *         (for use as training data_, and the second being 1/numFolds of the data, taken from the
-   *         fold<sup>th</sup> part of the data (for use as devTest data)
+   *         (for use as training data), and the second being 1/numFolds of the data, taken from the
+   *         fold<sup>th</sup> part of the data (for use as devTest data).  The last fold also
+   *         gets any items left over when the size is not divisible by numFolds.
+   *  @throws IllegalArgumentException If fold or numFolds is out of range
    */
   public Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> splitOutFold(int fold, int numFolds) {
     if (numFolds < 2 || numFolds > size() || fold < 0 || fold >= numFolds) {
@@ -301,19 +377,29 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
   /**
    * Returns the number of examples ({@link Datum}s) in the Dataset.
+   *
+   * @return The number of datums
    */
   public int size() {
     return size;
   }
 
+  /** Trims the data array to the size of the dataset. */
   protected void trimData() {
     data = trimToSize(data);
   }
 
+  /** Trims the labels array to the size of the dataset. */
   protected void trimLabels() {
     labels = trimToSize(labels);
   }
 
+  /**
+   * Copies the first {@link #size} elements of an array into a new array.
+   *
+   * @param i The array to trim
+   * @return A new array of length {@link #size}
+   */
   protected int[] trimToSize(int[] i) {
     int[] newI = new int[size];
     synchronized (System.class) {
@@ -322,6 +408,13 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     return newI;
   }
 
+  /**
+   * Copies the first {@link #size} elements of an array into a new array.
+   * The inner arrays are shared, not copied.
+   *
+   * @param i The array to trim
+   * @return A new array of length {@link #size}
+   */
   protected int[][] trimToSize(int[][] i) {
     int[][] newI = new int[size][];
     synchronized (System.class) {
@@ -330,6 +423,13 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     return newI;
   }
 
+  /**
+   * Copies the first {@link #size} elements of an array into a new array.
+   * The inner arrays are shared, not copied.
+   *
+   * @param i The array to trim
+   * @return A new array of length {@link #size}
+   */
   protected double[][] trimToSize(double[][] i) {
     double[][] newI = new double[size][];
     synchronized (System.class) {
@@ -366,14 +466,18 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   }
 
   /**
-   * Randomizes the data array in place.
+   * Randomizes the data array in place, applying the same permutation
+   * to a parallel list of side information.
    * Note: this cannot change the values array or the datum weights,
    * so redefine this for RVFDataset and WeightedDataset!
    * This uses the Fisher-Yates (or Durstenfeld-Knuth) shuffle, which is unbiased.
    * The same algorithm is used by shuffle() in j.u.Collections, and so you should get compatible
    * results if using it on a Collection with the same seed (as of JDK1.7, at least).
    *
+   * @param <E> The type of the side information
    * @param randomSeed A seed for the Random object (allows you to reproduce the same ordering)
+   * @param sideInformation A list parallel to the data, shuffled in place along with it
+   * @throws IllegalArgumentException If sideInformation is not the same size as the dataset
    */
   public <E> void shuffleWithSideInformation(long randomSeed, List<E> sideInformation) {
     if (size != sideInformation.size()) {
@@ -398,6 +502,16 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     }
   }
 
+  /**
+   * Draws a random sample of the datums into a new dataset of the same
+   * kind, which gets its own label and feature indices.
+   *
+   * @param randomSeed A seed for the Random object (allows you to reproduce the same sample)
+   * @param sampleFrac The size of the sample as a fraction of this dataset (rounded down)
+   * @param sampleWithReplacement Whether a datum may be drawn more than once
+   * @return The sampled dataset
+   * @throws RuntimeException If this is not a {@link Dataset} or {@link RVFDataset}
+   */
   public GeneralDataset<L,F> sampleDataset(long randomSeed, double sampleFrac, boolean sampleWithReplacement) {
     int sampleSize = (int)(this.size()*sampleFrac);
     Random rand = new Random(randomSeed);
@@ -445,10 +559,13 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
 
   /**
-   *
-   * @param dataset
-   * @return a new GeneralDataset whose features and ids map exactly to those of this GeneralDataset.
+   * Copies another dataset using this dataset's feature and label indices.
    * Useful when two Datasets are created independently and one wants to train a model on one dataset and test on the other. -Ramesh.
+   * The indices are locked while copying, so no new features or labels
+   * are added to them.
+   *
+   * @param dataset The dataset to copy
+   * @return a new GeneralDataset whose features and ids map exactly to those of this GeneralDataset.
    */
   public GeneralDataset<L,F> mapDataset(GeneralDataset<L,F> dataset){
     GeneralDataset<L,F> newDataset;
@@ -471,6 +588,17 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     return newDataset;
   }
 
+  /**
+   * Makes a copy of a datum with its label mapped to a new label type.
+   *
+   * @param <L> The original label type
+   * @param <L2> The new label type
+   * @param <F> The feature type
+   * @param d The datum to copy
+   * @param labelMapping Map from the original labels to the new labels
+   * @param defaultLabel The new label for any label not in {@code labelMapping}
+   * @return An {@link RVFDatum} if {@code d} is one, otherwise a {@link BasicDatum}
+   */
   public static <L,L2,F> Datum<L2,F> mapDatum(Datum<L,F> d, Map<L,L2> labelMapping, L2 defaultLabel) {
     // TODO: How to copy datum?
     L2 newLabel = labelMapping.get(d.label());
@@ -487,8 +615,14 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
 
   /**
+   * Copies another dataset using this dataset's feature index, with its
+   * labels mapped to a new label type (see {@link #mapDatum}).
    *
-   * @param dataset
+   * @param <L2> The new label type
+   * @param dataset The dataset to copy
+   * @param newLabelIndex The label index for the new dataset
+   * @param labelMapping Map from the original labels to the new labels
+   * @param defaultLabel The new label for any label not in {@code labelMapping}
    * @return a new GeneralDataset whose features and ids map exactly to those of this GeneralDataset. But labels are converted to be another set of labels
    */
   public <L2> GeneralDataset<L2,F> mapDataset(GeneralDataset<L,F> dataset, Index<L2> newLabelIndex, Map<L,L2> labelMapping, L2 defaultLabel)
@@ -516,9 +650,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   }
 
   /**
-   * Dumps the Dataset as a training/test file for SVMLight. <br>
-   * class [fno:val]+
-   * The features must occur in consecutive order.
+   * Dumps the Dataset to stdout as a training/test file for SVMLight.
+   *
+   * @see #printSVMLightFormat(PrintWriter)
    */
   public void printSVMLightFormat() {
     printSVMLightFormat(new PrintWriter(System.out));
@@ -540,16 +674,18 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     return labelMap;
   }
 
-  // todo: Fix javadoc, have unit tested
+  // todo: have unit tested
   /**
-   * Print SVM Light Format file.
+   * Print SVM Light Format file, one datum per line as
+   * {@code label fno:val fno:val ...}, with the features sorted by index.
+   * Feature numbers are the feature index + 1, since SVMLight feature
+   * numbers start at 1.
    *
-   * The following comments are no longer applicable because I am
-   * now printing out the exact labelID for each example. -Ramesh (nmramesh@cs.stanford.edu) 12/17/2009.
-   *
-   * If the Dataset has more than 2 classes, then it
+   * Labels are mapped by {@link #makeSvmLabelMap()}: if the Dataset has more than 2 classes, then it
    * prints using the label index (+1) (for svm_struct).  If it is 2 classes, then the labelIndex.get(0)
    * is mapped to +1 and labelIndex.get(1) is mapped to -1 (for svm_light).
+   *
+   * @param pw Where to print the dataset
    */
 
   public void printSVMLightFormat(PrintWriter pw) {
@@ -614,6 +750,11 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     };
   }
 
+  /**
+   * Counts the datums with each label.
+   *
+   * @return A counter from each label to its number of datums
+   */
   public ClassicCounter<L> numDatumsPerLabel(){
     labels = trimToSize(labels);
     ClassicCounter<L> numDatums = new ClassicCounter<>();
@@ -631,8 +772,10 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   public abstract void printSparseFeatureMatrix();
 
   /**
-   * prints a sparse feature matrix representation of the Dataset.  Prints the actual
+   * Prints a sparse feature matrix representation of the Dataset.  Prints the actual
    * {@link Object#toString()} representations of features.
+   *
+   * @param pw Where to print the matrix
    */
   public abstract void printSparseFeatureMatrix(PrintWriter pw);
 

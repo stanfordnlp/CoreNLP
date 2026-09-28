@@ -67,7 +67,7 @@
  * treebank and iterating over the trees contained therein. It builds
  * a histogram of sentence lengths.<p>
  *
- * <blockqouote>
+ * <blockquote>
  *   <pre>
  * import java.util.Iterator;
  * import edu.stanford.nlp.trees.*;
@@ -137,7 +137,7 @@
  *
  * /** This class counts how often each constituent appears
  * *  Use: java ConstituentCounter /turing/corpora/Treebank2/combined/wsj/07
- * *\
+ * *\/
  *
  * public class ConstituentCounter {
  *
@@ -231,7 +231,7 @@
  * </blockquote>
  *
  * <p>As well as the Treebank classes, there are corresponding Sentencebank
- *  classes (though they are not quite so extensively developed.
+ *  classes (though they are not quite so extensively developed).
  *  This final example shows use of a Sentencebank.  It also
  *  illustrates the Visitor pattern for examining sentences in a
  *  Sentencebank.  This was actually the original visitation

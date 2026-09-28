@@ -98,11 +98,20 @@ public class UniversalChineseGrammaticalRelations {
 
   private static final ReadWriteLock valuesLock = new ReentrantReadWriteLock();
 
+  /** Returns the read lock to hold while iterating over {@link #values()}.
+   *
+   *  @return The read lock for the list of relations
+   */
   public static Lock valuesLock() {
     return valuesLock.readLock();
   }
 
 
+  /** Returns the grammatical relation with the given short name.
+   *
+   *  @param s The short name, such as {@code "nsubj"}
+   *  @return The relation, or null if there is none with that name
+   */
   public static GrammaticalRelation valueOf(String s) {
     return GrammaticalRelation.valueOf(s, values(), valuesLock());
   }
@@ -127,8 +136,6 @@ public class UniversalChineseGrammaticalRelations {
   /**
    * The "nominal subject" (nsubj) grammatical relation.  A nominal subject is
    * a subject which is an noun phrase.
-   * <p>
-   * <code>
    * <pre>
    * Input:
    *   (ROOT
@@ -143,7 +150,6 @@ public class UniversalChineseGrammaticalRelations {
    *   nsubj(同步, 建设)
    *
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation NOMINAL_SUBJECT =
     new GrammaticalRelation(Language.UniversalChinese, "nsubj", "nominal subject",
@@ -163,8 +169,6 @@ public class UniversalChineseGrammaticalRelations {
    * The "nominal passive subject" (nsubjpass) grammatical relation.
    * The noun is the subject of a passive sentence.
    * The passive marker in Chinese is "被".
-   * <p>
-   * <code>
    * <pre>
    * Input:
    *   (IP
@@ -182,7 +186,6 @@ public class UniversalChineseGrammaticalRelations {
    * Output:
    *   nsubjpass(称作-3, 镍-1)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation NOMINAL_PASSIVE_SUBJECT =
     new GrammaticalRelation(Language.UniversalChinese,
@@ -193,12 +196,7 @@ public class UniversalChineseGrammaticalRelations {
   /**
    * The "clausal subject" grammatical relation.  A clausal subject is
    * a subject which is a clause.
-   * <p /> Examples:
-   * <code>
-   * <pre>
-   * </pre>
-   * </code>
-   * <p />
+   * <p>
    * Note: This one might not exist in Chinese, or very rare.
    * cdm 2016: There are a few CP-SBJ in the CTB like this one:
    * 我 估计 [CP-SBJ 他 欺负 别人 的 ] 多
@@ -225,8 +223,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "direct object" (dobj) grammatical relation.
-   * <p>
-   * <code>
    * <pre>
    * Input:
    *   (IP
@@ -243,7 +239,6 @@ public class UniversalChineseGrammaticalRelations {
    * Output:
    *   dobj(颁布, 文件)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation DIRECT_OBJECT =
     new GrammaticalRelation(Language.UniversalChinese,
@@ -266,8 +261,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "clausal complement" (ccomp) grammatical relation.
-   * <p>
-   * <code>
    * <pre>
    * Input:
    *   (IP
@@ -283,7 +276,6 @@ public class UniversalChineseGrammaticalRelations {
    * Output:
    *   ccomp(出现, 纳入)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation CLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.UniversalChinese,
@@ -322,7 +314,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "number modifier" (nummod) grammatical relation.
-   * <p>
    * <pre>
    * <code>
    * Input:
@@ -353,6 +344,9 @@ public class UniversalChineseGrammaticalRelations {
             "NP", tregexCompiler,
             "NP < (/^NP(-APP)?$/=target !<<- " + LOCATION_NOUNS + " !< NT !<: NR $+ (NP <: NR !$+ __))");
 
+  /**
+   * The "parataxis" grammatical relation (abstract).
+   */
   public static final GrammaticalRelation PARATAXIS =
           new GrammaticalRelation(Language.UniversalChinese, "parataxis", "parataxis", DEPENDENT);
 
@@ -378,9 +372,7 @@ public class UniversalChineseGrammaticalRelations {
   /**
    * The "range" grammatical relation (Chinese only).  The indirect
    * object of a VP is the quantifier phrase which is the (dative) object
-   * of the verb.<p>
-   * <p>
-   * <code>
+   * of the verb.
    * <pre>
    * Input:
    *   (VP (VV 成交)
@@ -390,7 +382,6 @@ public class UniversalChineseGrammaticalRelations {
    * Output:
    *   range(成交, 元)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation RANGE =
           new GrammaticalRelation(Language.UniversalChinese,
@@ -399,6 +390,10 @@ public class UniversalChineseGrammaticalRelations {
                   "VP < ( NP|DP|QP $+ DP|QP=target)",
                   "VP < ( VV $+ QP=target )");
 
+  /**
+   * The "possessive modifier" (nmod:poss) grammatical relation:
+   * a pronoun directly before a noun.
+   */
   public static final GrammaticalRelation POSSESSIVE_MODIFIER =
           new GrammaticalRelation(Language.UniversalChinese, "nmod:poss", "possessive modifier", NOUN_MODIFIER,
                   "NP", tregexCompiler,
@@ -441,6 +436,11 @@ public class UniversalChineseGrammaticalRelations {
       });
   */
 
+  /**
+   * The "clausal modifier of noun" (acl) grammatical relation:
+   * a CP containing a verb which precedes the noun it modifies,
+   * or an IP within an NP.
+   */
   public static final GrammaticalRelation CLAUSAL_MODIFIER =
           new GrammaticalRelation(Language.UniversalChinese, "acl", "clausal modifier of noun",
                   MODIFIER, "NP", tregexCompiler,
@@ -450,7 +450,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "relative clause modifier" (relcl) grammatical relation.
-   * <p>
    * <pre>
    * <code>
    * Input:
@@ -497,7 +496,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "adjective modifier" (amod) grammatical relation.
-   * <p>
    * <pre>
    * <code>
    * Input:
@@ -533,7 +531,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "determiner modifier" (det) grammatical relation.
-   * <p>
    * <pre>
    * <code>
    * Input:
@@ -553,7 +550,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "negative modifier" (neg) grammatical relation.
-   * <p>
    * <pre>
    * <code>
    * Input:
@@ -576,7 +572,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "adverbial modifier" (advmod) grammatical relation.
-   * <p>
    * <pre>
    * <code>
    * Input:
@@ -598,14 +593,15 @@ public class UniversalChineseGrammaticalRelations {
             "QP < (ADVP=target $+ QP)",
             "QP < ( QP $+ ADVP=target)");
 
+  /**
+   * The "clausal adverb" (advcl) grammatical relation (abstract).
+   */
   public static final GrammaticalRelation ADV_CLAUSAL_MODIFIER =
           new GrammaticalRelation(Language.UniversalChinese,
                   "advcl", "clausal adverb", ADVERBIAL_MODIFIER);
 
   /**
    * The "dvp modifier" grammatical relation.
-   * <p>
-   * <code>
    * <pre>
    * Input:
    *   (VP (DVP
@@ -615,7 +611,6 @@ public class UniversalChineseGrammaticalRelations {
    * Output:
    *   dvpmod(采取-9, 简单-7)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation DVPM_MODIFIER =
     new GrammaticalRelation(Language.UniversalChinese, "advmod:dvp", "dvp modifier",
@@ -673,7 +668,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "copula" grammatical relation.
-   * <p>
    * <pre>
    * <code>
    * Input:
@@ -693,7 +687,6 @@ public class UniversalChineseGrammaticalRelations {
   /**
    * The "marker" (mark) grammatical relation.  A marker is the word
    * introducing a finite clause subordinate to another clause.
-   * <p>
    * <pre>
    * <code>
    * Input:
@@ -817,8 +810,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "conjunct" (conj) grammatical relation.
-   * <p>
-   * <code>
    * <pre>
    * Input:
    *   (ROOT
@@ -835,7 +826,6 @@ public class UniversalChineseGrammaticalRelations {
    * Output:
    *   conj(建设, 开发) [should be reversed]
    * </pre>
-   * </code>
    *
    * TODO(pliang): make first item the head and the subsequent ones modifiers.
    */
@@ -889,8 +879,7 @@ public class UniversalChineseGrammaticalRelations {
   /**
    * The "coordination" grammatical relation.
    * A coordination is the relation between
-   * an element and a conjunction.<p>
-   * <code>
+   * an element and a conjunction.
    * <pre>
    * Input:
    *   (ROOT
@@ -904,7 +893,6 @@ public class UniversalChineseGrammaticalRelations {
    * Output:
    *   cc(建设, 与) [should be cc(开发, 与)]
    * </pre>
-   * </code>
    * TODO(pliang): by convention, the first item in the coordination should be
    * chosen, but currently, it's the head, which happens to be the last.
    */
@@ -917,7 +905,6 @@ public class UniversalChineseGrammaticalRelations {
   /**
    * The "case" grammatical relation.
    * This covers prepositions, localizers, and associative markers.
-   * <p>
    * <pre>
    * <code>
    * Input:
@@ -1067,6 +1054,11 @@ public class UniversalChineseGrammaticalRelations {
                   ADVERBIAL_MODIFIER, "VP|IP", tregexCompiler,
                   "VP|IP < (LCP=target !< IP) ");
 
+  /**
+   * The "clausal localizer complement" (advcl:loc) grammatical relation:
+   * a localizer phrase containing a clause.  Compare
+   * {@link #LOCALIZER_COMPLEMENT}, for localizer phrases without one.
+   */
   public static final GrammaticalRelation CLAUSAL_LOCALIZER_COMPLEMENT =
           new GrammaticalRelation(Language.UniversalChinese,
                   "advcl:loc", "localizer complement",
@@ -1092,8 +1084,6 @@ public class UniversalChineseGrammaticalRelations {
 
   /**
    * The "classifier marker" grammatical relation.
-   * <p>
-   * <code>
    * <pre>
    * Input:
    *   ((QP (CD 七十一)
@@ -1102,7 +1092,6 @@ public class UniversalChineseGrammaticalRelations {
    * Output:
    *   mark:clf(七十一, 件)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation CLASSIFIER_MODIFIER =
     new GrammaticalRelation(Language.UniversalChinese,
@@ -1305,10 +1294,12 @@ public class UniversalChineseGrammaticalRelations {
   private static final List<GrammaticalRelation> synchronizedValues =
     Collections.synchronizedList(values);
 
+  /** The relations which are part of Universal Dependencies, as opposed to Chinese-only. */
   public static final Set<GrammaticalRelation> universalValues = new HashSet<>();
 
-  // Map from GrammaticalRelation short names to their corresponding
-  // GrammaticalRelation objects
+  /** Map from GrammaticalRelation short names to their corresponding
+   *  GrammaticalRelation objects.
+   */
   public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<>();
 
   static {

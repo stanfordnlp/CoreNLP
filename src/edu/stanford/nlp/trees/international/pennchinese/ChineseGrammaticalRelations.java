@@ -82,13 +82,23 @@ public class ChineseGrammaticalRelations {
     return Collections.unmodifiableList(values);
   }
 
+  /** Guards the list of relations; see {@link #valuesLock()}. */
   public static final ReadWriteLock valuesLock = new ReentrantReadWriteLock();
 
+  /** Returns the read lock to hold while iterating over {@link #values()}.
+   *
+   *  @return The read lock for the list of relations
+   */
   public static Lock valuesLock() {
     return valuesLock.readLock();
   }
 
 
+  /** Returns the grammatical relation with the given short name.
+   *
+   *  @param s The short name, such as {@code "nsubj"}
+   *  @return The relation, or null if there is none with that name
+   */
   public static GrammaticalRelation valueOf(String s) {
     return GrammaticalRelation.valueOf(s, values(), valuesLock());
   }
@@ -120,7 +130,6 @@ public class ChineseGrammaticalRelations {
   /**
    * The "conjunct" grammatical relation.
    * Example:
-   * <code>
    * <pre>
    * (ROOT
    *   (IP
@@ -136,7 +145,6 @@ public class ChineseGrammaticalRelations {
    *
    * conj(建设, 开发)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation CONJUNCT =
     new GrammaticalRelation(Language.Chinese,
@@ -199,7 +207,6 @@ public class ChineseGrammaticalRelations {
    * an element and a conjunction.<p>
    * <br>
    * Example:
-   * <code>
    * <pre>
    * (ROOT
    *   (IP
@@ -212,7 +219,6 @@ public class ChineseGrammaticalRelations {
    *
    * cc(建设, 与)
    * </pre>
-   * </code>
    */
 
   public static final GrammaticalRelation COORDINATION =
@@ -246,7 +252,6 @@ public class ChineseGrammaticalRelations {
    * a subject which is an noun phrase.<p>
    * <br>
    * Example:
-   * <code>
    * <pre>
    * (ROOT
    *   (IP
@@ -259,7 +264,6 @@ public class ChineseGrammaticalRelations {
    *
    * nsubj(同步, 建设)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation NOMINAL_SUBJECT =
     new GrammaticalRelation(Language.Chinese, "nsubj", "nominal subject",
@@ -271,7 +275,6 @@ public class ChineseGrammaticalRelations {
   /**
    * The "topic" grammatical relation.
    * Example:
-   * <code>
    * <pre>
    * (IP
    *   (NP (NN 建筑))
@@ -289,7 +292,6 @@ public class ChineseGrammaticalRelations {
    *
    * top(是, 建筑)
    * </pre>
-   * </code>
    */
 
   public static final GrammaticalRelation TOP_SUBJECT =
@@ -304,7 +306,6 @@ public class ChineseGrammaticalRelations {
    * The noun is the subject of a passive sentence.
    * The passive marker in Chinese is "被".
    * <p>Example:
-   * <code>
    * <pre>
    * (IP
    *   (NP (NN 镍))
@@ -321,7 +322,6 @@ public class ChineseGrammaticalRelations {
    *
    * nsubjpass(称作-3, 镍-1)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation NOMINAL_PASSIVE_SUBJECT =
     new GrammaticalRelation(Language.Chinese,
@@ -333,13 +333,7 @@ public class ChineseGrammaticalRelations {
   /**
    * The "clausal subject" grammatical relation.  A clausal subject is
    * a subject which is a clause.
-   * <br>
-   * Examples:
-   * <code>
-   * <pre>
-   * </pre>
-   * </code>
-   * <br>
+   * <p>
    * Note: This one might not exist in Chinese, or very rare.
    */
   public static final GrammaticalRelation CLAUSAL_SUBJECT =
@@ -371,8 +365,7 @@ public class ChineseGrammaticalRelations {
 
   /**
    * The "direct object" grammatical relation.
-   * <p />Examples:
-   * <code>
+   * <p>Examples:
    * <pre>
    *(IP
    *   (NP (NR 上海) (NR 浦东))
@@ -388,7 +381,6 @@ public class ChineseGrammaticalRelations {
    *
    * dobj(颁布, 文件)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation DIRECT_OBJECT =
     new GrammaticalRelation(Language.Chinese,
@@ -945,7 +937,6 @@ public class ChineseGrammaticalRelations {
 
   /**
    * The "dvp modifier" grammatical relation.
-   * <code>
    * <pre>
    * (ADVP (AD 不))
    *    (VP (VC 是)
@@ -957,7 +948,6 @@ public class ChineseGrammaticalRelations {
    *
    * dvpmod(采取-9, 简单-7)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation DVPM_MODIFIER =
     new GrammaticalRelation(Language.Chinese, "dvpmod", "dvp modifier",
@@ -967,7 +957,6 @@ public class ChineseGrammaticalRelations {
 
   /**
    * The "associative marker" grammatical relation.
-   * <code>
    * <pre>
    *       (NP (DNP
    *             (NP (NP (NR 浦东))
@@ -978,7 +967,6 @@ public class ChineseGrammaticalRelations {
    *
    * assm(开发-31, 的-32)
    * </pre>
-   * </code>
    */
   public static final GrammaticalRelation ASSOCIATIVE_MODIFIER =
     new GrammaticalRelation(Language.Chinese,
@@ -1214,6 +1202,9 @@ public class ChineseGrammaticalRelations {
   private static final List<GrammaticalRelation> synchronizedValues =
     Collections.synchronizedList(values);
 
+  /** Not populated for these relations; see
+   *  {@link UniversalChineseGrammaticalRelations#universalValues}.
+   */
   public static final Set<GrammaticalRelation> universalValues = new HashSet<>();
 
   /** Map from Chinese GrammaticalRelation short names to their corresponding
