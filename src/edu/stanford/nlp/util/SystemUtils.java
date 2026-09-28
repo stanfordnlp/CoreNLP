@@ -350,7 +350,7 @@ public class SystemUtils {
 
 
   /**
-   * Returns the process ID
+   * Returns the process ID of this JVM, as reported by {@link ProcessHandle}.
    *
    * @return The process ID of this JVM
    * @throws UnsupportedOperationException If the platform does not support getting the process ID
