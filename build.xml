@@ -85,6 +85,7 @@
 
       <bottom><![CDATA[<font size="2"><a href="https://nlp.stanford.edu" target="_top">Stanford NLP Group</a></font>]]></bottom>
       <link href="https://docs.oracle.com/en/java/javase/11/docs/api/"/>
+      <!-- <arg value="-Xmaxwarns"/> <arg value="10000"/> -->
     </javadoc>
 
   </target>
