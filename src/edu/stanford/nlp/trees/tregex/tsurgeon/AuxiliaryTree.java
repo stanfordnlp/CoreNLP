@@ -13,6 +13,10 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /**
+ * A tree fragment used by Tsurgeon operations which build trees, such as
+ * adjoin, insert and replace.  Nodes may be named with {@code =name}, and
+ * for adjunction one leaf, the foot, is marked with a trailing {@code @}.
+ *
  * @author Roger Levy (rog@nlp.stanford.edu)
  */
 public class AuxiliaryTree  {
@@ -27,6 +31,15 @@ public class AuxiliaryTree  {
   private final Map<String,Tree> namesToNodes; // this one has a getter.
 
 
+  /**
+   * Builds an auxiliary tree from a parsed tree, destructively stripping the
+   * node names and the foot marker out of its labels and unescaping them.
+   *
+   * @param tree the tree; modified in place and kept, not copied
+   * @param mustHaveFoot whether the tree is required to have a foot node
+   * @throws TsurgeonParseException if a foot node is required but missing,
+   *   or if there is more than one foot node
+   */
   public AuxiliaryTree(Tree tree, boolean mustHaveFoot) {
     originalTreeString = tree.toString();
     this.tree = tree;
@@ -47,6 +60,11 @@ public class AuxiliaryTree  {
     nodesToNames = null;
   }
 
+  /**
+   * Returns the named nodes of this tree.
+   *
+   * @return the map from names to nodes; the internal map, not a copy
+   */
   public Map<String, Tree> namesToNodes() {
     return namesToNodes;
   }
@@ -64,6 +82,11 @@ public class AuxiliaryTree  {
    * produce trees which are of the same type as the input trees.
    * Each of the tsurgeon relations which copies a tree should include
    * pass in the correct factories.
+   *
+   * @param matcher the matcher whose new node names get the names in the copy
+   * @param treeFactory the factory used to build the copied nodes
+   * @param labelFactory the factory used to copy the labels; if null, CoreLabels are used
+   * @return the copy, with its own foot and name map
    */
   public AuxiliaryTree copy(TsurgeonMatcher matcher, TreeFactory treeFactory, LabelFactory labelFactory) {
     if (labelFactory == null) {

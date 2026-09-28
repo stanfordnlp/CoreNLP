@@ -13,8 +13,14 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
  *
  */
 public class SetRoots extends SsurgeonEdit {
+  /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL = "setRoots";
   List<String> newRootNames;
+  /**
+   * Creates an edit which sets the roots to the named nodes.
+   *
+   * @param newRootNames The names of the nodes to use as roots.  The list is kept, not copied.
+   */
   public SetRoots(List<String> newRootNames) {
     this.newRootNames = newRootNames;
   }
@@ -51,6 +57,9 @@ public class SetRoots extends SsurgeonEdit {
   }
 
   /**
+   * Does nothing.
+   *
+   * @param args Ignored
    */
   public static void main(String[] args) {
     // TODO Auto-generated method stub

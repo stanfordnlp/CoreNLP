@@ -27,10 +27,17 @@ import edu.stanford.nlp.util.StringUtils;
 
 public class CollapseSubtree extends SsurgeonEdit {
 
+  /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL="collapseSubtree";
-  protected String rootName; // Name of the root node in match
+  /** Name of the root node in match */
+  protected String rootName;
 
 
+  /**
+   * Creates a CollapseSubtree for the subtree under the given node.
+   *
+   * @param rootNodeName the name of the root node of the subtree in the match
+   */
   public CollapseSubtree(String rootNodeName) {
     this.rootName = rootNodeName;
   }

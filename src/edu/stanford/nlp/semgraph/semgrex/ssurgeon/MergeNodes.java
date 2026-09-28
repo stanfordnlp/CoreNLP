@@ -30,10 +30,20 @@ import edu.stanford.nlp.util.Pair;
  * @author John Bauer
  */
 public class MergeNodes extends SsurgeonEdit {
+  /** The name of this edit in an Ssurgeon script */
   public static final String LABEL = "mergeNodes";
+  /** The names of the matched nodes to merge */
   final List<String> names;
+  /** Attributes to set on the merged word, such as its word or lemma */
   final Map<String, String> attributes;
 
+  /**
+   * Creates an edit which merges the named nodes into one word.
+   *
+   * @param names The names of the nodes in the Semgrex pattern; copied
+   * @param attributes Attributes to set on the merged word; copied.
+   *   Word and lemma default to the concatenation of the merged words
+   */
   public MergeNodes(List<String> names, Map<String, String> attributes) {
     this.names = new ArrayList<>(names);
     this.attributes = new TreeMap<>(attributes);
@@ -67,6 +77,12 @@ public class MergeNodes extends SsurgeonEdit {
    * If so, then the two nodes can be treated as equivalent when merging nodes.
    * Otherwise, since there are two different heads, we can't pick a node
    * to treat as the head of the phrase, and we will have to abort
+   *
+   * @param sg The graph containing the nodes
+   * @param head The node currently chosen as the head
+   * @param candidate The node to compare against the head
+   * @param ignoreNodes Parents in this set are not considered
+   * @return true if both nodes have the same set of (parent, relation) pairs
    */
   public static boolean hasSameParents(SemanticGraph sg, IndexedWord head, IndexedWord candidate, Set<IndexedWord> ignoreNodes) {
     Set<Pair<IndexedWord, GrammaticalRelation>> headParents = new HashSet<>();

@@ -13,6 +13,9 @@ import edu.stanford.nlp.ling.CoreAnnotation;
  */
 public class SemanticGraphCoreAnnotations {
 
+  /** Creates a SemanticGraphCoreAnnotations.  All members are static, so this is not normally needed. */
+  public SemanticGraphCoreAnnotations() { }
+
   /**
    * The CoreMap key for getting the syntactic dependencies of a sentence.
    * These are collapsed dependencies!
@@ -24,6 +27,9 @@ public class SemanticGraphCoreAnnotations {
    */
   @Deprecated
   public static class CollapsedDependenciesAnnotation implements CoreAnnotation<SemanticGraph> {
+    /** Creates the annotation key. */
+    public CollapsedDependenciesAnnotation() { }
+
     @Override
     public Class<SemanticGraph> getType() {
       return SemanticGraph.class;
@@ -39,6 +45,9 @@ public class SemanticGraphCoreAnnotations {
    *
    */
   public static class BasicDependenciesAnnotation implements CoreAnnotation<SemanticGraph> {
+    /** Creates the annotation key. */
+    public BasicDependenciesAnnotation() { }
+
     @Override
     public Class<SemanticGraph> getType() {
       return SemanticGraph.class;
@@ -57,6 +66,9 @@ public class SemanticGraphCoreAnnotations {
    */
   @Deprecated
   public static class CollapsedCCProcessedDependenciesAnnotation implements CoreAnnotation<SemanticGraph> {
+    /** Creates the annotation key. */
+    public CollapsedCCProcessedDependenciesAnnotation() { }
+
     @Override
     public Class<SemanticGraph> getType() {
       return SemanticGraph.class;
@@ -70,6 +82,9 @@ public class SemanticGraphCoreAnnotations {
    * This key is typically set on sentence annotations.
    */
   public static class EnhancedDependenciesAnnotation implements CoreAnnotation<SemanticGraph> {
+    /** Creates the annotation key. */
+    public EnhancedDependenciesAnnotation() { }
+
     @Override
     public Class<SemanticGraph> getType() {
       return SemanticGraph.class;
@@ -83,6 +98,9 @@ public class SemanticGraphCoreAnnotations {
    * This key is typically set on sentence annotations.
    */
   public static class EnhancedPlusPlusDependenciesAnnotation implements CoreAnnotation<SemanticGraph> {
+    /** Creates the annotation key. */
+    public EnhancedPlusPlusDependenciesAnnotation() { }
+
     @Override
     public Class<SemanticGraph> getType() {
       return SemanticGraph.class;
@@ -96,6 +114,9 @@ public class SemanticGraphCoreAnnotations {
    * This key is typically set on sentence annotations.
    */
   public static class AlternativeDependenciesAnnotation implements CoreAnnotation<SemanticGraph> {
+    /** Creates the annotation key. */
+    public AlternativeDependenciesAnnotation() { }
+
     @Override
     public Class<SemanticGraph> getType() {
       return SemanticGraph.class;
@@ -106,8 +127,11 @@ public class SemanticGraphCoreAnnotations {
    * An enum to represent the three types of dependencies generally supported
    */
   public enum DependenciesType {
+    /** Basic dependencies, stored under {@link BasicDependenciesAnnotation} */
     BASIC            (BasicDependenciesAnnotation.class),
+    /** Enhanced dependencies, stored under {@link EnhancedDependenciesAnnotation} */
     ENHANCED         (EnhancedDependenciesAnnotation.class),
+    /** Enhanced++ dependencies, stored under {@link EnhancedPlusPlusDependenciesAnnotation} */
     ENHANCEDPLUSPLUS (EnhancedPlusPlusDependenciesAnnotation.class);
 
     private final Class<? extends CoreAnnotation<SemanticGraph>> annotation;
@@ -116,6 +140,11 @@ public class SemanticGraphCoreAnnotations {
       this.annotation = annotation;
     }
 
+    /**
+     * Returns the annotation key under which this type of graph is stored.
+     *
+     * @return the CoreAnnotation class for this dependencies type
+     */
     public Class<? extends CoreAnnotation<SemanticGraph>> annotation() {
       return this.annotation;
     }

@@ -47,6 +47,10 @@ public class SemanticGraphFormatter {
 
   // constructors ---------------------------------------------------------------
 
+  /**
+   * Creates a formatter with the default settings: width 80, indent 4,
+   * smart indentation, relations and tags shown, annotations and indices hidden.
+   */
   public SemanticGraphFormatter() {
     this(DEFAULT_WIDTH,
          DEFAULT_INDENT,
@@ -57,6 +61,18 @@ public class SemanticGraphFormatter {
          DEFAULT_SHOW_INDICES);
   }
 
+  /**
+   * Creates a formatter with the given settings.
+   *
+   * @param width the line width beyond which a node is broken over multiple lines
+   * @param indent the number of spaces to indent children when {@code smartIndent} is false
+   * @param smartIndent if true, indent children to line up under the parent's label
+   *   (and after the relation name) rather than by {@code indent} spaces
+   * @param showRelns whether to print relation names before dependents
+   * @param showTags whether to append the POS tag to each word
+   * @param showAnnos whether to append each word's full annotation map
+   * @param showIndices whether to prefix each word with its sentence index and word index
+   */
   public SemanticGraphFormatter(int width,
                                 int indent,
                                 boolean smartIndent,
@@ -79,6 +95,10 @@ public class SemanticGraphFormatter {
   /**
    * Returns a pretty-printed string representation of the given semantic graph,
    * on one or more lines.
+   * This uses internal working state, so a single formatter is not thread-safe.
+   *
+   * @param sg the graph to format
+   * @return the formatted graph, wrapped in brackets; {@code "[]"} for an empty graph
    */
   public String formatSemanticGraph(SemanticGraph sg) {
     if (sg.vertexSet().isEmpty()) {
@@ -227,6 +247,11 @@ public class SemanticGraphFormatter {
     System.out.println();
   }
 
+  /**
+   * Prints a few example graphs in compact and pretty-printed form, for testing.
+   *
+   * @param args ignored
+   */
   public static void main(String[] args) {
 
     SemanticGraphFormatter fmt = new SemanticGraphFormatter();

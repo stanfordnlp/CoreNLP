@@ -28,9 +28,17 @@ public class SsurgeonWordlist {
     buf.write(")");
     return buf.toString();
   }
+  /**
+   * Returns the id of this word list, which predicate tests use to refer to it.
+   *
+   * @return the id
+   */
   public String getID() { return id ; }
   /**
    * Reconstructs the resource from the XML file
+   *
+   * @param rootElt the resource element; its {@code id} attribute gives the
+   *   id, and the text of each {@code word} element below it is a word
    */
   @SuppressWarnings("unchecked")
   public SsurgeonWordlist(Element rootElt) {
@@ -45,11 +53,20 @@ public class SsurgeonWordlist {
     }    
   }
   
+  /**
+   * Tests whether a word is in this list.  The comparison is case sensitive.
+   *
+   * @param testWord the word to look for
+   * @return whether the word is in the list
+   */
   public boolean contains(String testWord) {
     return words.contains(testWord);
   }
   
   /**
+   * Does nothing.
+   *
+   * @param args ignored
    */
   public static void main(String[] args) {
     // TODO Auto-generated method stub

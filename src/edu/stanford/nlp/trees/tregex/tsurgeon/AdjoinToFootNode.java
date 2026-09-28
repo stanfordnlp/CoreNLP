@@ -14,6 +14,12 @@ public class AdjoinToFootNode extends AdjoinNode  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(AdjoinToFootNode.class);
 
+  /**
+   * Creates an {@code adjoinF} operation.
+   *
+   * @param t The auxiliary tree to adjoin; it is copied each time the operation is applied
+   * @param p The pattern which selects the target node
+   */
   public AdjoinToFootNode(AuxiliaryTree t, TsurgeonPattern p) {
     super("adjoinF", t, p);
   }

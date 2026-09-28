@@ -5,12 +5,19 @@ import java.io.*;
 
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 
+/**
+ * A predicate which is true when any of the predicates in this list is true,
+ * and false when the list is empty.
+ */
 public class SsurgOrPred extends ArrayList<SsurgPred> implements SsurgPred {
 
   /**
    * 
    */
   private static final long serialVersionUID = 4581463857927967518L;
+
+  /** Creates an empty disjunction. */
+  public SsurgOrPred() { }
 
   public boolean test(SemgrexMatcher matcher) {
     for (SsurgPred term : this) {

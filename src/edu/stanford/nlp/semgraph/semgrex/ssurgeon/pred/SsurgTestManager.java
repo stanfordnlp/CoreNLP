@@ -25,12 +25,23 @@ public class SsurgTestManager {
 //  
   }
   
+  /**
+   * Returns the singleton instance, creating it on first use.
+   *
+   * @return The shared SsurgTestManager
+   */
   public static SsurgTestManager inst() {
     if (instance == null)
       instance = new SsurgTestManager();
     return instance;
   }
 
+  /**
+   * Registers the class of {@code nodeTestObj} under its ID.
+   * The class must have a public constructor taking the match name as a String.
+   *
+   * @param nodeTestObj An example of the test to register
+   */
   public void registerNodeTest(NodeTest nodeTestObj) {
     nodeTests.put(nodeTestObj.getID(), nodeTestObj.getClass());
   }
@@ -38,6 +49,11 @@ public class SsurgTestManager {
   /**
    * Given the id of the test, and the match name argument, returns a new instance
    * of the given NodeTest, otherwise throws an exception if not available.
+   *
+   * @param id The ID the test was registered under
+   * @param matchName The match name passed to the test's constructor
+   * @return A new instance of the test.  An unregistered id results in a NullPointerException
+   * @throws SsurgeonRuntimeException if the test could not be constructed
    */
   public NodeTest getNodeTest(String id, String matchName) {
     try {

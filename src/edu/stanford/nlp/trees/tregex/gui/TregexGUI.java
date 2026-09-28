@@ -79,29 +79,48 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
 
   private static TregexGUI instance; // = null;
 
+  /** Menu item which opens the preferences dialog */
   private JMenuItem preferences;
+  /** Menu item which loads tree files */
   private JMenuItem loadFiles;
+  /** Menu item which saves the matched trees */
   private JMenuItem saveMatches;
+  /** Menu item which saves the matched sentences */
   private JMenuItem saveSentences;
+  /** Menu item which saves the search statistics */
   private JMenuItem saveHistory;
+  /** Menu item which loads a Tsurgeon script */
   private JMenuItem loadTsurgeon;
+  /** Check box menu item which turns Tdiff on and off */
   private JMenuItem tDiff;
+  /** Menu item which exits; only added to the menu when not on a Mac */
   private JMenuItem quit; //for when we're not running on a mac
+  /** Menu item which copies from the focused component */
   private JMenuItem copy;
+  /** Menu item which runs the search */
   private JMenuItem searchMenuItem;
+  /** Menu item which selects the previous matching tree */
   private JMenuItem prevMatch;
+  /** Menu item which selects the next matching tree */
   private JMenuItem nextMatch;
+  /** Menu item which scrolls to the previous match within the displayed tree */
   private JMenuItem prevTreeMatch;
+  /** Menu item which scrolls to the next match within the displayed tree */
   private JMenuItem nextTreeMatch;
+  /** Menu item which removes all of the loaded files */
   private JMenuItem clearFileList;
 
   //file choosing components for loading trees
+  /** The chooser for loading files, created when first needed */
   private JFileChooser chooser; // = null;
 
+  /** Transformer applied to trees as they are loaded, or null for none */
   final TreeTransformer transformer; // used in FileTreeModel
 
   //preferences, about panel so that we don't have to remake each time
+  /** The preferences dialog, created when first needed */
   private PreferencesPanel preferenceDialog; // = null;
+  /** The about dialog */
   private JDialog aboutBox; // = null;
 
   private static final String TRANSFORMER = "transformer";
@@ -245,6 +264,8 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   /**
    * Used to change the status of the save file menu item to reflect
    * whether any trees are available to save.
+   *
+   * @param enabled whether the save matches and save sentences items are enabled
    */
   public void setSaveEnabled(boolean enabled) {
     if (saveMatches.isEnabled() != enabled) {
@@ -256,6 +277,8 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   /**
    * Used to change the status of the saveHistory file menu item to reflect
    * whether any search statistics are available to save
+   *
+   * @param enabled whether the save statistics item is enabled
    */
   public void setSaveHistoryEnabled(boolean enabled) {
     if (saveHistory.isEnabled() != enabled) {
@@ -266,6 +289,8 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   /**
    * Used to change the status of the tsurgeon file menu item to reflect
    * whether tsurgeon is enabled
+   *
+   * @param enabled whether the load Tsurgeon script item is enabled
    */
   public void setTsurgeonEnabled(boolean enabled) {
     if (loadTsurgeon.isEnabled() != enabled) {
@@ -281,11 +306,20 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   }
 
 
-  /** This method duplicates the test done in jdk.internal.org.jline.utils.OSUtils */
+  /**
+   * This method duplicates the test done in jdk.internal.org.jline.utils.OSUtils
+   *
+   * @return whether the operating system is macOS
+   */
   public static boolean isMacOS() {
     return System.getProperty("os.name").toLowerCase().startsWith("mac");
   }
 
+  /**
+   * Returns the main window.
+   *
+   * @return the window, or null if it has not been created yet
+   */
   public static TregexGUI getInstance() {
     return instance;
   }
@@ -509,11 +543,18 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   }
 
   
+  /**
+   * Action listener for copy menu items: tracks the component which has
+   * the keyboard focus and runs that component's action for the command.
+   */
   public static class TransferActionListener implements ActionListener, PropertyChangeListener {
 
     private JComponent focusOwner; // = null;
 
     //This code based on Java DnD tutorial
+    /**
+     * Creates the listener and registers it to follow the keyboard focus.
+     */
     public TransferActionListener() {
       KeyboardFocusManager manager = KeyboardFocusManager.
       getCurrentKeyboardFocusManager();
@@ -647,12 +688,17 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     return filter;
   }
 
+  /** The kinds of filter which can be applied to file names when loading a directory */
   public enum FilterType {
+    /** No filter */
     none("None"),
+    /** The file name must end with the given string */
     hasExtension("Has extension: "),
+    /** The file name must start with the given string */
     hasPrefix("Has prefix: "),
 //    hasNumGreaterThan("Has number greater than: "),
 //    hasNumLessThan("Has number less than: ");
+    /** The number in the file name must be in the given ranges */
     isInRange("Has number in range: ");
 
     private final String text;
@@ -785,7 +831,9 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   }
 
   //Tdiff
+  /** Whether Tdiff is on */
   private boolean doTdiff = false;
+  /** The number of treebanks Tdiff compares: the first active one is the reference */
   public static final int MAX_TDIFF_TREEBANKS = 2;
 
   private void doTdiff() {
@@ -800,6 +848,11 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     }
   }
 
+  /**
+   * Returns whether Tdiff is on, in which case matches are compared against the first active treebank.
+   *
+   * @return whether Tdiff is on
+   */
   public boolean isTdiffEnabled() { return doTdiff; }
 
   public void actionPerformed(ActionEvent e) {
@@ -836,11 +889,17 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     }
   }
 
+  /**
+   * Removes all of the loaded files.
+   */
   public void doClearFileList() {
     FilePanel.getInstance().clearAll();
     clearFileList.setEnabled(false);
   }
 
+  /**
+   * Exits the program.
+   */
   public static void doQuit() {
     System.exit(0);
   }
@@ -861,6 +920,8 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
    * class is used as a TreeTransformer when loading in trees.
    * <br>
    * All other arguments will be interpreted as filenames to preload.
+   *
+   * @param args the command line arguments
    */
   public static void main(String[] args) {
     try {
@@ -889,6 +950,9 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   }
 
 
+  /**
+   * Shows the about dialog.
+   */
   public void about() {
     aboutBox.setSize(400, 240);
     aboutBox.setLocation((int)this.getLocation().getX() + 30, (int)this.getLocation().getY() + 30);

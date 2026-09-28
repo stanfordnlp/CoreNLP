@@ -19,10 +19,17 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
  *
  */
 public class RemoveNamedEdge extends SsurgeonEdit {  
+  /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL = "removeNamedEdge";
 
+  /** The name of the edge to remove */
   protected final String edgeName; // Name of the matched edge in the SemgrexPattern
   
+  /**
+   * Creates an edit which removes a named edge.
+   *
+   * @param edgeName The name of the edge in the Semgrex pattern
+   */
   public RemoveNamedEdge(String edgeName) {
     this.edgeName = edgeName;
   }
@@ -50,6 +57,11 @@ public class RemoveNamedEdge extends SsurgeonEdit {
     return false;
   }
 
+  /**
+   * Returns the name of the edge this edit removes.
+   *
+   * @return The edge name
+   */
   public String getEdgeName() {
     return edgeName;
   }

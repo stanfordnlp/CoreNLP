@@ -20,6 +20,13 @@ public class Alignment {
   private final double score;
   private final String justification;
 
+  /**
+   * Creates an alignment which uses the given map directly (it is not copied).
+   *
+   * @param map map from hypothesis words to text words
+   * @param score the score of this alignment
+   * @param justification a justification string, possibly null
+   */
   public Alignment(Map<IndexedWord, IndexedWord> map,
                    double score,
                    String justification) {
@@ -28,6 +35,11 @@ public class Alignment {
     this.justification = justification;
   }
 
+  /**
+   * Copy constructor.  The map is copied, but the words in it are shared.
+   *
+   * @param other the alignment to copy
+   */
   public Alignment(Alignment other) {
     // note that we aren't copying the words
     map = new HashMap<>(other.map);
@@ -35,29 +47,51 @@ public class Alignment {
     justification = other.justification;
   }
 
-  /*
+  /**
    * Returns the score for this <code>Alignment</code>.
+   *
+   * @return the score
    */
   public double getScore() { return score; }
 
-  /*
+  /**
    * Returns the map from hypothesis words to text words for this
-   * <code>Alignment</code>.
+   * <code>Alignment</code>.  This is the internal map, not a copy.
+   *
+   * @return the map from hypothesis words to text words
    */
   public Map<IndexedWord, IndexedWord> getMap() {
     return map;
   }
 
-  /*
+  /**
    * Returns the justification for this <code>Alignment</code>.
+   *
+   * @return the justification, possibly null
    */
   public String getJustification() { return justification; }
 
+  /**
+   * Returns this alignment in the "readable" format.
+   *
+   * @return a multi-line description of the alignment and its score
+   */
   @Override
   public String toString() {
     return toString("readable");
   }
 
+  /**
+   * Returns this alignment as a String in the given format.
+   * "readable" and "readable-tag-index" list the alignments sorted by
+   * hypothesis word followed by the score, "readable-old" lists them
+   * unsorted, and any other format returns the map's toString.
+   * The format is compared with {@code ==}, so it must be one of those
+   * String literals (or an interned String) to be recognized.
+   *
+   * @param format the name of the output format
+   * @return the alignment in the requested format
+   */
   public String toString(String format) {
     StringBuilder sb = new StringBuilder();
     if (format == "readable") {
@@ -150,6 +184,18 @@ public class Alignment {
    * index of the node in the text (passage) SemanticGraph to which the i'th
    * node in the hypothesis SemanticGraph is aligned, or -1 if it is aligned to
    * NO_WORD.
+   * Nodes are looked up with {@link SemanticGraph#getNodeByIndex}, so i is
+   * used as a word index in hypGraph.
+   *
+   * @param txtGraph the text graph
+   * @param hypGraph the hypothesis graph
+   * @param indexes for each hypothesis node, the index of the aligned text node, or -1
+   * @param score the score of the alignment
+   * @param justification a justification string, possibly null
+   * @return the new alignment
+   * @throws IllegalArgumentException if either graph is null or empty,
+   *   indexes is null or not the same length as hypGraph, or an index is
+   *   not found in its graph
    */
   public static Alignment makeFromIndexArray(SemanticGraph txtGraph,
                                              SemanticGraph hypGraph,
@@ -177,12 +223,31 @@ public class Alignment {
     return new Alignment(map, score, justification);
   }
 
+  /**
+   * Same as {@link #makeFromIndexArray(SemanticGraph, SemanticGraph, int[], double, String)}
+   * with a score of 0 and no justification.
+   *
+   * @param txtGraph the text graph
+   * @param hypGraph the hypothesis graph
+   * @param indexes for each hypothesis node, the index of the aligned text node, or -1
+   * @return the new alignment
+   */
   public static Alignment makeFromIndexArray(SemanticGraph txtGraph,
                                              SemanticGraph hypGraph,
                                              int[] indexes) {
     return makeFromIndexArray(txtGraph, hypGraph, indexes, 0.0, null);
   }
 
+  /**
+   * Same as {@link #makeFromIndexArray(SemanticGraph, SemanticGraph, int[], double, String)}
+   * with no justification.
+   *
+   * @param txtGraph the text graph
+   * @param hypGraph the hypothesis graph
+   * @param indexes for each hypothesis node, the index of the aligned text node, or -1
+   * @param score the score of the alignment
+   * @return the new alignment
+   */
   public static Alignment makeFromIndexArray(SemanticGraph txtGraph,
                                              SemanticGraph hypGraph,
                                              int[] indexes,

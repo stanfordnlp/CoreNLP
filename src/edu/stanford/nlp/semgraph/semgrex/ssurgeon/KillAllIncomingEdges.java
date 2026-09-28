@@ -13,9 +13,16 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
  *
  */
 public class KillAllIncomingEdges extends SsurgeonEdit {
+  /** The command name of this edit in an Ssurgeon script */
   public static final String LABEL = "killAllIncomingEdges";
+  /** The name of the matched node whose incoming edges are removed */
   protected String nodeName; // name of this node
 
+  /**
+   * Creates an edit which removes all incoming edges of the named node.
+   *
+   * @param nodeName the name of the node in the Semgrex pattern
+   */
   public KillAllIncomingEdges(String nodeName) {
     this.nodeName = nodeName;
   }

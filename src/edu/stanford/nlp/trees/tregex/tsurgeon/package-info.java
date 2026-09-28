@@ -121,7 +121,6 @@
  * parenthetical-bracketing tree syntax such as those used for the Penn
  * Treebank.  For example, for the NP "the dog" to be inserted you might
  * use the syntax:
- * <p>
  * <blockquote>
  * (NP (Det the) (N dog))
  * </blockquote>
@@ -134,7 +133,6 @@
  * <p>
  * For example, if you wanted to adjoin the adverb "breathlessly" into a
  * VP, you might specify the following auxiliary tree:
- * <p>
  * <blockquote>
  * (VP (Adv breathlessly) VP@ )
  * </blockquote>
@@ -149,7 +147,6 @@
  * (i.e., appear as \=); this escaping will be removed by Tsurgeon.  For
  * example, if you want to insert an NP trace somewhere and coindex it
  * with a node named "antecedent" you might say
- * <p>
  * <blockquote>
  * insert (NP (-NONE- *T*=trace)) node-location
  * coindex trace antecedent $

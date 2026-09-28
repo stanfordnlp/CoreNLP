@@ -1,16 +1,3 @@
-/**
- * A module with a command line program for the processing of tsurgeon requests.
- *<br>
- * This will compile a given list of tsurgeon operations, build trees out of the
- * input proto, use the operations on these trees, and return the results.
- *<br>
- * The input request is a list of operations to run and a list of trees.
- * The result will be the effect of running each of the operations in order
- * on each of the trees, one output tree per input tree.
- * <br>
- * TODO: could add headfinder and basic category options
- */
-
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
 import java.io.InputStream;
@@ -28,7 +15,22 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ProcessProtobufRequest;
 
+/**
+ * A module with a command line program for the processing of tsurgeon requests.
+ *<br>
+ * This will compile a given list of tsurgeon operations, build trees out of the
+ * input proto, use the operations on these trees, and return the results.
+ *<br>
+ * The input request is a list of operations to run and a list of trees.
+ * The result will be the effect of running each of the operations in order
+ * on each of the trees, one output tree per input tree.
+ * <br>
+ * TODO: could add headfinder and basic category options
+ */
 public class ProcessTsurgeonRequest extends ProcessProtobufRequest {
+  /** Creates a processor for tsurgeon requests. */
+  public ProcessTsurgeonRequest() { }
+
   /**
    * Extract a list of operations from a TsurgeonRequest proto
    */
@@ -49,6 +51,9 @@ public class ProcessTsurgeonRequest extends ProcessProtobufRequest {
    * For a single request, iterate through the Trees it includes,
    * perform each Tsurgeon operation on each tree, and return
    * a result with one tree per input tree.
+   *
+   * @param request the operations and trees to process
+   * @return the resulting trees, in the same order as the input trees
    */
   public static CoreNLPProtos.TsurgeonResponse processRequest(CoreNLPProtos.TsurgeonRequest request) {
     ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
@@ -74,9 +79,12 @@ public class ProcessTsurgeonRequest extends ProcessProtobufRequest {
   }
 
   /**
-   * Command line tool for processing a semgrex request.
+   * Command line tool for processing a tsurgeon request.
    * <br>
    * If -multiple is specified, will process multiple requests.
+   *
+   * @param args the command line arguments; only -multiple is recognized
+   * @throws IOException if reading from stdin or writing to stdout fails
    */
   public static void main(String[] args) throws IOException {
     ProcessProtobufRequest.process(new ProcessTsurgeonRequest(), args);

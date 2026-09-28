@@ -24,10 +24,18 @@ import edu.stanford.nlp.util.StringUtils;
  * @author John Bauer
  */
 public class CombineMWT extends SsurgeonEdit {
+  /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL = "combineMWT";
   final List<String> names;
   final String word;
 
+  /**
+   * Creates a CombineMWT for the given nodes.
+   *
+   * @param names the names of the nodes to combine; the list is copied
+   * @param word the text of the MWT, or null or empty to concatenate the words
+   * @throws SsurgeonParseException if there are fewer than two names
+   */
   public CombineMWT(List<String> names, String word) {
     this.names = new ArrayList<>(names);
     this.word = word;

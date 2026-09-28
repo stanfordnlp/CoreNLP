@@ -42,6 +42,7 @@ public class NodeAttributes {
   // key in that map, value to match, how the value is matched, named variable groups
   private List<Quintuple<String, String, String, AttributeMode, List<Pair<Integer, String>>>> contains;
 
+  /** Creates an empty set of attributes: not root, not empty, no attribute or map constraints. */
   public NodeAttributes() {
     root = false;
     empty = false;
@@ -50,22 +51,53 @@ public class NodeAttributes {
     contains = new ArrayList<>();
   }
 
+  /**
+   * Sets whether the node must be a root of the graph ({@code $} in the pattern).
+   *
+   * @param root whether the node must be a root
+   */
   public void setRoot(boolean root) {
     this.root = root;
   }
 
+  /**
+   * Returns whether the node must be a root of the graph.
+   *
+   * @return whether {@code $} was given for this node
+   */
   public boolean root() {
     return root;
   }
 
+  /**
+   * Sets whether the node must be the empty node {@link edu.stanford.nlp.ling.IndexedWord#NO_WORD} ({@code #} in the pattern).
+   *
+   * @param empty whether the node must be the empty node
+   */
   public void setEmpty(boolean empty) {
     this.empty = empty;
   }
 
+  /**
+   * Returns whether the node must be the empty node {@link edu.stanford.nlp.ling.IndexedWord#NO_WORD}.
+   *
+   * @return whether {@code #} was given for this node
+   */
   public boolean empty() {
     return empty;
   }
 
+  /**
+   * Adds a constraint on a single node attribute, such as {@code word:foo}.
+   * The case insensitive flag is kept only for the {@code word} attribute and dropped for any other key.
+   *
+   * @param key the attribute name
+   * @param value the value to match, as written in the pattern (a string, a regex, or {@code __})
+   * @param mode how the value is matched: required, negated, or optional
+   * @param varGroups the named variable groups captured from a regex value, as (group number, name) pairs
+   * @param caseInsensitive whether to match the value ignoring case
+   * @throws SemgrexParseException if mode is required and a required constraint on the same key was already added
+   */
   public void setAttribute(String key, String value, AttributeMode mode, List<Pair<Integer, String>> varGroups, boolean caseInsensitive) {
     // only a required attribute can conflict with another of the same
     // key.  two negated or two optional constraints are both satisfiable
@@ -81,15 +113,34 @@ public class NodeAttributes {
     attributes.add(new Quintuple<>(key, value, mode, varGroups, caseInsensitive));
   }
 
+  /**
+   * Adds a constraint on one key of a Map valued annotation, such as {@code morphofeatures:{Number:Sing}}.
+   *
+   * @param annotation the name of the Map valued annotation
+   * @param key the key in that map (a string, a regex, or {@code __})
+   * @param value the value to match for that key (a string, a regex, or {@code __})
+   * @param mode how the value is matched: required, negated, or optional
+   * @param varGroups the named variable groups captured from a regex value; the list is copied
+   */
   public void addContains(String annotation, String key, String value, AttributeMode mode,
                           List<Pair<Integer, String>> varGroups) {
     contains.add(new Quintuple(annotation, key, value, mode, new ArrayList<>(varGroups)));
   }
 
+  /**
+   * Returns the single attribute constraints in the order they were added.
+   *
+   * @return an unmodifiable view of (key, value, mode, variable groups, case insensitive) entries
+   */
   public List<Quintuple<String, String, AttributeMode, List<Pair<Integer, String>>, Boolean>> attributes() {
     return Collections.unmodifiableList(attributes);
   }
 
+  /**
+   * Returns the Map valued annotation constraints in the order they were added.
+   *
+   * @return an unmodifiable view of (annotation, key, value, mode, variable groups) entries
+   */
   public List<Quintuple<String, String, String, AttributeMode, List<Pair<Integer, String>>>> contains() {
     return Collections.unmodifiableList(contains);
   }

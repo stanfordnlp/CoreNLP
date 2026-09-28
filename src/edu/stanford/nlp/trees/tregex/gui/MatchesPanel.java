@@ -51,14 +51,22 @@ import edu.stanford.nlp.util.Pair;
 @SuppressWarnings("serial")
 public class MatchesPanel extends JPanel implements ListSelectionListener {
   private static MatchesPanel instance = null;
+  /** The list of displayed trees */
   private final JList<TreeFromFile> list;
   // todo: Change the below to just be a List<List<Tree>> paralleling list above
+  /** The matched nodes of each displayed tree */
   private Map<TreeFromFile,List<Tree>> matchedParts;
+  /** Listeners told when the displayed trees change */
   private final List<MatchesPanelListener> listeners;
+  /** The background color of the selected entry */
   private Color highlightColor = Color.CYAN;
+  /** Whether to display only the matched subtrees rather than the whole trees */
   private boolean showOnlyMatchedPortion = false;
+  /** The label of the most recently selected entry */
   private JTextField lastSelected = null;
+  /** The press which started a highlight or drag in the list */
   private MouseEvent firstMouseEvent = null;
+  /** The maximum number of entries to display */
   private int maxMatches = 1000;
 
 
@@ -176,6 +184,9 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
     this.add(scroller, BorderLayout.CENTER);
   }
 
+  /**
+   * Removes all trees from the panel and notifies the listeners.
+   */
   public void removeAllMatches() {
     setMatchedParts(Generics.newHashMap());
     ((DefaultListModel) list.getModel()).removeAllElements();
@@ -197,6 +208,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
    * the tregex expression).
    *
    * @param matches trees that match the expression
+   * @param matchedParts the matched nodes of each tree, or null if there are none (as when browsing)
    */
   public void setMatches(List<TreeFromFile> matches, Map<TreeFromFile, List<Tree>> matchedParts) {
     // cdm Nov 2010: I rewrote this so the performance wasn't dreadful.
@@ -320,11 +332,17 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
     return sb.toString();
   }
 
+  /**
+   * Selects the entry before the current one, staying at the first entry.
+   */
   public void selectPreviousMatch() {
     int idx = Math.max(0, list.getSelectedIndex() - 1);
     list.setSelectedIndex(idx);
   }
 
+  /**
+   * Selects the entry after the current one, staying at the last entry.
+   */
   public void selectNextMatch() {
     int idx = Math.min(list.getModel().getSize() - 1,
                        list.getSelectedIndex() + 1);
@@ -346,12 +364,17 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
    *
    */
   public interface MatchesPanelListener {
+    /**
+     * Called when the trees shown in the matches panel change.
+     */
     void matchesChanged();
 
   }
 
   /**
    * Become a listener to changes in the trees the matches panel is showing
+   *
+   * @param l the listener to add
    */
   public void addListener(MatchesPanelListener l) {
     listeners.add(l);
@@ -359,6 +382,8 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
 
   /**
    * Become a listener to changes in which tree is selected
+   *
+   * @param l the listener to add
    */
   public void addListener(ListSelectionListener l) {
     list.addListSelectionListener(l);
@@ -431,6 +456,11 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   } // end static class TreeTransferHandler
 
 
+  /**
+   * Returns the matched nodes of each displayed tree.
+   *
+   * @return map from tree to its matched nodes; the internal map, not a copy
+   */
   public Map<TreeFromFile, List<Tree>> getMatchedParts() {
     return matchedParts;
   }
@@ -446,18 +476,38 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
       this.matchedParts = matchedParts;
   }
 
+  /**
+   * Sets the background color of the selected entry.
+   *
+   * @param highlightColor the color
+   */
   public void setHighlightColor(Color highlightColor) {
     this.highlightColor = highlightColor;
   }
 
+  /**
+   * Returns whether only the matched subtrees are displayed rather than the whole trees.
+   *
+   * @return whether only the matched subtrees are displayed
+   */
   public boolean isShowOnlyMatchedPortion() {
     return showOnlyMatchedPortion;
   }
 
+  /**
+   * Sets whether to display only the matched subtrees.  Takes effect the next time matches are set.
+   *
+   * @param showOnlyMatchedPortion whether to display only the matched subtrees
+   */
   public void setShowOnlyMatchedPortion(boolean showOnlyMatchedPortion) {
     this.showOnlyMatchedPortion = showOnlyMatchedPortion;
   }
 
+  /**
+   * Sets the font of the list, keeping this panel's font style and size.
+   *
+   * @param fontName the name of the font
+   */
   public void setFontName(String fontName) {
     Font curFont = this.getFont();
     Font newFont = new Font(fontName, curFont.getStyle(), curFont.getSize());
@@ -484,10 +534,18 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
       lastSelected = curSelected;
   }
 
+  /**
+   * Sets the maximum number of entries to display.  Takes effect the next time matches are set.
+   *
+   * @param maxMatches the maximum number of entries
+   */
   public void setMaxMatches(int maxMatches) {
     this.maxMatches = maxMatches;
   }
 
+  /**
+   * Gives the keyboard focus to the list of matches.
+   */
   public void focusOnList() {
     list.requestFocusInWindow();
   }

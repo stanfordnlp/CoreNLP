@@ -20,12 +20,22 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  *
  */
 public class RelabelNamedEdge extends SsurgeonEdit {  
+  /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL = "relabelNamedEdge";
 
+  /** The name of the edge to relabel */
   protected final String edgeName; // Name of the matched edge in the SemgrexPattern
 
+  /** The new relation for the edge */
   protected final GrammaticalRelation relation; // Type of relation to add between these edges
 
+  /**
+   * Creates an edit which changes the relation of a named edge.
+   *
+   * @param edgeName The name of the edge in the Semgrex pattern
+   * @param relation The new relation for the edge
+   * @throws SsurgeonParseException if either argument is null
+   */
   public RelabelNamedEdge(String edgeName, GrammaticalRelation relation) {
     if (edgeName == null) {
       throw new SsurgeonParseException("RelabelNamedEdge created with no edge name!");

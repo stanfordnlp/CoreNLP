@@ -7,14 +7,29 @@ import java.util.List;
 
 import edu.stanford.nlp.util.Pair;
 
+/**
+ * One {@code key:value} constraint from a Semgrex node description, as
+ * built by {@link NodePattern}.
+ *<br>
+ * The value to match is stored twice, once for case sensitive and once
+ * for case insensitive matching.  Each is a {@code Boolean} (true for
+ * {@code __}, which matches any value), a {@code String} for an exact
+ * match, or a {@code java.util.regex.Pattern}.
+ */
 public class Attribute implements Serializable {
+  /** The attribute name, such as {@code word} or {@code lemma} */
   final String key;
+  /** What to match when matching is case sensitive: a Boolean, String, or Pattern */
   final Object cased;
+  /** What to match when matching ignores case: a Boolean, String, or Pattern */
   final Object caseless;
+  /** Whether the attribute is required, negated, or optional */
   final AttributeMode mode;
 
-  // specifies the groups in a regex that are captured as
-  // matcher-global string variables
+  /**
+   * Specifies the groups in a regex that are captured as
+   * matcher-global string variables
+   */
   final List<Pair<Integer, String>> variableGroups;
 
   Attribute(String key, Object cased, Object caseless, AttributeMode mode, List<Pair<Integer, String>> varGroups) {

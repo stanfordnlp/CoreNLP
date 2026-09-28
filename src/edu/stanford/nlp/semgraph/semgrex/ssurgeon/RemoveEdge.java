@@ -17,12 +17,23 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
  *
  */
 public class RemoveEdge extends SsurgeonEdit {
+  /** The name of this edit in an Ssurgeon script */
   public static final String LABEL = "removeEdge";
 
+  /** The relation to remove, or null to remove edges of any relation */
   protected GrammaticalRelation relation; // Name of the matched relation type
+  /** Name of the governor in the match, or {@link #WILDCARD_NODE} */
   protected String govName; // Name of governor of this reln, in match
+  /** Name of the dependent in the match, or {@link #WILDCARD_NODE} */
   protected String depName; // Name of the dependent in this reln, in match
 
+  /**
+   * Creates an edit which removes the edges between two named nodes.
+   *
+   * @param relation The relation to remove, or null to remove edges of any relation
+   * @param govName Name of the governor, or {@link #WILDCARD_NODE}
+   * @param depName Name of the dependent, or {@link #WILDCARD_NODE}
+   */
   public RemoveEdge(GrammaticalRelation relation, String govName, String depName) {
     this.relation = relation;
     this.govName = govName;
@@ -44,6 +55,7 @@ public class RemoveEdge extends SsurgeonEdit {
     return buf.toString();
   }
 
+  /** Used in place of the gov or dep name to match any node */
   public static final String WILDCARD_NODE = "**WILDNODE**";
 
   /**
@@ -121,15 +133,30 @@ public class RemoveEdge extends SsurgeonEdit {
   }
 
 
+    /**
+     * Returns the name of the dependent node.
+     *
+     * @return The dependent name
+     */
     public String getDepName() {
       return depName;
     }
 
 
+    /**
+     * Returns the name of the governor node.
+     *
+     * @return The governor name
+     */
     public String getGovName() {
       return govName;
     }
 
+    /**
+     * Returns the name of the relation to remove.
+     *
+     * @return The relation name.  Throws NullPointerException if no relation was given
+     */
     public String getRelationName() {
       return relation.toString();
     }

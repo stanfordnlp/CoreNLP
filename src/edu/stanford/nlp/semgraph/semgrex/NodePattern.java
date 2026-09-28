@@ -21,6 +21,10 @@ import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.VariableStrings;
 import edu.stanford.nlp.util.logging.Redwood;
 
+/**
+ * A single node description in a semgrex pattern, such as {@code {word:foo}=a},
+ * together with the relation, and optionally the graph, by which the node is reached.
+ */
 public class NodePattern extends SemgrexPattern  {
 
   /** A logger for this class */
@@ -28,8 +32,11 @@ public class NodePattern extends SemgrexPattern  {
 
   private static final long serialVersionUID = -5981133879119233896L;
 
+  /** The relation by which this node is reached from its parent pattern */
   private final GraphRelation reln;
+  /** The graph the relation is searched in, or null to use the current graph */
   private final SemgrexGraphName graphName;
+  /** Whether the node description is negated, as in {@code !{word:foo}} */
   private final boolean negDesc;
   /**
    *  A list of Attribute - key, case_sensitive_pattern, case_insensitive_pattern, mode
@@ -44,13 +51,31 @@ public class NodePattern extends SemgrexPattern  {
    * and only partial matches are necessary
    */
   private final List<Pair<String, Attribute>> partialAttributes;
+  /** Attributes of Map valued annotations where the map key is a regex or {@code __} */
   private final List<RegexPartialAttribute> regexPartialAttributes;
+  /** Whether the description includes {@code $}, requiring the node to be a root */
   private final boolean isRoot;
+  /** Whether this node was given a name with {@code =name} */
   private final boolean isLink;
+  /** Whether the description includes {@code #}, requiring the node to be the empty word */
   private final boolean isEmpty;
+  /** The name given with {@code =name}, or null */
   private final String name;
+  /** The attribute description, as it would be written in a pattern */
   private final String descString;
 
+  /**
+   * Builds a node pattern from the attributes parsed out of a node description.
+   *
+   * @param r the relation by which this node is reached
+   * @param graphName the graph to search the relation in, or null for the current graph
+   * @param negDesc whether the node description is negated
+   * @param attrs the attributes of the node description
+   * @param isLink whether the node is named
+   * @param name the node's name, or null
+   * @throws SemgrexParseException if a key/value is used on an annotation which is not a Map,
+   *   or a variable group is used with a regex map key
+   */
   public NodePattern(GraphRelation r, SemgrexGraphName graphName, boolean negDesc,
                      NodeAttributes attrs, boolean isLink, String name) {
     this.reln = r;
@@ -290,6 +315,18 @@ public class NodePattern extends SemgrexPattern  {
     return matches;
   }
 
+  /**
+   * Tests whether a node satisfies this node description, taking a negated
+   * description into account.  Relations are not checked.
+   * Strings captured by variable groups are recorded in {@code tempVariableStrings}.
+   *
+   * @param node the node to test
+   * @param sg the graph containing the node, used to check whether the node is a root
+   * @param ignoreCase whether to compare attributes case insensitively
+   * @param variableStrings variable values already bound by the match so far
+   * @param tempVariableStrings where variable values captured by this node are recorded
+   * @return whether the node matches this description
+   */
   @SuppressWarnings("unchecked")
   public boolean nodeAttrMatch(IndexedWord node, final SemanticGraph sg, boolean ignoreCase,
                                VariableStrings variableStrings, VariableStrings tempVariableStrings) {
@@ -381,10 +418,20 @@ public class NodePattern extends SemgrexPattern  {
     return !negDesc;
   }
 
+  /**
+   * Returns whether this description includes {@code $}, meaning the node must be a root.
+   *
+   * @return whether the node is required to be a root
+   */
   public boolean isRoot() {
     return isRoot;
   }
 
+  /**
+   * Returns whether this description includes {@code #}, meaning the node must be the empty word.
+   *
+   * @return whether the node is required to be {@link IndexedWord#NO_WORD}
+   */
   public boolean isNull() {
     return isEmpty;
   }
@@ -404,6 +451,14 @@ public class NodePattern extends SemgrexPattern  {
     return toString(hasPrecedence, true);
   }
 
+  /**
+   * Returns the relation and node description as they would be written in a pattern.
+   * A NodePattern has no children, so both arguments are ignored.
+   *
+   * @param hasPrecedence ignored
+   * @param addChild ignored
+   * @return the pattern string, with a leading space
+   */
   public String toString(boolean hasPrecedence, boolean addChild) {
     StringBuilder sb = new StringBuilder();
     sb.append(' ');
@@ -490,6 +545,11 @@ public class NodePattern extends SemgrexPattern  {
     return Collections.emptyList();
   }
 
+  /**
+   * Returns the name given to this node with {@code =name}.
+   *
+   * @return the node's name, or null if it has none
+   */
   public String getName() {
     return name;
   }

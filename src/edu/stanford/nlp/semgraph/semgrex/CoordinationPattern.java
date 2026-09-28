@@ -7,14 +7,24 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.VariableStrings;
 
-/** @author Chloe Kiddon */
+/**
+ * A conjunction or disjunction of two or more child patterns.
+ * The parser builds one for the {@code :} operator which splits a pattern
+ * into separate patterns (a root node conjunction), for alternative
+ * relations such as {@code [<nsubj {} | <obj {}]}, and for alternative nodes
+ * such as {@code < [{word:a} | {word:b}]}.
+ *
+ * @author Chloe Kiddon
+ */
 public class CoordinationPattern extends SemgrexPattern  {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(CoordinationPattern.class);
 
   private static final long serialVersionUID = -3122330899634961002L;
+  /** True if every child must match ("and"), false if any one child may match ("or"). */
   private final boolean isConj;
+  /** True if this coordinates nodes, false if it coordinates relations. */
   private final boolean isNodeCoord;
   /**
    * Represents whether this is the root coordination.  If so, the
@@ -22,11 +32,21 @@ public class CoordinationPattern extends SemgrexPattern  {
    * the lowest precedence possible.
    */
   private final boolean isRoot;
+  /** The coordinated patterns, as an unmodifiable list. */
   private final List<SemgrexPattern> children;
 
   /* if isConj is true, then it is an "AND" ; if it is false, it is an "OR".*/
   /* if isNodeCoord is true, then it is a node coordination conj; if it is false, then
            * 	it is a relation coordination conj. */
+  /**
+   * Creates a coordination of the given patterns.
+   *
+   * @param isNodeCoord true to coordinate nodes, false to coordinate relations
+   * @param children the patterns to coordinate; wrapped in an unmodifiable view, not copied
+   * @param isConj true for a conjunction ("and"), false for a disjunction ("or")
+   * @param isRoot true if this is the top level coordination created by the {@code :} operator
+   * @throws RuntimeException if there are fewer than two children
+   */
   public CoordinationPattern(boolean isNodeCoord, List<SemgrexPattern> children, boolean isConj, boolean isRoot) {
     if (children.size() < 2) {
       throw new RuntimeException("Coordination node must have at least 2 children.");
@@ -37,6 +57,11 @@ public class CoordinationPattern extends SemgrexPattern  {
     this.isRoot = isRoot;
   }
 
+  /**
+   * Returns whether this coordinates nodes rather than relations.
+   *
+   * @return true for a node coordination, false for a relation coordination
+   */
   public boolean isNodeCoord() { return isNodeCoord; }
 
   @Override

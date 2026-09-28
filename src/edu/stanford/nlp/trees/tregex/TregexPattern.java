@@ -360,9 +360,13 @@ public abstract class TregexPattern implements Serializable  {
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(TregexPattern.class);
 
+  /** Whether this node is negated, as in {@code !} before a relation */
   private boolean neg; // = false;
+  /** Whether this node is optional, as in {@code ?} before a relation */
   private boolean opt; // = false;
+  /** The string the pattern was compiled from; only set on the root pattern */
   private String patternString;
+  /** The variables named in the pattern; only set on the root pattern */
   private Set<String> knownVariables;
 
   void negate() {
@@ -478,6 +482,11 @@ public abstract class TregexPattern implements Serializable  {
     return result;
   }
 
+  /**
+   * Returns the string this pattern was compiled from.
+   *
+   * @return The pattern string, or null if this is not the root of a compiled pattern
+   */
   public String pattern() {
     return patternString;
   }
@@ -492,6 +501,12 @@ public abstract class TregexPattern implements Serializable  {
     this.knownVariables = knownVariables;
   }
 
+  /**
+   * Returns the names of the nodes named in the pattern.
+   * Throws NullPointerException if this is not the root of a compiled pattern.
+   *
+   * @return An unmodifiable view of the known variables
+   */
   public Set<String> knownVariables() {
     return Collections.unmodifiableSet(knownVariables);
   }
@@ -505,6 +520,8 @@ public abstract class TregexPattern implements Serializable  {
   /**
    * Print a multi-line representation
    * of the pattern illustrating it's syntax.
+   *
+   * @param pw Where to print
    */
   public void prettyPrint(PrintWriter pw) {
     prettyPrint(pw, 0);
@@ -513,6 +530,8 @@ public abstract class TregexPattern implements Serializable  {
   /**
    * Print a multi-line representation
    * of the pattern illustrating it's syntax.
+   *
+   * @param ps Where to print
    */
   public void prettyPrint(PrintStream ps) {
     prettyPrint(new PrintWriter(new OutputStreamWriter(ps), true));
@@ -605,6 +624,10 @@ public abstract class TregexPattern implements Serializable  {
    * <li> {@code -T} causes all trees to be printed as processed (for debugging purposes).  Otherwise only matching nodes are printed.
    * <li> {@code -macros <filename>} filename with macro substitutions to use.  file with tab separated lines original-tab-replacement
    * </ul>
+   *
+   * @param args Command line arguments, as described above
+   * @throws IOException if the {@code -i} or {@code -extractFile} file cannot be read,
+   *   or the {@code -encoding} is not supported
    */
   public static void main(String[] args) throws IOException {
     Timing.startTime();
@@ -961,10 +984,17 @@ public abstract class TregexPattern implements Serializable  {
   } // end class TRegexTreeVisitor
 
 
+  /**
+   * Reads Penn Treebank format trees.  By default, a null nonterminal label
+   * is replaced with the empty string and other labels are kept as is.
+   */
   public static class TRegexTreeReaderFactory implements TreeReaderFactory {
 
     private final TreeNormalizer tn;
 
+    /**
+     * Creates a factory whose normalizer only replaces null nonterminals with the empty string.
+     */
     public TRegexTreeReaderFactory() {
       this(new TreeNormalizer() {
 
@@ -981,6 +1011,11 @@ public abstract class TregexPattern implements Serializable  {
       });
     }
 
+    /**
+     * Creates a factory which uses the given normalizer.
+     *
+     * @param tn The normalizer given to each PennTreeReader
+     */
     public TRegexTreeReaderFactory(TreeNormalizer tn) {
       this.tn = tn;
     }

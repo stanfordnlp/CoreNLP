@@ -15,7 +15,11 @@ import edu.stanford.nlp.semgraph.*;
  *
  */
 public class KillNonRootedNodes extends SsurgeonEdit {
+  /** The command name of this edit in an Ssurgeon script */
   public static final String LABEL = "killNonRooted"; 
+
+  /** Creates an edit which removes the nodes with no path to a root. */
+  public KillNonRootedNodes() { }
 
   /**
    * If executed twice on the same graph, the second time there

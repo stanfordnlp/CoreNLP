@@ -22,10 +22,21 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ProcessProtobufRequest;
 import edu.stanford.nlp.util.XMLUtils;
 
+/**
+ * Processes Ssurgeon requests sent as protobufs.  A request holds
+ * Ssurgeon operations and dependency graphs, and the response holds
+ * each graph after all of the operations have been applied to it.
+ */
 public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
+  /** Creates a processor; there is no state to initialize. */
+  public ProcessSsurgeonRequest() { }
+
   /**
    * Read each operation, then read each graph.  For each graph, apply each operation
    * and append it to the output.
+   *
+   * @param request the Ssurgeon operations and the graphs to apply them to
+   * @return one result per input graph, in order, with the edited graph and whether any operation changed it
    */
   public static CoreNLPProtos.SsurgeonResponse processRequest(CoreNLPProtos.SsurgeonRequest request) {
     ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
@@ -83,9 +94,12 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
   }
 
   /**
-   * Command line tool for processing a semgrex request.
+   * Command line tool for processing a ssurgeon request.
    * <br>
    * If -multiple is specified, will process multiple requests.
+   *
+   * @param args command line arguments; only {@code -multiple} as the first argument is used
+   * @throws IOException if reading the request from stdin or writing the response to stdout fails
    */
   public static void main(String[] args) throws IOException {
     ProcessProtobufRequest.process(new ProcessSsurgeonRequest(), args);

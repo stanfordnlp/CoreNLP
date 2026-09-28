@@ -21,10 +21,27 @@ import edu.stanford.nlp.util.Pair;
 public class Macros {
   private Macros() {} // static methods only
 
+  /**
+   * Reads macros from a UTF-8 file.
+   *
+   * @param filename The file to read
+   * @return The (original, replacement) pairs, in file order
+   * @throws RuntimeIOException if the file cannot be read
+   * @throws IllegalArgumentException if a line has no tab
+   */
   public static List<Pair<String, String>> readMacros(String filename) {
     return readMacros(filename, "utf-8");
   }
 
+  /**
+   * Reads macros from a file.
+   *
+   * @param filename The file to read
+   * @param encoding The encoding of the file
+   * @return The (original, replacement) pairs, in file order
+   * @throws RuntimeIOException if the file cannot be read
+   * @throws IllegalArgumentException if a line has no tab
+   */
   public static List<Pair<String, String>> readMacros(String filename, String encoding) {
     try {
       BufferedReader bin = new BufferedReader(new InputStreamReader(new FileInputStream(filename), encoding));
@@ -34,6 +51,14 @@ public class Macros {
     }
   }
 
+  /**
+   * Reads macros from a reader, which is left open.
+   *
+   * @param bin The reader to read from
+   * @return The (original, replacement) pairs, in the order read
+   * @throws RuntimeIOException if the reader throws an IOException
+   * @throws IllegalArgumentException if a line has no tab
+   */
   public static List<Pair<String, String>> readMacros(BufferedReader bin) {
     try {
       List<Pair<String, String>> macros = new ArrayList<>();
@@ -60,6 +85,15 @@ public class Macros {
     }
   }
 
+  /**
+   * Reads macros from a file and adds them to a compiler.
+   *
+   * @param compiler The compiler to add the macros to
+   * @param filename The file to read; if null or empty, nothing is added
+   * @param encoding The encoding of the file
+   * @throws RuntimeIOException if the file cannot be read
+   * @throws IllegalArgumentException if a line has no tab
+   */
   public static void addAllMacros(TregexPatternCompiler compiler,
                                   String filename, String encoding) {
     if (filename == null || filename.equals("")) {
@@ -70,6 +104,14 @@ public class Macros {
     }
   }
 
+  /**
+   * Reads macros from a reader, which is left open, and adds them to a compiler.
+   *
+   * @param compiler The compiler to add the macros to
+   * @param br The reader to read from
+   * @throws RuntimeIOException if the reader throws an IOException
+   * @throws IllegalArgumentException if a line has no tab
+   */
   public static void addAllMacros(TregexPatternCompiler compiler,
                                   BufferedReader br) {
     for (Pair<String, String> macro : readMacros(br)) {

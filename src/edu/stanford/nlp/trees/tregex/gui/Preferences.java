@@ -64,40 +64,159 @@ public class Preferences {
   static final String DEFAULT_TREE_READER_FACTORY = "TregexTreeReaderFactory";
   static final String DEFAULT_ENCODING = "UTF-8";
 
+  /** Creates a Preferences; all of its methods are static. */
+  public Preferences() { }
+
+  /**
+   * Returns the saved name of the font for displaying trees and matches, or Dialog
+   * if none is saved.
+   *
+   * @return The font name
+   */
   public static String getFont() { return prefs.get(PREF_FONT, DEFAULT_FONT); }
+  /**
+   * Saves the name of the font for displaying trees and matches.
+   *
+   * @param font The font name
+   */
   public static void setFont(String font) { prefs.put(PREF_FONT, font); }
 
+  /**
+   * Returns the saved font size for displaying trees, or 12 if none is saved.
+   *
+   * @return The font size
+   */
   public static int getFontSize() { return prefs.getInt(PREF_FONT_SIZE, DEFAULT_FONT_SIZE); }
+  /**
+   * Saves the font size for displaying trees.
+   *
+   * @param fontSize The font size
+   */
   public static void setFontSize(int fontSize) { prefs.putInt(PREF_FONT_SIZE, fontSize); }
 
+  /**
+   * Returns the saved default color for drawing trees, or black if none is saved.
+   *
+   * @return The tree color
+   */
   public static Color getTreeColor() { return new Color(prefs.getInt(PREF_TREE_COLOR, DEFAULT_TREE_COLOR)); }
+  /**
+   * Saves the default color for drawing trees.
+   *
+   * @param treeColor The tree color
+   */
   public static void setTreeColor(Color treeColor) { prefs.putInt(PREF_TREE_COLOR, treeColor.getRGB()); }
 
+  /**
+   * Returns the saved color for matched nodes, or red if none is saved.
+   *
+   * @return The matched node color
+   */
   public static Color getMatchedColor() { return new Color(prefs.getInt(PREF_MATCHED_COLOR, DEFAULT_MATCHED_COLOR)); }
+  /**
+   * Saves the color for matched nodes.
+   *
+   * @param matchedColor The matched node color
+   */
   public static void setMatchedColor(Color matchedColor) { prefs.putInt(PREF_MATCHED_COLOR, matchedColor.getRGB()); }
 
+  /**
+   * Returns the saved highlight color for the list of matches, or cyan if none is
+   * saved.
+   *
+   * @return The highlight color
+   */
   public static Color getHighlightColor() { return new Color(prefs.getInt(PREF_HIGHLIGHT_COLOR, DEFAULT_HIGHLIGHT_COLOR)); }
+  /**
+   * Saves the highlight color for the list of matches.
+   *
+   * @param highlightColor The highlight color
+   */
   public static void setHighlightColor(Color highlightColor) { prefs.putInt(PREF_HIGHLIGHT_COLOR, highlightColor.getRGB()); }
 
+  /**
+   * Returns the saved number of recent patterns to remember, or 5 if none is saved.
+   *
+   * @return The number of recent patterns
+   */
   public static int getHistorySize() { return prefs.getInt(PREF_HISTORY_SIZE, DEFAULT_HISTORY_SIZE); }
+  /**
+   * Saves the number of recent patterns to remember.
+   *
+   * @param historySize The number of recent patterns
+   */
   public static void setHistorySize(int historySize) { prefs.putInt(PREF_HISTORY_SIZE, historySize); }
 
+  /**
+   * Returns the saved maximum number of matches to display, or 1000 if none is
+   * saved.
+   *
+   * @return The maximum number of matches
+   */
   public static int getMaxMatches() { return prefs.getInt(PREF_MAX_MATCHES, DEFAULT_MAX_MATCHES); }
+  /**
+   * Saves the maximum number of matches to display.
+   *
+   * @param maxMatches The maximum number of matches
+   */
   public static void setMaxMatches(int maxMatches) { prefs.putInt(PREF_MAX_MATCHES, maxMatches); }
 
+  /**
+   * Returns whether Tsurgeon is saved as enabled, or false if nothing is saved.
+   *
+   * @return Whether Tsurgeon is enabled
+   */
   public static boolean getEnableTsurgeon() { return prefs.getBoolean(PREF_ENABLE_TSURGEON, DEFAULT_ENABLE_TSURGEON); }
+  /**
+   * Saves whether Tsurgeon is enabled.
+   *
+   * @param enableTsurgeon Whether Tsurgeon is enabled
+   */
   public static void setEnableTsurgeon(boolean enableTsurgeon) { prefs.putBoolean(PREF_ENABLE_TSURGEON, enableTsurgeon); }
 
+  /**
+   * Returns whether only the matched portion of each tree is shown, or false if
+   * nothing is saved.
+   *
+   * @return Whether only the matched portion is shown
+   */
   public static boolean getMatchPortionOnly() { return prefs.getBoolean(PREF_MATCH_PORTION_ONLY, DEFAULT_MATCH_PORTION_ONLY); }
+  /**
+   * Saves whether only the matched portion of each tree is shown.
+   *
+   * @param matchPortionOnly Whether only the matched portion is shown
+   */
   public static void setMatchPortionOnly(boolean matchPortionOnly) { prefs.putBoolean(PREF_MATCH_PORTION_ONLY, matchPortionOnly); }
 
+  /**
+   * Returns the saved encoding for reading tree files, or UTF-8 if none is saved.
+   *
+   * @return The encoding
+   */
   public static String getEncoding() { return prefs.get(PREF_ENCODING, DEFAULT_ENCODING); }
+  /**
+   * Saves the encoding for reading tree files.
+   *
+   * @param encoding The encoding
+   */
   public static void setEncoding(String encoding) { prefs.put(PREF_ENCODING, encoding); }
 
+  /**
+   * Returns a new instance of the saved head finder, or of CollinsHeadFinder if none
+   * is saved.
+   *
+   * @return The head finder, or null if the saved name cannot be instantiated
+   */
   public static HeadFinder getHeadFinder() {
     return lookupHeadFinder(prefs.get(PREF_HEAD_FINDER, DEFAULT_HEAD_FINDER));
   }
 
+  /**
+   * Saves the head finder by its simple class name, which {@link #getHeadFinder} can
+   * only turn back into a head finder for the classes it knows by name.
+   *
+   * @param hf The head finder
+   */
   public static void setHeadFinder(HeadFinder hf) {
     prefs.put(PREF_HEAD_FINDER, hf.getClass().getSimpleName());
   }
@@ -139,10 +258,23 @@ public class Preferences {
     }
   }
 
+  /**
+   * Returns a new instance of the saved tree reader factory, or of
+   * TregexTreeReaderFactory if none is saved.
+   *
+   * @return The tree reader factory; a PennTreeReaderFactory if the saved name cannot be instantiated
+   */
   public static TreeReaderFactory getTreeReaderFactory() {
     return lookupTreeReaderFactory(prefs.get(PREF_TREE_READER_FACTORY, DEFAULT_TREE_READER_FACTORY));
   }
 
+  /**
+   * Saves the tree reader factory by its simple class name, which {@link
+   * #getTreeReaderFactory} can only turn back into a factory for the classes it
+   * knows by name.
+   *
+   * @param trf The tree reader factory
+   */
   public static void setTreeReaderFactory(TreeReaderFactory trf) {
     prefs.put(PREF_TREE_READER_FACTORY, trf.getClass().getSimpleName());
   }

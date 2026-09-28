@@ -93,6 +93,11 @@ public class SemgrexStats {
     return Collections.unmodifiableMap(registry);
   }
 
+  /**
+   * Returns the command words which may follow a {@code pattern} line.
+   *
+   * @return A new list of the registered command words, in registration order
+   */
   public static List<String> knownCommands() {
     return new ArrayList<>(REGISTRY.keySet());
   }
@@ -113,10 +118,20 @@ public class SemgrexStats {
       this.stats = Collections.unmodifiableList(new ArrayList<>(stats));
     }
 
+    /**
+     * Returns the pattern matched in this stage.
+     *
+     * @return The pattern
+     */
     public SemgrexPattern getPattern() {
       return pattern;
     }
 
+    /**
+     * Returns the statistics gathered in this stage.
+     *
+     * @return An unmodifiable list of the statistics, in script order
+     */
     public List<SemgrexStat> getStats() {
       return stats;
     }
@@ -177,22 +192,39 @@ public class SemgrexStats {
      * since whether the controls help depends on what is displaying the
      * output rather than on what is being counted.  A command may still
      * override it for itself.
+     *
+     * @return Whether bidi controls are allowed
      */
     public boolean bidiAllowed() {
       return bidiAllowed;
     }
 
+    /**
+     * Returns the pattern of the stage the command belongs to.
+     *
+     * @return The pattern
+     */
     public SemgrexPattern getPattern() {
       return pattern;
     }
 
-    /** Checks that keys name something in this stage's pattern.  See validateKeys. */
+    /**
+     * Checks that keys name something in this stage's pattern.  See validateKeys.
+     *
+     * @param command The command being built, used in error messages
+     * @param keys The names to check
+     */
     public void validateKeys(String command, List<String> keys) {
       SemgrexStats.validateKeys(pattern, command, keys);
     }
 
     /**
      * Declares a set for a command in this stage to fill.
+     *
+     * @param command The command being built, used in error messages
+     * @param name The name of the set
+     * @return The new, empty set, which the caller fills
+     * @throws SemgrexParseException if a set with this name was already declared
      */
     public Set<String> declareSet(String command, String name) {
       if (sets.containsKey(name)) {
@@ -211,6 +243,11 @@ public class SemgrexStats {
      * It has to be an earlier one: a set collected in this same stage is
      * still being filled while this stage runs, so restricting on it
      * would depend on the order the sentences happened to arrive in.
+     *
+     * @param command The command being built, used in error messages
+     * @param name The name of the set
+     * @return The shared set, which may still be empty when this is called
+     * @throws SemgrexParseException if the set was never declared or is declared in this or a later stage
      */
     public Set<String> useSet(String command, String name) {
       Integer collected = setStages.get(name);
@@ -228,14 +265,29 @@ public class SemgrexStats {
 
   private final List<Stage> stages;
 
+  /**
+   * Creates a runner for the given stages.
+   *
+   * @param stages The stages, in the order they are run; copied
+   */
   public SemgrexStats(List<Stage> stages) {
     this.stages = Collections.unmodifiableList(new ArrayList<>(stages));
   }
 
+  /**
+   * Returns the stages of the script.
+   *
+   * @return An unmodifiable list of the stages, in order
+   */
   public List<Stage> getStages() {
     return stages;
   }
 
+  /**
+   * Returns the number of stages, which is the number of passes over the corpus.
+   *
+   * @return The number of stages
+   */
   public int numStages() {
     return stages.size();
   }
@@ -244,18 +296,50 @@ public class SemgrexStats {
   // parsing
   // ------------------------------------------------------------------
 
+  /**
+   * Parses a script, with bidi controls allowed.
+   *
+   * @param script The text of the script
+   * @return The parsed script
+   * @throws SemgrexParseException if the script is empty or malformed
+   */
   public static SemgrexStats parse(String script) {
     return parse(script, true);
   }
 
+  /**
+   * Parses a script, splitting it into lines.
+   *
+   * @param script The text of the script
+   * @param bidiAllowed Whether commands may add Unicode bidi controls to their output
+   * @return The parsed script
+   * @throws SemgrexParseException if the script is empty or malformed
+   */
   public static SemgrexStats parse(String script, boolean bidiAllowed) {
     return parse(Arrays.asList(script.split("\n")), bidiAllowed);
   }
 
+  /**
+   * Parses the lines of a script, with bidi controls allowed.
+   *
+   * @param lines The lines of the script
+   * @return The parsed script
+   * @throws SemgrexParseException if the script is empty or malformed
+   */
   public static SemgrexStats parse(List<String> lines) {
     return parse(lines, true);
   }
 
+  /**
+   * Parses the lines of a script.  Blank lines and comments are skipped;
+   * each {@code pattern} line starts a new stage.
+   *
+   * @param lines The lines of the script
+   * @param bidiAllowed Whether commands may add Unicode bidi controls to their output
+   * @return The parsed script
+   * @throws SemgrexParseException if the script is empty, has a command before
+   *   the first pattern, has a stage with no commands, or has a bad pattern or command
+   */
   public static SemgrexStats parse(List<String> lines, boolean bidiAllowed) {
     List<String> meaningful = new ArrayList<>();
     for (String line : lines) {
@@ -329,6 +413,15 @@ public class SemgrexStats {
     return new Pair<>(pieces[0], pieces.length > 1 ? pieces[1].trim() : "");
   }
 
+  /**
+   * Builds one statistics command from its command word and arguments.
+   *
+   * @param context The stage the command belongs to
+   * @param command The command word
+   * @param rest The rest of the line, which is split on whitespace into arguments
+   * @return The new statistic
+   * @throws SemgrexParseException if the command word is unknown or the arguments are invalid
+   */
   public static SemgrexStat parseCommand(Context context, String command, String rest) {
     SemgrexStat.Factory factory = REGISTRY.get(command);
     if (factory == null) {
@@ -352,6 +445,12 @@ public class SemgrexStats {
    * only reachable on the transitive relations, since GraphRelation
    * refuses =name on those and =name sets the relation name anyway on
    * the others.
+   *
+   * @param pattern The compiled pattern, which must be a RootPattern
+   * @param command The command being built, used in error messages
+   * @param keys The names to check
+   * @throws IllegalArgumentException if {@code pattern} is not a RootPattern
+   * @throws SemgrexParseException if a key is unknown or ambiguous
    */
   public static void validateKeys(SemgrexPattern pattern, String command, List<String> keys) {
     if (!(pattern instanceof RootPattern)) {
@@ -401,11 +500,20 @@ public class SemgrexStats {
    * processed a file at a time rather than held in memory all at once.
    * Stages must be run in order, since a later one may read a set an
    * earlier one is still filling.
+   *
+   * @param stage The index of the stage, counting from 0
+   * @param sentences The sentences to match, each with a dependency graph
    */
   public void accumulate(int stage, List<CoreMap> sentences) {
     stages.get(stage).accumulate(sentences);
   }
 
+  /**
+   * Formats the results of every stage.  When there is more than one
+   * stage, each is headed by a {@code ## stage N} line.
+   *
+   * @return The report text
+   */
   public String report() {
     StringBuilder sb = new StringBuilder();
     for (int idx = 0; idx < stages.size(); ++idx) {
@@ -434,6 +542,9 @@ public class SemgrexStats {
   private static final String CONLLU_EXTENSION_FLAG = "-conlluExtension";
   private static final String NO_BIDI = "-noBidi";
 
+  /**
+   * Logs a description of the command line arguments and the script format.
+   */
   public static void help() {
     log.info("Possible arguments for SemgrexStats:");
     log.info(SCRIPT + ": a file containing a stats script");
@@ -570,6 +681,15 @@ public class SemgrexStats {
     return extensions;
   }
 
+  /**
+   * Runs a stats script over a corpus and prints the report to stdout.
+   * See {@link #help()} for the arguments.  Exits with status 2 if a
+   * required argument is missing, the script cannot be read, or a
+   * CoNLL-U path is invalid.
+   *
+   * @param args Command line arguments
+   * @throws IOException if a CoNLL-U file cannot be read
+   */
   public static void main(String[] args) throws IOException {
     Map<String, Integer> flagMap = Generics.newHashMap();
     flagMap.put(SCRIPT, 1);

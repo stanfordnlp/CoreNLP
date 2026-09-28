@@ -18,14 +18,27 @@ import edu.stanford.nlp.util.Generics;
  *
  */
 public class DeleteGraphFromNode extends SsurgeonEdit {
+  /** The name of this edit in an Ssurgeon script */
   public static final String LABEL = "delete";
 
+  /** The name of the matched node from which to start deleting */
   String destroyNodeName;
 
+  /**
+   * Creates an edit which deletes everything connected to the named node.
+   *
+   * @param destroyNodeName The name of the node in the Semgrex pattern
+   */
   public DeleteGraphFromNode(String destroyNodeName) {
     this.destroyNodeName = destroyNodeName;
   }
 
+  /**
+   * Builds the edit from its argument string, which is the node name.
+   *
+   * @param args The node name; surrounding whitespace is trimmed
+   * @return The new edit
+   */
   public static DeleteGraphFromNode fromArgs(String args) {
     return new DeleteGraphFromNode(args.trim());
   }
@@ -39,6 +52,14 @@ public class DeleteGraphFromNode extends SsurgeonEdit {
     return buf.toString();
   }
 
+  /**
+   * Adds to {@code seenVerts} every vertex connected to {@code vertex},
+   * following both incoming and outgoing edges.
+   *
+   * @param vertex The vertex to start from
+   * @param sg The graph to search
+   * @param seenVerts The vertices found so far; updated in place
+   */
   protected static void crawl(IndexedWord vertex, SemanticGraph sg, Set<IndexedWord> seenVerts) {
     seenVerts.add(vertex);
     for (SemanticGraphEdge edge : sg.incomingEdgeIterable(vertex)) {
@@ -56,6 +77,14 @@ public class DeleteGraphFromNode extends SsurgeonEdit {
     }
   }
 
+  /**
+   * Finds every vertex connected to {@code vertex}, following both incoming and
+   * outgoing edges, including {@code vertex} itself.
+   *
+   * @param vertex The vertex to start from
+   * @param sg The graph to search
+   * @return The set of connected vertices
+   */
   protected static Set<IndexedWord> crawl(IndexedWord vertex, SemanticGraph sg) {
     Set<IndexedWord> seen = Generics.newHashSet();
     crawl(vertex, sg, seen);

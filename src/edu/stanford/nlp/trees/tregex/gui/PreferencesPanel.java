@@ -74,11 +74,19 @@ public class PreferencesPanel extends JDialog {
   private static final String HISTORY_ERROR = "history";//error code if history size is not an int >0
   private static final String MAX_MATCH_ERROR = "maxMatch";//error code if history size is not an int >0
 
+  /** The main window, which reloads the preferences when they are saved */
   private final TregexGUI gui;
 
+  /** Button for choosing the color used to highlight the selected match */
   final JButton highlightButton;
+  /** Field holding the file encoding */
   private final JTextField setEncoding;//declared here because may change in different places
 
+  /**
+   * Builds the preferences dialog, filled in with the current preferences.
+   *
+   * @param gui the main window, which owns this dialog
+   */
   public PreferencesPanel(TregexGUI gui) {
     super(gui, TregexGUI.isMacOS() ? "Settings": "Preferences");
 
@@ -277,6 +285,12 @@ public class PreferencesPanel extends JDialog {
     return number;
   }
 
+  /**
+   * Left aligns each of the components in the given container.
+   * Each component must be a JComponent.
+   *
+   * @param box the container whose components to align
+   */
   public static void alignLeft(JComponent box) {
     for(Component comp: box.getComponents()) {
       ((JComponent) comp).setAlignmentX(Box.LEFT_ALIGNMENT);
@@ -407,7 +421,13 @@ public class PreferencesPanel extends JDialog {
   }
 
   /**
-   * Makes a color choosing button that displays only an icon with a square of the given color
+   * Makes a color choosing button that displays only an icon with a square of the given color.
+   * Clicking it opens a color chooser, and the chosen color replaces the icon's color.
+   *
+   * @param promptText the title of the color chooser
+   * @param iconColor the initial color
+   * @param parent the parent of the color chooser, repainted when the color changes
+   * @return the button
    */
   public static JButton makeColorButton(final String promptText, Color iconColor, final JPanel parent) {
     final ColorIcon icon = new ColorIcon(iconColor);

@@ -14,16 +14,27 @@ import edu.stanford.nlp.util.VariableStrings;
 /**
  * At semgrex creation time, this takes a list of nodes or attributes.
  *<br>
- * At batch processing time, this pares a list of matches down to
- * one match for each matching attributes.
+ * At batch processing time, this sorts the sentences by the values of
+ * those keys in their matches, as in {@code :: sort foo} or
+ * {@code :: rsort foo}.
  */
 public class SortPattern extends SemgrexPattern  {
   private static final long serialVersionUID = -3843276786L;
 
+  /** The pattern whose matches get sorted */
   private final SemgrexPattern child;
+  /** The node names or attributes used as sort keys */
   private final List<String> keys;
+  /** Whether to sort in reverse order ({@code rsort}) */
   private final boolean reverse;
 
+  /**
+   * Creates a sort operation over the matches of child.
+   *
+   * @param child the pattern whose matches get sorted
+   * @param keys the node names or attributes used as sort keys; the list is copied
+   * @param reverse whether to sort in reverse order
+   */
   public SortPattern(SemgrexPattern child, List<String> keys, boolean reverse) {
     this.child = child;
     this.keys = new ArrayList<>(keys);
@@ -99,6 +110,14 @@ public class SortPattern extends SemgrexPattern  {
     }
   }
 
+  /**
+   * Returns the pattern as a String, optionally without the child pattern.
+   *
+   * @param hasPrecedence ignored
+   * @param addChild whether to include the child pattern before the {@code :: sort} operation
+   * @return the {@code :: sort} or {@code :: rsort} operation and its keys,
+   *   preceded by the child pattern if addChild is set
+   */
   public String toString(boolean hasPrecedence, boolean addChild) {
     StringBuilder sb = new StringBuilder();
     if (addChild) {

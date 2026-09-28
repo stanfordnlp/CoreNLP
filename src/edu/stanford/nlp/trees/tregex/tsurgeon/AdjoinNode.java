@@ -25,6 +25,12 @@ class AdjoinNode extends TsurgeonPattern {
     adjunctionTree = t;
   }
 
+  /**
+   * Returns the auxiliary tree to adjoin.  This is the stored tree, not
+   * a copy; callers copy it before inserting it.
+   *
+   * @return The auxiliary tree
+   */
   protected AuxiliaryTree adjunctionTree() {
     return adjunctionTree;
   }

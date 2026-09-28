@@ -34,6 +34,12 @@ public class TreeFromFile  {
   private Set<Constituent> diffSet;
   private Tree markedTree;
 
+  /**
+   * Stores a tree as a string, along with its yield.  If the root label has
+   * a sentence index and document id, the displayed sentence is prefixed with them.
+   *
+   * @param t The tree to store
+   */
   public TreeFromFile(Tree t) {
     this.treeString = t.toString();
     sentence = SentenceUtils.listToString(t.yield());
@@ -46,21 +52,48 @@ public class TreeFromFile  {
     }
   }
 
+  /**
+   * Stores a tree and the name of the file it came from.
+   *
+   * @param t The tree to store
+   * @param filename The name of the file, which replaces any document id from the tree
+   */
   public TreeFromFile(Tree t, String filename) {
     this(t);
     this.filename = filename;
   }
 
+  /**
+   * Returns the name of the file the tree came from.
+   *
+   * @return The filename, which may be null
+   */
   public String getFilename() {
     return filename;
   }
 
+  /**
+   * Sets the name of the file the tree came from.
+   *
+   * @param filename The filename
+   */
   public void setFilename(String filename) {
     this.filename = filename;
   }
 
+  /**
+   * Returns the sentence index from the tree's root label.
+   *
+   * @return The sentence index, or -1 if there was none
+   */
   public int getSentenceId() { return sentId; }
 
+  /**
+   * Rebuilds the tree from its stored string, using the current tree reader
+   * factory, so each call returns a new Tree.
+   *
+   * @return The tree, or null if the string could not be read
+   */
   public Tree getTree() {
     try {
       // return Tree.valueOf(treeString, new LabeledScoredTreeReaderFactory(new TreeNormalizer()));
@@ -71,6 +104,11 @@ public class TreeFromFile  {
     return null;
   }
 
+  /**
+   * Returns a text field showing the sentence, creating it on first use.
+   *
+   * @return The label
+   */
   public JTextField getLabel() {
     if(label == null) {
       label = new JTextField(this.toString());
@@ -86,12 +124,32 @@ public class TreeFromFile  {
     return sentence;
   }
 
+  /**
+   * Sets the constituents found by a tree diff.
+   *
+   * @param lessConstituents The constituents; kept, not copied
+   */
   public void setDiffConstituents(Set<Constituent> lessConstituents) { diffSet = lessConstituents; }
 
+  /**
+   * Returns the constituents found by a tree diff.
+   *
+   * @return The constituents, or null if none were set
+   */
   public Set<Constituent> getDiffConstituents() { return diffSet; }
 
+  /**
+   * Sets the tree as decorated by a tree diff.
+   *
+   * @param decoratedTree The decorated tree
+   */
   public void setDiffDecoratedTree(Tree decoratedTree) { markedTree = decoratedTree; }
 
+  /**
+   * Returns the tree as decorated by a tree diff.
+   *
+   * @return The decorated tree, or null if none was set
+   */
   public Tree getDiffDecoratedTree() { return markedTree; }
 
 }

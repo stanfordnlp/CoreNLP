@@ -70,20 +70,34 @@ import edu.stanford.nlp.util.Pair;
 @SuppressWarnings("serial")
 public class DisplayMatchesPanel extends JPanel implements ListSelectionListener {
 
+  /** The scroll pane holding the displayed tree */
   private final JScrollPane scroller;
+  /** The press which started a highlight or drag in the filename field */
   private MouseEvent firstMouseEvent = null;
 
+  /** The font used to draw trees */
   private String fontName = "";
+  /** The font size used to draw trees */
   private int fontSize = 12;
+  /** The color of tree nodes which are not part of the match */
   private Color defaultColor = Color.BLACK;
+  /** The color of tree nodes which are part of the match */
   private Color matchedColor = Color.RED;
 
   private static DisplayMatchesPanel instance = null;
+  /** The panel drawing the current tree, or null if no tree has been shown */
   private ScrollableTreeJPanel tjp;
 
+  /** The coordinates of the matched nodes in the current tree */
   private List<Point2D.Double> matchedPartCoordinates;
+  /** Which matched node was last scrolled to, or -1 */
   private int matchedPartCoordinateIdx = -1;
 
+  /**
+   * Returns the single instance of this panel, creating it if needed.
+   *
+   * @return the panel
+   */
   public static synchronized DisplayMatchesPanel getInstance() {
     if (instance == null) {
       instance = new DisplayMatchesPanel();
@@ -148,7 +162,8 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
   /**
    * Used to set the single tree to be displayed in this panel (which should match
    * the tregex expression)
-   * @param match tree that matches the expression
+   * @param match tree that matches the expression, or null to just clear the display
+   * @param matchedParts the nodes of the tree to highlight as matched
    */
   public void setMatch(TreeFromFile match, List<Tree> matchedParts) {
     clearMatches();
@@ -171,9 +186,19 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     matchedPartCoordinateIdx = -1;
   }
 
+  /**
+   * Mouse listener for the filename field above a tree: shift-click extends
+   * a highlight, a press outside the highlight clears it, and dragging from
+   * inside the highlight copies it by drag and drop.
+   */
   public class FilenameMouseInputAdapter extends MouseInputAdapter {
     JTextField textField;
 
+    /**
+     * Creates a listener for the given field.
+     *
+     * @param textField the field showing the filename
+     */
     public FilenameMouseInputAdapter(JTextField textField) {
       this.textField = textField;
     }
@@ -476,14 +501,29 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
   } // end class DisplayMouseMotionAdapter
 
 
+  /**
+   * Sets the font for trees displayed after this call.
+   *
+   * @param fontName the name of the font
+   */
   public void setFontName(String fontName) {
     this.fontName = fontName;
   }
 
+  /**
+   * Sets the font size for trees displayed after this call.
+   *
+   * @param fontSize the font size
+   */
   public void setFontSize(int fontSize) {
     this.fontSize = fontSize;
   }
 
+  /**
+   * Sets the font size, and also applies it to the tree currently displayed.
+   *
+   * @param fontSize the font size
+   */
   public void setFontSizeRepaint(int fontSize) {
     this.fontSize = fontSize;
     if (tjp != null) {
@@ -494,10 +534,20 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     }
   }
 
+  /**
+   * Sets the color of unmatched nodes for trees displayed after this call.
+   *
+   * @param defaultColor the color
+   */
   public void setDefaultColor(Color defaultColor) {
     this.defaultColor = defaultColor;
   }
 
+  /**
+   * Sets the color of matched nodes for trees displayed after this call.
+   *
+   * @param matchedColor the color
+   */
   public void setMatchedColor(Color matchedColor) {
     this.matchedColor = matchedColor;
   }

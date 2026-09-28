@@ -64,6 +64,11 @@ public abstract class TregexMatcher {
     this.headFinder = headFinder;
   }
 
+  /**
+   * Returns the HeadFinder given when this matcher was created.
+   *
+   * @return The HeadFinder, or null if none was given
+   */
   public HeadFinder getHeadFinder() { return this.headFinder; }
 
   /**
@@ -169,6 +174,9 @@ public abstract class TregexMatcher {
    * subsequent matches in the same tree.  If you want to call this using
    * the same TregexMatcher on more than one node, call reset() first;
    * otherwise, an AssertionError will be thrown.
+   *
+   * @param node The node which must be the root of the match
+   * @return whether there is a (further) match rooted at {@code node}
    */
   public boolean findAt(Tree node) {
     if (findCurrent != null && findCurrent != node) {
@@ -207,6 +215,11 @@ public abstract class TregexMatcher {
     return namesToNodes.get(name);
   }
 
+  /**
+   * Returns the names of the named nodes in the current match.
+   *
+   * @return A view of the node names; this changes as the matcher moves on
+   */
   public Set<String> getNodeNames() {
     return namesToNodes.keySet();
   }
@@ -239,6 +252,9 @@ public abstract class TregexMatcher {
    * If there is a current match, and that match involves setting this
    * particular variable string, this returns that string.  Otherwise,
    * it returns null.
+   *
+   * @param var The variable name
+   * @return The variable's string, or null
    */
   public String getVariableString(String var) {
     return variableStrings.getString(var);

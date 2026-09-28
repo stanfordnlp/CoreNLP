@@ -429,6 +429,7 @@ public class Tsurgeon  {
    * of tsurgeon operations into a pair.
    *
    * @param reader Reader to read patterns from
+   * @param compiler The compiler used for the tregex pattern
    * @return A pair of a tregex and tsurgeon pattern read from a file, or {@code null}
    *    when the operations present in the Reader have been exhausted
    * @throws IOException If any IO problem
@@ -449,6 +450,8 @@ public class Tsurgeon  {
    * Assumes that we are at the beginning of a tsurgeon script file and gets the string for the
    * tregex pattern leading the file.
    *
+   * @param reader Reader to read the pattern from; it is left just after
+   *    the blank line ending the pattern, if any
    * @return tregex pattern string. May be empty, never null
    * @throws IOException If the usual kinds of IO errors occur
    */
@@ -471,7 +474,10 @@ public class Tsurgeon  {
    * Assumes the given reader has only tsurgeon operations (not a tregex pattern), and parses
    * these out, collecting them into one operation.  Stops on a whitespace line.
    *
+   * @param reader Reader to read the operations from
+   * @return The operations, collected into one pattern
    * @throws IOException If the usual kinds of IO errors occur
+   * @throws TsurgeonParseException If there are no operations, or one cannot be parsed
    */
   public static TsurgeonPattern getTsurgeonOperationsFromReader(BufferedReader reader) throws IOException {
     List<TsurgeonPattern> operations = new ArrayList<>();
@@ -509,7 +515,12 @@ public class Tsurgeon  {
    * them as a String, mirroring the way the strings appear in the file. This is helpful
    * for lazy evaluation of the operations, as in a GUI,
    * because you do not parse the operations on load.  Comments are still excised.
-   * @throws IOException
+   * Unlike {@link #getTsurgeonOperationsFromReader}, this reads to the end of
+   * the reader, skipping blank lines.
+   *
+   * @param reader Reader to read the operations from
+   * @return The operations, one per line
+   * @throws IOException If the usual kinds of IO errors occur
    */
   public static String getTsurgeonTextFromReader(BufferedReader reader) throws IOException {
     StringBuilder sb = new StringBuilder();
@@ -529,7 +540,9 @@ public class Tsurgeon  {
    * of pairs of tregex and tsurgeon patterns.
    *
    * @param filename A file, classpath resource or URL (perhaps gzipped) containing the tsurgeon script
-   * @return A pair of a tregex and tsurgeon pattern read from a file
+   * @param encoding The encoding of the file
+   * @param compiler The compiler used for the tregex patterns
+   * @return A list of pairs of a tregex and tsurgeon pattern read from the file
    * @throws IOException If there is any I/O problem
    */
   public static List<Pair<TregexPattern, TsurgeonPattern>> getOperationsFromFile(String filename, String encoding, TregexPatternCompiler compiler) throws IOException {
@@ -545,7 +558,8 @@ public class Tsurgeon  {
    * of pairs of tregex and tsurgeon patterns.
    *
    * @param reader A BufferedReader to read the operations
-   * @return A pair of a tregex and tsurgeon pattern read from reader
+   * @param compiler The compiler used for the tregex patterns
+   * @return A list of pairs of a tregex and tsurgeon pattern read from reader
    * @throws IOException If there is any I/O problem
    */
   @SuppressWarnings("WeakerAccess")
@@ -599,6 +613,17 @@ public class Tsurgeon  {
 
   private static boolean matchedOnTree; // hack-in field for seeing whether there was a match.
 
+  /**
+   * Applies each pair of patterns to a tree in turn, in the same way as
+   * {@link #processPattern}.  This also records, in a static field used by
+   * {@link #main}, whether any pattern matched, so it is not thread safe.
+   *
+   * @param ops The pairs of tregex and tsurgeon patterns to apply
+   * @param t The tree to match against and perform surgery on
+   * @return The modified tree, or null if an operation deleted the whole tree
+   * @throws RuntimeException wrapping a NullPointerException thrown while
+   *    matching or applying a pattern
+   */
   @SuppressWarnings("StringContatenationInLoop")
   public static Tree processPatternsOnTree(List<Pair<TregexPattern, TsurgeonPattern>> ops, Tree t) {
     matchedOnTree = false;

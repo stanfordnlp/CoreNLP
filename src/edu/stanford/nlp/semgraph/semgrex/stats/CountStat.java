@@ -99,6 +99,12 @@ public class CountStat implements SemgrexStat {
 
   /**
    * Parses "count [-flat] [-maxColumns N] [-noBidi] [-restrict KEY=SET ...] KEY [KEY ...]"
+   *
+   * @param context the stage this command is in, used to validate keys and look up sets
+   * @param args the arguments after "count"
+   * @return a new CountStat
+   * @throws SemgrexParseException if an option is unknown or malformed, there are no keys,
+   *   a key isn't in the pattern, or a restriction's set can't be used in this stage
    */
   public static SemgrexStat create(SemgrexStats.Context context, List<String> args) {
     List<String> keys = new ArrayList<>();
@@ -196,11 +202,20 @@ public class CountStat implements SemgrexStat {
     return value.replaceAll("[\t\r\n]", " ");
   }
 
+  /**
+   * Number of matches counted, not including those which failed a restriction.
+   *
+   * @return the number of matches counted
+   */
   public long getTotalMatches() {
     return totalMatches;
   }
 
-  /** Number of distinct key tuples seen */
+  /**
+   * Number of distinct key tuples seen
+   *
+   * @return the number of distinct key tuples
+   */
   public int getDistinctKeys() {
     return counts.size();
   }

@@ -4,15 +4,26 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * A constraint on a Map valued node annotation where the key is a regex
+ * (or {@code __}), such as {@code morphofeatures:{/Number|Person/:Sing}}.
+ * The constraint is checked against every entry whose key matches.
+ */
 public class RegexPartialAttribute implements Serializable {
+  /** The name of the Map valued annotation to check */
   final String annotation;
+  /** Pattern which a map key must fully match */
   final Pattern key;
 
   // TODO: separate these into two different classes?
+  /** Pattern for the value when matching case sensitively, or null if the value is an exact string */
   final Pattern casedPattern;
+  /** Pattern for the value when matching case insensitively, or null if the value is an exact string */
   final Pattern caselessPattern;
+  /** The exact string the value must equal, or null if the value is a regex or {@code __} */
   final String exactMatch;
 
+  /** Whether the constraint is required, negated, or optional */
   final AttributeMode mode;
 
   RegexPartialAttribute(String annotation, String key, String value, AttributeMode mode) {

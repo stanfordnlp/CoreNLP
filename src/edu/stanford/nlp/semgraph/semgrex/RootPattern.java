@@ -20,9 +20,13 @@ import edu.stanford.nlp.util.VariableStrings;
  * @author John Bauer
  */
 public class RootPattern extends SemgrexPattern  {
+  /** The pattern this root wraps */
   final SemgrexPattern child;
+  /** The node names used in the pattern */
   final Set<String> knownVariables;
+  /** The variable group names used in the pattern */
   final Set<String> knownVarGroups;
+  /** The edge names used in the pattern */
   final Set<String> knownEdges;
 
   public List<SemgrexPattern> getChildren() {

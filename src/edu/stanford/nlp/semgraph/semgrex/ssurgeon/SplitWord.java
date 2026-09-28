@@ -60,6 +60,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  * @author John Bauer
  */
 public class SplitWord extends SsurgeonEdit {
+  /** The name of this edit in an Ssurgeon script */
   public static final String LABEL = "splitWord";
 
   final String node;
@@ -92,10 +93,40 @@ public class SplitWord extends SsurgeonEdit {
     return references;
   }
 
+  /**
+   * Creates a split which attaches the new pieces to the head piece.
+   *
+   * @param node the name of the matched node to split
+   * @param nodePieces the regexes (or exact strings, if {@code exactSplit}) giving each piece
+   * @param headIndex the 0-indexed piece which keeps the matched node
+   * @param relation the relation attaching each new piece
+   * @param nodeNames names for the pieces, such as {@code 0=foo,1=bar}, or null
+   * @param edgeNames names for the new edges, in the same format, or null
+   * @param exactSplit whether {@code nodePieces} are exact strings rather than regexes
+   * @throws SsurgeonParseException if a required argument is missing, there are
+   *   fewer than two pieces, a name refers to a piece which does not exist,
+   *   or an edge name is given for the head piece
+   */
   public SplitWord(String node, List<String> nodePieces, Integer headIndex, GrammaticalRelation relation, String nodeNames, String edgeNames, boolean exactSplit) {
     this(node, nodePieces, headIndex, relation, nodeNames, edgeNames, exactSplit, false);
   }
 
+  /**
+   * Creates a split, optionally attaching the new pieces to the governors of the matched node.
+   *
+   * @param node the name of the matched node to split
+   * @param nodePieces the regexes (or exact strings, if {@code exactSplit}) giving each piece
+   * @param headIndex the 0-indexed piece which keeps the matched node
+   * @param relation the relation attaching each new piece
+   * @param nodeNames names for the pieces, such as {@code 0=foo,1=bar}, or null
+   * @param edgeNames names for the new edges, in the same format, or null
+   * @param exactSplit whether {@code nodePieces} are exact strings rather than regexes
+   * @param siblings if true, attach the new pieces to the governors of the
+   *   matched node rather than to the head piece
+   * @throws SsurgeonParseException if a required argument is missing, there are
+   *   fewer than two pieces, a name refers to a piece which does not exist,
+   *   or an edge name is given for the head piece
+   */
   public SplitWord(String node, List<String> nodePieces, Integer headIndex, GrammaticalRelation relation, String nodeNames, String edgeNames, boolean exactSplit, boolean siblings) {
     this.siblings = siblings;
     if (node == null) {

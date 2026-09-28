@@ -28,18 +28,30 @@ import edu.stanford.nlp.util.Generics;
 @SuppressWarnings("serial")
 public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListener {
 
+  /** The listeners notified when the tree structure changes */
   private final List<TreeModelListener> listeners;
+  /** The root node, which holds the loaded files and folders */
   private final FileTreeNode root;
+  /** The children of the root and of each folder node; file nodes have no entry */
   private final Map<FileTreeNode, List<FileTreeNode>> treeStructure;
 
+  /** The initial encoding, also suggested for tree files which are neither Chinese nor Negra */
   public static final String DEFAULT_ENCODING = "UTF-8";
+  /** The encoding suggested for Chinese tree files */
   public static final String DEFAULT_CHINESE_ENCODING = "GB18030";
+  /** The encoding suggested for Negra tree files */
   public static final String DEFAULT_NEGRA_ENCODING = " ISO-8859-1";
 
   private static String curEncoding = DEFAULT_ENCODING; // todo: shouldn't be static, but changing this requires fixing PreferencesPanel
   private static TreeReaderFactory trf; // todo: shouldn't be static, needs fixing in TreeFromFile
 
 
+  /**
+   * Creates a model with no files under the given root.  This also resets
+   * the shared tree reader factory to a {@code TRegexTreeReaderFactory}.
+   *
+   * @param root The root node
+   */
   public FileTreeModel(FileTreeNode root) {
    super(root);
    this.root = root;
@@ -57,6 +69,11 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
     listeners.add(l);
   }
 
+  /**
+   * Tells the listeners that the structure under the given path has changed.
+   *
+   * @param parentPath The path to the node whose structure changed
+   */
   protected void fireTreeStructureChanged(TreePath parentPath) {
     TreeModelEvent e = null;
     for (TreeModelListener l : listeners) {
@@ -119,6 +136,8 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
 
   /**
    * Returns true if the root has no children; false otherwise
+   *
+   * @return whether the root has no children
    */
   public boolean isEmpty() {
     return this.getChildCount(root) == 0;
@@ -142,7 +161,12 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
   }
 
   /**
-   * Forks off a new thread to load your files based on the filters you set in the interface
+   * Adds the files which pass the filters, searching the given folders
+   * recursively, and loads a treebank for each.  The loading happens in the
+   * calling thread; {@link TregexGUI} calls this from a separate thread.
+   *
+   * @param filters Filters on the names of files to load
+   * @param files The files and folders to add
    */
   public void addFileFolder(final EnumMap<FilterType, String> filters, final File[] files) {
     List<FileTreeNode> newFiles = new ArrayList<>();
@@ -232,18 +256,38 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
     return filename.startsWith(".");
   }
 
+  /**
+   * Returns the tree reader factory used to load files.
+   *
+   * @return The tree reader factory, shared by all FileTreeModels
+   */
   public static TreeReaderFactory getTRF() {
     return trf;
   }
 
+  /**
+   * Sets the tree reader factory used to load files from now on.
+   *
+   * @param trf The tree reader factory, shared by all FileTreeModels
+   */
   public static void setTRF(TreeReaderFactory trf) {
     FileTreeModel.trf = trf;
   }
 
+  /**
+   * Returns the encoding used to load files.
+   *
+   * @return The encoding, shared by all FileTreeModels
+   */
   public static String getCurEncoding() {
     return curEncoding;
   }
 
+  /**
+   * Sets the encoding used to load files from now on.
+   *
+   * @param curEncoding The encoding, shared by all FileTreeModels
+   */
   public static void setCurEncoding(String curEncoding) {
     FileTreeModel.curEncoding = curEncoding;
   }

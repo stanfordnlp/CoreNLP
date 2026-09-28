@@ -31,14 +31,32 @@ public class SemgrexBatchParser  {
   /** Maximum stream size in characters */
   private static final int MAX_STREAM_SIZE = 1024 * 1024;
 
+  /** If true, log each line which is changed by macro expansion */
   public static boolean VERBOSE = false;
 
   private SemgrexBatchParser() { } // static methods class
 
+  /**
+   * Reads and compiles all of the patterns in a stream, with no Env.
+   *
+   * @param is The stream to read, which must have at most 1M characters
+   * @return The compiled patterns, in the order they appear
+   * @throws IOException if the stream cannot be read
+   */
   public static List<SemgrexPattern> compileStream(InputStream is) throws IOException {
     return compileStream(is, null);
   }
 
+  /**
+   * Reads and compiles all of the patterns in a stream.
+   * The stream is read twice, first to collect the macros and then to
+   * compile the patterns, so it must fit in a buffer of 1M characters.
+   *
+   * @param is The stream to read
+   * @param env The Env used when compiling each pattern; may be null
+   * @return The compiled patterns, in the order they appear
+   * @throws IOException if the stream cannot be read or is too long to reset
+   */
   public static List<SemgrexPattern> compileStream(InputStream is, Env env) throws IOException {
     BufferedReader reader = new BufferedReader(new InputStreamReader(is));
     reader.mark(MAX_STREAM_SIZE);

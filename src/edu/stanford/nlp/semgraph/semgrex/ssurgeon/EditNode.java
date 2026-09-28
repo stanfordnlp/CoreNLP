@@ -21,6 +21,7 @@ import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
  * @author John Bauer
  */
 public class EditNode extends SsurgeonEdit {
+  /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL = "editNode";
 
   final String nodeName;
@@ -29,6 +30,18 @@ public class EditNode extends SsurgeonEdit {
   final Map<String, String> attributes;
   final Map<String, String> updateMorphoFeatures;
 
+  /**
+   * Creates an edit which changes the attributes of a named node.
+   *
+   * @param nodeName The name of the node to edit
+   * @param attributes Attributes to set, as attribute names and string values
+   * @param updateMorphoFeatures CoNLL-U features to add or overwrite, or null for none
+   * @param removedAttributes Names of attributes to remove from the node
+   * @param removedMorpho Names of CoNLL-U features to remove from the node
+   * @throws SsurgeonParseException if nodeName is null, there is nothing to edit,
+   *   an attribute cannot be set (see {@link AddDep#checkIllegalAttributes}),
+   *   or a removed attribute is unknown
+   */
   public EditNode(String nodeName, Map<String, String> attributes, String updateMorphoFeatures, List<String> removedAttributes, List<String> removedMorpho) {
     if (nodeName == null) {
       throw new SsurgeonParseException("Cannot make an EditNode with no nodeName");

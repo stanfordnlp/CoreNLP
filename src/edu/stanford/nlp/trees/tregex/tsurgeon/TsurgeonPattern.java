@@ -49,6 +49,11 @@ public abstract class TsurgeonPattern {
 
   TsurgeonPattern root; // TODO: can remove? Nothing seems to look at it.
 
+  /**
+   * Sets the root of this pattern and, recursively, of its children.
+   *
+   * @param root the root of the whole pattern
+   */
   protected void setRoot(TsurgeonPatternRoot root) {
     this.root = root;
     for (TsurgeonPattern child : children) {
@@ -84,10 +89,24 @@ public abstract class TsurgeonPattern {
     return resultSB.toString();
   }
 
+  /**
+   * Creates a matcher for the whole pattern.  Only the root of a pattern
+   * can do this; on any other pattern it throws.
+   *
+   * @return a new matcher with no named nodes
+   * @throws UnsupportedOperationException if this is not the root of the pattern
+   */
   public TsurgeonMatcher matcher() {
     throw new UnsupportedOperationException("Only the root node can produce the top level matcher");
   }
 
+  /**
+   * Creates a matcher for this pattern which shares state with the rest of the operation.
+   *
+   * @param newNodeNames the nodes named by operations so far
+   * @param coindexer the generator for new coindexation numbers, or null if the pattern does not coindex
+   * @return a new matcher for this pattern
+   */
   public abstract TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer);
 
 }

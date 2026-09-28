@@ -8,14 +8,23 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 
 /**
- * This action removes all incoming edges for the given node.
+ * This action deletes the given node, along with its incoming edges,
+ * if it is a leaf (has no outgoing edges).  The indices of the later
+ * words are then shifted down by one.
  * @author lumberjack
  *
  */
 public class DeleteLeaf extends SsurgeonEdit {
+  /** The name of this edit in an Ssurgeon script */
   public static final String LABEL = "deleteLeaf";
+  /** The name of the matched node to delete */
   protected String nodeName; // name of this node
 
+  /**
+   * Creates an edit which deletes the named node if it is a leaf.
+   *
+   * @param nodeName The name of the node in the Semgrex pattern
+   */
   public DeleteLeaf(String nodeName) {
     this.nodeName = nodeName;
   }

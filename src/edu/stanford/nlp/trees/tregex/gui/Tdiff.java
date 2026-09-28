@@ -38,9 +38,12 @@ public class Tdiff  {
   /**
    * Marks bracketings in t2 not in t1 using the DoAnnotation field.
    * Returns a list of brackets in t1 not in t2.
+   * <br>
+   * t2 is modified: its spans are set, and the label of each phrasal node
+   * gets DoAnnotation true if its bracket is not in t1 and false if it is.
    *
-   * @param t1
-   * @param t2
+   * @param t1 the tree to compare against; may be null, in which case every bracket in t2 is marked
+   * @param t2 the tree whose brackets are marked; may be null, in which case nothing is marked
    * @return A list of brackets in t1 not in t2;
    */
   public static Set<Constituent> markDiff(Tree t1, Tree t2) {
@@ -69,7 +72,11 @@ public class Tdiff  {
 
 
   /**
-   * @param args
+   * Reads the first tree from each of two files, marks the differences
+   * with {@link #markDiff}, then prints the second tree and the brackets
+   * of the first tree which are not in the second.
+   *
+   * @param args the paths of the two tree files
    */
   public static void main(String[] args) {
     if(args.length != 2) {

@@ -7,6 +7,11 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
+ * Refers to a node by name in a Tsurgeon operation.  The node is looked
+ * up first among the nodes named by earlier operations, then among the
+ * named nodes of the Tregex match; if neither has it, evaluating gives
+ * null and logs a warning.
+ *
  * @author Roger Levy (rog@stanford.edu)
  */
 public class FetchNode extends TsurgeonPattern  {
@@ -14,6 +19,11 @@ public class FetchNode extends TsurgeonPattern  {
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(FetchNode.class);
 
+  /**
+   * Creates a reference to a named node.
+   *
+   * @param nodeName the name of the node
+   */
   public FetchNode(String nodeName) {
     super(nodeName, TsurgeonPattern.EMPTY_TSURGEON_PATTERN_ARRAY);
   }

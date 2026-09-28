@@ -52,6 +52,12 @@ public class CollectStat implements SemgrexStat {
 
   /**
    * Parses "collect KEY as NAME"
+   *
+   * @param context the stage being built; KEY is checked against its pattern and NAME is declared as a set in it
+   * @param args the words after "collect": KEY, "as", NAME
+   * @return a stat which adds the value of KEY in each match to the set NAME
+   * @throws SemgrexParseException if args are not in that form, KEY is not a
+   *     single name in the pattern, or NAME was already declared
    */
   public static SemgrexStat create(SemgrexStats.Context context, List<String> args) {
     if (args.size() != 3 || !AS.equals(args.get(1))) {
@@ -76,10 +82,20 @@ public class CollectStat implements SemgrexStat {
     return Collections.singletonList(key);
   }
 
+  /**
+   * Returns the name of the set being collected into.
+   *
+   * @return the NAME in "collect KEY as NAME"
+   */
   public String getName() {
     return name;
   }
 
+  /**
+   * Returns the values collected so far.
+   *
+   * @return an unmodifiable view of the set, which reflects later additions
+   */
   public Set<String> getValues() {
     return Collections.unmodifiableSet(values);
   }

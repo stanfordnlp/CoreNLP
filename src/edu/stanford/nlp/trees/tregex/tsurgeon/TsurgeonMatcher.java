@@ -34,6 +34,13 @@ public abstract class TsurgeonMatcher {
   // TODO: ideally we should have the tree and the tregex matcher be
   // part of this as well.  That would involve putting some of the
   // functionality in Tsurgeon.java in this object
+  /**
+   * Creates a matcher for the pattern, creating matchers for each of the pattern's children.
+   *
+   * @param pattern the pattern this matcher evaluates
+   * @param newNodeNames the nodes named by operations so far; shared with the child matchers, not copied
+   * @param coindexer the generator for new coindexation numbers, or null if the pattern does not coindex
+   */
   public TsurgeonMatcher(TsurgeonPattern pattern, Map<String, Tree> newNodeNames, CoindexationGenerator coindexer) {
     this.newNodeNames = newNodeNames;
     this.coindexer = coindexer;

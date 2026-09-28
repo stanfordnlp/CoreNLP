@@ -5,14 +5,37 @@ import edu.stanford.nlp.semgraph.semgrex.ssurgeon.Ssurgeon;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonRuntimeException;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonWordlist;
 
+/**
+ * Tests whether a field of the matched node is in a wordlist resource
+ * registered with {@link Ssurgeon}.
+ */
 public class WordlistTest extends NodeTest {
+  /** Which field of the node is looked up in the wordlist */
   public static enum TYPE {
-    lemma, current_lasttoken, lemma_and_currlast, word, pos
+    /** The lemma, lowercased */
+    lemma,
+    /** The last whitespace separated token of the original text, lowercased */
+    current_lasttoken,
+    /** Either the lowercased lemma or the lowercased last token of the original text */
+    lemma_and_currlast,
+    /** The word, with its case unchanged */
+    word,
+    /** The POS tag, with its case unchanged */
+    pos
   };
   private TYPE type;
   private String resourceID;
   private String myID;
 
+  /**
+   * Creates a wordlist test.
+   *
+   * @param myID the ID of this test
+   * @param resourceID the ID of the wordlist resource; it is looked up each time the test is evaluated
+   * @param type the name of the {@link TYPE} to test, which must match exactly
+   * @param matchName the name of the node in the Semgrex match to test
+   * @throws IllegalArgumentException if type is not the name of a {@link TYPE}
+   */
   public WordlistTest(String myID, String resourceID, String type, String matchName) {
     super(matchName);
     this.resourceID = resourceID;

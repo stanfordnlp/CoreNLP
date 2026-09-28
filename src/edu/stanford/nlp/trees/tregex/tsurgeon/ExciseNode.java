@@ -17,6 +17,9 @@ public class ExciseNode extends TsurgeonPattern  {
 
   /**
    * Top should evaluate to a node that dominates bottom, but this is not checked!
+   *
+   * @param top the pattern for the highest node to remove
+   * @param bottom the pattern for the lowest node to remove, whose children take the place of top
    */
   public ExciseNode(TsurgeonPattern top, TsurgeonPattern bottom) {
     super("excise", new TsurgeonPattern[] { top, bottom });
@@ -24,6 +27,8 @@ public class ExciseNode extends TsurgeonPattern  {
 
   /**
    * Excises only the directed node.
+   *
+   * @param node the pattern for the node to remove; its children take its place
    */
   public ExciseNode(TsurgeonPattern node) {
     super("excise", new TsurgeonPattern[] { node,node });

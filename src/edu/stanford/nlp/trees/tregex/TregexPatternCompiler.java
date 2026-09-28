@@ -57,9 +57,14 @@ public class TregexPatternCompiler {
   private final List<Pair<String, String>> macros =
           new ArrayList<>();
 
+  /** A shared compiler with the default HeadFinder and basicCategoryFunction.  Macros added to it affect every user of it. */
   public static final TregexPatternCompiler defaultCompiler =
     new TregexPatternCompiler();
 
+  /**
+   * A compiler that uses the default HeadFinder ({@link CollinsHeadFinder}) and the
+   * default basicCategoryFunction (that of {@link PennTreebankLanguagePack}).
+   */
   public TregexPatternCompiler() {
     this(DEFAULT_HEAD_FINDER, DEFAULT_BASIC_CAT_FUNCTION);
   }

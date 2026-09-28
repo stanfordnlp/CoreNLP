@@ -22,9 +22,17 @@ import edu.stanford.nlp.util.VariableStrings;
 public class UniqPattern extends SemgrexPattern  {
   private static final long serialVersionUID = -38315768154569L;
 
+  /** The pattern whose matches get filtered */
   private final SemgrexPattern child;
+  /** The node names or attributes used as keys for uniqueness */
   private final List<String> keys;
 
+  /**
+   * Creates a uniq operation over the matches of child.
+   *
+   * @param child the pattern whose matches get filtered
+   * @param keys the node names or attributes used as keys; the list is copied
+   */
   public UniqPattern(SemgrexPattern child, List<String> keys) {
     this.child = child;
     this.keys = new ArrayList<>(keys);
@@ -78,6 +86,14 @@ public class UniqPattern extends SemgrexPattern  {
     }
   }
 
+  /**
+   * Returns the pattern as a String, optionally without the child pattern.
+   *
+   * @param hasPrecedence ignored
+   * @param addChild whether to include the child pattern before the {@code :: uniq} operation
+   * @return the {@code :: uniq} operation and its keys, preceded by the
+   *   child pattern if addChild is set
+   */
   public String toString(boolean hasPrecedence, boolean addChild) {
     StringBuilder sb = new StringBuilder();
     if (addChild) {

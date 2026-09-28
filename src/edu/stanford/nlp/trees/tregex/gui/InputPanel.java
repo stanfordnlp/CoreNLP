@@ -78,33 +78,61 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
 
   private static InputPanel inputPanel; // = null;
 
+  /** Label showing the statistics of the last search or browse */
   private JLabel foundStats;
+  /** Button which starts a search */
   private JButton findMatches;
+  /** Button which cancels a running search */
   private JButton cancel;
+  /** Button which shows the Tregex help */
   private JButton help;
+  /** Text area holding the Tregex pattern */
   private JTextArea tregexPattern;
+  /** Combo box of recently searched patterns */
   private JComboBox<String> recentTregexPatterns;
+  /** The model of the recent patterns combo box */
   private DefaultComboBoxModel<String> recentTregexPatternsModel;
+  /** The number of recent patterns to keep */
   private int numRecentPatterns = 5;// we save the last n patterns in our combo box, where n = numRecentPatterns
+  /** Text area holding the Tsurgeon script */
   private JTextArea tsurgeonScript;
+  /** The compiler for Tregex patterns, which carries the current head finder */
   private TregexPatternCompiler compiler;//this should change only when someone changes the headfinder/basic category finder
+  /** The statistics of each search */
   private final List<HistoryEntry> historyList;
+  /** Window showing the statistics history, or null if not shown yet */
   private JFrame historyFrame; // = null;
+  /** Label for the Tsurgeon script area */
   private JLabel scriptLabel;
+  /** Whether the Tsurgeon controls are enabled */
   private boolean tsurgeonEnabled; // = false;
+  /** Button which shows the Tsurgeon help */
   private JButton tsurgeonHelp;
+  /** Button which cancels a running Tsurgeon script */
   private JButton cancelTsurgeon;
+  /** The thread running the current search or script, or null */
   private Thread searchThread;
+  /** Button which shows the statistics history */
   private JButton historyButton;
+  /** Progress bar shown in place of the statistics during a search, or null */
   private JProgressBar progressBar;
+  /** Button which lists all of the trees in the active files */
   private JButton browseButton;
 
+  /** Window showing the Tregex help, or null if not shown yet */
   private JFrame helpFrame;
 
+  /** Window showing the Tsurgeon help, or null if not shown yet */
   private JFrame tsurgeonHelpFrame;
 
+  /** Button which runs the Tsurgeon script */
   private JButton runScript;
 
+  /**
+   * Returns the single instance of this panel, creating it if needed.
+   *
+   * @return the panel
+   */
   public static synchronized InputPanel getInstance() {
     if (inputPanel == null)
       inputPanel = new InputPanel();
@@ -356,6 +384,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
 
+  /**
+   * Enables or disables the Tsurgeon controls, and the matching menu options in the main window.
+   *
+   * @param enable whether Tsurgeon should be enabled
+   */
   public void enableTsurgeon(boolean enable) {
     if(tsurgeonEnabled == enable)
       return;//nothing changes
@@ -374,10 +407,20 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     TregexGUI.getInstance().setTsurgeonEnabled(enable);
   }
 
+  /**
+   * Returns the statistics of each search so far.
+   *
+   * @return the history list itself, not a copy
+   */
   public List<HistoryEntry> getHistoryList() {
     return historyList;
   }
 
+  /**
+   * Returns the statistics history as tab separated text, with a header line.
+   *
+   * @return the history, one line per search
+   */
   public String getHistoryString() {
     StringBuilder sb = new StringBuilder();
     sb.append(HistoryEntry.header());
@@ -397,6 +440,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     historyList.add(new HistoryEntry(pattern, numTreesMatched, numMatches));
   }
 
+  /**
+   * Sets the head finder used when compiling subsequent patterns.
+   *
+   * @param hf the head finder
+   */
   public void setHeadFinder(HeadFinder hf) {
     compiler = new TregexPatternCompiler(hf);
   }
@@ -432,6 +480,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       });
   }
 
+  /**
+   * Switches between showing the progress bar and showing the statistics label.
+   *
+   * @param useProgressBar true to show the progress bar, false to show the statistics
+   */
   public void useProgressBar(boolean useProgressBar) {
     if (useProgressBar) {//make sure we're in progress bar mode
       if (progressBar == null) {
@@ -710,6 +763,12 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     });
   }
 
+  /**
+   * Sets the text of the Tregex pattern and Tsurgeon script areas.
+   *
+   * @param tregexPatternString the Tregex pattern
+   * @param tsurgeonScriptString the Tsurgeon script
+   */
   public void setScriptAndPattern(String tregexPatternString, String tsurgeonScriptString) {
     this.tregexPattern.setText(tregexPatternString);
     this.tsurgeonScript.setText(tsurgeonScriptString);
@@ -734,6 +793,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     recentTregexPatterns.revalidate();
   }
 
+  /**
+   * Sets how many recent patterns to keep, dropping the oldest if there are too many.
+   *
+   * @param n the number of recent patterns to keep
+   */
   public void setNumRecentPatterns(int n) {
     numRecentPatterns = n;
     //shrink down the number of recent patterns if necessary
@@ -823,6 +887,13 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     private final int numTreesMatched;
     private final int numMatches;
 
+    /**
+     * Creates a history entry.
+     *
+     * @param pattern the pattern searched for
+     * @param numTreesMatched the number of trees which matched
+     * @param numMatches the total number of matches
+     */
     public HistoryEntry(String pattern, int numTreesMatched, int numMatches) {
       this.pattern = pattern;
       this.numTreesMatched = numTreesMatched;
@@ -841,6 +912,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       return array;
     }
 
+    /**
+     * Returns the column names for a table of history entries, in the order used by {@link #toArray}.
+     *
+     * @return the column names
+     */
     public static String[] columnNamesArray() {
       return new String[]{"Pattern","Trees Matched", "Total Matches"};
     }
@@ -861,6 +937,10 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   } // end class HistoryEntry
 
 
+  /**
+   * A tree visitor which matches a Tregex pattern against each tree it
+   * visits, recording the trees which match and the nodes which matched.
+   */
   public static class TRegexGUITreeVisitor implements TreeVisitor {
 
     private int totalMatches; // = 0;
@@ -877,6 +957,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       matchedParts = Generics.newHashMap();
     }
 
+    /**
+     * Returns the matched nodes of each matching tree.
+     *
+     * @return map from each matching tree to the nodes matched in it; the internal map, not a copy
+     */
     public Map<TreeFromFile,List<Tree>> getMatchedParts() {
       return matchedParts;
     }
@@ -901,26 +986,46 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     } // end visitTree
 
     /**
-     * Method for returning the number of matches found in the last tree
-     * visited by this tree visitor.
-     * @return number of matches found in previous tree
+     * Method for returning the total number of matches found in all of
+     * the trees visited by this tree visitor.
+     * @return number of matches found in all trees visited
      */
     public int numUniqueMatches() {
       return totalMatches;
     }
 
+    /**
+     * Returns the trees which matched, in the order they were visited.
+     *
+     * @return the matching trees; the internal list, not a copy
+     */
     public List<TreeFromFile> getMatches() {
       return matchedTrees;
     }
 
+    /**
+     * Returns the filename recorded with the trees currently being visited.
+     *
+     * @return the current filename
+     */
     public String getFilename() {
       return filename;
     }
 
+    /**
+     * Sets the filename to record with the trees visited from now on.
+     *
+     * @param curFilename the name of the file the trees come from
+     */
     public void setFilename(String curFilename) {
       this.filename = curFilename.intern();
     }
 
+    /**
+     * Returns the pattern this visitor matches.
+     *
+     * @return the pattern
+     */
     public TregexPattern getPattern() {
       return p;
     }

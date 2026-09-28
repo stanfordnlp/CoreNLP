@@ -22,6 +22,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  *
  */
 public class AddDep extends SsurgeonEdit {
+  /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL = "addDep";
   final Map<String, String> attributes;
   final GrammaticalRelation relation;
@@ -29,10 +30,31 @@ public class AddDep extends SsurgeonEdit {
   final String position;
   final double weight;
 
+  /**
+   * Creates an AddDep with an edge weight of 0.
+   *
+   * @param govNodeName the name of the matched node which governs the new node
+   * @param relation the relation from the governor to the new node
+   * @param attributes the attributes of the new node, such as word or lemma
+   * @param position where to put the new node, or null for the end of the sentence
+   * @throws SsurgeonParseException if an argument is missing or invalid
+   */
   public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position) {
     this(govNodeName, relation, attributes, position, 0.0);
   }
 
+  /**
+   * Creates an AddDep.
+   *
+   * @param govNodeName the name of the matched node which governs the new node
+   * @param relation the relation from the governor to the new node
+   * @param attributes the attributes of the new node, such as word or lemma; the map is copied
+   * @param position where to put the new node, or null for the end of the sentence.
+   *   Must start with {@code -} or {@code +}
+   * @param weight the weight of the new edge
+   * @throws SsurgeonParseException if govNodeName or relation is null,
+   *   the position is invalid, or the attributes can't be used for a new node
+   */
   public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight) {
     if (position != null) {
       if (!position.startsWith("-") && !position.startsWith("+")) {
@@ -151,6 +173,10 @@ public class AddDep extends SsurgeonEdit {
   /**
    * Certain attributes cannot be edited, especially docid, sentid, idx,
    * or they mess up the hashmaps in the SemanticGraph
+   *
+   * @param attributes the attribute keys and values for a node
+   * @throws SsurgeonParseException if the attributes include idx, sentIndex, or docID,
+   *   or if they can't be converted to a CoreLabel
    */
   public static void checkIllegalAttributes(Map<String, String> attributes) {
     if (attributes.containsKey("idx")) {
@@ -173,7 +199,11 @@ public class AddDep extends SsurgeonEdit {
 
   /**
    * Given the keys and values of the CoreAnnotation attributes,
-   * build a CoreLabel to use as the new word
+   * build a CoreLabel to use as the new word.
+   * If there is no value attribute, the value is set to the word.
+   *
+   * @param attributes the attribute keys and values for the new word
+   * @return a new CoreLabel with those attributes
    */
   public static CoreLabel fromCheapStrings(Map<String, String> attributes) {
     String[] keys = new String[attributes.size()];

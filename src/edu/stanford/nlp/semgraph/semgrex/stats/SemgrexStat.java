@@ -31,21 +31,29 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 public interface SemgrexStat {
   /**
    * The command word this stat was parsed from, eg "count".
+   *
+   * @return the command word
    */
   String name();
 
   /**
    * The named nodes, edges, and regex groups this command reads, in the order given.
+   *
+   * @return the keys this command reads
    */
   List<String> getKeys();
 
   /**
    * Tally a single match.  Called once per match, in corpus order.
+   *
+   * @param match the match to tally
    */
   void accumulate(SemgrexMatch match);
 
   /**
    * Render the accumulated results.  Should end with a line separator.
+   *
+   * @return the report
    */
   String report();
 
@@ -58,6 +66,15 @@ public interface SemgrexStat {
    * earlier stages.
    */
   interface Factory {
+    /**
+     * Builds a stat from the arguments which follow its command word.
+     *
+     * @param context the stage the command belongs to
+     * @param args the arguments after the command word
+     * @return the new stat
+     * @throws edu.stanford.nlp.semgraph.semgrex.SemgrexParseException if the
+     *   arguments are malformed or refer to keys or sets which cannot be used
+     */
     SemgrexStat create(SemgrexStats.Context context, List<String> args);
   }
 }

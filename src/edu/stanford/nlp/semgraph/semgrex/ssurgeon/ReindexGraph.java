@@ -22,8 +22,10 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
  *
  */
 public class ReindexGraph extends SsurgeonEdit {
+  /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL = "reindexGraph";
 
+  /** Creates the edit; it has no arguments. */
   public ReindexGraph() {
   }
 

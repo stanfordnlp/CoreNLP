@@ -269,7 +269,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * It is also possible to name relations.  For example, you can write the pattern
  * {@code {idx:1} >=reln {idx:2}}  The name of the relation will then
- * be stored in the matcher and can be extracted with {@code getRelnName("reln")}.
+ * be stored in the matcher and can be extracted with {@code getRelnString("reln")}.
  * If the relation is later referenced a second time, the type of
  * relation must be the same, or the potential match will not be
  * accepted.
@@ -284,7 +284,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * pattern will iterate through the edges from the root:
  * {@code {$} >~edge {}}
  * The edge itself is now stored with the matcher and can
- * be extracted with {@code getEdgeName("edge")}.  If the edge is
+ * be extracted with {@code getEdge("edge")}.  If the edge is
  * later referenced a second time, the exact edge must be the same, or
  * the potential match will not be accepted.
  * <br>
@@ -318,10 +318,14 @@ public abstract class SemgrexPattern implements Serializable  {
   private static final Redwood.RedwoodChannels log = Redwood.channels(SemgrexPattern.class);
 
   private static final long serialVersionUID = 1722052832350596732L;
+  /** Whether this pattern is negated */
   private boolean neg; // = false;
+  /** Whether this pattern is optional */
   private boolean opt; // = false;
+  /** The string this pattern was compiled from; only set on the pattern {@link #compile} returns */
   private String patternString; // conceptually final, but can't do because of parsing
 
+  /** The Env used to look up node attribute names */
   protected Env env; //always set with setEnv to make sure that it is also available to child patterns
 
   // package private constructor
@@ -413,14 +417,35 @@ public abstract class SemgrexPattern implements Serializable  {
     return opt;
   }
 
+  /**
+   * Returns the node names used in the pattern.
+   *
+   * @return The node names
+   * @throws UnsupportedOperationException unless this is the {@link RootPattern}
+   * returned by {@link #compile}
+   */
   public Set<String> getKnownVariables() {
     throw new UnsupportedOperationException("Only the RootPattern knows about the full set of known variables");
   }
 
+  /**
+   * Returns the variable group names used in the pattern.
+   *
+   * @return The variable group names
+   * @throws UnsupportedOperationException unless this is the {@link RootPattern}
+   * returned by {@link #compile}
+   */
   public Set<String> getKnownVarGroups() {
     throw new UnsupportedOperationException("Only the RootPattern knows about the full set of known var groups");
   }
 
+  /**
+   * Returns the edge names used in the pattern.
+   *
+   * @return The edge names
+   * @throws UnsupportedOperationException unless this is the {@link RootPattern}
+   * returned by {@link #compile}
+   */
   public Set<String> getKnownEdges() {
     throw new UnsupportedOperationException("Only the RootPattern knows about the full set of known edges");
   }
@@ -458,6 +483,11 @@ public abstract class SemgrexPattern implements Serializable  {
   /**
    * Get a {@link SemgrexMatcher} for this pattern in this graph, with some
    * initial conditions on the variable assignments
+   *
+   * @param sg The SemanticGraph to match on
+   * @param variables Nodes which the named nodes of the pattern must match.
+   *   The matcher uses this map (not a copy) to store its named nodes.
+   * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg, Map<String, IndexedWord> variables) {
     return matcher(new SemgrexGraphs(sg), SemgrexGraphName.BASIC, sg.getFirstRoot(), variables, new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
@@ -480,6 +510,11 @@ public abstract class SemgrexPattern implements Serializable  {
    *<br>
    * The search starts in the basic graph; a relation written with a graph
    * name, such as {@code >nsubj@enhanced}, moves it to that one.
+   *
+   * @param graphs The graphs of the sentence to match on
+   * @return a SemgrexMatcher
+   * @throws IllegalStateException if the sentence has no basic graph, or
+   *   lacks a graph the pattern names
    */
   public SemgrexMatcher matcher(SemgrexGraphs graphs) {
     SemanticGraph graph = graphs.getDefault();
@@ -502,10 +537,30 @@ public abstract class SemgrexPattern implements Serializable  {
                    new VariableStrings(), false);
   }
 
+  /**
+   * Get a {@link SemgrexMatcher} for this pattern on two graphs joined by an
+   * alignment.  The search starts at the first root of {@code hypGraph}.
+   *
+   * @param hypGraph The graph on the side the alignment maps from
+   * @param alignment The alignment joining the two graphs
+   * @param txtGraph The graph on the side the alignment maps to
+   * @return a SemgrexMatcher
+   */
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph) {
     return matcher(SemgrexGraphs.aligned(hypGraph, alignment, txtGraph), SemgrexGraphName.BASIC, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), false);
   }
 
+  /**
+   * Get a {@link SemgrexMatcher} for this pattern on two graphs joined by an
+   * alignment.  The search starts at the first root of {@code hypGraph}.
+   *
+   * @param hypGraph The graph on the side the alignment maps from
+   * @param alignment The alignment joining the two graphs
+   * @param txtGraph The graph on the side the alignment maps to
+   * @param ignoreCase Will ignore case for matching a pattern with a node; not
+   *          implemented by Coordination Pattern
+   * @return a SemgrexMatcher
+   */
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph, boolean ignoreCase) {
     return matcher(SemgrexGraphs.aligned(hypGraph, alignment, txtGraph), SemgrexGraphName.BASIC, hypGraph.getFirstRoot(), new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(), new VariableStrings(), ignoreCase);
   }
@@ -517,6 +572,10 @@ public abstract class SemgrexPattern implements Serializable  {
    *
    * TODO: make abstract
    * TODO: neither SortPattern nor UniqPattern operate recursively, seems like a bug
+   *
+   * @param matches The sentences and their matches
+   * @param keepEmptyMatches Whether sentences with no matches are kept
+   * @return The postprocessed matches; this implementation returns {@code matches} unchanged
    */
   public List<Pair<CoreMap, List<SemgrexMatch>>> postprocessMatches(List<Pair<CoreMap, List<SemgrexMatch>>> matches, boolean keepEmptyMatches) {
     return matches;
@@ -612,6 +671,14 @@ public abstract class SemgrexPattern implements Serializable  {
    *<br>
    * A sentence which is missing a graph the pattern needs is an
    * IllegalStateException, which names the sentence.
+   *
+   * @param sentences The sentences to match, each with a
+   *   {@code BasicDependenciesAnnotation} and optionally an
+   *   {@code EnhancedDependenciesAnnotation}
+   * @param keepEmptyMatches Whether to include sentences with no matches
+   * @return Each sentence paired with its matches, after postprocessing
+   *   such as {@code uniq} or {@code sort}
+   * @throws IllegalStateException if a sentence lacks a graph the pattern needs
    */
   public List<Pair<CoreMap, List<SemgrexMatch>>> matchSentences(List<CoreMap> sentences, boolean keepEmptyMatches) {
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = new ArrayList<>();
@@ -661,7 +728,9 @@ public abstract class SemgrexPattern implements Serializable  {
    * Creates a pattern from the given string.
    *
    * @param semgrex The pattern string
+   * @param env The Env used to look up node attribute names
    * @return A SemgrexPattern for the string.
+   * @throws SemgrexParseException if the pattern cannot be parsed
    */
   public static SemgrexPattern compile(String semgrex, Env env) {
     try {
@@ -675,10 +744,23 @@ public abstract class SemgrexPattern implements Serializable  {
     }
   }
 
+  /**
+   * Creates a pattern from the given string, with an empty Env.
+   *
+   * @param semgrex The pattern string
+   * @return A SemgrexPattern for the string.
+   * @throws SemgrexParseException if the pattern cannot be parsed
+   */
   public static SemgrexPattern compile(String semgrex) {
     return compile(semgrex, new Env());
   }
 
+  /**
+   * Returns the string this pattern was compiled from.
+   *
+   * @return The pattern string, or null if this pattern did not come
+   *   directly from {@link #compile}, such as a child of a compiled pattern
+   */
   public String pattern() {
     return patternString;
   }
@@ -707,9 +789,12 @@ public abstract class SemgrexPattern implements Serializable  {
   public abstract String toString();
 
   /**
+   * Returns a string representation of the pattern.
+   *
    * @param hasPrecedence indicates that this pattern has precedence in terms
    * of "order of operations", so there is no need to parenthesize the
    * expression
+   * @return A single-line string representation of the pattern
    */
   public abstract String toString(boolean hasPrecedence);
 
@@ -725,6 +810,8 @@ public abstract class SemgrexPattern implements Serializable  {
 
   /**
    * Print a multi-line representation of the pattern illustrating its syntax.
+   *
+   * @param pw The writer to print to
    */
   public void prettyPrint(PrintWriter pw) {
     prettyPrint(pw, 0);
@@ -732,6 +819,8 @@ public abstract class SemgrexPattern implements Serializable  {
 
   /**
    * Print a multi-line representation of the pattern illustrating its syntax.
+   *
+   * @param ps The stream to print to
    */
   public void prettyPrint(PrintStream ps) {
     prettyPrint(new PrintWriter(new OutputStreamWriter(ps), true));
@@ -757,9 +846,13 @@ public abstract class SemgrexPattern implements Serializable  {
     return this.toString().hashCode();
   }
 
+  /** How {@link #main} prints the matches it finds. */
   public enum OutputFormat {
+    /** Log each matching graph as a list of dependencies, followed by the matched nodes */
     LIST,
+    /** Print the line number of each matching sentence and the file it came from */
     OFFSET,
+    /** Print each matching sentence in CoNLL-U, with the matches as comments */
     CONLLU
   }
 
@@ -874,6 +967,7 @@ public abstract class SemgrexPattern implements Serializable  {
     return matches;
   }
 
+  /** Logs the command line arguments {@link #main} accepts. */
   public static void help() {
     log.info("Possible arguments for SemgrexPattern:");
     log.info(PATTERN + ": what pattern to use for matching");
@@ -896,6 +990,9 @@ public abstract class SemgrexPattern implements Serializable  {
    * java edu.stanford.nlp.semgraph.semgrex.SemgrexPattern [args]
    * <br>
    * See the help() function for a list of possible arguments to provide.
+   *
+   * @param args The command line arguments
+   * @throws IOException if a file cannot be read, or a file pattern matches nothing
    */
   public static void main(String[] args) throws IOException {
     Map<String, List<String>> argsMap = parseArgs(args);

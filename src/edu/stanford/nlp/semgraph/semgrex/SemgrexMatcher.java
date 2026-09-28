@@ -135,6 +135,7 @@ public abstract class SemgrexMatcher  {
   /** Rests the matcher and tests if it matches in the graph when rooted at
    * {@code node}.
    *
+   * @param node the node to try matching the root of the pattern at
    * @return whether the matcher matches at node
    */
   public boolean matchesAt(IndexedWord node) {
@@ -150,6 +151,11 @@ public abstract class SemgrexMatcher  {
    */
   public abstract IndexedWord getMatch();
 
+  /**
+   * The graph the pattern's root node was matched in.
+   *
+   * @return the name of the graph the match is in
+   */
   public abstract SemgrexGraphName getGraph();
 
   /**
@@ -169,6 +175,8 @@ public abstract class SemgrexMatcher  {
    * an alignment reports the sentence it crossed to, so that the relations
    * below it carry on there.  Read after a match, since which graphs apply
    * can depend on which part of the pattern matched.
+   *
+   * @return the graphs to match subsequent relations against
    */
   public SemgrexGraphs getGraphs() {
     return graphs;
@@ -236,14 +244,34 @@ public abstract class SemgrexMatcher  {
     return namesToNodes.get(name);
   }
 
+  /**
+   * Binds a name to a node in this matcher's named nodes, as Ssurgeon does
+   * when an edit creates or replaces a named node.
+   *
+   * @param name the name of the node
+   * @param node the node to bind to the name
+   * @return the node previously bound to the name, or null
+   */
   public IndexedWord putNode(String name, IndexedWord node) {
     return namesToNodes.put(name, node);
   }
 
+  /**
+   * Returns the relation name matched by the relation labeled with {@code name} in the pattern.
+   *
+   * @param name the name of the relation, specified in the pattern
+   * @return the matched relation, or null if there is no relation with that name
+   */
   public String getRelnString(String name) {
     return namesToRelations.get(name);
   }
   
+  /**
+   * Returns the edge labeled with {@code name} in the pattern.
+   *
+   * @param name the name of the edge, specified in the pattern
+   * @return the matched edge, or null if there is no edge with that name
+   */
   public SemanticGraphEdge getEdge(String name) {
     return namesToEdges.get(name);
   }
@@ -252,6 +280,8 @@ public abstract class SemgrexMatcher  {
    * Returns the set of names for named nodes in this pattern.
    * This is used as a convenience routine, when there are numerous patterns
    * with named nodes to track.
+   *
+   * @return the node names, as a live view of this matcher's internal map
    */
   public Set<String> getNodeNames() {
     return namesToNodes.keySet();
@@ -259,6 +289,8 @@ public abstract class SemgrexMatcher  {
 
   /**
    * Returns the set of names for named relations in this pattern.
+   *
+   * @return the relation names, as a live view of this matcher's internal map
    */
   public Set<String> getRelationNames() {
     return namesToRelations.keySet();
@@ -266,11 +298,21 @@ public abstract class SemgrexMatcher  {
   
   /**
    * Returns the set of names for named edges in this pattern
+   *
+   * @return the edge names, as a live view of this matcher's internal map
    */
   public Set<String> getEdgeNames() {
     return namesToEdges.keySet();
   }
 
+  /**
+   * Binds a name to an edge in this matcher's named edges, as Ssurgeon does
+   * when an edit creates or replaces a named edge.
+   *
+   * @param name the name of the edge
+   * @param edge the edge to bind to the name
+   * @return the edge previously bound to the name, or null
+   */
   public SemanticGraphEdge putNamedEdge(String name, SemanticGraphEdge edge) {
     return namesToEdges.put(name, edge);
   }

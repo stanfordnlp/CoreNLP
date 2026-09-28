@@ -43,6 +43,13 @@ public class SemanticGraphUtils  {
    * SemanticGraph based off the subset represented by those nodes.
    * This uses the same vertices as in the original graph, which
    * allows for equality and comparisons between the two graphs.
+   * With more than one node, only the nodes which have an edge to or from
+   * another node in the collection (or themselves) are included.
+   *
+   * @param nodes the nodes to include
+   * @param srcGraph the graph the nodes and edges come from
+   * @return a new graph over those nodes and the edges between them,
+   *   or null if nodes is empty
    */
   public static SemanticGraph makeGraphFromNodes(Collection<IndexedWord> nodes, SemanticGraph srcGraph) {
     if (nodes.size() == 1) {
@@ -78,6 +85,10 @@ public class SemanticGraphUtils  {
   /**
    * Finds the vertex in the given SemanticGraph that corresponds to the given node.
    * Returns null if cannot find. Uses first match on index, sentIndex, and word values.
+   *
+   * @param node the node to look for
+   * @param sg the graph to search
+   * @return the matching vertex of sg, or null
    */
   public static IndexedWord findMatchingNode(IndexedWord node,
                                              SemanticGraph sg) {
@@ -96,6 +107,10 @@ public class SemanticGraphUtils  {
    * a given edge.  A tabu list is maintained, in order to deal with cyclical relations (such as between a
    * rcmod (relative clause) and its nsubj).
    *
+   * @param vertice the vertex to start from
+   * @param sg the graph to search
+   * @param excludedEdge an edge which is neither followed nor returned
+   * @return the edges reachable from vertice by following outgoing edges
    */
   public static Set<SemanticGraphEdge> getSubTreeEdges(IndexedWord vertice, SemanticGraph sg, SemanticGraphEdge excludedEdge) {
     Set<SemanticGraphEdge> tabu = Generics.newHashSet();
@@ -105,6 +120,14 @@ public class SemanticGraphUtils  {
     return tabu;
   }
 
+  /**
+   * Adds to tabuEdges each edge reachable from vertice by following outgoing
+   * edges, without following any edge already in tabuEdges.
+   *
+   * @param vertice the vertex to start from
+   * @param sg the graph to search
+   * @param tabuEdges the edges already found or excluded; updated in place
+   */
   public static void getSubTreeEdgesHelper(IndexedWord vertice, SemanticGraph sg, Set<SemanticGraphEdge> tabuEdges) {
     for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(vertice)) {
       if (!tabuEdges.contains(edge)) {
@@ -119,6 +142,11 @@ public class SemanticGraphUtils  {
   /**
    * Given a set of nodes from a SemanticGraph, returns the set of
    * edges that are spanned between these nodes.
+   * Edges from a node to itself are not included.
+   *
+   * @param nodes the nodes
+   * @param sg the graph containing the nodes
+   * @return the edges between two different nodes in the collection
    */
   public static Collection<SemanticGraphEdge> getEdgesSpannedByVertices(Collection<IndexedWord> nodes, SemanticGraph sg) {
     Collection<SemanticGraphEdge> ret = Generics.newHashSet();
@@ -134,6 +162,12 @@ public class SemanticGraphUtils  {
 
   /**
    * Returns a list of all children bearing a grammatical relation starting with the given string, relnPrefix
+   *
+   * @param graph the graph containing vertex
+   * @param vertex the parent node
+   * @param relnPrefix the prefix to look for in the relation names
+   * @return the children with a matching relation; an empty list if vertex is NO_WORD
+   * @throws IllegalArgumentException if vertex is not in the graph
    */
   public static List<IndexedWord> getChildrenWithRelnPrefix(SemanticGraph graph, IndexedWord vertex, String relnPrefix) {
     if (vertex.equals(IndexedWord.NO_WORD))
@@ -152,6 +186,13 @@ public class SemanticGraphUtils  {
 
   /**
    * Returns a list of all children bearing a grammatical relation starting with the given set of relation prefixes
+   *
+   * @param graph the graph containing vertex
+   * @param vertex the parent node
+   * @param relnPrefixes the prefixes to look for in the relation names
+   * @return the children with a relation matching any of the prefixes;
+   *   an empty list if vertex is NO_WORD
+   * @throws IllegalArgumentException if vertex is not in the graph
    */
   public static List<IndexedWord> getChildrenWithRelnPrefix(SemanticGraph graph, IndexedWord vertex, Collection<String> relnPrefixes) {
     if (vertex.equals(IndexedWord.NO_WORD))
@@ -175,6 +216,11 @@ public class SemanticGraphUtils  {
   /**
    * Since graphs can be have preps collapsed, finds all the immediate children of this node
    * that are linked by a collapsed preposition edge.
+   * This is any edge whose relation name starts with "prep".
+   *
+   * @param sg the graph containing vertex
+   * @param vertex the parent node
+   * @return the children linked by such an edge
    */
   public static List<IndexedWord> getChildrenWithPrepC(SemanticGraph sg, IndexedWord vertex) {
     List<IndexedWord> ret = new ArrayList<>();
@@ -194,6 +240,11 @@ public class SemanticGraphUtils  {
    *
    * Because certain edges may remain in string form (prepcs), check for both
    * string and object form of relations.
+   *
+   * @param node the dependent node
+   * @param sg the graph containing node
+   * @param reln the relation to look for
+   * @return the incoming edges with that relation
    */
   public static List<SemanticGraphEdge> incomingEdgesWithReln(IndexedWord node, SemanticGraph sg, GrammaticalRelation reln) {
     return edgesWithReln(sg.incomingEdgeIterable(node), reln);
@@ -203,6 +254,11 @@ public class SemanticGraphUtils  {
    * Checks for outgoing edges of the node, in the given graph, which contain
    * the given relation.  Relations are matched on if they are GrammaticalRelation
    * objects or strings.
+   *
+   * @param node the governor node
+   * @param sg the graph containing node
+   * @param reln the relation to look for
+   * @return the outgoing edges with that relation
    */
   public static List<SemanticGraphEdge> outgoingEdgesWithReln(IndexedWord node, SemanticGraph sg, GrammaticalRelation reln) {
     return edgesWithReln(sg.outgoingEdgeIterable(node), reln);
@@ -211,6 +267,10 @@ public class SemanticGraphUtils  {
   /**
    * Given a list of edges, returns those which match the given relation (can be string or
    * GrammaticalRelation object).
+   *
+   * @param edges the edges to filter
+   * @param reln the relation to look for
+   * @return the edges whose relation equals reln
    */
   public static List<SemanticGraphEdge> edgesWithReln(Iterable<SemanticGraphEdge> edges,
                                                       GrammaticalRelation reln) {
@@ -228,6 +288,9 @@ public class SemanticGraphUtils  {
    * Given a semantic graph, and a relation prefix, returns a list of all relations (edges)
    * that start with the given prefix (e.g., prefix "prep" gives you all the prep relations: prep_by, pref_in,etc.)
    *
+   * @param sg the graph to search
+   * @param prefix the prefix to look for in the relation names
+   * @return the edges whose relation name starts with prefix
    */
   public static List<SemanticGraphEdge> findAllRelnsWithPrefix(SemanticGraph sg, String prefix) {
     ArrayList<SemanticGraphEdge> relns = new ArrayList<>();
@@ -242,6 +305,15 @@ public class SemanticGraphUtils  {
 
   /**
    * Finds the descendents of the given node in graph, avoiding the given set of nodes
+   * <br>
+   * The result includes vertex itself, unless vertex is in tabu, in which case it is empty.
+   * The descendants are not searched past a tabu node.
+   *
+   * @param sg the graph to search
+   * @param vertex the node to start from
+   * @param tabu the nodes to avoid
+   * @return the descendants found
+   * @throws IllegalArgumentException if vertex is not in the graph
    */
   public static Set<IndexedWord> tabuDescendants(SemanticGraph sg, IndexedWord vertex, Collection<IndexedWord> tabu) {
     if (!sg.containsVertex(vertex)) {
@@ -257,6 +329,15 @@ public class SemanticGraphUtils  {
    * Finds the set of descendants for a node in the graph, avoiding the set of nodes and the
    * set of edge relations.  NOTE: these edges are encountered from the downward cull,
    * from governor to dependent.
+   * <br>
+   * The result includes vertex itself, unless vertex is in tabu, in which case it is empty.
+   *
+   * @param sg the graph to search
+   * @param vertex the node to start from
+   * @param tabu the nodes to avoid
+   * @param tabuRelns the relations not to follow
+   * @return the descendants found
+   * @throws IllegalArgumentException if vertex is not in the graph
    */
   public static Set<IndexedWord> tabuDescendants(SemanticGraph sg, IndexedWord vertex, Collection<IndexedWord> tabu,
                                                  Collection<GrammaticalRelation> tabuRelns) {
@@ -269,6 +350,16 @@ public class SemanticGraphUtils  {
     return descendantSet;
   }
 
+  /**
+   * Finds the descendants of the given node in the graph, not following
+   * edges with the given relations.  The result includes vertex itself.
+   *
+   * @param sg the graph to search
+   * @param vertex the node to start from
+   * @param tabuRelns the relations not to follow
+   * @return the descendants found
+   * @throws IllegalArgumentException if vertex is not in the graph
+   */
   public static Set<IndexedWord> descendantsTabuRelns(SemanticGraph sg, IndexedWord vertex,
                                                       Collection<GrammaticalRelation> tabuRelns) {
     if (!sg.containsVertex(vertex)) {
@@ -280,6 +371,18 @@ public class SemanticGraphUtils  {
     return descendantSet;
   }
 
+  /**
+   * Finds the descendants of the given node in the graph, not following
+   * edges with the given relations or edges to a child which passes tabuTest.
+   * The result includes vertex itself.
+   *
+   * @param sg the graph to search
+   * @param vertex the node to start from
+   * @param tabuRelns the relations not to follow
+   * @param tabuTest children for which this is true are not followed
+   * @return the descendants found
+   * @throws IllegalArgumentException if vertex is not in the graph
+   */
   public static Set<IndexedWord> descendantsTabuTestAndRelns(SemanticGraph sg, IndexedWord vertex,
       Collection<GrammaticalRelation> tabuRelns, Predicate<IndexedWord> tabuTest) {
     if (!sg.containsVertex(vertex)) {
@@ -291,6 +394,20 @@ public class SemanticGraphUtils  {
     return descendantSet;
   }
 
+  /**
+   * Finds the descendants of the given node in the graph, avoiding the tabu
+   * nodes and not following edges with the given relations or edges to a
+   * child which passes tabuTest.
+   * The result includes vertex itself, unless vertex is in tabuNodes, in which case it is empty.
+   *
+   * @param sg the graph to search
+   * @param vertex the node to start from
+   * @param tabuNodes the nodes to avoid
+   * @param tabuRelns the relations not to follow
+   * @param tabuTest children for which this is true are not followed
+   * @return the descendants found
+   * @throws IllegalArgumentException if vertex is not in the graph
+   */
   public static Set<IndexedWord> descendantsTabuTestAndRelns(SemanticGraph sg, IndexedWord vertex,
       Collection<IndexedWord> tabuNodes, Collection<GrammaticalRelation> tabuRelns, Predicate<IndexedWord> tabuTest) {
     if (!sg.containsVertex(vertex)) {
@@ -302,6 +419,20 @@ public class SemanticGraphUtils  {
     return descendantSet;
   }
 
+  /**
+   * Finds the descendants of the given node in the graph, avoiding the tabu
+   * nodes and not following edges with the given relations or edges to a
+   * child which passes tabuTest.
+   * The result includes vertex itself, unless vertex is in tabuNodes, in which case it is empty.
+   *
+   * @param sg the graph to search
+   * @param vertex the node to start from
+   * @param tabuNodes the nodes to avoid
+   * @param tabuRelns the relations not to follow
+   * @param tabuTest children for which this is true, given the child and sg, are not followed
+   * @return the descendants found
+   * @throws IllegalArgumentException if vertex is not in the graph
+   */
   public static Set<IndexedWord> descendantsTabuTestAndRelns(SemanticGraph sg, IndexedWord vertex,
                                                              Collection<IndexedWord> tabuNodes, Collection<GrammaticalRelation> tabuRelns,
                                                              BiPredicate<IndexedWord,SemanticGraph> tabuTest) {
@@ -380,6 +511,11 @@ public class SemanticGraphUtils  {
    * Returns the vertice that is "leftmost."  Note this requires that the IndexedFeatureLabels present actually have
    * ordering information.
    * TODO: can be done more efficiently?
+   *
+   * @param startNode the node whose descendants are searched
+   * @param sg the graph containing startNode
+   * @return the first of startNode and its descendants in IndexedWord order,
+   *   which may be startNode itself
    */
   public static IndexedWord leftMostChildVertice(IndexedWord startNode, SemanticGraph sg) {
     TreeSet<IndexedWord> vertices = new TreeSet<>();
@@ -393,6 +529,10 @@ public class SemanticGraphUtils  {
    * Returns the vertices that are "leftmost, rightmost"  Note this requires that the IndexedFeatureLabels present actually have
    * ordering information.
    * TODO: can be done more efficiently?
+   *
+   * @param startNode the node whose descendants are searched
+   * @param sg the graph containing startNode
+   * @return the first and last of startNode and its descendants in IndexedWord order
    */
   public static Pair<IndexedWord, IndexedWord> leftRightMostChildVertices(IndexedWord startNode, SemanticGraph sg) {
     TreeSet<IndexedWord> vertices = new TreeSet<>();
@@ -407,6 +547,10 @@ public class SemanticGraphUtils  {
    * edge away from the set of nodes passed in.  This is similar to the idea of a Markov
    * Blanket, except in the context of a SemanticGraph.
    * TODO: optimize
+   *
+   * @param sg the graph containing the nodes
+   * @param assertedNodes the nodes whose neighbors are wanted
+   * @return the nodes not in assertedNodes which share an edge with one of them
    */
   public static Collection<IndexedWord> getDependencyBlanket(SemanticGraph sg, Collection<IndexedWord> assertedNodes) {
     Set<IndexedWord> retSet = Generics.newHashSet();
@@ -432,6 +576,9 @@ public class SemanticGraphUtils  {
    * NOTE: the vertices will be replaced, as JGraphT does not permit
    * in-place modification of the nodes.  (TODO: we no longer use
    * JGraphT, so this should be fixed)
+   *
+   * @param sg the graph to renumber; it is not changed
+   * @return a new graph with copies of the vertices, numbered from 1 in sorted order
    */
   public static SemanticGraph resetVerticeOrdering(SemanticGraph sg) {
     SemanticGraph nsg = new SemanticGraph();
@@ -492,6 +639,13 @@ public class SemanticGraphUtils  {
     }
   }
 
+  /**
+   * Replaces each edge whose relation was made from a String with an
+   * equivalent edge using the matching EnglishGrammaticalRelation, if there is one.
+   * NOTE: this is English specific.
+   *
+   * @param sg the graph to repair in place
+   */
   public static void enRepairEdges(SemanticGraph sg) {
     enRepairEdges(sg, false);
   }
@@ -499,6 +653,9 @@ public class SemanticGraphUtils  {
   /**
    * Deletes all nodes that are not rooted (such as dangling vertices after a series of
    * edges have been chopped).
+   * A node is kept if it is a root or a descendant of a root.
+   *
+   * @param sg the graph to edit in place
    */
   public static void killNonRooted(SemanticGraph sg) {
     List<IndexedWord> nodes = new ArrayList<>(sg.vertexSet());
@@ -520,6 +677,12 @@ public class SemanticGraphUtils  {
   /**
    * Replaces a node in the given SemanticGraph with the new node,
    * replacing its position in the node edges.
+   * If oldNode is not in the graph, this logs a message and does nothing.
+   * The roots of the graph are not updated.
+   *
+   * @param newNode the node to put in the graph
+   * @param oldNode the node to remove
+   * @param sg the graph to edit in place
    */
   public static void replaceNode(IndexedWord newNode, IndexedWord oldNode, SemanticGraph sg) {
     // Obtain the edges where the old node was the governor and the dependent.
@@ -547,7 +710,9 @@ public class SemanticGraphUtils  {
     }
   }
 
+  /** The word, original text and lemma given to vertices replaced by {@link #makeReplacedEdges} */
   public static final String WILDCARD_VERTICE_TOKEN = "WILDCARD";
+  /** A vertex with word, value and original text all set to {@code *} */
   public static final IndexedWord WILDCARD_VERTICE = new IndexedWord();
   static {
     WILDCARD_VERTICE.setWord("*");
@@ -561,6 +726,9 @@ public class SemanticGraphUtils  {
    *
    * @param verts Vertices to anonymize
    * @param prefix Prefix to assign to this anonymization
+   * @return a map from each original vertex to a copy with an empty lemma and
+   *   with its word, value and original text set to prefix followed by a number,
+   *   counting from 1
    */
   public static Map<IndexedWord, IndexedWord> anonymyizeNodes(Iterable<IndexedWord> verts, String prefix) {
     Map<IndexedWord, IndexedWord> retMap = Generics.newHashMap();
@@ -579,12 +747,17 @@ public class SemanticGraphUtils  {
   }
 
 
+  /** Prefix used by {@link #makeGenericVertices} */
   public static final String SHARED_NODE_ANON_PREFIX ="A";
+  /** Prefix used by {@link #makeBlanketVertices} */
   public static final String BLANKET_NODE_ANON_PREFIX ="B";
 
   /**
    * Used to make a mapping that lets you create "anonymous" versions of shared nodes between two
    * graphs (given in the arg) using the shared prefix.
+   *
+   * @param verts the vertices to anonymize
+   * @return a map from each vertex to an anonymized copy, as in {@link #anonymyizeNodes}
    */
   public static Map<IndexedWord, IndexedWord> makeGenericVertices(Iterable<IndexedWord> verts) {
     return anonymyizeNodes(verts, SHARED_NODE_ANON_PREFIX);
@@ -594,6 +767,9 @@ public class SemanticGraphUtils  {
    * Used to assign generic labels to the nodes in the "blanket" for a set of vertices in a graph.  Here, a "blanket" node is
    * similar to nodes in a Markov Blanket, i.e. nodes that are one edge away from a set of asserted vertices in a
    * SemanticGraph.
+   *
+   * @param verts the vertices to anonymize
+   * @return a map from each vertex to an anonymized copy, as in {@link #anonymyizeNodes}
    */
   public static Map<IndexedWord, IndexedWord> makeBlanketVertices(Iterable<IndexedWord> verts) {
     return anonymyizeNodes(verts, BLANKET_NODE_ANON_PREFIX);
@@ -603,11 +779,18 @@ public class SemanticGraphUtils  {
   /**
    * Given a set of edges, and a mapping between the replacement and target vertices that comprise the
    * vertices of the edges, returns a new set of edges with the replacement vertices.  If a replacement
-   * is not present, the WILDCARD_VERTICE is used in its place (i.e. can be anything).
+   * is not present and useGenericReplacement is set, a copy of the vertex with its word, original
+   * text and lemma set to WILDCARD_VERTICE_TOKEN is used in its place (i.e. can be anything);
+   * otherwise the original vertex is kept.
    *
    * Currently used to generate "generic" versions of Semantic Graphs, when given a list of generic
    * vertices to replace with, but can conceivably be used for other purposes where vertices must
    * be replaced.
+   *
+   * @param edges the edges to copy
+   * @param vertReplacementMap map from the original vertices to their replacements
+   * @param useGenericReplacement whether to use a wildcard copy of a vertex with no replacement
+   * @return new edges with the same relations, weights and extra flags as the originals
    */
   public static List<SemanticGraphEdge> makeReplacedEdges(Iterable<SemanticGraphEdge> edges, Map<IndexedWord, IndexedWord> vertReplacementMap,
       boolean useGenericReplacement) {
@@ -645,6 +828,12 @@ public class SemanticGraphUtils  {
   /**
    * Given a set of vertices from the same graph, returns the set of all edges between these
    * vertices.
+   * This includes every edge into or out of any of the vertices, even if
+   * the other end of the edge is not one of the vertices.
+   *
+   * @param vertices the vertices
+   * @param sg the graph containing the vertices
+   * @return the incoming and outgoing edges of the vertices
    */
   public static Set<SemanticGraphEdge> allEdgesInSet(Iterable<IndexedWord> vertices, SemanticGraph sg) {
     Set<SemanticGraphEdge> edges = Generics.newHashSet();
@@ -664,6 +853,13 @@ public class SemanticGraphUtils  {
    * edges in the first graph not in the second, and edges in the second not in the first.
    * Edge equality is determined using an object that implements ISemanticGraphEdgeEql.
    *
+   * @param edges1 the edges of the first graph
+   * @param edges2 the edges of the second graph
+   * @param sg1 the first graph
+   * @param sg2 the second graph
+   * @param compareObj the test for whether two edges are equal
+   * @return the edges of edges1 which matched an edge of edges2, and the
+   *   edges of each which did not match
    */
   public static EdgeDiffResult diffEdges(Collection<SemanticGraphEdge> edges1, Collection<SemanticGraphEdge> edges2,
       SemanticGraph sg1, SemanticGraph sg2,
@@ -701,11 +897,22 @@ public class SemanticGraphUtils  {
     return new EdgeDiffResult(sameEdges, remainingEdges1, remainingEdges2);
   }
 
+  /**
+   * The result of {@link #diffEdges}: the edges which matched, and the edges of
+   * each collection which did not.
+   */
   public static class EdgeDiffResult {
     Set<SemanticGraphEdge> sameEdges;
     Set<SemanticGraphEdge> remaining1;
     Set<SemanticGraphEdge> remaining2;
 
+    /**
+     * Creates a result from the given sets, which are used directly.
+     *
+     * @param sameEdges the edges of the first collection which matched an edge of the second
+     * @param remaining1 the edges of the first collection with no match
+     * @param remaining2 the edges of the second collection with no match
+     */
     public EdgeDiffResult(Set<SemanticGraphEdge> sameEdges,
         Set<SemanticGraphEdge> remaining1,
         Set<SemanticGraphEdge> remaining2) {
@@ -714,14 +921,29 @@ public class SemanticGraphUtils  {
       this.remaining2 = remaining2;
     }
 
+    /**
+     * The edges of the first collection with no match; this is the internal set, not a copy.
+     *
+     * @return the unmatched edges of the first collection
+     */
     public Set<SemanticGraphEdge> getRemaining1() {
       return remaining1;
     }
 
+    /**
+     * The edges of the second collection with no match; this is the internal set, not a copy.
+     *
+     * @return the unmatched edges of the second collection
+     */
     public Set<SemanticGraphEdge> getRemaining2() {
       return remaining2;
     }
 
+    /**
+     * The edges of the first collection which matched; this is the internal set, not a copy.
+     *
+     * @return the matched edges of the first collection
+     */
     public Set<SemanticGraphEdge> getSameEdges() {
       return sameEdges;
     }
@@ -730,6 +952,11 @@ public class SemanticGraphUtils  {
 
   /**
    * Pretty printers
+   * <br>
+   * Prints each edge on its own line, indented with a tab, as {@code reln(gov, dep)}.
+   *
+   * @param edges the edges to print
+   * @return the edges, one per line
    */
   public static String printEdges(Iterable<SemanticGraphEdge> edges) {
     StringWriter buf = new StringWriter();
@@ -745,18 +972,44 @@ public class SemanticGraphUtils  {
     return buf.toString();
   }
 
+  /**
+   * Options for {@link #printVertices(SemanticGraph, PrintVerticeParams)}.
+   */
   public static class PrintVerticeParams {
+    /** Creates the default options: index and word, wrapping at 8. */
+    public PrintVerticeParams() { }
+
+    /** Whether to print the word */
     public boolean showWord = true;
+    /** Whether to print the index */
     public boolean showIndex = true;
+    /** Whether to print the sentence index */
     public boolean showSentIndex = false;
+    /** Whether to print the tag */
     public boolean showPOS = false;
+    /** A newline and tab are printed before every vertex whose position, counting from 1, is a multiple of this */
     public int wrapAt = 8;
   }
 
+  /**
+   * Prints the vertices of the graph in sorted order, using the default {@link PrintVerticeParams}.
+   *
+   * @param sg the graph to print
+   * @return the vertices, as described in {@link #printVertices(SemanticGraph, PrintVerticeParams)}
+   */
   public static String printVertices(SemanticGraph sg) {
     return printVertices(sg, new PrintVerticeParams());
   }
 
+  /**
+   * Prints the vertices of the graph in sorted order, separated by spaces.
+   * Each vertex is printed as {@code index:sSentIndex/tag/word}, with each
+   * part included only if requested in params.
+   *
+   * @param sg the graph to print
+   * @param params which parts of each vertex to print, and where to wrap lines
+   * @return the vertices as a String
+   */
   public static String printVertices(SemanticGraph sg, PrintVerticeParams params) {
     StringWriter buf = new StringWriter();
     int count = 0;
@@ -793,12 +1046,30 @@ public class SemanticGraphUtils  {
    * NOTE: currently presumes there is only one root in this graph.
    * TODO: see if Semgrex can allow multiroot patterns
    * @param sg SemanticGraph to base this pattern on.
+   * @param matchTag whether the node descriptions include the tag
+   * @param matchWord whether the node descriptions include the word
+   * @param nodeNameMap the names to give the nodes in the pattern; if null, the sanitized word is used
+   * @return the Semgrex pattern
    */
   public static String semgrexFromGraph(SemanticGraph sg, boolean matchTag, boolean matchWord,
       Map<IndexedWord, String> nodeNameMap) {
     return semgrexFromGraph(sg, null, matchTag, matchWord, nodeNameMap);
   }
 
+  /**
+   * Given a SemanticGraph, creates a SemgrexPattern string based off of this graph,
+   * starting from its first root.
+   * If useWord is set, each node is described as {@code {word: /WORD/}}, with the word quoted as a regex.
+   * Note that useTag currently replaces that description with {@code tag: TAG}
+   * rather than adding to it, which does not produce a valid node description.
+   *
+   * @param sg SemanticGraph to base this pattern on
+   * @param wildcardNodes nodes to describe as {@code {}}, matching any node; may be null
+   * @param useTag whether the node descriptions include the tag
+   * @param useWord whether the node descriptions include the word
+   * @param nodeNameMap the names to give the nodes in the pattern; if null, the sanitized word is used
+   * @return the Semgrex pattern
+   */
   public static String semgrexFromGraph(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
                                         boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap) {
     Function<IndexedWord, String> transformNode = o ->{
@@ -819,9 +1090,16 @@ public class SemanticGraphUtils  {
   }
 
   /**
-   * nodeValuesTranformation is a function that converts a vertex (IndexedWord) to the value.
+   * wordTransformation is a function that converts a vertex (IndexedWord) to the value.
    * For an example, see {@code semgrexFromGraph}
    * function implementations (if useWord and useTag is true, the value is "{word: vertex.word; tag: vertex.tag}").
+   * The pattern starts from the first root of sg, and the edges are named E1, E2, etc.
+   *
+   * @param sg SemanticGraph to base this pattern on
+   * @param wildcardNodes nodes to describe as {@code {}}, matching any node; may be null
+   * @param nodeNameMap the names to give the nodes in the pattern; if null, the sanitized word is used
+   * @param wordTransformation converts a node to its description in the pattern
+   * @return the Semgrex pattern
    */
   public static String semgrexFromGraph(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
      Map<IndexedWord, String> nodeNameMap, Function<IndexedWord, String> wordTransformation) {
@@ -841,6 +1119,12 @@ public class SemanticGraphUtils  {
   /**
    * Given a set of edges that form a rooted and connected graph, returns a Semgrex pattern
    * corresponding to it.
+   *
+   * @param edges the edges of the graph
+   * @param matchTag whether the node descriptions include the tag
+   * @param matchWord whether the node descriptions include the word
+   * @param nodeNameMap the names to give the nodes in the pattern; if null, the sanitized word is used
+   * @return the Semgrex pattern, as from {@link #semgrexFromGraph(SemanticGraph, boolean, boolean, Map)}
    */
   public static String semgrexFromGraph(Iterable<SemanticGraphEdge> edges, boolean matchTag,
       boolean matchWord, Map<IndexedWord, String> nodeNameMap) {
@@ -852,6 +1136,21 @@ public class SemanticGraphUtils  {
    * Recursive call to generate the Semgrex pattern based off of this SemanticGraph.
    * nodeValuesTranformation is a function that converts a vertex (IndexedWord) to the value. For an example, see {@code semgrexFromGraph}
    * function implementations.
+   * <br>
+   * A node which is already in tabu is written as {@code {tag:TAG}}, followed by
+   * its unsanitized word as the name if useWordAsLabel is set, and is not expanded.
+   *
+   * @param vertice the node to describe
+   * @param sg the graph containing the node
+   * @param tabu the nodes already described; vertice is added to it
+   * @param seenEdges the edges already described; the outgoing edges of vertice are added to it
+   * @param useWordAsLabel whether to name nodes by their word when nodeNameMap is null
+   * @param nameEdges whether to name each edge E followed by the number of edges seen so far
+   * @param wildcardNodes nodes to describe as {@code {}}, matching any node; may be null
+   * @param nodeNameMap the names to give the nodes in the pattern; may be null
+   * @param orderedNodes whether to visit the outgoing edges sorted by relation name
+   * @param nodeValuesTransformation converts a node to its description in the pattern
+   * @return the pattern for vertice and the part of the graph below it
    */
   protected static String semgrexFromGraphHelper(IndexedWord vertice, SemanticGraph sg,
       Set<IndexedWord> tabu, Set<SemanticGraphEdge> seenEdges, boolean useWordAsLabel, boolean nameEdges, Collection<IndexedWord> wildcardNodes,
@@ -947,6 +1246,13 @@ public class SemanticGraphUtils  {
   }
 
   /** Same as semgrexFromGraph except the node traversal is ordered by sorting
+   * the outgoing edges of each node by relation name
+   *
+   * @param sg SemanticGraph to base this pattern on
+   * @param wildcardNodes nodes to describe as {@code {}}, matching any node; may be null
+   * @param nodeNameMap the names to give the nodes in the pattern; if null, the sanitized word is used
+   * @param wordTransformation converts a node to its description in the pattern
+   * @return the Semgrex pattern
    */
   public static String semgrexFromGraphOrderedNodes(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
             Map<IndexedWord, String> nodeNameMap, Function<IndexedWord, String> wordTransformation) {
@@ -966,6 +1272,10 @@ public class SemanticGraphUtils  {
 
   /**
    * Sanitizes the given string into a Semgrex friendly name
+   * by replacing punctuation such as . , / ? with names such as _DOT_
+   *
+   * @param text the String to sanitize
+   * @return the sanitized String
    */
   public static String sanitizeForSemgrexName(String text) {
     text = text.replaceAll("\\.", "_DOT_");
@@ -990,6 +1300,9 @@ public class SemanticGraphUtils  {
   /**
    * Given a {@code SemanticGraph}, sets the lemmas on its label
    * objects based on their word and tag.
+   * This uses the English {@link Morphology} lemmatizer.
+   *
+   * @param sg the graph whose nodes are lemmatized in place
    */
   public static void lemmatize(SemanticGraph sg) {
     for (IndexedWord node : sg.vertexSet()) {
@@ -1001,6 +1314,10 @@ public class SemanticGraphUtils  {
    * GIven a graph, returns a new graph with the the new sentence index enforced.
    * NOTE: new vertices are inserted.
    * TODO: is this ok?  rewrite this?
+   *
+   * @param sg the graph to copy; it is not changed
+   * @param newSentIndex the sentence index for the new vertices
+   * @return a new graph with copies of the vertices, all with the new sentence index
    */
   public static SemanticGraph setSentIndex(SemanticGraph sg, int newSentIndex) {
     SemanticGraph newGraph = new SemanticGraph(sg);
@@ -1027,6 +1344,9 @@ public class SemanticGraphUtils  {
   /**
    * Removes duplicate graphs from the set, using the string form of the graph
    * as the key (obviating issues with object equality).
+   *
+   * @param graphs the graphs to filter
+   * @return one graph for each distinct string form, in no particular order
    */
   public static Collection<SemanticGraph> removeDuplicates(Collection<SemanticGraph> graphs) {
     Map<String, SemanticGraph> map = Generics.newHashMap();
@@ -1040,6 +1360,10 @@ public class SemanticGraphUtils  {
   /**
    * Given the set of graphs to remove duplicates from, also removes those on the tabu graphs
    * (and does not include them in the return set).
+   *
+   * @param graphs the graphs to filter
+   * @param tabuGraphs graphs whose string forms are excluded from the result
+   * @return one graph for each distinct string form not in tabuGraphs, in no particular order
    */
   public static Collection<SemanticGraph> removeDuplicates(Collection<SemanticGraph> graphs,
       Collection<SemanticGraph> tabuGraphs) {
@@ -1058,6 +1382,13 @@ public class SemanticGraphUtils  {
     return map.values();
   }
 
+  /**
+   * Removes duplicate graphs from the set, and also those with the same string form as tabuGraph.
+   *
+   * @param graphs the graphs to filter
+   * @param tabuGraph a graph whose string form is excluded from the result
+   * @return one graph for each distinct string form other than that of tabuGraph, in no particular order
+   */
   public static Collection<SemanticGraph> removeDuplicates(Collection<SemanticGraph> graphs,
       SemanticGraph tabuGraph) {
     Collection<SemanticGraph> tabuSet = Generics.newHashSet();
@@ -1075,6 +1406,12 @@ public class SemanticGraphUtils  {
    * This is performed using lexical matching, finding the nth match.
    * NOTE: not all tree nodes may match a Semgraph node, esp. for tokens removed in a collapsed Semgraph,
    * such as prepositions.
+   * Each non-terminal is mapped to the node closest to the root of sg among the
+   * nodes its leaves map to.
+   *
+   * @param tree the parse tree
+   * @param sg the graph derived from the tree
+   * @return a map from positions in the tree to the matching graph nodes
    */
   public static Map<PositionedTree, IndexedWord> mapTreeToSg(Tree tree, SemanticGraph sg) {
     // In order to keep track of positions, we store lists, in order encountered, of lex terms.
@@ -1189,6 +1526,12 @@ public class SemanticGraphUtils  {
       return tree+"."+nodeNumber;
     }
 
+    /**
+     * Creates a PositionedTree for the given subtree.
+     *
+     * @param tree the subtree
+     * @param root the tree containing it
+     */
     public PositionedTree(Tree tree, Tree root) {
       this.tree = tree;
       this.root = root;
@@ -1256,8 +1599,10 @@ public class SemanticGraphUtils  {
    *
    * Checks whether a given SemanticGraph is a strict surface syntax tree.
    *
-   * @param sg
-   * @return
+   * @param sg the graph to check
+   * @return true if the graph has exactly one root, every node is reachable
+   *   from the root, and a breadth first search from the root never finds an
+   *   edge to a node it has already dequeued or to a copy node
    */
   public static boolean isTree(SemanticGraph sg) {
 
@@ -1288,6 +1633,12 @@ public class SemanticGraphUtils  {
     return visitedNodes.size() == sg.size();
   }
 
+  /**
+   * Returns the largest index of any node in the graph.
+   *
+   * @param sg the graph
+   * @return the largest index, or {@link Integer#MIN_VALUE} if the graph is empty
+   */
   public static int maxIndex(SemanticGraph sg) {
     int index = Integer.MIN_VALUE;
     for (IndexedWord node : sg.vertexSet()) {
@@ -1298,6 +1649,12 @@ public class SemanticGraphUtils  {
     return index;
   }
 
+  /**
+   * Returns the smallest index of any node in the graph.
+   *
+   * @param sg the graph
+   * @return the smallest index, or {@link Integer#MAX_VALUE} if the graph is empty
+   */
   public static int minIndex(SemanticGraph sg) {
     int index = Integer.MAX_VALUE;
     for (IndexedWord node : sg.vertexSet()) {

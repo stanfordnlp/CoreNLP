@@ -28,9 +28,18 @@ public class ModifierPattern extends SemgrexPattern  {
 
   private static final long serialVersionUID = -78784925769132145L;
 
+  /** The flags, such as {@code i}, as written between {@code (?} and {@code :} */
   private final String flags;
+  /** The pattern the flags apply to */
   private final SemgrexPattern child;
 
+  /**
+   * Wraps child in a marker for the given flags.
+   *
+   * @param flags the flags as written in the pattern
+   * @param child the pattern the flags apply to
+   * @throws SemgrexParseException if child is null
+   */
   public ModifierPattern(String flags, SemgrexPattern child) {
     this.flags = flags;
     this.child = child;

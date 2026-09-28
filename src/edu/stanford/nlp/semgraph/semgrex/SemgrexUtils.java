@@ -27,6 +27,19 @@ import edu.stanford.nlp.util.Pair;
  * @author John Bauer
  */
 public class SemgrexUtils {
+  /** Creates a SemgrexUtils; all of its methods are static. */
+  public SemgrexUtils() { }
+
+  /**
+   * Compares two keys element by element.  A null key sorts after a
+   * non-null key.  Keys which match up to the length of the shorter
+   * key are considered equal.
+   *
+   * @param first The first key
+   * @param second The second key
+   * @return A negative number, zero, or a positive number as {@code first}
+   * sorts before, equal to, or after {@code second}
+   */
   static public int compareKeys(List<String> first, List<String> second) {
     if (first == null && second == null) {
       return 0;
@@ -52,6 +65,11 @@ public class SemgrexUtils {
    * For a pattern such as UniqPattern, get this key from the SemgrexMatch.
    *<br>
    * The key is expected to be unambiguous, which can be enforced at SemgrexPattern compilation time
+   *
+   * @param match The match to read from
+   * @param key The name of a node, variable group, or edge, checked in that order
+   * @return The node's value, the variable's string, or the edge's relation,
+   * or null if nothing in the match has that name
    */
   static public String getKey(SemgrexMatch match, String key) {
     IndexedWord node = match.getNode(key);
@@ -69,6 +87,13 @@ public class SemgrexUtils {
     return null;
   }
 
+  /**
+   * Builds a key from a match using {@link #getKey} for each name.
+   *
+   * @param match The match to read from
+   * @param keys The names to look up
+   * @return The value for each name, with null for names not in the match
+   */
   static public List<String> buildKey(SemgrexMatch match, List<String> keys) {
     List<String> matchKey = new ArrayList<>();
     for (String key : keys) {
@@ -83,6 +108,17 @@ public class SemgrexUtils {
     }
   }
 
+  /**
+   * Reads trees from a file and converts them to English dependency graphs.
+   * Each graph is stored as the {@code BasicDependenciesAnnotation} of a
+   * new sentence, whatever {@code mode} is, with the graph's words as
+   * its tokens.
+   *
+   * @param treeFile The file or directory of trees to read
+   * @param mode Which kind of dependencies to build
+   * @param useExtras Whether to include all extra dependencies
+   * @return One sentence per tree
+   */
   public static List<CoreMap> readTreeFile(String treeFile, SemanticGraphFactory.Mode mode, boolean useExtras) {
     List<CoreMap> sentences = new ArrayList<>();
     MemoryTreebank treebank = new MemoryTreebank(new TreeNormalizer());

@@ -32,21 +32,39 @@ public class ScrollableTreeJPanel extends TreeJPanel    {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(ScrollableTreeJPanel.class);
 
+  /** The font size used to draw the tree */
   private int fontSize = 12;
+  /** The color of nodes which are not matched */
   private Color defaultColor = Color.BLACK;
+  /** The color of matched nodes */
   private Color matchedColor = Color.RED;
+  /** The color of nodes marked with a DoAnnotation by a tree diff */
   private Color tdiffColor = Color.BLUE;
+  /** The font name; if empty, the Graphics font is used when painting */
   private String fontName = "";
+  /** The font style */
   private int style = Font.PLAIN;
+  /** The cached preferred size, or null if it needs to be recomputed */
   private Dimension preferredSize = null;
 
+  /** The subtrees to draw in the matched color */
   private List<Tree> matchedParts = new ArrayList<>();
+  /** Where matched subtrees were drawn */
   private List<Point2D.Double> matchedPartCoordinates = new ArrayList<>();
 
+  /**
+   * Creates a panel with the tree centered both ways.
+   */
   public ScrollableTreeJPanel() {
     super();
   }
 
+  /**
+   * Creates a panel with the given alignment.
+   *
+   * @param i The horizontal alignment, a SwingConstants value
+   * @param j The vertical alignment, a SwingConstants value
+   */
   public ScrollableTreeJPanel(int i, int j) {
    super(i,j);
   }
@@ -158,11 +176,25 @@ public class ScrollableTreeJPanel extends TreeJPanel    {
   }
 
   //Tdiff data structures
+  /** The number of leaves painted so far in the current paint */
   private int leafCtr = 0;
+  /** The height of the tree, below which the yield is drawn */
   private double yieldHeight;
+  /** The x coordinate of each leaf, as painted */
   private float[] yieldOffsets;
 
 
+  /**
+   * Paints a subtree, drawing matched subtrees in the matched color and
+   * recording where they were drawn.
+   *
+   * @param t The subtree to paint
+   * @param start The upper left corner of the subtree
+   * @param g2 The graphics to paint with
+   * @param fM The metrics of the current font
+   * @param paintColor The color for the root of {@code t}
+   * @return The width of the painted subtree
+   */
   protected double paintTree(Tree t, Point2D start, Graphics2D g2, FontMetrics fM, Color paintColor) {
     if (t == null) {
       return 0.0;
@@ -241,53 +273,115 @@ public class ScrollableTreeJPanel extends TreeJPanel    {
     return preferredSize;
   }
 
+  /**
+   * Returns the subtrees drawn in the matched color.
+   *
+   * @return The matched subtrees
+   */
   public List<Tree> getMatchedParts() {
     return matchedParts;
   }
 
+  /**
+   * Sets the subtrees to draw in the matched color.
+   *
+   * @param matchedParts The matched subtrees; kept, not copied
+   */
   public void setMatchedParts(List<Tree> matchedParts) {
     this.matchedParts = matchedParts;
   }
 
+  /**
+   * Returns where the matched subtrees were drawn.  Coordinates are
+   * appended each time the tree is painted.
+   *
+   * @return The internal list of coordinates, not a copy
+   */
   public List<Point2D.Double> getMatchedPartCoordinates() {
     return matchedPartCoordinates;
   }
 
+  /**
+   * Returns the font size.
+   *
+   * @return The font size
+   */
   public int getFontSize() {
     return fontSize;
   }
 
+  /**
+   * Sets the font size.
+   *
+   * @param fontSize The font size
+   */
   public void setFontSize(int fontSize) {
     this.fontSize = fontSize;
     preferredSize = null; // stored info invalidated by font change
   }
 
+  /**
+   * Returns the color of nodes which are not matched.
+   *
+   * @return The default color
+   */
   public Color getDefaultColor() {
     return defaultColor;
   }
 
+  /**
+   * Sets the color of nodes which are not matched.
+   *
+   * @param defaultColor The default color
+   */
   public void setDefaultColor(Color defaultColor) {
     this.defaultColor = defaultColor;
   }
 
+  /**
+   * Returns the color of matched nodes.
+   *
+   * @return The matched color
+   */
   public Color getMatchedColor() {
     return matchedColor;
   }
 
+  /**
+   * Sets the color of matched nodes.
+   *
+   * @param matchedColor The matched color
+   */
   public void setMatchedColor(Color matchedColor) {
     this.matchedColor = matchedColor;
   }
 
+  /**
+   * Returns the font name.
+   *
+   * @return The font name, or the empty string if no font has been set or painted yet
+   */
   public String getFontName() {
     return fontName;
   }
 
+  /**
+   * Sets the font name.  The empty string means use the font of the Graphics.
+   *
+   * @param fontName The font name
+   */
   public void setFontName(String fontName) {
     this.fontName = fontName;
   }
 
 
+  /** Constituents from a tree diff, drawn as labeled spans below the yield */
   private Set<Constituent> diffConstituents = Generics.newHashSet();
+  /**
+   * Sets the constituents from a tree diff to draw below the yield.
+   *
+   * @param diffConstituents The constituents; kept, not copied
+   */
   public void setDiffConstituents(Set<Constituent> diffConstituents) {
     this.diffConstituents = diffConstituents;
   }

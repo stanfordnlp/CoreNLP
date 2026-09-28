@@ -13,6 +13,12 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * One node description in a Tregex pattern, such as {@code NP=np} or
+ * {@code !@/^VB/}, along with the relation which connects it to the
+ * preceding node and at most one child pattern.  Also used for
+ * backreferences ({@code =name} alone) and links ({@code ~name}).
+ */
 public class DescriptionPattern extends TregexPattern  {
 
   /** A logger for this class */
@@ -22,30 +28,41 @@ public class DescriptionPattern extends TregexPattern  {
     PATTERN, STRINGS, EXACT, ANYTHING, ROOT
   }
 
+  /** The relation to the preceding node */
   private final Relation rel;
+  /** Whether the node description is negated, as in {@code !NP} */
   private final boolean negDesc;
 
+  /** How the node value is matched; null for a backreference or link */
   private final DescriptionMode descriptionMode;
+  /** The string to match in EXACT mode */
   private final String exactMatch;
+  /** The regex to match in PATTERN mode */
   private final Pattern descPattern;
+  /** The filter to match in STRINGS mode */
   private final Predicate<String> stringFilter;
 
   // what size string matchers to use before switching to regex for
   // disjunction matches
   private static final int MAX_STRING_MATCHER_SIZE = 8;
 
+  /** The node description as written, used when printing the pattern */
   private final String stringDesc;
   /** The name to give the matched node */
   private final String name;
   /** If this pattern is a link, this is the node linked to */
   private final String linkedName;
+  /** Whether this pattern is a link, {@code ~name} */
   private final boolean isLink;
+  /** The pattern which the matched node must also satisfy, or null */
   // todo: conceptually final, but we'd need to rewrite TregexParser
   // to make it so.
   private TregexPattern child;
   // also conceptually final, but it depends on the child
+  /** Specifies the groups in a regex that are captured as matcher-global string variables */
   private final List<Pair<Integer,String>> variableGroups; // specifies the groups in a regex that are captured as matcher-global string variables
 
+  /** Applied to node values before matching when the description used {@code @}; otherwise null */
   private final Function<String, String> basicCatFunction;
 
   /** Used to detect regex expressions which can be simplified to exact matches */
@@ -61,6 +78,22 @@ public class DescriptionPattern extends TregexPattern  {
   private static final Pattern PREFIX_PATTERN = Pattern.compile("/\\^([-a-zA-Z|]+)\\/" + "|" + // for example, /^JJ/
                                                                 "/\\^\\(\\?\\:([-a-zA-Z|]+)\\)\\/");
 
+  /**
+   * Builds a node description.  Simple regexes, such as {@code /^NP$/} or
+   * short disjunctions, are converted to string matches.
+   *
+   * @param rel The relation to the preceding node
+   * @param negDesc Whether the description is negated
+   * @param desc The node description, or null for a backreference or link
+   * @param name The name to give the matched node, or the node referred to
+   *   by a backreference; may be null
+   * @param useBasicCat Whether to apply {@code basicCatFunction} to node values
+   * @param basicCatFunction The function used if {@code useBasicCat} is set
+   * @param variableGroups Regex groups to capture as variables; kept, not copied
+   * @param isLink Whether this is a link, {@code ~linkedName}
+   * @param linkedName The node linked to, if this is a link
+   * @throws AssertionError if {@code desc}, {@code name}, and {@code linkedName} are all null
+   */
   public DescriptionPattern(Relation rel, boolean negDesc, String desc,
                             String name, boolean useBasicCat,
                             Function<String, String> basicCatFunction,
@@ -217,6 +250,13 @@ public class DescriptionPattern extends TregexPattern  {
     this.variableGroups = variableGroups;
   }
 
+  /**
+   * Copies a node description, but with a different relation.  The child
+   * pattern and other components are shared with {@code oldPattern}.
+   *
+   * @param newRelation The relation to use
+   * @param oldPattern The pattern to copy
+   */
   public DescriptionPattern(Relation newRelation, DescriptionPattern oldPattern) {
     this.rel = newRelation;
     this.negDesc = oldPattern.negDesc;
@@ -277,6 +317,11 @@ public class DescriptionPattern extends TregexPattern  {
     return sb.toString();
   }
 
+  /**
+   * Sets the pattern which the matched node must also satisfy.
+   *
+   * @param n The child pattern, or null for none
+   */
   public void setChild(TregexPattern n) {
     child = n;
   }

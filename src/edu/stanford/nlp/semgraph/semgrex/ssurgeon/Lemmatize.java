@@ -18,12 +18,21 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
  * @author John Bauer
  */
 public class Lemmatize extends SsurgeonEdit {
+  /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL = "lemmatize";
 
   final String nodeName;
   final Morphology morphology;
   final Language language;
 
+  /**
+   * Creates a Lemmatize for the given node.
+   *
+   * @param nodeName the name of the node to lemmatize
+   * @param language the language of the graph; English, UniversalEnglish, or
+   *   Unknown (which is treated as English)
+   * @throws SsurgeonParseException if nodeName is null or the language is not supported
+   */
   public Lemmatize(String nodeName, Language language) {
     if (nodeName == null) {
       throw new SsurgeonParseException("Cannot make a Lemmatize with no nodeName");

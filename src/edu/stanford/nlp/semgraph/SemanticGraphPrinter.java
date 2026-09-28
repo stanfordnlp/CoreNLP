@@ -32,6 +32,15 @@ public class SemanticGraphPrinter  {
   private static Redwood.RedwoodChannels log = Redwood.channels(SemanticGraphPrinter.class);
   private SemanticGraphPrinter() {} // main method only
 
+  /**
+   * Prints several views of the SemanticGraphs built from some trees.
+   * Properties: {@code -treeFile} reads trees from a file, {@code -sentFile} parses
+   * one sentence per line with the English PCFG parser, and with neither a single
+   * example tree is used.  {@code -testGraph true} also prints the collapsed
+   * dependencies in several output formats.
+   *
+   * @param args Command line properties, as described above
+   */
   public static void main(String[] args) {
 
     Treebank tb = new MemoryTreebank();

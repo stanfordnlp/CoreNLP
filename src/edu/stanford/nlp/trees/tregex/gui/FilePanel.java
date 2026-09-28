@@ -55,9 +55,16 @@ public class FilePanel extends JPanel {
 
   private static final long serialVersionUID = -2229250395240163264L;
   private static FilePanel filePanel = null;
+  /** The tree view of the loaded files */
   private final JTree tree;
+  /** The model holding the loaded files; replaced when the files are cleared */
   private FileTreeModel treeModel;
 
+  /**
+   * Returns the single instance of this panel, creating it if needed.
+   *
+   * @return the panel
+   */
   public static synchronized FilePanel getInstance() {
     if (filePanel == null) {
       filePanel = new FilePanel();
@@ -98,19 +105,30 @@ public class FilePanel extends JPanel {
 
 
   /**
-   * Sets a new tree reader factory for reading trees from files in this panel.  Since this may make some files
-   * with trees unable to be read, clearFiles indicates if all current files should be removed from the panel.
+   * Sets a new tree reader factory for reading trees from files loaded into this panel.
+   * Files already loaded keep the reader they were loaded with.
+   *
+   * @param trf the factory to use for files loaded after this call
    */
   public void setTreeReaderFactory(TreeReaderFactory trf) {
     treeModel.setTRF(trf);
   }
 
+  /**
+   * Adds the given files to the panel, searching directories recursively and
+   * keeping only the files which pass the filters.
+   *
+   * @param filters the filters a file's name must pass to be loaded
+   * @param files the files and directories to load
+   */
   public void loadFiles(EnumMap<TregexGUI.FilterType, String> filters, File[] files) {
     treeModel.addFileFolder(filters, files);
   }
 
   /**
    *Returns true if no files are loaded; false otherwise
+   *
+   * @return whether the panel has no files
    */
   public boolean isEmpty() {
     return treeModel.isEmpty();

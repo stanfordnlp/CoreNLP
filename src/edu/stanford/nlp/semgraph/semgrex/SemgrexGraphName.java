@@ -10,12 +10,22 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
  * also used to track the graphs when searching over multiple graphs
  */
 public enum SemgrexGraphName {
+  /** The basic dependencies graph */
   BASIC("basic", SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class),
+  /** The enhanced dependencies graph */
   ENHANCED("enhanced", SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
 
+  /** The lowercase name used for this graph in a pattern */
   public final String lowerName;
+  /** The sentence annotation key under which this graph is stored */
   public final Class<? extends CoreAnnotation<SemanticGraph>> annotation;
 
+  /**
+   * Looks up a graph by name, ignoring case.
+   *
+   * @param name the graph name, such as {@code basic} or {@code enhanced}
+   * @return the matching graph, or null if the name is not a legal graph name
+   */
   public static SemgrexGraphName fromName(String name) {
     for (SemgrexGraphName graph : values()) {
       if (graph.lowerName.equalsIgnoreCase(name)) {

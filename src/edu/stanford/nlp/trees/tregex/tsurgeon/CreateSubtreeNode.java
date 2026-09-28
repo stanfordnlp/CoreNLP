@@ -17,10 +17,27 @@ import edu.stanford.nlp.util.Generics;
 public class CreateSubtreeNode extends TsurgeonPattern {
   private AuxiliaryTree auxTree;
 
+  /**
+   * Creates a {@code createSubtree} operation on a single node.
+   *
+   * @param start The pattern which selects the node to put under the new subtree
+   * @param tree The auxiliary tree, or a single leaf used as the label of the new node.
+   *   In the latter case its foot is set to that leaf.
+   * @throws TsurgeonParseException if {@code tree} has no foot and is not a single leaf
+   */
   public CreateSubtreeNode(TsurgeonPattern start, AuxiliaryTree tree) {
     this(start, null, tree);
   }
 
+  /**
+   * Creates a {@code createSubtree} operation on a span of sibling nodes.
+   *
+   * @param start The pattern which selects one end of the span
+   * @param end The pattern which selects the other end of the span, or null for a single node
+   * @param tree The auxiliary tree, or a single leaf used as the label of the new node.
+   *   In the latter case its foot is set to that leaf.
+   * @throws TsurgeonParseException if {@code tree} has no foot and is not a single leaf
+   */
   public CreateSubtreeNode(TsurgeonPattern start, TsurgeonPattern end, AuxiliaryTree tree) {
     super("combineSubtrees",
       (end == null) ? new TsurgeonPattern[] { start } : new TsurgeonPattern[] { start, end });

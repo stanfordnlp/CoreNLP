@@ -20,6 +20,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  * The purpose of that change is so for a noun phrase, for example, modifiers of that noun phrase such as nmod or nmod:desc now modify the new head
  */
 public class SetPhraseHead extends SsurgeonEdit {
+  /** The command name of this edit in an Ssurgeon script */
   public static final String LABEL = "setPhraseHead";
 
   final List<String> phrase;
@@ -27,6 +28,15 @@ public class SetPhraseHead extends SsurgeonEdit {
   final GrammaticalRelation relation;
   final double weight;
 
+  /**
+   * Creates an edit which makes one node of a phrase its head.
+   *
+   * @param nodes the names of the matched nodes in the phrase; the list is copied
+   * @param headIndex the index in nodes, counting from 0, of the node to make the head
+   * @param relation the relation connecting the new head to the other words of the phrase
+   * @param weight the weight of the new edges
+   * @throws SsurgeonParseException if headIndex is null or out of range, or relation is null
+   */
   public SetPhraseHead(List<String> nodes, Integer headIndex, GrammaticalRelation relation, double weight) {
     if (headIndex == null) {
       throw new SsurgeonParseException("SetPhraseHead expected a -headIndex, 0-indexed for the node to use as the new head");

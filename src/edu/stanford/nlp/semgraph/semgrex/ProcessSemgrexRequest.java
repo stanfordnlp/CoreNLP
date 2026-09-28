@@ -33,7 +33,15 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ProcessProtobufRequest;
 
+/**
+ * Processes {@code SemgrexRequest} protobufs: compiles the semgrex
+ * patterns, builds graphs for the sentences, and returns the matches as a
+ * {@code SemgrexResponse}.
+ */
 public class ProcessSemgrexRequest extends ProcessProtobufRequest {
+  /** Creates a processor for semgrex requests. */
+  public ProcessSemgrexRequest() { }
+
   /**
    * The proto version of a graph name.
    *<br>
@@ -79,6 +87,14 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
    * Builds the PatternResult for one SemgrexPattern and one sentence
    *<br>
    * The sentence is used to tell which of its graphs each named edge came from.
+   *
+   * @param pattern the pattern which was matched; not used when building the result
+   * @param sentence the sentence the matches came from
+   * @param matches the matches of the pattern on the sentence
+   * @param patternIdx the index of the pattern in the request
+   * @param sentenceIdx the index of the sentence in the request
+   * @return a PatternResult describing each match, with its named nodes,
+   *   relations, edges, and variable strings
    */
   public static CoreNLPProtos.SemgrexResponse.PatternResult matchSentence(SemgrexPattern pattern, CoreMap sentence, List<SemgrexMatch> matches, int patternIdx, int sentenceIdx) {
     CoreNLPProtos.SemgrexResponse.PatternResult.Builder patternResultBuilder = CoreNLPProtos.SemgrexResponse.PatternResult.newBuilder();
@@ -162,6 +178,17 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
     return patternResultBuilder.build();
   }
 
+  /**
+   * Matches each pattern against each sentence and builds the response.
+   *<br>
+   * If any of the patterns is sorted, only sentences with at least one
+   * match are included, in the order the matches were found.  Otherwise,
+   * every sentence is included, in order, with a result for every pattern.
+   *
+   * @param sentences the sentences to search
+   * @param patterns the patterns to match
+   * @return the response, with one SentenceResult per reported sentence
+   */
   public static CoreNLPProtos.SemgrexResponse processRequest(List<CoreMap> sentences, List<SemgrexPattern> patterns) {
     Map<CoreMap, Integer> sentenceIndices = new IdentityHashMap<>();
     for (CoreMap sentence : sentences) {
@@ -237,6 +264,9 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
    * Each sentence has a basic graph and optionally an enhanced graph.
    * Both are built over the same list of tokens, so a node reached in
    * one graph is the same node when a relation moves to the other.
+   *
+   * @param request the request, containing the patterns and the sentences
+   * @return the response with the matches of each pattern on each sentence
    */
   public static CoreNLPProtos.SemgrexResponse processRequest(CoreNLPProtos.SemgrexRequest request) {
     ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
@@ -284,6 +314,9 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
    * Command line tool for processing a semgrex request.
    * <br>
    * If -multiple is specified, will process multiple requests.
+   *
+   * @param args the command line arguments
+   * @throws IOException if reading the request or writing the response fails
    */
   public static void main(String[] args) throws IOException {
     ProcessProtobufRequest.process(new ProcessSemgrexRequest(), args);

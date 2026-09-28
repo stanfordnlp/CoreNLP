@@ -24,7 +24,14 @@ public class SemanticGraphFactory  {
 
   private static final boolean INCLUDE_PUNCTUATION_DEPENDENCIES = false;
 
+  /**
+   * Which kind of dependencies to build a graph from.  See
+   * {@link GrammaticalStructure} for the corresponding methods.
+   */
   public enum Mode {
+    /** Collapsed dependencies which keep a tree structure
+     *  ({@link GrammaticalStructure#typedDependenciesCollapsedTree()}).
+     */
     COLLAPSED_TREE,
     /** collapse: Whether to do "collapsing" of pairs of dependencies into
      *  single dependencies, e.g., for prepositions and conjunctions.
@@ -35,13 +42,19 @@ public class SemanticGraphFactory  {
      * {@code true}.
      */
     CCPROCESSED,
+    /** Basic (uncollapsed) dependencies. */
     BASIC,
+    /** Enhanced dependencies. */
     ENHANCED,
+    /** Enhanced++ dependencies. */
     ENHANCED_PLUS_PLUS
   }
 
   /**
    * Produces an Uncollapsed (basic) SemanticGraph.
+   *
+   * @param tree An English phrase structure tree, converted using UD
+   * @return The basic dependency graph
    */
   public static SemanticGraph generateUncollapsedDependencies(Tree tree) {
     return makeFromTree(tree, Mode.BASIC, GrammaticalStructure.Extras.NONE);
@@ -50,6 +63,8 @@ public class SemanticGraphFactory  {
   /**
    * Produces a Collapsed SemanticGraph.
    *
+   * @param tree An English phrase structure tree, converted using UD
+   * @return The collapsed dependency graph
    * @deprecated Use {@link #generateEnhancedDependencies(Tree)} or
    * {@link #generateEnhancedPlusPlusDependencies(Tree)} instead.
    */
@@ -61,6 +76,8 @@ public class SemanticGraphFactory  {
   /**
    * Produces a CCProcessed SemanticGraph.
    *
+   * @param tree An English phrase structure tree, converted using UD
+   * @return The CC processed dependency graph
    * @deprecated Use {@link #generateEnhancedDependencies(Tree)} or
    * {@link #generateEnhancedPlusPlusDependencies(Tree)} instead.
    *
@@ -73,6 +90,9 @@ public class SemanticGraphFactory  {
   /**
    *
    * Produces an enhanced dependencies SemanticGraph.
+   *
+   * @param tree An English phrase structure tree, converted using UD
+   * @return The enhanced dependency graph
    */
   public static SemanticGraph generateEnhancedDependencies(Tree tree){
     return makeFromTree(tree, Mode.ENHANCED, GrammaticalStructure.Extras.NONE);
@@ -81,6 +101,9 @@ public class SemanticGraphFactory  {
   /**
    *
    * Produces an enhanced++ dependencies SemanticGraph.
+   *
+   * @param tree An English phrase structure tree, converted using UD
+   * @return The enhanced++ dependency graph
    */
   public static SemanticGraph generateEnhancedPlusPlusDependencies(Tree tree){
     return makeFromTree(tree, Mode.ENHANCED_PLUS_PLUS, GrammaticalStructure.Extras.NONE);
@@ -88,6 +111,9 @@ public class SemanticGraphFactory  {
 
   /**
    * Produces an Uncollapsed (basic) SemanticGraph.
+   *
+   * @param gs The grammatical structure to get dependencies from
+   * @return The basic dependency graph
    */
   public static SemanticGraph generateUncollapsedDependencies(GrammaticalStructure gs) {
     return makeFromTree(gs, Mode.BASIC, GrammaticalStructure.Extras.NONE, null);
@@ -96,6 +122,8 @@ public class SemanticGraphFactory  {
   /**
    * Produces a Collapsed SemanticGraph.
    *
+   * @param gs The grammatical structure to get dependencies from
+   * @return The collapsed dependency graph
    * @deprecated Use {@link #generateEnhancedDependencies(GrammaticalStructure)} or
    * {@link #generateEnhancedPlusPlusDependencies(GrammaticalStructure)} instead.
    */
@@ -107,6 +135,8 @@ public class SemanticGraphFactory  {
   /**
    * Produces a CCProcessed SemanticGraph.
    *
+   * @param gs The grammatical structure to get dependencies from
+   * @return The CC processed dependency graph
    * @deprecated Use {@link #generateEnhancedDependencies(GrammaticalStructure)} or
    * {@link #generateEnhancedPlusPlusDependencies(GrammaticalStructure)} instead.
    */
@@ -117,6 +147,9 @@ public class SemanticGraphFactory  {
 
   /**
    * Produces an enhanced dependencies SemanticGraph.
+   *
+   * @param gs The grammatical structure to get dependencies from
+   * @return The enhanced dependency graph
    */
   public static SemanticGraph generateEnhancedDependencies(GrammaticalStructure gs) {
     return makeFromTree(gs, Mode.ENHANCED, GrammaticalStructure.Extras.NONE, null);
@@ -124,6 +157,9 @@ public class SemanticGraphFactory  {
 
   /**
    * Produces an enhanced++ dependencies SemanticGraph.
+   *
+   * @param gs The grammatical structure to get dependencies from
+   * @return The enhanced++ dependency graph
    */
   public static SemanticGraph generateEnhancedPlusPlusDependencies(GrammaticalStructure gs) {
     return makeFromTree(gs, Mode.ENHANCED_PLUS_PLUS, GrammaticalStructure.Extras.NONE, null);
@@ -134,6 +170,9 @@ public class SemanticGraphFactory  {
    *
    * The extras parameter has no effect if gs is an instance of {@link UniversalEnglishGrammaticalStructure}.
    *
+   * @param gs The grammatical structure to get dependencies from
+   * @param extras Which extra dependencies to include
+   * @return The basic dependency graph
    * @deprecated Use {@link #generateUncollapsedDependencies(GrammaticalStructure)} instead.
    */
   @Deprecated
@@ -144,6 +183,9 @@ public class SemanticGraphFactory  {
   /**
    * Produces a Collapsed SemanticGraph with optional extras.
    *
+   * @param gs The grammatical structure to get dependencies from
+   * @param extras Which extra dependencies to include
+   * @return The collapsed dependency graph
    * @deprecated Use {@link #generateEnhancedDependencies(GrammaticalStructure)} or
    * {@link #generateEnhancedPlusPlusDependencies(GrammaticalStructure)} instead.
    */
@@ -155,6 +197,9 @@ public class SemanticGraphFactory  {
   /**
    * Produces a CCProcessed SemanticGraph with optional extras.
    *
+   * @param gs The grammatical structure to get dependencies from
+   * @param extras Which extra dependencies to include
+   * @return The CC processed dependency graph
    * @deprecated Use {@link #generateEnhancedDependencies(GrammaticalStructure)} or
    * {@link #generateEnhancedPlusPlusDependencies(GrammaticalStructure)} instead.
    */
@@ -164,6 +209,15 @@ public class SemanticGraphFactory  {
   }
 
   /**
+   * Builds a graph from an English tree, leaving out punctuation dependencies.
+   *
+   * @param tree A tree representing a phrase structure parse
+   * @param mode Which kind of dependencies to build
+   * @param includeExtras Which extra dependencies to include
+   * @param filter A filter to exclude certain dependencies; ignored if null
+   * @param originalDependencies generate original Stanford dependencies instead of new
+   * Universal Dependencies
+   * @return A SemanticGraph
    * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate)
    */
   public static SemanticGraph makeFromTree(Tree tree,
@@ -189,12 +243,19 @@ public class SemanticGraphFactory  {
    * For a fuller explanation of the meaning of the boolean arguments, see
    * {@link GrammaticalStructure}.
    *
+   * The tree is converted using the English grammatical structure
+   * classes, {@link EnglishGrammaticalStructure} or
+   * {@link UniversalEnglishGrammaticalStructure}.
+   *
    * @param tree A tree representing a phrase structure parse
+   * @param mode Which kind of dependencies to build
    * @param includeExtras Whether to include extra dependencies, which may
    * result in a non-tree
    * @param filter A filter to exclude certain dependencies; ignored if null
    * @param originalDependencies generate original Stanford dependencies instead of new
    * Universal Dependencies
+   * @param includePunctuationDependencies Whether to keep dependencies
+   * involving punctuation
    * @return A SemanticGraph
    */
   public static SemanticGraph makeFromTree(Tree tree,
@@ -236,6 +297,17 @@ public class SemanticGraphFactory  {
 
   // TODO: these booleans would be more readable as enums similar to Mode.
   // Then the arguments would make more sense
+  /**
+   * Returns a new {@code SemanticGraph} built from the dependencies of
+   * the given {@link GrammaticalStructure}.
+   *
+   * @param gs The grammatical structure to get dependencies from
+   * @param mode Which kind of dependencies to build
+   * @param includeExtras Which extra dependencies to include; only used
+   * for the {@code BASIC}, {@code COLLAPSED}, and {@code CCPROCESSED} modes
+   * @param filter A filter to exclude certain dependencies; ignored if null
+   * @return A SemanticGraph
+   */
   public static SemanticGraph makeFromTree(GrammaticalStructure gs,
                                            Mode mode,
                                            GrammaticalStructure.Extras includeExtras,
@@ -286,6 +358,14 @@ public class SemanticGraphFactory  {
 
 
   /**
+   * Builds a graph from a grammatical structure, where a {@code true}
+   * {@code includeExtras} means {@link GrammaticalStructure.Extras#MAXIMAL}.
+   *
+   * @param tree The grammatical structure to get dependencies from
+   * @param mode Which kind of dependencies to build
+   * @param includeExtras Whether to include all extra dependencies
+   * @param filter A filter to exclude certain dependencies; ignored if null
+   * @return A SemanticGraph
    * @see #makeFromTree(GrammaticalStructure, Mode, GrammaticalStructure.Extras, Predicate)
    */
   @Deprecated
@@ -298,6 +378,10 @@ public class SemanticGraphFactory  {
 
 
   /**
+   * Builds a graph of the basic dependencies of a grammatical structure.
+   *
+   * @param structure The grammatical structure to get dependencies from
+   * @return A SemanticGraph
    * @see #makeFromTree(GrammaticalStructure, Mode, GrammaticalStructure.Extras, Predicate)
    */
   public static SemanticGraph makeFromTree(GrammaticalStructure structure) {
@@ -306,7 +390,15 @@ public class SemanticGraphFactory  {
 
 
   /**
-   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate)
+   * Builds a graph of Universal Dependencies from an English tree,
+   * leaving out punctuation dependencies.
+   *
+   * @param tree A tree representing a phrase structure parse
+   * @param mode Which kind of dependencies to build
+   * @param includeExtras Which extra dependencies to include
+   * @param filter A filter to exclude certain dependencies; ignored if null
+   * @return A SemanticGraph
+   * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate, boolean, boolean)
    */
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
@@ -316,6 +408,14 @@ public class SemanticGraphFactory  {
   }
 
   /**
+   * Builds a graph of Universal Dependencies from an English tree, where a
+   * {@code true} {@code includeExtras} means {@link GrammaticalStructure.Extras#MAXIMAL}.
+   *
+   * @param tree A tree representing a phrase structure parse
+   * @param mode Which kind of dependencies to build
+   * @param includeExtras Whether to include all extra dependencies
+   * @param filter A filter to exclude certain dependencies; ignored if null
+   * @return A SemanticGraph
    * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate)
    */
   @Deprecated
@@ -327,6 +427,13 @@ public class SemanticGraphFactory  {
   }
 
   /**
+   * Builds a graph of Universal Dependencies from an English tree,
+   * with no filter.
+   *
+   * @param tree A tree representing a phrase structure parse
+   * @param mode Which kind of dependencies to build
+   * @param includeExtras Which extra dependencies to include
+   * @return A SemanticGraph
    * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras, Predicate)
    */
   public static SemanticGraph makeFromTree(Tree tree,
@@ -336,6 +443,13 @@ public class SemanticGraphFactory  {
   }
 
   /**
+   * Builds a graph of Universal Dependencies from an English tree, where a
+   * {@code true} {@code includeExtras} means {@link GrammaticalStructure.Extras#MAXIMAL}.
+   *
+   * @param tree A tree representing a phrase structure parse
+   * @param mode Which kind of dependencies to build
+   * @param includeExtras Whether to include all extra dependencies
+   * @return A SemanticGraph
    * @see #makeFromTree(Tree, Mode, GrammaticalStructure.Extras)
    */
   @Deprecated
@@ -348,7 +462,12 @@ public class SemanticGraphFactory  {
   /**
    * Given a list of edges, attempts to create and return a rooted SemanticGraph.
    *
+   * The roots are set with {@link SemanticGraph#resetRoots()}.
+   *
    * TODO: throw Exceptions, or flag warnings on conditions for concern (no root, etc)
+   *
+   * @param edges The edges of the new graph
+   * @return A new graph containing the edges and their endpoints
    */
   public static SemanticGraph makeFromEdges(Iterable<SemanticGraphEdge> edges) {
     // Identify the root(s) of this graph
@@ -369,6 +488,11 @@ public class SemanticGraphFactory  {
    * Given a list of edges, attempts to create and return a rooted SemanticGraph.
    *
    * TODO: throw Exceptions, or flag warnings on conditions for concern (no root, etc)
+   *
+   * @param edges The edges of the new graph
+   * @param roots The roots of the new graph; these are added as vertices
+   * even if no edge touches them
+   * @return A new graph containing the edges, their endpoints, and the roots
    */
   public static SemanticGraph makeFromEdges(Iterable<SemanticGraphEdge> edges, Collection<IndexedWord> roots) {
     // Identify the root(s) of this graph
@@ -411,6 +535,11 @@ public class SemanticGraphFactory  {
    *
    * NOTE: the hope is the vertices will already be contiguous, but facilities are added just in case for
    * adding additional nodes.
+   *
+   * @param sg The graph the vertices come from
+   * @param nodes The vertices to connect
+   * @return A new graph with the vertices, the shortest directed paths between them,
+   * and roots set with {@link SemanticGraph#resetRoots()}
    */
   public static SemanticGraph makeFromVertices(SemanticGraph sg, Collection<IndexedWord> nodes) {
     List<SemanticGraphEdge> edgesToAdd = new ArrayList<>();
@@ -450,6 +579,9 @@ public class SemanticGraphFactory  {
 
   /**
    * This creates a new graph based off the given, but uses the existing nodes objects.
+   *
+   * @param sg The graph to copy
+   * @return A new graph with the same vertex objects, roots, and edges
    */
   public static SemanticGraph duplicateKeepNodes(SemanticGraph sg) {
     SemanticGraph retSg = new SemanticGraph();
@@ -473,6 +605,9 @@ public class SemanticGraphFactory  {
    * This method only works if the indexed words have different
    * sentence ids, as otherwise the maps used will confuse several of
    * the IndexedWords.
+   *
+   * @param sgList The graphs to combine
+   * @return A new graph with the vertices, edges, and roots of all the graphs
    */
   public static SemanticGraph makeFromGraphs(Collection<SemanticGraph> sgList) {
     SemanticGraph sg = new SemanticGraph();
@@ -495,6 +630,11 @@ public class SemanticGraphFactory  {
    * <br>
    * {@code lengths} must be a vector containing the number of
    * tokens in each sentence.  This is used to reindex the tokens.
+   *
+   * @param graphs The graphs to combine
+   * @param lengths The number of tokens in each graph's sentence
+   * @return A new graph with copies of all the vertices, reindexed so
+   * that each graph's words follow the previous graph's words
    */
   public static SemanticGraph deepCopyFromGraphs(List<SemanticGraph> graphs,
                                                  List<Integer> lengths) {

@@ -27,8 +27,11 @@ package edu.stanford.nlp.semgraph.semgrex;
  * @author John Bauer
  */
 public enum AttributeMode {
+  /** The attribute must be present and match, written {@code key:value} */
   REQUIRED(":"),
+  /** The attribute must be missing or not match, written {@code key!:value} */
   NEGATED("!:"),
+  /** The attribute must be missing or match, written {@code key?:value} */
   OPTIONAL("?:");
 
   private final String separator;
@@ -39,11 +42,20 @@ public enum AttributeMode {
 
   /**
    * How this mode is written between an attribute's key and its value
+   *
+   * @return the separator, such as {@code !:}
    */
   public String separator() {
     return separator;
   }
 
+  /**
+   * Finds the mode written with the given separator.
+   *
+   * @param separator the text between an attribute's key and its value
+   * @return the mode which uses that separator
+   * @throws SemgrexParseException if no mode uses that separator
+   */
   public static AttributeMode fromSeparator(String separator) {
     for (AttributeMode mode : values()) {
       if (mode.separator.equals(separator)) {
@@ -55,6 +67,8 @@ public enum AttributeMode {
 
   /**
    * Whether a node which doesn't have this attribute at all still matches
+   *
+   * @return true for NEGATED and OPTIONAL
    */
   public boolean matchesMissing() {
     return this != REQUIRED;
@@ -62,6 +76,8 @@ public enum AttributeMode {
 
   /**
    * Whether the sense of a match against a present value is reversed
+   *
+   * @return true for NEGATED
    */
   public boolean negated() {
     return this == NEGATED;

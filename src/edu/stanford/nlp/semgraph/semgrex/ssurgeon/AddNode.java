@@ -8,20 +8,48 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.util.Generics;
 
+/**
+ * Adds a new node, with no edges, built from a string such as
+ * {@code {word=foo lemma=foo POS=NN value=foo current=foo}}
+ * (see {@link #fromCheapString}).  The new node is registered with
+ * the owning SsurgeonPattern under the given name.
+ */
 public class AddNode extends SsurgeonEdit {
+  /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL="addNode";
   String nodeString = null;
   String nodeName = null;
   
+  /**
+   * Creates an AddNode.
+   *
+   * @param nodeString the description of the new node, in the format read by {@link #fromCheapString}
+   * @param nodeName the name for the new node
+   */
   public AddNode(String nodeString, String nodeName) {
     this.nodeString = nodeString;
     this.nodeName = nodeName;
   }
   
+  /**
+   * Creates an AddNode.
+   *
+   * @param nodeString the description of the new node, in the format read by {@link #fromCheapString}
+   * @param nodeName the name for the new node
+   * @return the new AddNode
+   */
   public static AddNode createAddNode(String nodeString, String nodeName) {
     return new AddNode(nodeString, nodeName);
   }
   
+  /**
+   * Creates an AddNode which adds a node with the word, lemma, tag,
+   * value and original text of the given node.
+   *
+   * @param node the prototype for the new node
+   * @param nodeName the name for the new node
+   * @return the new AddNode
+   */
   public static AddNode createAddNode(IndexedWord node, String nodeName) {
     String nodeString = cheapWordToString(node);
     return new AddNode(nodeString, nodeName);
@@ -55,17 +83,28 @@ public class AddNode extends SsurgeonEdit {
     return buf.toString();
   }
 
+  /** Key for the word in a node string */
   public static final String WORD_KEY = "word";
+  /** Key for the lemma in a node string */
   public static final String LEMMA_KEY = "lemma";
+  /** Key for the value in a node string */
   public static final String VALUE_KEY = "value";
+  /** Key for the original text in a node string */
   public static final String CURRENT_KEY = "current";
+  /** Key for the tag in a node string */
   public static final String POS_KEY = "POS";
+  /** Separates a key from its value in a node string */
   public static final String TUPLE_DELIMITER="=";
+  /** Separates the key/value pairs in a node string */
   public static final String ATOM_DELIMITER = " ";
 
   /**
    * This converts the node into a simple string based representation.
    * NOTE: this is extremely brittle, and presumes values do not contain delimiters
+   *
+   * @param node the node to convert
+   * @return the word, lemma, tag, value and original text of the node,
+   *   in the format read by {@link #fromCheapString}
    */
   public static String cheapWordToString(IndexedWord node) {
     StringWriter buf = new StringWriter();
@@ -97,12 +136,23 @@ public class AddNode extends SsurgeonEdit {
     return buf.toString();
   }
 
+  /**
+   * Replaces null with the empty string.
+   *
+   * @param str a String, possibly null
+   * @return str, or the empty string if str is null
+   */
   public static String nullShield(String str) {
     return str == null ? "" : str;
   }
 
   /**
    * Given the node arg string, converts it into an IndexedWord.
+   * The first and last characters (the braces) are dropped without being checked,
+   * and keys other than word, lemma, POS, value and current are ignored.
+   *
+   * @param rawArg the node string, such as {@code {word=foo lemma=foo}}
+   * @return a new IndexedWord with those attributes; attributes missing from the string are null
    */
   public static IndexedWord fromCheapString(String rawArg) {
     String arg = rawArg.substring(1, rawArg.length()-1);

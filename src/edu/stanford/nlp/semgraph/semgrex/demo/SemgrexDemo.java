@@ -24,6 +24,12 @@ public class SemgrexDemo  {
 
   private SemgrexDemo() {} // just static main
 
+  /**
+   * Converts a hardcoded tree to a SemanticGraph and logs the matches of
+   * {@code {}=A <<nsubj {}=B} on it.
+   *
+   * @param args Ignored
+   */
   public static void main(String[] args) {
     String treeString = "(ROOT  (S (NP (PRP$ My) (NN dog)) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))";
     // Typically the tree is constructed by parsing or reading a

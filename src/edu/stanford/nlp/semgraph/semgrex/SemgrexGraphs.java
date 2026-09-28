@@ -48,12 +48,20 @@ public class SemgrexGraphs implements Serializable {
    **/
   private final boolean mapsFrom;
 
-  /** One graph, with no alignment */
+  /**
+   * One graph, with no alignment
+   *
+   * @param graph the graph, stored as the basic graph; if null, there are no graphs
+   */
   public SemgrexGraphs(SemanticGraph graph) {
     this(singleGraph(graph), null, true);
   }
 
-  /** The named graphs of one sentence, with no alignment */
+  /**
+   * The named graphs of one sentence, with no alignment
+   *
+   * @param graphs the graphs by name; the map is kept as is, not copied
+   */
   public SemgrexGraphs(Map<SemgrexGraphName, SemanticGraph> graphs) {
     this(graphs, null, true);
   }
@@ -79,6 +87,10 @@ public class SemgrexGraphs implements Serializable {
    * pattern which then asks for the missing one says so when it is run,
    * rather than the caller having to decide in advance which graphs a
    * pattern is going to want.
+   *
+   * @param basic the basic dependencies graph, or null
+   * @param enhanced the enhanced dependencies graph, or null
+   * @return the graphs of the sentence, with no alignment
    */
   public static SemgrexGraphs of(SemanticGraph basic, SemanticGraph enhanced) {
     Map<SemgrexGraphName, SemanticGraph> map = new EnumMap<>(SemgrexGraphName.class);
@@ -97,6 +109,11 @@ public class SemgrexGraphs implements Serializable {
    * The two sides are linked to each other here rather than built on
    * demand, so that crossing the alignment is a field read and crossing
    * back arrives at the very same object.
+   *
+   * @param hypGraph the graph on the side the alignment maps from
+   * @param alignment the alignment joining the two graphs
+   * @param txtGraph the graph on the side the alignment maps to
+   * @return the hyp side; its {@link #crossAlignment} is the txt side
    */
   public static SemgrexGraphs aligned(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph) {
     SemgrexGraphs hyp = new SemgrexGraphs(singleGraph(hypGraph), alignment, true);
@@ -106,17 +123,30 @@ public class SemgrexGraphs implements Serializable {
     return hyp;
   }
 
-  /** The graph of this sentence with the given name, or null if there is none */
+  /**
+   * The graph of this sentence with the given name, or null if there is none
+   *
+   * @param name which graph to return
+   * @return the named graph, or null
+   */
   public SemanticGraph get(SemgrexGraphName name) {
     return graphs.get(name);
   }
 
-  /** The graph a pattern searches when it has not asked for one by name */
+  /**
+   * The graph a pattern searches when it has not asked for one by name
+   *
+   * @return the basic graph, or null if there is none
+   */
   public SemanticGraph getDefault() {
     return graphs.get(SemgrexGraphName.BASIC);
   }
 
-  /** The other side of the alignment, or null when there is no alignment */
+  /**
+   * The other side of the alignment, or null when there is no alignment
+   *
+   * @return the graphs of the aligned sentence, or null
+   */
   public SemgrexGraphs crossAlignment() {
     return aligned;
   }
@@ -124,6 +154,8 @@ public class SemgrexGraphs implements Serializable {
   /**
    * Whether this side is the one the alignment maps from, which is the
    * direction the ALIGNMENT relation walks the map in.
+   *
+   * @return true for the hyp side or when there is no alignment, false for the txt side
    */
   public boolean mapsFrom() {
     return mapsFrom;
