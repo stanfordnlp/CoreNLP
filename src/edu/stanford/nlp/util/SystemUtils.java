@@ -350,30 +350,25 @@ public class SystemUtils {
 
 
   /**
-   * Returns the process ID, via an awful hack: runs {@code perl} and asks for its parent's PID.
+   * Returns the process ID
    *
    * @return The process ID of this JVM
-   * @throws IOException If perl cannot be run
+   * @throws UnsupportedOperationException If the platform does not support getting the process ID
    */
-  public static int getPID() throws IOException {
-    // note that we ask Perl for "ppid" -- process ID of parent -- that's us
-    String[] cmd = 
-      new String[] {"perl", "-e", "print getppid() . \"\\n\";"};
-    StringBuilder out = new StringBuilder();
-    runShellCommand(cmd, out);
-    return Integer.parseInt(out.toString());
+  public static long getPID() {
+    return ProcessHandle.current().pid();
   }
 
 
   /**
-   * Returns the process ID, via an awful hack, or else -1.
+   * Returns the process ID of this JVM, or -1 if it cannot be determined.
    *
-   * @return The process ID of this JVM, or -1 if {@link #getPID()} throws an {@code IOException}
+   * @return The process ID of this JVM, or -1 if {@link #getPID()} throws
    */
-  public static int getPIDNoExceptions() {
+  public static long getPIDNoExceptions() {
     try {
       return SystemUtils.getPID();
-    } catch (IOException e) {
+    } catch (UnsupportedOperationException e) {
       return -1;
     }
   }
@@ -440,7 +435,7 @@ public class SystemUtils {
     StringBuilder out = new StringBuilder();
     runShellCommand("date", out);
     System.out.println("The date is " + out);
-    int pid = getPID();
+    long pid = getPID();
     System.out.println("The PID is " + pid);
     System.out.println("The memory in use is " + getMemoryInUse() + "MB");
     List<String> foo = new ArrayList<>();
