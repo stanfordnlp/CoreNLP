@@ -101,7 +101,7 @@ public interface Counter<E> extends PrettyLoggable {
    * hasn't been seen before, it is assumed to have count 0.0, and thus this
    * method will set its count to the given amount. <i>Note that this is
    * true regardless of the setting of defaultReturnValue.</i>
-   * Negative increments are equivalent to calling <tt>decrementCount</tt>.
+   * Negative increments are equivalent to calling {@code decrementCount}.
    * To more conveniently increment the count by 1.0, use
    * {@link #incrementCount(Object)}.
    * To set a count to a specific value instead of incrementing it, use

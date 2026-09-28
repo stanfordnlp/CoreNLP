@@ -25,7 +25,7 @@
  * tags, phrase structure trees, or dependencies, and is controlled by options
  * passed to the TreePrint class.
  * </p>
- * <h3>References</h3>
+ * <h2>References</h2>
  * <p>
  * The factored parser and the unlexicalized PCFG parser are described in:
  * <ul>
@@ -77,8 +77,8 @@
  * D. Manning. 2006. Generating Typed Dependency Parses from Phrase Structure
  * Parses.  <em>LREC 2006</em>.</li>
  * </ul>
- * <h3>End user usage</h3>
- * <h4>Requirements</h4>
+ * <h2>End user usage</h2>
+ * <h3>Requirements</h3>
  * <p>You need Java 1.6+ installed on your system, and
  * {@code java} in your PATH where commands are looked for.</p>
  * <p>
@@ -120,7 +120,7 @@
  * Then if you have some sentences in {@code testsent.txt} (as plain
  * text), the following commands should work.
  * </p>
- * <h4>Command-line parsing usage</h4>
+ * <h3>Command-line parsing usage</h3>
  * <p>Parsing a local text file:</p>
  * <blockquote>
  * {@code java -mx100m -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser
@@ -147,7 +147,7 @@
  * information on what it is doing to {@code stderr}, so one commonly
  * wants to direct just {@code stdout} to an output file, in the
  * standard way.</p>
- * <h4>Other languages: Chinese</h4>
+ * <h3>Other languages: Chinese</h3>
  * <p>Parsing a Chinese sentence (in the default input encoding for
  * Chinese of GB18030
  * - note you'll need the right fonts to see the output correctly):</p>
@@ -177,16 +177,16 @@
  * To do word segmentation within the parser, give one of the options
  * {@code -segmentMarkov} or {@code -segmentMaxMatch}.
  * </p>
- * <h4>Other languages</h4>
+ * <h3>Other languages</h3>
  * <p>
  * The parser also supports other languages including German and French.
  * </p>
- * <h4>Command-line options</h4>
+ * <h3>Command-line options</h3>
  * <p>The program has many options.  The most useful end-user option is
- * <code>-maxLength&nbsp<em>n</em></code> which determines the maximum
+ * <code>-maxLength <em>n</em></code> which determines the maximum
  * length sentence that the parser will parser.  Longer sentences are
  * skipped, with a message printed to {@code stderr}.</p>
- * <h5>Input formatting and tokenization options</h5>
+ * <h4>Input formatting and tokenization options</h4>
  * <p>The parser supports many different input formats: tokenized/not,
  * sentences/not, and tagged/not.</p>
  * <p>The input may be
@@ -263,7 +263,7 @@
  * printed in the
  * sentence it says it is parsing.  Only the words are printed there.
  * </p>
- * <h5>Output formatting options</h5>
+ * <h4>Output formatting options</h4>
  * <p>You can set how sentences are printed out by using the
  * {@code -outputFormat format} option.  The native and default format is as
  * trees are formatted in the Penn Treebank, but there are a number of
@@ -284,7 +284,7 @@
  * comma-separated list of formats.  See the TreePrint class for more
  * information on available output formats and options.
  * </p>
- * <h4>Programmatic usage</h4>
+ * <h3>Programmatic usage</h3>
  * <p>{@code LexicalizedParser} can be easily called
  * within a larger
  * application.  It implements a couple of useful interfaces that
@@ -348,7 +348,7 @@
  * }
  * </pre>
  * </blockquote>
- * <h4>Writing and reading trained parsers to and from files</h4>
+ * <h3>Writing and reading trained parsers to and from files</h3>
  * <p>A trained parser consists of grammars, a lexicon, and option values. Once
  * a parser has been trained, it may be written to file in one of two
  * formats: binary serialized Java objects or human readable text data. A parser
@@ -367,8 +367,8 @@
  * <ul>
  * <li>Options - consists of variable-value pairs, one per line, which must remain constant across training and parsing.</li>
  * <li>Lexicon - consists of lexical entries, one per line, each of which is preceded by the keyword SEEN or UNSEEN, and followed by a raw count.</li>
- * <li>Unary Grammar - consists of unary rewrite rules, one per line, each of which is of the form A -> B, followed by the normalized log probability.</li>
- * <li>Binary Grammar - consists of binary rewrite rules, one per line, each of which is of the form A -> B C, followed by the normalized log probability.</li>
+ * <li>Unary Grammar - consists of unary rewrite rules, one per line, each of which is of the form {@code A -> B}, followed by the normalized log probability.</li>
+ * <li>Binary Grammar - consists of binary rewrite rules, one per line, each of which is of the form {@code A -> B C}, followed by the normalized log probability.</li>
  * <li>Dependency Grammar</li>
  * </ul>
  * <p>Each section is headed by a line consisting of multiple asterisks (*) and the name
@@ -384,7 +384,7 @@
  * java -mx500m edu.stanford.nlp.parser.lexparser.LexicalizedParser
  * parserFilePath test.txt
  * }</blockquote>
- * <h4>A Note on Text Grammars</h4>
+ * <h3>A Note on Text Grammars</h3>
  * <p>If you want to use the text grammars in another parser and duplicate our
  * performance, you will need to know how we handle the POS tagging of rare
  * and unknown words:</p>
@@ -413,7 +413,7 @@
  * out-of-lexicon tags is fairly important, and not represented in our
  * text lexicon.</li>
  * </ul>
- * <h4>For additional information</h4>
+ * <h3>For additional information</h3>
  * <p>
  * For more information, you should next look at the Javadocs for the
  * LexicalizedParser class.  In particular, the {@code main} method of

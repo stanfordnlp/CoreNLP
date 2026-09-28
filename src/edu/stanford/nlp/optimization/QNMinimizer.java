@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * </blockquote>
  * A variety of different options are available.
  *
- * <h3>LINESEARCHES</h3>
+ * <h2>LINESEARCHES</h2>
  *
  * BACKTRACKING: This routine
  * simply starts with a guess for step size of 1. If the step size doesn't

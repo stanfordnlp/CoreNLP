@@ -148,12 +148,12 @@ public class TrainOptions implements Serializable  {
   public double tagSelectivePostSplitCutOff = 0.0;
 
   /**
-   * Right edge is right-recursive (X << X) Bad. (NP only is good)
+   * Right edge is right-recursive ({@code X << X}) Bad. (NP only is good)
    */
   public boolean rightRec = false;//true;
 
   /**
-   * Left edge is right-recursive (X << X)  Bad.
+   * Left edge is right-recursive ({@code X << X})  Bad.
    */
   public boolean leftRec = false;
 

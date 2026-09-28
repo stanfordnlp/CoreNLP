@@ -17,7 +17,7 @@ public interface Document<L, F, T> extends Datum<L, F>, List<T> {
 
   /**
    * Returns title of document, or "" if the document has no title.
-   * Implementations should never return <tt>null</tt>.
+   * Implementations should never return {@code null}.
    *
    * @return The document's title
    */

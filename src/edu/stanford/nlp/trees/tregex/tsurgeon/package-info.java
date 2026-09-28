@@ -9,7 +9,7 @@
  * to ensure that patterns do not continue to match after they have been
  * applied, or else Tsurgeon will go into an infinite loop.
  *
- * <h3>Description of operations:</h3>
+ * <h2>Description of operations:</h2>
  *
  * <pre>
  * delete name_1 name_2 ... name_m
@@ -109,13 +109,13 @@
  *   indices across things that are not meant to be coindexed.
  * </pre>
  *
- * <h3>Comments: </h3>
+ * <h2>Comments: </h2>
  *
  * For all lines after the first line of the file, the
  * character % introduces a comment that extends to the end of the line.
  * All other intended uses of % must be escaped as \% .
  *
- * <h3>Syntax for trees to be inserted or adjoined:</h3>
+ * <h2>Syntax for trees to be inserted or adjoined:</h2>
  *
  * A tree to be adjoined in can be specified with LISP-like
  * parenthetical-bracketing tree syntax such as those used for the Penn

@@ -54,8 +54,7 @@ public class Config {
 
   /**
    * Number of threads to use during training. Also indirectly controls
-   * how mini-batches are partitioned (more threads => more partitions
-   * => smaller partitions).
+   * how mini-batches are partitioned (more threads mean more, smaller partitions).
    */
   public int trainingThreads = 1;
 

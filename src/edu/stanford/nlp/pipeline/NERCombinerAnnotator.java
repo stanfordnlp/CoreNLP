@@ -62,7 +62,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
   /**
    * Helper class for aligning merged tokens and original tokens, stores number of merged tokens
-   * this merged token contains (e.g. All - Star --> All-Star, 2)
+   * this merged token contains (e.g. {@code All - Star --> All-Star}, 2)
    */
   public static class TokenMergeCountAnnotation implements CoreAnnotation<Integer> {
     public Class<Integer> getType() {

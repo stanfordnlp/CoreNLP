@@ -39,7 +39,7 @@ public class StoplistFilter<L, F> implements DocumentProcessor<Word, Word, L, F>
   }
 
   /**
-   * Returns a new Document with the same meta-data as <tt>in</tt> and the same words
+   * Returns a new Document with the same meta-data as {@code in} and the same words
    * except those on the stop list this filter was constructed with.
    */
   public Document<L, F, Word> processDocument(Document<L, F, Word> in) {

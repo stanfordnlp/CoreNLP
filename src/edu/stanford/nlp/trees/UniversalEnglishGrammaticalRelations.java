@@ -1245,7 +1245,7 @@ public class UniversalEnglishGrammaticalRelations {
    *
    * TODO: Fix variable names etc. but right output relation is used: The name "mwe" is from UDv1. It should now be "fixed"
    *
-   * @see {@link CoordinationTransformer#MWETransform(Tree)}
+   * @see CoordinationTransformer#MWETransform(Tree)
    * @see <a href="https://universaldependencies.org/en/dep/fixed.html">List of multi-word expressions</a>
    */
   public static final GrammaticalRelation MULTI_WORD_EXPRESSION =

@@ -17,9 +17,9 @@ import java.util.*;
  * and provides various options to percolate that option downwards
  * to the head noun, and perhaps also to inherit this from a PP-TMP.<br>
  * 2) Annotates S nodes which contain a gapped subject: i.e.,
- * <code>S &lt; (/^NP-SBJ/ &lt; -NONE-) --> S-G</code>  <br>
+ * {@code S < (/^NP-SBJ/ < -NONE-) --> S-G}  <br>
  * 3) Leave all functional tags on nodes. <br>
- * 4) Keeps -ADV labels on NP and marks head tag with &`^ADV
+ * 4) Keeps -ADV labels on NP and marks head tag with {@code -ADV}
  * <br>
  * <i>Performance note:</i> At one point in time, PCFG labeled F1 results
  * for the various TEMPORAL options in lexparser were:

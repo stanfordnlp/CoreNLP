@@ -2120,15 +2120,11 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * A {@code Filter} can assume
    * that it will not be called with a {@code null} argument.
    * <br>
-   * For example, the following code excises all PP nodes from a Tree: <br>
-   * <tt>
-   * Filter&lt;Tree&gt; f = new Filter&lt;Tree&gt; { <br>
-   * public boolean accept(Tree t) { <br>
-   * return ! t.label().value().equals("PP"); <br>
-   * } <br>
-   * }; <br>
+   * For example, the following code excises all PP nodes from a Tree:
+   * <pre>{@code
+   * Predicate<Tree> f = t -> ! t.label().value().equals("PP");
    * tree.prune(f);
-   * </tt> <br>
+   * }</pre>
    *
    * If the root of the tree is pruned, null will be returned.
    *

@@ -34,11 +34,10 @@ public class CoNLLUFeatures extends TreeMap<String, String> {
 
   /**
    * Parses the value of the feature column in a CoNLL-U file
-   * and returns them in a HashMap with the feature names as keys
+   * into this map, with the feature names as keys
    * and the feature values as values.
    *
-   * @param featureString
-   * @return A {@code HashMap<String,String>} with the feature values.
+   * @param featureString The value of the feature column, or {@code _} for no features
    */
   public CoNLLUFeatures(String featureString) {
     super(comparator);

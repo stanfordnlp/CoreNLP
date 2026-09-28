@@ -73,7 +73,7 @@ public class StripTagsProcessor<L, F> extends AbstractListProcessor<Word, Word, 
   }
 
   /**
-   * Returns a new Document with the same meta-data as <tt>in</tt>,
+   * Returns a new Document with the same meta-data as {@code in},
    * and the same words except tags are stripped.
    */
   public List<Word> process(List<? extends Word> in) {

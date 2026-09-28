@@ -134,7 +134,7 @@ public class PrecisionRecallStats {
   }
 
   /**
-   * Returns the current precision: <tt>tp/(tp+fp)</tt>.
+   * Returns the current precision: {@code tp/(tp+fp)}.
    * Returns 1.0 if tp and fp are both 0.
    */
   public double getPrecision() {
@@ -154,7 +154,7 @@ public class PrecisionRecallStats {
   }
 
   /**
-   * Returns the current recall: <tt>tp/(tp+fn)</tt>.
+   * Returns the current recall: {@code tp/(tp+fn)}.
    * Returns 1.0 if tp and fn are both 0.
    */
   public double getRecall() {
@@ -174,7 +174,7 @@ public class PrecisionRecallStats {
   }
 
   /**
-   * Returns the current F1 measure (<tt>alpha=0.5</tt>).
+   * Returns the current F1 measure ({@code alpha=0.5}).
    */
   public double getFMeasure() {
     return getFMeasure(0.5);
@@ -183,7 +183,7 @@ public class PrecisionRecallStats {
   /**
    * Returns the F-Measure with the given mixing parameter (must be between 0 and 1).
    * If either precision or recall are 0, return 0.0.
-   * <tt>F(alpha) = 1/(alpha/precision + (1-alpha)/recall)</tt>
+   * {@code F(alpha) = 1/(alpha/precision + (1-alpha)/recall)}
    */
   public double getFMeasure(double alpha) {
     double pr = getPrecision();

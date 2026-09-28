@@ -54,7 +54,7 @@ public class GermanUnknownWordModel extends BaseUnknownWordModel {
   /** Calculate the log-prob score of a particular TaggedWord in the
    *  unknown word model.
    *
-   *  @param itw the tag->word production in IntTaggedWord form
+   *  @param itw the {@code tag->word} production in IntTaggedWord form
    *  @return The log-prob score of a particular TaggedWord.
    */
   @Override

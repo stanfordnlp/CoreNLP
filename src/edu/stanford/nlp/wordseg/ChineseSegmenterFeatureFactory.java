@@ -28,6 +28,7 @@ import edu.stanford.nlp.util.PaddedList;
  * </p>
  *
  * <table>
+ * <caption>Feature templates</caption>
  * <tr>
  * <th>Feature</th><th>Templates</th>
  * </tr>

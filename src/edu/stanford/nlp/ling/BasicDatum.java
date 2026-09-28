@@ -84,7 +84,7 @@ public class BasicDatum<LabelType, FeatureType> implements Datum<LabelType, Feat
   /**
    * Removes all currently assigned Labels for this Datum then adds the
    * given Label.
-   * Calling <tt>setLabel(null)</tt> effectively clears all labels.
+   * Calling {@code setLabel(null)} effectively clears all labels.
    */
   public void setLabel(LabelType label) {
     labels.clear();

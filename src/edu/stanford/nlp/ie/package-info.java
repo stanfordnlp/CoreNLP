@@ -37,7 +37,7 @@
  * <li><code>demo/NERDemo</code> is a simple class examplifying the programmatical use
  * of the CRF-based NER tagger.</li>
  * </ol>
- * <h3>Usage examples</h3>
+ * <h2>Usage examples</h2>
  * <p>
  * 0. <i>Setup:</i> For all of these examples except 3., you need to be
  * connected to the Internet, and for the application's web search module
@@ -94,7 +94,7 @@
  * <p>2. Corporate Contact Information merged.  This illustrates the addition
  * of information merger across web pages.  Using the included
  * <code>MergeExtractDemo.bat</code> or similarly do:</p>
- * <center><code>java edu.stanford.nlp.ie.ExtractDemo -m</code></center>
+ * <p><code>java edu.stanford.nlp.ie.ExtractDemo -m</code></p>
  * <p>
  * The <code>ExtractDemo</code> screen is similar, but adds a button to
  * Select a Merger.

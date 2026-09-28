@@ -82,7 +82,7 @@ import java.text.DecimalFormat;
  *      Its accuracy was 96.92% on Penn Treebank WSJ secs. 22-24.</li>
  * </ul>
  *
- * <h3>Using the Java API</h3>
+ * <h2>Using the Java API</h2>
  *
  * <dl>
  * <dt style="margin-top:2em">
@@ -116,10 +116,10 @@ import java.text.DecimalFormat;
  * {@code process()} on the result.
  *
  *
- * <h3>Using the command line</h3>
+ * <h2>Using the command line</h2>
  *
  * Tagging, testing, and training can all also be done via the command line.
- * <h3>Training from the command line</h3>
+ * <h2>Training from the command line</h2>
  * To train a model from the command line, first generate a property file:
  * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -genprops </pre>
  *
@@ -135,7 +135,7 @@ import java.text.DecimalFormat;
  * and -verboseResults, which prints full information about intermediate results.  -verbose defaults to false
  * and -verboseResults defaults to true.
  *
- * <h3>Tagging and Testing from the command line</h3>
+ * <h2>Tagging and Testing from the command line</h2>
  *
  * Usage:
  * For tagging (plain text):

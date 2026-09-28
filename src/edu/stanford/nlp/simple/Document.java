@@ -564,7 +564,7 @@ public class Document {
   }
 
   /**
-   * Like the {@link Document@json(Function...)} function, but with minified JSON more suitable
+   * Like the {@link Document#json(Function...)} function, but with minified JSON more suitable
    * for sending over the wire.
    *
    * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
@@ -613,7 +613,7 @@ public class Document {
   }
 
   /**
-   * Like the {@link Document@xml(Function...)} function, but with minified XML more suitable
+   * Like the {@link Document#xml(Function...)} function, but with minified XML more suitable
    * for sending over the wire.
    *
    * @param functions The (possibly empty) list of annotations to populate on the document before dumping it

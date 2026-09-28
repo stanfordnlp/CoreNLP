@@ -40,7 +40,7 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
  * Objects which inherit this interface have a way to produce
  * ParserQuery objects, have a general Options object, and return a
  * list of Evals to perform on a parser.  This helps classes such as
- * {@link edu.stanford.nlp.parser.lexparser.EvaluateTreebank}
+ * {@link edu.stanford.nlp.parser.metrics.EvaluateTreebank}
  * analyze the performance of a parser.
  *
  * TODO: it would be nice to actually make this an interface again.

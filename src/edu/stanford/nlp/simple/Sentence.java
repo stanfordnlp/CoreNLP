@@ -941,7 +941,7 @@ public class Sentence {
     }
   }
 
-  /** @see Sentence@openieTriples(Properties) */
+  /** @see Sentence#openieTriples(Properties) */
   public Collection<RelationTriple> openieTriples() {
     return openieTriples(this.defaultProps);
   }
@@ -952,7 +952,7 @@ public class Sentence {
    * require converting the underlying representation into {@link CoreLabel}s; but, it also contains
    * significantly less information about the sentence.
    *
-   * @see Sentence@openieTriples(Properties)
+   * @see Sentence#openieTriples(Properties)
    */
   public Collection<Quadruple<String, String, String, Double>> openie() {
     document.runOpenie(this.defaultProps);
@@ -981,7 +981,7 @@ public class Sentence {
     }
   }
 
-  /** @see Sentence@kbpTriples(Properties) */
+  /** @see Sentence#kbpTriples(Properties) */
   public Collection<RelationTriple> kbpTriples() {
     return kbpTriples(this.defaultProps);
   }
@@ -992,7 +992,7 @@ public class Sentence {
    * require converting the underlying representation into {@link CoreLabel}s; but, it also contains
    * significantly less information about the sentence.
    *
-   * @see Sentence@kbpTriples(Properties)
+   * @see Sentence#kbpTriples(Properties)
    */
   public Collection<Quadruple<String, String, String, Double>> kbp() {
     document.runKBP(this.defaultProps);

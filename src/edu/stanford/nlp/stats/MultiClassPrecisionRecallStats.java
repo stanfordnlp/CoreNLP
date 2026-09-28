@@ -108,7 +108,7 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
   }
 
   /**
-   * Returns the current precision: <tt>tp/(tp+fp)</tt>.
+   * Returns the current precision: {@code tp/(tp+fp)}.
    * Returns 1.0 if tp and fp are both 0.
    */
   public Triple<Double, Integer, Integer> getPrecisionInfo(L label) {

@@ -46,9 +46,9 @@ public class IOBUtils  {
   public static final String NosegSymbol = "NOSEG";
   public static final String RewriteSymbol = "REW";
   
-  /** @Deprecated use RewriteSymbol instead */
+  /** @deprecated use RewriteSymbol instead */
   public static final String RewriteTahSymbol = "REWTA";
-  /** @Deprecated use RewriteSymbol instead */
+  /** @deprecated use RewriteSymbol instead */
   public static final String RewriteTareefSymbol = "REWAL";
 
   private static final String BoundarySymbol = ".##.";

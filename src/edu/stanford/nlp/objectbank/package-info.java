@@ -44,7 +44,7 @@
  * First you need to build a  ReaderIteratorFactory which will provide  java.io.Readers
  * over all the files in your directory:
  * <p>
- * </pre>
+ * <pre>
  * Collection c = new FileSequentialCollection("/u/nlp/data/gre/questions/", "", false);
  * ReaderIteratorFactory rif = new ReaderIteratorFactory(c);
  * </pre>

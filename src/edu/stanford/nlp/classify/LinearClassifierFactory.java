@@ -553,7 +553,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   /**
    * Trains the linear classifier using Generalized Expectation criteria as described in
-   * <tt>Generalized Expectation Criteria for Semi Supervised Learning of Conditional Random Fields</tt>, Mann and McCallum, ACL 2008.
+   * <i>Generalized Expectation Criteria for Semi Supervised Learning of Conditional Random Fields</i>, Mann and McCallum, ACL 2008.
    * The original algorithm is proposed for CRFs but has been adopted to LinearClassifier (which is a simpler special case of a CRF).
    * IMPORTANT: the labeled features that are passed as an argument are assumed to be binary valued, although
    * other features are allowed to be real valued.
@@ -571,7 +571,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   /**
    * Trains the linear classifier using Generalized Expectation criteria as described in
-   * <tt>Generalized Expectation Criteria for Semi Supervised Learning of Conditional Random Fields</tt>, Mann and McCallum, ACL 2008.
+   * <i>Generalized Expectation Criteria for Semi Supervised Learning of Conditional Random Fields</i>, Mann and McCallum, ACL 2008.
    * The original algorithm is proposed for CRFs but has been adopted to LinearClassifier (which is a simpler, special case of a CRF).
    * Automatically discovers high precision, high frequency labeled features to be used as GE constraints.
    * IMPORTANT: the current feature selector assumes the features are binary. The GE constraints assume the constraining features are binary anyway, although

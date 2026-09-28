@@ -68,7 +68,7 @@
  * a histogram of sentence lengths.<p>
  *
  * <blockquote>
- *   <pre>
+ *   <pre>{@code
  * import java.util.Iterator;
  * import edu.stanford.nlp.trees.*;
  * import edu.stanford.nlp.io.NumberRangesFileFilter;
@@ -99,7 +99,7 @@
  *       Tree t = (Tree) it.next();
  *       numSents++;
  *       int len = t.yield().length();
- *       if (len &lt;= maxleng) {
+ *       if (len <= maxleng) {
  *         lengthCounts[len]++;
  *       }
  *     }
@@ -108,13 +108,13 @@
  *       System.out.print(args[1] + " ");
  *     }
  *     System.out.println("consists of " + numSents + " sentences");
- *     for (int i = 0; i &lt;= maxleng; i++) {
+ *     for (int i = 0; i <= maxleng; i++) {
  *       System.out.println("  " + lengthCounts[i] + " of length " + i);
  *     }
  *     Timing.endTime("Read/count all trees");
  *   }
  * }
- * </pre>
+ * }</pre>
  * </blockquote>
  *
  * <h3>Treebank, custom TreeReaderFactory, Tree, and Constituent</h3>

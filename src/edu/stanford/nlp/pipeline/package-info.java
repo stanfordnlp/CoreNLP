@@ -1,18 +1,18 @@
 /**
- * <h1>Linguistic Annotation Pipeline</h1>
+ * <h2>Linguistic Annotation Pipeline</h2>
  * The point of this package is to enable people to quickly and
  * painlessly get complete linguistic annotations of their text.  It
  * is designed to be highly flexible and extensible.  I will first discuss
  * the organization and functions of the classes, and then I will give some
  * sample code and a run-down of the implemented Annotators.
  * <p>
- * <h2>Annotation</h2>
+ * <h3>Annotation</h3>
  * An Annotation is the data structure which holds the results of annotators.
  * An Annotations is basically a map, from keys to bits of annotation, such
  * as the parse, the part-of-speech tags, or named entity tags.  Annotations
  * are designed to operate at the sentence-level, however depending on the
  * Annotators you use this may not be how you choose to use the package.
- * <h2>Annotators</h2>
+ * <h3>Annotators</h3>
  * The backbone of this package are the Annotators.  Annotators are a lot like
  * functions, except that they operate over Annotations instead of Objects.
  * They do things like tokenize, parse, or NER tag sentences.  In the
@@ -22,7 +22,7 @@
  * the example from the previous set of parentheses, it would be
  * <code>TextAnnotation.class</code>).  They should also specify what they add
  * to the annotation, and where.
- * <h2>AnnotationPipeline</h2>
+ * <h3>AnnotationPipeline</h3>
  * An AnnotationPipeline is where many Annotators are strung together
  * to form a linguistic annotation pipeline.  It is, itself, an
  * Annotator.  AnnotationPipelines usually also keep track of how much time
@@ -32,7 +32,7 @@
  * It serves as an example on how to build your own pipeline.
  * If you just want to use a typical NLP pipeline take a look at StanfordCoreNLP
  * (described later in this document).
- * <h2>Sample Usage</h2>
+ * <h3>Sample Usage</h3>
  * Here is some sample code which illustrates the intended usage
  * of the package:
  * <pre>
@@ -64,7 +64,7 @@
  * }
  * }
  * </pre>
- * <h2>Existing Annotators</h2>
+ * <h3>Existing Annotators</h3>
  * There already exist Annotators for many common tasks, all of which include
  * default model locations, so they can just be used off the shelf.  They are:
  * <ul>
@@ -81,12 +81,12 @@
  * <li>DeterministicCorefAnnotator - implements anaphora resolution using a deterministic model </li>
  * <li>NFLAnnotator - implements entity and relation mention extraction for the NFL domain</li>
  * </ul>
- * <h2>How Do I Use This?</h2>
+ * <h3>How Do I Use This?</h3>
  * You do not have to construct your pipeline from scratch! For the typical NL processors, use
  * StanfordCoreNLP. This pipeline implements the most common functionality needed: tokenization,
  * lemmatization, POS tagging, NER, parsing and coreference resolution. Read below for how to use
  * this pipeline from the command line, or directly in your Java code.
- * <h3>Using StanfordCoreNLP from the Command Line</h3>
+ * <h4>Using StanfordCoreNLP from the Command Line</h4>
  * The command line for StanfordCoreNLP is:
  * <pre>
  * ./bin/stanfordcorenlp.sh
@@ -516,7 +516,7 @@
  * &lt;/MachineReading&gt;
  * </pre>
  * -->
- * <h3>The StanfordCoreNLP API</h3>
+ * <h4>The StanfordCoreNLP API</h4>
  * More information is available here: <a href="http://nlp.stanford.edu/software/corenlp.shtml">Stanford CoreNLP</a>
  * <!--
  * <p>

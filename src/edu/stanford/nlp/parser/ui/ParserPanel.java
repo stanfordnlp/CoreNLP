@@ -216,7 +216,7 @@ public class ParserPanel extends JPanel  {
   }
 
   /**
-   * Finds the nearest delimiter starting from index start. If <tt>seekDir</tt>
+   * Finds the nearest delimiter starting from index start. If {@code seekDir}
    * is SEEK_FORWARD, finds the nearest delimiter after start.  Else, if it is
    * SEEK_BACK, finds the nearest delimiter before start.
    */
@@ -353,7 +353,7 @@ public class ParserPanel extends JPanel  {
 
   /**
    * Loads a text or html file from a file path or URL.  Treats anything
-   * beginning with <tt>http:\\</tt>,<tt>.htm</tt>, or <tt>.html</tt> as an
+   * beginning with {@code http:\\},{@code .htm}, or {@code .html} as an
    * html file, and strips all tags from the document
    */
   public void loadFile(String filename) {

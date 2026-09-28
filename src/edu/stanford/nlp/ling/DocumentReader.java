@@ -64,7 +64,7 @@ public class DocumentReader<L> {
    * Reader and tokenize it into words using the given Tokenizer. The default
    * implementation will internally buffer the reader if it is not already
    * buffered, so there is no need to pre-wrap the reader with a BufferedReader.
-   * This class provides many <tt>getReader</tt> methods for conviniently
+   * This class provides many {@code getReader} methods for conviniently
    * reading from many input sources.
    */
   public DocumentReader(Reader in, TokenizerFactory<? extends HasWord> tokenizerFactory, boolean keepOriginalText) {
@@ -86,7 +86,7 @@ public class DocumentReader<L> {
    * Sets the reader from which to read and create documents.
    * Default implementation automatically buffers the Reader if it's not
    * already buffered. Subclasses that don't want buffering may want to override
-   * this method to simply set the global <tt>in</tt> directly.
+   * this method to simply set the global {@code in} directly.
    */
   public void setReader(Reader in) {
     this.in = getBufferedReader(in);
@@ -164,13 +164,13 @@ public class DocumentReader<L> {
   /**
    * Wraps the given Reader in a BufferedReader or returns it directly if it
    * is already a BufferedReader. Subclasses should use this method before
-   * reading from <tt>in</tt> for efficiency and/or to read entire lines at
+   * reading from {@code in} for efficiency and/or to read entire lines at
    * a time. Note that this should only be done once per reader because when
    * you read from a buffered reader, it reads more than necessary and stores
    * the rest, so if you then throw that buffered reader out and get a new one
    * for the original reader, text will be missing. In the default DocumentReader
    * text, the Reader passed in at construction is wrapped in a buffered reader
-   * so you can just cast <tt>in</tt> down to a BufferedReader without calling
+   * so you can just cast {@code in} down to a BufferedReader without calling
    * this method.
    */
   public static BufferedReader getBufferedReader(Reader in) {

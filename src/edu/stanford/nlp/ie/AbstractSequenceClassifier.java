@@ -718,7 +718,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * In particular, if you call this method directly, your document will not be preprocessed
    * to add things like word distributional similarity class or word shape features that your
    * classifier may rely on to work correctly. In such cases, you should call
-   * {@link #classifySentence(List<? extends HasWord>) classifySentence} instead.
+   * {@link #classifySentence(List) classifySentence} instead.
    *
    * @param document A {@link List} of something that extends {@link CoreMap}.
    * @return The same {@link List}, but with the elements annotated with their

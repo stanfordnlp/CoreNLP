@@ -311,7 +311,8 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
    * Creates an extractor using the specified environment, and reading the rules from the given string
    * @param env
    * @param str
-   * @throws IOException, ParseException
+   * @throws IOException If a rules file cannot be read
+   * @throws ParseException If a rules file cannot be parsed
    */
   public static CoreMapExpressionExtractor createExtractorFromString(Env env, String str) throws IOException, ParseException, TokenSequenceParseException {
     TokenSequenceParser parser = new TokenSequenceParser();

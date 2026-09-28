@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
  *
  * <p>
  * In order to train a classifier, instantiate this class using the
- * {@link #Classifier(Config, Dataset, double[][], double[][], double[], double[][], java.util.List)}
+ * {@link #Classifier(Config, Dataset, float[][], float[][], float[], float[][], java.util.List)}
  * constructor. (The presence of a non-null dataset signals that we
  * wish to train.) After training by alternating calls to
  * {@link #computeCostFunction(int, double, double)} and,

@@ -65,7 +65,7 @@ import java.util.Set;
  *     <td>Text (for each sentence or for entire annotation if no sentences)</td>
  *     <td>Optional</td>
  *   </tr>
- *   <tr><td colspan="4"><center><b>Per token annotations</b></center></td></tr>
+ *   <tr><td colspan="4"><b>Per token annotations</b></td></tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation}</td>
  *     <td>{@code String}</td>
@@ -114,7 +114,7 @@ import java.util.Set;
  *     <td>{@code List&lt;CoreMap&gt;}</td>
  *     <td>List of temporal expressions (on the entire annotation and also for each sentence)</td>
  *   </tr>
- *   <tr><td colspan="3"><center><b>Per each temporal expression</b></center></td></tr>
+ *   <tr><td colspan="3"><b>Per each temporal expression</b></td></tr>
  *   <tr>
  *     <td>{@link TimeAnnotations.TimexAnnotation}</td>
  *     <td>{@link Timex}</td>

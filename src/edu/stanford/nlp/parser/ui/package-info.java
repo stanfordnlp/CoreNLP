@@ -1,5 +1,4 @@
 /**
- * <body>
  * This package contains graphical user interface components for parsing sentences
  * with parser created using lexparser.LexicalizedParser.
  * ParserPanel is a component that can also has a main() method that allows it to
@@ -14,6 +13,5 @@
  * display a tree, simply use the <I>setTree(Tree tree)</I> method.
  * @author Dan Klein (klein@cs.stanford.edu)
  * @author Huy Nguyen (htnguyen@stanford.edu)
- * </body>
  */
 package edu.stanford.nlp.parser.ui;

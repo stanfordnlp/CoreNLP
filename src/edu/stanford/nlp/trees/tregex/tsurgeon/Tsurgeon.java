@@ -259,7 +259,7 @@ public class Tsurgeon  {
    *     (It is still accessible as {@code name}, and retains its status as parent of its children.
    *     The root of the auxiliary tree is ignored.)
    *
-   * <li> <dt>{@code coindex <name1> <name2> ... <nameM>} Puts a (Penn Treebank style)
+   * <li> {@code coindex <name1> <name2> ... <nameM>} Puts a (Penn Treebank style)
    *     coindexation suffix of the form "-N" on each of nodes name_1 through name_m.  The value of N will be
    *     automatically generated in reference to the existing coindexations in the tree, so that there is never
    *     an accidental clash of indices across things that are not meant to be coindexed.

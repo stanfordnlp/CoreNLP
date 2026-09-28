@@ -2700,7 +2700,6 @@ public class SeqClassifierFlags implements Serializable  {
    * note that this does *not* return string representation of arrays, lists and
    * enums
    *
-   * @throws IllegalAccessException
    * @throws IllegalArgumentException
    */
   public String getNotNullTrueStringRep() {

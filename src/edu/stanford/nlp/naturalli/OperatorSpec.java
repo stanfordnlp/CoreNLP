@@ -49,9 +49,7 @@ public class OperatorSpec {
    * If true, this is an explicit quantifier, such as "all" or "some."
    * The other option is for this to be an implicit quantification, for instance with proper names:
    *
-   * <code>
-   * "Felix is a cat" -> \forall x, Felix(x) \rightarrow cat(x).
-   * </code>
+   * {@code "Felix is a cat" -> \forall x, Felix(x) \rightarrow cat(x).}
    */
   public boolean isExplicit() {
     return instance != Operator.IMPLICIT_NAMED_ENTITY;

@@ -37,7 +37,7 @@ import java.io.Serializable;
  * into Strings and then parses them into appropriate Objects.
  *
  *
- * <h3>Example Usages:</h3>
+ * <h2>Example Usages:</h2>
  *
  * The general case is covered below, but the most common thing people
  * <i>actually</i> want to do is read lines from a file.  There are special

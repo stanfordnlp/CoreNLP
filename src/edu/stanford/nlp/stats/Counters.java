@@ -930,7 +930,7 @@ public class Counters  {
   /**
    * Returns a comparator suitable for sorting this Counter's keys or entries by
    * their respective value or magnitude (by absolute value). If
-   * <tt>ascending</tt> is true, smaller magnitudes will be returned first,
+   * {@code ascending} is true, smaller magnitudes will be returned first,
    * otherwise higher magnitudes will be returned first.
    * <p>
    * Sample usage:

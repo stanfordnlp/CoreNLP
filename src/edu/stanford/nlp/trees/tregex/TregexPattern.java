@@ -90,6 +90,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * The currently supported node-node relations and their symbols are:
  *
  * <table border = "1">
+ * <caption>Node-node relations</caption>
  * <tr><th>Symbol<th>Meaning
  * <tr><td>A &lt;&lt; B <td>A dominates B
  * <tr><td>A &gt;&gt; B <td>A is dominated by B
@@ -589,13 +590,13 @@ public abstract class TregexPattern implements Serializable  {
    * <li> {@code -e <extension>} Only attempt to read files with the given extension. If not provided, will attempt to read all files.</li>
    * <li> {@code -v} print every tree that contains no matches of the specified pattern, but print no matches to the pattern.
    *
-   * <li> {@code -x} Instead of the matched subtree, print the matched subtree's identifying number as defined in <tt>tgrep2</tt>:a
+   * <li> {@code -x} Instead of the matched subtree, print the matched subtree's identifying number as defined in {@code tgrep2}:a
    * unique identifier for the subtree and is in the form s:n, where s is an integer specifying
    * the sentence number in the corpus (starting with 1), and n is an integer giving the order
    * in which the node is encountered in a depth-first search starting with 1 at top node in the
    * sentence tree.
    *
-   * <li> {@code -extract <tree-file>} extracts the subtree s:n specified by <tt>code</tt> from the specified <tt>tree-file</tt>.
+   * <li> {@code -extract <tree-file>} extracts the subtree s:n specified by {@code code} from the specified {@code tree-file}.
    *     Overrides all other behavior of tregex.  Can't specify multiple encodings etc. yet.
    * <li> {@code -extractFile <code-file> <tree-file>} extracts every subtree specified by the subtree codes in
    *     {@code code-file}, which must appear exactly one per line, from the specified {@code tree-file}.

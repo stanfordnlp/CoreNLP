@@ -1,5 +1,5 @@
 /**
- * <h1>Multi-pass Sieve Coreference Resolution System</h1>
+ * <h2>Multi-pass Sieve Coreference Resolution System</h2>
  *
  * <a href="#authors">[authors]</a>
  * <a href="#current">[current results]</a>
@@ -16,7 +16,7 @@
  * Note that this code is already different from the system reported in the paper.
  * After the EMNLP paper, two additional sieves were included. The current code gives slightly better scores than those in the paper.
  *
- * <h2><a name="authors">Authors</a></h2>
+ * <h3><a id="authors">Authors</a></h3>
  * <ul>
  * <li>Karthik Raghunathan
  * <li>Heeyoung Lee
@@ -28,7 +28,7 @@
  * <li>Christopher Manning
  * </ul>
  *
- * <h2><a name="current">Current Results</a></h2>
+ * <h3><a id="current">Current Results</a></h3>
  * <pre>
  * ----------------------------------------------------------------------------
  * MUC               B cubed             Pairwise
@@ -40,8 +40,8 @@
  * MUC6 test     | 90.5  69.0  78.3  | 90.5  62.5  73.9  | 89.3  56.1  68.9
  * ----------------------------------------------------------------------------
  * </pre>
- * <h2><a name="changes">Changes</a></h2>
- * <h3>August 26, 2010</h3>
+ * <h3><a id="changes">Changes</a></h3>
+ * <h4>August 26, 2010</h4>
  * <p>
  * This release is generally similar to the code used for EMNLP 2010,
  * with one additional sieve: relaxed exact string match.<br>
@@ -59,9 +59,9 @@
  * MUC6 test     | 90.3  68.9  78.2  | 90.5  62.3  73.8  | 89.4  55.5  68.5
  * ----------------------------------------------------------------------------
  * </pre>
- * <h2><a name="usage">Usage</a></h2>
+ * <h3><a id="usage">Usage</a></h3>
  * <p>
- * <h3> Running coreference resolution on raw text </h3>
+ * <h4> Running coreference resolution on raw text </h4>
  * This software is now fully incorporated in StanfordCoreNLP, so all you have to do is add the dcoref annotator to the "annotators" property in StanfordCoreNLP.
  * For example:
  * <pre>
@@ -83,7 +83,7 @@
  * See StanfordCoreNLP for more details.
  * </p>
  * <p>
- * <h3> How to replicate the results in our EMNLP2010 paper</h3>
+ * <h4> How to replicate the results in our EMNLP2010 paper</h4>
  * To replicate the results in the paper run:
  * <pre>
  * java -Xmx8g edu.stanford.nlp.dcoref.SieveCoreferenceSystem -props &lt;properties file&gt;

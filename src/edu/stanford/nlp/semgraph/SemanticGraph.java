@@ -918,7 +918,7 @@ public class SemanticGraph implements Serializable  {
   /**
    *
    * @return A sorted list of the vertices
-   * @throws CyclicGraphException (a subtype of IllegalStateException) if this graph is not a DAG
+   * @throws edu.stanford.nlp.graph.CyclicGraphException (a subtype of IllegalStateException) if this graph is not a DAG
    */
   public List<IndexedWord> topologicalSort() {
     return graph.topologicalSort();
@@ -1353,7 +1353,7 @@ public class SemanticGraph implements Serializable  {
 
   /**
    * Similar to {@code toRecoveredString}, but will fill in words that were
-   * collapsed into relations (i.e. prep_for --> 'for'). Mostly to deal with
+   * collapsed into relations (i.e. {@code prep_for --> 'for'}). Mostly to deal with
    * collapsed dependency trees.
    *
    * TODO: consider merging with toRecoveredString() NOTE: assumptions currently

@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
  *
  * Accepts the following properties
  * <table>
+ *   <caption>Properties</caption>
  *   <tr><th>Field</th><th>Type</th><th>Default</th><th>Description</th></tr>
  *   <tr><td>{@code columns}</td><td>String</td><td>{@code}</td><td>Comma separated list of mapping between annotation (see {@link edu.stanford.nlp.ling.AnnotationLookup}) and column index (starting from 0).  Example: {@code word=0,tag=1}</td></tr>
  *   <tr><td>{@code delimiter}</td><td>String</td><td>{@code \t}</td><td>Regular expression for delimiter</td></tr>

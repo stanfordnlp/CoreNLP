@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 
 /**
  * This interface is used for writing
- * lattices out of {@link SequenceClassifier}s.
+ * lattices out of {@link edu.stanford.nlp.ie.AbstractSequenceClassifier}s.
  *
  * @author Michel Galley
  */

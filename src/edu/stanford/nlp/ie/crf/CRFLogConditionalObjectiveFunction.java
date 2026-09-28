@@ -808,7 +808,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
    * the first element is the mapped index of the clique size (e.g., node-0, edge-1) matching featuresIndex i
    * the second element is the number of output classes for that clique size
    *
-   * @return a 2D weight array
+   * @param newWeights The 2D weight array, which is filled in
    */
   public static void to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map, double[][] newWeights) {
     int index = 0;
