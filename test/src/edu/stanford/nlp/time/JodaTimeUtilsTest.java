@@ -894,10 +894,13 @@ public class JodaTimeUtilsTest {
   public void testTimexDateValueForSubDayRanges() {
     assertEquals("2017-06-15T10:30",
             JodaTimeUtils.timexDateValue(utc("2017-06-15T10:30:00Z"), utc("2017-06-15T10:31:00Z")));
-    // QUIRK: an hour-long range reports the end hour rather than the start hour, so
-    // 10:00-11:00 comes out as 11 rather than 10.
-    assertEquals("2017-06-15T11",
+    assertEquals("2017-06-15T10",
             JodaTimeUtils.timexDateValue(utc("2017-06-15T10:00:00Z"), utc("2017-06-15T11:00:00Z")));
+    assertEquals("2017-06-15T00",
+            JodaTimeUtils.timexDateValue(utc("2017-06-15T00:00:00Z"), utc("2017-06-15T01:00:00Z")));
+    // The last hour of a day is 23, not 24.
+    assertEquals("2017-06-15T23",
+            JodaTimeUtils.timexDateValue(utc("2017-06-15T23:00:00Z"), utc("2017-06-16T00:00:00Z")));
   }
 
   @Test
