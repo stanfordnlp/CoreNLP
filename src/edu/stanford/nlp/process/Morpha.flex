@@ -2082,8 +2082,23 @@ S_ENDING_DEMONYMS = "Aborigine"|"Achaean"|"Afghan"|"Afghani"|"African"|"Albanian
 <scan>"n"['’]"t"/_RB     { return(stem(3,"not","")); }      /* cdm add; disprefer */
 <scan>"nt"/_RB      { return(stem(2,"not","")); }      /* luffa add; disprefer? */
 <scan>"n"/_RB       { return(stem(1,"not","")); }      /* cdm add; disprefer */
+/* possessives are lemmatized to the determiner form, as in EWT:
+   his_PRP$ is his, mine_PRP is my.  the independent forms also
+   accept PRP$, in case of a mistagged tree */
+<scan>"my"/_PRP"$"      { return(stem(0,"","")); }
+<scan>"your"/_PRP"$"    { return(stem(0,"","")); }
+<scan>"his"/_PRP        { return(stem(0,"","")); }
+<scan>"its"/_PRP        { return(stem(0,"","")); }
+<scan>"our"/_PRP"$"     { return(stem(0,"","")); }
+<scan>"their"/_PRP"$"   { return(stem(0,"","")); }
+<scan>"mine"/_PRP       { return(stem(3,"y","")); }
+<scan>"yours"/_PRP      { return(stem(1,"","")); }
+<scan>"hers"/_PRP       { return(stem(1,"","")); }
+<scan>"ours"/_PRP       { return(stem(1,"","")); }
+<scan>"theirs"/_PRP     { return(stem(1,"","")); }
 <scan>"him"/_P  { return(stem(3,"he","")); }
 <scan>"her"/_P  { return(stem(3,"she","")); }
+<scan>"her"/_PRP"$"  { return(stem(0,"","")); }
 <scan>"them"/_P   { return(stem(1,"y","")); }
 <scan>"me"/_P   { return(stem(2,"I","")); }
 <scan>"us"/_P   { return(stem(2,"we","")); }

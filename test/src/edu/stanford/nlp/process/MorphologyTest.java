@@ -75,7 +75,7 @@ public class MorphologyTest extends TestCase {
                                 "stop", "xopp",
                                 "cleaner", "clean", "take", "buy",
                                 "be", "be", "do", "not", "not", "not", "will",
-                                "be", "'s", "can", "she", "she", "they",
+                                "be", "'s", "can", "she", "her", "their",
                                 "Books", "light-weight", "cease-fire",
                                 "John_William_Smith", "dog",
                                 "be", "be", "would", "be", "'s", "be",
@@ -109,6 +109,39 @@ public class MorphologyTest extends TestCase {
       assertEquals("Stemmed " + exWords[i] + '/' + exTags[i] + " to lemma " +
                    ans.lemma() + " versus correct " + exAnswers[i],
                    ans.lemma(), exAnswers[i]);
+    }
+  }
+
+  /**
+   * Possessive pronouns are lemmatized to the possessive determiner, as in EWT.
+   * mine_NN and her_PRP check that the pronoun rules only apply to the possessive tags.
+   */
+  public void testPossessives() {
+    String[][] cases = {
+      {"my",     "PRP$", "my"},
+      {"your",   "PRP$", "your"},
+      {"his",    "PRP$", "his"},
+      {"her",    "PRP$", "her"},
+      {"Her",    "PRP$", "her"},
+      {"its",    "PRP$", "its"},
+      {"our",    "PRP$", "our"},
+      {"their",  "PRP$", "their"},
+      {"mine",   "PRP",  "my"},
+      {"Mine",   "PRP",  "my"},
+      {"yours",  "PRP",  "your"},
+      {"his",    "PRP",  "his"},
+      {"hers",   "PRP",  "her"},
+      {"ours",   "PRP",  "our"},
+      {"theirs", "PRP",  "their"},
+      // a mistagged independent possessive gets the same lemma
+      {"mine",   "PRP$", "my"},
+      {"theirs", "PRP$", "their"},
+      {"her",    "PRP",  "she"},
+      {"mine",   "NN",   "mine"},
+    };
+    for (String[] c : cases) {
+      WordLemmaTag ans = lemmatizeStatic(new WordTag(c[0], c[1]));
+      assertEquals("Lemma of " + c[0] + '/' + c[1], c[2], ans.lemma());
     }
   }
 

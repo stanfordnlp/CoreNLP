@@ -97,7 +97,7 @@ public class MorphaAnnotatorITest {
           "I", "see", "he", "order", "a", "saw", ".", "Jack", "'s",
           "father", "have", "not", "play", "golf", "since", "20", "year", "ago",
           ".", "I", "be", "go", "to", "the", "bookstore", "to", "return", "a",
-          "book", "Jack", "and", "he", "friend", "buy", "I", "."
+          "book", "Jack", "and", "his", "friend", "buy", "I", "."
   };
 
   private static final String[] tokenizedText = {
