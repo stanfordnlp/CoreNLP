@@ -62,7 +62,7 @@ those	DT	PronType=Dem|Number=Plur
 here	RB	PronType=Dem
 there	RB	PronType=Dem
 then	RB	PronType=Dem
-whose	WP$	Poss=Yes
+whose	WP$	Case=Gen|Poss=Yes
 hard	RB	Degree=Pos
 fast	RB	Degree=Pos
 late	RB	Degree=Pos
