@@ -59,6 +59,21 @@ public class FeatureExtractor {
     SINGLETON_FEATURES.put(12, "coordination");
   }
 
+  /**
+   * Possessive pronoun lemmas mapped to the nominative pronoun, for use in head-lemma-match.
+   * The lemmatizer gives possessives their own lemma ({@code his_PRP$} is {@code his}),
+   * whereas this feature should treat {@code he}, {@code him} and {@code his} as the same head.
+   * {@code my} and {@code its} are deliberately left out, so that they only match themselves.
+   */
+  private static final Map<String, String> POSSESSIVE_PRONOUN_LEMMAS = new HashMap<>();
+  static {
+    POSSESSIVE_PRONOUN_LEMMAS.put("his", "he");
+    POSSESSIVE_PRONOUN_LEMMAS.put("her", "she");
+    POSSESSIVE_PRONOUN_LEMMAS.put("their", "they");
+    POSSESSIVE_PRONOUN_LEMMAS.put("our", "we");
+    POSSESSIVE_PRONOUN_LEMMAS.put("your", "you");
+  }
+
   private final Dictionaries dictionaries;
   private final Set<String> vocabulary;
   private final Compressor<String> compressor;
@@ -421,7 +436,7 @@ public class FeatureExtractor {
     addFeature(features, "is-acronym", CorefRules.entityIsAcronym(doc, c2, c1));
     addFeature(features, "demonym", m2.isDemonym(m1, dictionaries));
     addFeature(features, "incompatible-modifier", CorefRules.entityHaveIncompatibleModifier(m2, m1));
-    addFeature(features, "head-lemma-match", m1.headWord.lemma().equals(m2.headWord.lemma()));
+    addFeature(features, "head-lemma-match", headLemmaForMatch(m1).equals(headLemmaForMatch(m2)));
     addFeature(features, "words-included", CorefRules.entityWordsIncluded(c2, c1, m2, m1));
     addFeature(features, "extra-proper-noun", CorefRules.entityHaveExtraProperNoun(m2, m1, new HashSet<>()));
     addFeature(features, "number-in-later-mentions", CorefRules.entityNumberInLaterMention(m2, m1));
@@ -608,6 +623,23 @@ public class FeatureExtractor {
       return -1;
     }
     return embeddingLevel;
+  }
+
+  /**
+   * The head lemma used by head-lemma-match.  For a pronoun head, a possessive
+   * lemma is replaced with the nominative pronoun from {@link #POSSESSIVE_PRONOUN_LEMMAS};
+   * any other head keeps its lemma unchanged.
+   */
+  private static String headLemmaForMatch(Mention m) {
+    String lemma = m.headWord.lemma();
+    String tag = m.headWord.tag();
+    if (lemma != null && tag != null && tag.startsWith("PRP")) {
+      String nominative = POSSESSIVE_PRONOUN_LEMMAS.get(lemma.toLowerCase());
+      if (nominative != null) {
+        return nominative;
+      }
+    }
+    return lemma;
   }
 
   private static boolean headContainedIn(Mention m1, Mention m2) {
