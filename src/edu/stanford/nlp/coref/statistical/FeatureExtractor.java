@@ -65,14 +65,12 @@ public class FeatureExtractor {
    * whereas this feature should treat {@code he}, {@code him} and {@code his} as the same head.
    * {@code my} and {@code its} are deliberately left out, so that they only match themselves.
    */
-  private static final Map<String, String> POSSESSIVE_PRONOUN_LEMMAS = new HashMap<>();
-  static {
-    POSSESSIVE_PRONOUN_LEMMAS.put("his", "he");
-    POSSESSIVE_PRONOUN_LEMMAS.put("her", "she");
-    POSSESSIVE_PRONOUN_LEMMAS.put("their", "they");
-    POSSESSIVE_PRONOUN_LEMMAS.put("our", "we");
-    POSSESSIVE_PRONOUN_LEMMAS.put("your", "you");
-  }
+  private static final Map<String, String> POSSESSIVE_PRONOUN_LEMMAS = Map.of(
+      "his", "he",
+      "her", "she",
+      "their", "they",
+      "our", "we",
+      "your", "you");
 
   private final Dictionaries dictionaries;
   private final Set<String> vocabulary;
