@@ -421,7 +421,7 @@ public class FeatureExtractor {
     addFeature(features, "is-acronym", CorefRules.entityIsAcronym(doc, c2, c1));
     addFeature(features, "demonym", m2.isDemonym(m1, dictionaries));
     addFeature(features, "incompatible-modifier", CorefRules.entityHaveIncompatibleModifier(m2, m1));
-    addFeature(features, "head-lemma-match", m1.headWord.lemma().equals(m2.headWord.lemma()));
+    addFeature(features, "head-lemma-match", Mention.modelLemma(m1.headWord).equals(Mention.modelLemma(m2.headWord)));
     addFeature(features, "words-included", CorefRules.entityWordsIncluded(c2, c1, m2, m1));
     addFeature(features, "extra-proper-noun", CorefRules.entityHaveExtraProperNoun(m2, m1, new HashSet<>()));
     addFeature(features, "number-in-later-mentions", CorefRules.entityNumberInLaterMention(m2, m1));
