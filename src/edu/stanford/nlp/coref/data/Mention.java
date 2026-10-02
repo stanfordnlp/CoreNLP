@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -66,6 +67,42 @@ import edu.stanford.nlp.util.*;
 public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   private static final long serialVersionUID = -7524485803945717057L;
+
+  /**
+   * Lemmas of the possessive pronouns as the released coref models expect them.
+   * Those models were trained when Morpha lemmatized {@code his_PRP$} as {@code he}
+   * and left the independent possessives such as {@code theirs} unchanged, whereas
+   * Morpha now follows EWT ({@code his_PRP$} is {@code his}, {@code theirs_PRP} is {@code their}).
+   * Keyed on the lowercased word, so the value is the same for both PRP and PRP$.
+   */
+  private static final Map<String, String> MODEL_POSSESSIVE_LEMMAS = Map.of(
+      "his", "he",
+      "her", "she",
+      "your", "you",
+      "our", "we",
+      "their", "they",
+      "mine", "mine",
+      "yours", "yours",
+      "hers", "hers",
+      "ours", "ours",
+      "theirs", "theirs");
+
+  /**
+   * The lemma of a token for use in features of the trained coref models.
+   * This is the token's lemma, except that a PRP or PRP$ possessive pronoun gets
+   * the lemma from {@link #MODEL_POSSESSIVE_LEMMAS}, which is what the models were trained on.
+   */
+  public static String modelLemma(AbstractCoreLabel token) {
+    String tag = token.tag();
+    String word = token.word();
+    if (tag != null && word != null && tag.startsWith("PRP")) {
+      String lemma = MODEL_POSSESSIVE_LEMMAS.get(word.toLowerCase(Locale.ROOT));
+      if (lemma != null) {
+        return lemma;
+      }
+    }
+    return token.lemma();
+  }
 
   public Mention() {
   }
@@ -1474,7 +1511,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       }
 
       // add possessive if not a personal determiner
-      if(gr == UniversalEnglishGrammaticalRelations.POSSESSION_MODIFIER && !dict.determiners.contains(word.lemma())) {
+      if(gr == UniversalEnglishGrammaticalRelations.POSSESSION_MODIFIER && !dict.determiners.contains(modelLemma(word))) {
         count++;
       }
     }
