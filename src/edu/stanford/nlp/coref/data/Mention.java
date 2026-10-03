@@ -69,8 +69,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   private static final long serialVersionUID = -7524485803945717057L;
 
   /**
-   * Lemmas of the possessive pronouns as the released coref models expect them.
-   * Those models were trained when Morpha lemmatized {@code his_PRP$} as {@code he}
+   * Lemmas of the possessive pronouns as the released coref models and dictionaries expect them.
+   * Those were built when Morpha lemmatized {@code his_PRP$} as {@code he}
    * and left the independent possessives such as {@code theirs} unchanged, whereas
    * Morpha now follows EWT ({@code his_PRP$} is {@code his}, {@code theirs_PRP} is {@code their}).
    * Keyed on the lowercased word, so the value is the same for both PRP and PRP$.
@@ -88,9 +88,9 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       "theirs", "theirs");
 
   /**
-   * The lemma of a token for use in features of the trained coref models.
+   * The lemma of a token for use with the trained coref models and dictionaries.
    * This is the token's lemma, except that a PRP or PRP$ possessive pronoun gets
-   * the lemma from {@link #MODEL_POSSESSIVE_LEMMAS}, which is what the models were trained on.
+   * the lemma from {@link #MODEL_POSSESSIVE_LEMMAS}, which is what those were built with.
    */
   public static String modelLemma(AbstractCoreLabel token) {
     String tag = token.tag();
@@ -1234,11 +1234,11 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     String[] components = new String[4];
 
-    components[0] = headWord.lemma();
+    components[0] = modelLemma(headWord);
 
     if(premodifiers.size() == 0){
-      components[1] = headWord.lemma();
-      components[2] = headWord.lemma();
+      components[1] = modelLemma(headWord);
+      components[2] = modelLemma(headWord);
     } else if(premodifiers.size() == 1){
       ArrayList<AbstractCoreLabel> premod = Generics.newArrayList();
       premod.addAll(premodifiers.get(premodifiers.size()-1));
@@ -1282,7 +1282,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     String ne = "";
     for(AbstractCoreLabel token : pTokens){
       if(token.index() == headWord.index()){
-        phrase_string.add(token.lemma());
+        phrase_string.add(modelLemma(token));
         ne = "";
 
       } else if( (token.lemma().equals("and") || StringUtils.isPunct(token.lemma()))
@@ -1292,7 +1292,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
       } else if(token.index() == headWord.index()-1
           && token.ner().equals(nerString)){
-        phrase_string.add(token.lemma());
+        phrase_string.add(modelLemma(token));
         ne = "";
 
       } else if(!token.ner().equals("O")){
@@ -1302,7 +1302,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         }
 
       } else {
-        phrase_string.add(token.lemma());
+        phrase_string.add(modelLemma(token));
         ne = "";
       }
     }
