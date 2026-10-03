@@ -423,7 +423,7 @@ public abstract class DeterministicCorefSieve extends Sieve  {
     if(flags.USE_COREF_DICT){
 
       // Head match
-      if(ant.headWord.lemma().equals(mention2.headWord.lemma())) return false;
+      if(Mention.modelLemma(ant.headWord).equals(Mention.modelLemma(mention2.headWord))) return false;
 
       // Constraint: ignore pairs commonNoun - properNoun
       if (ant.mentionType != MentionType.PROPER &&

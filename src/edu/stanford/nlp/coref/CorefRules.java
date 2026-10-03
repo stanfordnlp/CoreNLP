@@ -935,7 +935,7 @@ public class CorefRules {
     for(Mention men : menCluster.getCorefMentions()){
       if(men.isPronominal()) continue;
       for(Mention ant : antCluster.getCorefMentions()){
-        if(ant.isPronominal() || men.headWord.lemma().equals(ant.headWord.lemma())) continue;
+        if(ant.isPronominal() || Mention.modelLemma(men.headWord).equals(Mention.modelLemma(ant.headWord))) continue;
         if(entityCorefDictionary(men, ant, dict, dictColumn, freq)){
           ret = true;
         } else {
