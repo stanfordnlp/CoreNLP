@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Locale;
+import java.util.Map;
 import java.util.function.Function;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -209,6 +211,47 @@ public class Morphology implements Function  {
                                                 boolean lowercase) {
     initStaticLexer();
     return lemmatize(word, tag, staticLexer, lowercase);
+  }
+
+
+  /**
+   * Possessive pronouns mapped to the lemmas Morpha gave them before it followed EWT.
+   * Keyed on the lowercased word; the value is the same for both PRP and PRP$.
+   */
+  private static final Map<String, String> LEGACY_POSSESSIVE_LEMMAS = Map.of(
+      "his", "he",
+      "her", "she",
+      "your", "you",
+      "our", "we",
+      "their", "they",
+      "mine", "mine",
+      "yours", "yours",
+      "hers", "hers",
+      "ours", "ours",
+      "theirs", "theirs");
+
+  /**
+   * The lemma Morpha gave a possessive pronoun before it followed EWT, for use with
+   * models trained on those lemmas, such as the English models in
+   * {@code edu.stanford.nlp.coref} and {@code edu.stanford.nlp.dcoref}.
+   * The older lemmas mapped the possessive determiners to the nominative pronoun
+   * ({@code his_PRP$} was {@code he}) and left the independent possessives unchanged
+   * ({@code theirs_PRP} was {@code theirs}), where Morpha now gives {@code his} and {@code their}.
+   * If Morpha changes the lemma of some other word, those models may need an entry here as well.
+   *
+   *  @param word The word
+   *  @param tag Its part of speech
+   *  @param lemma Its lemma from Morpha
+   *  @return The older lemma if the word is a PRP or PRP$ possessive pronoun, otherwise {@code lemma}
+   */
+  public static String legacyPossessiveLemma(String word, String tag, String lemma) {
+    if (word != null && tag != null && tag.startsWith("PRP")) {
+      String legacy = LEGACY_POSSESSIVE_LEMMAS.get(word.toLowerCase(Locale.ROOT));
+      if (legacy != null) {
+        return legacy;
+      }
+    }
+    return lemma;
   }
 
 

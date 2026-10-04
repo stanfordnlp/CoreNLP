@@ -145,6 +145,39 @@ public class MorphologyTest extends TestCase {
     }
   }
 
+  /**
+   * legacyPossessiveLemma gives the possessive pronouns the lemmas Morpha used before it followed EWT,
+   * and leaves every other word with its current lemma.
+   */
+  public void testLegacyPossessiveLemma() {
+    String[][] cases = {
+      {"his",    "PRP$", "he"},
+      {"His",    "PRP$", "he"},
+      {"his",    "PRP",  "he"},
+      {"her",    "PRP$", "she"},
+      {"her",    "PRP",  "she"},
+      {"your",   "PRP$", "you"},
+      {"our",    "PRP$", "we"},
+      {"their",  "PRP$", "they"},
+      {"my",     "PRP$", "my"},
+      {"its",    "PRP$", "its"},
+      {"mine",   "PRP",  "mine"},
+      {"yours",  "PRP",  "yours"},
+      {"hers",   "PRP",  "hers"},
+      {"ours",   "PRP",  "ours"},
+      {"theirs", "PRP",  "theirs"},
+      {"Theirs", "PRP$", "theirs"},
+      {"he",     "PRP",  "he"},
+      {"them",   "PRP",  "they"},
+      {"mine",   "NN",   "mine"},
+      {"dogs",   "NNS",  "dog"},
+    };
+    for (String[] c : cases) {
+      String lemma = legacyPossessiveLemma(c[0], c[1], lemmaStatic(c[0], c[1]));
+      assertEquals("Legacy lemma of " + c[0] + '/' + c[1], c[2], lemma);
+    }
+  }
+
   public void testStem() {
     assertEquals("John", stemStatic(new WordTag("John", "NNP")).word());
     assertEquals("Corporations", stemStatic(new WordTag("Corporations", "NNPS")).word());

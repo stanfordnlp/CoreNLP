@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.classify.LogisticClassifier;
@@ -48,6 +47,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
@@ -66,42 +66,13 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   private static final long serialVersionUID = -7524485803945717057L;
 
   /**
-   * Lemmas of the possessive pronouns as the trained dcoref resources expect them.
-   * The singleton predictor and the coref dictionaries were built when Morpha lemmatized
-   * {@code his_PRP$} as {@code he} and left the independent possessives such as {@code theirs}
-   * unchanged, whereas Morpha now follows EWT ({@code his_PRP$} is {@code his},
-   * {@code theirs_PRP} is {@code their}).
-   * Keyed on the lowercased word, so the value is the same for both PRP and PRP$.
-   * This duplicates the table in {@code edu.stanford.nlp.coref.data.Mention}, which keeps
-   * dcoref independent of the coref package.
-   */
-  private static final Map<String, String> MODEL_POSSESSIVE_LEMMAS = Map.of(
-      "his", "he",
-      "her", "she",
-      "your", "you",
-      "our", "we",
-      "their", "they",
-      "mine", "mine",
-      "yours", "yours",
-      "hers", "hers",
-      "ours", "ours",
-      "theirs", "theirs");
-
-  /**
-   * The lemma of a token for use with the trained dcoref resources.
-   * This is the token's lemma, except that a PRP or PRP$ possessive pronoun gets
-   * the lemma from {@link #MODEL_POSSESSIVE_LEMMAS}, which is what those resources were built with.
+   * The lemma of a token for use with the trained dcoref resources
+   * (the singleton predictor and the coref dictionaries).
+   * Those were built with the older lemmas for possessive pronouns, so this is the
+   * token's lemma passed through {@link Morphology#legacyPossessiveLemma}.
    */
   public static String modelLemma(AbstractCoreLabel token) {
-    String tag = token.tag();
-    String word = token.word();
-    if (tag != null && word != null && tag.startsWith("PRP")) {
-      String lemma = MODEL_POSSESSIVE_LEMMAS.get(word.toLowerCase(Locale.ROOT));
-      if (lemma != null) {
-        return lemma;
-      }
-    }
-    return token.lemma();
+    return Morphology.legacyPossessiveLemma(token.word(), token.tag(), token.lemma());
   }
 
   public Mention() {
