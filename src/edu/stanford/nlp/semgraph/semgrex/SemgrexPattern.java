@@ -1,9 +1,6 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
 import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.util.*;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -871,102 +868,6 @@ public abstract class SemgrexPattern implements Serializable  {
   private static final Set<String> SINGLE_VALUED =
     Collections.unmodifiableSet(new HashSet<>(Arrays.asList(PATTERN, MODE, EXTRAS, OUTPUT_FORMAT_OPTION)));
 
-  /**
-   * Splits a command line into the arguments given for each flag.
-   *<br>
-   * A flag which names files takes every argument up to the next flag, so
-   * that a list of them can be given at once.  The others take one, which
-   * leaves the files after them free to be files.  Anything not claimed by
-   * a flag is collected under a null key.
-   */
-  static Map<String, List<String>> parseArgs(String[] args) {
-    Map<String, List<String>> parsed = new LinkedHashMap<>();
-    parsed.put(null, new ArrayList<>());
-    String flag = null;
-    for (String arg : args) {
-      if (!arg.isEmpty() && arg.charAt(0) == '-' && !isFilename(arg)) {
-        flag = arg;
-        parsed.computeIfAbsent(flag, key -> new ArrayList<>());
-      } else {
-        parsed.computeIfAbsent(flag, key -> new ArrayList<>()).add(arg);
-        if (SINGLE_VALUED.contains(flag)) {
-          flag = null;
-        }
-      }
-    }
-    return parsed;
-  }
-
-  /** A leading "-" is a flag unless it names something on disk, such as -oddly-named.conllu */
-  private static boolean isFilename(String arg) {
-    return new File(arg).exists();
-  }
-
-  private static String firstArg(Map<String, List<String>> args, String flag, String fallback) {
-    List<String> values = args.get(flag);
-    return (values == null || values.isEmpty()) ? fallback : values.get(0);
-  }
-
-  /**
-   * Every file named by the given paths, expanding directories and globs.
-   *<br>
-   * A path may be a file, a directory, or a pattern such as
-   * es_gsd-ud-*.conllu.  A shell normally expands a pattern before the
-   * program sees it, but not when it is quoted.  A file named outright is
-   * read whatever it is called; a directory gives up only the files with
-   * the given extension.
-   */
-  static List<File> expandFiles(List<String> paths, String extension) throws IOException {
-    List<File> files = new ArrayList<>();
-    for (String path : paths) {
-      File file = new File(path);
-      if (file.isFile()) {
-        files.add(file);
-      } else if (file.isDirectory()) {
-        // a directory is a request for the files of the kind being read,
-        // not for a README which happens to sit beside them
-        File[] listed = file.listFiles();
-        if (listed != null) {
-          List<File> sorted = new ArrayList<>(Arrays.asList(listed));
-          Collections.sort(sorted);
-          for (File child : sorted) {
-            if (child.isFile() && child.getName().endsWith(extension)) {
-              files.add(child);
-            }
-          }
-          if (files.isEmpty()) {
-            log.info("No files ending in " + extension + " in " + file);
-          }
-        }
-      } else {
-        List<File> matches = glob(path);
-        if (matches.isEmpty()) {
-          throw new FileNotFoundException("Could not find any files matching " + path);
-        }
-        files.addAll(matches);
-      }
-    }
-    return files;
-  }
-
-  /** The files matching a path whose last piece is a pattern */
-  private static List<File> glob(String path) {
-    File asFile = new File(path);
-    File parent = asFile.getParentFile() == null ? new File(".") : asFile.getParentFile();
-    PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + asFile.getName());
-    File[] listed = parent.listFiles();
-    List<File> matches = new ArrayList<>();
-    if (listed != null) {
-      for (File child : listed) {
-        if (child.isFile() && matcher.matches(Paths.get(child.getName()))) {
-          matches.add(child);
-        }
-      }
-    }
-    Collections.sort(matches);
-    return matches;
-  }
-
   /** Logs the command line arguments {@link #main} accepts. */
   public static void help() {
     log.info("Possible arguments for SemgrexPattern:");
@@ -995,14 +896,14 @@ public abstract class SemgrexPattern implements Serializable  {
    * @throws IOException if a file cannot be read, or a file pattern matches nothing
    */
   public static void main(String[] args) throws IOException {
-    Map<String, List<String>> argsMap = parseArgs(args);
+    Map<String, List<String>> argsMap = SemgrexUtils.parseArgs(args, SINGLE_VALUED);
 
-    if (firstArg(argsMap, PATTERN, null) == null) {
+    if (SemgrexUtils.firstArg(argsMap, PATTERN, null) == null) {
       help();
       System.exit(2);
     }
     SemgrexPattern semgrex;
-    String patternArg = firstArg(argsMap, PATTERN, null);
+    String patternArg = SemgrexUtils.firstArg(argsMap, PATTERN, null);
     try {
       semgrex = SemgrexPattern.compile(IOUtils.slurpFile(patternArg));
     } catch(IOException e) {
@@ -1013,13 +914,13 @@ public abstract class SemgrexPattern implements Serializable  {
     // rather than against text.  in a Turkish locale the default would
     // uppercase the i of "basic" to a dotted capital I, and the valueOf
     // below would then fail
-    String modeString = firstArg(argsMap, MODE, DEFAULT_MODE).toUpperCase(Locale.ROOT);
+    String modeString = SemgrexUtils.firstArg(argsMap, MODE, DEFAULT_MODE).toUpperCase(Locale.ROOT);
     SemanticGraphFactory.Mode mode = SemanticGraphFactory.Mode.valueOf(modeString);
 
-    String outputFormatString = firstArg(argsMap, OUTPUT_FORMAT_OPTION, DEFAULT_OUTPUT_FORMAT).toUpperCase(Locale.ROOT);
+    String outputFormatString = SemgrexUtils.firstArg(argsMap, OUTPUT_FORMAT_OPTION, DEFAULT_OUTPUT_FORMAT).toUpperCase(Locale.ROOT);
     OutputFormat outputFormat = OutputFormat.valueOf(outputFormatString);
 
-    boolean useExtras = Boolean.parseBoolean(firstArg(argsMap, EXTRAS, "true"));
+    boolean useExtras = Boolean.parseBoolean(SemgrexUtils.firstArg(argsMap, EXTRAS, "true"));
 
     List<CoreMap> sentences = new ArrayList<>();
     // which file each sentence was read from, so that a match can be
@@ -1027,7 +928,7 @@ public abstract class SemgrexPattern implements Serializable  {
     Map<CoreMap, String> sentenceFiles = new IdentityHashMap<>();
 
     List<String> treePaths = argsMap.getOrDefault(TREE_FILE, Collections.emptyList());
-    for (File treeFile : expandFiles(treePaths, ".txt")) {
+    for (File treeFile : SemgrexUtils.expandFiles(treePaths, ".txt")) {
       log.info("Loading file " + treeFile);
       List<CoreMap> read = SemgrexUtils.readTreeFile(treeFile.toString(), mode, useExtras);
       for (CoreMap sentence : read) {
@@ -1041,7 +942,7 @@ public abstract class SemgrexPattern implements Serializable  {
     conlluPaths.addAll(argsMap.getOrDefault(null, Collections.emptyList()));
     if (!conlluPaths.isEmpty()) {
       CoNLLUReader reader = new CoNLLUReader();
-      for (File conlluFile : expandFiles(conlluPaths, ".conllu")) {
+      for (File conlluFile : SemgrexUtils.expandFiles(conlluPaths, ".conllu")) {
         log.info("Loading file " + conlluFile);
         List<Annotation> docs = reader.readCoNLLUFile(conlluFile.toString());
         for (Annotation doc : docs) {
