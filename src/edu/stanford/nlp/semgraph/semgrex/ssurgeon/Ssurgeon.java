@@ -26,6 +26,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -961,6 +962,101 @@ public class Ssurgeon  {
     } catch (ParserConfigurationException | SAXException e) {
       throw new SsurgeonParseException("XML failure while reading " + file, e);
     }
+  }
+
+  /**
+   * Reads Ssurgeon patterns written as plain text blocks, the same format
+   * the edit files of Stanza's {@code stanza/server/ssurgeon.py} use.
+   *<br>
+   * Blocks are separated by one or more blank lines.  In each block,
+   * lines starting with {@code #} are comments, which are joined to make
+   * the pattern's notes.  The first other line is the semgrex pattern, and
+   * each line after it is one edit, applied in order.  For example:
+   *<pre>{@code
+   * # que as a subordinating conjunction
+   * {word:/(?i:que)/;cpos:CCONJ}=que <mark {}
+   * EditNode -node que -cpos SCONJ
+   *
+   * {word:/(?i:que)/;cpos:CCONJ}=que <obj {}
+   * EditNode -node que -cpos PRON -morphofeatures PronType=Rel
+   * }</pre>
+   * A block of nothing but comments is skipped.  Each pattern's UID is the
+   * position of its block, counting from 1 and including skipped blocks.
+   *
+   * @param text The blocks to read
+   * @param language The name of the language used when parsing relation names in the edits,
+   *   such as {@code UniversalEnglish}
+   * @return The patterns, in the order their blocks appear
+   * @throws SsurgeonParseException if the language is unknown, or a
+   *   semgrex pattern or an edit cannot be parsed
+   */
+  public static List<SsurgeonPattern> readFromEditText(String text, String language) {
+    if (Language.valueOfSafe(language) == null) {
+      throw new SsurgeonParseException("Unknown language " + language);
+    }
+    List<SsurgeonPattern> patterns = new ArrayList<>();
+    List<List<String>> blocks = new ArrayList<>();
+    List<String> block = new ArrayList<>();
+    for (String line : text.split("\\R")) {
+      if (line.trim().isEmpty()) {
+        if (!block.isEmpty()) {
+          blocks.add(block);
+          block = new ArrayList<>();
+        }
+      } else {
+        block.add(line.trim());
+      }
+    }
+    if (!block.isEmpty()) {
+      blocks.add(block);
+    }
+
+    for (int blockIdx = 0; blockIdx < blocks.size(); ++blockIdx) {
+      List<String> comments = new ArrayList<>();
+      List<String> lines = new ArrayList<>();
+      for (String line : blocks.get(blockIdx)) {
+        if (line.startsWith("#")) {
+          comments.add(line.substring(1).trim());
+        } else {
+          lines.add(line);
+        }
+      }
+      if (lines.isEmpty()) {
+        continue;
+      }
+
+      String uid = Integer.toString(blockIdx + 1);
+      SemgrexPattern semgrex;
+      try {
+        semgrex = SemgrexPattern.compile(lines.get(0));
+      } catch (RuntimeException e) {
+        throw new SsurgeonParseException("Unable to compile the semgrex pattern of block " + uid + ": " + lines.get(0), e);
+      }
+      SsurgeonPattern pattern = new SsurgeonPattern(uid, semgrex);
+      pattern.setNotes(String.join(" ", comments));
+      pattern.setLanguage(language);
+
+      Set<String> knownEdges = new HashSet<>(semgrex.getKnownEdges());
+      for (String edit : lines.subList(1, lines.size())) {
+        pattern.addEdit(parseEditLine(edit, Collections.emptyMap(), pattern.getLanguage(), knownEdges));
+      }
+      patterns.add(pattern);
+    }
+    return patterns;
+  }
+
+  /**
+   * Reads Ssurgeon patterns from a file of plain text blocks, as described in {@link #readFromEditText}.
+   *
+   * @param file The file to read, in UTF-8
+   * @param language The name of the language used when parsing relation names in the edits
+   * @return The patterns, in the order their blocks appear
+   * @throws IOException if the file cannot be read
+   * @throws SsurgeonParseException if a pattern cannot be parsed
+   */
+  public static List<SsurgeonPattern> readFromEditFile(File file, String language) throws IOException {
+    String text = IOUtils.slurpFile(file.getPath(), "utf-8");
+    return readFromEditText(text, language);
   }
 
   /**
