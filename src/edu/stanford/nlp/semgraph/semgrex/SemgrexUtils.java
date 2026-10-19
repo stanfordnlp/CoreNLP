@@ -1,9 +1,19 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -20,6 +30,7 @@ import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Refactored a useful semgrex key comparison, so as to allow multiple places to use it
@@ -27,6 +38,8 @@ import edu.stanford.nlp.util.Pair;
  * @author John Bauer
  */
 public class SemgrexUtils {
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SemgrexUtils.class);
+
   /** Creates a SemgrexUtils; all of its methods are static. */
   public SemgrexUtils() { }
 
@@ -134,5 +147,119 @@ public class SemgrexUtils {
       sentences.add(sentence);
     }
     return sentences;
+  }
+
+  /**
+   * Splits a command line into the arguments given for each flag.
+   *<br>
+   * A flag which names files takes every argument up to the next flag, so
+   * that a list of them can be given at once.  A flag in
+   * {@code singleValued} takes one argument, which leaves the arguments
+   * after it free to be files.  Anything not claimed by a flag is
+   * collected under a null key.
+   *
+   * @param args The command line
+   * @param singleValued The flags which take exactly one argument
+   * @return The arguments for each flag, in the order the flags first appear
+   */
+  public static Map<String, List<String>> parseArgs(String[] args, Set<String> singleValued) {
+    Map<String, List<String>> parsed = new LinkedHashMap<>();
+    parsed.put(null, new ArrayList<>());
+    String flag = null;
+    for (String arg : args) {
+      if (!arg.isEmpty() && arg.charAt(0) == '-' && !isFilename(arg)) {
+        flag = arg;
+        parsed.computeIfAbsent(flag, key -> new ArrayList<>());
+      } else {
+        parsed.computeIfAbsent(flag, key -> new ArrayList<>()).add(arg);
+        if (singleValued.contains(flag)) {
+          flag = null;
+        }
+      }
+    }
+    return parsed;
+  }
+
+  /** A leading "-" is a flag unless it names something on disk, such as -oddly-named.conllu */
+  private static boolean isFilename(String arg) {
+    return new File(arg).exists();
+  }
+
+  /**
+   * The first argument given for a flag.
+   *
+   * @param args Arguments as returned by {@link #parseArgs}
+   * @param flag The flag to look up
+   * @param fallback What to return if the flag was not given or has no arguments
+   * @return The first argument for the flag, or {@code fallback}
+   */
+  public static String firstArg(Map<String, List<String>> args, String flag, String fallback) {
+    List<String> values = args.get(flag);
+    return (values == null || values.isEmpty()) ? fallback : values.get(0);
+  }
+
+  /**
+   * Every file named by the given paths, expanding directories and globs.
+   *<br>
+   * A path may be a file, a directory, or a pattern such as
+   * es_gsd-ud-*.conllu.  A shell normally expands a pattern before the
+   * program sees it, but not when it is quoted.  A file named outright is
+   * read whatever it is called; a directory gives up only the files with
+   * the given extension.
+   *
+   * @param paths The files, directories, and patterns to expand
+   * @param extension The ending of the files to take from a directory
+   * @return The files, in the order the paths were given, sorted within each directory or pattern
+   * @throws IOException if a path is neither a file nor a directory and matches no files
+   */
+  public static List<File> expandFiles(List<String> paths, String extension) throws IOException {
+    List<File> files = new ArrayList<>();
+    for (String path : paths) {
+      File file = new File(path);
+      if (file.isFile()) {
+        files.add(file);
+      } else if (file.isDirectory()) {
+        // a directory is a request for the files of the kind being read,
+        // not for a README which happens to sit beside them
+        File[] listed = file.listFiles();
+        if (listed != null) {
+          List<File> sorted = new ArrayList<>(Arrays.asList(listed));
+          Collections.sort(sorted);
+          for (File child : sorted) {
+            if (child.isFile() && child.getName().endsWith(extension)) {
+              files.add(child);
+            }
+          }
+          if (files.isEmpty()) {
+            log.info("No files ending in " + extension + " in " + file);
+          }
+        }
+      } else {
+        List<File> matches = glob(path);
+        if (matches.isEmpty()) {
+          throw new FileNotFoundException("Could not find any files matching " + path);
+        }
+        files.addAll(matches);
+      }
+    }
+    return files;
+  }
+
+  /** The files matching a path whose last piece is a pattern */
+  private static List<File> glob(String path) {
+    File asFile = new File(path);
+    File parent = asFile.getParentFile() == null ? new File(".") : asFile.getParentFile();
+    PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + asFile.getName());
+    File[] listed = parent.listFiles();
+    List<File> matches = new ArrayList<>();
+    if (listed != null) {
+      for (File child : listed) {
+        if (child.isFile() && matcher.matches(Paths.get(child.getName()))) {
+          matches.add(child);
+        }
+      }
+    }
+    Collections.sort(matches);
+    return matches;
   }
 }
