@@ -1,16 +1,27 @@
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 
 import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.SsurgPred;
 import edu.stanford.nlp.semgraph.semgrex.*;
+import edu.stanford.nlp.trees.ud.CoNLLUDocumentWriter;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * This represents a source pattern and a subsequent edit script, or a sequence
@@ -26,6 +37,8 @@ import edu.stanford.nlp.util.Pair;
  *
  */
 public class SsurgeonPattern {
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SsurgeonPattern.class);
+
   /** An identifier for this pattern */
   protected String UID;
   /** Free text notes describing this pattern */
@@ -431,19 +444,370 @@ public class SsurgeonPattern {
     this.language = Language.valueOfSafe(language);
   }
 
+  private static final String EDIT_FILE = "-editFile";
+  private static final String SEMGREX = "-semgrex";
+  private static final String EDIT = "-edit";
+  private static final String CONLLU_FILE = "-conlluFile";
+  private static final String OUTPUT = "-output";
+  private static final String IN_PLACE = "-inPlace";
+  private static final String LANGUAGE_OPTION = "-language";
+  private static final String DEFAULT_LANGUAGE = "UniversalEnglish";
+
+  /** Flags which take one argument; the rest take everything up to the next flag */
+  private static final Set<String> SINGLE_VALUED =
+    Collections.unmodifiableSet(new HashSet<>(Arrays.asList(EDIT_FILE, SEMGREX, EDIT, OUTPUT, LANGUAGE_OPTION)));
+
+  /** Flags which take no arguments */
+  private static final Set<String> NO_VALUE = Collections.singleton(IN_PLACE);
+
+  /** Logs the command line arguments {@link #main} accepts. */
+  public static void help() {
+    log.info("Possible arguments for SsurgeonPattern:");
+    log.info(EDIT_FILE + ": a file of Ssurgeon patterns.  May be given more than once; the files are applied in the order given.");
+    log.info("  Blocks of lines are separated by blank lines.  The first line of each block is a semgrex pattern,");
+    log.info("  and each following line is an edit to apply to its matches.  Lines starting with # are comments.");
+    log.info("  This is the same format as the edit files of Stanza's ssurgeon.py.");
+    log.info("  A file starting with < is read as Ssurgeon XML instead.");
+    log.info(SEMGREX + ": a semgrex pattern to use instead of, or after, the edit files");
+    log.info(EDIT + ": an edit to apply to the matches of " + SEMGREX + ".  May be given more than once; the edits are applied in order.");
+    log.info(CONLLU_FILE + ": one or more CoNLL-U files to edit.");
+    log.info("  Each may be a file, a directory, or a pattern such as 'es_gsd-ud-*.conllu'.");
+    log.info("  Files may also be named after the flags, with no flag of their own.");
+    log.info(OUTPUT + ": where to write the edited files.  With one input file, this is the output file,");
+    log.info("  unless it is an existing directory.  Otherwise, it is a directory, and each file is written under its own name.");
+    log.info(IN_PLACE + ": write each edited file back over its input");
+    log.info("  Without " + OUTPUT + " or " + IN_PLACE + ", the edited files are printed to stdout.");
+    log.info(LANGUAGE_OPTION + ": the language used for relation names in the edits.  Default " + DEFAULT_LANGUAGE);
+    log.info();
+    log.info("Only the basic dependencies are edited.  The enhanced dependencies are written unchanged,");
+    log.info("unless the edits change the words of a sentence, in which case that sentence's enhanced dependencies are dropped.");
+    log.info();
+    log.info("For example:");
+    log.info("  java edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonPattern -editFile update_que_cconj.txt -inPlace UD_Spanish-GSD");
+    log.info();
+    log.info("Given only an XML pattern file and compact semantic graphs, with no flags, the patterns are printed and");
+    log.info("then applied to each graph, printing all of the results.");
+  }
+
   /**
-   * Simply reads the given Ssurgeon pattern from file (args[0]), parses it, and prints it out.
-   * Use this for debugging the class and patterns. 
-   * Any further arguments are compact semantic graphs to run the patterns on.
-   *
-   * @param args the pattern file, followed by optional graphs
+   * Reads the patterns named on the command line: the edit files in the
+   * order given, then the pattern from {@code -semgrex} and {@code -edit}.
    */
-  public static void main(String[] args) {
-    if (args.length == 0) {
-      System.out.println("Usage: SsurgeonPattern FILEPATH [\"COMPACT_SEMANTIC_GRAPH\"], FILEPATH=path to ssurgeon pattern to parse and print., SENTENCE=test sentence (in quotes)");
-      System.exit(-1);
+  private static List<SsurgeonPattern> readPatterns(Map<String, List<String>> argsMap) throws IOException {
+    String language = SemgrexUtils.firstArg(argsMap, LANGUAGE_OPTION, DEFAULT_LANGUAGE);
+    if (Language.valueOfSafe(language) == null) {
+      throw new IllegalArgumentException("Unknown language " + language);
     }
 
+    List<SsurgeonPattern> patterns = new ArrayList<>();
+    for (String editFile : argsMap.getOrDefault(EDIT_FILE, Collections.emptyList())) {
+      String text = IOUtils.slurpFile(editFile, "utf-8");
+      if (text.trim().startsWith("<")) {
+        patterns.addAll(Ssurgeon.inst().readFromString(text));
+      } else {
+        patterns.addAll(Ssurgeon.readFromEditText(text, language));
+      }
+    }
+
+    List<String> semgrex = argsMap.getOrDefault(SEMGREX, Collections.emptyList());
+    List<String> edits = argsMap.getOrDefault(EDIT, Collections.emptyList());
+    if (semgrex.size() > 1) {
+      throw new IllegalArgumentException("Only one " + SEMGREX + " pattern may be given.  Use " + EDIT_FILE + " for more");
+    }
+    if (semgrex.isEmpty() && !edits.isEmpty()) {
+      throw new IllegalArgumentException(EDIT + " was given without a " + SEMGREX + " pattern for it to edit");
+    }
+    if (!semgrex.isEmpty()) {
+      // one block of the edit file format: the semgrex, then each edit on its own line
+      List<String> block = new ArrayList<>();
+      block.add(semgrex.get(0));
+      block.addAll(edits);
+      for (SsurgeonPattern pattern : Ssurgeon.readFromEditText(String.join("\n", block), language)) {
+        pattern.setUID(SEMGREX);
+        patterns.add(pattern);
+      }
+    }
+    return patterns;
+  }
+
+  /** Whether the comment is the {@code # text} comment of a CoNLL-U sentence */
+  private static boolean isTextComment(String comment) {
+    return (comment.startsWith("# text ") || comment.startsWith("#text ") ||
+            comment.startsWith("# text=") || comment.startsWith("#text="));
+  }
+
+  /**
+   * The text of a sentence, rebuilt from the words of its graph.
+   *<br>
+   * A multiword token contributes its own text rather than that of its
+   * words.  Each token is followed by its spaces after, except the last.
+   * Empty nodes and copy nodes are skipped.
+   *
+   * @param graph the graph to read the words from
+   * @return the text, as for a {@code # text} comment
+   */
+  static String sentenceText(SemanticGraph graph) {
+    List<IndexedWord> words = new ArrayList<>();
+    for (IndexedWord word : graph.vertexListSorted()) {
+      if (word.getEmptyIndex() == 0 && word.copyCount() == 0) {
+        words.add(word);
+      }
+    }
+
+    StringBuilder text = new StringBuilder();
+    int i = 0;
+    while (i < words.size()) {
+      IndexedWord word = words.get(i);
+      // the last word of the token, which holds the spaces after it
+      int last = i;
+      String tokenText;
+      IntPair span = word.get(CoreAnnotations.CoNLLUTokenSpanAnnotation.class);
+      Boolean isFirstOfMWT = word.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class);
+      if (span != null) {
+        tokenText = word.originalText();
+        while (last + 1 < words.size() && words.get(last + 1).index() <= span.getTarget()) {
+          ++last;
+        }
+      } else if (isFirstOfMWT != null && isFirstOfMWT && word.get(CoreAnnotations.MWTTokenTextAnnotation.class) != null) {
+        tokenText = word.get(CoreAnnotations.MWTTokenTextAnnotation.class);
+        while (last + 1 < words.size() && CoNLLUDocumentWriter.isMWTbutNotStart(words.get(last + 1))) {
+          ++last;
+        }
+      } else {
+        tokenText = word.word();
+      }
+      text.append(tokenText);
+      if (last + 1 < words.size()) {
+        // no SpaceAfter information at all is written as a plain space
+        String after = words.get(last).get(CoreAnnotations.AfterAnnotation.class);
+        text.append(after == null ? " " : after);
+      }
+      i = last + 1;
+    }
+    return text.toString();
+  }
+
+  /**
+   * Whether two lists of words are the same objects with the same indices.
+   * The enhanced graph shares its words with the basic graph, so this tells
+   * whether the enhanced graph still describes the words of the edited basic graph.
+   */
+  private static boolean sameWords(List<IndexedWord> words, List<String> indices, SemanticGraph graph) {
+    List<IndexedWord> current = graph.vertexListSorted();
+    if (current.size() != words.size()) {
+      return false;
+    }
+    for (int i = 0; i < words.size(); ++i) {
+      if (current.get(i) != words.get(i) || !current.get(i).toCopyOrEmptyIndex().equals(indices.get(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** The sent_id of a sentence, or else where it starts in its file */
+  private static String describeSentence(List<String> comments, SemanticGraph graph, File file) {
+    for (String comment : comments) {
+      if (comment.startsWith("# sent_id")) {
+        return comment.substring(1).trim() + " of " + file;
+      }
+    }
+    List<IndexedWord> words = graph.vertexListSorted();
+    if (!words.isEmpty() && words.get(0).get(CoreAnnotations.LineNumberAnnotation.class) != null) {
+      return "the sentence at line " + words.get(0).get(CoreAnnotations.LineNumberAnnotation.class) + " of " + file;
+    }
+    return "a sentence of " + file;
+  }
+
+  /**
+   * Applies each pattern in turn to the basic dependencies of one sentence,
+   * using {@link #iterate}, then writes the sentence as CoNLL-U.
+   *<br>
+   * If the sentence changed, its {@code # text} comment is rebuilt from the
+   * edited words.  The enhanced dependencies are written as they are,
+   * unless the words of the sentence changed, in which case they no
+   * longer fit and are left out.
+   *
+   * @return the CoNLL-U for the sentence, and whether any pattern changed it
+   */
+  private static Pair<String, Boolean> processSentence(List<SsurgeonPattern> patterns, CoreMap sentence, File file) {
+    SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    List<String> comments = new ArrayList<>();
+    if (sentence.get(CoreAnnotations.CommentsAnnotation.class) != null) {
+      comments.addAll(sentence.get(CoreAnnotations.CommentsAnnotation.class));
+    }
+
+    List<IndexedWord> words = graph.vertexListSorted();
+    List<String> indices = new ArrayList<>();
+    for (IndexedWord word : words) {
+      indices.add(word.toCopyOrEmptyIndex());
+    }
+
+    boolean changed = false;
+    for (SsurgeonPattern pattern : patterns) {
+      try {
+        Pair<SemanticGraph, Boolean> result = pattern.iterate(graph);
+        graph = result.first();
+        changed = changed || result.second();
+      } catch (RuntimeException e) {
+        throw new RuntimeException("Ssurgeon pattern " + pattern.getUID() + " failed on " + describeSentence(comments, graph, file), e);
+      }
+    }
+
+    if (changed) {
+      if (enhanced != null && !sameWords(words, indices, graph)) {
+        log.warn("The edits changed the words of " + describeSentence(comments, graph, file) +
+                 ".  Its enhanced dependencies, including any empty nodes, no longer fit and are not written");
+        enhanced = null;
+      }
+      String text = sentenceText(graph);
+      for (int i = 0; i < comments.size(); ++i) {
+        if (isTextComment(comments.get(i))) {
+          comments.set(i, "# text = " + text);
+        }
+      }
+    }
+
+    CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
+    return new Pair<>(writer.printSemanticGraph(graph, enhanced, false, comments), changed);
+  }
+
+  /**
+   * Where each input file is written: the {@code -output} file or
+   * directory, the input file itself for {@code -inPlace}, or null for stdout.
+   */
+  private static List<File> outputFiles(List<File> inputs, String output, boolean inPlace) {
+    List<File> outputs = new ArrayList<>();
+    if (inPlace) {
+      outputs.addAll(inputs);
+    } else if (output == null) {
+      for (int i = 0; i < inputs.size(); ++i) {
+        outputs.add(null);
+      }
+    } else if (inputs.size() == 1 && !new File(output).isDirectory()) {
+      outputs.add(new File(output));
+    } else {
+      File dir = new File(output);
+      if (!dir.isDirectory() && !dir.mkdirs()) {
+        throw new IllegalArgumentException("Could not make the output directory " + dir);
+      }
+      Map<String, File> seen = new HashMap<>();
+      for (File input : inputs) {
+        File previous = seen.put(input.getName(), input);
+        if (previous != null) {
+          throw new IllegalArgumentException("Both " + previous + " and " + input + " would be written to the same file in " + dir);
+        }
+        outputs.add(new File(dir, input.getName()));
+      }
+    }
+    return outputs;
+  }
+
+  /**
+   * Edits CoNLL-U files with Ssurgeon patterns.
+   *<br>
+   * The patterns come from edit files, in the format described in
+   * {@link Ssurgeon#readFromEditText}, or from a single semgrex pattern
+   * and its edits on the command line.  Each pattern is applied in turn
+   * to each sentence, repeating until it no longer matches anything it
+   * changes, as in {@link #iterate}.  For example:
+   *<pre>{@code
+   * java edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonPattern -editFile update_que_cconj.txt -inPlace UD_Spanish-GSD
+   * java edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonPattern -semgrex "{}=source >nsubj {} >csubj=bad {}" -edit "relabelNamedEdge -edge bad -reln advcl" -conlluFile en_pronouns-ud-test.conllu
+   * }</pre>
+   * See {@link #help} for all of the arguments.
+   *<br>
+   * Given no flags at all, the first argument is instead a file of
+   * Ssurgeon XML, and any further arguments are compact semantic graphs.
+   * The patterns are printed, then applied to each graph with
+   * {@link Ssurgeon#exhaustFromPatterns}, printing every graph produced.
+   *
+   * @param args the command line arguments
+   * @throws IOException if a file cannot be read or written
+   */
+  public static void main(String[] args) throws IOException {
+    if (args.length == 0) {
+      help();
+      System.exit(2);
+    }
+    boolean anyFlags = false;
+    for (String arg : args) {
+      if (arg.startsWith("-")) {
+        anyFlags = true;
+        break;
+      }
+    }
+    if (!anyFlags) {
+      printAndExhaust(args);
+      return;
+    }
+
+    Map<String, List<String>> argsMap = SemgrexUtils.parseArgs(args, SINGLE_VALUED, NO_VALUE);
+    for (String flag : argsMap.keySet()) {
+      if (flag != null && !flag.equals(CONLLU_FILE) && !SINGLE_VALUED.contains(flag) && !NO_VALUE.contains(flag)) {
+        help();
+        throw new IllegalArgumentException("Unknown flag " + flag);
+      }
+    }
+
+    List<SsurgeonPattern> patterns = readPatterns(argsMap);
+    if (patterns.isEmpty()) {
+      help();
+      throw new IllegalArgumentException("No Ssurgeon patterns given.  Use " + EDIT_FILE + " or " + SEMGREX);
+    }
+
+    List<String> conlluPaths = new ArrayList<>(argsMap.getOrDefault(CONLLU_FILE, Collections.emptyList()));
+    conlluPaths.addAll(argsMap.getOrDefault(null, Collections.emptyList()));
+    List<File> inputs = SemgrexUtils.expandFiles(conlluPaths, ".conllu");
+    if (inputs.isEmpty()) {
+      throw new IllegalArgumentException("No CoNLL-U files to edit.  Use " + CONLLU_FILE);
+    }
+
+    String output = SemgrexUtils.firstArg(argsMap, OUTPUT, null);
+    boolean inPlace = argsMap.containsKey(IN_PLACE);
+    if (inPlace && output != null) {
+      throw new IllegalArgumentException("Use only one of " + OUTPUT + " and " + IN_PLACE);
+    }
+    List<File> outputs = outputFiles(inputs, output, inPlace);
+
+    PrintStream stdout = new PrintStream(new FileOutputStream(FileDescriptor.out), true, "utf-8");
+    CoNLLUReader reader = new CoNLLUReader();
+    for (int i = 0; i < inputs.size(); ++i) {
+      File input = inputs.get(i);
+      File outputFile = outputs.get(i);
+      log.info("Processing " + input + (outputFile == null ? "" : " to " + outputFile));
+
+      StringBuilder result = new StringBuilder();
+      int sentences = 0;
+      int changed = 0;
+      for (Annotation doc : reader.readCoNLLUFile(input.getPath())) {
+        for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
+          Pair<String, Boolean> processed = processSentence(patterns, sentence, input);
+          result.append(processed.first());
+          ++sentences;
+          if (processed.second()) {
+            ++changed;
+          }
+        }
+      }
+      log.info("  Changed " + changed + " of " + sentences + " sentences");
+
+      if (outputFile == null) {
+        stdout.print(result);
+        stdout.flush();
+      } else {
+        Files.write(outputFile.toPath(), result.toString().getBytes(StandardCharsets.UTF_8));
+      }
+    }
+  }
+
+  /**
+   * Reads the Ssurgeon XML file in {@code args[0]} and prints its patterns,
+   * then applies them to each compact semantic graph in the rest of the
+   * arguments, printing every graph produced.
+   */
+  private static void printAndExhaust(String[] args) {
     File tgtFile = new File(args[0]);
     try {
       Ssurgeon.inst().initLog(new File("./ssurgeon.log"));
