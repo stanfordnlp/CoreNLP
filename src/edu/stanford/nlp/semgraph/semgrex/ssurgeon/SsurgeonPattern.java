@@ -449,7 +449,7 @@ public class SsurgeonPattern {
   private static final String EDIT = "-edit";
   private static final String CONLLU_FILE = "-conlluFile";
   private static final String OUTPUT = "-output";
-  private static final String IN_PLACE = "-inPlace";
+  private static final String STDOUT = "-stdout";
   private static final String LANGUAGE_OPTION = "-language";
   private static final String DEFAULT_LANGUAGE = "UniversalEnglish";
 
@@ -458,7 +458,7 @@ public class SsurgeonPattern {
     Collections.unmodifiableSet(new HashSet<>(Arrays.asList(EDIT_FILE, SEMGREX, EDIT, OUTPUT, LANGUAGE_OPTION)));
 
   /** Flags which take no arguments */
-  private static final Set<String> NO_VALUE = Collections.singleton(IN_PLACE);
+  private static final Set<String> NO_VALUE = Collections.singleton(STDOUT);
 
   /** Logs the command line arguments {@link #main} accepts. */
   public static void help() {
@@ -475,15 +475,16 @@ public class SsurgeonPattern {
     log.info("  Files may also be named after the flags, with no flag of their own.");
     log.info(OUTPUT + ": where to write the edited files.  With one input file, this is the output file,");
     log.info("  unless it is an existing directory.  Otherwise, it is a directory, and each file is written under its own name.");
-    log.info(IN_PLACE + ": write each edited file back over its input");
-    log.info("  Without " + OUTPUT + " or " + IN_PLACE + ", the edited files are printed to stdout.");
+    log.info(STDOUT + ": print the edited files to stdout");
+    log.info("  Without " + OUTPUT + " or " + STDOUT + ", each edited file is written back over its input.");
+    log.info("  A file is only rewritten if the edits changed at least one of its sentences.");
     log.info(LANGUAGE_OPTION + ": the language used for relation names in the edits.  Default " + DEFAULT_LANGUAGE);
     log.info();
     log.info("Only the basic dependencies are edited.  The enhanced dependencies are written unchanged,");
     log.info("unless the edits change the words of a sentence, in which case that sentence's enhanced dependencies are dropped.");
     log.info();
     log.info("For example:");
-    log.info("  java edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonPattern -editFile update_que_cconj.txt -inPlace UD_Spanish-GSD");
+    log.info("  java edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonPattern -editFile update_que_cconj.txt UD_Spanish-GSD");
     log.info();
     log.info("Given only an XML pattern file and compact semantic graphs, with no flags, the patterns are printed and");
     log.info("then applied to each graph, printing all of the results.");
@@ -674,17 +675,17 @@ public class SsurgeonPattern {
   }
 
   /**
-   * Where each input file is written: the {@code -output} file or
-   * directory, the input file itself for {@code -inPlace}, or null for stdout.
+   * Where each input file is written: null for {@code -stdout}, the
+   * {@code -output} file or directory, or else the input file itself.
    */
-  private static List<File> outputFiles(List<File> inputs, String output, boolean inPlace) {
+  private static List<File> outputFiles(List<File> inputs, String output, boolean toStdout) {
     List<File> outputs = new ArrayList<>();
-    if (inPlace) {
-      outputs.addAll(inputs);
-    } else if (output == null) {
+    if (toStdout) {
       for (int i = 0; i < inputs.size(); ++i) {
         outputs.add(null);
       }
+    } else if (output == null) {
+      outputs.addAll(inputs);
     } else if (inputs.size() == 1 && !new File(output).isDirectory()) {
       outputs.add(new File(output));
     } else {
@@ -711,10 +712,12 @@ public class SsurgeonPattern {
    * {@link Ssurgeon#readFromEditText}, or from a single semgrex pattern
    * and its edits on the command line.  Each pattern is applied in turn
    * to each sentence, repeating until it no longer matches anything it
-   * changes, as in {@link #iterate}.  For example:
+   * changes, as in {@link #iterate}.  The edited files are written back
+   * over the originals unless {@code -output} or {@code -stdout} is given.
+   * For example:
    *<pre>{@code
-   * java edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonPattern -editFile update_que_cconj.txt -inPlace UD_Spanish-GSD
-   * java edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonPattern -semgrex "{}=source >nsubj {} >csubj=bad {}" -edit "relabelNamedEdge -edge bad -reln advcl" -conlluFile en_pronouns-ud-test.conllu
+   * java edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonPattern -editFile update_que_cconj.txt UD_Spanish-GSD
+   * java edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonPattern -semgrex "{}=source >nsubj {} >csubj=bad {}" -edit "relabelNamedEdge -edge bad -reln advcl" -stdout -conlluFile en_pronouns-ud-test.conllu
    * }</pre>
    * See {@link #help} for all of the arguments.
    *<br>
@@ -765,11 +768,11 @@ public class SsurgeonPattern {
     }
 
     String output = SemgrexUtils.firstArg(argsMap, OUTPUT, null);
-    boolean inPlace = argsMap.containsKey(IN_PLACE);
-    if (inPlace && output != null) {
-      throw new IllegalArgumentException("Use only one of " + OUTPUT + " and " + IN_PLACE);
+    boolean toStdout = argsMap.containsKey(STDOUT);
+    if (toStdout && output != null) {
+      throw new IllegalArgumentException("Use only one of " + OUTPUT + " and " + STDOUT);
     }
-    List<File> outputs = outputFiles(inputs, output, inPlace);
+    List<File> outputs = outputFiles(inputs, output, toStdout);
 
     PrintStream stdout = new PrintStream(new FileOutputStream(FileDescriptor.out), true, "utf-8");
     CoNLLUReader reader = new CoNLLUReader();
@@ -796,6 +799,10 @@ public class SsurgeonPattern {
       if (outputFile == null) {
         stdout.print(result);
         stdout.flush();
+      } else if (changed == 0 && outputFile.equals(input)) {
+        // nothing to write back, and leaving the file alone means
+        // nothing can change in it which the edits did not ask for
+        log.info("  Leaving " + input + " as it is");
       } else {
         Files.write(outputFile.toPath(), result.toString().getBytes(StandardCharsets.UTF_8));
       }
