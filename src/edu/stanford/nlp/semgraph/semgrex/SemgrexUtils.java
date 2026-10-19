@@ -225,12 +225,14 @@ public class SemgrexUtils {
         if (listed != null) {
           List<File> sorted = new ArrayList<>(Arrays.asList(listed));
           Collections.sort(sorted);
+          int found = 0;
           for (File child : sorted) {
             if (child.isFile() && child.getName().endsWith(extension)) {
               files.add(child);
+              ++found;
             }
           }
-          if (files.isEmpty()) {
+          if (found == 0) {
             log.info("No files ending in " + extension + " in " + file);
           }
         }
