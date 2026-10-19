@@ -163,6 +163,23 @@ public class SemgrexUtils {
    * @return The arguments for each flag, in the order the flags first appear
    */
   public static Map<String, List<String>> parseArgs(String[] args, Set<String> singleValued) {
+    return parseArgs(args, singleValued, Collections.emptySet());
+  }
+
+  /**
+   * Splits a command line into the arguments given for each flag.
+   *<br>
+   * As {@link #parseArgs(String[], Set)}, except that a flag in
+   * {@code noValue} takes no arguments, so what follows it is free to be
+   * files.  Such a flag is present in the result with an empty list.
+   * A flag given more than once collects the arguments from each time.
+   *
+   * @param args The command line
+   * @param singleValued The flags which take exactly one argument
+   * @param noValue The flags which take no arguments
+   * @return The arguments for each flag, in the order the flags first appear
+   */
+  public static Map<String, List<String>> parseArgs(String[] args, Set<String> singleValued, Set<String> noValue) {
     Map<String, List<String>> parsed = new LinkedHashMap<>();
     parsed.put(null, new ArrayList<>());
     String flag = null;
@@ -170,6 +187,9 @@ public class SemgrexUtils {
       if (!arg.isEmpty() && arg.charAt(0) == '-' && !isFilename(arg)) {
         flag = arg;
         parsed.computeIfAbsent(flag, key -> new ArrayList<>());
+        if (noValue.contains(flag)) {
+          flag = null;
+        }
       } else {
         parsed.computeIfAbsent(flag, key -> new ArrayList<>()).add(arg);
         if (singleValued.contains(flag)) {
