@@ -452,6 +452,84 @@ sentence {
   }
 
   /**
+   * One match can name the same arc in each graph.  nsubj(likes, Sue)
+   * is in both, and each name reports the graph it was found in
+   */
+  @Test
+  public void testSameArcNamedInBothGraphs() {
+    CoreNLPProtos.SemgrexRequest request = buildEnhancedRequest("{word:likes} >nsubj=b {word:Sue} >nsubj@enhanced=e {word:Sue}");
+    CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
+
+    CoreNLPProtos.SemgrexResponse.Match match = onlyMatch(response, 0);
+    CoreNLPProtos.SemgrexResponse.NamedEdge basic = namedEdge(match, "b");
+    CoreNLPProtos.SemgrexResponse.NamedEdge enhanced = namedEdge(match, "e");
+    for (CoreNLPProtos.SemgrexResponse.NamedEdge edge : new CoreNLPProtos.SemgrexResponse.NamedEdge[] { basic, enhanced }) {
+      Assert.assertEquals("nsubj", edge.getReln());
+      Assert.assertEquals(2, edge.getSource());
+      Assert.assertEquals(1, edge.getTarget());
+    }
+    Assert.assertEquals(CoreNLPProtos.SemgrexResponse.GraphName.BASIC, basic.getGraph());
+    Assert.assertEquals(CoreNLPProtos.SemgrexResponse.GraphName.ENHANCED, enhanced.getGraph());
+  }
+
+  /**
+   * An edge from an empty node reports the empty node as its source
+   */
+  @Test
+  public void testEdgeFromEmptyNode() {
+    CoreNLPProtos.SemgrexRequest request = buildEnhancedRequest("{} >obj@enhanced=e {word:tea}");
+    CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
+
+    CoreNLPProtos.SemgrexResponse.Match match = onlyMatch(response, 0);
+    Assert.assertEquals(5, match.getMatchIndex());
+    Assert.assertEquals(1, match.getMatchEmptyIndex());
+
+    CoreNLPProtos.SemgrexResponse.NamedEdge obj = namedEdge(match, "e");
+    Assert.assertEquals("obj", obj.getReln());
+    Assert.assertEquals(5, obj.getSource());
+    Assert.assertEquals(1, obj.getSourceEmpty());
+    Assert.assertEquals(6, obj.getTarget());
+    Assert.assertFalse(obj.hasTargetEmpty());
+    Assert.assertEquals(CoreNLPProtos.SemgrexResponse.GraphName.ENHANCED, obj.getGraph());
+  }
+
+  /**
+   * An edge name used twice must be the same edge in the same graph,
+   * so the equal arc in the other graph does not satisfy it
+   */
+  @Test
+  public void testEdgeNameAcrossGraphs() {
+    CoreNLPProtos.SemgrexRequest request = buildEnhancedRequest("{word:likes} >nsubj=e {word:Sue} >nsubj@enhanced=e {word:Sue}",
+                                                                "{word:likes} >nsubj=e {word:Sue} >nsubj=e {word:Sue}");
+    CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
+
+    Assert.assertEquals(1, response.getSentenceCount());
+    Assert.assertEquals(0, response.getSentence(0).getPattern(0).getMatchCount());
+    Assert.assertEquals(CoreNLPProtos.SemgrexResponse.GraphName.BASIC, namedEdge(onlyMatch(response, 1), "e").getGraph());
+  }
+
+  /**
+   * Matches which go through uniq are copies, and still know the graph
+   * of each of their edges
+   */
+  @Test
+  public void testEdgeGraphAfterUniq() {
+    CoreNLPProtos.SemgrexRequest request = buildEnhancedRequest("{}=v >obj@enhanced=e {}=o :: uniq o");
+    CoreNLPProtos.SemgrexResponse response = ProcessSemgrexRequest.processRequest(request);
+
+    Assert.assertEquals(1, response.getSentenceCount());
+    CoreNLPProtos.SemgrexResponse.PatternResult result = response.getSentence(0).getPattern(0);
+    // obj(likes, coffee) and obj(likes-5.1, tea).  uniq keys on the words,
+    // so the objects are the key which keeps the two matches apart
+    Assert.assertEquals(2, result.getMatchCount());
+    for (CoreNLPProtos.SemgrexResponse.Match match : result.getMatchList()) {
+      CoreNLPProtos.SemgrexResponse.NamedEdge obj = namedEdge(match, "e");
+      Assert.assertEquals("obj", obj.getReln());
+      Assert.assertEquals(CoreNLPProtos.SemgrexResponse.GraphName.ENHANCED, obj.getGraph());
+    }
+  }
+
+  /**
    * When one sentence of many is missing the enhanced graph, the error
    * says which one, by its position in the request and its words
    */
