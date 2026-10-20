@@ -1,5 +1,9 @@
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
+import java.util.Collections;
+import java.util.Set;
+
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -44,6 +48,19 @@ public abstract class SsurgeonEdit {
    */
   public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
     return evaluate(graphs.getDefault(), sm);
+  }
+
+  /**
+   * The graphs this edit chooses to edit, such as with {@code -graph enhanced}.
+   *<br>
+   * The sentence must have each of them for the edit to be applied.  An
+   * edit which works on the graph its match came from, or on the words
+   * themselves, chooses none.
+   *
+   * @return the graphs, which is none unless an edit says otherwise
+   */
+  public Set<SemgrexGraphName> requiredGraphs() {
+    return Collections.emptySet();
   }
 
   /**

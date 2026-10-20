@@ -18,6 +18,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
@@ -1960,6 +1961,44 @@ public class SsurgeonTest {
     assertEquals("it's", sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
   }
 
+
+  /** -graph says which graph an edit works on, and is written back out by toEditString */
+  @Test
+  public void parseGraphArg() {
+    Set<String> knownEdges = new HashSet<>();
+    SsurgeonEdit edit = Ssurgeon.parseEditLine("addEdge -gov a -dep b -reln obj -graph enhanced", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+    assertTrue(edit.toEditString(), edit.toEditString().contains("-graph enhanced"));
+    SsurgeonEdit reparsed = Ssurgeon.parseEditLine(edit.toEditString(), new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(edit.toEditString(), reparsed.toEditString());
+
+    // the default is the basic graph, which is not written out
+    edit = Ssurgeon.parseEditLine("addEdge -gov a -dep b -reln obj", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.emptySet(), edit.requiredGraphs());
+    assertFalse(edit.toEditString().contains("-graph"));
+    edit = Ssurgeon.parseEditLine("addEdge -gov a -dep b -reln obj -graph BASIC", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.emptySet(), edit.requiredGraphs());
+
+    edit = Ssurgeon.parseEditLine("removeEdge -gov a -dep b -graph enhanced", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+    edit = Ssurgeon.parseEditLine("killAllIncomingEdges -node a -graph enhanced", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+
+    // an XML attribute is the same as the flag
+    Map<String, String> attributes = new HashMap<>();
+    attributes.put("graph", "enhanced");
+    edit = Ssurgeon.parseEditLine("addEdge -gov a -dep b -reln obj", attributes, Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+  }
+
+  @Test
+  public void parseGraphArgErrors() {
+    assertThrows(SsurgeonParseException.class, () ->
+                 Ssurgeon.parseEditLine("addEdge -gov a -dep b -reln obj -graph nonsense", new HashMap<>(), Language.UniversalEnglish, new HashSet<>()));
+    // an edit which does not choose its graph does not take -graph
+    assertThrows(SsurgeonParseException.class, () ->
+                 Ssurgeon.parseEditLine("editNode -node a -lemma foo -graph enhanced", new HashMap<>(), Language.UniversalEnglish, new HashSet<>()));
+  }
 
   /**
    * Reattaching an edge onto an arc which already has an edge with the same

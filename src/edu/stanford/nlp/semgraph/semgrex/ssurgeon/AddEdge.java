@@ -1,8 +1,12 @@
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import java.io.StringWriter;
+import java.util.Collections;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -35,6 +39,8 @@ public class AddEdge extends SsurgeonEdit {
   protected final double weight;
   /** Name to give the new edge in the matcher, or null */
   protected final String edgeName;
+  /** The graph this edit works on */
+  protected final SemgrexGraphName graph;
   
   /**
    * Creates an AddEdge with a weight of 0 and no edge name.
@@ -70,11 +76,26 @@ public class AddEdge extends SsurgeonEdit {
    * @param edgeName name to give the new edge in the matcher, or null
    */
   public AddEdge(String govName, String depName, GrammaticalRelation relation, double weight, String edgeName) {
+    this(govName, depName, relation, weight, edgeName, SemgrexGraphName.BASIC);
+  }
+
+  /**
+   * Creates an AddEdge which adds its edge to the given graph.
+   *
+   * @param govName name of the governor node in the match
+   * @param depName name of the dependent node in the match
+   * @param relation the relation of the new edge
+   * @param weight the weight of the new edge
+   * @param edgeName name to give the new edge in the matcher, or null
+   * @param graph the graph to add the edge to
+   */
+  public AddEdge(String govName, String depName, GrammaticalRelation relation, double weight, String edgeName, SemgrexGraphName graph) {
     this.govName = govName;
     this.depName = depName;
     this.relation = relation;
     this.weight = weight;
     this.edgeName = edgeName;
+    this.graph = graph;
   }
   
   @Override
@@ -96,6 +117,11 @@ public class AddEdge extends SsurgeonEdit {
       buf.write("\t");
       buf.write(Ssurgeon.EDGE_NAME_ARG);buf.write(" ");
       buf.write(edgeName);
+    }
+    if (graph != SemgrexGraphName.BASIC) {
+      buf.write("\t");
+      buf.write(Ssurgeon.GRAPH_ARG); buf.write(" ");
+      buf.write(graph.lowerName);
     }
     return buf.toString();
   }
@@ -131,14 +157,35 @@ public class AddEdge extends SsurgeonEdit {
 
 
   /**
-   * If the edge already exists in the graph,
-   * a new edge is not added.
+   * Adds the edge, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
+
+  /**
+   * Adds the edge to this edit's graph.
+   * If the edge already exists in the graph,
+   * a new edge is not added.
+   *<br>
+   * A node which no graph of the sentence has yet, such as one made by
+   * AddNode, is added to the graph along with the edge.  A word which
+   * another graph has and this one does not, such as an empty word when
+   * adding to the basic graph, is not, and the graph is left alone.
+   */
+  @Override
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+    SemanticGraph sg = graphs.get(graph);
     IndexedWord govNode = getNamedNode(govName, sm);
     IndexedWord depNode =  getNamedNode(depName, sm);
-    SemanticGraphEdge existingEdge = sg.getEdge(govNode, depNode, relation);
+    if (sg == null || govNode == null || depNode == null) {
+      return false;
+    }
+    if (!canAdd(graphs, sg, govNode) || !canAdd(graphs, sg, depNode)) {
+      return false;
+    }
+    SemanticGraphEdge existingEdge = sg.containsVertex(govNode) && sg.containsVertex(depNode) ? sg.getEdge(govNode, depNode, relation) : null;
     if (existingEdge == null) {
       // When adding the edge, check to see if the gov/dep nodes are presently in the graph.
       if (!sg.containsVertex(govNode)) 
@@ -147,11 +194,36 @@ public class AddEdge extends SsurgeonEdit {
         sg.addVertex(depNode);
       SemanticGraphEdge newEdge = sg.addEdge(govNode, depNode, relation, weight, false);
       if (edgeName != null) {
-        sm.putNamedEdge(edgeName, newEdge);
+        sm.putNamedEdge(edgeName, newEdge, graph);
       }
       return true;
     }
     return false;
+  }
+
+  /**
+   * Whether the node may be an endpoint of an edge in {@code sg}: it is
+   * already in it, or it is a new node which no graph of the sentence has
+   */
+  private static boolean canAdd(SemgrexGraphs graphs, SemanticGraph sg, IndexedWord node) {
+    if (sg.containsVertex(node)) {
+      return true;
+    }
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph other = graphs.get(name);
+      if (other != null && other.containsVertex(node)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * The graph this edit works on, if it is not the basic graph.
+   */
+  @Override
+  public Set<SemgrexGraphName> requiredGraphs() {
+    return graph == SemgrexGraphName.BASIC ? Collections.emptySet() : Collections.singleton(graph);
   }
 
 }

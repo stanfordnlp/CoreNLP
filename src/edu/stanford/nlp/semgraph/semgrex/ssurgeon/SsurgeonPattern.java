@@ -296,14 +296,15 @@ public class SsurgeonPattern {
    * Once the edits change which words the basic graph has, or their
    * indices, the other graphs no longer describe the same words, and they
    * are left out of the graphs returned.  Matching then continues on the
-   * basic graph alone, or stops if the pattern needs another graph.
+   * basic graph alone, or stops if the pattern searches another graph or
+   * an edit edits one.
    *
    * @param graphs the graphs of one sentence, with no alignment; the basic
    *   graph is required, and the graphs must share their words, as
    *   {@link #checkSharedWords} describes
    * @return the edited copies of the graphs, and whether any edit changed them
    * @throws IllegalArgumentException if the graphs have an alignment, or do not share their words
-   * @throws IllegalStateException if the pattern names a graph the sentence has not got,
+   * @throws IllegalStateException if the pattern or an edit names a graph the sentence has not got,
    *   or an edit leaves the graphs with different copies of a word
    */
   public Pair<SemgrexGraphs, Boolean> iterate(SemgrexGraphs graphs) {
@@ -313,6 +314,13 @@ public class SsurgeonPattern {
     String unshared = unsharedWord(graphs);
     if (unshared != null) {
       throw new IllegalArgumentException(unshared);
+    }
+    for (SsurgeonEdit edit : editScript) {
+      for (SemgrexGraphName name : edit.requiredGraphs()) {
+        if (graphs.get(name) == null) {
+          throw new IllegalStateException("Ssurgeon edit " + edit + " edits the " + name + " graph, which the sentence has not got");
+        }
+      }
     }
     graphs = copyGraphs(graphs);
     SemanticGraph basic = graphs.getDefault();
@@ -338,7 +346,7 @@ public class SsurgeonPattern {
         if (otherGraphs && !sameWords(words, indices, basic)) {
           graphs = new SemgrexGraphs(basic);
           otherGraphs = false;
-          if (searchesBeyondBasic()) {
+          if (usesGraphsBeyondBasic()) {
             break;
           }
         }
@@ -438,6 +446,25 @@ public class SsurgeonPattern {
     for (SemgrexGraphName name : semgrexPattern.requiredGraphs()) {
       if (name != SemgrexGraphName.BASIC) {
         return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Whether the pattern searches, or any of its edits edits, a graph other than the basic graph.
+   *
+   * @return true if the pattern needs a graph other than the basic graph
+   */
+  public boolean usesGraphsBeyondBasic() {
+    if (searchesBeyondBasic()) {
+      return true;
+    }
+    for (SsurgeonEdit edit : editScript) {
+      for (SemgrexGraphName name : edit.requiredGraphs()) {
+        if (name != SemgrexGraphName.BASIC) {
+          return true;
+        }
       }
     }
     return false;
@@ -642,9 +669,10 @@ public class SsurgeonPattern {
     log.info("  A file is only rewritten if the edits changed at least one of its sentences.");
     log.info(LANGUAGE_OPTION + ": the language used for relation names in the edits.  Default " + DEFAULT_LANGUAGE);
     log.info();
-    log.info("The semgrex patterns can search the enhanced dependencies as well as the basic, as in >nsubj@enhanced,");
-    log.info("but only the basic dependencies are edited.  The enhanced dependencies are written unchanged,");
-    log.info("unless the edits change the words of a sentence, in which case that sentence's enhanced dependencies are dropped.");
+    log.info("The semgrex patterns can search the enhanced dependencies as well as the basic, as in >nsubj@enhanced.");
+    log.info("An edit to a named edge changes the graph the edge was found in, and an edit which takes -graph,");
+    log.info("such as addEdge -graph enhanced, changes the graph it names.  Edits which add, remove, or renumber words");
+    log.info("change only the basic dependencies, and a sentence whose words change has its enhanced dependencies dropped.");
     log.info();
     log.info("For example:");
     log.info("  java edu.stanford.nlp.semgraph.semgrex.ssurgeon.SsurgeonPattern -editFile update_que_cconj.txt UD_Spanish-GSD");
@@ -784,14 +812,13 @@ public class SsurgeonPattern {
   }
 
   /**
-   * Applies each pattern in turn to the basic dependencies of one sentence,
-   * using {@link #iterate(SemgrexGraphs)} so that the patterns can also
-   * search the enhanced dependencies, then writes the sentence as CoNLL-U.
+   * Applies each pattern in turn to the graphs of one sentence, using
+   * {@link #iterate(SemgrexGraphs)}, then writes the sentence as CoNLL-U.
    *<br>
    * If the sentence changed, its {@code # text} comment is rebuilt from the
-   * edited words.  The enhanced dependencies are written as they are,
-   * unless the words of the sentence changed, in which case they no
-   * longer fit and are left out.
+   * edited words.  The enhanced dependencies are written as the edits
+   * left them, unless the words of the sentence changed, in which case
+   * they no longer fit and are left out.
    *
    * @return the CoNLL-U for the sentence, and whether any pattern changed it
    */
@@ -808,9 +835,9 @@ public class SsurgeonPattern {
     SemgrexGraphs graphs = SemgrexGraphs.of(graph, enhanced);
     boolean changed = false;
     for (SsurgeonPattern pattern : patterns) {
-      if (enhanced != null && graphs.get(SemgrexGraphName.ENHANCED) == null && pattern.searchesBeyondBasic()) {
+      if (enhanced != null && graphs.get(SemgrexGraphName.ENHANCED) == null && pattern.usesGraphsBeyondBasic()) {
         log.warn("Skipping Ssurgeon pattern " + pattern.getUID() + " on " + describeSentence(comments, graphs.getDefault(), file) +
-                 ": it searches the enhanced graph, which no longer fits now that earlier edits changed the words");
+                 ": it uses the enhanced graph, which no longer fits now that earlier edits changed the words");
         continue;
       }
       try {
@@ -881,7 +908,8 @@ public class SsurgeonPattern {
    * to each sentence, repeating until it no longer matches anything it
    * changes, as in {@link #iterate(SemgrexGraphs)}.  The
    * patterns can search the enhanced dependencies of a sentence as well
-   * as the basic, but only the basic dependencies are edited.  The edited files are written back
+   * as the basic, and edits to edges can change either; see {@link #help}.
+   * The edited files are written back
    * over the originals unless {@code -output} or {@code -stdout} is given.
    * For example:
    *<pre>{@code
