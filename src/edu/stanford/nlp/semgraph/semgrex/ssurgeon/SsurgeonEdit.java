@@ -1,5 +1,6 @@
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -26,6 +27,24 @@ public abstract class SsurgeonEdit {
    * @return whether or not there was an edit
    */
   public abstract boolean evaluate(SemanticGraph sg, SemgrexMatcher sm);
+
+  /**
+   * Given a matching instance (via the SemgrexMatcher), performs an in-place
+   * modification on the graphs of a sentence.
+   *<br>
+   * The graphs are the ones the match was found in, or copies of them which
+   * share their words and edges, so the matcher's nodes and edges can be
+   * looked up in them.  This edits the basic graph with
+   * {@link #evaluate(SemanticGraph, SemgrexMatcher)}; an edit which works
+   * on the other graphs as well overrides it.
+   *
+   * @param graphs The graphs to edit
+   * @param sm The matcher, positioned at the current match
+   * @return whether or not there was an edit
+   */
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+    return evaluate(graphs.getDefault(), sm);
+  }
 
   /**
    * Returns this edit in the Ssurgeon edit syntax.
