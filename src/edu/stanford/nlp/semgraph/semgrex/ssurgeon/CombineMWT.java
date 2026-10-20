@@ -8,6 +8,7 @@ import java.util.List;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -66,14 +67,27 @@ public class CombineMWT extends SsurgeonEdit {
   }
 
   /**
-   * Combine the nodes named in the expression, as long as they are all in a row
+   * Combines the named words, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
+
+  /**
+   * Combine the nodes named in the expression, as long as they are all in a row
+   *<br>
+   * The words of a token are the words of the basic graph.  The graphs
+   * share their words, so the MWT is seen in all of them.  An empty or
+   * copy word, such as one found only in the enhanced graph, is part of
+   * no token, so a match which names one is left alone.
+   */
+  @Override
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
     List<IndexedWord> nodes = new ArrayList<>();
     for (String name : names) {
       IndexedWord node = sm.getNode(name);
-      if (node == null) {
+      if (node == null || node.getEmptyIndex() != 0 || node.copyCount() != 0) {
         return false;
       }
       nodes.add(node);
@@ -98,7 +112,7 @@ public class CombineMWT extends SsurgeonEdit {
     boolean changed = false;
     int startIndex = nodes.get(0).index();
     int endIndex = nodes.get(nodes.size() - 1).index();
-    for (IndexedWord vertex : sg.vertexSet()) {
+    for (IndexedWord vertex : graphs.getDefault().vertexSet()) {
       if (vertex.index() >= startIndex && vertex.index() <= endIndex) {
         if (!vertex.containsKey(CoreAnnotations.IsMultiWordTokenAnnotation.class) ||
             !vertex.get(CoreAnnotations.IsMultiWordTokenAnnotation.class)) {

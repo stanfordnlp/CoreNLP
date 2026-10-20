@@ -7,6 +7,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 
 /**
@@ -60,7 +61,22 @@ public class Lemmatize extends SsurgeonEdit {
     return buf.toString();
   }
 
+  /**
+   * Lemmatizes the named word, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
+   */
+  @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
+
+  /**
+   * Sets the lemma of the named word.
+   *<br>
+   * The graphs share their words, so the new lemma is seen in all of them,
+   * whichever graph the word was matched in.
+   */
+  @Override
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
     IndexedWord word = sm.getNode(nodeName);
     if (word == null)
       return false;

@@ -281,4 +281,76 @@ public class SsurgeonPatternTest {
     IllegalStateException e = assertThrows(IllegalStateException.class, () -> pattern.iterate(graphs));
     assertTrue(e.getMessage(), e.getMessage().contains("different copies of word 8 (ok)"));
   }
+
+  /** "Sue likes coffee and Bill tea", where the enhanced graph has an empty word 5.1 for the elided "likes" */
+  private static final String EMPTY_WORD_SENTENCE = String.join("\n",
+    "# text = Sue likes coffee and Bill tea",
+    "1\tSue\tSue\tPROPN\t_\t_\t2\tnsubj\t2:nsubj\t_",
+    "2\tlikes\tlike\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "3\tcoffee\tcoffee\tNOUN\t_\t_\t2\tobj\t2:obj\t_",
+    "4\tand\tand\tCCONJ\t_\t_\t5\tcc\t5.1:cc\t_",
+    "5\tBill\tBill\tPROPN\t_\t_\t2\tconj\t5.1:nsubj\t_",
+    "5.1\tlikes\tlike\tVERB\t_\t_\t_\t_\t2:conj:and\t_",
+    "6\ttea\ttea\tNOUN\t_\t_\t5\torphan\t5.1:obj\t_",
+    "",
+    "");
+
+  /** EditNode reaches an empty word, which only the enhanced graph has */
+  @Test
+  public void editNodeOnEmptyWord() throws IOException {
+    SemgrexGraphs graphs = readGraphs(EMPTY_WORD_SENTENCE);
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=e !< {} <@enhanced {}\nEditNode -node e -lemma ELIDED", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
+    assertTrue(result.second());
+
+    IndexedWord empty = null;
+    for (IndexedWord word : result.first().get(SemgrexGraphName.ENHANCED).vertexSet()) {
+      if (word.getEmptyIndex() == 1) {
+        empty = word;
+      }
+    }
+    assertNotNull(empty);
+    assertEquals("ELIDED", empty.lemma());
+    // the likes of the basic graph is a different word
+    assertEquals("like", result.first().getDefault().getNodeByIndex(2).lemma());
+  }
+
+  /** Lemmatize works on a word found through the enhanced graph */
+  @Test
+  public void lemmatizeThroughEnhanced() throws IOException {
+    SemgrexGraphs graphs = readGraphs(EMPTY_WORD_SENTENCE);
+    IndexedWord tea = graphs.getDefault().getNodeByIndex(6);
+    tea.setLemma("WRONG");
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:tea}=t <obj@enhanced {}\nLemmatize -node t", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
+    assertTrue(result.second());
+    assertEquals("tea", result.first().getDefault().getNodeByIndex(6).lemma());
+    assertEquals("tea", result.first().get(SemgrexGraphName.ENHANCED).getNodeByIndex(6).lemma());
+  }
+
+  /**
+   * An empty word belongs to no token.  5.1 has the index 5, so a match
+   * naming it and "tea" would otherwise look like two words in a row
+   */
+  @Test
+  public void combineMWTIgnoresEmptyWords() throws IOException {
+    SemgrexGraphs graphs = readGraphs(EMPTY_WORD_SENTENCE);
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:tea}=t <obj@enhanced {}=e\nCombineMWT -node e -node t", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
+    assertFalse(result.second());
+    for (int index = 1; index <= 6; ++index) {
+      assertNotEquals(Boolean.TRUE, result.first().getDefault().getNodeByIndex(index).get(CoreAnnotations.IsMultiWordTokenAnnotation.class));
+    }
+  }
+
+  /** CombineMWT on real words works with both graphs given, and both see the MWT */
+  @Test
+  public void combineMWTWithEnhanced() throws IOException {
+    SemgrexGraphs graphs = readGraphs(EMPTY_WORD_SENTENCE);
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:Bill}=b . {word:tea}=t\nCombineMWT -node b -node t -word Billtea", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
+    assertTrue(result.second());
+    assertEquals("Billtea", result.first().get(SemgrexGraphName.ENHANCED).getNodeByIndex(6).get(CoreAnnotations.MWTTokenTextAnnotation.class));
+    assertNotNull(result.first().get(SemgrexGraphName.ENHANCED));
+  }
 }
