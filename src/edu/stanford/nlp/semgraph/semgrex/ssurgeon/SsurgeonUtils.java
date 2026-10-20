@@ -23,10 +23,12 @@ public class SsurgeonUtils {
   // possibly by building a cache from node/edge to name?
   /**
    * Replaces word in the graph with a new IndexedWord at newIndex.
-   * The new node shares word's backing CoreLabel, so word's index changes as well.
+   * The new node shares word's backing CoreLabel, so word's index changes as well,
+   * and keeps word's copy count.
    * The edges to and from word are replaced with equivalent edges to and from the
    * new node, the new node replaces word as a root if word was a root, and any
-   * named nodes and edges in sm which referred to word or its edges are updated.
+   * named nodes and edges in sm which referred to word or its edges are updated
+   * to refer to the new node and to the edges now in the graph.
    * Nothing checks whether newIndex is already in use.
    *
    * @param sg the graph to edit
@@ -40,7 +42,9 @@ public class SsurgeonUtils {
     boolean isRoot = sg.isRoot(word);
     sg.removeVertex(word);
 
+    // the copy count is kept on the IndexedWord rather than the CoreLabel
     IndexedWord newWord = new IndexedWord(word.backingLabel());
+    newWord.setCopyCount(word.copyCount());
     newWord.setIndex(newIndex);
 
     // could be more expensive than necessary if we move multiple roots,
@@ -58,28 +62,26 @@ public class SsurgeonUtils {
       }
     }
 
+    // the graph holds a copy of an edge given to addEdge, so the edges
+    // are made by addEdge, and the names go to the edges it returns
     for (SemanticGraphEdge oldEdge : outgoing) {
-      SemanticGraphEdge newEdge = new SemanticGraphEdge(newWord, oldEdge.getTarget(), oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
+      SemanticGraphEdge newEdge = sg.addEdge(newWord, oldEdge.getTarget(), oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
 
       for (String name : sm.getEdgeNames()) {
         if (sm.getEdge(name) == oldEdge) {
           sm.putNamedEdge(name, newEdge);
         }
       }
-
-      sg.addEdge(newEdge);
     }
 
     for (SemanticGraphEdge oldEdge : incoming) {
-      SemanticGraphEdge newEdge = new SemanticGraphEdge(oldEdge.getSource(), newWord, oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
+      SemanticGraphEdge newEdge = sg.addEdge(oldEdge.getSource(), newWord, oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
 
       for (String name : sm.getEdgeNames()) {
         if (sm.getEdge(name) == oldEdge) {
           sm.putNamedEdge(name, newEdge);
         }
       }
-
-      sg.addEdge(newEdge);
     }
   }
 
