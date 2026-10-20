@@ -547,4 +547,68 @@ public class SsurgeonPatternTest {
     assertFalse(result.second());
     assertEquals(2, result.first().getDefault().getFirstRoot().index());
   }
+
+  /** "John Bauer works", with the same edges in both graphs */
+  private static final String NAME_SENTENCE = String.join("\n",
+    "# text = John Bauer works",
+    "1\tJohn\tJohn\tPROPN\t_\t_\t3\tnsubj\t3:nsubj\t_",
+    "2\tBauer\tBauer\tPROPN\t_\t_\t1\tflat\t1:flat\t_",
+    "3\tworks\twork\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "",
+    "");
+
+  private static final String NAME_PHRASE = "{word:John}=n1 . {word:Bauer}=n2\nsetPhraseHead -node n1 -node n2 -headIndex 1 -reln flat";
+
+  @Test
+  public void setPhraseHeadOfEnhanced() throws IOException {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText(NAME_PHRASE + " -graph enhanced", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(readGraphs(NAME_SENTENCE));
+    assertTrue(result.second());
+    SemanticGraph enhanced = result.first().get(SemgrexGraphName.ENHANCED);
+    assertEquals(Collections.singletonList("nsubj"), relations(enhanced, 3, 2));
+    assertEquals(Collections.singletonList("flat"), relations(enhanced, 2, 1));
+    assertEquals(Collections.emptyList(), relations(enhanced, 3, 1));
+    SemanticGraph basic = result.first().getDefault();
+    assertEquals(Collections.singletonList("nsubj"), relations(basic, 3, 1));
+    assertEquals(Collections.singletonList("flat"), relations(basic, 1, 2));
+  }
+
+  @Test
+  public void setPhraseHeadOfBasicByDefault() throws IOException {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText(NAME_PHRASE, "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(readGraphs(NAME_SENTENCE));
+    assertTrue(result.second());
+    assertEquals(Collections.singletonList("nsubj"), relations(result.first().getDefault(), 3, 2));
+    assertEquals(Collections.singletonList("nsubj"), relations(result.first().get(SemgrexGraphName.ENHANCED), 3, 1));
+  }
+
+  /** "John Bauer came and saw", where the enhanced graph makes John the subject of both verbs */
+  private static final String TWO_HEADS_SENTENCE = String.join("\n",
+    "# text = John Bauer came and saw",
+    "1\tJohn\tJohn\tPROPN\t_\t_\t3\tnsubj\t3:nsubj|5:nsubj\t_",
+    "2\tBauer\tBauer\tPROPN\t_\t_\t1\tflat\t1:flat\t_",
+    "3\tcame\tcome\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "4\tand\tand\tCCONJ\t_\t_\t5\tcc\t5:cc\t_",
+    "5\tsaw\tsee\tVERB\t_\t_\t3\tconj\t3:conj:and\t_",
+    "",
+    "");
+
+  /**
+   * A phrase with two heads outside of it is not rearranged.  In the
+   * enhanced graph, John Bauer has both came and saw as heads; in the basic
+   * graph it only has came, so there the head can move
+   */
+  @Test
+  public void setPhraseHeadTwoOutsideHeads() throws IOException {
+    SsurgeonPattern enhanced = Ssurgeon.readFromEditText(NAME_PHRASE + " -graph enhanced", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = enhanced.iterate(readGraphs(TWO_HEADS_SENTENCE));
+    assertFalse(result.second());
+    assertEquals(Collections.singletonList("flat"), relations(result.first().get(SemgrexGraphName.ENHANCED), 1, 2));
+
+    SsurgeonPattern basic = Ssurgeon.readFromEditText(NAME_PHRASE, "UniversalEnglish").get(0);
+    result = basic.iterate(readGraphs(TWO_HEADS_SENTENCE));
+    assertTrue(result.second());
+    assertEquals(Collections.singletonList("flat"), relations(result.first().getDefault(), 2, 1));
+    assertEquals(Collections.singletonList("nsubj"), relations(result.first().getDefault(), 3, 2));
+  }
 }
