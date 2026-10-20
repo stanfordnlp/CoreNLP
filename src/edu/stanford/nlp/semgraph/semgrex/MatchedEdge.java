@@ -16,7 +16,16 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
  * graph itself is kept so that a user of the match, such as a Ssurgeon
  * edit working on a copy of the graphs, can find the same graph in the
  * graphs it has.
- *
+ *<br>
+ * This is tracked here rather than as a property of the
+ * SemanticGraphEdge so as to allow edges to be agnostic about which
+ * graph they show up in.  Several places in the codebase expect the
+ * same edge to be in multiple graphs.
+ *<br>
+ * We pass around objects instead of multiple maps in the Matcher and
+ * Match objects to make it clear that the edge and graph are needed
+ * at the same time, not to mention to avoid any potential bugs from
+ * not properly passing both
  * @author John Bauer
  */
 public final class MatchedEdge implements Serializable {
