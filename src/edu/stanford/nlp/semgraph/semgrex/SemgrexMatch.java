@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.VariableStrings;
  */
 
 public class SemgrexMatch implements Serializable  {
-  private static final long serialVersionUID = 978254376856L;
+  private static final long serialVersionUID = 6203817459263L;
 
   /** The pattern which produced this match */
   final SemgrexPattern matchedPattern;
@@ -32,8 +32,8 @@ public class SemgrexMatch implements Serializable  {
   final Map<String, IndexedWord> namesToNodes;
   /** Copy of the matcher's named relations */
   final Map<String, String> namesToRelations;
-  /** Copy of the matcher's named edges */
-  final Map<String, SemanticGraphEdge> namesToEdges;
+  /** Copy of the matcher's named edges, with the graph each was found in */
+  final Map<String, MatchedEdge> namesToEdges;
   /** Copy of the matcher's variable group strings */
   final VariableStrings variableStrings;
 
@@ -134,7 +134,19 @@ public class SemgrexMatch implements Serializable  {
    * @return The named edge, or null if there is none
    */
   public SemanticGraphEdge getEdge(String name) {
-    return namesToEdges.get(name);
+    MatchedEdge matched = namesToEdges.get(name);
+    return matched == null ? null : matched.edge;
+  }
+
+  /**
+   * Returns the graph the edge with the given name was found in.
+   *
+   * @param name The edge name
+   * @return The graph the named edge was found in, or null if there is no edge with that name
+   */
+  public SemgrexGraphName getEdgeGraph(String name) {
+    MatchedEdge matched = namesToEdges.get(name);
+    return matched == null ? null : matched.graph;
   }
 
   /**
@@ -165,7 +177,7 @@ public class SemgrexMatch implements Serializable  {
     for (Map.Entry<String, IndexedWord> entry : namesToNodes.entrySet()) {
       builder.append(entry.getKey() + " matched at " + entry.getValue() + "\n");
     }
-    for (Map.Entry<String, SemanticGraphEdge> entry : namesToEdges.entrySet()) {
+    for (Map.Entry<String, MatchedEdge> entry : namesToEdges.entrySet()) {
       builder.append(entry.getKey() + " matched at " + entry.getValue() + "\n");
     }
     return builder.toString();

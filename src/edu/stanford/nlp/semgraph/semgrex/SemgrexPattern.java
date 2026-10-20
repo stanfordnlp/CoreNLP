@@ -453,7 +453,7 @@ public abstract class SemgrexPattern implements Serializable  {
   // These get implemented in semgrex.CoordinationMatcher and NodeMatcher
   abstract SemgrexMatcher matcher(SemgrexGraphs graphs, SemgrexGraphName currentGraph,
                                   IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
-                                  Map<String, SemanticGraphEdge> namesToEdges,
+                                  Map<String, MatchedEdge> namesToEdges,
                                   VariableStrings variableStrings, boolean ignoreCase);
 
   /**

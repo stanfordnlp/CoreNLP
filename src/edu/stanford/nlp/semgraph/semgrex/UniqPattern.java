@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.VariableStrings;
@@ -112,7 +111,7 @@ public class UniqPattern extends SemgrexPattern  {
                                 IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
-                                Map<String, SemanticGraphEdge> namesToEdges,
+                                Map<String, MatchedEdge> namesToEdges,
                                 VariableStrings variableStrings,
                                 boolean ignoreCase) {
     return child.matcher(graphs, currentGraph, node, namesToNodes, namesToRelations, namesToEdges, variableStrings, ignoreCase);

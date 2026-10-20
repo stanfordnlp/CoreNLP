@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.VariableStrings;
 
 /**
@@ -133,7 +132,7 @@ class HeadedPattern extends SemgrexPattern {
   public SemgrexMatcher matcher(SemgrexGraphs graphs, SemgrexGraphName currentGraph,
                                 IndexedWord node, Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
-                                Map<String, SemanticGraphEdge> namesToEdges,
+                                Map<String, MatchedEdge> namesToEdges,
                                 VariableStrings variableStrings, boolean ignoreCase) {
     return new HeadedMatcher(this, graphs, currentGraph, node, namesToNodes, namesToRelations,
                              namesToEdges, variableStrings, ignoreCase);
@@ -151,7 +150,7 @@ class HeadedPattern extends SemgrexPattern {
 
     public HeadedMatcher(HeadedPattern n, SemgrexGraphs graphs, SemgrexGraphName currentGraph,
                          IndexedWord node, Map<String, IndexedWord> namesToNodes,
-                         Map<String, String> namesToRelations, Map<String, SemanticGraphEdge> namesToEdges,
+                         Map<String, String> namesToRelations, Map<String, MatchedEdge> namesToEdges,
                          VariableStrings variableStrings, boolean ignoreCase) {
       super(graphs, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       this.myNode = n;
