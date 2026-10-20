@@ -2,6 +2,7 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1989,6 +1990,29 @@ public class SsurgeonTest {
     attributes.put("graph", "enhanced");
     edit = Ssurgeon.parseEditLine("addEdge -gov a -dep b -reln obj", attributes, Language.UniversalEnglish, knownEdges);
     assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+  }
+
+  /** setRoots takes its node names without flags, but -graph can be among them */
+  @Test
+  public void parseSetRootsGraph() {
+    Set<String> knownEdges = new HashSet<>();
+    SsurgeonEdit edit = Ssurgeon.parseEditLine("setRoots a -graph enhanced b", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+    assertEquals(Arrays.asList("a", "b"), ((SetRoots) edit).newRootNames);
+    SsurgeonEdit reparsed = Ssurgeon.parseEditLine(edit.toEditString(), new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(edit.toEditString(), reparsed.toEditString());
+
+    edit = Ssurgeon.parseEditLine("setRoots a b", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.emptySet(), edit.requiredGraphs());
+    assertEquals(Arrays.asList("a", "b"), ((SetRoots) edit).newRootNames);
+
+    Map<String, String> attributes = new HashMap<>();
+    attributes.put("graph", "enhanced");
+    edit = Ssurgeon.parseEditLine("setRoots a", attributes, Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+
+    assertThrows(SsurgeonParseException.class, () ->
+                 Ssurgeon.parseEditLine("setRoots a -graph", new HashMap<>(), Language.UniversalEnglish, knownEdges));
   }
 
   @Test

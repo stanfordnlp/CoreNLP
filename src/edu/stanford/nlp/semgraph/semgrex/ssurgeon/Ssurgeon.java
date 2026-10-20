@@ -89,7 +89,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code combineMWT -node node -word word}
  * <li> {@code splitWord -node node -headIndex idx -reln depType -regex w1 -regex w2 ...}
  * <li> {@code setPhraseHead -node n1 -node n2 ... -headIndex idx -reln depType -weight w}
- * <li> {@code setRoots n1 (n2 n3 ...)}
+ * <li> {@code setRoots n1 (n2 n3 ...) -graph enhanced}
  * <li> {@code mergeNodes -node n1 -node n2 ...}
  * <li> {@code killAllIncomingEdges -node node -graph enhanced}
  * <li> {@code deleteLeaf -node node}
@@ -181,6 +181,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *</p><p>
  * {@code setRoots} sets the roots of the sentence to a new root. <br>
  * {@code n1, n2, ...} are the names of the nodes from the Semgrex to use as the root(s). <br>
+ * {@code -graph} is the graph whose roots to set, {@code basic} or {@code enhanced}.  The default is {@code basic}. <br>
  * This is best done in conjunction with other operations which actually manipulate the structure
  * of the graph, or the new root will weirdly have dependents and the graph will be incorrect.
  *</p><p>
@@ -735,9 +736,22 @@ public class Ssurgeon  {
       final String command = tuples1[0];
 
       if (command.equalsIgnoreCase(SetRoots.LABEL)) {
+        // the root names are not flags, but -graph can be given among them
         String[] names = tuples1[1].split("\\s+");
-        List<String> newRoots = Arrays.asList(names);
-        return new SetRoots(newRoots);
+        List<String> newRoots = new ArrayList<>();
+        SemgrexGraphName graph = attributeArgs.containsKey("graph") ? parseGraphName(attributeArgs.get("graph")) : SemgrexGraphName.BASIC;
+        for (int i = 0; i < names.length; ++i) {
+          if (names[i].equals(GRAPH_ARG)) {
+            if (i + 1 == names.length) {
+              throw new SsurgeonParseException(GRAPH_ARG + " needs the name of a graph");
+            }
+            graph = parseGraphName(names[i + 1]);
+            ++i;
+          } else {
+            newRoots.add(names[i]);
+          }
+        }
+        return new SetRoots(newRoots, graph);
       } else if (command.equalsIgnoreCase(KillNonRootedNodes.LABEL)) {
         return new KillNonRootedNodes();
       }

@@ -530,4 +530,21 @@ public class SsurgeonPatternTest {
     assertEquals(7, result.first().getDefault().size());
     assertNull(result.first().get(SemgrexGraphName.ENHANCED));
   }
+
+  /** The enhanced graph's root, written as 0:root in DEPS, can be set apart from the basic graph's */
+  @Test
+  public void setRootsOfEnhanced() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence(WANT_I_GO + "\nSetRoots g -graph enhanced");
+    assertEquals(Collections.singleton(graphs.getDefault().getNodeByIndex(4)), graphs.get(SemgrexGraphName.ENHANCED).getRoots());
+    assertEquals(Collections.singleton(graphs.getDefault().getNodeByIndex(2)), graphs.getDefault().getRoots());
+  }
+
+  /** The empty word cannot be a root of the basic graph, which does not have it */
+  @Test
+  public void setRootsToEmptyWord() throws IOException {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:Bill}=b <nsubj@enhanced {}=x\nSetRoots x", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(readGraphs(EMPTY_WORD_SENTENCE));
+    assertFalse(result.second());
+    assertEquals(2, result.first().getDefault().getFirstRoot().index());
+  }
 }
