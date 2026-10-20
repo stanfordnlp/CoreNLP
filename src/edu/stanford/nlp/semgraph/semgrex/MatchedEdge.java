@@ -39,6 +39,21 @@ public final class MatchedEdge implements Serializable {
   }
 
   /**
+   * Whether this is an edge equal to the given one, found in the given graph.
+   *<br>
+   * This is the same test as {@link #equals}, without needing a
+   * MatchedEdge to compare against, which saves making one for each
+   * candidate edge a match tries.
+   *
+   * @param edge the edge to compare to
+   * @param graph the graph that edge was found in
+   * @return true if the edges are equal and the graphs are the same
+   */
+  public boolean isSameEdge(SemanticGraphEdge edge, SemgrexGraphName graph) {
+    return this.graph == graph && this.edge.equals(edge);
+  }
+
+  /**
    * Two matched edges are equal if they are equal edges found in the same graph.
    */
   @Override
@@ -50,7 +65,7 @@ public final class MatchedEdge implements Serializable {
       return false;
     }
     MatchedEdge other = (MatchedEdge) o;
-    return graph == other.graph && edge.equals(other.edge);
+    return isSameEdge(other.edge, other.graph);
   }
 
   @Override
