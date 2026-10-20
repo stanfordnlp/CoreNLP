@@ -2,10 +2,10 @@ package edu.stanford.nlp.semgraph.semgrex;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
@@ -15,7 +15,6 @@ import edu.stanford.nlp.trees.ud.CoNLLUDocumentWriter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.VariableStrings;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -868,6 +867,51 @@ public abstract class SemgrexPattern implements Serializable  {
   private static final Set<String> SINGLE_VALUED =
     Collections.unmodifiableSet(new HashSet<>(Arrays.asList(PATTERN, MODE, EXTRAS, OUTPUT_FORMAT_OPTION)));
 
+  /** Sentence order for words: by index, then empty index or copy count, as in 8, 8.1, 8.2, 9 */
+  private static final Comparator<IndexedWord> SENTENCE_ORDER =
+    Comparator.comparingInt(IndexedWord::index)
+              .thenComparingInt(IndexedWord::getEmptyIndex)
+              .thenComparingInt(IndexedWord::copyCount);
+
+  /**
+   * The ConlluEditor comments which highlight the matches of a sentence.
+   *<br>
+   * {@code # highlight tokens} lists the word each match starts at and
+   * its named nodes.  {@code # highlight deprels} lists the dependent of
+   * each named edge, as ConlluEditor marks a deprel by the word it points
+   * to.  ConlluEditor shows that mark on every arc into the word, the
+   * basic one and any in the enhanced graph, and accepts the ids of empty
+   * words such as 8.1, which only have enhanced arcs.
+   *<br>
+   * ConlluEditor keeps only the last of each line in a sentence, so the
+   * matches of a sentence share one of each.
+   *
+   * @param matches the matches of one sentence
+   * @return the comments, each only if it has something to highlight
+   */
+  static List<String> highlightComments(List<SemgrexMatch> matches) {
+    Set<IndexedWord> nodes = new TreeSet<>(SENTENCE_ORDER);
+    Set<IndexedWord> deprels = new TreeSet<>(SENTENCE_ORDER);
+    for (SemgrexMatch match : matches) {
+      nodes.add(match.getMatch());
+      for (String name : match.getNodeNames()) {
+        nodes.add(match.getNode(name));
+      }
+      for (String name : match.getEdgeNames()) {
+        deprels.add(match.getEdge(name).getTarget());
+      }
+    }
+
+    List<String> comments = new ArrayList<>();
+    if (!nodes.isEmpty()) {
+      comments.add("# highlight tokens = " + nodes.stream().map(IndexedWord::toCopyOrEmptyIndex).collect(Collectors.joining(" ")));
+    }
+    if (!deprels.isEmpty()) {
+      comments.add("# highlight deprels = " + deprels.stream().map(IndexedWord::toCopyOrEmptyIndex).collect(Collectors.joining(" ")));
+    }
+    return comments;
+  }
+
   /** Logs the command line arguments {@link #main} accepts. */
   public static void help() {
     log.info("Possible arguments for SemgrexPattern:");
@@ -988,17 +1032,9 @@ public abstract class SemgrexPattern implements Serializable  {
         if (comments.size() == 0) {
           comments.addAll(graph.getComments());
         }
-        Set<Integer> highlightNodes = new TreeSet<>();
-        Set<Integer> highlightEdges = new TreeSet<>();
         for (SemgrexMatch matcher : sentenceMatches.second()) {
           StringBuilder comment = new StringBuilder();
           comment.append("# semgrex pattern = |" + semgrexName + "| matched at " + matcher.getMatch().toString(CoreLabel.OutputFormat.VALUE_INDEX));
-
-          // TODO: figure out how conllueditor handles empty nodes
-          IndexedWord match = matcher.getMatch();
-          if (match.getEmptyIndex() == 0 && match.copyCount() == 0) {
-            highlightNodes.add(match.index());
-          }
 
           List<String> nodeNames = new ArrayList<>();
           nodeNames.addAll(matcher.getNodeNames());
@@ -1009,32 +1045,10 @@ public abstract class SemgrexPattern implements Serializable  {
             comment.append(name);
             comment.append(":");
             comment.append(node.toString(CoreLabel.OutputFormat.VALUE_INDEX));
-
-            // TODO: figure out how conllueditor handles empty nodes
-            if (node.getEmptyIndex() == 0 && node.copyCount() == 0) {
-              highlightNodes.add(node.index());
-            }
-          }
-          for (String name : matcher.getEdgeNames()) {
-            SemanticGraphEdge edge = matcher.getEdge(name);
-            IndexedWord target = edge.getTarget();
-            if (target.getEmptyIndex() == 0 && target.copyCount() == 0) {
-              // TODO: figure out how conllueditor handles empty nodes
-              highlightEdges.add(target.index());
-            }
           }
           comments.add(comment.toString());
-          if (highlightNodes.size() > 0) {
-            String highlight = StringUtils.join(highlightNodes, " ");
-            highlight = "# highlight tokens = " + highlight;
-            comments.add(highlight);
-          }
-          if (highlightEdges.size() > 0) {
-            String highlight = StringUtils.join(highlightEdges, " ");
-            highlight = "# highlight deprels = " + highlight;
-            comments.add(highlight);
-          }
         }
+        comments.addAll(highlightComments(sentenceMatches.second()));
         String output = writer.printSemanticGraph(graph, enhanced, false, comments);
         System.out.print(output);
       }
