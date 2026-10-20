@@ -2,6 +2,10 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,13 +13,19 @@ import java.util.List;
 import org.junit.Test;
 
 import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.util.CoreMap;
 
 /** Tests moving nodes with {@link SsurgeonUtils} */
 public class SsurgeonUtilsTest {
@@ -96,5 +106,145 @@ public class SsurgeonUtilsTest {
     assertEquals(1, moved.copyCount());
     assertEquals(Collections.singletonList("dep"), relations(graph, ate, moved));
     assertEquals(Collections.singletonList("obj"), relations(graph, ate, cake));
+  }
+
+  // ------------------------------------------------------------------
+  // moving nodes in every graph of a sentence
+  // ------------------------------------------------------------------
+
+  /** "Sue likes coffee and Bill tea", where the enhanced graph has an empty word 5.1 for the elided "likes" */
+  private static final String SENTENCE = String.join("\n",
+    "# text = Sue likes coffee and Bill tea",
+    "1\tSue\tSue\tPROPN\t_\t_\t2\tnsubj\t2:nsubj\t_",
+    "2\tlikes\tlike\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "3\tcoffee\tcoffee\tNOUN\t_\t_\t2\tobj\t2:obj\t_",
+    "4\tand\tand\tCCONJ\t_\t_\t5\tcc\t5.1:cc\t_",
+    "5\tBill\tBill\tPROPN\t_\t_\t2\tconj\t5.1:nsubj\t_",
+    "5.1\tlikes\tlike\tVERB\t_\t_\t_\t_\t2:conj:and\t_",
+    "6\ttea\ttea\tNOUN\t_\t_\t5\torphan\t5.1:obj\t_",
+    "",
+    "");
+
+  private static SemgrexGraphs readGraphs() throws IOException {
+    File file = File.createTempFile("ssurgeonutils", ".conllu");
+    file.deleteOnExit();
+    Files.write(file.toPath(), SENTENCE.getBytes(StandardCharsets.UTF_8));
+    CoreMap sentence = new CoNLLUReader().readCoNLLUFile(file.getPath()).get(0).get(CoreAnnotations.SentencesAnnotation.class).get(0);
+    return SemgrexGraphs.of(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class),
+                            sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
+  }
+
+  /** The word with the given index and empty index in a graph */
+  private static IndexedWord word(SemanticGraph graph, int index, int emptyIndex) {
+    for (IndexedWord word : graph.vertexSet()) {
+      if (word.index() == index && word.getEmptyIndex() == emptyIndex) {
+        return word;
+      }
+    }
+    return null;
+  }
+
+  @Test
+  public void moveNodesInBothGraphs() throws IOException {
+    SemgrexGraphs graphs = readGraphs();
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:tea}=t <orphan=bo {word:Bill}=b <obj@enhanced=eo {}=x").matcher(graphs);
+    assertTrue(matcher.find());
+
+    // make room for a word at 4, as AddDep would
+    SsurgeonUtils.moveNodes(graphs, matcher, x -> x >= 4, x -> x + 1);
+
+    assertEquals("and", basic.getNodeByIndex(5).word());
+    assertEquals("Bill", basic.getNodeByIndex(6).word());
+    assertEquals("tea", basic.getNodeByIndex(7).word());
+    assertNull(basic.getNodeByIndexSafe(4));
+    // the empty word follows Bill, so 5.1 becomes 6.1
+    IndexedWord empty = word(enhanced, 6, 1);
+    assertNotNull(empty);
+    assertNull(word(enhanced, 5, 1));
+    // the six words and the empty word
+    assertEquals(7, enhanced.size());
+
+    // one IndexedWord per word, shared by both graphs
+    SsurgeonPattern.checkSharedWords(graphs);
+    IndexedWord bill = basic.getNodeByIndex(6);
+    IndexedWord tea = basic.getNodeByIndex(7);
+    assertTrue(enhanced.containsVertex(tea));
+
+    // the edges moved with their words, in each graph
+    assertEquals(Collections.singletonList("orphan"), relations(basic, bill, tea));
+    assertEquals(Collections.singletonList("obj"), relations(enhanced, empty, tea));
+    assertEquals(Collections.singletonList("nsubj"), relations(enhanced, empty, bill));
+    assertEquals(Collections.singletonList("conj:and"), relations(enhanced, basic.getNodeByIndex(2), empty));
+    assertEquals(Collections.emptyList(), relations(basic, empty, tea));
+
+    // named nodes and edges refer to the moved words and edges, each edge in its own graph
+    assertSame(tea, matcher.getNode("t"));
+    assertSame(bill, matcher.getNode("b"));
+    assertSame(empty, matcher.getNode("x"));
+    assertEquals(SemgrexGraphName.BASIC, matcher.getEdgeGraph("bo"));
+    assertTrue(inGraph(basic, matcher.getEdge("bo")));
+    assertEquals(SemgrexGraphName.ENHANCED, matcher.getEdgeGraph("eo"));
+    assertTrue(inGraph(enhanced, matcher.getEdge("eo")));
+    assertSame(empty, matcher.getEdge("eo").getGovernor());
+
+    // the root did not move
+    assertEquals(Collections.singleton(basic.getNodeByIndex(2)), basic.getRoots());
+    assertEquals(Collections.singleton(basic.getNodeByIndex(2)), enhanced.getRoots());
+  }
+
+  /** Moving the root moves it in both graphs, to the same new IndexedWord */
+  @Test
+  public void moveRoot() throws IOException {
+    SemgrexGraphs graphs = readGraphs();
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:likes}=v >nsubj {word:Sue}").matcher(graphs);
+    assertTrue(matcher.find());
+
+    IndexedWord moved = SsurgeonUtils.moveNode(graphs, matcher, matcher.getNode("v"), 10);
+    assertEquals(10, moved.index());
+    assertEquals(Collections.singleton(moved), basic.getRoots());
+    assertSame(moved, basic.getFirstRoot());
+    assertSame(moved, enhanced.getFirstRoot());
+    assertSame(moved, matcher.getNode("v"));
+    SsurgeonPattern.checkSharedWords(graphs);
+    assertEquals(Collections.singletonList("nsubj"), relations(basic, moved, basic.getNodeByIndex(1)));
+  }
+
+  /**
+   * A copy which shares its CoreLabel with the word it copies has the same
+   * index, so moveNodes moves the two together
+   */
+  @Test
+  public void copySharingLabelMovesTogether() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate-1 obj> cake-2]");
+    IndexedWord ate = graph.getNodeByIndex(1);
+    IndexedWord cake = graph.getNodeByIndex(2);
+    IndexedWord copy = new IndexedWord(cake.backingLabel());
+    copy.setCopyCount(1);
+    graph.addEdge(ate, copy, GrammaticalRelation.valueOf(Language.UniversalEnglish, "dep"), 1.0, false);
+    assertEquals(3, graph.size());
+
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:ate}").matcher(graph);
+    assertTrue(matcher.find());
+    SsurgeonUtils.moveNodes(graph, matcher, x -> x >= 2, x -> x + 3, false);
+
+    assertEquals(3, graph.size());
+    IndexedWord newCake = null;
+    IndexedWord newCopy = null;
+    for (IndexedWord word : graph.vertexSet()) {
+      if (word.copyCount() == 1) {
+        newCopy = word;
+      } else if (word.word().equals("cake")) {
+        newCake = word;
+      }
+      assertTrue(graph.containsVertex(word));
+    }
+    assertEquals(5, newCake.index());
+    assertEquals(5, newCopy.index());
+    assertEquals(Collections.singletonList("obj"), relations(graph, ate, newCake));
+    assertEquals(Collections.singletonList("dep"), relations(graph, ate, newCopy));
   }
 }
