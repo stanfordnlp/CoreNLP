@@ -1984,6 +1984,9 @@ public class SsurgeonTest {
     assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
     edit = Ssurgeon.parseEditLine("killAllIncomingEdges -node a -graph enhanced", new HashMap<>(), Language.UniversalEnglish, knownEdges);
     assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+    edit = Ssurgeon.parseEditLine("setPhraseHead -node a -node b -headIndex 0 -reln flat -graph enhanced", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+    assertEquals(edit.toEditString(), Ssurgeon.parseEditLine(edit.toEditString(), new HashMap<>(), Language.UniversalEnglish, knownEdges).toEditString());
 
     // an XML attribute is the same as the flag
     Map<String, String> attributes = new HashMap<>();

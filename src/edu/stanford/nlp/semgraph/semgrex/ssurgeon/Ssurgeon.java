@@ -88,7 +88,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code lemmatize -node node}
  * <li> {@code combineMWT -node node -word word}
  * <li> {@code splitWord -node node -headIndex idx -reln depType -regex w1 -regex w2 ...}
- * <li> {@code setPhraseHead -node n1 -node n2 ... -headIndex idx -reln depType -weight w}
+ * <li> {@code setPhraseHead -node n1 -node n2 ... -headIndex idx -reln depType -weight w -graph enhanced}
  * <li> {@code setRoots n1 (n2 n3 ...) -graph enhanced}
  * <li> {@code mergeNodes -node n1 -node n2 ...}
  * <li> {@code killAllIncomingEdges -node node -graph enhanced}
@@ -161,6 +161,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -headIndex} is the index (counting from 0) of the node to make the head. <br>
  * {@code -reln} is the name of the dependency type to use to connect the other words in the phrase to the new head <br>
  * {@code -weight} is the weight to give the new edges (probably not particularly important) <br>
+ * {@code -graph} is the graph whose edges to rearrange, {@code basic} or {@code enhanced}.  The default is {@code basic}. <br>
  * The words must already be in a phrase for this to work.  This is
  * detected by making sure each node has its parent within the phrase,
  * except for the head word, which can either be the root or have the
@@ -636,7 +637,8 @@ public class Ssurgeon  {
   private static final Set<String> GRAPH_EDITS =
     new HashSet<>(Arrays.asList(AddEdge.LABEL.toLowerCase(Locale.ROOT),
                                 RemoveEdge.LABEL.toLowerCase(Locale.ROOT),
-                                KillAllIncomingEdges.LABEL.toLowerCase(Locale.ROOT)));
+                                KillAllIncomingEdges.LABEL.toLowerCase(Locale.ROOT),
+                                SetPhraseHead.LABEL.toLowerCase(Locale.ROOT)));
 
   private static SsurgeonArgs parseArgsBox(String args, Map<String, String> additionalArgs) {
     SsurgeonArgs argsBox = new SsurgeonArgs();
@@ -840,7 +842,7 @@ public class Ssurgeon  {
           throw new SsurgeonParseException(command + " requires a -reln argument");
         }
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
-        return new SetPhraseHead(argsBox.nodes, argsBox.headIndex, reln, argsBox.weight);
+        return new SetPhraseHead(argsBox.nodes, argsBox.headIndex, reln, argsBox.weight, graph);
       } else if (command.equalsIgnoreCase(SplitWord.LABEL)) {
         if (argsBox.reln == null) {
           throw new SsurgeonParseException(command + " requires a -reln argument");

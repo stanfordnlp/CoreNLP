@@ -4,6 +4,8 @@ import java.util.*;
 import java.io.*;
 
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -18,6 +20,10 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  * If the head is changed, the edge out of the phrase (if it is not root) is changed to come from the new head <br>
  * Edges in to the phrase are also changed to point to the new head.
  * The purpose of that change is so for a noun phrase, for example, modifiers of that noun phrase such as nmod or nmod:desc now modify the new head
+ * <br>
+ * Only edges change, so this works on one graph of the sentence, the basic graph unless told otherwise.
+ * A phrase with more than one edge coming in from outside it is left alone, which in an enhanced graph
+ * includes a phrase whose head has a second head of its own.
  */
 public class SetPhraseHead extends SsurgeonEdit {
   /** The command name of this edit in an Ssurgeon script */
@@ -27,6 +33,8 @@ public class SetPhraseHead extends SsurgeonEdit {
   final int headIndex;
   final GrammaticalRelation relation;
   final double weight;
+  /** The graph whose edges are rearranged */
+  final SemgrexGraphName graph;
 
   /**
    * Creates an edit which makes one node of a phrase its head.
@@ -38,6 +46,20 @@ public class SetPhraseHead extends SsurgeonEdit {
    * @throws SsurgeonParseException if headIndex is null or out of range, or relation is null
    */
   public SetPhraseHead(List<String> nodes, Integer headIndex, GrammaticalRelation relation, double weight) {
+    this(nodes, headIndex, relation, weight, SemgrexGraphName.BASIC);
+  }
+
+  /**
+   * Creates an edit which makes one node of a phrase its head in the given graph.
+   *
+   * @param nodes the names of the matched nodes in the phrase; the list is copied
+   * @param headIndex the index in nodes, counting from 0, of the node to make the head
+   * @param relation the relation connecting the new head to the other words of the phrase
+   * @param weight the weight of the new edges
+   * @param graph the graph whose edges are rearranged
+   * @throws SsurgeonParseException if headIndex is null or out of range, or relation is null
+   */
+  public SetPhraseHead(List<String> nodes, Integer headIndex, GrammaticalRelation relation, double weight, SemgrexGraphName graph) {
     if (headIndex == null) {
       throw new SsurgeonParseException("SetPhraseHead expected a -headIndex, 0-indexed for the node to use as the new head");
     }
@@ -53,6 +75,7 @@ public class SetPhraseHead extends SsurgeonEdit {
     this.headIndex = headIndex;
     this.relation = relation;
     this.weight = weight;
+    this.graph = graph;
   }
 
   @Override
@@ -68,18 +91,46 @@ public class SetPhraseHead extends SsurgeonEdit {
     if (weight != 0.0) {
       buf.write("\t-weight " + weight);
     }
+    if (graph != SemgrexGraphName.BASIC) {
+      buf.write("\t");
+      buf.write(Ssurgeon.GRAPH_ARG); buf.write(" ");
+      buf.write(graph.lowerName);
+    }
     return buf.toString();
   }
 
+  /**
+   * The graph whose edges are rearranged, if it is not the basic graph.
+   */
+  @Override
+  public Set<SemgrexGraphName> requiredGraphs() {
+    return graph == SemgrexGraphName.BASIC ? Collections.emptySet() : Collections.singleton(graph);
+  }
 
+  /**
+   * Sets the head of the phrase, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
+   */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
+
+  /**
+   * Sets the head of the phrase in this edit's graph.  Every word of the
+   * phrase must already be in that graph, or the graph is left alone.
+   */
+  @Override
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+    SemanticGraph sg = graphs.get(graph);
+    if (sg == null) {
+      return false;
+    }
     List<IndexedWord> matchedNodes = new ArrayList<>();
     IndexedWord newHead = null;
     int idx = 0;
     for (String word : phrase) {
       IndexedWord node = sm.getNode(word);
-      if (node == null) {
+      if (node == null || !sg.containsVertex(node)) {
         return false;
       }
       matchedNodes.add(node);
