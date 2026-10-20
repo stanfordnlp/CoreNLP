@@ -108,6 +108,11 @@ public class SemgrexEdgeGraphTest {
     SemanticGraphEdge edge = both().getDefault().edgeListSorted().get(0);
     assertEquals(new MatchedEdge(edge, SemgrexGraphName.BASIC), new MatchedEdge(edge, SemgrexGraphName.BASIC));
     assertNotEquals(new MatchedEdge(edge, SemgrexGraphName.BASIC), new MatchedEdge(edge, SemgrexGraphName.ENHANCED));
+    assertTrue(new MatchedEdge(edge, SemgrexGraphName.BASIC).isSameEdge(edge, SemgrexGraphName.BASIC));
+    assertFalse(new MatchedEdge(edge, SemgrexGraphName.BASIC).isSameEdge(edge, SemgrexGraphName.ENHANCED));
+    SemanticGraphEdge other = both().getDefault().edgeListSorted().get(0);
+    assertNotSame(edge, other);
+    assertTrue(new MatchedEdge(edge, SemgrexGraphName.BASIC).isSameEdge(other, SemgrexGraphName.BASIC));
     assertEquals(edge.toString(), new MatchedEdge(edge, SemgrexGraphName.BASIC).toString());
     assertEquals(edge + "@enhanced", new MatchedEdge(edge, SemgrexGraphName.ENHANCED).toString());
   }

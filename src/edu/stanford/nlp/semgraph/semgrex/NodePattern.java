@@ -685,7 +685,7 @@ public class NodePattern extends SemgrexPattern  {
           // an edge named twice must be the same edge both times, in the same graph
           MatchedEdge foundEdge = namesToEdges.get(myNode.reln.getEdgeName());
           nextMatchEdge = ((GraphRelation.SearchNodeIterator) nodeMatchCandidateIterator).getEdge();
-          if ((foundEdge != null) && (!new MatchedEdge(nextMatchEdge, currentGraph).equals(foundEdge))) {
+          if ((foundEdge != null) && (!foundEdge.isSameEdge(nextMatchEdge, currentGraph))) {
             nextMatch = nodeMatchCandidateIterator.next();
             continue;
           }
