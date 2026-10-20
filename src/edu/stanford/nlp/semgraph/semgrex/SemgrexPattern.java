@@ -373,8 +373,10 @@ public abstract class SemgrexPattern implements Serializable  {
    * intends, so the whole pattern is checked against the sentence once,
    * when the search is set up, rather than a relation at a time as the
    * match happens to reach it.
+   *
+   * @return the graphs the relations of this pattern name
    */
-  Set<SemgrexGraphName> requiredGraphs() {
+  public Set<SemgrexGraphName> requiredGraphs() {
     Set<SemgrexGraphName> names = EnumSet.noneOf(SemgrexGraphName.class);
     collectRequiredGraphs(names);
     return names;
