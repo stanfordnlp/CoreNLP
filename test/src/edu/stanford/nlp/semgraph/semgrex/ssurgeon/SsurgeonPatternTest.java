@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -352,5 +355,65 @@ public class SsurgeonPatternTest {
     assertTrue(result.second());
     assertEquals("Billtea", result.first().get(SemgrexGraphName.ENHANCED).getNodeByIndex(6).get(CoreAnnotations.MWTTokenTextAnnotation.class));
     assertNotNull(result.first().get(SemgrexGraphName.ENHANCED));
+  }
+
+  /** The relations from gov to dep in one graph, sorted */
+  private static List<String> relations(SemanticGraph graph, int gov, int dep) {
+    List<String> relations = new ArrayList<>();
+    for (SemanticGraphEdge edge : graph.getAllEdges(graph.getNodeByIndex(gov), graph.getNodeByIndex(dep))) {
+      relations.add(edge.getRelation().toString());
+    }
+    Collections.sort(relations);
+    return relations;
+  }
+
+  /** Runs one edit block on the "I want to go" sentence, checking that it changed something */
+  private static SemgrexGraphs editEnhancedSentence(String block) throws IOException {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText(block, "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(readGraphs(ENHANCED_SENTENCE));
+    assertTrue(result.second());
+    assertNotNull(result.first().get(SemgrexGraphName.ENHANCED));
+    return result.first();
+  }
+
+  @Test
+  public void relabelEnhancedEdge() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence("{} >/nsubj:xsubj/@enhanced=e {}\nRelabelNamedEdge -edge e -reln nsubj");
+    assertEquals(Collections.singletonList("nsubj"), relations(graphs.get(SemgrexGraphName.ENHANCED), 4, 1));
+    assertEquals(Collections.singletonList("nsubj"), relations(graphs.getDefault(), 2, 1));
+    assertEquals(Collections.emptyList(), relations(graphs.getDefault(), 4, 1));
+  }
+
+  /** nsubj(want, I) is in both graphs; relabeling the basic one leaves the enhanced one alone */
+  @Test
+  public void relabelBasicEdgeLeavesEnhanced() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence("{word:want} >nsubj=e {word:I}\nRelabelNamedEdge -edge e -reln expl");
+    assertEquals(Collections.singletonList("expl"), relations(graphs.getDefault(), 2, 1));
+    assertEquals(Collections.singletonList("nsubj"), relations(graphs.get(SemgrexGraphName.ENHANCED), 2, 1));
+  }
+
+  /** An enhanced edge can be moved to a node matched in the basic graph */
+  @Test
+  public void reattachEnhancedEdge() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence("{word:want}=w >xcomp ({word:go} >/nsubj:xsubj/@enhanced=e {})\nReattachNamedEdge -edge e -gov w");
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertEquals(Arrays.asList("nsubj", "nsubj:xsubj"), relations(enhanced, 2, 1));
+    assertEquals(Collections.emptyList(), relations(enhanced, 4, 1));
+    assertEquals(Collections.singletonList("nsubj"), relations(graphs.getDefault(), 2, 1));
+  }
+
+  @Test
+  public void removeEnhancedEdge() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence("{} >/nsubj:xsubj/@enhanced=e {}\nRemoveNamedEdge -edge e");
+    assertEquals(Collections.emptyList(), relations(graphs.get(SemgrexGraphName.ENHANCED), 4, 1));
+    assertEquals(Collections.singletonList("nsubj"), relations(graphs.get(SemgrexGraphName.ENHANCED), 2, 1));
+    assertEquals(Collections.singletonList("nsubj"), relations(graphs.getDefault(), 2, 1));
+  }
+
+  @Test
+  public void removeBasicEdgeLeavesEnhanced() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence("{word:ok} <discourse=e {}\nRemoveNamedEdge -edge e");
+    assertEquals(Collections.emptyList(), relations(graphs.getDefault(), 2, 8));
+    assertEquals(Collections.singletonList("discourse"), relations(graphs.get(SemgrexGraphName.ENHANCED), 2, 8));
   }
 }

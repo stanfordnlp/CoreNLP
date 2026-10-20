@@ -3,6 +3,8 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 import java.io.StringWriter;
 
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -113,7 +115,8 @@ public class ReattachNamedEdge extends SsurgeonEdit {
     // whether we recreated a new edge with the new relation,
     // or found an existing edge with the relation we wanted,
     // update the named edge in the SemgrexMatcher so future
-    // iterations have the name connected to the edge
+    // iterations have the name connected to the edge.  the name
+    // stays bound in the graph it was found in, which is this one
     // TODO: if an existing edge was clobbered, perhaps we need to
     // update anything that named it
     if (edgeName != null) {
@@ -123,13 +126,27 @@ public class ReattachNamedEdge extends SsurgeonEdit {
   }
 
   /**
-   * "Reattach" the named edge by removing it and then recreating it with the new gov and/or dep
+   * Reattaches the named edge, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    SemanticGraphEdge edge = sm.getEdge(edgeName);
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
 
-    if (edge != null) {
+  /**
+   * "Reattach" the named edge by removing it and then recreating it with the new gov and/or dep
+   *<br>
+   * The edge is moved within the graph it was matched in.  The graphs
+   * share their words, so the new gov or dep can be a node matched in
+   * any of them.
+   */
+  @Override
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+    SemanticGraphEdge edge = sm.getEdge(edgeName);
+    SemgrexGraphName graphName = sm.getEdgeGraph(edgeName);
+    SemanticGraph sg = graphName == null ? null : graphs.get(graphName);
+
+    if (edge != null && sg != null) {
       final IndexedWord gov = (govNodeName != null) ? sm.getNode(govNodeName) : edge.getSource();
       final IndexedWord dep = (depNodeName != null) ? sm.getNode(depNodeName) : edge.getTarget();
       return reattachEdge(sg, sm, edge, edgeName, gov, dep);
