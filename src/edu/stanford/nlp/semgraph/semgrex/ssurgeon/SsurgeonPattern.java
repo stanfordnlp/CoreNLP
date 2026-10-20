@@ -298,14 +298,21 @@ public class SsurgeonPattern {
    * are left out of the graphs returned.  Matching then continues on the
    * basic graph alone, or stops if the pattern needs another graph.
    *
-   * @param graphs the graphs of one sentence, with no alignment; the basic graph is required
+   * @param graphs the graphs of one sentence, with no alignment; the basic
+   *   graph is required, and the graphs must share their words, as
+   *   {@link #checkSharedWords} describes
    * @return the edited copies of the graphs, and whether any edit changed them
-   * @throws IllegalArgumentException if the graphs have an alignment
-   * @throws IllegalStateException if the pattern names a graph the sentence has not got
+   * @throws IllegalArgumentException if the graphs have an alignment, or do not share their words
+   * @throws IllegalStateException if the pattern names a graph the sentence has not got,
+   *   or an edit leaves the graphs with different copies of a word
    */
   public Pair<SemgrexGraphs, Boolean> iterate(SemgrexGraphs graphs) {
     if (graphs.crossAlignment() != null) {
       throw new IllegalArgumentException("Ssurgeon cannot edit graphs joined by an alignment");
+    }
+    String unshared = unsharedWord(graphs);
+    if (unshared != null) {
+      throw new IllegalArgumentException(unshared);
     }
     graphs = copyGraphs(graphs);
     SemanticGraph basic = graphs.getDefault();
@@ -338,7 +345,63 @@ public class SsurgeonPattern {
         matcher = semgrexPattern.matcher(graphs);
       }
     }
+    unshared = unsharedWord(graphs);
+    if (unshared != null) {
+      throw new IllegalStateException("Ssurgeon pattern " + getUID() + " left the graphs with different copies of a word.  " + unshared);
+    }
     return new Pair<>(graphs, anyChanges);
+  }
+
+  /**
+   * Checks that the graphs of a sentence share their words.
+   *<br>
+   * A word in more than one graph, which is to say one with the same
+   * index, empty index, and copy count, must be the very same IndexedWord
+   * in each.  There is then one copy of each word: an edit to a word, such
+   * as EditNode, is seen in every graph, and there is only ever one answer
+   * for what the word is.  An edit which adds, removes, or renumbers words
+   * does the same to each graph, with the same IndexedWords.
+   *<br>
+   * Graphs read from CoNLL-U by CoNLLUReader share their words.  Graphs
+   * built separately, such as with SemanticGraph.valueOf, do not, and
+   * neither do graphs which wrap the same CoreLabels in IndexedWords of
+   * their own.
+   *
+   * @param graphs the graphs of one sentence
+   * @throws IllegalArgumentException naming a word the graphs have different copies of
+   */
+  public static void checkSharedWords(SemgrexGraphs graphs) {
+    String unshared = unsharedWord(graphs);
+    if (unshared != null) {
+      throw new IllegalArgumentException(unshared);
+    }
+  }
+
+  /** A description of a word the graphs have different copies of, or null if they share all of their words */
+  private static String unsharedWord(SemgrexGraphs graphs) {
+    SemanticGraph basic = graphs.getDefault();
+    if (basic == null) {
+      return null;
+    }
+    Map<String, IndexedWord> basicWords = new HashMap<>();
+    for (IndexedWord word : basic.vertexSet()) {
+      basicWords.put(word.toCopyOrEmptyIndex(), word);
+    }
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph other = graphs.get(name);
+      if (name == SemgrexGraphName.BASIC || other == null) {
+        continue;
+      }
+      for (IndexedWord word : other.vertexSet()) {
+        IndexedWord basicWord = basicWords.get(word.toCopyOrEmptyIndex());
+        if (basicWord != null && basicWord != word) {
+          return "The " + SemgrexGraphName.BASIC + " and " + name + " graphs have different copies of word " +
+            word.toCopyOrEmptyIndex() + " (" + word.word() + ").  Ssurgeon needs every graph of a sentence " +
+            "to share its words, so that an edit to a word is seen in all of them";
+        }
+      }
+    }
+    return null;
   }
 
   /** A copy of each graph, sharing its words and edges with the original */

@@ -8,17 +8,25 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.Alignment;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 
@@ -162,5 +170,115 @@ public class SsurgeonPatternTest {
     result = noMatch.iterate(graphs);
     assertFalse(result.second());
     assertNotNull(result.first().get(SemgrexGraphName.ENHANCED));
+  }
+
+  @Test
+  public void sharedWordsFromConllu() throws IOException {
+    SsurgeonPattern.checkSharedWords(readGraphs(ENHANCED_SENTENCE));
+  }
+
+  /**
+   * Graphs built separately have separate copies of each word, so an edit
+   * to a word in one would leave the other with a different answer
+   */
+  @Test
+  public void separateWordsRejected() {
+    SemanticGraph basic = SemanticGraph.valueOf("[want-2 nsubj> I-1 xcomp> go-3]");
+    SemanticGraph enhanced = SemanticGraph.valueOf("[want-2 nsubj> I-1 xcomp> [go-3 nsubj:xsubj> I-1]]");
+    SemgrexGraphs graphs = SemgrexGraphs.of(basic, enhanced);
+    assertThrows(IllegalArgumentException.class, () -> SsurgeonPattern.checkSharedWords(graphs));
+
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=gov >nsubj {}\nEditNode -node gov -lemma WANT", "UniversalEnglish").get(0);
+    assertThrows(IllegalArgumentException.class, () -> pattern.iterate(graphs));
+  }
+
+  /**
+   * Sharing the CoreLabels is not enough: each word has to be the same
+   * IndexedWord in every graph
+   */
+  @Test
+  public void separateWrappersRejected() {
+    SemanticGraph basic = SemanticGraph.valueOf("[want-2 nsubj> I-1 xcomp> go-3]");
+    Map<IndexedWord, IndexedWord> wrapped = new HashMap<>();
+    SemanticGraph enhanced = new SemanticGraph();
+    for (IndexedWord word : basic.vertexSet()) {
+      IndexedWord wrapper = new IndexedWord(word.backingLabel());
+      wrapped.put(word, wrapper);
+      enhanced.addVertex(wrapper);
+    }
+    for (SemanticGraphEdge edge : basic.edgeIterable()) {
+      enhanced.addEdge(wrapped.get(edge.getGovernor()), wrapped.get(edge.getDependent()), edge.getRelation(), 1.0, false);
+    }
+    enhanced.addEdge(wrapped.get(basic.getNodeByIndex(3)), wrapped.get(basic.getNodeByIndex(1)),
+                     GrammaticalRelation.valueOf(Language.UniversalEnglish, "nsubj:xsubj"), 1.0, false);
+    enhanced.setRoot(wrapped.get(basic.getFirstRoot()));
+    assertNotSame(basic.getNodeByIndex(1), enhanced.getNodeByIndex(1));
+    assertSame(basic.getNodeByIndex(1).backingLabel(), enhanced.getNodeByIndex(1).backingLabel());
+
+    SemgrexGraphs graphs = SemgrexGraphs.of(basic, enhanced);
+    assertThrows(IllegalArgumentException.class, () -> SsurgeonPattern.checkSharedWords(graphs));
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=gov >nsubj {}\nEditNode -node gov -lemma WANT", "UniversalEnglish").get(0);
+    assertThrows(IllegalArgumentException.class, () -> pattern.iterate(graphs));
+  }
+
+  /**
+   * The same graphs built with one set of IndexedWords pass
+   */
+  @Test
+  public void sharedWords() {
+    SemanticGraph basic = SemanticGraph.valueOf("[want-2 nsubj> I-1 xcomp> go-3]");
+    SemanticGraph enhanced = new SemanticGraph(basic);
+    enhanced.addEdge(basic.getNodeByIndex(3), basic.getNodeByIndex(1),
+                     GrammaticalRelation.valueOf(Language.UniversalEnglish, "nsubj:xsubj"), 1.0, false);
+    SemgrexGraphs graphs = SemgrexGraphs.of(basic, enhanced);
+    SsurgeonPattern.checkSharedWords(graphs);
+
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=gov >/nsubj:xsubj/@enhanced {}\nEditNode -node gov -lemma GO", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
+    assertTrue(result.second());
+    assertEquals("GO", basic.getNodeByIndex(3).lemma());
+  }
+
+  /**
+   * An edit which gives the enhanced graph its own copy of a word, once,
+   * so that the pattern stops matching after it
+   */
+  private static class SeparateWordEdit extends SsurgeonEdit {
+    boolean done = false;
+
+    @Override
+    public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+      if (done) {
+        return false;
+      }
+      done = true;
+      SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+      IndexedWord ok = enhanced.getNodeByIndex(8);
+      IndexedWord gov = enhanced.getParent(ok);
+      GrammaticalRelation reln = enhanced.getEdge(gov, ok).getRelation();
+      enhanced.removeVertex(ok);
+      // the same CoreLabel in a new IndexedWord is still a second copy of the word
+      enhanced.addEdge(gov, new IndexedWord(ok.backingLabel()), reln, 1.0, false);
+      return true;
+    }
+
+    @Override
+    public String toEditString() {
+      return "separateWord";
+    }
+  }
+
+  @Test
+  public void editWhichSeparatesWords() throws IOException {
+    SsurgeonPattern pattern = new SsurgeonPattern("separate", SemgrexPattern.compile("{word:ok}"));
+    pattern.addEdit(new SeparateWordEdit());
+    SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
+    IllegalStateException e = assertThrows(IllegalStateException.class, () -> pattern.iterate(graphs));
+    assertTrue(e.getMessage(), e.getMessage().contains("different copies of word 8 (ok)"));
   }
 }
