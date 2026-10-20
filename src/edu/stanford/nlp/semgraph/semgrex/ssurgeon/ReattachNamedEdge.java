@@ -79,6 +79,12 @@ public class ReattachNamedEdge extends SsurgeonEdit {
    * is not null, that name in the matcher is updated to refer to the new edge.
    * If an edge with the same relation already goes from {@code gov} to
    * {@code dep}, no edge is added and the name refers to that edge.
+   *<br>
+   * Moving an edge does not change which words the graph has, so both
+   * {@code gov} and {@code dep} must already be in it.  A word from
+   * another graph of the sentence which this one does not have, such as
+   * an empty word from the enhanced graph when editing the basic graph,
+   * leaves the graph as it is.
    *
    * @param sg The graph to edit
    * @param sm The matcher whose named edge is updated
@@ -86,13 +92,18 @@ public class ReattachNamedEdge extends SsurgeonEdit {
    * @param edgeName The name of the edge in the matcher, or null to not update any name
    * @param gov The new gov
    * @param dep The new dep
-   * @return false if the edge already goes from {@code gov} to {@code dep} or could not be removed, true otherwise
+   * @return false if the edge already goes from {@code gov} to {@code dep}, could not be removed,
+   *   or would join a word the graph does not have; true otherwise
    */
   public static boolean reattachEdge(SemanticGraph sg, SemgrexMatcher sm,
                                      SemanticGraphEdge edge, String edgeName, IndexedWord gov, IndexedWord dep) {
     if (gov == edge.getSource() && dep == edge.getTarget()) {
       // we were asked to point the edge to the same nodes it already pointed to
       // nothing to do
+      return false;
+    }
+    if (gov == null || dep == null || !sg.containsVertex(gov) || !sg.containsVertex(dep)) {
+      // addEdge would add the missing word to the graph
       return false;
     }
     boolean success = sg.removeEdge(edge);

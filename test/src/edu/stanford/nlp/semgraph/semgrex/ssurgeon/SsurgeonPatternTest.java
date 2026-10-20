@@ -416,4 +416,23 @@ public class SsurgeonPatternTest {
     assertEquals(Collections.emptyList(), relations(graphs.getDefault(), 2, 8));
     assertEquals(Collections.singletonList("discourse"), relations(graphs.get(SemgrexGraphName.ENHANCED), 2, 8));
   }
+
+  /**
+   * A basic edge cannot be reattached to the empty word: the basic graph
+   * has no such word, and adding the edge would add the word to it
+   */
+  @Test
+  public void reattachBasicEdgeToEmptyWord() throws IOException {
+    SemgrexGraphs graphs = readGraphs(EMPTY_WORD_SENTENCE);
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:tea} <orphan=e {} <obj@enhanced {}=x\nReattachNamedEdge -edge e -gov x", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
+    assertFalse(result.second());
+
+    SemanticGraph basic = result.first().getDefault();
+    for (IndexedWord word : basic.vertexSet()) {
+      assertEquals("The basic graph gained " + word.toCopyOrEmptyIndex(), 0, word.getEmptyIndex());
+    }
+    assertEquals(Collections.singletonList("orphan"), relations(basic, 5, 6));
+    assertNotNull(result.first().get(SemgrexGraphName.ENHANCED));
+  }
 }
