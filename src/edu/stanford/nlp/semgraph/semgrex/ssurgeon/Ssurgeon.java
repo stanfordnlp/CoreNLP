@@ -33,6 +33,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.*;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.Generics;
@@ -77,9 +78,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * Available operations and their arguments include:
  * <ul>
- * <li> {@code addEdge -gov node1 -dep node2 -reln depType -weight 0.5}
+ * <li> {@code addEdge -gov node1 -dep node2 -reln depType -weight 0.5 -graph enhanced}
  * <li> {@code relabelNamedEdge -edge edgename -reln depType}
- * <li> {@code removeEdge -gov node1 -dep node2 -reln depType}
+ * <li> {@code removeEdge -gov node1 -dep node2 -reln depType -graph enhanced}
  * <li> {@code removeNamedEdge -edge edgename}
  * <li> {@code reattachNamedEdge -edge edgename -gov gov -dep dep}
  * <li> {@code addDep -gov node1 -reln depType -position where ...attributes...}
@@ -90,7 +91,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code setPhraseHead -node n1 -node n2 ... -headIndex idx -reln depType -weight w}
  * <li> {@code setRoots n1 (n2 n3 ...)}
  * <li> {@code mergeNodes -node n1 -node n2 ...}
- * <li> {@code killAllIncomingEdges -node node}
+ * <li> {@code killAllIncomingEdges -node node -graph enhanced}
  * <li> {@code deleteLeaf -node node}
  * <li> {@code killNonRooted}
  * <li> {@code reindexGraph}
@@ -99,7 +100,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  *<p>
  * {@code addEdge} adds a new edge between two existing nodes. <br>
  * {@code -gov} and {@code -dep} will be nodes matched by the Semgrex pattern. <br>
- * {@code -reln} is the name of the dependency type to add.
+ * {@code -reln} is the name of the dependency type to add. <br>
+ * {@code -graph} is the graph to add it to, {@code basic} or {@code enhanced}.  The default is {@code basic}. <br>
+ * A node made by an earlier {@code addNode} is added to the graph along with the edge,
+ * but a word which another graph of the sentence has and this one does not,
+ * such as an empty word when adding to the basic graph, is not.
  *</p><p>
  * {@code relabelNamedEdge} changes the dependency type of a named edge. <br>
  * {@code edge} is the name of the edge in the Semgrex pattern. <br>
@@ -110,7 +115,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -dep} is the dependent to delete, a named node from the Semgrex pattern. <br>
  * {@code -reln} is the name of the dependency to delete. <br>
  * If {@code -gov} or {@code -dep} are left empty, then all (matching) edges to or from the
- * remaining argument will be deleted.
+ * remaining argument will be deleted. <br>
+ * {@code -graph} is the graph to delete it from, {@code basic} or {@code enhanced}.  The default is {@code basic}.
  *</p><p>
  * {@code removeNamedEdge} deletes an edge based on its name. <br>
  * {@code edge} is the name of the edge in the Semgrex pattern.
@@ -184,6 +190,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *</p><p>
  * {@code killAllIncomingEdges} deletes all edges to a node. <br>
  * {@code -node} is the node to edit. <br>
+ * {@code -graph} is the graph to delete them from, {@code basic} or {@code enhanced}.  The default is {@code basic}. <br>
  * Note that this is the same as {@code removeEdge} with only the dependent set.
  *</p><p>
  * {@code deleteLeaf} deletes a node as long as it is a leaf. <br>
@@ -502,6 +509,8 @@ public class Ssurgeon  {
   public static final String NAME_ARG = "-name";
   /** Flag for where to put a new word */
   public static final String POSITION_ARG = "-position";
+  /** Arg which says which graph of the sentence an edit works on, such as {@code enhanced} */
+  public static final String GRAPH_ARG = "-graph";
   /** Flag for morpho features to add or change without removing the others */
   public static final String UPDATE_MORPHO_FEATURES = "-updateMorphoFeatures";
   /** Lowercase spelling of {@link #UPDATE_MORPHO_FEATURES} */
@@ -573,6 +582,9 @@ public class Ssurgeon  {
 
     /** Each {@code -removeMorphoFeatures} feature, in order */
     public List<String> removeMorphoFeatures = new ArrayList<>();
+
+    /** The {@code -graph} the edit works on, or null if not given */
+    public SemgrexGraphName graph = null;
   }
 
   /**
@@ -603,6 +615,27 @@ public class Ssurgeon  {
     }
     return parsedArgs;
   }
+
+  /**
+   * The graph named by a {@code -graph} argument.
+   *
+   * @param name the name, such as {@code basic} or {@code enhanced}, in any case
+   * @return the graph
+   * @throws SsurgeonParseException if there is no graph by that name
+   */
+  static SemgrexGraphName parseGraphName(String name) {
+    SemgrexGraphName graph = SemgrexGraphName.fromName(name);
+    if (graph == null) {
+      throw new SsurgeonParseException("Unknown graph " + name + " for " + GRAPH_ARG + ": expected one of " + Arrays.toString(SemgrexGraphName.values()));
+    }
+    return graph;
+  }
+
+  /** The edits which take a {@code -graph} argument, in lower case */
+  private static final Set<String> GRAPH_EDITS =
+    new HashSet<>(Arrays.asList(AddEdge.LABEL.toLowerCase(Locale.ROOT),
+                                RemoveEdge.LABEL.toLowerCase(Locale.ROOT),
+                                KillAllIncomingEdges.LABEL.toLowerCase(Locale.ROOT)));
 
   private static SsurgeonArgs parseArgsBox(String args, Map<String, String> additionalArgs) {
     SsurgeonArgs argsBox = new SsurgeonArgs();
@@ -654,6 +687,9 @@ public class Ssurgeon  {
           break;
         case POSITION_ARG:
           argsBox.position = argsValue;
+          break;
+        case GRAPH_ARG:
+          argsBox.graph = parseGraphName(argsValue);
           break;
         case UPDATE_MORPHO_FEATURES:
         case UPDATE_MORPHO_FEATURES_LOWER:
@@ -708,6 +744,10 @@ public class Ssurgeon  {
 
       // Parse the arguments based upon the type of command to execute.
       final SsurgeonArgs argsBox = parseArgsBox(tuples1.length == 1 ? "" : tuples1[1], attributeArgs);
+      if (argsBox.graph != null && !GRAPH_EDITS.contains(command.toLowerCase(Locale.ROOT))) {
+        throw new SsurgeonParseException(command + " does not take a " + GRAPH_ARG + " argument");
+      }
+      final SemgrexGraphName graph = argsBox.graph == null ? SemgrexGraphName.BASIC : argsBox.graph;
 
       if (command.equalsIgnoreCase(AddDep.LABEL)) {
         if (argsBox.reln == null) {
@@ -725,7 +765,7 @@ public class Ssurgeon  {
         if (argsBox.edge != null) {
           knownEdges.add(argsBox.edge);
         }
-        return new AddEdge(argsBox.govNodeName, argsBox.dep, reln, argsBox.weight, argsBox.edge);
+        return new AddEdge(argsBox.govNodeName, argsBox.dep, reln, argsBox.weight, argsBox.edge, graph);
       } else if (command.equalsIgnoreCase(ReattachNamedEdge.LABEL)) {
         if (argsBox.edge == null) {
           throw new SsurgeonParseException("Edge not specified for ReattachNamedEdge");
@@ -771,14 +811,14 @@ public class Ssurgeon  {
         if (argsBox.reln != null) {
           reln = GrammaticalRelation.valueOf(argsBox.reln);
         }
-        return new RemoveEdge(reln, argsBox.govNodeName, argsBox.dep);
+        return new RemoveEdge(reln, argsBox.govNodeName, argsBox.dep, graph);
       } else if (command.equalsIgnoreCase(RemoveNamedEdge.LABEL)) {
         return new RemoveNamedEdge(argsBox.edge);
       } else if (command.equalsIgnoreCase(KillAllIncomingEdges.LABEL)) {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make a KillAllIncomingEdges out of " + argsBox.nodes.size() + " nodes");
         }
-        return new KillAllIncomingEdges(argsBox.nodes.get(0));
+        return new KillAllIncomingEdges(argsBox.nodes.get(0), graph);
       } else if (command.equalsIgnoreCase(CombineMWT.LABEL)) {
         return new CombineMWT(argsBox.nodes, argsBox.annotations.get("word"));
       } else if (command.equalsIgnoreCase(SetPhraseHead.LABEL)) {

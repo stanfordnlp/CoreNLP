@@ -2,9 +2,13 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -26,6 +30,8 @@ public class RemoveEdge extends SsurgeonEdit {
   protected String govName; // Name of governor of this reln, in match
   /** Name of the dependent in the match, or {@link #WILDCARD_NODE} */
   protected String depName; // Name of the dependent in this reln, in match
+  /** The graph this edit works on */
+  protected final SemgrexGraphName graph;
 
   /**
    * Creates an edit which removes the edges between two named nodes.
@@ -35,9 +41,22 @@ public class RemoveEdge extends SsurgeonEdit {
    * @param depName Name of the dependent, or {@link #WILDCARD_NODE}
    */
   public RemoveEdge(GrammaticalRelation relation, String govName, String depName) {
+    this(relation, govName, depName, SemgrexGraphName.BASIC);
+  }
+
+  /**
+   * Creates an edit which removes the edges between two named nodes in the given graph.
+   *
+   * @param relation The relation to remove, or null to remove edges of any relation
+   * @param govName Name of the governor, or {@link #WILDCARD_NODE}
+   * @param depName Name of the dependent, or {@link #WILDCARD_NODE}
+   * @param graph The graph to remove the edges from
+   */
+  public RemoveEdge(GrammaticalRelation relation, String govName, String depName, SemgrexGraphName graph) {
     this.relation = relation;
     this.govName = govName;
     this.depName = depName;
+    this.graph = graph;
   }
 
   @Override
@@ -52,6 +71,11 @@ public class RemoveEdge extends SsurgeonEdit {
     buf.write(govName); buf.write("\t");
     buf.write(Ssurgeon.DEP_NODENAME_ARG);buf.write(" ");
     buf.write(depName);
+    if (graph != SemgrexGraphName.BASIC) {
+      buf.write("\t");
+      buf.write(Ssurgeon.GRAPH_ARG); buf.write(" ");
+      buf.write(graph.lowerName);
+    }
     return buf.toString();
   }
 
@@ -68,13 +92,23 @@ public class RemoveEdge extends SsurgeonEdit {
    *<br>
    * This will not update anything the second time executed on the
    * same graph.
+   *<br>
+   * The edges are removed from this edit's graph.  A named node which
+   * that graph does not have has no edges in it to remove.
    */
   @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+    SemanticGraph sg = graphs.get(graph);
+    if (sg == null) {
+      return false;
+    }
     boolean govWild = govName.equals(WILDCARD_NODE);
     boolean depWild = depName.equals(WILDCARD_NODE);
     IndexedWord govNode = getNamedNode(govName, sm);
     IndexedWord depNode = getNamedNode(depName, sm);
+    if ((govNode != null && !sg.containsVertex(govNode)) || (depNode != null && !sg.containsVertex(depNode))) {
+      return false;
+    }
     boolean success = false;
 
     List<SemanticGraphEdge> edgesToDelete = null;
@@ -130,6 +164,22 @@ public class RemoveEdge extends SsurgeonEdit {
 
     // will be true if at least one edge was removed
     return success;
+  }
+
+  /**
+   * Removes the edges, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
+   */
+  @Override
+  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
+
+  /**
+   * The graph this edit works on, if it is not the basic graph.
+   */
+  @Override
+  public Set<SemgrexGraphName> requiredGraphs() {
+    return graph == SemgrexGraphName.BASIC ? Collections.emptySet() : Collections.singleton(graph);
   }
 
 

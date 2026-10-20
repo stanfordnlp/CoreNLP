@@ -435,4 +435,99 @@ public class SsurgeonPatternTest {
     assertEquals(Collections.singletonList("orphan"), relations(basic, 5, 6));
     assertNotNull(result.first().get(SemgrexGraphName.ENHANCED));
   }
+
+  /** want has I as its nsubj and go as its xcomp, in both graphs */
+  private static final String WANT_I_GO = "{word:want}=w >nsubj {word:I}=i >xcomp {word:go}=g";
+
+  @Test
+  public void addEdgeToEnhanced() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence(WANT_I_GO + "\nAddEdge -gov g -dep i -reln nsubj:pass -graph enhanced");
+    assertEquals(Arrays.asList("nsubj:pass", "nsubj:xsubj"), relations(graphs.get(SemgrexGraphName.ENHANCED), 4, 1));
+    assertEquals(Collections.emptyList(), relations(graphs.getDefault(), 4, 1));
+  }
+
+  @Test
+  public void addEdgeToBasicByDefault() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence(WANT_I_GO + "\nAddEdge -gov g -dep i -reln nsubj:pass");
+    assertEquals(Collections.singletonList("nsubj:pass"), relations(graphs.getDefault(), 4, 1));
+    assertEquals(Collections.singletonList("nsubj:xsubj"), relations(graphs.get(SemgrexGraphName.ENHANCED), 4, 1));
+  }
+
+  /** An empty word can be joined to the enhanced graph, but not the basic graph, which does not have it */
+  @Test
+  public void addEdgeWithEmptyWord() throws IOException {
+    SsurgeonPattern basic = Ssurgeon.readFromEditText("{word:Bill}=b <nsubj@enhanced {}=x\nAddEdge -gov x -dep b -reln dep", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = basic.iterate(readGraphs(EMPTY_WORD_SENTENCE));
+    assertFalse(result.second());
+    for (IndexedWord word : result.first().getDefault().vertexSet()) {
+      assertEquals(0, word.getEmptyIndex());
+    }
+
+    SsurgeonPattern enhanced = Ssurgeon.readFromEditText("{word:Bill}=b <nsubj@enhanced {}=x\nAddEdge -gov x -dep b -reln dep -graph enhanced", "UniversalEnglish").get(0);
+    result = enhanced.iterate(readGraphs(EMPTY_WORD_SENTENCE));
+    assertTrue(result.second());
+    SemanticGraph enhancedGraph = result.first().get(SemgrexGraphName.ENHANCED);
+    IndexedWord empty = null;
+    for (IndexedWord word : enhancedGraph.vertexSet()) {
+      if (word.getEmptyIndex() == 1) {
+        empty = word;
+      }
+    }
+    List<String> fromEmpty = new ArrayList<>();
+    // in the enhanced graph, both Bill and the empty word have the index 5,
+    // so Bill comes from the basic graph, which shares him
+    IndexedWord bill = result.first().getDefault().getNodeByIndex(5);
+    for (SemanticGraphEdge edge : enhancedGraph.getAllEdges(empty, bill)) {
+      fromEmpty.add(edge.getRelation().toString());
+    }
+    Collections.sort(fromEmpty);
+    assertEquals(Arrays.asList("dep", "nsubj"), fromEmpty);
+  }
+
+  @Test
+  public void removeEdgeFromEnhanced() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence(WANT_I_GO + "\nRemoveEdge -gov g -dep i -graph enhanced");
+    assertEquals(Collections.emptyList(), relations(graphs.get(SemgrexGraphName.ENHANCED), 4, 1));
+    assertEquals(Collections.singletonList("nsubj"), relations(graphs.get(SemgrexGraphName.ENHANCED), 2, 1));
+    assertEquals(Collections.singletonList("nsubj"), relations(graphs.getDefault(), 2, 1));
+  }
+
+  @Test
+  public void removeEdgeFromBasicByDefault() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence(WANT_I_GO + "\nRemoveEdge -gov w -dep i -reln nsubj");
+    assertEquals(Collections.emptyList(), relations(graphs.getDefault(), 2, 1));
+    assertEquals(Collections.singletonList("nsubj"), relations(graphs.get(SemgrexGraphName.ENHANCED), 2, 1));
+  }
+
+  @Test
+  public void killAllIncomingEdgesOfEnhanced() throws IOException {
+    SemgrexGraphs graphs = editEnhancedSentence(WANT_I_GO + "\nKillAllIncomingEdges -node i -graph enhanced");
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertEquals(0, enhanced.incomingEdgeList(enhanced.getNodeByIndex(1)).size());
+    assertEquals(Collections.singletonList("nsubj"), relations(graphs.getDefault(), 2, 1));
+  }
+
+  /** An edit which names a graph the sentence has not got is an error, as a pattern which searches it is */
+  @Test
+  public void editMissingGraph() throws IOException {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText(WANT_I_GO + "\nAddEdge -gov g -dep i -reln nsubj:pass -graph enhanced", "UniversalEnglish").get(0);
+    assertFalse(pattern.searchesBeyondBasic());
+    assertTrue(pattern.usesGraphsBeyondBasic());
+    SemanticGraph basic = readGraph(ENHANCED_SENTENCE);
+    IllegalStateException e = assertThrows(IllegalStateException.class, () -> pattern.iterate(new SemgrexGraphs(basic)));
+    assertTrue(e.getMessage(), e.getMessage().contains("ENHANCED graph"));
+  }
+
+  /**
+   * Once the words change, the enhanced graph is left out, so a pattern
+   * which edits it stops, as one which searches it does
+   */
+  @Test
+  public void enhancedEditStopsWhenWordsChange() throws IOException {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:/:/}=p\nDeleteLeaf -node p\nKillAllIncomingEdges -node p -graph enhanced", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(readGraphs(ENHANCED_SENTENCE));
+    assertTrue(result.second());
+    assertEquals(7, result.first().getDefault().size());
+    assertNull(result.first().get(SemgrexGraphName.ENHANCED));
+  }
 }
