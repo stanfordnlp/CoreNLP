@@ -12,6 +12,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
 
@@ -109,7 +110,23 @@ public class EditNode extends SsurgeonEdit {
     return buf.toString();
   }
 
+  /**
+   * Edits the named word, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
+   */
+  @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
+
+  /**
+   * Edits the attributes and features of the named word.
+   *<br>
+   * The graphs share their words, so the edit is seen in all of them,
+   * whichever graph the word was matched in.  That includes an empty word
+   * found only in the enhanced graph.
+   */
+  @Override
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
     IndexedWord word = sm.getNode(nodeName);
     if (word == null)
       return false;
