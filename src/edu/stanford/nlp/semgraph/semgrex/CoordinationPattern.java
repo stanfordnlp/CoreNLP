@@ -4,7 +4,6 @@ import edu.stanford.nlp.util.logging.Redwood;
 import java.util.*;
 
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.VariableStrings;
 
 /**
@@ -117,7 +116,7 @@ public class CoordinationPattern extends SemgrexPattern  {
                                 IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
-                                Map<String, SemanticGraphEdge> namesToEdges,
+                                Map<String, MatchedEdge> namesToEdges,
                                 VariableStrings variableStrings,
                                 boolean ignoreCase) {
     return new CoordinationMatcher(this, graphs, currentGraph, node,
@@ -142,7 +141,7 @@ public class CoordinationPattern extends SemgrexPattern  {
                                IndexedWord n,
                                Map<String, IndexedWord> namesToNodes,
                                Map<String, String> namesToRelations,
-                               Map<String, SemanticGraphEdge> namesToEdges,
+                               Map<String, MatchedEdge> namesToEdges,
                                VariableStrings variableStrings,
                                boolean ignoreCase) {
       super(graphs, n, namesToNodes, namesToRelations, namesToEdges, variableStrings);

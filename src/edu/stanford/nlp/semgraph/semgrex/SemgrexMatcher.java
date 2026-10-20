@@ -24,7 +24,7 @@ public abstract class SemgrexMatcher  {
 	
   final Map<String, IndexedWord> namesToNodes;
   final Map<String, String> namesToRelations;
-  final Map<String, SemanticGraphEdge> namesToEdges;
+  final Map<String, MatchedEdge> namesToEdges;
   final VariableStrings variableStrings;
 
   IndexedWord node;
@@ -41,7 +41,7 @@ public abstract class SemgrexMatcher  {
                  IndexedWord node,
                  Map<String, IndexedWord> namesToNodes,
                  Map<String, String> namesToRelations,
-                 Map<String, SemanticGraphEdge> namesToEdges,
+                 Map<String, MatchedEdge> namesToEdges,
                  VariableStrings variableStrings) {
     this.graphs = graphs;
     this.node = node;
@@ -273,7 +273,24 @@ public abstract class SemgrexMatcher  {
    * @return the matched edge, or null if there is no edge with that name
    */
   public SemanticGraphEdge getEdge(String name) {
-    return namesToEdges.get(name);
+    MatchedEdge matched = namesToEdges.get(name);
+    return matched == null ? null : matched.edge;
+  }
+
+  /**
+   * Returns the graph the edge labeled with {@code name} was found in.
+   *<br>
+   * A sentence can be matched against more than one of its graphs, as in
+   * {@code {} >obj@enhanced=e {}}, and an edge with the same governor,
+   * dependent, and relation can be in several of them, so the edge itself
+   * cannot say which.
+   *
+   * @param name the name of the edge, specified in the pattern
+   * @return the graph the named edge was found in, or null if there is no edge with that name
+   */
+  public SemgrexGraphName getEdgeGraph(String name) {
+    MatchedEdge matched = namesToEdges.get(name);
+    return matched == null ? null : matched.graph;
   }
 
   /**
@@ -308,13 +325,32 @@ public abstract class SemgrexMatcher  {
   /**
    * Binds a name to an edge in this matcher's named edges, as Ssurgeon does
    * when an edit creates or replaces a named edge.
+   *<br>
+   * The edge is taken to be in the graph the name was already bound in,
+   * as when an edit replaces an edge with a relabeled copy, or the basic
+   * graph if the name is new.  Use {@link #putNamedEdge(String, SemanticGraphEdge, SemgrexGraphName)}
+   * to say which graph.
    *
    * @param name the name of the edge
    * @param edge the edge to bind to the name
    * @return the edge previously bound to the name, or null
    */
   public SemanticGraphEdge putNamedEdge(String name, SemanticGraphEdge edge) {
-    return namesToEdges.put(name, edge);
+    SemgrexGraphName graph = getEdgeGraph(name);
+    return putNamedEdge(name, edge, graph == null ? SemgrexGraphName.BASIC : graph);
+  }
+
+  /**
+   * Binds a name to an edge in the given graph in this matcher's named edges.
+   *
+   * @param name the name of the edge
+   * @param edge the edge to bind to the name
+   * @param graph the graph the edge is in
+   * @return the edge previously bound to the name, or null
+   */
+  public SemanticGraphEdge putNamedEdge(String name, SemanticGraphEdge edge, SemgrexGraphName graph) {
+    MatchedEdge previous = namesToEdges.put(name, new MatchedEdge(edge, graph));
+    return previous == null ? null : previous.edge;
   }
 
   @Override

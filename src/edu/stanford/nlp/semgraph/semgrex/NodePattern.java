@@ -558,7 +558,7 @@ public class NodePattern extends SemgrexPattern  {
   public SemgrexMatcher matcher(SemgrexGraphs graphs, SemgrexGraphName currentGraph, IndexedWord node,
                                 Map<String, IndexedWord> namesToNodes,
                                 Map<String, String> namesToRelations,
-                                Map<String, SemanticGraphEdge> namesToEdges,
+                                Map<String, MatchedEdge> namesToEdges,
                                 VariableStrings variableStrings,
                                 boolean ignoreCase) {
     // the aligned root starts the search on the other side of the
@@ -619,7 +619,7 @@ public class NodePattern extends SemgrexPattern  {
 
     public NodeMatcher(NodePattern n, SemgrexGraphs graphs, SemgrexGraphName currentGraph,
                        IndexedWord node, Map<String, IndexedWord> namesToNodes, Map<String, String> namesToRelations,
-                       Map<String, SemanticGraphEdge> namesToEdges,
+                       Map<String, MatchedEdge> namesToEdges,
                        VariableStrings variableStrings, boolean ignoreCase) {
       super(graphs, node, namesToNodes, namesToRelations, namesToEdges, variableStrings);
       myNode = n;
@@ -682,9 +682,10 @@ public class NodePattern extends SemgrexPattern  {
         }
 
         if (myNode.reln.getEdgeName() != null) {
-          SemanticGraphEdge foundEdge = namesToEdges.get(myNode.reln.getEdgeName());
+          // an edge named twice must be the same edge both times, in the same graph
+          MatchedEdge foundEdge = namesToEdges.get(myNode.reln.getEdgeName());
           nextMatchEdge = ((GraphRelation.SearchNodeIterator) nodeMatchCandidateIterator).getEdge();
-          if ((foundEdge != null) && (!nextMatchEdge.equals(foundEdge))) {
+          if ((foundEdge != null) && (!new MatchedEdge(nextMatchEdge, currentGraph).equals(foundEdge))) {
             nextMatch = nodeMatchCandidateIterator.next();
             continue;
           }
@@ -751,7 +752,7 @@ public class NodePattern extends SemgrexPattern  {
         if (myNode.reln.getEdgeName() != null) {
           if (!namesToEdges.containsKey(myNode.reln.getEdgeName()))
             edgeNamedFirst = true;
-          namesToEdges.put(myNode.reln.getEdgeName(), nextMatchEdge);
+          namesToEdges.put(myNode.reln.getEdgeName(), new MatchedEdge(nextMatchEdge, currentGraph));
         }
         commitVariableGroups(tempVariableStrings); // commit my variable groups.
       }
