@@ -87,6 +87,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code lemmatize -node node}
  * <li> {@code combineMWT -node node -word word}
  * <li> {@code splitWord -node node -headIndex idx -reln depType -regex w1 -regex w2 ...}
+ * <li> {@code setPhraseHead -node n1 -node n2 ... -headIndex idx -reln depType -weight w}
  * <li> {@code setRoots n1 (n2 n3 ...)}
  * <li> {@code mergeNodes -node n1 -node n2 ...}
  * <li> {@code killAllIncomingEdges -node node}
@@ -197,6 +198,13 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code killNonRootedNodes} searches the graph and deletes all nodes which have no path to a root.
  *</p><p>
  * {@code reindexGraph} reindexes the graph from 1 in case there are gaps or the node indices start later than 1.  (Warning: does not work for first index less than 1)
+ *</p><p>
+ * Two older operations remain for existing code, but are not recommended. <br>
+ * {@code addNode -nodearg "{word=foo lemma=foo}" -name name} makes a new node, with no index or edges, which
+ *   a later {@code addEdge} can attach.  It makes a node every time it runs, so a pattern which uses it never
+ *   finishes under {@link SsurgeonPattern#iterate}, which is what the command line and Stanza's ssurgeon.py use.
+ *   {@code addDep} adds a word with its index and its edge in one step. <br>
+ * {@link CollapseSubtree} can only be used from Java.
  *</P>
  *<p>
  * A practical example comes from the {@code UD_English-Pronouns}

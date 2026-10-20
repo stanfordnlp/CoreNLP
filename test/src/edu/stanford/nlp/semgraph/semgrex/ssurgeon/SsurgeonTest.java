@@ -2409,6 +2409,90 @@ public class SsurgeonTest {
     assertEquals(newSg, expected);
   }
 
+  /** The head of a phrase can be any of its words, not just the first */
+  @Test
+  public void setPhraseHeadSecondWord() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:John}=n1 . {word:Bauer}=n2\nsetPhraseHead -node n1 -node n2 -headIndex 1 -reln flat", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[works-4 obl> [Stanford-6 case> at-5] nsubj> [John-2 flat> Bauer-3 nmod> Earl-1]]");
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(sg);
+    assertTrue(result.second);
+    SemanticGraph expected = SemanticGraph.valueOf("[works-4 obl> [Stanford-6 case> at-5] nsubj> [Bauer-3 flat> John-2 nmod> Earl-1]]");
+    assertEquals(expected, result.first);
+  }
+
+  /** Every other word of a longer phrase is attached to the new head */
+  @Test
+  public void setPhraseHeadThreeWords() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:John}=a . ({word:Q}=b . {word:Public}=c)\nsetPhraseHead -node a -node b -node c -headIndex 0 -reln flat", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[lives-4 nsubj> [Public-3 flat> John-1 flat> Q-2]]");
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(sg);
+    assertTrue(result.second);
+    SemanticGraph expected = SemanticGraph.valueOf("[lives-4 nsubj> [John-1 flat> Q-2 flat> Public-3]]");
+    assertEquals(expected, result.first);
+  }
+
+  /** A phrase which already has the requested head is left alone, and reported as unchanged */
+  @Test
+  public void setPhraseHeadUnchanged() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:John}=n1 . {word:Bauer}=n2\nsetPhraseHead -node n1 -node n2 -headIndex 0 -reln flat", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[works-3 nsubj> [John-1 flat> Bauer-2]]");
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(sg);
+    assertFalse(result.second);
+    assertEquals(SemanticGraph.valueOf("[works-3 nsubj> [John-1 flat> Bauer-2]]"), result.first);
+  }
+
+  /** Words with separate heads outside of them are not a phrase, and are not rearranged */
+  @Test
+  public void setPhraseHeadNotAPhrase() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:John}=n1 . {word:Bauer}=n2\nsetPhraseHead -node n1 -node n2 -headIndex 0 -reln flat", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[met-3 nsubj> John-1 obj> Bauer-2]");
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(sg);
+    assertFalse(result.second);
+    assertEquals(SemanticGraph.valueOf("[met-3 nsubj> John-1 obj> Bauer-2]"), result.first);
+  }
+
+  @Test
+  public void parseSetPhraseHead() {
+    Set<String> knownEdges = new HashSet<>();
+    SsurgeonEdit edit = Ssurgeon.parseEditLine("setPhraseHead -node a -node b -headIndex 1 -reln flat -weight 0.5", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertTrue(edit.toEditString(), edit.toEditString().contains("-weight 0.5"));
+    SsurgeonEdit reparsed = Ssurgeon.parseEditLine(edit.toEditString(), new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(edit.toEditString(), reparsed.toEditString());
+
+    // no -headIndex, a -headIndex past the end of the phrase, and no -reln
+    assertThrows(SsurgeonParseException.class, () ->
+                 Ssurgeon.parseEditLine("setPhraseHead -node a -node b -reln flat", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    assertThrows(SsurgeonParseException.class, () ->
+                 Ssurgeon.parseEditLine("setPhraseHead -node a -node b -headIndex 2 -reln flat", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    assertThrows(SsurgeonParseException.class, () ->
+                 Ssurgeon.parseEditLine("setPhraseHead -node a -node b -headIndex 0", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+  }
+
+  /**
+   * addNode is kept for older code.  The node it makes is in no graph
+   * until an addEdge attaches it, which addEdge allows for a node no graph
+   * has yet.  Since addNode makes a node every time it runs, this uses
+   * execute, which applies the edits once per match, rather than iterate.
+   */
+  @Test
+  public void addNodeThenAddEdge() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:ate}=a\naddNode -nodearg \"{word=fast lemma=fast POS=RB}\" -name new\naddEdge -gov a -dep new -reln advmod", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[ate-2 nsubj> Bill-1]");
+    Collection<SemanticGraph> results = pattern.execute(sg);
+    assertEquals(1, results.size());
+    SemanticGraph result = results.iterator().next();
+    assertEquals(3, result.size());
+    IndexedWord ate = result.getNodeByIndex(2);
+    IndexedWord fast = null;
+    for (IndexedWord child : result.getChildren(ate)) {
+      if ("fast".equals(child.word())) {
+        fast = child;
+      }
+    }
+    assertNotNull(fast);
+    assertEquals("advmod", result.getEdge(ate, fast).getRelation().toString());
+  }
+
   /**
    * Test splitWord, which should split a word into pieces based on regex matches, with the head at position 0
    */

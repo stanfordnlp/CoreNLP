@@ -65,6 +65,9 @@ public class SetPhraseHead extends SsurgeonEdit {
     }
     buf.write("-headIndex " + headIndex + "\t");
     buf.write("-reln " + relation.toString());
+    if (weight != 0.0) {
+      buf.write("\t-weight " + weight);
+    }
     return buf.toString();
   }
 
