@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Test;
@@ -15,6 +16,9 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoNLLUReader;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.semgrex.Alignment;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 
@@ -75,21 +79,39 @@ public class SsurgeonPatternTest {
     "",
     "");
 
-  @Test
-  public void iterateSearchesEnhanced() throws IOException {
-    CoreMap sentence = readSentence(ENHANCED_SENTENCE);
+  private static SemgrexGraphs readGraphs(String conllu) throws IOException {
+    CoreMap sentence = readSentence(conllu);
     SemanticGraph basic = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    assertNotNull(enhanced);
+    return SemgrexGraphs.of(basic, enhanced);
+  }
+
+  @Test
+  public void iterateSearchesEnhanced() throws IOException {
+    SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
     SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=gov >/nsubj:xsubj/@enhanced {}\nEditNode -node gov -lemma GO", "UniversalEnglish").get(0);
     assertTrue(pattern.searchesBeyondBasic());
 
-    Pair<SemanticGraph, Boolean> result = pattern.iterate(basic, enhanced);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
     assertTrue(result.second());
-    assertEquals("GO", result.first().getNodeByIndex(4).lemma());
-    // the words are shared, so the enhanced graph sees the edit as well
-    assertEquals("GO", enhanced.getNodeByIndex(4).lemma());
-    // the edit only touched a word, so the structure of the basic graph is unchanged
-    assertEquals(basic, result.first());
+    assertEquals("GO", result.first().getDefault().getNodeByIndex(4).lemma());
+    // the words are shared, so both graphs, and the originals, see the edit
+    assertEquals("GO", result.first().get(SemgrexGraphName.ENHANCED).getNodeByIndex(4).lemma());
+    assertEquals("GO", graphs.get(SemgrexGraphName.ENHANCED).getNodeByIndex(4).lemma());
+    // the edit only touched a word, so the structure of the graphs is unchanged
+    assertEquals(graphs.getDefault(), result.first().getDefault());
+    assertEquals(graphs.get(SemgrexGraphName.ENHANCED), result.first().get(SemgrexGraphName.ENHANCED));
+  }
+
+  @Test
+  public void iterateCopiesGraphs() throws IOException {
+    SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=gov >nsubj {}\nEditNode -node gov -lemma WANT", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
+    assertTrue(result.second());
+    assertNotSame(graphs.getDefault(), result.first().getDefault());
+    assertNotSame(graphs.get(SemgrexGraphName.ENHANCED), result.first().get(SemgrexGraphName.ENHANCED));
   }
 
   @Test
@@ -97,7 +119,7 @@ public class SsurgeonPatternTest {
     SemanticGraph basic = readGraph(ENHANCED_SENTENCE);
     SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=gov >/nsubj:xsubj/@enhanced {}\nEditNode -node gov -lemma GO", "UniversalEnglish").get(0);
     assertThrows(IllegalStateException.class, () -> pattern.iterate(basic));
-    assertThrows(IllegalStateException.class, () -> pattern.iterate(basic, null));
+    assertThrows(IllegalStateException.class, () -> pattern.iterate(new SemgrexGraphs(basic)));
 
     SsurgeonPattern basicOnly = Ssurgeon.readFromEditText("{}=gov >nsubj {}\nEditNode -node gov -lemma WANT", "UniversalEnglish").get(0);
     assertFalse(basicOnly.searchesBeyondBasic());
@@ -105,27 +127,40 @@ public class SsurgeonPatternTest {
   }
 
   @Test
-  public void iterateStopsWhenEnhancedNoLongerFits() throws IOException {
-    CoreMap sentence = readSentence(ENHANCED_SENTENCE);
-    SemanticGraph basic = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-    SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+  public void iterateRejectsAlignment() throws IOException {
+    SemanticGraph basic = readGraph(ENHANCED_SENTENCE);
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=gov >nsubj {}\nEditNode -node gov -lemma WANT", "UniversalEnglish").get(0);
+    SemgrexGraphs aligned = SemgrexGraphs.aligned(basic, new Alignment(new HashMap<>(), 0.0, ""), basic);
+    assertThrows(IllegalArgumentException.class, () -> pattern.iterate(aligned));
+  }
 
+  @Test
+  public void iterateStopsWhenEnhancedNoLongerFits() throws IOException {
     // deleting a word means the enhanced graph no longer describes the
     // words of the basic graph, so a pattern which searches the enhanced
-    // graph stops after the first deletion
+    // graph stops after the first deletion, and the enhanced graph is
+    // left out of the graphs returned
+    SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
     SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:/:/}=p <punct@enhanced {}\nDeleteLeaf -node p", "UniversalEnglish").get(0);
-    Pair<SemanticGraph, Boolean> result = pattern.iterate(basic, enhanced);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
     assertTrue(result.second());
-    assertEquals(7, result.first().size());
+    assertEquals(7, result.first().getDefault().size());
+    assertNull(result.first().get(SemgrexGraphName.ENHANCED));
 
     // a pattern on the basic graph alone deletes both, even with the enhanced graph given.
     // renumbering the words changes their shared labels, so this needs a fresh sentence
-    sentence = readSentence(ENHANCED_SENTENCE);
-    basic = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-    enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    graphs = readGraphs(ENHANCED_SENTENCE);
     SsurgeonPattern basicOnly = Ssurgeon.readFromEditText("{word:/:/}=p <punct {}\nDeleteLeaf -node p", "UniversalEnglish").get(0);
-    result = basicOnly.iterate(basic, enhanced);
+    result = basicOnly.iterate(graphs);
     assertTrue(result.second());
-    assertEquals(6, result.first().size());
+    assertEquals(6, result.first().getDefault().size());
+    assertNull(result.first().get(SemgrexGraphName.ENHANCED));
+
+    // with no change to the words, the enhanced graph stays
+    graphs = readGraphs(ENHANCED_SENTENCE);
+    SsurgeonPattern noMatch = Ssurgeon.readFromEditText("{word:nothing}=p\nDeleteLeaf -node p", "UniversalEnglish").get(0);
+    result = noMatch.iterate(graphs);
+    assertFalse(result.second());
+    assertNotNull(result.first().get(SemgrexGraphName.ENHANCED));
   }
 }

@@ -275,37 +275,45 @@ public class SsurgeonPattern {
    * @throws IllegalStateException if the pattern names a graph other than the basic graph
    */
   public Pair<SemanticGraph, Boolean> iterate(SemanticGraph sg) {
-    return iterate(sg, null);
+    Pair<SemgrexGraphs, Boolean> result = iterate(new SemgrexGraphs(sg));
+    return new Pair<>(result.first().getDefault(), result.second());
   }
 
   /**
-   * Repeatedly matches and edits the basic graph of a sentence, as
-   * {@link #iterate(SemanticGraph)} does, with the enhanced graph of the
-   * same sentence available to the semgrex pattern.
+   * Repeatedly matches and edits the graphs of a sentence, as
+   * {@link #iterate(SemanticGraph)} does for the basic graph alone.
+   *<br>
+   * Each graph is copied, and the copies are matched and edited.  As with
+   * the basic graph alone, the copies share their words and edges with the
+   * originals, so an edit which changes a word, such as EditNode, is seen
+   * in the originals as well.
    *<br>
    * The pattern can search the enhanced graph with relations such as
-   * {@code >nsubj@enhanced}.  Only the basic graph is edited.  The two
-   * graphs normally share their words, as when read from CoNLL-U, so an
-   * edit which changes a word, such as EditNode, changes it in both, and
-   * that includes a word matched only in the enhanced graph.
+   * {@code >nsubj@enhanced}.  An edit changes whichever graphs it is
+   * written to change; one which only knows about the basic graph leaves
+   * the others alone.
    *<br>
    * Once the edits change which words the basic graph has, or their
-   * indices, the enhanced graph no longer describes the same words.
-   * Matching then continues on the basic graph alone, or stops if the
-   * pattern needs the enhanced graph.
+   * indices, the other graphs no longer describe the same words, and they
+   * are left out of the graphs returned.  Matching then continues on the
+   * basic graph alone, or stops if the pattern needs another graph.
    *
-   * @param sg the basic graph to edit; it is copied, but word nodes are shared
-   * @param enhanced the enhanced graph of the same sentence, which is not edited, or null if there is none
-   * @return the edited copy of the basic graph, and whether any edit changed it
+   * @param graphs the graphs of one sentence, with no alignment; the basic graph is required
+   * @return the edited copies of the graphs, and whether any edit changed them
+   * @throws IllegalArgumentException if the graphs have an alignment
    * @throws IllegalStateException if the pattern names a graph the sentence has not got
    */
-  public Pair<SemanticGraph, Boolean> iterate(SemanticGraph sg, SemanticGraph enhanced) {
-    SemanticGraph copied = new SemanticGraph(sg);
-    List<IndexedWord> words = copied.vertexListSorted();
+  public Pair<SemgrexGraphs, Boolean> iterate(SemgrexGraphs graphs) {
+    if (graphs.crossAlignment() != null) {
+      throw new IllegalArgumentException("Ssurgeon cannot edit graphs joined by an alignment");
+    }
+    graphs = copyGraphs(graphs);
+    SemanticGraph basic = graphs.getDefault();
+    List<IndexedWord> words = basic.vertexListSorted();
     List<String> indices = wordIndices(words);
+    boolean otherGraphs = hasOtherGraphs(graphs);
 
     // the edits work on the same graphs the matcher searches
-    SemgrexGraphs graphs = SemgrexGraphs.of(copied, enhanced);
     SemgrexMatcher matcher = semgrexPattern.matcher(graphs);
     boolean anyChanges = false;
     while (matcher.find()) {
@@ -320,17 +328,42 @@ public class SsurgeonPattern {
         }
       }
       if (edited) {
-        if (enhanced != null && !sameWords(words, indices, copied)) {
-          enhanced = null;
+        if (otherGraphs && !sameWords(words, indices, basic)) {
+          graphs = new SemgrexGraphs(basic);
+          otherGraphs = false;
           if (searchesBeyondBasic()) {
             break;
           }
         }
-        graphs = SemgrexGraphs.of(copied, enhanced);
         matcher = semgrexPattern.matcher(graphs);
       }
     }
-    return new Pair<>(copied, anyChanges);
+    return new Pair<>(graphs, anyChanges);
+  }
+
+  /** A copy of each graph, sharing its words and edges with the original */
+  private static SemgrexGraphs copyGraphs(SemgrexGraphs graphs) {
+    if (graphs.getDefault() == null) {
+      throw new IllegalArgumentException("Ssurgeon edits the " + SemgrexGraphName.BASIC + " graph, but there is none");
+    }
+    Map<SemgrexGraphName, SemanticGraph> copies = new EnumMap<>(SemgrexGraphName.class);
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph graph = graphs.get(name);
+      if (graph != null) {
+        copies.put(name, new SemanticGraph(graph));
+      }
+    }
+    return new SemgrexGraphs(copies);
+  }
+
+  /** Whether there is any graph besides the basic graph */
+  private static boolean hasOtherGraphs(SemgrexGraphs graphs) {
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      if (name != SemgrexGraphName.BASIC && graphs.get(name) != null) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -689,9 +722,8 @@ public class SsurgeonPattern {
 
   /**
    * Applies each pattern in turn to the basic dependencies of one sentence,
-   * using {@link #iterate(SemanticGraph, SemanticGraph)} so that the
-   * patterns can also search the enhanced dependencies, then writes the
-   * sentence as CoNLL-U.
+   * using {@link #iterate(SemgrexGraphs)} so that the patterns can also
+   * search the enhanced dependencies, then writes the sentence as CoNLL-U.
    *<br>
    * If the sentence changed, its {@code # text} comment is rebuilt from the
    * edited words.  The enhanced dependencies are written as they are,
@@ -708,34 +740,32 @@ public class SsurgeonPattern {
       comments.addAll(sentence.get(CoreAnnotations.CommentsAnnotation.class));
     }
 
-    List<IndexedWord> words = graph.vertexListSorted();
-    List<String> indices = wordIndices(words);
-
+    // iterate leaves the enhanced graph out of the graphs it returns once
+    // the edits have changed the words it describes
+    SemgrexGraphs graphs = SemgrexGraphs.of(graph, enhanced);
     boolean changed = false;
     for (SsurgeonPattern pattern : patterns) {
-      // the enhanced graph describes the words as they were read, so it
-      // is only searched while the edits have left those words alone
-      SemanticGraph searchEnhanced = (enhanced != null && sameWords(words, indices, graph)) ? enhanced : null;
-      if (enhanced != null && searchEnhanced == null && pattern.searchesBeyondBasic()) {
-        log.warn("Skipping Ssurgeon pattern " + pattern.getUID() + " on " + describeSentence(comments, graph, file) +
+      if (enhanced != null && graphs.get(SemgrexGraphName.ENHANCED) == null && pattern.searchesBeyondBasic()) {
+        log.warn("Skipping Ssurgeon pattern " + pattern.getUID() + " on " + describeSentence(comments, graphs.getDefault(), file) +
                  ": it searches the enhanced graph, which no longer fits now that earlier edits changed the words");
         continue;
       }
       try {
-        Pair<SemanticGraph, Boolean> result = pattern.iterate(graph, searchEnhanced);
-        graph = result.first();
+        Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
+        graphs = result.first();
         changed = changed || result.second();
       } catch (RuntimeException e) {
-        throw new RuntimeException("Ssurgeon pattern " + pattern.getUID() + " failed on " + describeSentence(comments, graph, file), e);
+        throw new RuntimeException("Ssurgeon pattern " + pattern.getUID() + " failed on " + describeSentence(comments, graphs.getDefault(), file), e);
       }
     }
+    graph = graphs.getDefault();
 
     if (changed) {
-      if (enhanced != null && !sameWords(words, indices, graph)) {
+      if (enhanced != null && graphs.get(SemgrexGraphName.ENHANCED) == null) {
         log.warn("The edits changed the words of " + describeSentence(comments, graph, file) +
                  ".  Its enhanced dependencies, including any empty nodes, no longer fit and are not written");
-        enhanced = null;
       }
+      enhanced = graphs.get(SemgrexGraphName.ENHANCED);
       String text = sentenceText(graph);
       for (int i = 0; i < comments.size(); ++i) {
         if (isTextComment(comments.get(i))) {
@@ -786,7 +816,7 @@ public class SsurgeonPattern {
    * {@link Ssurgeon#readFromEditText}, or from a single semgrex pattern
    * and its edits on the command line.  Each pattern is applied in turn
    * to each sentence, repeating until it no longer matches anything it
-   * changes, as in {@link #iterate(SemanticGraph, SemanticGraph)}.  The
+   * changes, as in {@link #iterate(SemgrexGraphs)}.  The
    * patterns can search the enhanced dependencies of a sentence as well
    * as the basic, but only the basic dependencies are edited.  The edited files are written back
    * over the originals unless {@code -output} or {@code -stdout} is given.
