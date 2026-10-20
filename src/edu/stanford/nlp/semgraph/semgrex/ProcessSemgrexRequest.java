@@ -60,43 +60,16 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
   }
 
   /**
-   * Which graph of the sentence an edge was matched in, or null if it
-   * is in none of them.
-   *<br>
-   * The edges a match names are the graph's own edge objects, so this
-   * checks for that very object.  An edge which is in both the basic
-   * and the enhanced graph is still reported as the one it was
-   * matched in.
-   */
-  static SemgrexGraphName graphOfEdge(CoreMap sentence, SemanticGraphEdge edge) {
-    for (SemgrexGraphName name : SemgrexGraphName.values()) {
-      SemanticGraph graph = sentence.get(name.annotation);
-      if (graph == null || !graph.containsVertex(edge.getSource())) {
-        continue;
-      }
-      for (SemanticGraphEdge candidate : graph.getAllEdges(edge.getSource(), edge.getTarget())) {
-        if (candidate == edge) {
-          return name;
-        }
-      }
-    }
-    return null;
-  }
-
-  /**
    * Builds the PatternResult for one SemgrexPattern and one sentence
-   *<br>
-   * The sentence is used to tell which of its graphs each named edge came from.
    *
    * @param pattern the pattern which was matched; not used when building the result
-   * @param sentence the sentence the matches came from
    * @param matches the matches of the pattern on the sentence
    * @param patternIdx the index of the pattern in the request
    * @param sentenceIdx the index of the sentence in the request
    * @return a PatternResult describing each match, with its named nodes,
    *   relations, edges, and variable strings
    */
-  public static CoreNLPProtos.SemgrexResponse.PatternResult matchSentence(SemgrexPattern pattern, CoreMap sentence, List<SemgrexMatch> matches, int patternIdx, int sentenceIdx) {
+  public static CoreNLPProtos.SemgrexResponse.PatternResult matchSentence(SemgrexPattern pattern, List<SemgrexMatch> matches, int patternIdx, int sentenceIdx) {
     CoreNLPProtos.SemgrexResponse.PatternResult.Builder patternResultBuilder = CoreNLPProtos.SemgrexResponse.PatternResult.newBuilder();
     patternResultBuilder.setSemgrexIndex(patternIdx);
     for (SemgrexMatch matcher : matches) {
@@ -158,10 +131,7 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
         if (edge.getTarget().getEmptyIndex() != 0) {
           edgeBuilder.setTargetEmpty(edge.getTarget().getEmptyIndex());
         }
-        SemgrexGraphName graphName = graphOfEdge(sentence, edge);
-        if (graphName != null) {
-          edgeBuilder.setGraph(toProto(graphName));
-        }
+        edgeBuilder.setGraph(toProto(matcher.getEdgeGraph(edgeName)));
         matchBuilder.addEdge(edgeBuilder.build());
       }
 
@@ -247,7 +217,7 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
         for (Pair<SemgrexPattern, List<SemgrexMatch>> patternMatches : sentenceMatches) {
           SemgrexPattern pattern = patternMatches.first();
           int patternIdx = semgrexIndices.get(pattern);
-          sentenceResultBuilder.addPattern(matchSentence(pattern, sentence, patternMatches.second(), patternIdx, sentenceIdx));
+          sentenceResultBuilder.addPattern(matchSentence(pattern, patternMatches.second(), patternIdx, sentenceIdx));
         }
       }
 
