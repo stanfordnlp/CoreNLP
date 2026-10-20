@@ -3,6 +3,8 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 import java.io.StringWriter;
 
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -44,15 +46,28 @@ public class RemoveNamedEdge extends SsurgeonEdit {
   }
 
   /**
-   * Removes the named edge from the graph, if it exists.
+   * Removes the named edge, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
    *
    * @return whether the edge was in the graph to be removed
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    SemanticGraphEdge edge = sm.getEdge(edgeName);
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
 
-    if (edge != null) {
+  /**
+   * Removes the named edge from the graph it was matched in, if it is still there.
+   * An edge with the same endpoints and relation in another graph is left alone.
+   *
+   * @return whether the edge was in the graph to be removed
+   */
+  @Override
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+    SemanticGraphEdge edge = sm.getEdge(edgeName);
+    SemgrexGraphName graphName = sm.getEdgeGraph(edgeName);
+    SemanticGraph sg = graphName == null ? null : graphs.get(graphName);
+
+    if (edge != null && sg != null) {
       return sg.removeEdge(edge);
     }
     return false;

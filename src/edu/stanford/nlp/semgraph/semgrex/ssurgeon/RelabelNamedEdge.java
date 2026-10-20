@@ -2,6 +2,8 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import java.io.StringWriter;
 
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -63,13 +65,26 @@ public class RelabelNamedEdge extends SsurgeonEdit {
   }
 
   /**
-   * "Rename" the named edge by removing it and then recreating it
+   * Relabels the named edge, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    SemanticGraphEdge edge = sm.getEdge(edgeName);
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
 
-    if (edge != null) {
+  /**
+   * "Rename" the named edge by removing it and then recreating it
+   *<br>
+   * The edge is relabeled in the graph it was matched in.  An edge with
+   * the same endpoints and relation in another graph is left alone.
+   */
+  @Override
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+    SemanticGraphEdge edge = sm.getEdge(edgeName);
+    SemgrexGraphName graphName = sm.getEdgeGraph(edgeName);
+    SemanticGraph sg = graphName == null ? null : graphs.get(graphName);
+
+    if (edge != null && sg != null) {
       // if the edge is already named what we want, then our work here is done
       // this bomb-proofs the operation in the event someone writes an edit that
       // generically changes any edge to nsubj, for example
@@ -99,7 +114,7 @@ public class RelabelNamedEdge extends SsurgeonEdit {
       // iterations have the name connected to the edge
       // TODO: if an existing edge was clobbered, perhaps we need to
       // update anything that named it
-      sm.putNamedEdge(edgeName, newEdge);
+      sm.putNamedEdge(edgeName, newEdge, graphName);
       return true;
     }
     return false;
