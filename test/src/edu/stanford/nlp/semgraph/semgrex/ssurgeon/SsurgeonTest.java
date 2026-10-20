@@ -17,8 +17,10 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -1914,6 +1916,69 @@ public class SsurgeonTest {
     assertEquals("it's", sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
   }
 
+
+  /**
+   * Reattaching an edge onto an arc which already has an edge with the same
+   * relation keeps that edge, rather than adding a second one
+   */
+  @Test
+  public void reattachOntoExistingEdge() {
+    SemanticGraph sg = SemanticGraph.valueOf("[a-1 obj> c-3 dep> b-2]");
+    GrammaticalRelation obj = GrammaticalRelation.valueOf(Language.UniversalEnglish, "obj");
+    IndexedWord b = sg.getNodeByIndex(2);
+    IndexedWord c = sg.getNodeByIndex(3);
+    sg.addEdge(b, c, obj, 1.0, false);
+
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:a}=a >obj=e {word:c} >dep {word:b}=b\nReattachNamedEdge -edge e -gov b", "UniversalEnglish").get(0);
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(sg);
+    assertTrue(result.second);
+    SemanticGraph edited = result.first;
+    assertEquals(0, edited.getAllEdges(edited.getNodeByIndex(1), edited.getNodeByIndex(3)).size());
+    assertEquals(1, edited.getAllEdges(edited.getNodeByIndex(2), edited.getNodeByIndex(3)).size());
+  }
+
+  /** The edge a named-edge edit gives its name to is the one in the graph */
+  private static void assertNamedEdgeInGraph(SemanticGraph sg, SemgrexMatcher matcher, String name) {
+    SemanticGraphEdge named = matcher.getEdge(name);
+    boolean found = false;
+    for (SemanticGraphEdge edge : sg.getAllEdges(named.getSource(), named.getTarget())) {
+      found = found || edge == named;
+    }
+    assertTrue("The edge named " + name + " is not the edge in the graph", found);
+  }
+
+  @Test
+  public void relabelNamesTheEdgeInTheGraph() {
+    SemanticGraph sg = SemanticGraph.valueOf("[ate-1 nsubj> Bill-2 obj> cake-3]");
+    SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {}").matcher(sg);
+    assertTrue(matcher.find());
+    RelabelNamedEdge edit = new RelabelNamedEdge("e", GrammaticalRelation.valueOf(Language.UniversalEnglish, "iobj"));
+    assertTrue(edit.evaluate(sg, matcher));
+    assertEquals("iobj", matcher.getEdge("e").getRelation().toString());
+    assertNamedEdgeInGraph(sg, matcher, "e");
+  }
+
+  @Test
+  public void reattachNamesTheEdgeInTheGraph() {
+    SemanticGraph sg = SemanticGraph.valueOf("[ate-1 nsubj> Bill-2 obj> cake-3]");
+    SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {} >nsubj {}=s").matcher(sg);
+    assertTrue(matcher.find());
+    ReattachNamedEdge edit = new ReattachNamedEdge("e", "s", null);
+    assertTrue(edit.evaluate(sg, matcher));
+    assertEquals(2, matcher.getEdge("e").getSource().index());
+    assertNamedEdgeInGraph(sg, matcher, "e");
+  }
+
+  /** RemoveNamedEdge only reports a change when there was an edge to remove */
+  @Test
+  public void removeNamedEdgeReportsRemoval() {
+    SemanticGraph sg = SemanticGraph.valueOf("[ate-1 nsubj> Bill-2 obj> cake-3]");
+    SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {}").matcher(sg);
+    assertTrue(matcher.find());
+    RemoveNamedEdge edit = new RemoveNamedEdge("e");
+    assertTrue(edit.evaluate(sg, matcher));
+    assertFalse(edit.evaluate(sg, matcher));
+  }
 
   /**
    * CombineMWT says when it changed something, so that a caller such as

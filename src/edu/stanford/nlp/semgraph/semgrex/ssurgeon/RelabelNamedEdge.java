@@ -89,12 +89,9 @@ public class RelabelNamedEdge extends SsurgeonEdit {
             break found;
           }
         }
-        newEdge = new SemanticGraphEdge(edge.getSource(),
-                                        edge.getTarget(),
-                                        this.relation,
-                                        edge.getWeight(),
-                                        edge.isExtra());
-        sg.addEdge(newEdge);
+        // the graph holds a copy of an edge given to addEdge, so this is
+        // the edge to give the name to
+        newEdge = sg.addEdge(edge.getSource(), edge.getTarget(), this.relation, edge.getWeight(), edge.isExtra());
       }
       // whether we recreated a new edge with the new relation,
       // or found an existing edge with the relation we wanted,

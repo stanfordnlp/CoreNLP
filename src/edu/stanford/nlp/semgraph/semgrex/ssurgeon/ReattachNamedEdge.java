@@ -75,8 +75,8 @@ public class ReattachNamedEdge extends SsurgeonEdit {
    * Removes {@code edge} from the graph and adds an edge with the same relation,
    * weight, and extra flag from {@code gov} to {@code dep}.  If {@code edgeName}
    * is not null, that name in the matcher is updated to refer to the new edge.
-   * If, after the removal, an edge with the same relation still connects the
-   * original source and target, no edge is added and the name refers to that edge.
+   * If an edge with the same relation already goes from {@code gov} to
+   * {@code dep}, no edge is added and the name refers to that edge.
    *
    * @param sg The graph to edit
    * @param sm The matcher whose named edge is updated
@@ -100,18 +100,15 @@ public class ReattachNamedEdge extends SsurgeonEdit {
     }
     final SemanticGraphEdge newEdge;
     found: {
-      for (SemanticGraphEdge existingEdge : sg.getAllEdges(edge.getSource(), edge.getTarget())) {
+      for (SemanticGraphEdge existingEdge : sg.getAllEdges(gov, dep)) {
         if (existingEdge.getRelation().equals(edge.getRelation())) {
           newEdge = existingEdge;
           break found;
         }
       }
-      newEdge = new SemanticGraphEdge(gov,
-                                      dep,
-                                      edge.getRelation(),
-                                      edge.getWeight(),
-                                      edge.isExtra());
-      sg.addEdge(newEdge);
+      // the graph holds a copy of an edge given to addEdge, so this is
+      // the edge to give the name to
+      newEdge = sg.addEdge(gov, dep, edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
     // whether we recreated a new edge with the new relation,
     // or found an existing edge with the relation we wanted,

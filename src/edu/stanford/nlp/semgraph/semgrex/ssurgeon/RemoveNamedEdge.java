@@ -45,14 +45,15 @@ public class RemoveNamedEdge extends SsurgeonEdit {
 
   /**
    * Removes the named edge from the graph, if it exists.
+   *
+   * @return whether the edge was in the graph to be removed
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
     SemanticGraphEdge edge = sm.getEdge(edgeName);
 
     if (edge != null) {
-      sg.removeEdge(edge);
-      return true;
+      return sg.removeEdge(edge);
     }
     return false;
   }
