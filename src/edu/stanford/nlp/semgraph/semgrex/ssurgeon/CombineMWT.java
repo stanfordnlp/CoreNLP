@@ -124,6 +124,6 @@ public class CombineMWT extends SsurgeonEdit {
       }
     }
 
-    return false;
+    return changed;
   }
 }

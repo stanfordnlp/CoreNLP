@@ -19,6 +19,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.XMLUtils;
 
 public class SsurgeonTest {
@@ -1913,6 +1914,24 @@ public class SsurgeonTest {
     assertEquals("it's", sVertex.get(CoreAnnotations.MWTTokenTextAnnotation.class));
   }
 
+
+  /**
+   * CombineMWT says when it changed something, so that a caller such as
+   * the SsurgeonPattern command line knows the sentence was edited
+   */
+  @Test
+  public void combineMWTReportsChange() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:/[iI]t/}=it . {word:/'s/}=s\nCombineMWT -node it -node s", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[yours-4 nsubj> it-1 cop> 's-2 advmod> yours-3 punct> !-5]");
+
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(sg);
+    assertTrue(result.second);
+    assertEquals("it's", result.first.getNodeByIndexSafe(1).get(CoreAnnotations.MWTTokenTextAnnotation.class));
+
+    // the MWT is already there, so a second pass changes nothing
+    result = pattern.iterate(result.first);
+    assertFalse(result.second);
+  }
 
   /**
    * Put MWT annotations on a couple nodes using CombineMWT
