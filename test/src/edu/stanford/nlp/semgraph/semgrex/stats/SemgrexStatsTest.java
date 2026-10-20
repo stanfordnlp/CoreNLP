@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.pipeline.CoNLLUReader;
+import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexParseException;
@@ -839,5 +842,121 @@ public class SemgrexStatsTest {
 
     assertThrows(IllegalArgumentException.class, () ->
                  SemgrexStats.expandConlluFiles(List.of(""), CONLLU_EXTENSIONS));
+  }
+
+  // ------------------------------------------------------------------
+  // sentences with more than one graph
+  // ------------------------------------------------------------------
+
+  /**
+   * "Sue likes coffee and Bill tea", where the enhanced graph has an
+   * empty word 5.1 for the elided "likes"
+   */
+  static final String ENHANCED_SENTENCE = String.join("\n",
+    "# text = Sue likes coffee and Bill tea",
+    "1\tSue\tSue\tPROPN\t_\t_\t2\tnsubj\t2:nsubj\t_",
+    "2\tlikes\tlike\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "3\tcoffee\tcoffee\tNOUN\t_\t_\t2\tobj\t2:obj\t_",
+    "4\tand\tand\tCCONJ\t_\t_\t5\tcc\t5.1:cc\t_",
+    "5\tBill\tBill\tPROPN\t_\t_\t2\tconj\t5.1:nsubj\t_",
+    "5.1\tlikes\tlike\tVERB\t_\t_\t_\t_\t2:conj:and\t_",
+    "6\ttea\ttea\tNOUN\t_\t_\t5\torphan\t5.1:obj\t_",
+    "",
+    "");
+
+  /** The sentence above, read from CoNLL-U the way SemgrexStats.main reads a file, with both of its graphs */
+  public static List<CoreMap> readEnhancedSentence() throws IOException {
+    File file = File.createTempFile("semgrexstats", ".conllu");
+    file.deleteOnExit();
+    Files.write(file.toPath(), ENHANCED_SENTENCE.getBytes(StandardCharsets.UTF_8));
+    List<CoreMap> sentences = new ArrayList<>();
+    for (Annotation doc : new CoNLLUReader().readCoNLLUFile(file.getPath())) {
+      sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
+    }
+    assertEquals(1, sentences.size());
+    assertNotNull(sentences.get(0).get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
+    return sentences;
+  }
+
+  public static SemgrexStats runScript(String script, List<CoreMap> sentences) {
+    SemgrexStats stats = SemgrexStats.parse(script);
+    for (int stage = 0; stage < stats.numStages(); ++stage) {
+      stats.accumulate(stage, sentences);
+    }
+    return stats;
+  }
+
+  /**
+   * A pattern can count the relations of the enhanced graph, including
+   * the ones to and from the empty word
+   */
+  @Test
+  public void testEnhancedEdges() throws IOException {
+    SemgrexStats stats = runScript(lines("pattern {}=gov >/.*/@enhanced=edge {}",
+                                         "count edge"),
+                                   readEnhancedSentence());
+    CountStat count = countStat(stats, 0, 0);
+    // nsubj and obj twice, once each from the empty likes
+    assertEquals(6, count.getTotalMatches());
+    assertEquals(4, count.getDistinctKeys());
+    String report = stats.report();
+    assertEquals("2", chartRow(report, "nsubj").get(1));
+    assertEquals("2", chartRow(report, "obj").get(1));
+    assertEquals("1", chartRow(report, "cc").get(1));
+    assertEquals("1", chartRow(report, "conj:and").get(1));
+    assertNull(chartRow(report, "orphan"));
+  }
+
+  /**
+   * The same sentences counted without naming a graph see only the basic graph
+   */
+  @Test
+  public void testBasicEdgesOfEnhancedSentence() throws IOException {
+    SemgrexStats stats = runScript(lines("pattern {}=gov >/.*/=edge {}",
+                                         "count edge"),
+                                   readEnhancedSentence());
+    CountStat count = countStat(stats, 0, 0);
+    assertEquals(5, count.getTotalMatches());
+    assertEquals(5, count.getDistinctKeys());
+    assertNotNull(chartRow(stats.report(), "orphan"));
+    assertNull(chartRow(stats.report(), "conj:and"));
+  }
+
+  /**
+   * A match can start at the empty word, which is only in the enhanced graph.
+   *<br>
+   * {#} is not the way to ask for it: that is IndexedWord.NO_WORD, the
+   * unaligned word of an alignment.  The empty word is the one with an
+   * enhanced head and no basic head
+   */
+  @Test
+  public void testEmptyWordMatch() throws IOException {
+    SemgrexStats stats = runScript(lines("pattern {}=elided !< {} <@enhanced {}=gov",
+                                         "count elided gov"),
+                                   readEnhancedSentence());
+    CountStat count = countStat(stats, 0, 0);
+    assertEquals(1, count.getTotalMatches());
+    assertEquals(1, count.getDistinctKeys());
+  }
+
+  /**
+   * A first stage can collect words through the enhanced graph for a
+   * second stage which counts their basic relations: the words whose
+   * enhanced head is the empty "likes" are the ones left in the basic
+   * graph without a verb of their own
+   */
+  @Test
+  public void testCollectThroughEnhanced() throws IOException {
+    SemgrexStats stats = runScript(lines("pattern {} !< {} <@enhanced {} >@enhanced {}=word",
+                                         "collect word as elided",
+                                         "pattern {}=word <=relation {}",
+                                         "count -restrict word=elided relation"),
+                                   readEnhancedSentence());
+    CountStat count = countStat(stats, 1, 0);
+    assertEquals(3, count.getTotalMatches());
+    String report = stats.report();
+    assertEquals("1", chartRow(report, "cc").get(1));
+    assertEquals("1", chartRow(report, "conj").get(1));
+    assertEquals("1", chartRow(report, "orphan").get(1));
   }
 }
