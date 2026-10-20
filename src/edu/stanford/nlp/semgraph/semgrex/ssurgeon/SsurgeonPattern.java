@@ -236,8 +236,9 @@ public class SsurgeonPattern {
       // We use the same nodes, since the matcher operates off of those.
       SemanticGraph tgt = SemanticGraphFactory.duplicateKeepNodes(sg);
       nodeMap = Generics.newHashMap();
+      SemgrexGraphs tgtGraphs = new SemgrexGraphs(tgt);
       for (SsurgeonEdit edit : editScript) {      
-        edit.evaluate(tgt, matcher);
+        edit.evaluate(tgtGraphs, matcher);
       }
       generated.add(tgt);
     }
@@ -303,7 +304,9 @@ public class SsurgeonPattern {
     List<IndexedWord> words = copied.vertexListSorted();
     List<String> indices = wordIndices(words);
 
-    SemgrexMatcher matcher = semgrexPattern.matcher(SemgrexGraphs.of(copied, enhanced));
+    // the edits work on the same graphs the matcher searches
+    SemgrexGraphs graphs = SemgrexGraphs.of(copied, enhanced);
+    SemgrexMatcher matcher = semgrexPattern.matcher(graphs);
     boolean anyChanges = false;
     while (matcher.find()) {
       // We reset the named node map with each edit set, since these edits
@@ -311,7 +314,7 @@ public class SsurgeonPattern {
       nodeMap = Generics.newHashMap();
       boolean edited = false;
       for (SsurgeonEdit edit : editScript) {
-        if (edit.evaluate(copied, matcher)) {
+        if (edit.evaluate(graphs, matcher)) {
           edited = true;
           anyChanges = true;
         }
@@ -323,7 +326,8 @@ public class SsurgeonPattern {
             break;
           }
         }
-        matcher = semgrexPattern.matcher(SemgrexGraphs.of(copied, enhanced));
+        graphs = SemgrexGraphs.of(copied, enhanced);
+        matcher = semgrexPattern.matcher(graphs);
       }
     }
     return new Pair<>(copied, anyChanges);
@@ -377,8 +381,9 @@ public class SsurgeonPattern {
       // should exist in a separate graph for each unique Semgrex match.
       nodeMap = Generics.newHashMap();
       SemanticGraph tgt = new SemanticGraph(sg);
+      SemgrexGraphs tgtGraphs = new SemgrexGraphs(tgt);
       for (SsurgeonEdit edit : editScript) {      
-        edit.evaluate(tgt, matcher);
+        edit.evaluate(tgtGraphs, matcher);
       }
       generated.add(tgt);
     }
