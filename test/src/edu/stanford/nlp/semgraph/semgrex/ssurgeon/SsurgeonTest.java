@@ -1194,6 +1194,84 @@ public class SsurgeonTest {
   }
 
   /**
+   * addDep -name puts the new word in the match, so a later edit can use it.
+   * Each match adds its own word: "dog chased cat" gets two articles,
+   * and the edit after the addDep edits the one its own match added.
+   */
+  @Test
+  public void readXMLAddDepName() {
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Put an article in front of each noun which has none</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:/dog|cat/}=noun !> {word:the}") + "</semgrex>",
+                             "    <edit-list>addDep -gov noun -reln det -position -noun -word the -name article</edit-list>",
+                             "    <edit-list>editNode -node article -lemma the</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = readFromString(add);
+    assertEquals(1, patterns.size());
+    SsurgeonPattern addSsurgeon = patterns.get(0);
+    assertTrue(addSsurgeon.getEditScript().get(0).toEditString().contains("-name article"));
+
+    SemanticGraph sg = SemanticGraph.valueOf("[chased-2 nsubj> dog-1 obj> cat-3]", Language.UniversalEnglish);
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
+    SemanticGraph expected = SemanticGraph.valueOf("[chased-3 nsubj> [dog-2 det> the-1] obj> [cat-5 det> the-4]]", Language.UniversalEnglish);
+    assertEquals(expected, newSG);
+    // addDep does not set the lemma, so the editNode found each new word by its name
+    assertEquals("the", newSG.getNodeByIndex(1).lemma());
+    assertEquals("the", newSG.getNodeByIndex(4).lemma());
+    assertNull(newSG.getNodeByIndex(2).lemma());
+  }
+
+  /**
+   * With an optional node of the same name in the pattern, addDep -name
+   * fills in the word only where it is missing.  Where the pattern found
+   * the word, nothing is added, and later edits use the word it found.
+   */
+  @Test
+  public void readXMLAddDepFillsOptionalNode() {
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Make sure each antennae is blue</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae ?>dep {word:blue}=blue") + "</semgrex>",
+                             "    <edit-list>addDep -gov antennae -reln dep -word blue -name blue</edit-list>",
+                             "    <edit-list>editNode -node blue -lemma blue</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    SsurgeonPattern pattern = readFromString(add).get(0);
+
+    // no blue, so one is added, and only one
+    SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]", Language.UniversalEnglish);
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(sg);
+    assertTrue(result.second);
+    SemanticGraph expected = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-3 dep> blue-4]]", Language.UniversalEnglish);
+    assertEquals(expected, result.first);
+    assertEquals("blue", result.first.getNodeByIndex(4).lemma());
+
+    // blue is already there, so nothing is added, and the editNode edits the blue the pattern found
+    sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> [antennae-4 dep> blue-3]]", Language.UniversalEnglish);
+    result = pattern.iterate(sg);
+    assertTrue(result.second);
+    assertEquals(sg, result.first);
+    assertEquals("blue", result.first.getNodeByIndex(3).lemma());
+  }
+
+  /** A second addDep with the same name finds the first one's word in the match, and adds nothing */
+  @Test
+  public void addDepNameAlreadyAdded() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:dog}=noun !> {}\naddDep -gov noun -reln det -word the -name a\naddDep -gov noun -reln det -word an -name a", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[chased-2 nsubj> dog-1]", Language.UniversalEnglish);
+    SemanticGraph edited = pattern.iterate(sg).first;
+    assertEquals(SemanticGraph.valueOf("[chased-2 nsubj> [dog-1 det> the-3]]", Language.UniversalEnglish), edited);
+  }
+
+  /**
    * There should be an exception for an annotation key that does not exist
    */
   @Test

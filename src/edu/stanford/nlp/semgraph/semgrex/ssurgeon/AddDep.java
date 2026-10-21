@@ -17,6 +17,13 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  * Nodes will be placed at the end of the sentence by default, at the
  * start or end using "-position -" or "-position +", or
  * before or after a node with "-position -word" and "-position +word"
+ *<br>
+ * With "-name", the new node is added to the match under that name, so
+ * later edits for the same match can refer to it.  Each match adds its
+ * own node, and the name refers to the one added for that match.  If the
+ * match already has a node by that name, such as one an optional relation
+ * of the semgrex pattern found, no node is added, so the edit fills in a
+ * node only where one is missing.
  *
  * @author Eric Yeh
  *
@@ -29,6 +36,7 @@ public class AddDep extends SsurgeonEdit {
   final String govNodeName;
   final String position;
   final double weight;
+  final String nodeName;
 
   /**
    * Creates an AddDep with an edge weight of 0.
@@ -56,6 +64,23 @@ public class AddDep extends SsurgeonEdit {
    *   the position is invalid, or the attributes can't be used for a new node
    */
   public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight) {
+    this(govNodeName, relation, attributes, position, weight, null);
+  }
+
+  /**
+   * Creates an AddDep which names its new node.
+   *
+   * @param govNodeName the name of the matched node which governs the new node
+   * @param relation the relation from the governor to the new node
+   * @param attributes the attributes of the new node, such as word or lemma; the map is copied
+   * @param position where to put the new node, or null for the end of the sentence.
+   *   Must start with {@code -} or {@code +}
+   * @param weight the weight of the new edge
+   * @param nodeName the name to give the new node in the match, or null for no name
+   * @throws SsurgeonParseException if govNodeName or relation is null,
+   *   the position is invalid, or the attributes can't be used for a new node
+   */
+  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight, String nodeName) {
     if (position != null) {
       if (!position.startsWith("-") && !position.startsWith("+")) {
         throw new SsurgeonParseException("Unknown position " + position + " in AddDep operation");
@@ -74,6 +99,7 @@ public class AddDep extends SsurgeonEdit {
     this.govNodeName = govNodeName;
     this.position = position;
     this.weight = weight;
+    this.nodeName = nodeName;
   }
 
   /**
@@ -91,6 +117,11 @@ public class AddDep extends SsurgeonEdit {
     if (position != null) {
       buf.write(Ssurgeon.POSITION_ARG);buf.write(" ");
       buf.write(position);buf.write("\t");
+    }
+
+    if (nodeName != null) {
+      buf.write(Ssurgeon.NAME_ARG);buf.write(" ");
+      buf.write(nodeName);buf.write("\t");
     }
 
     for (String key : attributes.keySet()) {
@@ -114,6 +145,10 @@ public class AddDep extends SsurgeonEdit {
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    if (nodeName != null && sm.getNode(nodeName) != null) {
+      // the match already has this node, so there is nothing to fill in
+      return false;
+    }
     IndexedWord govNode = sm.getNode(govNodeName);
     // must make new copy of CoreLabel - if the same word is added
     // multiple times by the same operation, we don't want to have the
@@ -159,6 +194,10 @@ public class AddDep extends SsurgeonEdit {
 
     sg.addVertex(newNode);
     sg.addEdge(govNode, newNode, relation, weight, false);
+    // named before it moves, so the name follows it to its place
+    if (nodeName != null) {
+      sm.putNode(nodeName, newNode);
+    }
 
     if (position != null && !position.equals("+")) {
       // the payoff for tempIndex == maxIndex + 2:

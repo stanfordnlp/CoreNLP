@@ -83,7 +83,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code removeEdge -gov node1 -dep node2 -reln depType -graph enhanced}
  * <li> {@code removeNamedEdge -edge edgename}
  * <li> {@code reattachNamedEdge -edge edgename -gov gov -dep dep}
- * <li> {@code addDep -gov node1 -reln depType -position where ...attributes...}
+ * <li> {@code addDep -gov node1 -reln depType -position where -name name ...attributes...}
  * <li> {@code editNode -node node ...attributes...}
  * <li> {@code lemmatize -node node}
  * <li> {@code combineMWT -node node -word word}
@@ -133,6 +133,13 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -position} is where in the sentence the word should go.  {@code -} will be the first word of the sentence,
  *   {@code +} will be the last word of the sentence, and {@code -node} or {@code +node} will be before or after the
  *   named node. <br>
+ * {@code -name} adds the new word to the match under that name, so later edits for the same match can use it.
+ *   Each match adds its own word, and the name refers to the word added for that match.
+ *   If the match already has a node by that name, nothing is added, and later edits use that node.
+ *   With an optional node in the Semgrex pattern, this fills in a word only where one is missing:
+ *   {@code {word:antennae}=antennae ?>dep {word:blue}=blue} with
+ *   {@code addDep -gov antennae -reln dep -word blue -name blue} adds {@code blue} to antennae which have none,
+ *   and stops once it has. <br>
  * {@code ...attributes...} means any attributes which can be set from a string or numerical value
  *   eg {@code -text ...} sets the text of the word
  *   {@code -pos ...} sets the xpos of the word, {@code -cpos ...} sets the upos of the word, etc.
@@ -770,7 +777,7 @@ public class Ssurgeon  {
           throw new SsurgeonParseException("Relation not specified for AddDep");
         }
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
-        return new AddDep(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position, argsBox.weight);
+        return new AddDep(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position, argsBox.weight, argsBox.name);
       } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
         return AddNode.createAddNode(argsBox.nodeString, argsBox.name);
       } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {
