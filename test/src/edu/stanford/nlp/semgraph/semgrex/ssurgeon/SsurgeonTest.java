@@ -2901,7 +2901,7 @@ public class SsurgeonTest {
     attributes.put("lemma", "is");
     attributes.put("current", "is");
     attributes.put("pos", "VBN");
-    SsurgeonEdit addCopula = new AddDep("a2", EnglishGrammaticalRelations.COPULA, attributes, null, 0.0);
+    SsurgeonEdit addCopula = new AddDep("a2", EnglishGrammaticalRelations.COPULA, attributes, null, 0.0, null, null);
     pattern.addEdit(addCopula);
 
     // Keep only the piece with bartender, which is cut off from the old root
