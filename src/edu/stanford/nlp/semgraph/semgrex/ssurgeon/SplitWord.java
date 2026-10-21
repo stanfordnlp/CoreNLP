@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 import java.io.*;
 
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -19,11 +21,13 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  * regex, one which matches the " in a group, one which matches the
  * rest of the word without the "
  * <br>
+ * The pieces are counted from 0, in the order they appear in the
+ * sentence, for -headIndex, -name, -edge, and -reln alike.
+ * <br>
  * Aside from the text and the dependency, the new node is rather bare bones.
  * Adding the -name argument allows for specifying a comma-separate list
  * of names which can be used to insert the new nodes into the SemgrexMatcher
  * as named nodes.  This will allow for further edits in the same edit step.
- * This list should be 0 indexed.
  * <br>
  * For example, this will split "foobar" and put the pos ADJ on the first word
  * <pre>
@@ -44,18 +48,31 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  * whatever the original word hung from.  A Spanish contraction such as
  * "yla" splits into "y" and "la", and neither of those is the head of the
  * other; they both belong to the phrase the original word belonged to.
- * Since one -reln has to serve for every new piece, name the edges with
- * -edge and relabel them afterwards:
+ * <br>
+ * -reln is either one relation for every new piece, or a relation for
+ * each piece, written as 1=det,2=obj.  In that form, each new piece needs
+ * a relation.  The head piece may have one as well, which replaces the
+ * relation of each of its incoming edges; otherwise those are left as
+ * they are.  So "yla" can be split with each piece getting its own
+ * relation:
  * <pre>
  * semgrex:
  *   {word:/yla/}=split
  * ssurgeon:
- *   splitWord -node split -exact y -exact la -reln dep -headIndex 0 -siblings true -edge 1=second
- *   relabelNamedEdge -edge second -reln det
+ *   splitWord -node split -exact y -exact la -reln 0=cc,1=det -headIndex 0 -siblings true
  * </pre>
+ * -edge names the edges of the new pieces, so that later edits can
+ * change them.  The head piece keeps the edges it had, which the
+ * semgrex pattern can name.
+ * <br>
+ * The new pieces go into every graph of the sentence, so the graphs keep
+ * sharing their words.  In each graph, a new piece is attached to the
+ * head piece, or with -siblings, to each governor the matched node has
+ * in that graph.  A name given with -edge refers to the edge in the basic
+ * graph.  An empty word after the matched node goes after the last piece.
  * <br>
  * A matched node with no governor at all, such as the root, cannot be
- * split this way, and the edit does nothing.
+ * split with -siblings, and the edit does nothing.
  *
  * @author John Bauer
  */
@@ -67,7 +84,10 @@ public class SplitWord extends SsurgeonEdit {
   final List<Pattern> nodeRegex;
   final List<String> exactPieces;
   final int headIndex;
+  /** The relation for every new piece, or null if each piece has its own */
   final GrammaticalRelation relation;
+  /** The relation for each piece, by its index, or empty if every new piece has the same one */
+  final Map<Integer, GrammaticalRelation> pieceRelations;
   final Map<Integer, String> nodeNames;
   final Map<Integer, String> edgeNames;
   final boolean siblings;
@@ -94,40 +114,26 @@ public class SplitWord extends SsurgeonEdit {
   }
 
   /**
-   * Creates a split which attaches the new pieces to the head piece.
+   * Creates a split.
    *
    * @param node the name of the matched node to split
    * @param nodePieces the regexes (or exact strings, if {@code exactSplit}) giving each piece
    * @param headIndex the 0-indexed piece which keeps the matched node
-   * @param relation the relation attaching each new piece
-   * @param nodeNames names for the pieces, such as {@code 0=foo,1=bar}, or null
-   * @param edgeNames names for the new edges, in the same format, or null
-   * @param exactSplit whether {@code nodePieces} are exact strings rather than regexes
-   * @throws SsurgeonParseException if a required argument is missing, there are
-   *   fewer than two pieces, a name refers to a piece which does not exist,
-   *   or an edge name is given for the head piece
-   */
-  public SplitWord(String node, List<String> nodePieces, Integer headIndex, GrammaticalRelation relation, String nodeNames, String edgeNames, boolean exactSplit) {
-    this(node, nodePieces, headIndex, relation, nodeNames, edgeNames, exactSplit, false);
-  }
-
-  /**
-   * Creates a split, optionally attaching the new pieces to the governors of the matched node.
-   *
-   * @param node the name of the matched node to split
-   * @param nodePieces the regexes (or exact strings, if {@code exactSplit}) giving each piece
-   * @param headIndex the 0-indexed piece which keeps the matched node
-   * @param relation the relation attaching each new piece
+   * @param relation the relation attaching each new piece, or null if pieceRelations gives one for each
+   * @param pieceRelations the relation for each piece, by its 0-based index, or null if relation is used.
+   *   Each new piece needs one; one for the head piece replaces the relation of its incoming edges
    * @param nodeNames names for the pieces, such as {@code 0=foo,1=bar}, or null
    * @param edgeNames names for the new edges, in the same format, or null
    * @param exactSplit whether {@code nodePieces} are exact strings rather than regexes
    * @param siblings if true, attach the new pieces to the governors of the
    *   matched node rather than to the head piece
    * @throws SsurgeonParseException if a required argument is missing, there are
-   *   fewer than two pieces, a name refers to a piece which does not exist,
-   *   or an edge name is given for the head piece
+   *   fewer than two pieces, a name or relation refers to a piece which does
+   *   not exist, a new piece has no relation, or an edge name is given for
+   *   the head piece
    */
-  public SplitWord(String node, List<String> nodePieces, Integer headIndex, GrammaticalRelation relation, String nodeNames, String edgeNames, boolean exactSplit, boolean siblings) {
+  public SplitWord(String node, List<String> nodePieces, Integer headIndex, GrammaticalRelation relation, Map<Integer, GrammaticalRelation> pieceRelations,
+                   String nodeNames, String edgeNames, boolean exactSplit, boolean siblings) {
     this.siblings = siblings;
     if (node == null) {
       throw new SsurgeonParseException("SplitWord expected -node with the name of the matched node to split");
@@ -156,10 +162,28 @@ public class SplitWord extends SsurgeonEdit {
     }
     this.headIndex = headIndex;
 
-    if (relation == null) {
+    if (relation == null && (pieceRelations == null || pieceRelations.isEmpty())) {
       throw new SsurgeonParseException("SplitWord expected a -reln to represent the dependency to use for the new words");
     }
+    if (relation != null && pieceRelations != null && !pieceRelations.isEmpty()) {
+      throw new SsurgeonParseException("SplitWord expected either one -reln for every new word, or one for each word, not both");
+    }
     this.relation = relation;
+    if (relation == null) {
+      for (Integer index : pieceRelations.keySet()) {
+        if (index < 0 || index >= nodePieces.size()) {
+          throw new SsurgeonParseException("SplitWord got an index in -reln which was not one of the split pieces, " + index + " (this is 0-indexed)");
+        }
+      }
+      for (int i = 0; i < nodePieces.size(); ++i) {
+        if (i != headIndex && !pieceRelations.containsKey(i)) {
+          throw new SsurgeonParseException("SplitWord got a -reln for each piece, but none for piece " + i + " (this is 0-indexed)");
+        }
+      }
+      this.pieceRelations = new HashMap<>(pieceRelations);
+    } else {
+      this.pieceRelations = Collections.emptyMap();
+    }
 
     this.nodeNames = splitNames(nodeNames, "name", nodePieces.size());
     this.edgeNames = splitNames(edgeNames, "edge", nodePieces.size());
@@ -172,7 +196,7 @@ public class SplitWord extends SsurgeonEdit {
   /**
    * Renders a name map as the 0=foo,1=bar the parser reads, in index order
    */
-  static String joinNames(Map<Integer, String> names) {
+  static String joinNames(Map<Integer, ?> names) {
     List<Integer> indices = new ArrayList<>(names.keySet());
     Collections.sort(indices);
     StringBuilder buf = new StringBuilder();
@@ -200,7 +224,11 @@ public class SplitWord extends SsurgeonEdit {
         buf.write("-exact " + piece + "\t");
       }
     }
-    buf.write("-reln " + relation.toString() + "\t");
+    if (relation != null) {
+      buf.write("-reln " + relation.toString() + "\t");
+    } else {
+      buf.write("-reln " + joinNames(pieceRelations) + "\t");
+    }
     if (nodeNames.size() > 0) {
       buf.write("-name " + joinNames(nodeNames) + "\t");
     }
@@ -214,18 +242,43 @@ public class SplitWord extends SsurgeonEdit {
     return buf.toString();
   }
 
+  /** The relation for the new piece with the given index */
+  private GrammaticalRelation relationFor(int index) {
+    return relation != null ? relation : pieceRelations.get(index);
+  }
+
+  /**
+   * Splits the word, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does
+   * for a sentence with only this graph.
+   */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
+
+  /**
+   * Splits the word in every graph of the sentence which has it.
+   *<br>
+   * The words after the matched node move down to make room for the
+   * pieces, along with any empty words after the matched node, which end
+   * up after the last piece.  The head piece keeps the matched node and
+   * its edges in each graph.  Each new piece goes into every graph which
+   * has the matched node, attached to the head piece or, with -siblings,
+   * to each governor the matched node has in that graph.
+   */
+  @Override
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
     IndexedWord matchedNode = sm.getNode(node);
     if (matchedNode == null) {
       return false;
     }
+    SemanticGraph basic = graphs.getDefault();
     String origWord = matchedNode.word();
 
     // the new pieces attach to the governors of the matched node, so a node
     // with none of them cannot be split this way.  checked before anything
     // is edited, since a graph half split is worse than one not split
-    if (siblings && sg.incomingEdgeList(matchedNode).size() == 0) {
+    if (siblings && (!basic.containsVertex(matchedNode) || basic.incomingEdgeList(matchedNode).size() == 0)) {
       return false;
     }
 
@@ -256,27 +309,49 @@ public class SplitWord extends SsurgeonEdit {
       }
     }
 
-    int matchedIndex = matchedNode.index();
+    final int matchedIndex = matchedNode.index();
+    final int lastIndex = matchedIndex + words.size() - 1;
 
-    // at this point, we can make new words out of each of the patterns
+    // the graphs which have the matched node get the new pieces
+    List<SemgrexGraphName> withNode = new ArrayList<>();
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph graph = graphs.get(name);
+      if (graph != null && graph.containsVertex(matchedNode)) {
+        withNode.add(name);
+      }
+    }
 
-    // move all words down by nodeRegex.size() - 1
-    // then move the original word down by headIndex
-    SsurgeonUtils.moveNodes(sg, sm, x -> (x > matchedIndex), x -> x+words.size() - 1, true);
-    // the head node has its word replaced, and its index & links need
-    // to be rearranged, but none of the links are added or removed
-    if (headIndex > 0) {
-      SsurgeonUtils.moveNode(sg, sm, matchedNode, matchedIndex + headIndex);
+    // move the matched node to the place of the last piece, along with
+    // everything after it, so that its empty words follow the last piece.
+    // then the head piece, which keeps the matched node, goes to its own
+    // place, leaving the empty words where they are
+    SsurgeonUtils.moveNodes(graphs, sm, x -> (x >= matchedIndex), x -> x + words.size() - 1);
+    if (matchedIndex + headIndex != lastIndex) {
+      SsurgeonUtils.moveNode(graphs, sm, sm.getNode(node), matchedIndex + headIndex);
     }
     matchedNode = sm.getNode(node);
     matchedNode.setWord(words.get(headIndex));
     matchedNode.setValue(words.get(headIndex));
 
+    if (pieceRelations.containsKey(headIndex)) {
+      relabelIncoming(graphs, sm, withNode, matchedNode, pieceRelations.get(headIndex));
+    }
+
     // read the governors after the moves above: those renumber the nodes,
     // and an edge held from before them names a vertex the graph no longer
     // has, which would put a stale copy of it back when used
-    List<SemanticGraphEdge> governingEdges =
-      siblings ? sg.incomingEdgeList(matchedNode) : null;
+    Map<SemgrexGraphName, List<IndexedWord>> governors = new EnumMap<>(SemgrexGraphName.class);
+    for (SemgrexGraphName name : withNode) {
+      List<IndexedWord> graphGovernors = new ArrayList<>();
+      if (siblings) {
+        for (SemanticGraphEdge edge : graphs.get(name).incomingEdgeList(matchedNode)) {
+          graphGovernors.add(edge.getGovernor());
+        }
+      } else {
+        graphGovernors.add(matchedNode);
+      }
+      governors.put(name, graphGovernors);
+    }
 
     for (int i = 0; i < words.size(); ++i) {
       if (i == headIndex) {
@@ -287,7 +362,7 @@ public class SplitWord extends SsurgeonEdit {
       }
 
       // otherwise, add a word with the appropriate index,
-      // then connect it to matchedNode
+      // then connect it to its governors
       // rather than adding the ability to set other values,
       // we insert the nodes and edges with names into the matcher,
       // allowing further edits to update those values
@@ -298,31 +373,62 @@ public class SplitWord extends SsurgeonEdit {
       newNode.setWord(words.get(i));
       newNode.setValue(words.get(i));
 
-      sg.addVertex(newNode);
-      SemanticGraphEdge newEdge;
-      if (siblings) {
-        // one edge from each governor of the matched node, so the new piece
-        // sits alongside it rather than under it.  the first is the one a
-        // name refers to, since a later edit can only relabel one edge
-        newEdge = null;
-        for (SemanticGraphEdge parentEdge : governingEdges) {
-          SemanticGraphEdge siblingEdge = sg.addEdge(parentEdge.getGovernor(), newNode, relation, 0.0, false);
-          if (newEdge == null) {
-            newEdge = siblingEdge;
+      // the name of an edge refers to the first edge in the basic graph.
+      // with -siblings, that is the one from the first governor
+      SemanticGraphEdge namedEdge = null;
+      for (SemgrexGraphName name : withNode) {
+        SemanticGraph graph = graphs.get(name);
+        graph.addVertex(newNode);
+        for (IndexedWord governor : governors.get(name)) {
+          SemanticGraphEdge newEdge = graph.addEdge(governor, newNode, relationFor(i), 0.0, false);
+          if (namedEdge == null && name == SemgrexGraphName.BASIC) {
+            namedEdge = newEdge;
           }
         }
-      } else {
-        newEdge = sg.addEdge(matchedNode, newNode, relation, 0.0, false);
       }
 
       if (nodeNames.containsKey(i)) {
         sm.putNode(nodeNames.get(i), newNode);
       }
-      if (edgeNames.containsKey(i)) {
-        sm.putNamedEdge(edgeNames.get(i), newEdge);
+      if (edgeNames.containsKey(i) && namedEdge != null) {
+        sm.putNamedEdge(edgeNames.get(i), namedEdge, SemgrexGraphName.BASIC);
       }
     }
 
+    return true;
+  }
+
+  /**
+   * Gives each incoming edge of the node, in each of the graphs, the
+   * relation.  A name in the matcher which referred to one of the edges
+   * refers to its replacement.
+   */
+  private static void relabelIncoming(SemgrexGraphs graphs, SemgrexMatcher sm, List<SemgrexGraphName> withNode,
+                                      IndexedWord node, GrammaticalRelation relation) {
+    for (SemgrexGraphName name : withNode) {
+      SemanticGraph graph = graphs.get(name);
+      for (SemanticGraphEdge oldEdge : graph.incomingEdgeList(node)) {
+        if (oldEdge.getRelation().equals(relation)) {
+          continue;
+        }
+        graph.removeEdge(oldEdge);
+        SemanticGraphEdge newEdge = graph.addEdge(oldEdge.getGovernor(), node, relation, oldEdge.getWeight(), oldEdge.isExtra());
+        for (String edgeName : sm.getEdgeNames()) {
+          if (sm.getEdge(edgeName) == oldEdge && sm.getEdgeGraph(edgeName) == name) {
+            sm.putNamedEdge(edgeName, newEdge, name);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * SplitWord adds its words to every graph and renumbers the words of every graph.
+   *
+   * @return true
+   */
+  @Override
+  public boolean changesWordsInEveryGraph() {
     return true;
   }
 }

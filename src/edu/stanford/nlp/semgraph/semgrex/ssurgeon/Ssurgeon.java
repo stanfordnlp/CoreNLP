@@ -183,13 +183,20 @@ import edu.stanford.nlp.util.logging.Redwood;
  *</p><p>
  * {@code splitWord} will split a single word into multiple pieces from the text of the current word <br>
  * {@code -node} is the node to split. <br>
+ * The pieces are counted from 0, in the order they appear, for {@code -headIndex}, {@code -name}, {@code -edge}, and {@code -reln}. <br>
  * {@code -headIndex} is the index (counting from 0) of the word piece to make the head. <br>
- * {@code -reln} is the name of the dependency type to use.  pieces other than the head will connect using this relation <br>
+ * {@code -reln} is the name of the dependency type to use.  pieces other than the head will connect using this relation. <br>
+ *   Or, written as {@code 1=det,2=obj}, the relation for each piece.  Each piece other than the head needs one.
+ *   One for the head replaces the relation of its incoming edges, which are otherwise left as they are. <br>
  * {@code -regex} regex must match the matched node.  all matching groups will be concatenated to form a new word.  need at least 2 to split a word <br>
  * {@code -exact} instead of specifying matching regex, can split to exact pieces.  need at least 2 to split a word <br>
  * {@code -siblings true} attaches the new words to the governors of the split node rather than to the split node itself <br>
- * {@code -name} will give names to the newly created nodes.  The format is #=name, comma separated
- * {@code -edge} will give a name to the newly created edges.  Later operations can update those edges.  Index the edges from the dep (since the gov is always the same)
+ * {@code -name} will give names to the newly created nodes.  The format is #=name, comma separated <br>
+ * {@code -edge} will give a name to the newly created edges.  Later operations can update those edges.  Index the edges from the dep (since the gov is always the same).
+ *   The name refers to the edge in the basic graph. <br>
+ * The new words go into every graph of the sentence.  In each graph, they are attached to the head piece, or with
+ *   {@code -siblings true}, to each governor the split word has in that graph.  An empty word after the split word
+ *   goes after the last piece.
  *</p><p>
  * {@code setRoots} sets the roots of the sentence to a new root. <br>
  * {@code n1, n2, ...} are the names of the nodes from the Semgrex to use as the root(s). <br>
@@ -859,19 +866,26 @@ public class Ssurgeon  {
         if (argsBox.reln == null) {
           throw new SsurgeonParseException(command + " requires a -reln argument");
         }
-        GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
         if (argsBox.regex.size() > 0 && argsBox.exact.size() > 0) {
           throw new SsurgeonParseException("Found both regex and exact in the splits for splitWord");
         }
         if (argsBox.nodes.size() == 0) {
           throw new SsurgeonParseException("splitWord not given any -node parameter for the node to split");
         }
-        final SplitWord split;
-        if (argsBox.regex.size() > 0) {
-          split = new SplitWord(argsBox.nodes.get(0), argsBox.regex, argsBox.headIndex, reln, argsBox.name, argsBox.edge, false, argsBox.siblings);
+        boolean exact = argsBox.regex.isEmpty();
+        List<String> pieces = exact ? argsBox.exact : argsBox.regex;
+        // a relation name has no =, so one with = is a relation for each piece
+        GrammaticalRelation reln = null;
+        Map<Integer, GrammaticalRelation> pieceRelns = null;
+        if (argsBox.reln.contains("=")) {
+          pieceRelns = new HashMap<>();
+          for (Map.Entry<Integer, String> entry : SplitWord.splitNames(argsBox.reln, "reln", pieces.size()).entrySet()) {
+            pieceRelns.put(entry.getKey(), GrammaticalRelation.valueOf(language, entry.getValue()));
+          }
         } else {
-          split = new SplitWord(argsBox.nodes.get(0), argsBox.exact, argsBox.headIndex, reln, argsBox.name, argsBox.edge, true, argsBox.siblings);
+          reln = GrammaticalRelation.valueOf(language, argsBox.reln);
         }
+        final SplitWord split = new SplitWord(argsBox.nodes.get(0), pieces, argsBox.headIndex, reln, pieceRelns, argsBox.name, argsBox.edge, exact, argsBox.siblings);
         for (String edgeName : split.edgeNames.values()) {
           knownEdges.add(edgeName);
         }
