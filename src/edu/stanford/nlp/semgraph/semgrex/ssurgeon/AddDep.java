@@ -6,7 +6,8 @@ import java.util.*;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphUtils;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 
@@ -16,7 +17,15 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  *<br>
  * Nodes will be placed at the end of the sentence by default, at the
  * start or end using "-position -" or "-position +", or
- * before or after a node with "-position -word" and "-position +word"
+ * before or after a node with "-position -word" and "-position +word".
+ * An empty word stays after the word it follows, so a node put after
+ * a word goes after any empty words which follow it, and a node put
+ * before a word goes after any empty words which follow the word before.
+ * A node cannot be put directly before an empty word.
+ *<br>
+ * The new node goes into every graph of the sentence, so the graphs
+ * keep sharing their words.  Its edge goes into each graph which has
+ * the governor, or with "-graph", into that graph alone.
  *<br>
  * With "-name", the new node is added to the match under that name, so
  * later edits for the same match can refer to it.  Each match adds its
@@ -37,6 +46,8 @@ public class AddDep extends SsurgeonEdit {
   final String position;
   final double weight;
   final String nodeName;
+  /** The graph which gets the new edge, or null for every graph with the governor */
+  final SemgrexGraphName graph;
 
   /**
    * Creates an AddDep with an edge weight of 0.
@@ -64,7 +75,7 @@ public class AddDep extends SsurgeonEdit {
    *   the position is invalid, or the attributes can't be used for a new node
    */
   public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight) {
-    this(govNodeName, relation, attributes, position, weight, null);
+    this(govNodeName, relation, attributes, position, weight, null, null);
   }
 
   /**
@@ -81,6 +92,24 @@ public class AddDep extends SsurgeonEdit {
    *   the position is invalid, or the attributes can't be used for a new node
    */
   public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight, String nodeName) {
+    this(govNodeName, relation, attributes, position, weight, nodeName, null);
+  }
+
+  /**
+   * Creates an AddDep which names its new node and chooses the graph for its edge.
+   *
+   * @param govNodeName the name of the matched node which governs the new node
+   * @param relation the relation from the governor to the new node
+   * @param attributes the attributes of the new node, such as word or lemma; the map is copied
+   * @param position where to put the new node, or null for the end of the sentence.
+   *   Must start with {@code -} or {@code +}
+   * @param weight the weight of the new edge
+   * @param nodeName the name to give the new node in the match, or null for no name
+   * @param graph the graph which gets the new edge, or null for every graph which has the governor
+   * @throws SsurgeonParseException if govNodeName or relation is null,
+   *   the position is invalid, or the attributes can't be used for a new node
+   */
+  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight, String nodeName, SemgrexGraphName graph) {
     if (position != null) {
       if (!position.startsWith("-") && !position.startsWith("+")) {
         throw new SsurgeonParseException("Unknown position " + position + " in AddDep operation");
@@ -100,6 +129,7 @@ public class AddDep extends SsurgeonEdit {
     this.position = position;
     this.weight = weight;
     this.nodeName = nodeName;
+    this.graph = graph;
   }
 
   /**
@@ -124,6 +154,11 @@ public class AddDep extends SsurgeonEdit {
       buf.write(nodeName);buf.write("\t");
     }
 
+    if (graph != null) {
+      buf.write(Ssurgeon.GRAPH_ARG);buf.write(" ");
+      buf.write(graph.lowerName);buf.write("\t");
+    }
+
     for (String key : attributes.keySet()) {
       buf.write("-");
       buf.write(key);
@@ -141,72 +176,153 @@ public class AddDep extends SsurgeonEdit {
   }
 
   /**
-   * TODO: bombproof if this gov, dep, and reln already exist.
+   * Adds the node, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does
+   * for a sentence with only this graph.
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
+    return evaluate(new SemgrexGraphs(sg), sm);
+  }
+
+  /**
+   * Adds the new node to every graph of the sentence, and its edge from the
+   * governor to the graph this edit names, or to each graph with the governor.
+   *<br>
+   * The words from the new node's index on move up by one in every graph
+   * to make room for it.  This does nothing if the governor, or the node
+   * the position names, is not in the match, if the graph this edit names
+   * has not got the governor, or if the match already has a node by the
+   * name this edit gives its new node.
+   *<br>
+   * Otherwise, nothing checks whether the governor already has such a
+   * dependent, so the semgrex pattern has to stop matching once the node
+   * is added, such as with {@code !> {word:blue}}, or find it with an
+   * optional relation and name it as this edit does.  Otherwise each new
+   * match adds another.
+   *
+   * @throws SsurgeonRuntimeException if the position is directly before an empty word
+   */
+  @Override
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
     if (nodeName != null && sm.getNode(nodeName) != null) {
       // the match already has this node, so there is nothing to fill in
       return false;
     }
     IndexedWord govNode = sm.getNode(govNodeName);
+    if (govNode == null) {
+      return false;
+    }
+    List<SemanticGraph> edgeGraphs = new ArrayList<>();
+    if (graph != null) {
+      SemanticGraph sg = graphs.get(graph);
+      if (sg == null || !sg.containsVertex(govNode)) {
+        return false;
+      }
+      edgeGraphs.add(sg);
+    } else {
+      for (SemgrexGraphName name : SemgrexGraphName.values()) {
+        SemanticGraph sg = graphs.get(name);
+        if (sg != null && sg.containsVertex(govNode)) {
+          edgeGraphs.add(sg);
+        }
+      }
+    }
+
+    final int newIndex;
+    if (position == null || position.equals("+")) {
+      // after every word, including any empty words after the last one
+      newIndex = maxIndex(graphs) + 1;
+    } else if (position.equals("-")) {
+      // before every word, but after any empty words before the first one
+      newIndex = minWordIndex(graphs);
+    } else {
+      IndexedWord target = sm.getNode(position.substring(1));
+      if (target == null) {
+        return false;
+      }
+      if (position.startsWith("-")) {
+        if (target.getEmptyIndex() != 0) {
+          throw new SsurgeonRuntimeException("AddDep cannot put a word directly before the empty word " + target.toCopyOrEmptyIndex() + ", as an empty word follows the word before it");
+        }
+        newIndex = target.index();
+      } else {
+        newIndex = target.index() + 1;
+      }
+    }
+    SsurgeonUtils.moveNodes(graphs, sm, x -> x >= newIndex, x -> x + 1);
+    // the governor may have moved
+    govNode = sm.getNode(govNodeName);
+
     // must make new copy of CoreLabel - if the same word is added
     // multiple times by the same operation, we don't want to have the
     // same backing CoreLabel in each instance
     CoreLabel newWord = fromCheapStrings(attributes);
     IndexedWord newNode = new IndexedWord(newWord);
-    final int tempIndex;
-    final int newIndex;
-    if (position != null && !position.equals("+")) {
-      // +2 to leave room: we will increase all other nodes with the
-      // proper index, so we need +1 of room, then another +1 for
-      // a temp place to put this node
-      // TODO: we could theoretically put the new node in the right place
-      // immediately and move the other nodes, but this is easier
-      tempIndex = SemanticGraphUtils.maxIndex(sg) + 2;
-
-      if (position.equals("-")) {
-        newIndex = SemanticGraphUtils.minIndex(sg);
-      } else if (position.startsWith("-") || position.startsWith("+")) {
-        String targetName = position.substring(1);
-        IndexedWord target = sm.getNode(targetName);
-        if (target == null) {
-          return false;
-        }
-        if (position.startsWith("-")) {
-          // it will be exactly to the left rather than pushing over
-          // something a word earlier if we do .index(), not .index() - 1
-          newIndex = target.index();
-        } else {
-          newIndex = target.index() + 1;
-        }
-      } else {
-        throw new UnsupportedOperationException("Unknown position in AddDep: |" + position + "|");
-      }
-    } else {
-      tempIndex = SemanticGraphUtils.maxIndex(sg) + 1;
-      newIndex = -1;
-    }
-
     newNode.setDocID(govNode.docID());
-    newNode.setIndex(tempIndex);
+    newNode.setIndex(newIndex);
     newNode.setSentIndex(govNode.sentIndex());
 
-    sg.addVertex(newNode);
-    sg.addEdge(govNode, newNode, relation, weight, false);
-    // named before it moves, so the name follows it to its place
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph sg = graphs.get(name);
+      if (sg != null) {
+        sg.addVertex(newNode);
+      }
+    }
+    for (SemanticGraph sg : edgeGraphs) {
+      sg.addEdge(govNode, newNode, relation, weight, false);
+    }
     if (nodeName != null) {
       sm.putNode(nodeName, newNode);
     }
-
-    if (position != null && !position.equals("+")) {
-      // the payoff for tempIndex == maxIndex + 2:
-      // everything will be moved one higher, unless it's the new node
-      SsurgeonUtils.moveNodes(sg, sm, x -> (x >= newIndex && x != tempIndex), x -> x+1, true);
-      SsurgeonUtils.moveNode(sg, sm, newNode, newIndex);
-    }
-
     return true;
+  }
+
+  /** The largest index of any node in the graphs */
+  private static int maxIndex(SemgrexGraphs graphs) {
+    int index = Integer.MIN_VALUE;
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph sg = graphs.get(name);
+      if (sg != null) {
+        for (IndexedWord word : sg.vertexSet()) {
+          index = Math.max(index, word.index());
+        }
+      }
+    }
+    return index;
+  }
+
+  /** The smallest index of any word in the graphs, leaving out empty words */
+  private static int minWordIndex(SemgrexGraphs graphs) {
+    int index = Integer.MAX_VALUE;
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph sg = graphs.get(name);
+      if (sg != null) {
+        for (IndexedWord word : sg.vertexSet()) {
+          if (word.getEmptyIndex() == 0) {
+            index = Math.min(index, word.index());
+          }
+        }
+      }
+    }
+    return index;
+  }
+
+  /**
+   * AddDep changes the words of every graph, so the graphs still describe the same words.
+   *
+   * @return true
+   */
+  @Override
+  public boolean changesWordsInEveryGraph() {
+    return true;
+  }
+
+  /**
+   * The graph this edit puts its edge in, if it names one other than the basic graph.
+   */
+  @Override
+  public Set<SemgrexGraphName> requiredGraphs() {
+    return graph == null || graph == SemgrexGraphName.BASIC ? Collections.emptySet() : Collections.singleton(graph);
   }
 
   /**

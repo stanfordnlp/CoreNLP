@@ -531,6 +531,142 @@ public class SsurgeonPatternTest {
     assertNull(result.first().get(SemgrexGraphName.ENHANCED));
   }
 
+  /** The words of a graph in order, each as its index and text, such as {@code 5.1=likes} */
+  private static String wordsOf(SemanticGraph graph) {
+    List<String> words = new ArrayList<>();
+    for (IndexedWord word : graph.vertexListSorted()) {
+      words.add(word.toCopyOrEmptyIndex() + "=" + word.word());
+    }
+    return String.join(" ", words);
+  }
+
+  /** The word with the given index and empty index in a graph */
+  private static IndexedWord word(SemanticGraph graph, int index, int emptyIndex) {
+    for (IndexedWord word : graph.vertexSet()) {
+      if (word.index() == index && word.getEmptyIndex() == emptyIndex) {
+        return word;
+      }
+    }
+    return null;
+  }
+
+  /** The relations from gov to dep in one graph, sorted */
+  private static List<String> relations(SemanticGraph graph, IndexedWord gov, IndexedWord dep) {
+    List<String> relations = new ArrayList<>();
+    for (SemanticGraphEdge edge : graph.getAllEdges(gov, dep)) {
+      relations.add(edge.getRelation().toString());
+    }
+    Collections.sort(relations);
+    return relations;
+  }
+
+  /** Runs one edit block on a sentence, checking that it changed something and kept the graphs sharing their words */
+  private static SemgrexGraphs editSentence(String conllu, String block) throws IOException {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText(block, "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(readGraphs(conllu));
+    assertTrue(result.second());
+    SsurgeonPattern.checkSharedWords(result.first());
+    return result.first();
+  }
+
+  /** addDep puts the word in both graphs, and its edge in both, so the enhanced graph stays */
+  @Test
+  public void addDepToEveryGraph() throws IOException {
+    SemgrexGraphs graphs = editSentence(ENHANCED_SENTENCE, "{word:go}=g !> {word:quickly}\naddDep -gov g -reln advmod -word quickly -position +g");
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertNotNull(enhanced);
+    assertEquals("1=I 2=want 3=to 4=go 5=quickly 6=: 7=now 8=: 9=ok", wordsOf(basic));
+    assertEquals(wordsOf(basic), wordsOf(enhanced));
+    assertEquals(Collections.singletonList("advmod"), relations(basic, 4, 5));
+    assertEquals(Collections.singletonList("advmod"), relations(enhanced, 4, 5));
+    // the edges of the words which moved are still there
+    assertEquals(Collections.singletonList("nsubj:xsubj"), relations(enhanced, 4, 1));
+    assertEquals(Collections.singletonList("discourse"), relations(enhanced, 2, 9));
+    assertEquals(Collections.singletonList("discourse"), relations(basic, 2, 9));
+  }
+
+  /** With -graph, the word still goes in both graphs, but the edge only in the one named */
+  @Test
+  public void addDepEdgeToOneGraph() throws IOException {
+    SemgrexGraphs graphs = editSentence(ENHANCED_SENTENCE, "{word:go}=g !>advmod@enhanced {word:quickly}\naddDep -gov g -reln advmod -word quickly -position +g -graph enhanced");
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertEquals(wordsOf(basic), wordsOf(enhanced));
+    assertEquals(Collections.singletonList("advmod"), relations(enhanced, 4, 5));
+    assertEquals(0, basic.incomingEdgeList(basic.getNodeByIndex(5)).size());
+
+    graphs = editSentence(ENHANCED_SENTENCE, "{word:go}=g !> {word:quickly}\naddDep -gov g -reln advmod -word quickly -position +g -graph basic");
+    basic = graphs.getDefault();
+    enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertEquals(wordsOf(basic), wordsOf(enhanced));
+    assertEquals(Collections.singletonList("advmod"), relations(basic, 4, 5));
+    assertEquals(0, enhanced.incomingEdgeList(enhanced.getNodeByIndex(5)).size());
+  }
+
+  /**
+   * An empty word stays after the word it follows: a word put after Bill
+   * goes after 5.1, and so does one put before tea
+   */
+  @Test
+  public void addDepAroundEmptyWord() throws IOException {
+    String expected = "1=Sue 2=likes 3=coffee 4=and 5=Bill 5.1=likes 6=green 7=tea";
+    SemgrexGraphs graphs = editSentence(EMPTY_WORD_SENTENCE, "{word:Bill}=b !> {word:green}\naddDep -gov b -reln amod -word green -position +b");
+    assertEquals(expected, wordsOf(graphs.get(SemgrexGraphName.ENHANCED)));
+    assertEquals(expected.replace(" 5.1=likes", ""), wordsOf(graphs.getDefault()));
+
+    graphs = editSentence(EMPTY_WORD_SENTENCE, "{word:tea}=t !> {word:green}\naddDep -gov t -reln amod -word green -position -t");
+    assertEquals(expected, wordsOf(graphs.get(SemgrexGraphName.ENHANCED)));
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    // tea moved, and is still the object of the empty word
+    assertEquals(Collections.singletonList("obj"), relations(enhanced, word(enhanced, 5, 1), word(enhanced, 7, 0)));
+
+    // there is no place directly before an empty word
+    SsurgeonPattern before = Ssurgeon.readFromEditText("{word:Bill}=b <nsubj@enhanced {}=x !> {word:green}\naddDep -gov b -reln amod -word green -position -x", "UniversalEnglish").get(0);
+    assertThrows(SsurgeonRuntimeException.class, () -> before.iterate(readGraphs(EMPTY_WORD_SENTENCE)));
+  }
+
+  /**
+   * An optional node found through the enhanced graph stops addDep -name
+   * once the word is there, even though the basic graph never gets the edge
+   */
+  @Test
+  public void addDepFillsOptionalEnhancedNode() throws IOException {
+    SemgrexGraphs graphs = editSentence(ENHANCED_SENTENCE, "{word:go}=g ?>advmod@enhanced {word:quickly}=q\naddDep -gov g -reln advmod -word quickly -position +g -name q -graph enhanced");
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertEquals("1=I 2=want 3=to 4=go 5=quickly 6=: 7=now 8=: 9=ok", wordsOf(enhanced));
+    assertEquals(wordsOf(basic), wordsOf(enhanced));
+    assertEquals(Collections.singletonList("advmod"), relations(enhanced, 4, 5));
+    assertEquals(0, basic.incomingEdgeList(basic.getNodeByIndex(5)).size());
+  }
+
+  /** A dependent of an empty word gets its edge in the enhanced graph, the only one with its governor */
+  @Test
+  public void addDepToEmptyWord() throws IOException {
+    SemgrexGraphs graphs = editSentence(EMPTY_WORD_SENTENCE, "{}=x >nsubj@enhanced {word:Bill} !>advmod@enhanced {word:also}\naddDep -gov x -reln advmod -word also -position +x");
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertEquals("1=Sue 2=likes 3=coffee 4=and 5=Bill 5.1=likes 6=also 7=tea", wordsOf(enhanced));
+    assertEquals(Collections.singletonList("advmod"), relations(enhanced, word(enhanced, 5, 1), word(enhanced, 6, 0)));
+    IndexedWord also = word(basic, 6, 0);
+    assertEquals("also", also.word());
+    assertEquals(0, basic.incomingEdgeList(also).size());
+  }
+
+  /**
+   * An edit which changes the words of the basic graph alone still leaves
+   * the enhanced graph out, even after an addDep kept it
+   */
+  @Test
+  public void addDepThenDeleteLeaf() throws IOException {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:now}=n . {word:/:/}=p\naddDep -gov n -reln advmod -word right -position -n\nDeleteLeaf -node p", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(readGraphs(ENHANCED_SENTENCE));
+    assertTrue(result.second());
+    assertNull(result.first().get(SemgrexGraphName.ENHANCED));
+    assertEquals("1=I 2=want 3=to 4=go 5=: 6=right 7=now 8=ok", wordsOf(result.first().getDefault()));
+  }
+
   /** The enhanced graph's root, written as 0:root in DEPS, can be set apart from the basic graph's */
   @Test
   public void setRootsOfEnhanced() throws IOException {

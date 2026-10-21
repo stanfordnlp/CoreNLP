@@ -2066,6 +2066,18 @@ public class SsurgeonTest {
     assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
     assertEquals(edit.toEditString(), Ssurgeon.parseEditLine(edit.toEditString(), new HashMap<>(), Language.UniversalEnglish, knownEdges).toEditString());
 
+    // addDep puts its edge in every graph with the governor unless told otherwise,
+    // and an explicit basic graph is written out, as it differs from the default
+    edit = Ssurgeon.parseEditLine("addDep -gov a -reln det -word the -graph enhanced", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+    assertEquals(edit.toEditString(), Ssurgeon.parseEditLine(edit.toEditString(), new HashMap<>(), Language.UniversalEnglish, knownEdges).toEditString());
+    edit = Ssurgeon.parseEditLine("addDep -gov a -reln det -word the -graph basic", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.emptySet(), edit.requiredGraphs());
+    assertTrue(edit.toEditString(), edit.toEditString().contains("-graph basic"));
+    edit = Ssurgeon.parseEditLine("addDep -gov a -reln det -word the", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.emptySet(), edit.requiredGraphs());
+    assertFalse(edit.toEditString().contains("-graph"));
+
     // an XML attribute is the same as the flag
     Map<String, String> attributes = new HashMap<>();
     attributes.put("graph", "enhanced");

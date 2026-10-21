@@ -83,7 +83,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code removeEdge -gov node1 -dep node2 -reln depType -graph enhanced}
  * <li> {@code removeNamedEdge -edge edgename}
  * <li> {@code reattachNamedEdge -edge edgename -gov gov -dep dep}
- * <li> {@code addDep -gov node1 -reln depType -position where -name name ...attributes...}
+ * <li> {@code addDep -gov node1 -reln depType -position where -name name -graph enhanced ...attributes...}
  * <li> {@code editNode -node node ...attributes...}
  * <li> {@code lemmatize -node node}
  * <li> {@code combineMWT -node node -word word}
@@ -132,7 +132,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -reln} is the name of the dependency type to use. <br>
  * {@code -position} is where in the sentence the word should go.  {@code -} will be the first word of the sentence,
  *   {@code +} will be the last word of the sentence, and {@code -node} or {@code +node} will be before or after the
- *   named node. <br>
+ *   named node.  An empty word stays after the word it follows, so a word put after {@code node} goes after any
+ *   empty words which follow {@code node}, and a word put before {@code node} goes after any empty words which
+ *   follow the word before it.  A word cannot be put directly before an empty word. <br>
+ * The word goes into every graph of the sentence.  Its edge goes into each graph which has the governor, or with
+ *   {@code -graph}, into that graph alone, {@code basic} or {@code enhanced}. <br>
  * {@code -name} adds the new word to the match under that name, so later edits for the same match can use it.
  *   Each match adds its own word, and the name refers to the word added for that match.
  *   If the match already has a node by that name, nothing is added, and later edits use that node.
@@ -642,7 +646,8 @@ public class Ssurgeon  {
 
   /** The edits which take a {@code -graph} argument, in lower case */
   private static final Set<String> GRAPH_EDITS =
-    new HashSet<>(Arrays.asList(AddEdge.LABEL.toLowerCase(Locale.ROOT),
+    new HashSet<>(Arrays.asList(AddDep.LABEL.toLowerCase(Locale.ROOT),
+                                AddEdge.LABEL.toLowerCase(Locale.ROOT),
                                 RemoveEdge.LABEL.toLowerCase(Locale.ROOT),
                                 KillAllIncomingEdges.LABEL.toLowerCase(Locale.ROOT),
                                 SetPhraseHead.LABEL.toLowerCase(Locale.ROOT)));
@@ -777,7 +782,7 @@ public class Ssurgeon  {
           throw new SsurgeonParseException("Relation not specified for AddDep");
         }
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
-        return new AddDep(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position, argsBox.weight, argsBox.name);
+        return new AddDep(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position, argsBox.weight, argsBox.name, argsBox.graph);
       } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
         return AddNode.createAddNode(argsBox.nodeString, argsBox.name);
       } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {
