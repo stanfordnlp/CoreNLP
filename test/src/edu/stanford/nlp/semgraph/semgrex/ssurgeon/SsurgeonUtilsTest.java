@@ -126,9 +126,13 @@ public class SsurgeonUtilsTest {
     "");
 
   private static SemgrexGraphs readGraphs() throws IOException {
+    return readGraphs(SENTENCE);
+  }
+
+  private static SemgrexGraphs readGraphs(String conllu) throws IOException {
     File file = File.createTempFile("ssurgeonutils", ".conllu");
     file.deleteOnExit();
-    Files.write(file.toPath(), SENTENCE.getBytes(StandardCharsets.UTF_8));
+    Files.write(file.toPath(), conllu.getBytes(StandardCharsets.UTF_8));
     CoreMap sentence = new CoNLLUReader().readCoNLLUFile(file.getPath()).get(0).get(CoreAnnotations.SentencesAnnotation.class).get(0);
     return SemgrexGraphs.of(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class),
                             sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
@@ -246,5 +250,125 @@ public class SsurgeonUtilsTest {
     assertEquals(5, newCopy.index());
     assertEquals(Collections.singletonList("obj"), relations(graph, ate, newCake));
     assertEquals(Collections.singletonList("dep"), relations(graph, ate, newCopy));
+  }
+
+  // ------------------------------------------------------------------
+  // renumbering empty words
+  // ------------------------------------------------------------------
+
+  /** "Sue sleeps very soundly", with three empty words */
+  private static final String EMPTY_WORDS_SENTENCE = String.join("\n",
+    "# text = Sue sleeps very soundly",
+    "1\tSue\tSue\tPROPN\t_\t_\t2\tnsubj\t2:nsubj\t_",
+    "2\tsleeps\tsleep\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "2.1\tsnores\tsnore\tVERB\t_\t_\t_\t_\t2:conj\t_",
+    "2.2\tdreams\tdream\tVERB\t_\t_\t_\t_\t2:conj\t_",
+    "3\tvery\tvery\tADV\t_\t_\t4\tadvmod\t4:advmod\t_",
+    "3.1\tdeeply\tdeeply\tADV\t_\t_\t_\t_\t2:advmod\t_",
+    "4\tsoundly\tsoundly\tADV\t_\t_\t2\tadvmod\t2:advmod\t_",
+    "",
+    "");
+
+  /** The words of a graph in order, each as its index and text, such as {@code 2.1=snores} */
+  private static String wordsOf(SemanticGraph graph) {
+    List<String> words = new ArrayList<>();
+    for (IndexedWord word : graph.vertexListSorted()) {
+      words.add(word.toCopyOrEmptyIndex() + "=" + word.word());
+    }
+    return String.join(" ", words);
+  }
+
+  /** Takes a word out of every graph of the sentence */
+  private static void remove(SemgrexGraphs graphs, IndexedWord word) {
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph graph = graphs.get(name);
+      if (graph != null) {
+        graph.removeVertex(word);
+      }
+    }
+  }
+
+  /**
+   * With "very" gone, "deeply" follows "sleeps", and goes after the empty
+   * words already there, and "soundly" moves into the place of "very"
+   */
+  @Test
+  public void emptyWordsFollowTheWordBefore() throws IOException {
+    SemgrexGraphs graphs = readGraphs(EMPTY_WORDS_SENTENCE);
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:very}=v . {word:soundly}=s").matcher(graphs);
+    assertTrue(matcher.find());
+    // a semgrex pattern cannot name an empty word by position, so name it directly
+    IndexedWord deeply = word(enhanced, 3, 1);
+    matcher.putNode("d", deeply);
+
+    remove(graphs, matcher.getNode("v"));
+    SsurgeonUtils.moveNodes(graphs, matcher, x -> x >= 3, x -> x - 1);
+
+    assertEquals("1=Sue 2=sleeps 2.1=snores 2.2=dreams 2.3=deeply 3=soundly", wordsOf(enhanced));
+    assertEquals("1=Sue 2=sleeps 3=soundly", wordsOf(basic));
+    SsurgeonPattern.checkSharedWords(graphs);
+    IndexedWord newDeeply = word(enhanced, 2, 3);
+    assertSame(newDeeply, matcher.getNode("d"));
+    assertSame(word(enhanced, 3, 0), matcher.getNode("s"));
+    assertEquals(Collections.singletonList("advmod"), relations(enhanced, word(enhanced, 2, 0), newDeeply));
+  }
+
+  /** Every call numbers the empty words after each word from 1, even one which moves no word */
+  @Test
+  public void emptyWordsNumberedFromOne() throws IOException {
+    SemgrexGraphs graphs = readGraphs(EMPTY_WORDS_SENTENCE);
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:sleeps}=s").matcher(graphs);
+    assertTrue(matcher.find());
+    IndexedWord dreams = word(enhanced, 2, 2);
+    matcher.putNode("d", dreams);
+
+    remove(graphs, word(enhanced, 2, 1));
+    SsurgeonUtils.moveNodes(graphs, matcher, x -> false, x -> x);
+
+    assertEquals("1=Sue 2=sleeps 2.1=dreams 3=very 3.1=deeply 4=soundly", wordsOf(enhanced));
+    SsurgeonPattern.checkSharedWords(graphs);
+    assertSame(word(enhanced, 2, 1), matcher.getNode("d"));
+    assertEquals(Collections.singletonList("conj"), relations(enhanced, word(enhanced, 2, 0), matcher.getNode("d")));
+    // the words which did not move are the same IndexedWords
+    assertSame(matcher.getNode("s"), word(enhanced, 2, 0));
+  }
+
+  /** An empty word whose words are all gone follows the nearest word left before it */
+  @Test
+  public void emptyWordsSkipSeveralGoneWords() throws IOException {
+    SemgrexGraphs graphs = readGraphs(EMPTY_WORDS_SENTENCE);
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:soundly}=s").matcher(graphs);
+    assertTrue(matcher.find());
+
+    // taking out the root leaves the roots alone, which moveNodes does not look at
+    remove(graphs, word(enhanced, 2, 0));
+    remove(graphs, word(enhanced, 3, 0));
+    SsurgeonUtils.moveNodes(graphs, matcher, x -> x >= 4, x -> x - 2);
+
+    assertEquals("1=Sue 1.1=snores 1.2=dreams 1.3=deeply 2=soundly", wordsOf(enhanced));
+    SsurgeonPattern.checkSharedWords(graphs);
+  }
+
+  /** An empty word before the first word stays before it */
+  @Test
+  public void emptyWordBeforeFirstWord() throws IOException {
+    String conllu = String.join("\n",
+      "# text = Sue sleeps",
+      "0.1\tit\tit\tPRON\t_\t_\t_\t_\t2:expl\t_",
+      "1\tSue\tSue\tPROPN\t_\t_\t2\tnsubj\t2:nsubj\t_",
+      "2\tsleeps\tsleep\tVERB\t_\t_\t0\troot\t0:root\t_",
+      "",
+      "");
+    SemgrexGraphs graphs = readGraphs(conllu);
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:Sue}=s").matcher(graphs);
+    assertTrue(matcher.find());
+    // make room for a word at 1, as addDep -position - would
+    SsurgeonUtils.moveNodes(graphs, matcher, x -> x >= 1, x -> x + 1);
+    assertEquals("0.1=it 2=Sue 3=sleeps", wordsOf(enhanced));
   }
 }

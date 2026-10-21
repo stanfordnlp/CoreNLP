@@ -1,9 +1,12 @@
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import edu.stanford.nlp.ling.IndexedWord;
@@ -52,6 +55,9 @@ public class SsurgeonUtils {
    * sees the index change as well, so it has to be moved along with word.
    * {@link #moveNodes(SemgrexGraphs, SemgrexMatcher, Function, Function)}
    * does that, as it moves every node with the indices it selects.
+   *<br>
+   * An empty word keeps its empty index, and the empty words which follow
+   * word stay where they are.  moveNodes moves them along with their words.
    *
    * @param graphs the graphs of the sentence
    * @param sm the matcher whose named nodes and edges are updated
@@ -60,8 +66,8 @@ public class SsurgeonUtils {
    * @return the new node
    */
   public static IndexedWord moveNode(SemgrexGraphs graphs, SemgrexMatcher sm, IndexedWord word, int newIndex) {
-    Map<IndexedWord, Integer> destinations = new HashMap<>();
-    destinations.put(word, newIndex);
+    Map<IndexedWord, Position> destinations = new HashMap<>();
+    destinations.put(word, new Position(newIndex, word.getEmptyIndex()));
     return moveWords(graphs, sm, destinations).get(word);
   }
 
@@ -75,8 +81,8 @@ public class SsurgeonUtils {
    *
    * @param sg the graph to edit
    * @param sm the matcher whose named nodes and edges are updated
-   * @param shouldMove given a node's index, whether to move that node
-   * @param destination given a node's index, the index to move it to
+   * @param shouldMove given a word's index, whether to move that word
+   * @param destination given a word's index, the index to move it to
    * @param reverse not used
    */
   public static void moveNodes(SemanticGraph sg, SemgrexMatcher sm, Function<Integer, Boolean> shouldMove, Function<Integer, Integer> destination, boolean reverse) {
@@ -84,34 +90,102 @@ public class SsurgeonUtils {
   }
 
   /**
-   * Moves each node, in every graph of the sentence, whose index satisfies
-   * shouldMove to the index given by destination.
+   * Moves each word, in every graph of the sentence, whose index satisfies
+   * shouldMove to the index given by destination, and the empty words along
+   * with the words they follow.
    *<br>
    * Every node is moved as {@link #moveNode(SemgrexGraphs, SemgrexMatcher, IndexedWord, int)}
    * moves one, but all at once, so no node is ever left at an index another
-   * one is about to leave.  An empty node moves with the word it follows:
-   * its index is that word's, and its empty index stays the same, so
-   * moving the words from 8 down by one makes 8.1 into 7.1.
+   * one is about to leave.
+   *<br>
+   * shouldMove and destination are given the indices of the words, and not
+   * of the empty words.  An empty word follows the word with its index, or
+   * if there is no such word, such as after that word was deleted, the
+   * nearest word before it, and goes wherever that word goes.  The empty
+   * words which follow the same word are then numbered from 1, in the order
+   * they were in.  So moving the words from 8 down by one makes 8.1 into
+   * 7.1, or into 7.2 if 7.1 is there already, and every call leaves the
+   * empty words numbered from 1 after each word, even one which moves no
+   * word: with 8.1 deleted, 8.2 becomes 8.1.
    *
    * @param graphs the graphs of the sentence
    * @param sm the matcher whose named nodes and edges are updated
-   * @param shouldMove given a node's index, whether to move that node
-   * @param destination given a node's index, the index to move it to
+   * @param shouldMove given a word's index, whether to move that word
+   * @param destination given a word's index, the index to move it to
    */
   public static void moveNodes(SemgrexGraphs graphs, SemgrexMatcher sm, Function<Integer, Boolean> shouldMove, Function<Integer, Integer> destination) {
-    Map<IndexedWord, Integer> destinations = new HashMap<>();
+    Map<IndexedWord, Position> destinations = new HashMap<>();
+    // the new index of each word, by its old index
+    Map<Integer, Integer> wordIndices = new HashMap<>();
+    List<IndexedWord> emptyWords = new ArrayList<>();
+    Set<IndexedWord> seen = new HashSet<>();
     for (SemgrexGraphName name : SemgrexGraphName.values()) {
       SemanticGraph graph = graphs.get(name);
       if (graph == null) {
         continue;
       }
       for (IndexedWord word : graph.vertexSet()) {
-        if (!destinations.containsKey(word) && shouldMove.apply(word.index())) {
-          destinations.put(word, destination.apply(word.index()));
+        if (!seen.add(word)) {
+          continue;
+        }
+        if (word.getEmptyIndex() != 0) {
+          emptyWords.add(word);
+          continue;
+        }
+        int index = word.index();
+        int newIndex = shouldMove.apply(index) ? destination.apply(index) : index;
+        wordIndices.put(index, newIndex);
+        if (newIndex != index) {
+          destinations.put(word, new Position(newIndex, 0));
         }
       }
     }
+    if (!emptyWords.isEmpty()) {
+      placeEmptyWords(emptyWords, wordIndices, destinations);
+    }
     moveWords(graphs, sm, destinations);
+  }
+
+  /** Orders empty words by where they are in the sentence */
+  private static final Comparator<IndexedWord> EMPTY_WORD_ORDER =
+    Comparator.comparingInt(IndexedWord::index).thenComparingInt(IndexedWord::getEmptyIndex);
+
+  /**
+   * Gives each empty word its place after the word it follows, as
+   * {@link #moveNodes(SemgrexGraphs, SemgrexMatcher, Function, Function)} describes,
+   * adding a destination for each one whose place changes
+   *
+   * @param emptyWords the empty words of the sentence
+   * @param wordIndices the new index of each word, by its old index
+   * @param destinations the destinations of the words, which the empty words are added to
+   */
+  private static void placeEmptyWords(List<IndexedWord> emptyWords, Map<Integer, Integer> wordIndices, Map<IndexedWord, Position> destinations) {
+    emptyWords.sort(EMPTY_WORD_ORDER);
+    // by the new index of a word, the empty index last given to an empty word after it
+    Map<Integer, Integer> lastEmptyIndex = new HashMap<>();
+    for (IndexedWord emptyWord : emptyWords) {
+      int index = emptyWord.index();
+      while (index > 0 && !wordIndices.containsKey(index)) {
+        --index;
+      }
+      // an empty word before the first word stays before it
+      int newIndex = index > 0 ? wordIndices.get(index) : 0;
+      int newEmptyIndex = lastEmptyIndex.merge(newIndex, 1, Integer::sum);
+      if (newIndex != emptyWord.index() || newEmptyIndex != emptyWord.getEmptyIndex()) {
+        destinations.put(emptyWord, new Position(newIndex, newEmptyIndex));
+      }
+    }
+  }
+
+  /** Where a node goes: its index, and its empty index, which is 0 unless it is an empty word */
+  private static final class Position {
+    final int index;
+    final int emptyIndex;
+
+    Position(int index, int emptyIndex) {
+      this.index = index;
+      this.emptyIndex = emptyIndex;
+    }
   }
 
   /** What is needed to put the words moved out of one graph back in */
@@ -137,7 +211,7 @@ public class SsurgeonUtils {
   /**
    * Moves each word to its destination in every graph which has it.
    *<br>
-   * An IndexedWord caches its hash code, and its index is kept in its
+   * An IndexedWord caches its hash code, and its index and empty index are kept in its
    * CoreLabel, so every word to be moved leaves every graph before any
    * index changes.  Otherwise a graph could be left holding a word whose
    * index, and so whose place in the graph's maps, had changed underneath it.
@@ -150,12 +224,12 @@ public class SsurgeonUtils {
    *
    * @return the new node for each word moved, keyed by the old node
    */
-  private static Map<IndexedWord, IndexedWord> moveWords(SemgrexGraphs graphs, SemgrexMatcher sm, Map<IndexedWord, Integer> destinations) {
+  private static Map<IndexedWord, IndexedWord> moveWords(SemgrexGraphs graphs, SemgrexMatcher sm, Map<IndexedWord, Position> destinations) {
     // the new nodes.  their indices are set once the old nodes are out of every graph
     Map<IndexedWord, IndexedWord> moved = new HashMap<>();
     List<IndexedWord> newWords = new ArrayList<>();
-    List<Integer> newIndices = new ArrayList<>();
-    for (Map.Entry<IndexedWord, Integer> entry : destinations.entrySet()) {
+    List<Position> newPositions = new ArrayList<>();
+    for (Map.Entry<IndexedWord, Position> entry : destinations.entrySet()) {
       IndexedWord word = entry.getKey();
       // the copy count is kept on the IndexedWord rather than the CoreLabel.
       // a pseudo-position, which SemanticGraph.valueOf sets to the old
@@ -164,7 +238,7 @@ public class SsurgeonUtils {
       newWord.setCopyCount(word.copyCount());
       moved.put(word, newWord);
       newWords.add(newWord);
-      newIndices.add(entry.getValue());
+      newPositions.add(entry.getValue());
     }
 
     // take the moved words out of each graph, remembering their edges and roots
@@ -224,7 +298,12 @@ public class SsurgeonUtils {
     }
 
     for (int i = 0; i < newWords.size(); ++i) {
-      newWords.get(i).setIndex(newIndices.get(i));
+      IndexedWord newWord = newWords.get(i);
+      Position position = newPositions.get(i);
+      newWord.setIndex(position.index);
+      if (newWord.getEmptyIndex() != position.emptyIndex) {
+        newWord.setEmptyIndex(position.emptyIndex);
+      }
     }
 
     // put the new nodes and their edges back, giving each named edge the edge now in the graph
