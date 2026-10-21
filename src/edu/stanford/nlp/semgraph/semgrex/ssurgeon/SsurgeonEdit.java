@@ -64,6 +64,22 @@ public abstract class SsurgeonEdit {
   }
 
   /**
+   * Whether this edit, when it adds, removes, or renumbers words, does the
+   * same to every graph of the sentence with the same IndexedWords.
+   *<br>
+   * {@link SsurgeonPattern#iterate(SemgrexGraphs)} keeps the other graphs
+   * of a sentence after such an edit changes its words.  After any other
+   * edit changes the words of the basic graph, the other graphs no longer
+   * describe the same words, and are left out.  An edit which never
+   * changes the words can leave this as it is.
+   *
+   * @return false unless an edit says otherwise
+   */
+  public boolean changesWordsInEveryGraph() {
+    return false;
+  }
+
+  /**
    * Returns this edit in the Ssurgeon edit syntax.
    *
    * @return A parseable string representing the edit

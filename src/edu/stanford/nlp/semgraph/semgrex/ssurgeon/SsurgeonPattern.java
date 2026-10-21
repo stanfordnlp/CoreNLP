@@ -293,11 +293,13 @@ public class SsurgeonPattern {
    * written to change; one which only knows about the basic graph leaves
    * the others alone.
    *<br>
-   * Once the edits change which words the basic graph has, or their
-   * indices, the other graphs no longer describe the same words, and they
-   * are left out of the graphs returned.  Matching then continues on the
-   * basic graph alone, or stops if the pattern searches another graph or
-   * an edit edits one.
+   * An edit which adds, removes, or renumbers words in every graph, such as
+   * AddDep, leaves the graphs describing the same words, as
+   * {@link SsurgeonEdit#changesWordsInEveryGraph} describes.  Once any other
+   * edit changes which words the basic graph has, or their indices, the
+   * other graphs no longer describe the same words, and they are left out
+   * of the graphs returned.  Matching then continues on the basic graph
+   * alone, or stops if the pattern searches another graph or an edit edits one.
    *
    * @param graphs the graphs of one sentence, with no alignment; the basic
    *   graph is required, and the graphs must share their words, as
@@ -336,14 +338,24 @@ public class SsurgeonPattern {
       // should exist in a separate graph for each unique Semgrex match.
       nodeMap = Generics.newHashMap();
       boolean edited = false;
+      // whether an edit changed the words of the basic graph alone
+      boolean graphsDiverged = false;
       for (SsurgeonEdit edit : editScript) {
         if (edit.evaluate(graphs, matcher)) {
           edited = true;
           anyChanges = true;
+          if (otherGraphs && !sameWords(words, indices, basic)) {
+            if (edit.changesWordsInEveryGraph()) {
+              words = basic.vertexListSorted();
+              indices = wordIndices(words);
+            } else {
+              graphsDiverged = true;
+            }
+          }
         }
       }
       if (edited) {
-        if (otherGraphs && !sameWords(words, indices, basic)) {
+        if (graphsDiverged) {
           graphs = new SemgrexGraphs(basic);
           otherGraphs = false;
           if (usesGraphsBeyondBasic()) {
