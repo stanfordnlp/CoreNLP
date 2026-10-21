@@ -169,29 +169,19 @@ public class AddEdge extends SsurgeonEdit {
    * If the edge already exists in the graph,
    * a new edge is not added.
    *<br>
-   * A node which no graph of the sentence has yet, such as one made by
-   * AddNode, is added to the graph along with the edge.  A word which
-   * another graph has and this one does not, such as an empty word when
-   * adding to the basic graph, is not, and the graph is left alone.
+   * Nor is one added if either node is not in the graph, such as an empty
+   * word when adding to the basic graph, or a word an earlier edit deleted.
    */
   @Override
   public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
     SemanticGraph sg = graphs.get(graph);
     IndexedWord govNode = getNamedNode(govName, sm);
     IndexedWord depNode =  getNamedNode(depName, sm);
-    if (sg == null || govNode == null || depNode == null) {
+    if (sg == null || govNode == null || depNode == null || !sg.containsVertex(govNode) || !sg.containsVertex(depNode)) {
       return false;
     }
-    if (!canAdd(graphs, sg, govNode) || !canAdd(graphs, sg, depNode)) {
-      return false;
-    }
-    SemanticGraphEdge existingEdge = sg.containsVertex(govNode) && sg.containsVertex(depNode) ? sg.getEdge(govNode, depNode, relation) : null;
+    SemanticGraphEdge existingEdge = sg.getEdge(govNode, depNode, relation);
     if (existingEdge == null) {
-      // When adding the edge, check to see if the gov/dep nodes are presently in the graph.
-      if (!sg.containsVertex(govNode)) 
-        sg.addVertex(govNode);
-      if (!sg.containsVertex(depNode)) 
-        sg.addVertex(depNode);
       SemanticGraphEdge newEdge = sg.addEdge(govNode, depNode, relation, weight, false);
       if (edgeName != null) {
         sm.putNamedEdge(edgeName, newEdge, graph);
@@ -199,23 +189,6 @@ public class AddEdge extends SsurgeonEdit {
       return true;
     }
     return false;
-  }
-
-  /**
-   * Whether the node may be an endpoint of an edge in {@code sg}: it is
-   * already in it, or it is a new node which no graph of the sentence has
-   */
-  private static boolean canAdd(SemgrexGraphs graphs, SemanticGraph sg, IndexedWord node) {
-    if (sg.containsVertex(node)) {
-      return true;
-    }
-    for (SemgrexGraphName name : SemgrexGraphName.values()) {
-      SemanticGraph other = graphs.get(name);
-      if (other != null && other.containsVertex(node)) {
-        return false;
-      }
-    }
-    return true;
   }
 
   /**

@@ -118,27 +118,14 @@ public abstract class SsurgeonEdit {
   }
   
   /**
-   * Used to retrieve the named node.  If not found in the SemgrexMatcher, check the
-   * owning pattern object, as this could've been a created node.
+   * Used to retrieve the named node: one the Semgrex pattern matched, or
+   * one an earlier edit for the same match added, such as with addDep -name.
    *
    * @param nodeName The name of the node
    * @param sm The matcher, positioned at the current match
-   * @return The named node, or null if neither the matcher nor the owning pattern has it
+   * @return The named node, or null if the match has no node by that name
    */
   public IndexedWord getNamedNode(String nodeName, SemgrexMatcher sm) {
-    IndexedWord ret = sm.getNode(nodeName);
-    if ((ret == null) && getOwningPattern() != null)
-      return getOwningPattern().getNamedNode(nodeName);
-    return ret; 
-  }
-  
-  /**
-   * Records a node under a name in the owning pattern, which must be set.
-   *
-   * @param newNode The node
-   * @param name The name for the node
-   */
-  public void addNamedNode(IndexedWord newNode, String name) {
-    getOwningPattern().addNamedNode(newNode, name);
+    return sm.getNode(nodeName);
   }
 }

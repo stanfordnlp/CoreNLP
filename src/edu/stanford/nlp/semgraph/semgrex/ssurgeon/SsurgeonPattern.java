@@ -53,10 +53,6 @@ public class SsurgeonPattern {
   protected SemanticGraph semgrexGraph = null; // Source graph semgrex pattern was derived from (used for pattern learning)
   /** A test which a match must pass for the edits to be applied, or null for no test */
   protected SsurgPred predicateTest = null; // Predicate tests to apply, if non-null, must return true to execute.
-
-  // NodeMap is used to maintain a list of named nodes outside of the set in the SemgrexMatcher.
-  // Primarily for newly inserted nodes.
-  private Map<String, IndexedWord> nodeMap = null;
   
   /**
    * Creates a pattern with the given edit script, and sets this as the
@@ -150,29 +146,6 @@ public class SsurgeonPattern {
     editScript.add(newEdit);
   }
 
-  /**
-   * Adds the node to the set of named nodes registered, using the given name.
-   * The set is created fresh for each match by the execute and iterate
-   * methods, so calling this before either of them throws a NullPointerException.
-   *
-   * @param node the node to register
-   * @param name the name to register it under
-   */
-  public void addNamedNode(IndexedWord node, String name) {
-    nodeMap.put(name, node);
-  }
-  
-  /**
-   * Returns a node registered with {@link #addNamedNode}.
-   * As with that method, this throws a NullPointerException before the pattern has been executed.
-   *
-   * @param name the name the node was registered under
-   * @return the node, or null if no node has that name
-   */
-  public IndexedWord getNamedNode(String name) {
-    return nodeMap.get(name);
-  }
-  
   @Override
   public String toString() {
     StringWriter buf = new StringWriter();
@@ -235,7 +208,6 @@ public class SsurgeonPattern {
       // Generate a new graph, since we don't want to mutilate the original graph.
       // We use the same nodes, since the matcher operates off of those.
       SemanticGraph tgt = SemanticGraphFactory.duplicateKeepNodes(sg);
-      nodeMap = Generics.newHashMap();
       SemgrexGraphs tgtGraphs = new SemgrexGraphs(tgt);
       for (SsurgeonEdit edit : editScript) {      
         edit.evaluate(tgtGraphs, matcher);
@@ -334,9 +306,6 @@ public class SsurgeonPattern {
     SemgrexMatcher matcher = semgrexPattern.matcher(graphs);
     boolean anyChanges = false;
     while (matcher.find()) {
-      // We reset the named node map with each edit set, since these edits
-      // should exist in a separate graph for each unique Semgrex match.
-      nodeMap = Generics.newHashMap();
       boolean edited = false;
       // whether an edit changed the words of the basic graph alone
       boolean graphsDiverged = false;
@@ -512,9 +481,6 @@ public class SsurgeonPattern {
         if (!predicateTest.test(matcher))
           continue;
       }
-      // We reset the named node map with each edit set, since these edits
-      // should exist in a separate graph for each unique Semgrex match.
-      nodeMap = Generics.newHashMap();
       SemanticGraph tgt = new SemanticGraph(sg);
       SemgrexGraphs tgtGraphs = new SemgrexGraphs(tgt);
       for (SsurgeonEdit edit : editScript) {      

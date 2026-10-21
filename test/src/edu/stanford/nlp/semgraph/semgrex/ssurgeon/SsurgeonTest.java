@@ -2776,28 +2776,22 @@ public class SsurgeonTest {
   }
 
   /**
-   * addNode is kept for older code.  The node it makes is in no graph
-   * until an addEdge attaches it, which addEdge allows for a node no graph
-   * has yet.  Since addNode makes a node every time it runs, this uses
-   * execute, which applies the edits once per match, rather than iterate.
+   * addDep -name makes the word, with its index and its edge, and names it
+   * for the edits after it.  An optional node of the same name stops it
+   * once the word is there.
    */
   @Test
-  public void addNodeThenAddEdge() {
-    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:ate}=a\naddNode -nodearg \"{word=fast lemma=fast POS=RB}\" -name new\naddEdge -gov a -dep new -reln advmod", "UniversalEnglish").get(0);
+  public void addDepNameThenAddEdge() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:ate}=a >nsubj {}=s ?>advmod {word:fast}=new\naddDep -gov a -reln advmod -word fast -lemma fast -pos RB -name new\naddEdge -gov new -dep s -reln dep", "UniversalEnglish").get(0);
     SemanticGraph sg = SemanticGraph.valueOf("[ate-2 nsubj> Bill-1]");
-    Collection<SemanticGraph> results = pattern.execute(sg);
-    assertEquals(1, results.size());
-    SemanticGraph result = results.iterator().next();
+    SemanticGraph result = pattern.iterate(sg).first;
     assertEquals(3, result.size());
     IndexedWord ate = result.getNodeByIndex(2);
-    IndexedWord fast = null;
-    for (IndexedWord child : result.getChildren(ate)) {
-      if ("fast".equals(child.word())) {
-        fast = child;
-      }
-    }
-    assertNotNull(fast);
+    IndexedWord fast = result.getNodeByIndex(3);
+    assertEquals("fast", fast.word());
+    assertEquals("RB", fast.tag());
     assertEquals("advmod", result.getEdge(ate, fast).getRelation().toString());
+    assertEquals("dep", result.getEdge(fast, result.getNodeByIndex(1)).getRelation().toString());
   }
 
   /**
