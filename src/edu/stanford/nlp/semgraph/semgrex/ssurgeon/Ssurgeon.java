@@ -103,9 +103,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -gov} and {@code -dep} will be nodes matched by the Semgrex pattern. <br>
  * {@code -reln} is the name of the dependency type to add. <br>
  * {@code -graph} is the graph to add it to, {@code basic} or {@code enhanced}.  The default is {@code basic}. <br>
- * A node made by an earlier {@code addNode} is added to the graph along with the edge,
- * but a word which another graph of the sentence has and this one does not,
- * such as an empty word when adding to the basic graph, is not.
+ * A word which the graph does not have, such as an empty word when adding to the basic graph,
+ * or a word an earlier edit deleted, is not added, and the graph is left alone.
  *</p><p>
  * {@code relabelNamedEdge} changes the dependency type of a named edge. <br>
  * {@code edge} is the name of the edge in the Semgrex pattern. <br>
@@ -235,13 +234,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *   A graph's last root is never deleted, and the words left keep their indices.
  *</p><p>
  * {@code reindexGraph} reindexes the graph from 1 in case there are gaps or the node indices start later than 1.  (Warning: does not work for first index less than 1)
- *</p><p>
- * One older operation remains for existing code, but is not recommended. <br>
- * {@code addNode -nodearg "{word=foo lemma=foo}" -name name} makes a new node, with no index or edges, which
- *   a later {@code addEdge} can attach.  It makes a node every time it runs, so a pattern which uses it never
- *   finishes under {@link SsurgeonPattern#iterate}, which is what the command line and Stanza's ssurgeon.py use.
- *   {@code addDep} adds a word with its index and its edge in one step.
- *</P>
+ *</p>
  *<p>
  * A practical example comes from the {@code UD_English-Pronouns}
  * dataset, where some words had both {@code nsubj} and {@code csubj}
@@ -530,8 +523,6 @@ public class Ssurgeon  {
   public static final String SIBLINGS_ARG = "-siblings";
   /** Flag for the name of a dependency relation */
   public static final String RELN_ARG = "-reln";
-  /** Flag for the string description of a node to add */
-  public static final String NODE_PROTO_ARG = "-nodearg";
   /** Flag for the weight of a new edge */
   public static final String WEIGHT_ARG = "-weight";
   /** Flag for the index, counting from 0, of the head of a phrase or split */
@@ -589,8 +580,6 @@ public class Ssurgeon  {
     public boolean siblings = false;
 
     // below are string representations of the intended values
-    /** The {@code -nodearg} node description */
-    public String nodeString = null;
 
     /** The {@code -weight}, or 0 if not given */
     public double weight = 0.0;
@@ -707,9 +696,6 @@ public class Ssurgeon  {
         case SIBLINGS_ARG:
           argsBox.siblings = Boolean.parseBoolean(argsValue);
           break;
-        case NODE_PROTO_ARG:
-          argsBox.nodeString = argsValue;
-          break;
         case WEIGHT_ARG:
           argsBox.weight = Double.valueOf(argsValue);
           break;
@@ -819,8 +805,6 @@ public class Ssurgeon  {
         }
         GrammaticalRelation reln = argsBox.reln == null ? null : GrammaticalRelation.valueOf(language, argsBox.reln);
         return new AddDep(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position, argsBox.weight, argsBox.name, argsBox.graph);
-      } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
-        return AddNode.createAddNode(argsBox.nodeString, argsBox.name);
       } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {
         if (argsBox.reln == null) {
           throw new SsurgeonParseException("Relation not specified for AddEdge");
