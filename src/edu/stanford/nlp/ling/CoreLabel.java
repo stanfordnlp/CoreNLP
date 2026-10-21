@@ -60,7 +60,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    * @param label The CoreLabel to copy
    */
   public CoreLabel(CoreLabel label) {
-    this((CoreMap) label);
+    super(label);
   }
 
   /**
@@ -71,13 +71,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    */
   @SuppressWarnings({"unchecked"})
   public CoreLabel(CoreMap label) {
-    super(label.size());
-    Consumer<Class<? extends Key<?>>> savedListener = ArrayCoreMap.listener;  // don't listen to the clone operation
-    ArrayCoreMap.listener = null;
-    for (Class key : label.keySet()) {
-      set(key, label.get(key));
-    }
-    ArrayCoreMap.listener = savedListener;
+    super(label);
   }
 
   /**
@@ -94,25 +88,26 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    */
   @SuppressWarnings("unchecked")
   public CoreLabel(Label label) {
-    super(0);
-    if (label instanceof CoreMap) {
-      CoreMap cl = (CoreMap) label;
-      setCapacity(cl.size());
-      for (Class key : cl.keySet()) {
-        set(key, cl.get(key));
-      }
-    } else if (label instanceof IndexedWord) {
-      CoreMap cl = ((IndexedWord) label).backingLabel();
-      setCapacity(cl.size());
-      for (Class key : cl.keySet()) {
-        set(key, cl.get(key));
-      }
-    } else {
+    this(extractCoreMap(label), label);
+  }
+
+  private CoreLabel(CoreMap map, Label label) {
+    super(map != null ? map : new ArrayCoreMap(0));
+    if (map == null && label != null) {
       if (label instanceof HasWord) {
-         setWord(((HasWord)label).word());
+        setWord(((HasWord) label).word());
       }
       setValue(label.value());
     }
+  }
+
+  private static CoreMap extractCoreMap(Label label) {
+    if (label instanceof CoreMap) {
+      return (CoreMap) label;
+    } else if (label instanceof IndexedWord) {
+      return ((IndexedWord) label).backingLabel();
+    }
+    return null;
   }
 
   /**

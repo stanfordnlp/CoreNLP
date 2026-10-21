@@ -81,21 +81,35 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
 
   /**
    * Copy constructor.
-   * @param other The ArrayCoreMap to copy. It may not be null.
+   * @param other The CoreMap to copy. It may not be null.
    */
   @SuppressWarnings("unchecked")
   public ArrayCoreMap(CoreMap other) {
+    if (other instanceof ArrayCoreMap) {
+      ArrayCoreMap otherArray = (ArrayCoreMap) other;
+      this.size = otherArray.size;
+      this.keys = Arrays.copyOf(otherArray.keys, size);
+      this.values = Arrays.copyOf(otherArray.values, size);
+      return;
+    }
+
     Set<Class<?>> otherKeys = other.keySet();
 
     size = otherKeys.size();
     keys = new Class[size];
     values = new Object[size];
 
-    int i = 0;
-    for (Class key : otherKeys) {
-      this.keys[i] = key;
-      this.values[i] = other.get(key);
-      i++;
+    Consumer<Class<? extends Key<?>>> savedListener = listener;
+    listener = null;
+    try {
+      int i = 0;
+      for (Class key : otherKeys) {
+        this.keys[i] = key;
+        this.values[i] = other.get(key);
+        i++;
+      }
+    } finally {
+      listener = savedListener;
     }
   }
 
