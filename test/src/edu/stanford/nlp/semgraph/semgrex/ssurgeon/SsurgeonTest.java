@@ -78,8 +78,8 @@ public class SsurgeonTest {
    *<br>
    * A Spanish contraction such as "yla" splits into "y" and "la", neither
    * of which heads the other: both belong under whatever the original word
-   * hung from.  One -reln serves for every new piece, so the edges are
-   * named and relabelled afterwards.
+   * hung from.  Here one -reln serves for every new piece, and the edge of
+   * the second is named and relabelled afterwards.
    */
   @Test
   public void readXMLSplitWordSiblings() {
@@ -102,6 +102,61 @@ public class SsurgeonTest {
     SemanticGraph newSG = pattern.iterate(sg).first;
     SemanticGraph expected = SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-5 det> y-3 det> la-4]]");
     assertEquals(expected, newSG);
+  }
+
+  /**
+   * With a relation for each piece, "yla" splits into "y" and "la" with
+   * their own relations, and no relabelling afterwards.  Pieces count from 0.
+   */
+  @Test
+  public void readXMLSplitWordPieceRelations() {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Split a contraction, giving each piece its relation</notes>",
+                             "    <language>UniversalEnglish</language>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:yla}=split") + "</semgrex>",
+                             "    <edit-list>splitWord -node split -exact y -exact la -reln 1=det -headIndex 0 -siblings true</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    SsurgeonPattern pattern = readFromString(doc).get(0);
+    assertTrue(pattern.getEditScript().get(0).toEditString().contains("-reln 1=det"));
+    SemanticGraph sg = SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-4 det> yla-3]]");
+    // the head piece keeps the edge the word had
+    assertEquals(SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-5 det> y-3 det> la-4]]"), pattern.iterate(sg).first);
+
+    // a relation for the head piece replaces the relation of its edges
+    doc = doc.replace("-reln 1=det", "-reln 0=cc,1=det");
+    pattern = readFromString(doc).get(0);
+    assertTrue(pattern.getEditScript().get(0).toEditString().contains("-reln 0=cc,1=det"));
+    sg = SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-4 det> yla-3]]");
+    assertEquals(SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-5 cc> y-3 det> la-4]]"), pattern.iterate(sg).first);
+  }
+
+  /** A name the semgrex pattern gave an edge of the head piece follows it when its relation changes */
+  @Test
+  public void splitWordHeadRelationKeepsEdgeName() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=g >det=e {word:yla}=split\n" +
+                                                        "splitWord -node split -exact y -exact la -reln 0=cc,1=det -headIndex 0 -siblings true\n" +
+                                                        "relabelNamedEdge -edge e -reln mark", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-4 det> yla-3]]", Language.UniversalEnglish);
+    SemanticGraph expected = SemanticGraph.valueOf("[comieron-1 nsubj> Juan-2 obj> [manzana-5 mark> y-3 det> la-4]]", Language.UniversalEnglish);
+    assertEquals(expected, pattern.iterate(sg).first);
+  }
+
+  /** Each new piece needs a relation, and each index has to be one of the pieces */
+  @Test
+  public void splitWordPieceRelationErrors() {
+    Set<String> knownEdges = new HashSet<>();
+    // no relation for la
+    assertThrows(SsurgeonParseException.class, () ->
+                 Ssurgeon.parseEditLine("splitWord -node a -exact y -exact la -reln 0=cc -headIndex 0", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    // there is no third piece
+    assertThrows(SsurgeonParseException.class, () ->
+                 Ssurgeon.parseEditLine("splitWord -node a -exact y -exact la -reln 1=det,2=obj -headIndex 0", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    // the head piece does not need one
+    Ssurgeon.parseEditLine("splitWord -node a -exact y -exact la -reln 1=det -headIndex 0", new HashMap<>(), Language.UniversalEnglish, knownEdges);
   }
 
   /**

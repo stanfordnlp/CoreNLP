@@ -667,6 +667,79 @@ public class SsurgeonPatternTest {
     assertEquals("1=I 2=want 3=to 4=go 5=: 6=right 7=now 8=ok", wordsOf(result.first().getDefault()));
   }
 
+  /** "Sue likes coffee and BillBob tea", with an empty word 5.1 after the word to split */
+  private static final String SPLIT_SENTENCE = String.join("\n",
+    "# text = Sue likes coffee and BillBob tea",
+    "1\tSue\tSue\tPROPN\t_\t_\t2\tnsubj\t2:nsubj\t_",
+    "2\tlikes\tlike\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "3\tcoffee\tcoffee\tNOUN\t_\t_\t2\tobj\t2:obj\t_",
+    "4\tand\tand\tCCONJ\t_\t_\t5\tcc\t5.1:cc\t_",
+    "5\tBillBob\tBillBob\tPROPN\t_\t_\t2\tconj\t5.1:nsubj\t_",
+    "5.1\tlikes\tlike\tVERB\t_\t_\t_\t_\t2:conj:and\t_",
+    "6\ttea\ttea\tNOUN\t_\t_\t5\torphan\t5.1:obj\t_",
+    "",
+    "");
+
+  /**
+   * Splitting the word before an empty word puts the empty word after the
+   * last piece, and the new piece gets its edge in both graphs
+   */
+  @Test
+  public void splitWordBeforeEmptyWord() throws IOException {
+    SemgrexGraphs graphs = editSentence(SPLIT_SENTENCE, "{word:BillBob}=b\nsplitWord -node b -exact Bill -exact Bob -reln flat -headIndex 0");
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertNotNull(enhanced);
+    assertEquals("1=Sue 2=likes 3=coffee 4=and 5=Bill 6=Bob 6.1=likes 7=tea", wordsOf(enhanced));
+    assertEquals("1=Sue 2=likes 3=coffee 4=and 5=Bill 6=Bob 7=tea", wordsOf(basic));
+
+    IndexedWord empty = word(enhanced, 6, 1);
+    IndexedWord bill = word(basic, 5, 0);
+    IndexedWord bob = word(basic, 6, 0);
+    // the head piece keeps the edges of the word in each graph
+    assertEquals(Collections.singletonList("conj"), relations(basic, word(basic, 2, 0), bill));
+    assertEquals(Collections.singletonList("orphan"), relations(basic, bill, word(basic, 7, 0)));
+    assertEquals(Collections.singletonList("nsubj"), relations(enhanced, empty, bill));
+    // the new piece hangs from the head piece in both
+    assertEquals(Collections.singletonList("flat"), relations(basic, bill, bob));
+    assertEquals(Collections.singletonList("flat"), relations(enhanced, bill, bob));
+    // the empty word kept its edges
+    assertEquals(Collections.singletonList("cc"), relations(enhanced, empty, word(enhanced, 4, 0)));
+    assertEquals(Collections.singletonList("obj"), relations(enhanced, empty, word(enhanced, 7, 0)));
+    assertEquals(Collections.singletonList("conj:and"), relations(enhanced, word(enhanced, 2, 0), empty));
+  }
+
+  /** With the head as the last piece, the empty word still follows it */
+  @Test
+  public void splitWordHeadLastBeforeEmptyWord() throws IOException {
+    SemgrexGraphs graphs = editSentence(SPLIT_SENTENCE, "{word:BillBob}=b\nsplitWord -node b -exact Bill -exact Bob -reln flat -headIndex 1");
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertEquals("1=Sue 2=likes 3=coffee 4=and 5=Bill 6=Bob 6.1=likes 7=tea", wordsOf(enhanced));
+    IndexedWord bill = word(basic, 5, 0);
+    IndexedWord bob = word(basic, 6, 0);
+    assertEquals(Collections.singletonList("conj"), relations(basic, word(basic, 2, 0), bob));
+    assertEquals(Collections.singletonList("nsubj"), relations(enhanced, word(enhanced, 6, 1), bob));
+    assertEquals(Collections.singletonList("flat"), relations(basic, bob, bill));
+    assertEquals(Collections.singletonList("flat"), relations(enhanced, bob, bill));
+  }
+
+  /**
+   * With -siblings, the new piece hangs from the governors the word has in
+   * each graph, which differ here.  -edge names the edge in the basic graph.
+   */
+  @Test
+  public void splitWordSiblingsInEachGraph() throws IOException {
+    SemgrexGraphs graphs = editSentence(SPLIT_SENTENCE, "{word:BillBob}=b\nsplitWord -node b -exact Bill -exact Bob -reln 1=conj -headIndex 0 -siblings true -edge 1=e\nrelabelNamedEdge -edge e -reln appos");
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertEquals("1=Sue 2=likes 3=coffee 4=and 5=Bill 6=Bob 6.1=likes 7=tea", wordsOf(enhanced));
+    IndexedWord bob = word(basic, 6, 0);
+    assertEquals(Collections.singletonList("appos"), relations(basic, word(basic, 2, 0), bob));
+    assertEquals(Collections.singletonList("conj"), relations(enhanced, word(enhanced, 6, 1), bob));
+    assertEquals(1, enhanced.incomingEdgeList(bob).size());
+  }
+
   /** The enhanced graph's root, written as 0:root in DEPS, can be set apart from the basic graph's */
   @Test
   public void setRootsOfEnhanced() throws IOException {
