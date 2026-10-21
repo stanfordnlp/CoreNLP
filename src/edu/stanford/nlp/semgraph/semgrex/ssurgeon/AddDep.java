@@ -50,53 +50,7 @@ public class AddDep extends SsurgeonEdit {
   final SemgrexGraphName graph;
 
   /**
-   * Creates an AddDep with an edge weight of 0.
-   *
-   * @param govNodeName the name of the matched node which governs the new node
-   * @param relation the relation from the governor to the new node
-   * @param attributes the attributes of the new node, such as word or lemma
-   * @param position where to put the new node, or null for the end of the sentence
-   * @throws SsurgeonParseException if an argument is missing or invalid
-   */
-  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position) {
-    this(govNodeName, relation, attributes, position, 0.0);
-  }
-
-  /**
    * Creates an AddDep.
-   *
-   * @param govNodeName the name of the matched node which governs the new node
-   * @param relation the relation from the governor to the new node
-   * @param attributes the attributes of the new node, such as word or lemma; the map is copied
-   * @param position where to put the new node, or null for the end of the sentence.
-   *   Must start with {@code -} or {@code +}
-   * @param weight the weight of the new edge
-   * @throws SsurgeonParseException if govNodeName or relation is null,
-   *   the position is invalid, or the attributes can't be used for a new node
-   */
-  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight) {
-    this(govNodeName, relation, attributes, position, weight, null, null);
-  }
-
-  /**
-   * Creates an AddDep which names its new node.
-   *
-   * @param govNodeName the name of the matched node which governs the new node
-   * @param relation the relation from the governor to the new node
-   * @param attributes the attributes of the new node, such as word or lemma; the map is copied
-   * @param position where to put the new node, or null for the end of the sentence.
-   *   Must start with {@code -} or {@code +}
-   * @param weight the weight of the new edge
-   * @param nodeName the name to give the new node in the match, or null for no name
-   * @throws SsurgeonParseException if govNodeName or relation is null,
-   *   the position is invalid, or the attributes can't be used for a new node
-   */
-  public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight, String nodeName) {
-    this(govNodeName, relation, attributes, position, weight, nodeName, null);
-  }
-
-  /**
-   * Creates an AddDep which names its new node and chooses the graph for its edge.
    *
    * @param govNodeName the name of the matched node which governs the new node
    * @param relation the relation from the governor to the new node
