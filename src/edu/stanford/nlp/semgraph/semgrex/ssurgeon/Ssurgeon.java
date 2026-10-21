@@ -718,7 +718,7 @@ public class Ssurgeon  {
           throw new SsurgeonParseException("Relation not specified for AddDep");
         }
         GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
-        return new AddDep(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position);
+        return new AddDep(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position, argsBox.weight);
       } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
         return AddNode.createAddNode(argsBox.nodeString, argsBox.name);
       } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {

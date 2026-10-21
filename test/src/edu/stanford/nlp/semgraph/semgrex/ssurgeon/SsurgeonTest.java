@@ -1148,6 +1148,33 @@ public class SsurgeonTest {
   }
 
   /**
+   * The weight of an addDep is read from its edit string and given to the new edge
+   */
+  @Test
+  public void readXMLAddDepWeight() {
+    String add = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>38</uid>",
+                             "    <notes>Add a word with a weighted edge</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{word:antennae}=antennae !> {word:blue}") + "</semgrex>",
+                             "    <edit-list>addDep -gov antennae -reln dep -word blue -weight 0.5</edit-list>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    List<SsurgeonPattern> patterns = readFromString(add);
+    assertEquals(1, patterns.size());
+    SsurgeonPattern addSsurgeon = patterns.get(0);
+    assertTrue(addSsurgeon.getEditScript().get(0).toEditString().contains("-weight 0.5"));
+
+    SemanticGraph sg = SemanticGraph.valueOf("[has-2 nsubj> Jennifer-1 obj> antennae-3]");
+    SemanticGraph newSG = addSsurgeon.iterate(sg).first;
+    IndexedWord blue = newSG.getNodeByIndex(4);
+    assertEquals("blue", blue.word());
+    SemanticGraphEdge edge = newSG.getEdge(newSG.getParent(blue), blue);
+    assertEquals(0.5, edge.getWeight(), 0.0);
+  }
+
+  /**
    * There should be an exception for an annotation key that does not exist
    */
   @Test
