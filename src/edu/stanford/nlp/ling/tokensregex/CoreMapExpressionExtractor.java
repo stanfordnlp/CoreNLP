@@ -36,6 +36,22 @@ import java.util.function.Predicate;
  *   <li><b>Filtering</b> of an invalid expression.  In the final phase, a final filtering stage filters out invalid expressions.</li>
  * </ol>
  * The different stages are numbered and are applied in numeric order.
+ * <p>
+ * Each stage reads its settings from the environment defaults when the
+ * first rule of that stage is added, for example
+ * {@code ENV.defaults["stage.keepNestedMatches"] = TRUE} in a rules file:
+ * <ul>
+ *   <li>{@code stage.clearMatched}: discard expressions matched in earlier stages (default false)</li>
+ *   <li>{@code stage.limitIters}: maximum number of times composite rules are applied (default 50)</li>
+ *   <li>{@code stage.keepNestedMatches}: return expressions nested inside other expressions,
+ *       such as "New York" inside "New York Times".  Partially overlapping expressions
+ *       are still pruned (default false)</li>
+ *   <li>{@code stage.keepOverlappingMatches}: return all overlapping expressions, nested or not.
+ *       Only repeats of the same rule over the same tokens are pruned (default false)</li>
+ * </ul>
+ * Keeping nested or overlapping matches only changes which expressions are returned.
+ * Composite rules still match against the best non-overlapping set of expressions.
+ * Use {@code matchFindType: "FIND_ALL"} on a rule to also find overlapping matches of that one rule.
  *
  * @author Angel Chang
  * @see SequenceMatchRules
@@ -69,6 +85,16 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
      * (prevents badly formed rules from iterating forever)
      */
     int limitIters = 50;
+    /**
+     * Whether to keep expressions nested inside other expressions.
+     * Expressions which partially overlap are still pruned.
+     */
+    boolean keepNestedMatches = false;
+    /**
+     * Whether to keep all overlapping expressions, nested or not.
+     * Only duplicate expressions (same rule, same tokens) are pruned.
+     */
+    boolean keepOverlappingMatches = false;
     /**
      * Stage id (stages are applied in numeric order from low to high)
      */
@@ -186,6 +212,14 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
           Integer limitIters = (Integer) env.getDefaults().get("stage.limitIters");
           if (limitIters != null) {
             stage.limitIters = limitIters;
+          }
+          Boolean keepNestedMatches = (Boolean) env.getDefaults().get("stage.keepNestedMatches");
+          if (keepNestedMatches != null) {
+            stage.keepNestedMatches = keepNestedMatches;
+          }
+          Boolean keepOverlappingMatches = (Boolean) env.getDefaults().get("stage.keepOverlappingMatches");
+          if (keepOverlappingMatches != null) {
+            stage.keepOverlappingMatches = keepOverlappingMatches;
           }
         }
         if (aer.active) {
@@ -417,7 +451,36 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     }
   }
 
+  /**
+   * Picks the best set of non-overlapping expressions.
+   * This set is what gets merged into the chunk list
+   * which later composite rules match against.
+   */
+  private static <T extends MatchedExpression> List<T> pruneToNonOverlapping(List<T> expressions) {
+    List<T> pruned = MatchedExpression.removeNested(expressions);
+    return MatchedExpression.removeOverlapping(pruned);
+  }
+
+  /**
+   * Prunes the expressions returned to the caller, according to the stage settings.
+   * <ul>
+   *   <li>{@code keepOverlappingMatches}: only duplicates (same rule, same tokens) are removed</li>
+   *   <li>{@code keepNestedMatches}: partially overlapping expressions are removed, nested ones kept</li>
+   *   <li>neither: only the best non-overlapping expressions are kept</li>
+   * </ul>
+   */
+  private static <T extends MatchedExpression> List<T> pruneMatches(Stage<T> stage, List<T> expressions) {
+    if (stage.keepOverlappingMatches) {
+      return MatchedExpression.removeDuplicates(expressions);
+    } else if (stage.keepNestedMatches) {
+      return MatchedExpression.removeDuplicates(MatchedExpression.removeCrossing(expressions));
+    } else {
+      return pruneToNonOverlapping(expressions);
+    }
+  }
+
   private Pair<List<? extends CoreMap>, List<T>> applyCompositeRule(
+          Stage<T> stage,
           SequenceMatchRules.ExtractRule<List<? extends CoreMap>, T> compositeExtractRule,
           List<? extends CoreMap> merged,
           List<T> matchedExpressions, int limit) {
@@ -434,13 +497,13 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
         annotateExpressions(merged, newExprs);
         newExprs = MatchedExpression.removeNullValues(newExprs);
         if ( ! newExprs.isEmpty()) {
-          newExprs = MatchedExpression.removeNested(newExprs);
-          newExprs = MatchedExpression.removeOverlapping(newExprs);
-          merged = MatchedExpression.replaceMerged(merged, newExprs);
+          List<T> bestNewExprs = pruneToNonOverlapping(newExprs);
+          merged = MatchedExpression.replaceMerged(merged, bestNewExprs);
           // Favor newly matched expressions over older ones
-          newExprs.addAll(matchedExpressions);
-          matchedExpressions = MatchedExpression.removeNested(newExprs);
-          matchedExpressions = MatchedExpression.removeOverlapping(matchedExpressions);
+          boolean keepAll = stage.keepNestedMatches || stage.keepOverlappingMatches;
+          List<T> combined = new ArrayList<>(keepAll ? newExprs : bestNewExprs);
+          combined.addAll(matchedExpressions);
+          matchedExpressions = pruneMatches(stage, combined);
         } else {
           extracted = false;
         }
@@ -487,15 +550,17 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
         }
         annotateExpressions(annotation, matchedExpressions);
         matchedExpressions = MatchedExpression.removeNullValues(matchedExpressions);
-        matchedExpressions = MatchedExpression.removeNested(matchedExpressions);
-        matchedExpressions = MatchedExpression.removeOverlapping(matchedExpressions);
+        matchedExpressions = pruneMatches(stage, matchedExpressions);
       }
 
-      List<? extends CoreMap> merged = MatchedExpression.replaceMergedUsingTokenOffsets(annotation.get(tokensAnnotationKey), matchedExpressions);
+      // Composite rules see the same chunks whether or not nested / overlapping matches are kept
+      boolean keepAll = stage.keepNestedMatches || stage.keepOverlappingMatches;
+      List<T> bestExpressions = keepAll ? pruneToNonOverlapping(new ArrayList<>(matchedExpressions)) : matchedExpressions;
+      List<? extends CoreMap> merged = MatchedExpression.replaceMergedUsingTokenOffsets(annotation.get(tokensAnnotationKey), bestExpressions);
       SequenceMatchRules.ExtractRule<List<? extends CoreMap>, T> compositeExtractRule = stage.compositeExtractRule;
       if (compositeExtractRule != null) {
         Pair<List<? extends CoreMap>, List<T>> p = applyCompositeRule(
-                compositeExtractRule, merged, matchedExpressions, stage.limitIters);
+                stage, compositeExtractRule, merged, matchedExpressions, stage.limitIters);
         merged = p.first();
         matchedExpressions = p.second();
       }
