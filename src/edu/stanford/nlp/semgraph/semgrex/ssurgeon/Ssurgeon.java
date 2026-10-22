@@ -207,6 +207,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code mergeNodes} will merge n1 and n2, assuming they are mergeable. <br>
  * The nodes can be merged if one of the nodes is the head of a phrase
  * and the other node depends on the head.
+ * Another node with exactly the same parents, with the same relations, can merge into the head as well,
+ * and its children outside the phrase move to the head.  The other nodes cannot have edges to words outside the phrase. <br>
+ * The nodes are merged in every graph of the sentence which has them, and each of those graphs has to allow
+ *   the merge.  The head is the first node which every one of those graphs allows as the head.  The merged word takes the place of the first of the words, and the empty
+ *   words which followed any of them follow it.  A name for any of the nodes refers to the merged word afterwards.
  *</p><p>
  * {@code killAllIncomingEdges} deletes all edges to a node. <br>
  * {@code -node} is the node to edit. <br>

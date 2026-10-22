@@ -740,6 +740,116 @@ public class SsurgeonPatternTest {
     assertEquals(1, enhanced.incomingEdgeList(bob).size());
   }
 
+  /**
+   * "Sue likes coffee and Bill Bob tea", with an empty word after Bill and
+   * another after Bob.  Bill heads Bob in both graphs.
+   */
+  private static final String MERGE_SENTENCE = String.join("\n",
+    "# text = Sue likes coffee and Bill Bob tea",
+    "1\tSue\tSue\tPROPN\t_\t_\t2\tnsubj\t2:nsubj\t_",
+    "2\tlikes\tlike\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "3\tcoffee\tcoffee\tNOUN\t_\t_\t2\tobj\t2:obj\t_",
+    "4\tand\tand\tCCONJ\t_\t_\t5\tcc\t5.1:cc\t_",
+    "5\tBill\tBill\tPROPN\t_\t_\t2\tconj\t5.1:nsubj\t_",
+    "5.1\tlikes\tlike\tVERB\t_\t_\t_\t_\t2:conj:and\t_",
+    "6\tBob\tBob\tPROPN\t_\t_\t5\tflat\t5:flat\t_",
+    "6.1\tmore\tmore\tADV\t_\t_\t_\t_\t5.1:advmod\t_",
+    "7\ttea\ttea\tNOUN\t_\t_\t5\torphan\t5.1:obj\t_",
+    "",
+    "");
+
+  /** Checks the merged sentence, which is the same whichever of Bill and Bob was the head */
+  private static void checkMergedSentence(SemgrexGraphs graphs) {
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertNotNull(enhanced);
+    // both empty words follow the merged word, in the order they were in
+    assertEquals("1=Sue 2=likes 3=coffee 4=and 5=BillBob 5.1=likes 5.2=more 6=tea", wordsOf(enhanced));
+    assertEquals("1=Sue 2=likes 3=coffee 4=and 5=BillBob 6=tea", wordsOf(basic));
+
+    IndexedWord merged = word(basic, 5, 0);
+    IndexedWord likes = word(enhanced, 5, 1);
+    assertEquals(Collections.singletonList("conj"), relations(basic, word(basic, 2, 0), merged));
+    assertEquals(Collections.singletonList("cc"), relations(basic, merged, word(basic, 4, 0)));
+    assertEquals(Collections.singletonList("orphan"), relations(basic, merged, word(basic, 6, 0)));
+    assertEquals(Collections.singletonList("nsubj"), relations(enhanced, likes, merged));
+    assertEquals(Collections.singletonList("obj"), relations(enhanced, likes, word(enhanced, 6, 0)));
+    assertEquals(Collections.singletonList("advmod"), relations(enhanced, likes, word(enhanced, 5, 2)));
+    assertEquals(Collections.singletonList("conj:and"), relations(enhanced, word(enhanced, 2, 0), likes));
+    assertEquals(0, basic.outgoingEdgeList(merged).stream().filter(e -> e.getRelation().toString().equals("flat")).count());
+    assertEquals(0, enhanced.outgoingEdgeList(merged).stream().filter(e -> e.getRelation().toString().equals("flat")).count());
+  }
+
+  /**
+   * mergeNodes merges the words in both graphs, and the empty words after
+   * either of them follow the merged word.  The name of Bob refers to the
+   * merged word afterwards.
+   */
+  @Test
+  public void mergeNodesWithEmptyWords() throws IOException {
+    SemgrexGraphs graphs = editSentence(MERGE_SENTENCE, "{word:Bill}=b . {word:Bob}=c\nmergeNodes -node b -node c\neditNode -node c -lemma Bilbo");
+    checkMergedSentence(graphs);
+    assertEquals("Bilbo", word(graphs.getDefault(), 5, 0).lemma());
+  }
+
+  /** With the second word as the head, the merged word still takes the place of the first */
+  @Test
+  public void mergeNodesHeadLast() throws IOException {
+    String sentence = MERGE_SENTENCE
+      .replace("4\tand\tand\tCCONJ\t_\t_\t5\tcc", "4\tand\tand\tCCONJ\t_\t_\t6\tcc")
+      .replace("5\tBill\tBill\tPROPN\t_\t_\t2\tconj\t5.1:nsubj", "5\tBill\tBill\tPROPN\t_\t_\t6\tflat\t6:flat")
+      .replace("6\tBob\tBob\tPROPN\t_\t_\t5\tflat\t5:flat", "6\tBob\tBob\tPROPN\t_\t_\t2\tconj\t5.1:nsubj")
+      .replace("7\ttea\ttea\tNOUN\t_\t_\t5\torphan", "7\ttea\ttea\tNOUN\t_\t_\t6\torphan");
+    checkMergedSentence(editSentence(sentence, "{word:Bill}=b . {word:Bob}=c\nmergeNodes -node b -node c"));
+  }
+
+  /**
+   * "test foo bar", where foo and bar are both objects of test in the basic
+   * graph, so either could head the merged word, but in the enhanced graph
+   * one hangs from the other, so only that one can
+   */
+  private static final String TWO_HEADS_MERGE_SENTENCE = String.join("\n",
+    "# text = test foo bar",
+    "1\ttest\ttest\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "2\tfoo\tfoo\tNOUN\t_\t_\t1\tobj\t3:compound\t_",
+    "3\tbar\tbar\tPROPN\t_\t_\t1\tobj\t1:obj\t_",
+    "",
+    "");
+
+  /** The head is the first word which every graph allows, rather than the first in each graph */
+  @Test
+  public void mergeNodesHeadEveryGraphAllows() throws IOException {
+    String block = "{word:foo}=f . {word:bar}=b\nmergeNodes -node f -node b";
+    // the enhanced graph only allows bar, the second word, as the head
+    SemgrexGraphs graphs = editSentence(TWO_HEADS_MERGE_SENTENCE, block);
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertEquals("1=test 2=foobar", wordsOf(basic));
+    assertEquals("1=test 2=foobar", wordsOf(enhanced));
+    // the merged word is bar, with its upos, at the place of foo
+    assertEquals("PROPN", word(basic, 2, 0).get(CoreAnnotations.CoarseTagAnnotation.class));
+    assertEquals(Collections.singletonList("obj"), relations(basic, 1, 2));
+    assertEquals(Collections.singletonList("obj"), relations(enhanced, 1, 2));
+
+    // and the other way around, where the enhanced graph only allows foo
+    String other = TWO_HEADS_MERGE_SENTENCE.replace("\t3:compound\t", "\t1:obj\t").replace("\t1:obj\t_\n\n", "\t2:compound\t_\n\n");
+    graphs = editSentence(other, block);
+    assertEquals("1=test 2=foobar", wordsOf(graphs.get(SemgrexGraphName.ENHANCED)));
+    assertEquals("NOUN", word(graphs.getDefault(), 2, 0).get(CoreAnnotations.CoarseTagAnnotation.class));
+    assertEquals(Collections.singletonList("obj"), relations(graphs.get(SemgrexGraphName.ENHANCED), 1, 2));
+  }
+
+  /** If the enhanced graph does not allow the merge, nothing is merged, even though the basic graph does */
+  @Test
+  public void mergeNodesNeedsEveryGraph() throws IOException {
+    // in the enhanced graph, Bob has a parent outside the phrase of his own
+    String sentence = MERGE_SENTENCE.replace("\t5:flat\t", "\t5:flat|2:dep\t");
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:Bill}=b . {word:Bob}=c\nmergeNodes -node b -node c", "UniversalEnglish").get(0);
+    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(readGraphs(sentence));
+    assertFalse(result.second());
+    assertEquals("1=Sue 2=likes 3=coffee 4=and 5=Bill 5.1=likes 6=Bob 6.1=more 7=tea", wordsOf(result.first().get(SemgrexGraphName.ENHANCED)));
+  }
+
   /** The enhanced graph's root, written as 0:root in DEPS, can be set apart from the basic graph's */
   @Test
   public void setRootsOfEnhanced() throws IOException {
