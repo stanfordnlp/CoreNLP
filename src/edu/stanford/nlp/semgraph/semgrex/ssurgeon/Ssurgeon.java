@@ -93,7 +93,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code killAllIncomingEdges -node node}
  * <li> {@code delete -node node}
  * <li> {@code deleteLeaf -node node}
- * <li> {@code killNonRootedNodes}
+ * <li> {@code killNonRooted}
  * <li> {@code reindexGraph}
  * </ul>
  *
@@ -195,7 +195,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code -node} is the node to delete. <br>
  * If the node is not a leaf (no outgoing edges), it will not be deleted.
  *</p><p>
- * {@code killNonRootedNodes} searches the graph and deletes all nodes which have no path to a root.
+ * {@code killNonRooted} searches the graph and deletes all nodes which have no path to a root.
  *</p><p>
  * {@code reindexGraph} reindexes the graph from 1 in case there are gaps or the node indices start later than 1.  (Warning: does not work for first index less than 1)
  *</p><p>

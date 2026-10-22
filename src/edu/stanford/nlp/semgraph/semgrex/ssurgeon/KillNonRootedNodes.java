@@ -32,8 +32,8 @@ public class KillNonRootedNodes extends SsurgeonEdit {
     List<IndexedWord> nodes = new ArrayList<>(sg.vertexSet());
     for (IndexedWord node : nodes) {
       List<IndexedWord> rootPath = sg.getPathToRoot(node);
-      if (rootPath == null) {
-        changed = changed || sg.removeVertex(node);
+      if (rootPath == null && sg.removeVertex(node)) {
+        changed = true;
       }
     }
     return changed;
@@ -42,10 +42,7 @@ public class KillNonRootedNodes extends SsurgeonEdit {
   @Override
   public String toEditString() {
      StringWriter buf = new StringWriter();
-     buf.append(LABEL);     
-     buf.append("\t");         
-     buf.append(LABEL);     
-     
+     buf.append(LABEL);
      return buf.toString();
    }
 }

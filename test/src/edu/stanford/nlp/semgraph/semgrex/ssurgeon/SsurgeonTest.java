@@ -546,6 +546,21 @@ public class SsurgeonTest {
   }
 
   /**
+   * killNonRooted deletes every node with no path to a root, not just the
+   * first one it finds, and is written back out as the command it was read from
+   */
+  @Test
+  public void killNonRootedRemovesEveryNode() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=a1 >dep {}=a2\nremoveEdge -gov a1 -dep a2 -reln dep\nkillNonRooted", "UniversalEnglish").get(0);
+    assertEquals("killNonRooted", pattern.getEditScript().get(1).toEditString());
+    // cutting A from B leaves both B and C with no path to the root
+    SemanticGraph sg = SemanticGraph.valueOf("[A dep> [B obj> C]]", Language.UniversalEnglish);
+    SemanticGraph result = pattern.iterate(sg).first;
+    assertEquals(1, result.size());
+    assertEquals("A", result.getFirstRoot().word());
+  }
+
+  /**
    * Test that if the root is removed by a prune operation,
    * the roots on the graph are reset
    */
