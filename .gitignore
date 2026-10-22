@@ -8,7 +8,6 @@
 
 # stuff gets built here
 classes/**
-target/**
 
 # IntelliJ IDEA
 *.eml
@@ -20,9 +19,3 @@ target/**
 
 # generated javadoc
 javadoc/**
-
-# arcade artifacts
-arcade-report/
-.arcade-cache/
-**/.arcade-cache/
-

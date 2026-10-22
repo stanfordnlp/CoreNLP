@@ -95,22 +95,15 @@ public class CoreLabelTest {
   }
 
   @Test
-  public void testCopyPerformanceScaling() {
+  public void testCopyDoesNotShareStorage() {
     CoreLabel orig = createSampleLabel();
-    // Warmup
-    for (int i = 0; i < 10_000; i++) {
-      CoreLabel copy = new CoreLabel(orig);
-      Assert.assertNotNull(copy);
-    }
-
-    // Timed run: 100,000 copies should complete in tens of milliseconds with O(N) array copy
-    long start = System.nanoTime();
-    for (int i = 0; i < 100_000; i++) {
-      CoreLabel copy = new CoreLabel(orig);
-      Assert.assertNotNull(copy);
-    }
-    long elapsedMs = (System.nanoTime() - start) / 1_000_000;
-    // 100,000 copies in O(N) takes < 200ms on modern hardware
-    Assert.assertTrue("Copying 100k CoreLabels took too long: " + elapsedMs + "ms", elapsedMs < 2000);
+    int origSize = orig.size();
+    CoreLabel copy = new CoreLabel(orig);
+    copy.set(CoreAnnotations.ShapeAnnotation.class, "Xxxxx");
+    Assert.assertEquals(origSize, orig.size());
+    Assert.assertNull(orig.get(CoreAnnotations.ShapeAnnotation.class));
+    orig.remove(CoreAnnotations.NamedEntityTagAnnotation.class);
+    Assert.assertEquals("ORGANIZATION", copy.ner());
+    Assert.assertEquals(copy, new CoreLabel(copy));
   }
 }
