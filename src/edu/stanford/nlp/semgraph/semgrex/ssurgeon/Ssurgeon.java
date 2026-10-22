@@ -199,12 +199,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  *</p><p>
  * {@code reindexGraph} reindexes the graph from 1 in case there are gaps or the node indices start later than 1.  (Warning: does not work for first index less than 1)
  *</p><p>
- * Two older operations remain for existing code, but are not recommended. <br>
+ * One older operation remains for existing code, but is not recommended. <br>
  * {@code addNode -nodearg "{word=foo lemma=foo}" -name name} makes a new node, with no index or edges, which
  *   a later {@code addEdge} can attach.  It makes a node every time it runs, so a pattern which uses it never
  *   finishes under {@link SsurgeonPattern#iterate}, which is what the command line and Stanza's ssurgeon.py use.
- *   {@code addDep} adds a word with its index and its edge in one step. <br>
- * {@link CollapseSubtree} can only be used from Java.
+ *   {@code addDep} adds a word with its index and its edge in one step.
  *</P>
  *<p>
  * A practical example comes from the {@code UD_English-Pronouns}
