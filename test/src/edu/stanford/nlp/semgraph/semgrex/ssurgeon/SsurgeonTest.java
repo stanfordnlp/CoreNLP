@@ -2902,6 +2902,43 @@ public class SsurgeonTest {
   }
 
   /**
+   * A copy of a word shares its index, and its label, with the word, so
+   * the two are renumbered together, and the graph can still find both
+   */
+  @Test
+  public void reindexGraphWithCopy() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{$}\nreindexGraph", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[example-5 det> the-2 amod> foobar-4]", Language.UniversalEnglish);
+    IndexedWord foobar = sg.getNodeByIndex(4);
+    IndexedWord copy = new IndexedWord(foobar.backingLabel());
+    copy.setCopyCount(1);
+    sg.addEdge(sg.getNodeByIndex(5), copy, GrammaticalRelation.valueOf(Language.UniversalEnglish, "dep"), 1.0, false);
+
+    SemanticGraph newSg = pattern.iterate(sg).first;
+    assertEquals(4, newSg.size());
+    IndexedWord newFoobar = null;
+    IndexedWord newCopy = null;
+    for (IndexedWord vertex : newSg.vertexSet()) {
+      // every node is where the graph's maps expect it
+      assertTrue(newSg.containsVertex(vertex));
+      if (vertex.word().equals("foobar")) {
+        if (vertex.copyCount() == 0) {
+          newFoobar = vertex;
+        } else {
+          newCopy = vertex;
+        }
+      }
+    }
+    assertEquals(2, newFoobar.index());
+    assertEquals(2, newCopy.index());
+    assertEquals(1, newCopy.copyCount());
+    IndexedWord example = newSg.getFirstRoot();
+    assertEquals(3, example.index());
+    assertEquals("amod", newSg.getEdge(example, newFoobar).getRelation().toString());
+    assertEquals("dep", newSg.getEdge(example, newCopy).getRelation().toString());
+  }
+
+  /**
    * Test splitWord, which should split a word into pieces based on regex matches, with three pieces
    */
   @Test
