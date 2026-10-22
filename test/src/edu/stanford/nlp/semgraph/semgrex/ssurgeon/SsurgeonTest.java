@@ -3,6 +3,7 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 import static org.junit.Assert.*;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -460,7 +461,7 @@ public class SsurgeonTest {
                                "    <uid>38</uid>",
                                "    <notes>This semgrex detects disjoint nodes</notes>",
                                "    <semgrex>" + XMLUtils.escapeXML("{}=disjoint !== {$} !<< {$}") + "</semgrex>",
-                               "    <edit-list>delete -node disjoint</edit-list>",
+                               "    <edit-list>killNonRooted</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
     patterns = readFromString(prune);
@@ -513,7 +514,7 @@ public class SsurgeonTest {
                              "    <notes>Remove dep edges and prune</notes>",
                              "    <semgrex>" + XMLUtils.escapeXML("{}=a1 >dep {}=a2") + "</semgrex>",
                              "    <edit-list>removeEdge -gov a1 -dep a2 -reln dep</edit-list>",
-                             "    <edit-list>delete -node a2</edit-list>",
+                             "    <edit-list>killNonRooted</edit-list>",
                              "  </ssurgeon-pattern>",
                              "</ssurgeon-pattern-list>");
     List<SsurgeonPattern> patterns = readFromString(xml);
@@ -561,11 +562,11 @@ public class SsurgeonTest {
   }
 
   /**
-   * Test that if the root is removed by a prune operation,
-   * the roots on the graph are reset
+   * After a cut, the piece without the root can be kept instead: give it
+   * the root, then delete the nodes with no path to it
    */
   @Test
-  public void readXMLPruneNodesResetRoots() {
+  public void readXMLPruneKeepsCutPiece() {
     String cut = String.join(newline,
                              "<ssurgeon-pattern-list>",
                              "  <ssurgeon-pattern>",
@@ -583,9 +584,10 @@ public class SsurgeonTest {
                                "<ssurgeon-pattern-list>",
                                "  <ssurgeon-pattern>",
                                "    <uid>38</uid>",
-                               "    <notes>This semgrex detects disjoint roots</notes>",
-                               "    <semgrex>" + XMLUtils.escapeXML("{$}=root : {} !== {}=root !>> {}=root") + "</semgrex>",
-                               "    <edit-list>delete -node root</edit-list>",
+                               "    <notes>This semgrex finds a piece cut off from the root</notes>",
+                               "    <semgrex>" + XMLUtils.escapeXML("{$}=root : ({}=keep !== {}=root !<< {}=root !> {})") + "</semgrex>",
+                               "    <edit-list>setRoots keep</edit-list>",
+                               "    <edit-list>killNonRooted</edit-list>",
                                "  </ssurgeon-pattern>",
                                "</ssurgeon-pattern-list>");
     patterns = readFromString(prune);
@@ -597,7 +599,7 @@ public class SsurgeonTest {
     SemanticGraph cutSG = ssurgeonCut.iterate(sg).first;
     assertEquals(2, cutSG.vertexSet().size());
     SemanticGraph pruneSG = ssurgeonPrune.iterate(cutSG).first;
-    // note that for now, the prune operation doesn't renumber nodes in any way
+    // note that killNonRooted doesn't renumber nodes in any way
     SemanticGraph expected = SemanticGraph.valueOf("[B-1]");
     assertEquals(expected, pruneSG);
 
@@ -2746,9 +2748,9 @@ public class SsurgeonTest {
     SsurgeonEdit addCopula = new AddDep("a2", EnglishGrammaticalRelations.COPULA, attributes, null, 0.0);
     pattern.addEdit(addCopula);
 
-    // Destroy subgraph
-    SsurgeonEdit destroySubgraph = new DeleteGraphFromNode("a3");
-    pattern.addEdit(destroySubgraph);
+    // Keep only the piece with bartender, which is cut off from the old root
+    pattern.addEdit(new SetRoots(Collections.singletonList("a2")));
+    pattern.addEdit(new KillNonRootedNodes());
 
     // Process and output modified
     Collection<SemanticGraph> newSgs = pattern.execute(sg);
