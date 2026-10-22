@@ -850,6 +850,74 @@ public class SsurgeonPatternTest {
     assertEquals("1=Sue 2=likes 3=coffee 4=and 5=Bill 5.1=likes 6=Bob 6.1=more 7=tea", wordsOf(result.first().get(SemgrexGraphName.ENHANCED)));
   }
 
+  /** "Sue sleeps very soundly", with an empty word before the first word and two more after words */
+  private static final String REINDEX_SENTENCE = String.join("\n",
+    "# text = Sue sleeps very soundly",
+    "0.1\tit\tit\tPRON\t_\t_\t_\t_\t2:expl\t_",
+    "1\tSue\tSue\tPROPN\t_\t_\t2\tnsubj\t2:nsubj\t_",
+    "2\tsleeps\tsleep\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "2.1\tsnores\tsnore\tVERB\t_\t_\t_\t_\t2:conj\t_",
+    "3\tvery\tvery\tADV\t_\t_\t4\tadvmod\t4:advmod\t_",
+    "3.1\tdeeply\tdeeply\tADV\t_\t_\t_\t_\t2:advmod\t_",
+    "4\tsoundly\tsoundly\tADV\t_\t_\t2\tadvmod\t2:advmod\t_",
+    "",
+    "");
+
+  /** Takes a word out of the given graphs, leaving a gap where it was */
+  private static void remove(IndexedWord word, SemanticGraph... graphs) {
+    for (SemanticGraph graph : graphs) {
+      graph.removeVertex(word);
+    }
+  }
+
+  /** Runs reindexGraph directly, so the graphs can have gaps which CoNLL-U cannot */
+  private static boolean reindex(SemgrexGraphs graphs) {
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:sleeps}").matcher(graphs);
+    assertTrue(matcher.find());
+    return new ReindexGraph().evaluate(graphs, matcher);
+  }
+
+  /**
+   * With "very" gone from both graphs, the words close up, the empty word
+   * which followed "very" follows "sleeps" after its own empty word, and
+   * the empty word before the first word stays where it is
+   */
+  @Test
+  public void reindexGraphWithEmptyWords() throws IOException {
+    SemgrexGraphs graphs = readGraphs(REINDEX_SENTENCE);
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    remove(word(basic, 3, 0), basic, enhanced);
+
+    assertTrue(reindex(graphs));
+    assertEquals("0.1=it 1=Sue 2=sleeps 2.1=snores 2.2=deeply 3=soundly", wordsOf(enhanced));
+    assertEquals("1=Sue 2=sleeps 3=soundly", wordsOf(basic));
+    SsurgeonPattern.checkSharedWords(graphs);
+    IndexedWord sleeps = word(basic, 2, 0);
+    assertEquals(Collections.singletonList("advmod"), relations(basic, sleeps, word(basic, 3, 0)));
+    assertEquals(Collections.singletonList("advmod"), relations(enhanced, sleeps, word(enhanced, 3, 0)));
+    assertEquals(Collections.singletonList("advmod"), relations(enhanced, sleeps, word(enhanced, 2, 2)));
+    assertEquals(Collections.singletonList("expl"), relations(enhanced, sleeps, word(enhanced, 0, 1)));
+
+    // nothing left to renumber
+    assertFalse(reindex(graphs));
+  }
+
+  /** A word which only one graph has still gets its own place among the words */
+  @Test
+  public void reindexGraphWordInOneGraph() throws IOException {
+    SemgrexGraphs graphs = readGraphs(REINDEX_SENTENCE);
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    remove(word(basic, 1, 0), basic);
+    remove(word(basic, 3, 0), basic, enhanced);
+
+    assertTrue(reindex(graphs));
+    assertEquals("0.1=it 1=Sue 2=sleeps 2.1=snores 2.2=deeply 3=soundly", wordsOf(enhanced));
+    assertEquals("2=sleeps 3=soundly", wordsOf(basic));
+    SsurgeonPattern.checkSharedWords(graphs);
+  }
+
   /** The enhanced graph's root, written as 0:root in DEPS, can be set apart from the basic graph's */
   @Test
   public void setRootsOfEnhanced() throws IOException {

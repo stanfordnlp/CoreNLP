@@ -112,8 +112,9 @@ public class SsurgeonUtils {
    * @param sm the matcher whose named nodes and edges are updated
    * @param shouldMove given a word's index, whether to move that word
    * @param destination given a word's index, the index to move it to
+   * @return whether any word or empty word got a new index or empty index
    */
-  public static void moveNodes(SemgrexGraphs graphs, SemgrexMatcher sm, Function<Integer, Boolean> shouldMove, Function<Integer, Integer> destination) {
+  public static boolean moveNodes(SemgrexGraphs graphs, SemgrexMatcher sm, Function<Integer, Boolean> shouldMove, Function<Integer, Integer> destination) {
     Map<IndexedWord, Position> destinations = new HashMap<>();
     // the new index of each word, by its old index
     Map<Integer, Integer> wordIndices = new HashMap<>();
@@ -144,6 +145,7 @@ public class SsurgeonUtils {
       placeEmptyWords(emptyWords, wordIndices, destinations);
     }
     moveWords(graphs, sm, destinations);
+    return !destinations.isEmpty();
   }
 
   /** Orders empty words by where they are in the sentence */
