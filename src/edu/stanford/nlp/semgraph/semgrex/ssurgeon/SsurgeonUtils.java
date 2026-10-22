@@ -58,6 +58,12 @@ public class SsurgeonUtils {
    *<br>
    * An empty word keeps its empty index, and the empty words which follow
    * word stay where they are.  moveNodes moves them along with their words.
+   *<br>
+   * The graphs have to share their words, as
+   * {@link SsurgeonPattern#checkSharedWords} describes, which the graphs
+   * {@link SsurgeonPattern#iterate(SemgrexGraphs)} edits always do.  A word
+   * which another graph has as a separate, equal IndexedWord is not moved
+   * in that graph.
    *
    * @param graphs the graphs of the sentence
    * @param sm the matcher whose named nodes and edges are updated
@@ -107,6 +113,13 @@ public class SsurgeonUtils {
    * 7.1, or into 7.2 if 7.1 is there already, and every call leaves the
    * empty words numbered from 1 after each word, even one which moves no
    * word: with 8.1 deleted, 8.2 becomes 8.1.
+   *<br>
+   * The graphs have to share their words, as
+   * {@link SsurgeonPattern#checkSharedWords} describes, which the graphs
+   * {@link SsurgeonPattern#iterate(SemgrexGraphs)} edits always do.  The
+   * nodes are collected from every graph by equality, so where two graphs
+   * have separate, equal IndexedWords for a word, only the first one found
+   * is moved, and the graphs no longer agree on where the word is.
    *
    * @param graphs the graphs of the sentence
    * @param sm the matcher whose named nodes and edges are updated
