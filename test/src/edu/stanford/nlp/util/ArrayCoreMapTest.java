@@ -323,6 +323,18 @@ public class ArrayCoreMapTest {
     Assert.assertEquals(3, boff.size());
     Assert.assertEquals(biff, boff);
     Assert.assertEquals("fozzle", boff.get(CoreAnnotations.LemmaAnnotation.class));
+
+    // Test ArrayCoreMap(CoreMap) fast-path branch
+    CoreMap asCoreMap = biff;
+    ArrayCoreMap fromCoreMap = new ArrayCoreMap(asCoreMap);
+    Assert.assertEquals(3, fromCoreMap.size());
+    Assert.assertEquals(biff, fromCoreMap);
+    Assert.assertEquals("fozzle", fromCoreMap.get(CoreAnnotations.LemmaAnnotation.class));
+
+    // Ensure independence of copy
+    fromCoreMap.set(CoreAnnotations.LemmaAnnotation.class, "bar");
+    Assert.assertEquals("bar", fromCoreMap.get(CoreAnnotations.LemmaAnnotation.class));
+    Assert.assertEquals("fozzle", biff.get(CoreAnnotations.LemmaAnnotation.class));
   }
 
 }

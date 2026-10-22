@@ -106,4 +106,21 @@ public class CoreLabelTest {
     Assert.assertEquals("ORGANIZATION", copy.ner());
     Assert.assertEquals(copy, new CoreLabel(copy));
   }
+
+  @Test
+  public void testCopyDoesNotNotifyListener() {
+    CoreLabel orig = createSampleLabel();
+    java.util.List<Class<?>> seen = new java.util.ArrayList<>();
+    java.util.function.Consumer<Class<? extends edu.stanford.nlp.util.TypesafeMap.Key<?>>> saved =
+        edu.stanford.nlp.util.ArrayCoreMap.listener;
+    edu.stanford.nlp.util.ArrayCoreMap.listener = seen::add;
+    try {
+      new CoreLabel((CoreMap) orig);
+      new CoreLabel((Label) orig);
+      new edu.stanford.nlp.util.ArrayCoreMap((CoreMap) orig);
+    } finally {
+      edu.stanford.nlp.util.ArrayCoreMap.listener = saved;
+    }
+    Assert.assertTrue(seen.isEmpty());
+  }
 }

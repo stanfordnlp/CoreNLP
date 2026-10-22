@@ -85,6 +85,14 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    */
   @SuppressWarnings("unchecked")
   public ArrayCoreMap(CoreMap other) {
+    if (other instanceof ArrayCoreMap) {
+      // a CoreLabel passed as a CoreMap does not reach ArrayCoreMap(ArrayCoreMap) at compile time
+      ArrayCoreMap o = (ArrayCoreMap) other;
+      size = o.size;
+      keys = Arrays.copyOf(o.keys, size);
+      values = Arrays.copyOf(o.values, size);
+      return;
+    }
     Set<Class<?>> otherKeys = other.keySet();
 
     size = otherKeys.size();
