@@ -277,6 +277,15 @@ public class MatchedExpression {
     return text;
   }
 
+  /**
+   * Returns the name of the rule which produced this expression,
+   * as given by the {@code name} field of the rule.
+   * This is {@code null} if the rule was not given a name.
+   */
+  public String getName() {
+    return (extractFunc != null) ? extractFunc.name : null;
+  }
+
   public CoreMap getAnnotation() {
     return annotation;
   }
@@ -383,6 +392,68 @@ public class MatchedExpression {
     } else {
       return chunks;
     }
+  }
+
+  /**
+   * Removes expressions which partially overlap a preferred expression.
+   * Expressions which are nested inside one another, or which cover
+   * exactly the same tokens, are all kept.
+   * Preference is by priority, then length, the same as {@link #removeOverlapping}.
+   * <br>
+   * The token offsets are treated as half open intervals, which is how
+   * the expressions extracted by this class set them.
+   */
+  public static <T extends MatchedExpression> List<T> removeCrossing(List<T> chunks) {
+    if (chunks.size() <= 1) {
+      return chunks;
+    }
+    for (int i = 0, sz = chunks.size(); i < sz; i++) {
+      chunks.get(i).order = i;
+    }
+    List<T> sorted = new ArrayList<>(chunks);
+    sorted.sort(EXPR_PRIORITY_LENGTH_COMPARATOR);
+    List<T> kept = new ArrayList<>(sorted.size());
+    for (T chunk : sorted) {
+      boolean crosses = false;
+      for (T other : kept) {
+        if (crosses(chunk.tokenOffsets, other.tokenOffsets)) {
+          crosses = true;
+          break;
+        }
+      }
+      if (!crosses) {
+        kept.add(chunk);
+      }
+    }
+    return kept;
+  }
+
+  /** True if the two half open intervals overlap without one containing the other */
+  private static boolean crosses(Interval<Integer> i1, Interval<Integer> i2) {
+    int b1 = i1.getBegin(), e1 = i1.getEnd();
+    int b2 = i2.getBegin(), e2 = i2.getEnd();
+    boolean overlaps = b1 < e2 && b2 < e1;
+    boolean nested = (b1 <= b2 && e2 <= e1) || (b2 <= b1 && e1 <= e2);
+    return overlaps && !nested;
+  }
+
+  /**
+   * Removes expressions produced by the same rule over the same tokens,
+   * keeping the first one in the list.
+   * Expressions over the same tokens from different rules are all kept.
+   */
+  public static <T extends MatchedExpression> List<T> removeDuplicates(List<T> chunks) {
+    if (chunks.size() <= 1) {
+      return chunks;
+    }
+    Set<Pair<Interval<Integer>, SingleAnnotationExtractor>> seen = new HashSet<>();
+    List<T> kept = new ArrayList<>(chunks.size());
+    for (T chunk : chunks) {
+      if (seen.add(new Pair<>(chunk.tokenOffsets, chunk.extractFunc))) {
+        kept.add(chunk);
+      }
+    }
+    return kept;
   }
 
   public static <T extends MatchedExpression> T getBestMatched(List<T> matches, ToDoubleFunction<MatchedExpression> scorer) {
