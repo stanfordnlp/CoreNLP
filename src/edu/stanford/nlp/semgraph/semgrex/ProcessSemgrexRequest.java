@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -243,31 +245,87 @@ public class ProcessSemgrexRequest extends ProcessProtobufRequest {
 
     List<CoreMap> sentences = new ArrayList<>();
     for (CoreNLPProtos.SemgrexRequest.Dependencies sentence : request.getQueryList()) {
-      final List<CoreLabel> tokens;
-      if (sentence.getGraph().getTokenList().size() > 0) {
-        tokens = sentence.getGraph().getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
-      } else {
-        tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
-      }
-      SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, "semgrex");
-      CoreMap coremap = new ArrayCoreMap();
-      coremap.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
-      if (sentence.hasEnhancedGraph()) {
-        SemanticGraph enhanced = ProtobufAnnotationSerializer.fromProto(sentence.getEnhancedGraph(), tokens, "semgrex");
-        coremap.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, enhanced);
-      }
-      coremap.set(CoreAnnotations.TokensAnnotation.class, tokens);
-      // the sent_id and the position in the request, so an error
-      // about this sentence can say which one it is
-      if (sentence.hasSentenceID()) {
-        coremap.set(CoreAnnotations.SentenceIDAnnotation.class, sentence.getSentenceID());
-      }
-      coremap.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
-      sentences.add(coremap);
+      sentences.add(readSentence(serializer, sentence, sentences.size(), "semgrex"));
     }
 
     List<SemgrexPattern> patterns = request.getSemgrexList().stream().map(SemgrexPattern::compile).collect(Collectors.toList());
     return processRequest(sentences, patterns);
+  }
+
+  /**
+   * One sentence of a request, as a CoreMap with its tokens, its basic
+   * graph, its enhanced graph if it has one, its sentenceID if it has
+   * one, and its place in the request as its SentenceIndexAnnotation, so
+   * an error about it can say which sentence it is.
+   *<br>
+   * The tokens are those of the basic graph, or if it has none, those of
+   * the sentence.  Both graphs are built over the same tokens, and share
+   * their IndexedWords as graphs read from CoNLL-U do: a word in both
+   * graphs is the same IndexedWord in each, which Ssurgeon needs, and
+   * which keeps Semgrex seeing the same graphs it would see in a file.
+   *
+   * @param serializer the serializer to read the tokens with
+   * @param sentence the sentence of the request
+   * @param sentenceIndex the place of the sentence in the request, counting from 0
+   * @param docid the document ID to give the graphs' words
+   * @return the sentence, with its tokens and graphs
+   */
+  public static CoreMap readSentence(ProtobufAnnotationSerializer serializer, CoreNLPProtos.SemgrexRequest.Dependencies sentence,
+                                     int sentenceIndex, String docid) {
+    final List<CoreLabel> tokens;
+    if (sentence.getGraph().getTokenList().size() > 0) {
+      tokens = sentence.getGraph().getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+    } else {
+      tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+    }
+    SemanticGraph graph = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, docid);
+    CoreMap coremap = new ArrayCoreMap();
+    coremap.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
+    if (sentence.hasEnhancedGraph()) {
+      SemanticGraph enhanced = shareWords(graph, ProtobufAnnotationSerializer.fromProto(sentence.getEnhancedGraph(), tokens, docid));
+      coremap.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, enhanced);
+    }
+    coremap.set(CoreAnnotations.TokensAnnotation.class, tokens);
+    if (sentence.hasSentenceID()) {
+      coremap.set(CoreAnnotations.SentenceIDAnnotation.class, sentence.getSentenceID());
+    }
+    coremap.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
+    return coremap;
+  }
+
+  /**
+   * The other graph, rebuilt over the IndexedWords of the basic graph
+   * wherever it has the same word.  fromProto wraps the tokens in new
+   * IndexedWords for each graph it builds, even when the graphs are
+   * built over the same tokens.  Words the basic graph does not have,
+   * such as empty words and copies, keep the IndexedWords they have.
+   */
+  private static SemanticGraph shareWords(SemanticGraph basic, SemanticGraph other) {
+    Map<List<Integer>, IndexedWord> basicWords = new HashMap<>();
+    for (IndexedWord word : basic.vertexSet()) {
+      basicWords.put(position(word), word);
+    }
+    Map<IndexedWord, IndexedWord> sharedWords = new HashMap<>();
+    SemanticGraph shared = new SemanticGraph();
+    for (IndexedWord word : other.vertexSet()) {
+      IndexedWord sharedWord = basicWords.getOrDefault(position(word), word);
+      sharedWords.put(word, sharedWord);
+      shared.addVertex(sharedWord);
+    }
+    for (SemanticGraphEdge edge : other.edgeIterable()) {
+      shared.addEdge(sharedWords.get(edge.getSource()), sharedWords.get(edge.getTarget()), edge.getRelation(), edge.getWeight(), edge.isExtra());
+    }
+    List<IndexedWord> roots = new ArrayList<>();
+    for (IndexedWord root : other.getRoots()) {
+      roots.add(sharedWords.get(root));
+    }
+    shared.setRoots(roots);
+    return shared;
+  }
+
+  /** Where a word is in the sentence: its index, empty index, and copy count */
+  private static List<Integer> position(IndexedWord word) {
+    return Arrays.asList(word.index(), word.getEmptyIndex(), word.copyCount());
   }
 
   /**
