@@ -2132,6 +2132,17 @@ public class SsurgeonTest {
     edit = Ssurgeon.parseEditLine("addDep -gov a -reln det -word the", new HashMap<>(), Language.UniversalEnglish, knownEdges);
     assertEquals(Collections.emptySet(), edit.requiredGraphs());
     assertFalse(edit.toEditString().contains("-graph"));
+    edit = Ssurgeon.parseEditLine("killNonRooted -graph enhanced", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+    assertEquals(edit.toEditString(), Ssurgeon.parseEditLine(edit.toEditString(), new HashMap<>(), Language.UniversalEnglish, knownEdges).toEditString());
+    edit = Ssurgeon.parseEditLine("killNonRooted", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals("killNonRooted", edit.toEditString());
+    // the edit string older versions wrote still reads
+    assertEquals("killNonRooted", Ssurgeon.parseEditLine("killNonRooted\tkillNonRooted", new HashMap<>(), Language.UniversalEnglish, knownEdges).toEditString());
+    Map<String, String> graphAttribute = new HashMap<>();
+    graphAttribute.put("graph", "enhanced");
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), Ssurgeon.parseEditLine("killNonRooted", graphAttribute, Language.UniversalEnglish, knownEdges).requiredGraphs());
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("killNonRooted -node a", new HashMap<>(), Language.UniversalEnglish, knownEdges));
 
     // an XML attribute is the same as the flag
     Map<String, String> attributes = new HashMap<>();
