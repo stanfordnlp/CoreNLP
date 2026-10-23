@@ -1,8 +1,11 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,9 +23,10 @@ import edu.stanford.nlp.util.VariableStrings;
  * are already compiled
  *<br>
  * Ssurgeon edits work on a SemgrexMatch of the match they edit.  It has
- * its own copies of the named nodes and edges, so an edit can bind a
- * name, such as for a node it adds, for the edits after it, without
- * touching the matcher, which keeps its own copies as part of its search.
+ * its own copies of the named nodes, edges, and variables, so an edit can
+ * bind a name, such as for a node it adds, or set a variable for the
+ * edits after it, without touching the matcher, which keeps its own
+ * copies as part of its search.
  */
 
 public class SemgrexMatch implements Serializable  {
@@ -51,6 +55,13 @@ public class SemgrexMatch implements Serializable  {
 
   /** The node which matched the root of the pattern */
   final IndexedWord match;
+
+  /**
+   * Variables set by Ssurgeon edits, over the ones the pattern captured.
+   * A null value unsets a captured variable.  Created only when an edit
+   * sets one.
+   */
+  private Map<String, String> editVariables = null;
 
   /**
    * Records the current match of {@code matcher}, copying its named
@@ -195,17 +206,52 @@ public class SemgrexMatch implements Serializable  {
    * @return A new sorted list of variable names
    */
   public Collection<String> getVariableNames() {
-    return variableStrings.getVariableNames();
+    if (editVariables == null) {
+      return variableStrings.getVariableNames();
+    }
+    List<String> names = new ArrayList<>();
+    for (String var : variableStrings.getVariableNames()) {
+      if (!editVariables.containsKey(var)) {
+        names.add(var);
+      }
+    }
+    for (Map.Entry<String, String> entry : editVariables.entrySet()) {
+      if (entry.getValue() != null) {
+        names.add(entry.getKey());
+      }
+    }
+    Collections.sort(names);
+    return names;
   }
 
   /**
-   * Returns the string matched by a variable group.
+   * Returns the string of a variable: one an edit set with
+   * {@link #putVariableString}, or else the string a variable group of
+   * the pattern matched, such as {@code {lemma:/(.*)ir/#1%stem}}.
    *
    * @param var The variable name
    * @return The variable's string, or null if it is not set
    */
   public String getVariableString(String var) {
+    if (editVariables != null && editVariables.containsKey(var)) {
+      return editVariables.get(var);
+    }
     return variableStrings.getString(var);
+  }
+
+  /**
+   * Sets a variable in this match, as Ssurgeon does when an edit computes
+   * a value for the edits after it.  This takes precedence over a variable
+   * group of the same name.  The matcher is not changed.
+   *
+   * @param var The variable name
+   * @param value The variable's new string, or null to unset it
+   */
+  public void putVariableString(String var, String value) {
+    if (editVariables == null) {
+      editVariables = new HashMap<>();
+    }
+    editVariables.put(var, value);
   }
 
   public String toString() {

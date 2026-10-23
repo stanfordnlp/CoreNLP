@@ -17,6 +17,10 @@ import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
 
 /**
  * Edit an existing node to have new attributes.
+ *<br>
+ * The attribute values and the updated features may refer to variables
+ * of the match, such as {@code -lemma ${stem}ar}, as {@link SsurgeonTemplate}
+ * describes.  If a variable is not set, the node is left as it is.
  *
  * @author John Bauer
  */
@@ -27,20 +31,28 @@ public class EditNode extends SsurgeonEdit {
   final String nodeName;
   final List<String> removedAttributes;
   final List<String> removedMorpho;
+  /** The attribute values as written in the edit */
   final Map<String, String> attributes;
+  /** The attribute values, parsed for variables */
+  final Map<String, SsurgeonTemplate> attributeTemplates;
+  /** The attribute values, if none of them refer to variables, or else null */
+  final Map<String, String> literalAttributes;
+  /** The features to update, if they do not refer to variables, or else empty */
   final Map<String, String> updateMorphoFeatures;
+  /** The features to update, if they refer to variables, or else null */
+  final SsurgeonTemplate updateMorphoTemplate;
 
   /**
    * Creates an edit which changes the attributes of a named node.
    *
    * @param nodeName The name of the node to edit
-   * @param attributes Attributes to set, as attribute names and string values
-   * @param updateMorphoFeatures CoNLL-U features to add or overwrite, or null for none
+   * @param attributes Attributes to set, as attribute names and string values, which may refer to variables
+   * @param updateMorphoFeatures CoNLL-U features to add or overwrite, which may refer to variables, or null for none
    * @param removedAttributes Names of attributes to remove from the node
    * @param removedMorpho Names of CoNLL-U features to remove from the node
    * @throws SsurgeonParseException if nodeName is null, there is nothing to edit,
    *   an attribute cannot be set (see {@link AddDep#checkIllegalAttributes}),
-   *   or a removed attribute is unknown
+   *   a value refers to a variable in a malformed way, or a removed attribute is unknown
    */
   public EditNode(String nodeName, Map<String, String> attributes, String updateMorphoFeatures, List<String> removedAttributes, List<String> removedMorpho) {
     if (nodeName == null) {
@@ -49,13 +61,20 @@ public class EditNode extends SsurgeonEdit {
     if (attributes.size() == 0 && updateMorphoFeatures == null && removedAttributes.size() == 0 && removedMorpho.size() == 0) {
       throw new SsurgeonParseException("Cannot make an EditNode with no updated attributes, removed attributes, or updated/removed morphological features");
     }
-    AddDep.checkIllegalAttributes(attributes);
     this.nodeName = nodeName;
     this.attributes = new TreeMap<>(attributes);
-    if (updateMorphoFeatures != null) {
-      this.updateMorphoFeatures = new CoNLLUFeatures(updateMorphoFeatures);
-    } else {
+    this.attributeTemplates = SsurgeonTemplate.attributes(attributes);
+    this.literalAttributes = literalValues(attributeTemplates);
+    SsurgeonTemplate morphoTemplate = updateMorphoFeatures == null ? null : new SsurgeonTemplate(updateMorphoFeatures);
+    if (morphoTemplate == null) {
       this.updateMorphoFeatures = Collections.emptyMap();
+      this.updateMorphoTemplate = null;
+    } else if (morphoTemplate.hasVariables()) {
+      this.updateMorphoFeatures = Collections.emptyMap();
+      this.updateMorphoTemplate = morphoTemplate;
+    } else {
+      this.updateMorphoFeatures = new CoNLLUFeatures(morphoTemplate.literal());
+      this.updateMorphoTemplate = null;
     }
     this.removedAttributes = new ArrayList<>(removedAttributes);
     for (String attr : removedAttributes) {
@@ -66,6 +85,20 @@ public class EditNode extends SsurgeonEdit {
     this.removedMorpho = new ArrayList<>(removedMorpho);
   }
 
+
+  /**
+   * The values of the attributes, if none of them refer to variables, or else null
+   */
+  static Map<String, String> literalValues(Map<String, SsurgeonTemplate> templates) {
+    Map<String, String> values = new TreeMap<>();
+    for (Map.Entry<String, SsurgeonTemplate> entry : templates.entrySet()) {
+      if (entry.getValue().hasVariables()) {
+        return null;
+      }
+      values.put(entry.getKey(), entry.getValue().literal());
+    }
+    return values;
+  }
 
   /**
    * Emits a parseable instruction string.
@@ -93,10 +126,15 @@ public class EditNode extends SsurgeonEdit {
       buf.append("\t");
     }
 
-    if (this.updateMorphoFeatures.size() > 0) {
+    if (this.updateMorphoTemplate != null) {
       buf.append(Ssurgeon.UPDATE_MORPHO_FEATURES);
       buf.append(" ");
-      buf.append(CoNLLUFeatures.toFeatureString(this.updateMorphoFeatures));
+      buf.append(this.updateMorphoTemplate.text);
+    } else if (this.updateMorphoFeatures.size() > 0) {
+      buf.append(Ssurgeon.UPDATE_MORPHO_FEATURES);
+      buf.append(" ");
+      // a $ in a feature is written as $$, so it reads back as a $
+      buf.append(CoNLLUFeatures.toFeatureString(this.updateMorphoFeatures).replace("$", "$$"));
     }
 
     for (String remove : removedMorpho) {
@@ -115,6 +153,11 @@ public class EditNode extends SsurgeonEdit {
    * The graphs share their words, so the edit is seen in all of them,
    * whichever graph the word was matched in.  That includes an empty word
    * found only in the enhanced graph.
+   *<br>
+   * If a value refers to a variable which is not set in this match,
+   * nothing is edited.
+   *
+   * @throws SsurgeonRuntimeException if a value with variables comes out as one the attribute cannot take
    */
   @Override
   public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
@@ -122,7 +165,31 @@ public class EditNode extends SsurgeonEdit {
     if (word == null)
       return false;
 
-    CoreLabel other = AddDep.fromCheapStrings(attributes);
+    final Map<String, String> values;
+    final CoreLabel other;
+    if (literalAttributes != null) {
+      values = literalAttributes;
+      other = AddDep.fromCheapStrings(values);
+    } else {
+      values = SsurgeonTemplate.expand(attributeTemplates, sm);
+      if (values == null) {
+        return false;
+      }
+      try {
+        other = AddDep.fromCheapStrings(values);
+      } catch (RuntimeException e) {
+        throw new SsurgeonRuntimeException("EditNode could not set the attributes " + values, e);
+      }
+    }
+    Map<String, String> updateMorphoFeatures = this.updateMorphoFeatures;
+    if (updateMorphoTemplate != null) {
+      String features = updateMorphoTemplate.expand(sm);
+      if (features == null) {
+        return false;
+      }
+      updateMorphoFeatures = new CoNLLUFeatures(features);
+    }
+
     boolean changed = false;
     for (Class key : other.keySet()) {
       Object thisV = word.get(key);

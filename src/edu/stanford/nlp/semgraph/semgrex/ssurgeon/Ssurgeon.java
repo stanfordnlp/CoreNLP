@@ -162,6 +162,14 @@ import edu.stanford.nlp.util.logging.Redwood;
  *   {@code -removeMorphoFeatures ...} will remove this one morpho feature. <br>
  *   {@code -remove ...} will remove the attribute entirely, such as doing {@code -remove lemma} to remove the lemma.
  *</p><p>
+ * The attribute values of {@code addDep} and {@code editNode}, and the features of {@code -updateMorphoFeatures},
+ *   can refer to variables of the match as {@code ${name}}.  A variable is set by a regex group the Semgrex
+ *   pattern captures, written {@code #group%name} after the regex.  For example, to fix verb lemmas which
+ *   end in -ir rather than -ar: <br>
+ *   {@code {cpos:VERB;lemma:/(.*)ir/#1%stem}=verb} with {@code editNode -node verb -lemma ${stem}ar} <br>
+ *   If a variable is not set, the edit does nothing.  {@code $$} is a literal {@code $}, so {@code $${name}}
+ *   is the text {@code ${name}}, and any other {@code $}, such as in {@code US$}, is literal as well.
+ *</p><p>
  * {@code lemmatize} will put a lemma on a word. <br>
  * {@code -node} is the node to edit. <br>
  *   This only works on English text.

@@ -22,8 +22,8 @@ public abstract class SsurgeonEdit {
    * Given a match, performs an in-place modification on the graphs of a sentence.
    *<br>
    * The match has its own copies of the named nodes, edges, and variables
-   * of the semgrex match.  An edit can bind names in it for the edits after
-   * it, without changing the matcher's search.
+   * of the semgrex match.  An edit can bind names and set variables in it
+   * for the edits after it, without changing the matcher's search.
    *<br>
    * The graphs are the ones the match was found in, or copies of them which
    * share their words and edges, so the match's nodes and edges can be
