@@ -570,6 +570,24 @@ public class SsurgeonPatternTest {
     return result.first();
   }
 
+  /** Without a governor, addDep puts its word in both graphs with no edges */
+  @Test
+  public void addDepWithoutGovernor() throws IOException {
+    SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:go}=g").matcher(graphs);
+    assertTrue(matcher.find());
+    AddDep edit = new AddDep(null, null, Collections.singletonMap("word", "quickly"), "+g", 0.0, "q", null);
+    assertTrue(edit.evaluate(graphs, matcher));
+    IndexedWord quickly = matcher.getNode("q");
+    assertEquals(5, quickly.index());
+    for (SemanticGraph sg : Arrays.asList(graphs.getDefault(), graphs.get(SemgrexGraphName.ENHANCED))) {
+      assertTrue(sg.containsVertex(quickly));
+      assertEquals(0, sg.inDegree(quickly));
+      assertEquals(0, sg.outDegree(quickly));
+    }
+    SsurgeonPattern.checkSharedWords(graphs);
+  }
+
   /** addDep puts the word in both graphs, and its edge in both, so the enhanced graph stays */
   @Test
   public void addDepToEveryGraph() throws IOException {

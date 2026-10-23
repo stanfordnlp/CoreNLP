@@ -84,6 +84,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code removeNamedEdge -edge edgename}
  * <li> {@code reattachNamedEdge -edge edgename -gov gov -dep dep}
  * <li> {@code addDep -gov node1 -reln depType -position where -name name -graph enhanced ...attributes...}
+ * <li> {@code addDep -position where -name name ...attributes...}
  * <li> {@code editNode -node node ...attributes...}
  * <li> {@code lemmatize -node node}
  * <li> {@code combineMWT -node node -word word}
@@ -144,6 +145,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  *   {@code {word:antennae}=antennae ?>dep {word:blue}=blue} with
  *   {@code addDep -gov antennae -reln dep -word blue -name blue} adds {@code blue} to antennae which have none,
  *   and stops once it has. <br>
+ * Without {@code -gov}, the word is added with no edges, so it needs {@code -name} for later edits to attach it,
+ *   such as {@code addEdge}, or to make it a root with {@code setRoots}.
+ *   {@code -reln}, {@code -weight} and {@code -graph} are then not allowed. <br>
  * {@code ...attributes...} means any attributes which can be set from a string or numerical value
  *   eg {@code -text ...} sets the text of the word
  *   {@code -pos ...} sets the xpos of the word, {@code -cpos ...} sets the upos of the word, etc.
@@ -810,10 +814,10 @@ public class Ssurgeon  {
       final SemgrexGraphName graph = argsBox.graph == null ? SemgrexGraphName.BASIC : argsBox.graph;
 
       if (command.equalsIgnoreCase(AddDep.LABEL)) {
-        if (argsBox.reln == null) {
+        if (argsBox.govNodeName != null && argsBox.reln == null) {
           throw new SsurgeonParseException("Relation not specified for AddDep");
         }
-        GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
+        GrammaticalRelation reln = argsBox.reln == null ? null : GrammaticalRelation.valueOf(language, argsBox.reln);
         return new AddDep(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position, argsBox.weight, argsBox.name, argsBox.graph);
       } else if (command.equalsIgnoreCase(AddNode.LABEL)) {
         return AddNode.createAddNode(argsBox.nodeString, argsBox.name);
