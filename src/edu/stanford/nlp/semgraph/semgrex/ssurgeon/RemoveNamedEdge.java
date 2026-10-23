@@ -46,16 +46,6 @@ public class RemoveNamedEdge extends SsurgeonEdit {
   }
 
   /**
-   * Removes the named edge, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
-   *
-   * @return whether the edge was in the graph to be removed
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * Removes the named edge from the graph it was matched in, if it is still there.
    * An edge with the same endpoints and relation in another graph is left alone.
    *

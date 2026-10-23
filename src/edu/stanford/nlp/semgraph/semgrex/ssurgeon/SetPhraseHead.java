@@ -108,14 +108,6 @@ public class SetPhraseHead extends SsurgeonEdit {
   }
 
   /**
-   * Sets the head of the phrase, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * Sets the head of the phrase in this edit's graph.  Every word of the
    * phrase must already be in that graph, or the graph is left alone.
    */

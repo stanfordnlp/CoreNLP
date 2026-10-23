@@ -137,14 +137,6 @@ public class ReattachNamedEdge extends SsurgeonEdit {
   }
 
   /**
-   * Reattaches the named edge, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * "Reattach" the named edge by removing it and then recreating it with the new gov and/or dep
    *<br>
    * The edge is moved within the graph it was matched in.  The graphs

@@ -6,7 +6,6 @@ import java.util.Set;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
-import edu.stanford.nlp.semgraph.SemanticGraph;
 
 /**
  * An edit which an Ssurgeon pattern applies to a graph at each Semgrex match.
@@ -21,31 +20,22 @@ public abstract class SsurgeonEdit {
   
   /**
    * Given a matching instance (via the SemgrexMatcher), performs an in-place
-   * modification on the given SemanticGraph.
-   *
-   * @param sg The graph to edit
-   * @param sm The matcher, positioned at the current match
-   * @return whether or not there was an edit
-   */
-  public abstract boolean evaluate(SemanticGraph sg, SemgrexMatcher sm);
-
-  /**
-   * Given a matching instance (via the SemgrexMatcher), performs an in-place
    * modification on the graphs of a sentence.
    *<br>
    * The graphs are the ones the match was found in, or copies of them which
    * share their words and edges, so the matcher's nodes and edges can be
-   * looked up in them.  This edits the basic graph with
-   * {@link #evaluate(SemanticGraph, SemgrexMatcher)}; an edit which works
-   * on the other graphs as well overrides it.
+   * looked up in them.  A sentence with only a basic graph is edited by
+   * passing {@code new SemgrexGraphs(graph)}.
+   *<br>
+   * An edit which adds, removes, or renumbers words does the same to every
+   * graph of the sentence with the same IndexedWords, so the graphs keep
+   * describing the same words.
    *
    * @param graphs The graphs to edit
    * @param sm The matcher, positioned at the current match
    * @return whether or not there was an edit
    */
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
-    return evaluate(graphs.getDefault(), sm);
-  }
+  public abstract boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm);
 
   /**
    * The graphs this edit chooses to edit, such as with {@code -graph enhanced}.
@@ -58,22 +48,6 @@ public abstract class SsurgeonEdit {
    */
   public Set<SemgrexGraphName> requiredGraphs() {
     return Collections.emptySet();
-  }
-
-  /**
-   * Whether this edit, when it adds, removes, or renumbers words, does the
-   * same to every graph of the sentence with the same IndexedWords.
-   *<br>
-   * {@link SsurgeonPattern#iterate(SemgrexGraphs)} keeps the other graphs
-   * of a sentence after such an edit changes its words.  After any other
-   * edit changes the words of the basic graph, the other graphs no longer
-   * describe the same words, and are left out.  An edit which never
-   * changes the words can leave this as it is.
-   *
-   * @return false unless an edit says otherwise
-   */
-  public boolean changesWordsInEveryGraph() {
-    return false;
   }
 
   /**

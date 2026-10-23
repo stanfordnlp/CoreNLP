@@ -157,14 +157,6 @@ public class AddEdge extends SsurgeonEdit {
 
 
   /**
-   * Adds the edge, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * Adds the edge to this edit's graph.
    * If the edge already exists in the graph,
    * a new edge is not added.

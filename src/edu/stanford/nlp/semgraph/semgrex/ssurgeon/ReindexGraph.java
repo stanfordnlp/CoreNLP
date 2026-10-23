@@ -45,15 +45,6 @@ public class ReindexGraph extends SsurgeonEdit {
   }
 
   /**
-   * Reindexes the graph, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does
-   * for a sentence with only this graph.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * Numbers the words of every graph of the sentence from 1, in order.
    *
    * @return whether any word or empty word got a new index
@@ -82,13 +73,4 @@ public class ReindexGraph extends SsurgeonEdit {
     return SsurgeonUtils.moveNodes(graphs, sm, x -> !newIndices.get(x).equals(x), newIndices::get);
   }
 
-  /**
-   * ReindexGraph renumbers the words of every graph.
-   *
-   * @return true
-   */
-  @Override
-  public boolean changesWordsInEveryGraph() {
-    return true;
-  }
 }

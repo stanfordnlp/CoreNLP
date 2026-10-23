@@ -103,7 +103,6 @@ public class SsurgeonPatternTest {
   public void iterateSearchesEnhanced() throws IOException {
     SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
     SsurgeonPattern pattern = Ssurgeon.readFromEditText("{}=gov >/nsubj:xsubj/@enhanced {}\nEditNode -node gov -lemma GO", "UniversalEnglish").get(0);
-    assertTrue(pattern.searchesBeyondBasic());
 
     Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
     assertTrue(result.second());
@@ -134,7 +133,6 @@ public class SsurgeonPatternTest {
     assertThrows(IllegalStateException.class, () -> pattern.iterate(new SemgrexGraphs(basic)));
 
     SsurgeonPattern basicOnly = Ssurgeon.readFromEditText("{}=gov >nsubj {}\nEditNode -node gov -lemma WANT", "UniversalEnglish").get(0);
-    assertFalse(basicOnly.searchesBeyondBasic());
     assertTrue(basicOnly.iterate(basic).second());
   }
 
@@ -146,32 +144,23 @@ public class SsurgeonPatternTest {
     assertThrows(IllegalArgumentException.class, () -> pattern.iterate(aligned));
   }
 
+  /**
+   * Every edit keeps the graphs describing the same words, so an edit
+   * which deletes a word from the basic graph alone is a bug, and iterate
+   * says which edit it was
+   */
   @Test
-  public void iterateStopsWhenEnhancedNoLongerFits() throws IOException {
-    // deleting a word from the basic graph alone means the enhanced graph
-    // no longer describes the words of the basic graph, so a pattern which
-    // searches the enhanced graph stops after the first deletion, and the
-    // enhanced graph is left out of the graphs returned
-    SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
-    SsurgeonPattern pattern = basicOnlyDeletes("{word:/:/}=p <punct@enhanced {}\nDeleteLeaf -node p");
-    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
-    assertTrue(result.second());
-    assertEquals(7, result.first().getDefault().size());
-    assertNull(result.first().get(SemgrexGraphName.ENHANCED));
-
-    // a pattern on the basic graph alone deletes both, even with the enhanced graph given.
-    // renumbering the words changes their shared labels, so this needs a fresh sentence
-    graphs = readGraphs(ENHANCED_SENTENCE);
-    SsurgeonPattern basicOnly = basicOnlyDeletes("{word:/:/}=p <punct {}\nDeleteLeaf -node p");
-    result = basicOnly.iterate(graphs);
-    assertTrue(result.second());
-    assertEquals(6, result.first().getDefault().size());
-    assertNull(result.first().get(SemgrexGraphName.ENHANCED));
+  public void iterateThrowsWhenGraphsHaveDifferentWords() throws IOException {
+    SsurgeonPattern pattern = new SsurgeonPattern("basic only", SemgrexPattern.compile("{word:/:/}=p"));
+    pattern.addEdit(new BasicGraphOnly(new DeleteLeaf("p")));
+    IllegalStateException e = assertThrows(IllegalStateException.class, () -> pattern.iterate(readGraphs(ENHANCED_SENTENCE)));
+    assertTrue(e.getMessage(), e.getMessage().contains("deleteLeaf"));
+    assertTrue(e.getMessage(), e.getMessage().contains("different words"));
 
     // with no change to the words, the enhanced graph stays
-    graphs = readGraphs(ENHANCED_SENTENCE);
+    SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
     SsurgeonPattern noMatch = Ssurgeon.readFromEditText("{word:nothing}=p\nDeleteLeaf -node p", "UniversalEnglish").get(0);
-    result = noMatch.iterate(graphs);
+    Pair<SemgrexGraphs, Boolean> result = noMatch.iterate(graphs);
     assertFalse(result.second());
     assertNotNull(result.first().get(SemgrexGraphName.ENHANCED));
   }
@@ -246,7 +235,7 @@ public class SsurgeonPatternTest {
   /**
    * An edit which runs another edit on the basic graph alone, so that it
    * changes the words of the basic graph without changing the other graphs
-   * to match, as an edit which only knows about the basic graph does
+   * to match, which no edit should do
    */
   private static class BasicGraphOnly extends SsurgeonEdit {
     final SsurgeonEdit edit;
@@ -256,8 +245,8 @@ public class SsurgeonPatternTest {
     }
 
     @Override
-    public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-      return edit.evaluate(sg, sm);
+    public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+      return edit.evaluate(new SemgrexGraphs(graphs.getDefault()), sm);
     }
 
     @Override
@@ -266,27 +255,12 @@ public class SsurgeonPatternTest {
     }
   }
 
-  /** Reads an edit block, with each of its deleteLeaf edits working on the basic graph alone */
-  private static SsurgeonPattern basicOnlyDeletes(String block) {
-    SsurgeonPattern read = Ssurgeon.readFromEditText(block, "UniversalEnglish").get(0);
-    SsurgeonPattern pattern = new SsurgeonPattern(read.getUID(), read.getSemgrexPattern());
-    for (SsurgeonEdit edit : read.getEditScript()) {
-      pattern.addEdit(edit instanceof DeleteLeaf ? new BasicGraphOnly(edit) : edit);
-    }
-    return pattern;
-  }
-
   /**
    * An edit which gives the enhanced graph its own copy of a word, once,
    * so that the pattern stops matching after it
    */
   private static class SeparateWordEdit extends SsurgeonEdit {
     boolean done = false;
-
-    @Override
-    public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-      throw new UnsupportedOperationException();
-    }
 
     @Override
     public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
@@ -545,25 +519,9 @@ public class SsurgeonPatternTest {
   @Test
   public void editMissingGraph() throws IOException {
     SsurgeonPattern pattern = Ssurgeon.readFromEditText(WANT_I_GO + "\nAddEdge -gov g -dep i -reln nsubj:pass -graph enhanced", "UniversalEnglish").get(0);
-    assertFalse(pattern.searchesBeyondBasic());
-    assertTrue(pattern.usesGraphsBeyondBasic());
     SemanticGraph basic = readGraph(ENHANCED_SENTENCE);
     IllegalStateException e = assertThrows(IllegalStateException.class, () -> pattern.iterate(new SemgrexGraphs(basic)));
     assertTrue(e.getMessage(), e.getMessage().contains("ENHANCED graph"));
-  }
-
-  /**
-   * Once an edit changes the words of the basic graph alone, the enhanced
-   * graph is left out, so a pattern which edits it stops, as one which
-   * searches it does
-   */
-  @Test
-  public void enhancedEditStopsWhenWordsChange() throws IOException {
-    SsurgeonPattern pattern = basicOnlyDeletes("{word:/:/}=p\nDeleteLeaf -node p\nKillAllIncomingEdges -node p -graph enhanced");
-    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(readGraphs(ENHANCED_SENTENCE));
-    assertTrue(result.second());
-    assertEquals(7, result.first().getDefault().size());
-    assertNull(result.first().get(SemgrexGraphName.ENHANCED));
   }
 
   /** The words of a graph in order, each as its index and text, such as {@code 5.1=likes} */
@@ -705,19 +663,6 @@ public class SsurgeonPatternTest {
     IndexedWord also = word(basic, 6, 0);
     assertEquals("also", also.word());
     assertEquals(0, basic.incomingEdgeList(also).size());
-  }
-
-  /**
-   * An edit which changes the words of the basic graph alone still leaves
-   * the enhanced graph out, even after an addDep kept it
-   */
-  @Test
-  public void addDepThenBasicOnlyDelete() throws IOException {
-    SsurgeonPattern pattern = basicOnlyDeletes("{word:now}=n . {word:/:/}=p\naddDep -gov n -reln advmod -word right -position -n\nDeleteLeaf -node p");
-    Pair<SemgrexGraphs, Boolean> result = pattern.iterate(readGraphs(ENHANCED_SENTENCE));
-    assertTrue(result.second());
-    assertNull(result.first().get(SemgrexGraphName.ENHANCED));
-    assertEquals("1=I 2=want 3=to 4=go 5=: 6=right 7=now 8=ok", wordsOf(result.first().getDefault()));
   }
 
   /** deleteLeaf deletes the word from both graphs and renumbers both, so the enhanced graph stays */
