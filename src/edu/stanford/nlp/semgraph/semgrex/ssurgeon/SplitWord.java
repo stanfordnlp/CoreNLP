@@ -8,7 +8,7 @@ import java.io.*;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -26,7 +26,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  * <br>
  * Aside from the text and the dependency, the new node is rather bare bones.
  * Adding the -name argument allows for specifying a comma-separate list
- * of names which can be used to insert the new nodes into the SemgrexMatcher
+ * of names which can be used to insert the new nodes into the match
  * as named nodes.  This will allow for further edits in the same edit step.
  * <br>
  * For example, this will split "foobar" and put the pos ADJ on the first word
@@ -258,7 +258,7 @@ public class SplitWord extends SsurgeonEdit {
    * to each governor the matched node has in that graph.
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     IndexedWord matchedNode = sm.getNode(node);
     if (matchedNode == null) {
       return false;
@@ -355,7 +355,7 @@ public class SplitWord extends SsurgeonEdit {
       // otherwise, add a word with the appropriate index,
       // then connect it to its governors
       // rather than adding the ability to set other values,
-      // we insert the nodes and edges with names into the matcher,
+      // we insert the nodes and edges with names into the match,
       // allowing further edits to update those values
       IndexedWord newNode = new IndexedWord();
       newNode.setDocID(matchedNode.docID());
@@ -391,10 +391,10 @@ public class SplitWord extends SsurgeonEdit {
 
   /**
    * Gives each incoming edge of the node, in each of the graphs, the
-   * relation.  A name in the matcher which referred to one of the edges
+   * relation.  A name in the match which referred to one of the edges
    * refers to its replacement.
    */
-  private static void relabelIncoming(SemgrexGraphs graphs, SemgrexMatcher sm, List<SemgrexGraphName> withNode,
+  private static void relabelIncoming(SemgrexGraphs graphs, SemgrexMatch sm, List<SemgrexGraphName> withNode,
                                       IndexedWord node, GrammaticalRelation relation) {
     for (SemgrexGraphName name : withNode) {
       SemanticGraph graph = graphs.get(name);

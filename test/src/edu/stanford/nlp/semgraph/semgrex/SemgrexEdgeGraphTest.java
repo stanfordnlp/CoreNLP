@@ -83,24 +83,25 @@ public class SemgrexEdgeGraphTest {
     assertNull(match.getEdgeGraph("f"));
   }
 
+  /** An edge bound in a match keeps the graph it is given, and the matcher keeps its own edge */
   @Test
   public void putNamedEdge() {
     SemgrexMatcher matcher = SemgrexPattern.compile("{} >extra@enhanced=e {}").matcher(both());
     assertTrue(matcher.find());
-    SemanticGraphEdge original = matcher.getEdge("e");
+    SemgrexMatch match = new SemgrexMatch(matcher);
+    SemanticGraphEdge original = match.getEdge("e");
     SemanticGraphEdge replacement = new SemanticGraphEdge(original.getGovernor(), original.getDependent(),
                                                           original.getRelation(), 2.0, false);
 
-    // replacing an edge keeps the graph it was found in
-    assertSame(original, matcher.putNamedEdge("e", replacement));
-    assertSame(replacement, matcher.getEdge("e"));
-    assertEquals(SemgrexGraphName.ENHANCED, matcher.getEdgeGraph("e"));
+    assertSame(original, match.putNamedEdge("e", replacement, SemgrexGraphName.ENHANCED));
+    assertSame(replacement, match.getEdge("e"));
+    assertEquals(SemgrexGraphName.ENHANCED, match.getEdgeGraph("e"));
+    assertNull(match.putNamedEdge("g", replacement, SemgrexGraphName.BASIC));
+    assertEquals(SemgrexGraphName.BASIC, match.getEdgeGraph("g"));
 
-    // a new name is in the basic graph unless told otherwise
-    assertNull(matcher.putNamedEdge("f", replacement));
-    assertEquals(SemgrexGraphName.BASIC, matcher.getEdgeGraph("f"));
-    matcher.putNamedEdge("g", replacement, SemgrexGraphName.ENHANCED);
-    assertEquals(SemgrexGraphName.ENHANCED, matcher.getEdgeGraph("g"));
+    // the matcher's own edges are untouched
+    assertSame(original, matcher.getEdge("e"));
+    assertNull(matcher.getEdge("g"));
   }
 
   @Test

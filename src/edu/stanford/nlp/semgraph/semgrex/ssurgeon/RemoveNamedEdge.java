@@ -5,7 +5,7 @@ import java.io.StringWriter;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 
@@ -52,7 +52,7 @@ public class RemoveNamedEdge extends SsurgeonEdit {
    * @return whether the edge was in the graph to be removed
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     SemanticGraphEdge edge = sm.getEdge(edgeName);
     SemgrexGraphName graphName = sm.getEdgeGraph(edgeName);
     SemanticGraph sg = graphName == null ? null : graphs.get(graphName);

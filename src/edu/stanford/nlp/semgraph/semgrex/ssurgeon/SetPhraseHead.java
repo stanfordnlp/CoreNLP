@@ -6,7 +6,7 @@ import java.io.*;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -112,7 +112,7 @@ public class SetPhraseHead extends SsurgeonEdit {
    * phrase must already be in that graph, or the graph is left alone.
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     SemanticGraph sg = graphs.get(graph);
     if (sg == null) {
       return false;

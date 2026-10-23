@@ -22,6 +22,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -56,11 +57,12 @@ public class SsurgeonUtilsTest {
     SemanticGraph graph = SemanticGraph.valueOf("[ate-1 obj> cake-2]");
     SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {}=b").matcher(graph);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
 
-    SsurgeonUtils.moveNode(graph, matcher, matcher.getNode("b"), 5);
-    assertEquals(5, matcher.getNode("b").index());
-    assertTrue(inGraph(graph, matcher.getEdge("e")));
-    assertEquals(5, matcher.getEdge("e").getTarget().index());
+    SsurgeonUtils.moveNode(graph, match, match.getNode("b"), 5);
+    assertEquals(5, match.getNode("b").index());
+    assertTrue(inGraph(graph, match.getEdge("e")));
+    assertEquals(5, match.getEdge("e").getTarget().index());
   }
 
   /**
@@ -72,9 +74,10 @@ public class SsurgeonUtilsTest {
     SemanticGraph graph = SemanticGraph.valueOf("[ate-1 obj> cake-2]");
     SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {}=b").matcher(graph);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
 
-    SsurgeonUtils.moveNodes(graph, matcher, x -> x >= 1, x -> x + 1, true);
-    SemanticGraphEdge edge = matcher.getEdge("e");
+    SsurgeonUtils.moveNodes(graph, match, x -> x >= 1, x -> x + 1, true);
+    SemanticGraphEdge edge = match.getEdge("e");
     assertTrue(inGraph(graph, edge));
     assertEquals(2, edge.getSource().index());
     assertEquals(3, edge.getTarget().index());
@@ -93,7 +96,8 @@ public class SsurgeonUtilsTest {
 
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:ate}").matcher(graph);
     assertTrue(matcher.find());
-    SsurgeonUtils.moveNode(graph, matcher, copy, 5);
+    SemgrexMatch match = new SemgrexMatch(matcher);
+    SsurgeonUtils.moveNode(graph, match, copy, 5);
 
     assertEquals(3, graph.size());
     IndexedWord moved = null;
@@ -155,9 +159,10 @@ public class SsurgeonUtilsTest {
     SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:tea}=t <orphan=bo {word:Bill}=b <obj@enhanced=eo {}=x").matcher(graphs);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
 
     // make room for a word at 4, as AddDep would
-    SsurgeonUtils.moveNodes(graphs, matcher, x -> x >= 4, x -> x + 1);
+    SsurgeonUtils.moveNodes(graphs, match, x -> x >= 4, x -> x + 1);
 
     assertEquals("and", basic.getNodeByIndex(5).word());
     assertEquals("Bill", basic.getNodeByIndex(6).word());
@@ -184,14 +189,14 @@ public class SsurgeonUtilsTest {
     assertEquals(Collections.emptyList(), relations(basic, empty, tea));
 
     // named nodes and edges refer to the moved words and edges, each edge in its own graph
-    assertSame(tea, matcher.getNode("t"));
-    assertSame(bill, matcher.getNode("b"));
-    assertSame(empty, matcher.getNode("x"));
-    assertEquals(SemgrexGraphName.BASIC, matcher.getEdgeGraph("bo"));
-    assertTrue(inGraph(basic, matcher.getEdge("bo")));
-    assertEquals(SemgrexGraphName.ENHANCED, matcher.getEdgeGraph("eo"));
-    assertTrue(inGraph(enhanced, matcher.getEdge("eo")));
-    assertSame(empty, matcher.getEdge("eo").getGovernor());
+    assertSame(tea, match.getNode("t"));
+    assertSame(bill, match.getNode("b"));
+    assertSame(empty, match.getNode("x"));
+    assertEquals(SemgrexGraphName.BASIC, match.getEdgeGraph("bo"));
+    assertTrue(inGraph(basic, match.getEdge("bo")));
+    assertEquals(SemgrexGraphName.ENHANCED, match.getEdgeGraph("eo"));
+    assertTrue(inGraph(enhanced, match.getEdge("eo")));
+    assertSame(empty, match.getEdge("eo").getGovernor());
 
     // the root did not move
     assertEquals(Collections.singleton(basic.getNodeByIndex(2)), basic.getRoots());
@@ -206,13 +211,14 @@ public class SsurgeonUtilsTest {
     SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:likes}=v >nsubj {word:Sue}").matcher(graphs);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
 
-    IndexedWord moved = SsurgeonUtils.moveNode(graphs, matcher, matcher.getNode("v"), 10);
+    IndexedWord moved = SsurgeonUtils.moveNode(graphs, match, match.getNode("v"), 10);
     assertEquals(10, moved.index());
     assertEquals(Collections.singleton(moved), basic.getRoots());
     assertSame(moved, basic.getFirstRoot());
     assertSame(moved, enhanced.getFirstRoot());
-    assertSame(moved, matcher.getNode("v"));
+    assertSame(moved, match.getNode("v"));
     SsurgeonPattern.checkSharedWords(graphs);
     assertEquals(Collections.singletonList("nsubj"), relations(basic, moved, basic.getNodeByIndex(1)));
   }
@@ -233,7 +239,8 @@ public class SsurgeonUtilsTest {
 
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:ate}").matcher(graph);
     assertTrue(matcher.find());
-    SsurgeonUtils.moveNodes(graph, matcher, x -> x >= 2, x -> x + 3, false);
+    SemgrexMatch match = new SemgrexMatch(matcher);
+    SsurgeonUtils.moveNodes(graph, match, x -> x >= 2, x -> x + 3, false);
 
     assertEquals(3, graph.size());
     IndexedWord newCake = null;
@@ -299,19 +306,20 @@ public class SsurgeonUtilsTest {
     SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:very}=v . {word:soundly}=s").matcher(graphs);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
     // a semgrex pattern cannot name an empty word by position, so name it directly
     IndexedWord deeply = word(enhanced, 3, 1);
-    matcher.putNode("d", deeply);
+    match.putNode("d", deeply);
 
-    remove(graphs, matcher.getNode("v"));
-    SsurgeonUtils.moveNodes(graphs, matcher, x -> x >= 3, x -> x - 1);
+    remove(graphs, match.getNode("v"));
+    SsurgeonUtils.moveNodes(graphs, match, x -> x >= 3, x -> x - 1);
 
     assertEquals("1=Sue 2=sleeps 2.1=snores 2.2=dreams 2.3=deeply 3=soundly", wordsOf(enhanced));
     assertEquals("1=Sue 2=sleeps 3=soundly", wordsOf(basic));
     SsurgeonPattern.checkSharedWords(graphs);
     IndexedWord newDeeply = word(enhanced, 2, 3);
-    assertSame(newDeeply, matcher.getNode("d"));
-    assertSame(word(enhanced, 3, 0), matcher.getNode("s"));
+    assertSame(newDeeply, match.getNode("d"));
+    assertSame(word(enhanced, 3, 0), match.getNode("s"));
     assertEquals(Collections.singletonList("advmod"), relations(enhanced, word(enhanced, 2, 0), newDeeply));
   }
 
@@ -322,18 +330,19 @@ public class SsurgeonUtilsTest {
     SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:sleeps}=s").matcher(graphs);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
     IndexedWord dreams = word(enhanced, 2, 2);
-    matcher.putNode("d", dreams);
+    match.putNode("d", dreams);
 
     remove(graphs, word(enhanced, 2, 1));
-    SsurgeonUtils.moveNodes(graphs, matcher, x -> false, x -> x);
+    SsurgeonUtils.moveNodes(graphs, match, x -> false, x -> x);
 
     assertEquals("1=Sue 2=sleeps 2.1=dreams 3=very 3.1=deeply 4=soundly", wordsOf(enhanced));
     SsurgeonPattern.checkSharedWords(graphs);
-    assertSame(word(enhanced, 2, 1), matcher.getNode("d"));
-    assertEquals(Collections.singletonList("conj"), relations(enhanced, word(enhanced, 2, 0), matcher.getNode("d")));
+    assertSame(word(enhanced, 2, 1), match.getNode("d"));
+    assertEquals(Collections.singletonList("conj"), relations(enhanced, word(enhanced, 2, 0), match.getNode("d")));
     // the words which did not move are the same IndexedWords
-    assertSame(matcher.getNode("s"), word(enhanced, 2, 0));
+    assertSame(match.getNode("s"), word(enhanced, 2, 0));
   }
 
   /** An empty word whose words are all gone follows the nearest word left before it */
@@ -343,11 +352,12 @@ public class SsurgeonUtilsTest {
     SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:soundly}=s").matcher(graphs);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
 
     // taking out the root leaves the roots alone, which moveNodes does not look at
     remove(graphs, word(enhanced, 2, 0));
     remove(graphs, word(enhanced, 3, 0));
-    SsurgeonUtils.moveNodes(graphs, matcher, x -> x >= 4, x -> x - 2);
+    SsurgeonUtils.moveNodes(graphs, match, x -> x >= 4, x -> x - 2);
 
     assertEquals("1=Sue 1.1=snores 1.2=dreams 1.3=deeply 2=soundly", wordsOf(enhanced));
     SsurgeonPattern.checkSharedWords(graphs);
@@ -367,8 +377,9 @@ public class SsurgeonUtilsTest {
     SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:Sue}=s").matcher(graphs);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
     // make room for a word at 1, as addDep -position - would
-    SsurgeonUtils.moveNodes(graphs, matcher, x -> x >= 1, x -> x + 1);
+    SsurgeonUtils.moveNodes(graphs, match, x -> x >= 1, x -> x + 1);
     assertEquals("0.1=it 2=Sue 3=sleeps", wordsOf(enhanced));
   }
 }

@@ -8,7 +8,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 
 /**
@@ -168,7 +168,7 @@ public class AddDep extends SsurgeonEdit {
    * @throws SsurgeonRuntimeException if the position is directly before an empty word
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     if (nodeName != null && sm.getNode(nodeName) != null) {
       // the match already has this node, so there is nothing to fill in
       return false;

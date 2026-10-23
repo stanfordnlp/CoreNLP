@@ -6,7 +6,7 @@ import java.io.*;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 
 /**
@@ -52,7 +52,7 @@ public class SetRoots extends SsurgeonEdit {
    * it is.
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     SemanticGraph sg = graphs.get(graph);
     Set<IndexedWord> newRoots = new LinkedHashSet<>();
     for (String name : newRootNames) {

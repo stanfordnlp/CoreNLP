@@ -7,7 +7,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 
 /**
  * Add the output of the English lemmatizer to the word in question.
@@ -67,7 +67,7 @@ public class Lemmatize extends SsurgeonEdit {
    * whichever graph the word was matched in.
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     IndexedWord word = sm.getNode(nodeName);
     if (word == null)
       return false;

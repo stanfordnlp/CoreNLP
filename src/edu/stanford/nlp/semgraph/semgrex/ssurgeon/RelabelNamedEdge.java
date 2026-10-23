@@ -4,7 +4,7 @@ import java.io.StringWriter;
 
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 
@@ -71,7 +71,7 @@ public class RelabelNamedEdge extends SsurgeonEdit {
    * the same endpoints and relation in another graph is left alone.
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     SemanticGraphEdge edge = sm.getEdge(edgeName);
     SemgrexGraphName graphName = sm.getEdgeGraph(edgeName);
     SemanticGraph sg = graphName == null ? null : graphs.get(graphName);
@@ -102,7 +102,7 @@ public class RelabelNamedEdge extends SsurgeonEdit {
       }
       // whether we recreated a new edge with the new relation,
       // or found an existing edge with the relation we wanted,
-      // update the named edge in the SemgrexMatcher so future
+      // update the named edge in the match so future
       // iterations have the name connected to the edge
       // TODO: if an existing edge was clobbered, perhaps we need to
       // update anything that named it

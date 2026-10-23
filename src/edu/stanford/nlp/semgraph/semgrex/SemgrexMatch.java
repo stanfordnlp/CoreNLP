@@ -18,6 +18,11 @@ import edu.stanford.nlp.util.VariableStrings;
  * In particular, it will be possible to post-process results after coordinating all of the results.
  * For example, results can be sorted or uniqed by the matching nodes, as long as all of the results
  * are already compiled
+ *<br>
+ * Ssurgeon edits work on a SemgrexMatch of the match they edit.  It has
+ * its own copies of the named nodes and edges, so an edit can bind a
+ * name, such as for a node it adds, for the edits after it, without
+ * touching the matcher, which keeps its own copies as part of its search.
  */
 
 public class SemgrexMatch implements Serializable  {
@@ -72,6 +77,15 @@ public class SemgrexMatch implements Serializable  {
   }
 
   /**
+   * Records the current match of {@code matcher}, as the pattern it is matching.
+   *
+   * @param matcher The matcher, which should currently be at a match
+   */
+  public SemgrexMatch(SemgrexMatcher matcher) {
+    this(matcher.getPattern(), matcher);
+  }
+
+  /**
    * Returns the node which matched the root of the pattern.
    *
    * @return The matched node
@@ -88,6 +102,18 @@ public class SemgrexMatch implements Serializable  {
    */
   public IndexedWord getNode(String name) {
     return namesToNodes.get(name);
+  }
+
+  /**
+   * Binds a name to a node in this match, as Ssurgeon does when an edit
+   * adds a node or replaces a named node.  The matcher is not changed.
+   *
+   * @param name The node name
+   * @param node The node to bind to the name
+   * @return The node previously bound to the name, or null
+   */
+  public IndexedWord putNode(String name, IndexedWord node) {
+    return namesToNodes.put(name, node);
   }
 
   /**
@@ -147,6 +173,20 @@ public class SemgrexMatch implements Serializable  {
   public SemgrexGraphName getEdgeGraph(String name) {
     MatchedEdge matched = namesToEdges.get(name);
     return matched == null ? null : matched.graph;
+  }
+
+  /**
+   * Binds a name to an edge of the given graph in this match, as Ssurgeon
+   * does when an edit adds or replaces a named edge.  The matcher is not changed.
+   *
+   * @param name The edge name
+   * @param edge The edge to bind to the name
+   * @param graph The graph the edge is in
+   * @return The edge previously bound to the name, or null
+   */
+  public SemanticGraphEdge putNamedEdge(String name, SemanticGraphEdge edge, SemgrexGraphName graph) {
+    MatchedEdge previous = namesToEdges.put(name, new MatchedEdge(edge, graph));
+    return previous == null ? null : previous.edge;
   }
 
   /**

@@ -10,7 +10,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 
 /**
  * Go through the nodes.  Reindex them all so that the starting index is 1,
@@ -50,7 +50,7 @@ public class ReindexGraph extends SsurgeonEdit {
    * @return whether any word or empty word got a new index
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     // the index of each word in any graph, which a copy of the word shares
     Set<Integer> wordIndices = new TreeSet<>();
     for (SemgrexGraphName name : SemgrexGraphName.values()) {
