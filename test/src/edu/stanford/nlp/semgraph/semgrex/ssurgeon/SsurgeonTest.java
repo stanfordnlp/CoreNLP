@@ -1327,6 +1327,47 @@ public class SsurgeonTest {
   }
 
   /**
+   * Without -gov, addDep adds a word with no edges, which later edits
+   * attach and make the root: "John bought car" becomes "John owns car"
+   */
+  @Test
+  public void addDepWithoutGovernor() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText(String.join(newline,
+                                                                    "{word:bought}=b >nsubj {}=s >obj {}=o",
+                                                                    "addDep -position +b -word owns -name owns",
+                                                                    "addEdge -gov owns -dep s -reln nsubj",
+                                                                    "addEdge -gov owns -dep o -reln obj",
+                                                                    "setRoots owns",
+                                                                    "killNonRooted"), "UniversalEnglish").get(0);
+    String addDep = pattern.getEditScript().get(0).toEditString();
+    assertFalse(addDep.contains(Ssurgeon.GOV_NODENAME_ARG));
+    assertFalse(addDep.contains(Ssurgeon.RELN_ARG));
+    Set<String> knownEdges = new HashSet<>();
+    assertEquals(addDep, Ssurgeon.parseEditLine(addDep, new HashMap<>(), Language.UniversalEnglish, knownEdges).toEditString());
+
+    SemanticGraph sg = SemanticGraph.valueOf("[bought-2 nsubj> John-1 obj> car-3]", Language.UniversalEnglish);
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(sg);
+    assertTrue(result.second);
+    // owns goes after bought, and car moves up to make room
+    SemanticGraph expected = SemanticGraph.valueOf("[owns-3 nsubj> John-1 obj> car-4]", Language.UniversalEnglish);
+    assertEquals(expected, result.first);
+    assertEquals(Collections.singleton(result.first.getNodeByIndex(3)), new HashSet<>(result.first.getRoots()));
+    assertEquals(sg.getNodeByIndex(1).sentIndex(), result.first.getNodeByIndex(3).sentIndex());
+  }
+
+  /** An addDep without -gov needs a name, and takes no relation, weight or graph */
+  @Test
+  public void addDepWithoutGovernorArgs() {
+    Set<String> knownEdges = new HashSet<>();
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("addDep -word owns", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("addDep -reln dep -word owns -name owns", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("addDep -weight 0.5 -word owns -name owns", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("addDep -graph enhanced -word owns -name owns", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("addDep -gov a -word owns -name owns", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    Ssurgeon.parseEditLine("addDep -word owns -name owns", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+  }
+
+  /**
    * There should be an exception for an annotation key that does not exist
    */
   @Test

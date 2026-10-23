@@ -15,6 +15,11 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
  * Adds a new dependent node, based off of a prototype IndexedWord, with the given relation.
  * The new node's sentence index is inherited from the governing node.
  *<br>
+ * Without a governor, the new node has no edges, and must have a name
+ * so later edits can attach it, such as with addEdge, or make it a root
+ * with setRoots.  Its sentence index comes from the other words of the
+ * sentence.
+ *<br>
  * Nodes will be placed at the end of the sentence by default, at the
  * start or end using "-position -" or "-position +", or
  * before or after a node with "-position -word" and "-position +word".
@@ -52,16 +57,18 @@ public class AddDep extends SsurgeonEdit {
   /**
    * Creates an AddDep.
    *
-   * @param govNodeName the name of the matched node which governs the new node
-   * @param relation the relation from the governor to the new node
+   * @param govNodeName the name of the matched node which governs the new node,
+   *   or null to add the node with no edges
+   * @param relation the relation from the governor to the new node, or null if there is no governor
    * @param attributes the attributes of the new node, such as word or lemma; the map is copied
    * @param position where to put the new node, or null for the end of the sentence.
    *   Must start with {@code -} or {@code +}
    * @param weight the weight of the new edge
    * @param nodeName the name to give the new node in the match, or null for no name
    * @param graph the graph which gets the new edge, or null for every graph which has the governor
-   * @throws SsurgeonParseException if govNodeName or relation is null,
-   *   the position is invalid, or the attributes can't be used for a new node
+   * @throws SsurgeonParseException if there is a governor without a relation, or a relation,
+   *   weight or graph without a governor, or neither a governor nor a name;
+   *   if the position is invalid; or if the attributes can't be used for a new node
    */
   public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight, String nodeName, SemgrexGraphName graph) {
     if (position != null) {
@@ -70,9 +77,19 @@ public class AddDep extends SsurgeonEdit {
       }
     }
     if (govNodeName == null) {
-      throw new SsurgeonParseException("No governor given for an AddDep");
-    }
-    if (relation == null) {
+      if (nodeName == null) {
+        throw new SsurgeonParseException("An AddDep with no governor needs a name, or nothing could ever attach its new word");
+      }
+      if (relation != null) {
+        throw new SsurgeonParseException("An AddDep with no governor cannot have a relation");
+      }
+      if (weight != 0.0) {
+        throw new SsurgeonParseException("An AddDep with no governor cannot have a weight");
+      }
+      if (graph != null) {
+        throw new SsurgeonParseException("An AddDep with no governor adds no edge, so it cannot have a graph");
+      }
+    } else if (relation == null) {
       throw new SsurgeonParseException("No relation given for an AddDep");
     }
     checkIllegalAttributes(attributes);
@@ -93,10 +110,12 @@ public class AddDep extends SsurgeonEdit {
   public String toEditString() {
     StringWriter buf = new StringWriter();
     buf.write(LABEL);  buf.write("\t");
-    buf.write(Ssurgeon.GOV_NODENAME_ARG);buf.write(" ");
-    buf.write(govNodeName); buf.write("\t");
-    buf.write(Ssurgeon.RELN_ARG);buf.write(" ");
-    buf.write(relation.toString()); buf.write("\t");
+    if (govNodeName != null) {
+      buf.write(Ssurgeon.GOV_NODENAME_ARG);buf.write(" ");
+      buf.write(govNodeName); buf.write("\t");
+      buf.write(Ssurgeon.RELN_ARG);buf.write(" ");
+      buf.write(relation.toString()); buf.write("\t");
+    }
 
     if (position != null) {
       buf.write(Ssurgeon.POSITION_ARG);buf.write(" ");
@@ -141,6 +160,7 @@ public class AddDep extends SsurgeonEdit {
   /**
    * Adds the new node to every graph of the sentence, and its edge from the
    * governor to the graph this edit names, or to each graph with the governor.
+   * Without a governor, the node is added with no edges.
    *<br>
    * The words from the new node's index on move up by one in every graph
    * to make room for it.  This does nothing if the governor, or the node
@@ -162,12 +182,13 @@ public class AddDep extends SsurgeonEdit {
       // the match already has this node, so there is nothing to fill in
       return false;
     }
-    IndexedWord govNode = sm.getNode(govNodeName);
-    if (govNode == null) {
-      return false;
-    }
+    IndexedWord govNode = null;
     List<SemanticGraph> edgeGraphs = new ArrayList<>();
-    if (graph != null) {
+    if (govNodeName == null) {
+      // no edges to add
+    } else if ((govNode = sm.getNode(govNodeName)) == null) {
+      return false;
+    } else if (graph != null) {
       SemanticGraph sg = graphs.get(graph);
       if (sg == null || !sg.containsVertex(govNode)) {
         return false;
@@ -205,16 +226,23 @@ public class AddDep extends SsurgeonEdit {
     }
     SsurgeonUtils.moveNodes(graphs, sm, x -> x >= newIndex, x -> x + 1);
     // the governor may have moved
-    govNode = sm.getNode(govNodeName);
+    if (govNodeName != null) {
+      govNode = sm.getNode(govNodeName);
+    }
 
     // must make new copy of CoreLabel - if the same word is added
     // multiple times by the same operation, we don't want to have the
     // same backing CoreLabel in each instance
     CoreLabel newWord = fromCheapStrings(attributes);
     IndexedWord newNode = new IndexedWord(newWord);
-    newNode.setDocID(govNode.docID());
+    // the new word belongs to the same sentence as the governor,
+    // or without one, as any other word
+    IndexedWord sameSentence = govNode != null ? govNode : anyWord(graphs);
+    if (sameSentence != null) {
+      newNode.setDocID(sameSentence.docID());
+      newNode.setSentIndex(sameSentence.sentIndex());
+    }
     newNode.setIndex(newIndex);
-    newNode.setSentIndex(govNode.sentIndex());
 
     for (SemgrexGraphName name : SemgrexGraphName.values()) {
       SemanticGraph sg = graphs.get(name);
@@ -231,9 +259,20 @@ public class AddDep extends SsurgeonEdit {
     return true;
   }
 
-  /** The largest index of any node in the graphs */
+  /** Any word of the graphs, or null if they have none */
+  private static IndexedWord anyWord(SemgrexGraphs graphs) {
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph sg = graphs.get(name);
+      if (sg != null && !sg.isEmpty()) {
+        return sg.vertexSet().iterator().next();
+      }
+    }
+    return null;
+  }
+
+  /** The largest index of any node in the graphs, or 0 if they have none */
   private static int maxIndex(SemgrexGraphs graphs) {
-    int index = Integer.MIN_VALUE;
+    int index = 0;
     for (SemgrexGraphName name : SemgrexGraphName.values()) {
       SemanticGraph sg = graphs.get(name);
       if (sg != null) {
@@ -245,7 +284,7 @@ public class AddDep extends SsurgeonEdit {
     return index;
   }
 
-  /** The smallest index of any word in the graphs, leaving out empty words */
+  /** The smallest index of any word in the graphs, leaving out empty words, or 1 if they have none */
   private static int minWordIndex(SemgrexGraphs graphs) {
     int index = Integer.MAX_VALUE;
     for (SemgrexGraphName name : SemgrexGraphName.values()) {
@@ -258,7 +297,7 @@ public class AddDep extends SsurgeonEdit {
         }
       }
     }
-    return index;
+    return index == Integer.MAX_VALUE ? 1 : index;
   }
 
   /**
