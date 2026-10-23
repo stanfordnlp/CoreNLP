@@ -93,7 +93,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code mergeNodes -node n1 -node n2 ...}
  * <li> {@code killAllIncomingEdges -node node -graph enhanced}
  * <li> {@code deleteLeaf -node node}
- * <li> {@code killNonRooted}
+ * <li> {@code killNonRooted -graph basic}
  * <li> {@code reindexGraph}
  * </ul>
  *
@@ -224,7 +224,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  *</p><p>
  * {@code killNonRooted} searches the graph and deletes all nodes which have no path to a root. <br>
  * After cutting a piece of the graph off with {@code removeEdge}, this deletes the piece without the root.
- *   To keep that piece instead, give it the root with {@code setRoots} first.
+ *   To keep that piece instead, give it the root with {@code setRoots} first. <br>
+ * A node is deleted from every graph of the sentence, if it has no path to a root in any graph which has it.
+ *   With {@code -graph}, only that graph decides, {@code basic} or {@code enhanced}, so after a cut made in
+ *   the basic graph alone, {@code killNonRooted -graph basic} deletes the piece from every graph.
+ *   A graph's last root is never deleted, and the words left keep their indices.
  *</p><p>
  * {@code reindexGraph} reindexes the graph from 1 in case there are gaps or the node indices start later than 1.  (Warning: does not work for first index less than 1)
  *</p><p>
@@ -779,7 +783,23 @@ public class Ssurgeon  {
         }
         return new SetRoots(newRoots, graph);
       } else if (command.equalsIgnoreCase(KillNonRootedNodes.LABEL)) {
-        return new KillNonRootedNodes();
+        // older versions wrote the label a second time, which is skipped
+        String[] words = tuples1.length == 1 ? new String[0] : tuples1[1].trim().split("\\s+");
+        SemgrexGraphName graph = attributeArgs.containsKey("graph") ? parseGraphName(attributeArgs.get("graph")) : null;
+        for (int i = 0; i < words.length; ++i) {
+          if (words[i].isEmpty() || words[i].equalsIgnoreCase(KillNonRootedNodes.LABEL)) {
+            continue;
+          } else if (words[i].equals(GRAPH_ARG)) {
+            if (i + 1 == words.length) {
+              throw new SsurgeonParseException(GRAPH_ARG + " needs the name of a graph");
+            }
+            graph = parseGraphName(words[i + 1]);
+            ++i;
+          } else {
+            throw new SsurgeonParseException(KillNonRootedNodes.LABEL + " does not take the argument " + words[i]);
+          }
+        }
+        return new KillNonRootedNodes(graph);
       }
 
       // Parse the arguments based upon the type of command to execute.

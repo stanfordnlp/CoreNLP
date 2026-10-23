@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -916,6 +917,84 @@ public class SsurgeonPatternTest {
     assertEquals("0.1=it 1=Sue 2=sleeps 2.1=snores 2.2=deeply 3=soundly", wordsOf(enhanced));
     assertEquals("2=sleeps 3=soundly", wordsOf(basic));
     SsurgeonPattern.checkSharedWords(graphs);
+  }
+
+  /** Cuts "go" off from "want" in the basic graph alone, then kills the unrooted nodes */
+  private static final String CUT_GO = WANT_I_GO + "\nremoveEdge -gov w -dep g -reln xcomp\nkillNonRooted";
+
+  /**
+   * After a cut in the basic graph alone, "to go" still hangs from "want"
+   * in the enhanced graph, so by default nothing is deleted
+   */
+  @Test
+  public void killNonRootedKeepsNodesRootedInAnyGraph() throws IOException {
+    SemgrexGraphs graphs = editSentence(ENHANCED_SENTENCE, CUT_GO);
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    assertEquals(8, basic.size());
+    assertEquals(8, enhanced.size());
+    assertEquals(Collections.emptyList(), relations(basic, 2, 4));
+    assertEquals(Collections.singletonList("xcomp"), relations(enhanced, 2, 4));
+  }
+
+  /** With -graph basic, the piece cut off in the basic graph is deleted from both */
+  @Test
+  public void killNonRootedOneGraphDecides() throws IOException {
+    SemgrexGraphs graphs = editSentence(ENHANCED_SENTENCE, CUT_GO + " -graph basic");
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    // the words left keep their indices
+    assertEquals("1=I 2=want 5=: 6=now 7=: 8=ok", wordsOf(basic));
+    assertEquals(wordsOf(basic), wordsOf(enhanced));
+    assertEquals(Collections.singletonList("nsubj"), relations(enhanced, 2, 1));
+  }
+
+  /** Cut in both graphs, the piece has no path to a root in either, so it goes by default */
+  @Test
+  public void killNonRootedAfterCutInEveryGraph() throws IOException {
+    SemgrexGraphs graphs = editSentence(ENHANCED_SENTENCE, WANT_I_GO + "\nremoveEdge -gov w -dep g -reln xcomp\nremoveEdge -gov w -dep g -reln xcomp -graph enhanced\nkillNonRooted");
+    assertEquals("1=I 2=want 5=: 6=now 7=: 8=ok", wordsOf(graphs.get(SemgrexGraphName.ENHANCED)));
+    assertEquals("1=I 2=want 5=: 6=now 7=: 8=ok", wordsOf(graphs.getDefault()));
+  }
+
+  /**
+   * A second root of the enhanced graph, cut off from "want" in the basic
+   * graph, is deleted with the rest of its piece when the basic graph
+   * decides, since "want" is still a root of the enhanced graph
+   */
+  @Test
+  public void killNonRootedDeletesSecondRoot() throws IOException {
+    SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    IndexedWord want = basic.getNodeByIndex(2);
+    IndexedWord go = basic.getNodeByIndex(4);
+    enhanced.setRoots(Arrays.asList(want, go));
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:want}").matcher(graphs);
+    assertTrue(matcher.find());
+    assertTrue(basic.removeEdge(basic.getEdge(want, go)));
+    assertTrue(new KillNonRootedNodes(SemgrexGraphName.BASIC).evaluate(graphs, matcher));
+    assertEquals("1=I 2=want 5=: 6=now 7=: 8=ok", wordsOf(basic));
+    assertEquals(wordsOf(basic), wordsOf(enhanced));
+    assertEquals(Collections.singleton(want), new HashSet<>(enhanced.getRoots()));
+  }
+
+  /** The basic graph's only root is not deleted, even when the enhanced graph decides and gives it no path */
+  @Test
+  public void killNonRootedKeepsRoots() throws IOException {
+    SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
+    SemanticGraph basic = graphs.getDefault();
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    IndexedWord want = basic.getNodeByIndex(2);
+    IndexedWord ok = basic.getNodeByIndex(8);
+    // in the enhanced graph, "ok" alone is the root, and nothing reaches it
+    enhanced.setRoots(Collections.singleton(ok));
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:want}").matcher(graphs);
+    assertTrue(matcher.find());
+    assertTrue(new KillNonRootedNodes(SemgrexGraphName.ENHANCED).evaluate(graphs, matcher));
+    assertEquals("2=want 8=ok", wordsOf(enhanced));
+    assertEquals("2=want 8=ok", wordsOf(basic));
+    assertTrue(basic.isRoot(want));
   }
 
   /** The enhanced graph's root, written as 0:root in DEPS, can be set apart from the basic graph's */
